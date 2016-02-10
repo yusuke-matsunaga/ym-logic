@@ -9,14 +9,12 @@
 /// All rights reserved.
 
 
-#include "ym/expr_nsdef.h"
+#include "ym/ym_logic.h"
 #include "ym/Literal.h"
 #include "ym/HashMap.h"
 #include "ym/IDO.h"
 #include "ym/ODO.h"
 
-
-END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_YM_LOGIC
 
@@ -136,21 +134,21 @@ public:
   /// @return chd_list を部分論理式に持つ AND 式を生成し，返す．
   static
   Expr
-  make_and(const ExprVector& chd_list);
+  make_and(const vector<Expr>& chd_list);
 
   /// @brief AND 式の生成
   /// @param[in] chd_list オペランドのリスト
   /// @return chd_list を部分論理式に持つ AND 式を生成し，返す．
   static
   Expr
-  make_and(const ExprList& chd_list);
+  make_and(const list<Expr>& chd_list);
 
   /// @brief OR 式の生成
   /// @param[in] chd_list オペランドのベクタ
   /// @return chd_list を部分論理式に持つ OR 式を生成し，返す．
   static
   Expr
-  make_or(const ExprVector& chd_list);
+  make_or(const vector<Expr>& chd_list);
 
   /// @brief OR 式の生成
   ///
@@ -159,21 +157,21 @@ public:
   /// @return chd_list を部分論理式に持つ OR 式を生成し，返す．
   static
   Expr
-  make_or(const ExprList& chd_list);
+  make_or(const list<Expr>& chd_list);
 
   /// @brief XOR 式の生成
   /// @param[in] chd_list オペランドのベクタ
   /// @return chd_list を部分論理式に持つ XOR 式を生成し，返す．
   static
   Expr
-  make_xor(const ExprVector& chd_list);
+  make_xor(const vector<Expr>& chd_list);
 
   /// @brief XOR 式の生成
   /// @param[in] chd_list オペランドのリスト
   /// @return chd_list を部分論理式に持つ XOR 式を生成し，返す．
   static
   Expr
-  make_xor(const ExprList& chd_list);
+  make_xor(const list<Expr>& chd_list);
 
   /// @brief 確保していたメモリを開放する．
   /// @note メモリリークチェックのための関数なので通常は使用しない．

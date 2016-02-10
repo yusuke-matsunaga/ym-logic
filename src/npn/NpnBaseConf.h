@@ -15,7 +15,8 @@
 
 #define USE_MALLOC 0
 
-BEGIN_NAMESPACE_YM_NPN
+
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 /// @class NpnBaseConf NpnBaseConf.h "NpnBaseConf.h"
@@ -479,6 +480,6 @@ NpnBaseConf::add_indep(ymuint pos)
   ++ mIndepNum;
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC
 
 #endif // NPNBASECONF_H

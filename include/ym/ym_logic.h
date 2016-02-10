@@ -38,8 +38,6 @@ class ExprWriter;
 class NpnMap;
 class NpnMapM;
 class NpnVmap;
-class TvFunc;
-class TvFuncM;
 
 END_NAMESPACE_YM_LOGIC
 
@@ -51,8 +49,9 @@ using nsLogic::ExprWriter;
 using nsLogic::NpnMap;
 using nsLogic::NpnMapM;
 using nsLogic::NpnVmap;
-using nsLogic::TvFunc;
-using nsLogic::TvFuncM;
+
+class TvFunc;
+class TvFuncM;
 
 END_NAMESPACE_YM
 

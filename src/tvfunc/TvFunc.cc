@@ -9,6 +9,7 @@
 
 #include "ym/TvFunc.h"
 #include "ym/NpnMap.h"
+#include "NpnMgr.h"
 
 
 // 1 ワード当たりの入力数
@@ -4965,6 +4966,27 @@ TvFunc::xform(const NpnMap& npnmap) const
 #endif
 
   return ans;
+}
+
+// @brief npn 変換の正規変換を求める．
+NpnMap
+TvFunc::npn_cannonical_map() const
+{
+  nsLogic::NpnMgr npn_mgr;
+  NpnMap xmap;
+  npn_mgr.cannonical(*this, xmap);
+  return xmap;
+}
+
+// @brief npn 変換の正規変換をすべて求める．
+// @param[out] map_list 変換を格納するリスト
+void
+TvFunc::npn_cannonical_all_map(vector<NpnMap>& map_list) const
+{
+  nsLogic::NpnMgr npn_mgr;
+  NpnMap xmap;
+  npn_mgr.cannonical(*this, xmap);
+  npn_mgr.all_map(map_list);
 }
 
 // ハッシュ値を返す．

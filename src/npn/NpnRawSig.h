@@ -13,7 +13,7 @@
 #include "ym/TvFunc.h"
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 class NpnConf;
 
@@ -416,6 +416,6 @@ NpnRawSig::add_indep(ymuint rep)
   ++ mIndepNum;
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC
 
 #endif // NPNRAWSIG_H

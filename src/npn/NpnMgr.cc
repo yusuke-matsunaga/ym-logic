@@ -7,11 +7,11 @@
 /// All rights reserved.
 
 
-#include "ym/NpnMgr.h"
+#include "NpnMgr.h"
 #include "NpnMgrImpl.h"
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 // クラス NpnMgr
@@ -63,4 +63,4 @@ NpnMgr::tvmax_count() const
   return mImpl->tvmax_count();
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC

@@ -7,10 +7,8 @@
 /// All rights reserved.
 
 
-#include "ym_config.h"
-#include "ym/TvFunc.h"
-
 #include "NpnBaseConf.h"
+#include "ym/TvFunc.h"
 
 
 const int debug_normalize = 0x0001;
@@ -18,7 +16,7 @@ const int debug_none      = 0x0000;
 const int debug_all       = 0xffff;
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 extern
 int debug;
@@ -265,4 +263,4 @@ NpnBaseConf::print_pols(ostream& s) const
   s << endl;
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC

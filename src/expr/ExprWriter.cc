@@ -49,7 +49,7 @@ ExprWriter::dump(ostream& s,
 // @brief 内容を文字列にする．
 // @param[in] expr 文字列
 string
-ExprWriter::dump_string(const Expr& expr) const
+ExprWriter::dump_to_string(const Expr& expr) const
 {
   ostringstream buf;
   dump(buf, expr);
@@ -62,8 +62,8 @@ ExprWriter::dump_string(const Expr& expr) const
 // @note varid 番目の変数名として var_names[varid] を用いる．
 // 登録されていなければデフォルトの表記を用いる．
 string
-ExprWriter::dump_string(const Expr& expr,
-			const HashMap<VarId, string>& var_names) const
+ExprWriter::dump_to_string(const Expr& expr,
+			   const HashMap<VarId, string>& var_names) const
 {
   ostringstream buf;
   dump(buf, expr, var_names);

@@ -10,7 +10,7 @@
 #include "NpnMgrImpl.h"
 
 #include "ym/TvFunc.h"
-#include "ym/NpnMgr.h"
+#include "NpnMgr.h"
 #include "NpnBaseConf.h"
 #include "NpnConf.h"
 
@@ -36,7 +36,7 @@ int debug = DEBUG_FLAG;
 END_NONAMESPACE
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 
 //////////////////////////////////////////////////////////////////////
@@ -1007,4 +1007,4 @@ NpnMgrImpl::free_npnconf(NpnConf* conf)
   mAlloc.put_memory(sizeof(NpnConf), conf);
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC

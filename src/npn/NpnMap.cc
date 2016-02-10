@@ -13,7 +13,7 @@
 //#define DEBUG_NPN_MAP
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 // デバッグ用のフラグ変数
 #if defined(DEBUG) || defined(DEBUG_NPN_MAP)
@@ -337,4 +337,4 @@ operator>>(IDO& bis,
   return bis;
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC

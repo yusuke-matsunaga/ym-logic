@@ -14,7 +14,7 @@
 #include "NpnBaseConf.h"
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 class NpnConf;
 
@@ -146,6 +146,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC
 
 #endif // NPNMGRIMPL_H

@@ -7,10 +7,8 @@
 /// All rights reserved.
 
 
-#include "ym_config.h"
-#include "ym/TvFunc.h"
-
 #include "NpnRawSig.h"
+#include "ym/TvFunc.h"
 #include "NpnConf.h"
 
 
@@ -24,7 +22,7 @@ const int debug_all       = 0xffff;
 #endif
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 int debug = DEBUG_FLAG;
 
@@ -361,4 +359,4 @@ NpnRawSig::dump_pols(ostream& s) const
   s << endl;
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC

@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 
+#include "ym/ym_logic.h"
 #include "ym/VarId.h"
 #include "ym/HashBase.h"
 #include "ym/IDO.h"
@@ -262,6 +263,15 @@ public:
   /// @return 変換した関数を返す．
   TvFunc
   xform(const NpnMap& npnmap) const;
+
+  /// @brief npn 変換の正規変換を求める．
+  NpnMap
+  npn_cannonical_map() const;
+
+  /// @brief npn 変換の正規変換をすべて求める．
+  /// @param[out] map_list 変換を格納するリスト
+  void
+  npn_cannonical_all_map(vector<NpnMap>& map_list) const;
 
 
 public:

@@ -13,7 +13,7 @@
 #include "NpnBaseConf.h"
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 /// @class NpnConf NpnConf.h "NpnConf.h"
@@ -588,6 +588,6 @@ NpnConf::refine(ymuint g0,
   return mGroupNum - ng0;
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC
 
-#endif // NPNCONF
+#endif // NPNCONF_H

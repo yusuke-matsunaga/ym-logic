@@ -8,10 +8,10 @@
 
 
 #include "NpnConf.h"
-#include "ym/NpnMgr.h"
+#include "NpnMgr.h"
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 // コンストラクタ
 NpnConf::NpnConf() :
@@ -340,4 +340,4 @@ NpnConf::print(ostream& s) const
     << endl;
 }
 
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC

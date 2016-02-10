@@ -11,7 +11,7 @@
 #include "ym/NpnMap.h"
 
 
-BEGIN_NAMESPACE_YM_NPN
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 // クラス NpnMapM
@@ -380,4 +380,4 @@ operator>>(IDO& bis,
 
   return bis;
 }
-END_NAMESPACE_YM_NPN
+END_NAMESPACE_YM_LOGIC

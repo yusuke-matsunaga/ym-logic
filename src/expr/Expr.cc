@@ -103,12 +103,12 @@ Expr::make_negaliteral(VarId varid)
 
 // 与えられた論理式を部分論理式に持つ n 入力ANDの論理式を作るクラス・メソッド
 Expr
-Expr::make_and(const ExprVector& chd_list)
+Expr::make_and(const vector<Expr>& chd_list)
 {
   ASSERT_COND(chd_list.size() > 0 );
   ExprMgr& mgr = ExprMgr::the_obj();
   ymuint begin = mgr.nodestack_top();
-  for (ExprVector::const_iterator p = chd_list.begin();
+  for (vector<Expr>::const_iterator p = chd_list.begin();
        p != chd_list.end(); ++ p) {
     mgr.nodestack_push((*p).root());
   }
@@ -116,12 +116,12 @@ Expr::make_and(const ExprVector& chd_list)
 }
 
 Expr
-Expr::make_and(const ExprList& chd_list)
+Expr::make_and(const list<Expr>& chd_list)
 {
   ASSERT_COND(chd_list.size() > 0 );
   ExprMgr& mgr = ExprMgr::the_obj();
   ymuint begin = mgr.nodestack_top();
-  for (ExprList::const_iterator p = chd_list.begin();
+  for (list<Expr>::const_iterator p = chd_list.begin();
        p != chd_list.end(); ++ p) {
     mgr.nodestack_push((*p).root());
   }
@@ -130,12 +130,12 @@ Expr::make_and(const ExprList& chd_list)
 
 // 与えられた論理式を部分論理式に持つ n 入力ORの論理式を作るクラス・メソッド
 Expr
-Expr::make_or(const ExprVector& chd_list)
+Expr::make_or(const vector<Expr>& chd_list)
 {
   ASSERT_COND(chd_list.size() > 0 );
   ExprMgr& mgr = ExprMgr::the_obj();
   ymuint begin = mgr.nodestack_top();
-  for (ExprVector::const_iterator p = chd_list.begin();
+  for (vector<Expr>::const_iterator p = chd_list.begin();
        p != chd_list.end(); ++ p) {
     mgr.nodestack_push((*p).root());
   }
@@ -143,12 +143,12 @@ Expr::make_or(const ExprVector& chd_list)
 }
 
 Expr
-Expr::make_or(const ExprList& chd_list)
+Expr::make_or(const list<Expr>& chd_list)
 {
   ASSERT_COND(chd_list.size() > 0 );
   ExprMgr& mgr = ExprMgr::the_obj();
   ymuint begin = mgr.nodestack_top();
-  for (ExprList::const_iterator p = chd_list.begin();
+  for (list<Expr>::const_iterator p = chd_list.begin();
        p != chd_list.end(); ++ p) {
     mgr.nodestack_push((*p).root());
   }
@@ -157,12 +157,12 @@ Expr::make_or(const ExprList& chd_list)
 
 // 与えられた論理式を部分論理式に持つ n 入力XORの論理式を作るクラス・メソッド
 Expr
-Expr::make_xor(const ExprVector& chd_list)
+Expr::make_xor(const vector<Expr>& chd_list)
 {
   ASSERT_COND(chd_list.size() > 0 );
   ExprMgr& mgr = ExprMgr::the_obj();
   ymuint begin = mgr.nodestack_top();
-  for (ExprVector::const_iterator p = chd_list.begin();
+  for (vector<Expr>::const_iterator p = chd_list.begin();
        p != chd_list.end(); ++ p) {
     mgr.nodestack_push((*p).root());
   }
@@ -170,12 +170,12 @@ Expr::make_xor(const ExprVector& chd_list)
 }
 
 Expr
-Expr::make_xor(const ExprList& chd_list)
+Expr::make_xor(const list<Expr>& chd_list)
 {
   ASSERT_COND(chd_list.size() > 0 );
   ExprMgr& mgr = ExprMgr::the_obj();
   ymuint begin = mgr.nodestack_top();
-  for (ExprList::const_iterator p = chd_list.begin();
+  for (list<Expr>::const_iterator p = chd_list.begin();
        p != chd_list.end(); ++ p) {
     mgr.nodestack_push((*p).root());
   }
