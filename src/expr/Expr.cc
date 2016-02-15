@@ -439,6 +439,13 @@ Expr::is_op() const
   return root()->is_op();
 }
 
+bool
+check_equiv(const Expr& left,
+	    const Expr& right)
+{
+  return posi_equiv(left.root(), right.root());
+}
+
 // src1 と src2 の根のタイプが同じとき true を返す．
 bool
 compare_type(const Expr& src1,

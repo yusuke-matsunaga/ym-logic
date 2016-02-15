@@ -525,6 +525,11 @@ public:
 
   friend
   bool
+  check_equiv(const Expr& left,
+	      const Expr& right);
+
+  friend
+  bool
   compare_type(const Expr& src1,
 	       const Expr& src2);
 
