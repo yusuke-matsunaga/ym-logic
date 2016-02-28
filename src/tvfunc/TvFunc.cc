@@ -431,7 +431,7 @@ TvFunc::TvFunc(ymuint ni,
   mVector(new ymuint64[mBlockNum])
 {
   ymuint ni_pow = 1U << ni;
-  ASSERT_COND(values.size() == ni_pow );
+  ASSERT_COND( values.size() == ni_pow );
   if ( ni <= NIPW ) {
     ymuint64 pat = 0UL;
     for (ymuint i = 0; i < ni_pow; ++ i) {
