@@ -57,34 +57,8 @@ set (ym_logic_SOURCES
 #  ターゲットの設定
 # ===================================================================
 
-#ym_add_library(ym_logic
-#  SHARED
-#  DESTINATION ${YM_INSTALL_LIBDIR}
-#  )
-
-#target_link_libraries(ym_logic
-#  ym_common
-#  )
-
-#target_link_libraries(ym_logic_p
-#  ym_common_p
-#  )
-
-#target_link_libraries(ym_logic_d
-#  ym_common_d
-#  )
-
-add_library ( ym_logic
-  OBJECT
+ym_add_object_library ( ym_logic
   ${ym_logic_SOURCES}
-  )
-
-target_compile_options ( ym_logic
-  PRIVATE "-O3" "-fPIC"
-  )
-
-target_compile_definitions ( ym_logic
-  PRIVATE "-DNDEBUG"
   )
 
 
