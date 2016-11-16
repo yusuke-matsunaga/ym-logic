@@ -87,7 +87,7 @@ public:
   /// @brief 入力の変換内容の設定
   /// @param[in] src_var 入力番号
   /// @param[in] dst_var 変換先の入力番号
-  /// @param[in] int 極性
+  /// @param[in] inv 極性
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
   void

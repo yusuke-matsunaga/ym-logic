@@ -99,7 +99,7 @@ public:
 
   /// @brief リテラル式の生成
   /// @param[in] varid 変数番号
-  /// @param[in] int 極性
+  /// @param[in] inv 極性
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
   /// @return 生成したオブジェクト
