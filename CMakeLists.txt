@@ -37,7 +37,6 @@ set (npn_SOURCES
   src/npn/NpnMap.cc
   src/npn/NpnMapM.cc
   src/npn/NpnMgr.cc
-  src/npn/NpnMgrImpl.cc
   src/npn/NpnRawSig.cc
   )
 

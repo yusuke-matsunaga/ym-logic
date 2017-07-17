@@ -3,7 +3,7 @@
 /// @brief TvFunc の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -489,36 +489,6 @@ TvFunc::operator=(const TvFunc& src)
 TvFunc::~TvFunc()
 {
   delete [] mVector;
-}
-
-// 恒偽関数を作る．
-TvFunc
-TvFunc::const_zero(ymuint ni)
-{
-  return TvFunc(ni);
-}
-
-// 恒真関数を作る．
-TvFunc
-TvFunc::const_one(ymuint ni)
-{
-  return TvFunc(ni, 0);
-}
-
-// 肯定のリテラル関数を作る．
-TvFunc
-TvFunc::posi_literal(ymuint ni,
-		     VarId varid)
-{
-  return TvFunc(ni, varid, false);
-}
-
-// 否定のリテラル関数を作る．
-TvFunc
-TvFunc::nega_literal(ymuint ni,
-		     VarId varid)
-{
-  return TvFunc(ni, varid, true);
 }
 
 // 自分自身を否定する．
@@ -4972,10 +4942,8 @@ TvFunc::xform(const NpnMap& npnmap) const
 NpnMap
 TvFunc::npn_cannonical_map() const
 {
-  nsLogic::NpnMgr npn_mgr;
-  NpnMap xmap;
-  npn_mgr.cannonical(*this, xmap);
-  return xmap;
+  nsLogic::NpnMgr npn_mgr(*this);
+  return npn_mgr.cmap();
 }
 
 // @brief npn 変換の正規変換をすべて求める．
@@ -4983,10 +4951,8 @@ TvFunc::npn_cannonical_map() const
 void
 TvFunc::npn_cannonical_all_map(vector<NpnMap>& map_list) const
 {
-  nsLogic::NpnMgr npn_mgr;
-  NpnMap xmap;
-  npn_mgr.cannonical(*this, xmap);
-  npn_mgr.all_map(map_list);
+  nsLogic::NpnMgr npn_mgr(*this);
+  npn_mgr.all_cmap(map_list);
 }
 
 // ハッシュ値を返す．

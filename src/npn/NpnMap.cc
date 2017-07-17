@@ -29,13 +29,13 @@ NpnMap::NpnMap() :
 }
 
 // 入力数(と出力極性)を指定したコンストラクタ
-// 各入力の変換内容は kImapBad になっている．
+// 恒等変換になる．
 NpnMap::NpnMap(ymuint ni,
 	       bool inv) :
   mNiPol((ni << 1) | static_cast<ymuint32>(inv))
 {
   for (ymuint i = 0; i < ni; ++ i) {
-    mImap[i] = NpnVmap::invalid();
+    mImap[i] = NpnVmap(VarId(i), false);
   }
 }
 

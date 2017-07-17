@@ -75,28 +75,28 @@ Expr::~Expr()
 
 // 定数 0 の論理式を作る
 Expr
-Expr::make_zero()
+Expr::const_zero()
 {
   return Expr(ExprMgr::the_obj().make_zero());
 }
 
 // 定数 1 の論理式を作る
 Expr
-Expr::make_one()
+Expr::const_one()
 {
   return Expr(ExprMgr::the_obj().make_one());
 }
 
 // 肯定のリテラルを作る．
 Expr
-Expr::make_posiliteral(VarId varid)
+Expr::posi_literal(VarId varid)
 {
   return Expr(ExprMgr::the_obj().make_posiliteral(varid));
 }
 
 // 否定のリテラルを作る．
 Expr
-Expr::make_negaliteral(VarId varid)
+Expr::nega_literal(VarId varid)
 {
   return Expr(ExprMgr::the_obj().make_negaliteral(varid));
 }
@@ -647,7 +647,7 @@ Expr::stream_to_expr(istream& in,
   }
   catch ( SyntaxError e ) {
     err_msg = e.mMsg;
-    return make_zero();
+    return const_zero();
   }
 }
 
@@ -709,23 +709,23 @@ read_expr(IDO& s)
   s >> type;
   switch ( type ) {
   case 0:
-    return Expr::make_zero();
+    return Expr::const_zero();
 
   case 1:
-    return Expr::make_one();
+    return Expr::const_one();
 
   case 2:
     {
       VarId var;
       s >> var;
-      return Expr::make_posiliteral(var);
+      return Expr::posi_literal(var);
     }
 
   case 3:
     {
       VarId var;
       s >> var;
-      return Expr::make_negaliteral(var);
+      return Expr::nega_literal(var);
     }
   }
 
@@ -752,7 +752,7 @@ read_expr(IDO& s)
   }
 
   // ダミー
-  return Expr::make_zero();
+  return Expr::const_zero();
 }
 
 END_NONAMESPACE

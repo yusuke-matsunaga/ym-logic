@@ -26,15 +26,11 @@ public:
   /// @brief 入力数と出力数を指定したコンストラクタ
   /// @param[in] ni 入力数
   /// @param[in] no 出力数 ( > 0 )
-  /// @note 中身は恒偽関数
+  ///
+  /// 中身は恒偽関数となる．
   explicit
   TvFuncM(ymuint ni = 0,
 	  ymuint no = 1);
-
-  /// @brief TvFunc を用いたコンストラクタ
-  /// @param[in] src_list 各出力の論理関数
-  /// @note src_list の関数の入力数は等しくなければならない．
-  TvFuncM(const vector<TvFunc>& src_list);
 
   /// @brief コピーコンストラクタ
   TvFuncM(const TvFuncM& src);
@@ -42,6 +38,18 @@ public:
   /// @brief TvFunc からの変換用コンストラクタ
   explicit
   TvFuncM(const TvFunc& src);
+
+  /// @brief TvFunc のリストを用いたコンストラクタ
+  /// @param[in] src_list 各出力の論理関数
+  ///
+  /// src_list の関数の入力数は等しくなければならない．
+  TvFuncM(const vector<TvFunc>& src_list);
+
+  /// @brief TvFunc のリストを用いたコンストラクタ
+  /// @param[in] src_list 各出力の論理関数
+  ///
+  /// src_list の関数の入力数は等しくなければならない．
+  TvFuncM(const list<TvFunc>& src_list);
 
   /// @brief 代入演算子
   const TvFuncM&
@@ -61,23 +69,23 @@ public:
   const TvFuncM&
   negate();
 
-  /// @brief left との論理積を計算し自分に代入する．
-  /// @param[in] left 論理対象のオブジェクト
+  /// @brief right との論理積を計算し自分に代入する．
+  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   const TvFuncM&
-  operator&=(const TvFuncM& left);
+  operator&=(const TvFuncM& right);
 
-  /// @brief left との論理和を計算し自分に代入する．
-  /// @param[in] left 論理対象のオブジェクト
+  /// @brief right との論理和を計算し自分に代入する．
+  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   const TvFuncM&
-  operator|=(const TvFuncM& left);
+  operator|=(const TvFuncM& right);
 
-  /// @brief left との排他的論理和を計算し自分に代入する．
-  /// @param[in] left 論理対象のオブジェクト
+  /// @brief right との排他的論理和を計算し自分に代入する．
+  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   const TvFuncM&
-  operator^=(const TvFuncM& left);
+  operator^=(const TvFuncM& right);
 
   /// @brief コファクターを計算し自分に代入する．
   /// @param[in] varid 変数番号
@@ -92,7 +100,8 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // 一つに出力に対して論理演算を伴った代入
+  // 一つに出力に対する論理演算を伴った代入
+  // 対象の出力を ovar で指定する．
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 自分自身を否定する．
@@ -101,29 +110,29 @@ public:
   const TvFuncM&
   negate(VarId ovar);
 
-  /// @brief left との論理積を計算し自分に代入する．
+  /// @brief right との論理積を計算し自分に代入する．
   /// @param[in] ovar 出力番号
-  /// @param[in] left 論理対象のオブジェクト
+  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   const TvFuncM&
   and_assign(VarId ovar,
-	     const TvFunc& left);
+	     const TvFunc& right);
 
-  /// @brief left との論理和を計算し自分に代入する．
+  /// @brief right との論理和を計算し自分に代入する．
   /// @param[in] ovar 出力番号
-  /// @param[in] left 論理対象のオブジェクト
+  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   const TvFuncM&
   or_assign(VarId ovar,
-	    const TvFunc& left);
+	    const TvFunc& right);
 
-  /// @brief left との排他的論理和を計算し自分に代入する．
+  /// @brief right との排他的論理和を計算し自分に代入する．
   /// @param[in] ovar 出力番号
-  /// @param[in] left 論理対象のオブジェクト
+  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   const TvFuncM&
   xor_assign(VarId ovar,
-	     const TvFunc& left);
+	     const TvFunc& right);
 
   /// @brief コファクターを計算し自分に代入する．
   /// @param[in] ovar 出力番号
@@ -306,16 +315,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  ymuint32 mInputNum;
+  ymuint mInputNum;
 
   // 出力数
-  ymuint32 mOutputNum;
+  ymuint mOutputNum;
 
   // 1出力分のブロック数
-  ymuint32 mBlockNum1;
+  ymuint mBlockNum1;
 
   // ブロック数
-  ymuint32 mBlockNum;
+  ymuint mBlockNum;
 
   // パックされた真理値ベクトル
   ymuint64* mVector;

@@ -26,8 +26,21 @@ int debug;
 //////////////////////////////////////////////////////////////////////
 
 // コンストラクタ
-NpnBaseConf::NpnBaseConf()
+NpnBaseConf::NpnBaseConf(const TvFunc& func) :
+  mFunc(func),
+  mInputNum(mFunc.input_num())
 {
+#if USE_MALLOC
+  mW1 = new ymint32[mInputNum];
+  mW2 = new ymint32[mInputNum * mInputNum];
+  mW2flag = new ymuint8[mInputNum * mInputNum];
+  mIpols = new ymuint8[mInputNum];
+  mIcRep = new ymuint32[mInputNum];
+  mIcNum = new ymuint32[mInputNum];
+  mIcLink = new ymuint32[mInputNum];
+#endif
+
+  normalize();
 }
 
 // デストラクタ
@@ -45,22 +58,10 @@ NpnBaseConf::~NpnBaseConf()
 }
 
 // @brief W0/W1 を用いて正規化する．
-// @param[in] func 対象の関数
 void
-NpnBaseConf::normalize(const TvFunc& func)
+NpnBaseConf::normalize()
 {
-  mFunc = func;
-  mInputNum = mFunc.input_num();
-
-#if USE_MALLOC
-  mW1 = new ymint32[mInputNum];
-  mW2 = new ymint32[mInputNum * mInputNum];
-  mW2flag = new ymuint8[mInputNum * mInputNum];
-  mIpols = new ymuint8[mInputNum];
-  mIcRep = new ymuint32[mInputNum];
-  mIcNum = new ymuint32[mInputNum];
-  mIcLink = new ymuint32[mInputNum];
-#endif
+  // 作業領域を初期化する．
   for (ymuint i = 0; i < mInputNum; ++ i) {
     ymuint base = i * mInputNum;
     for (ymuint j = 0; j < mInputNum; ++ j) {
@@ -71,6 +72,7 @@ NpnBaseConf::normalize(const TvFunc& func)
     mIcNum[i] = 0;
     mIcLink[i] = static_cast<ymuint>(-1);
   }
+
   // Walsh の0次と1次の係数を計算する．
   // 2次の係数はオンデマンドで計算する．
   mW0 = mFunc.walsh_01(mW1);
@@ -83,16 +85,20 @@ NpnBaseConf::normalize(const TvFunc& func)
 
   // mW0 が非負になるように出力極性の調整を行う．
   if ( mW0 < 0 ) {
+    // 出力の極性を反転させる．
     mOpol = 2;
     mW0 = -mW0;
+    // 1次の係数も反転させる．
     for (ymuint i = 0; i < mInputNum; ++ i) {
       mW1[i] = -mW1[i];
     }
   }
   else if ( mW0 == 0 ) {
+    // 極性は決められない．
     mOpol = 0;
   }
   else { // mW0 > 0
+    // そのままの極性で固定する．
     mOpol = 1;
   }
 
@@ -117,6 +123,7 @@ NpnBaseConf::normalize(const TvFunc& func)
 	continue;
       }
       else {
+	// この入力の極性は未確定
 	mIpols[i] = 0;
       }
     }
@@ -135,6 +142,7 @@ NpnBaseConf::normalize(const TvFunc& func)
       // 対称性のチェックを行う．
       VarId var(i);
       VarId var1(pos1);
+      // 極性が (1, 2) か (2, 1) の時は逆極性で調べる．
       bool inv = (mIpols[pos1] * mIpols[i] == 2);
       bool stat = mFunc.check_sym(var, var1, inv);
       if ( stat ) {

@@ -18,6 +18,7 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 /// @class NpnConf NpnConf.h "NpnConf.h"
 /// @brief 1つのコンフィグレーションを表すクラス
+///
 /// 具体的には
 ///  - 出力の極性
 ///  - 入力の極性
@@ -175,9 +176,9 @@ public:
   walsh_2i(ymuint pos1,
 	   ymuint pos2) const;
 
-  /// @brief 内容を NpnMap にセットする．
-  void
-  set_map(NpnMap& map) const;
+  /// @brief 内容を NpnMap に変換する．
+  NpnMap
+  conv_to_npnmap() const;
 
 
 public:

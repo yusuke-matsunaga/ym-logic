@@ -29,7 +29,8 @@ class Literal
 public:
 
   /// @brief デフォルトコンストラクタ
-  /// 内容は不定なのであまり使わない方が良い．
+  ///
+  /// 未定義リテラル(kLiteralX)になる．
   Literal();
 
   /// @brief 変数番号と極性を指定したコンストラクタ
@@ -129,7 +130,7 @@ private:
 
   /// @brief 内部でのみ用いるコンストラクタ
   explicit
-  Literal(ymuint32 body);
+  Literal(ymuint body);
 
 
 private:
@@ -138,7 +139,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数番号と極性をパックしたもの
-  ymuint32 mBody;
+  ymuint mBody;
 
 };
 
@@ -255,14 +256,15 @@ void
 Literal::set(VarId varid,
 	     bool inv)
 {
-  mBody = (varid.val() << 1) + static_cast<ymuint32>(inv);
+  mBody = (varid.val() << 1) + static_cast<ymuint>(inv);
 }
 
 // デフォルトコンストラクタ
 inline
-Literal::Literal() :
-  mBody(0xfffffffe)
+Literal::Literal()
 {
+  mBody = static_cast<ymuint>(-1);
+  mBody <<= 1;
 }
 
 // 変数番号と極性を指定したコンストラクタ
@@ -275,7 +277,7 @@ Literal::Literal(VarId varid,
 
 // 内部でのみ用いるコンストラクタ
 inline
-Literal::Literal(ymuint32 body) :
+Literal::Literal(ymuint body) :
   mBody(body)
 {
 }
@@ -283,7 +285,7 @@ Literal::Literal(ymuint32 body) :
 // @brief index からの変換関数
 inline
 Literal
-Literal::index2literal(ymuint32 index)
+Literal::index2literal(ymuint index)
 {
   return Literal(index);
 }

@@ -21,24 +21,27 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 /// @class NpnBaseConf NpnBaseConf.h "NpnBaseConf.h"
 /// @brief NPN同値類を区別するためのシグネチャを表すクラス
+///
+/// normalize() のアルゴリズムは以下の通り
+/// - Walsh の0次係数が非負になるように出力の極性を決める．
+///   * 0 の場合は決められない．
+/// - Walsh の1次係数が非負になるように各入力の極性を決める．
+///   * 0 の場合は決められない．
+///   * ただしその変数が独立(役立たず)の場合もあるので調べる．
+/// - Walsh の1次係数が同じ入力に対して対称性のチェックを行う．
+///   * 具体的には f|xy' == f|x'y が成り立つか調べる．
+///   * さらに f|xy == f|x'y' が成り立つか調べる．-> bisym フラグを立てる．
 //////////////////////////////////////////////////////////////////////
 class NpnBaseConf
 {
 public:
 
   /// @brief コンストラクタ
-  NpnBaseConf();
+  /// @param[in] func 対象の関数
+  NpnBaseConf(const TvFunc& func);
 
   /// @brief デストラクタ
   ~NpnBaseConf();
-
-
-public:
-
-  /// @brief W0/W1 を用いて正規化する．
-  /// @param[in] func 対象の関数
-  void
-  normalize(const TvFunc& func);
 
 
 public:
@@ -122,7 +125,8 @@ public:
   indep_num() const;
 
   /// @brief 独立(無関係)な入力クラスの先頭番号を返す．
-  /// @note 2番め以降の要素は ic_link() でたどる．
+  ///
+  /// 2番め以降の要素は ic_link() でたどる．
   ymuint
   indep_rep() const;
 
@@ -161,6 +165,10 @@ private:
   // 情報設定用の下請け関数
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief W0/W1 を用いて正規化する．
+  void
+  normalize();
+
   /// @brief 新しい等価入力クラスを作る．
   /// @param[in] pos 入力番号
   void
@@ -193,26 +201,26 @@ private:
   TvFunc mFunc;
 
   // 関数の入力数
-  ymuint32 mInputNum;
+  ymuint mInputNum;
 
   // Walsh の 0次係数
-  ymint32 mW0;
+  ymint mW0;
 
   // Walsh の 1次係数
   // 大きさ mInputNum の配列へのポインタ
 #if USE_MALLOC
-  ymint32* mW1;
+  ymint* mW1;
 #else
-  ymint32 mW1[TvFunc::kMaxNi];
+  ymint mW1[TvFunc::kMaxNi];
 #endif
 
   // Walsh の 2次係数
   // 大きさ mInputNum * mInputNum の配列へのポインタ
   mutable
 #if USE_MALLOC
-  ymint32* mW2;
+  ymint* mW2;
 #else
-  ymint32 mW2[TvFunc::kMaxNi * TvFunc::kMaxNi];
+  ymint mW2[TvFunc::kMaxNi * TvFunc::kMaxNi];
 #endif
 
   // mW2 が計算済みかどうかを記録するフラグ
@@ -239,36 +247,36 @@ private:
 #endif
 
   // 等価入力クラスの数
-  ymuint32 mNc;
+  ymuint mNc;
 
   // 等価入力クラスの先頭番号のリスト
   // インデックスはクラス番号
 #if USE_MALLOC
-  ymuint32* mIcRep;
+  ymuint* mIcRep;
 #else
-  ymuint32 mIcRep[TvFunc::kMaxNi];
+  ymuint mIcRep[TvFunc::kMaxNi];
 #endif
 
   // 等価入力クラスの要素数の配列
   // インデックスは入力番号
 #if USE_MALLOC
-  ymuint32* mIcNum;
+  ymuint* mIcNum;
 #else
-  ymuint32 mIcNum[TvFunc::kMaxNi];
+  ymuint mIcNum[TvFunc::kMaxNi];
 #endif
 
   // 独立な入力クラスの先頭番号
-  ymuint32 mIndepRep;
+  ymuint mIndepRep;
 
   // 独立な入力クラスの要素数
-  ymuint32 mIndepNum;
+  ymuint mIndepNum;
 
   // 等価入力クラスの次の要素を指す配列
   // インデックスは入力番号
 #if USE_MALLOC
-  ymuint32* mIcLink;
+  ymuint* mIcLink;
 #else
-  ymuint32 mIcLink[TvFunc::kMaxNi];
+  ymuint mIcLink[TvFunc::kMaxNi];
 #endif
 
 };

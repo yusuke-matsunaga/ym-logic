@@ -21,6 +21,7 @@ BEGIN_NAMESPACE_YM
 /// @class VarId VarId.h "ym/VarId.h"
 /// @ingroup LogicGroup
 /// @brief 変数番号を表す型
+///
 /// 基本的にはただの符号なし整数だが，意味のある演算がほとんどないので
 /// あえてクラスの形にしている．
 /// 例えば変数どうしの四則演算に直接的な意味はない．
@@ -30,10 +31,15 @@ class VarId
 public:
 
   /// @brief 空のコンストラクタ
-  /// @note 不正な値(kVarIdIllegal)になる．
+  ///
+  /// 不正な値(kVarIdIllegal)になる．
   VarId();
 
   /// @brief 値を指定したコンストラクタ
+  /// @param[in] val 変数番号
+  ///
+  /// val は数値だが同じ数値の変数が同じ変数を表す
+  /// という以外に意味はない．
   explicit
   VarId(ymuint val);
 
@@ -177,9 +183,10 @@ const VarId kVarIdIllegal;
 
 // @brief 空のコンストラクタ
 inline
-VarId::VarId() :
-  mVal(0xFFFFFFFFU)
+VarId::VarId()
 {
+  mVal = static_cast<ymuint>(-1);
+  // この値は kVarIdIllegal となる．
 }
 
 // @brief 値を指定したコンストラクタ

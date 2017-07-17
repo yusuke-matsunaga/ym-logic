@@ -31,7 +31,8 @@ class NpnMap
 public:
 
   /// @brief 空のコンストラクタ．
-  /// @note 内容は不定
+  ///
+  /// 内容は不定
   NpnMap();
 
   /// @brief 入力数(と出力極性)を指定したコンストラクタ
@@ -39,7 +40,8 @@ public:
   /// @param[in] oinv 出力極性
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
-  /// @note 各入力の変換内容は不正な値になっている．
+  ///
+  /// 恒等変換になる．
   explicit
   NpnMap(ymuint ni,
 	 bool oinv = false);
@@ -64,14 +66,16 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 内容をクリアする．
-  /// @note 入力の変換内容は不正な値になる．
+  ///
+  /// 入力の変換内容は不正な値になる．
   /// 出力の極性は kPolPosi
   void
   clear();
 
   /// @brief 入力数を再設定する．
   /// @param[in] ni 入力数
-  /// @note 以前の内容はクリアされる．
+  ///
+  /// 以前の内容はクリアされる．
   void
   resize(ymuint ni);
 
@@ -160,7 +164,8 @@ private:
 /// @brief 逆写像を求める．
 /// @param[in] src 入力となるマップ
 /// @return src の逆写像
-/// @note 1対1写像でなければ答えは不定．
+///
+/// 1対1写像でなければ答えは不定．
 NpnMap
 inverse(const NpnMap& src);
 
@@ -168,7 +173,8 @@ inverse(const NpnMap& src);
 /// @brief 合成を求める．
 /// @param[in] src1,src2 入力となるマップ
 /// @return src1 と src2 を合成したもの
-/// @note src1の値域とsrc2の定義域は一致していな
+///
+/// src1の値域とsrc2の定義域は一致していな
 /// ければならない．そうでなければ答えは不定．
 NpnMap
 operator*(const NpnMap& src1,
@@ -178,7 +184,8 @@ operator*(const NpnMap& src1,
 /// @brief 内容を表示する(主にデバッグ用)．
 /// @param[in] s 出力ストリーム
 /// @param[in] map 出力対象のマップ
-/// @note 改行はしない．
+///
+/// 改行はしない．
 ostream&
 operator<<(ostream& s,
 	   const NpnMap& map);

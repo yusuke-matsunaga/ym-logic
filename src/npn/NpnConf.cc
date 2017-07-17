@@ -249,11 +249,13 @@ NpnConf::set_ic_pol(ymuint pos,
   }
 }
 
-// @brief 内容を NpnMap にセットする．
-void
-NpnConf::set_map(NpnMap& map) const
+
+// @brief 内容を NpnMap に変換する．
+NpnMap
+NpnConf::conv_to_npnmap() const
 {
-  map.resize(mBaseConf->input_num());
+  NpnMap map(mBaseConf->input_num());
+
   bool oinv = (opol() == 2);
   map.set_oinv(oinv);
 
@@ -276,6 +278,8 @@ NpnConf::set_map(NpnMap& map) const
     rep = mBaseConf->ic_link(rep);
   }
   ASSERT_COND( k == input_num() );
+
+  return map;
 }
 
 // @brief 内容を出力する．

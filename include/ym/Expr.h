@@ -5,7 +5,7 @@
 /// @brief Expr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -48,7 +48,7 @@ public:
   /// @brief 空のデフォルトコンストラクタ
   ///
   /// - 値は定数0になる
-  /// - ただし意識して定数0を作りたいなら MakeConst0() を使うこと．
+  /// - ただし意識して定数0を作りたいなら const_zero() を使うこと．
   Expr();
 
   /// @brief コピーコンストラクタ
@@ -89,13 +89,13 @@ public:
   /// @return 生成したオブジェクト
   static
   Expr
-  make_zero();
+  const_zero();
 
   /// @brief 恒真関数の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  make_one();
+  const_one();
 
   /// @brief リテラル式の生成
   /// @param[in] varid 変数番号
@@ -105,29 +105,29 @@ public:
   /// @return 生成したオブジェクト
   static
   Expr
-  make_literal(VarId varid,
-	       bool inv);
+  literal(VarId varid,
+	  bool inv);
 
   /// @brief リテラル式の生成
   /// @param[in] lit リテラル
   /// @return 生成したオブジェクト
   static
   Expr
-  make_literal(const Literal& lit);
+  literal(Literal lit);
 
   /// @brief 正(肯定)リテラル式の生成
   /// @param[in] varid 変数番号
   /// @return 生成したオブジェクト
   static
   Expr
-  make_posiliteral(VarId varid);
+  posi_literal(VarId varid);
 
   /// @brief 負(否定)リテラル式の生成
   /// @param[in] varid 変数番号
   /// @return 生成したオブジェクト
   static
   Expr
-  make_negaliteral(VarId varid);
+  nega_literal(VarId varid);
 
   /// @brief AND 式の生成
   /// @param[in] chd_list オペランドのベクタ
@@ -414,7 +414,7 @@ public:
   /// @param[in] lit リテラル
   /// @return lit のリテラルの出現回数を得る．
   ymuint
-  litnum(const Literal& lit) const;
+  litnum(Literal lit) const;
 
   /// @brief 使われている変数の最大の番号 + 1を得る．
   ymuint
@@ -451,7 +451,7 @@ public:
   /// @param[in] lit リテラル
   /// @return SOP形式に展開したときの lit のリテラルの出現回数
   ymuint
-  sop_litnum(const Literal& lit) const;
+  sop_litnum(Literal lit) const;
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -636,29 +636,29 @@ operator>>(IDO& s,
 
 inline
 Expr
-Expr::make_literal(VarId varid,
-		      bool inv)
+Expr::literal(VarId varid,
+	      bool inv)
 {
-  return inv ? make_negaliteral(varid) : make_posiliteral(varid);
+  return inv ? nega_literal(varid) : posi_literal(varid);
 }
 
 inline
 Expr
-Expr::make_literal(const Literal& lit)
+Expr::literal(Literal lit)
 {
-  return make_literal(lit.varid(), lit.is_negative());
+  return literal(lit.varid(), lit.is_negative());
 }
 
 inline
 ymuint
-Expr::litnum(const Literal& lit) const
+Expr::litnum(Literal lit) const
 {
   return litnum(lit.varid(), lit.is_negative());
 }
 
 inline
 ymuint
-Expr::sop_litnum(const Literal& lit) const
+Expr::sop_litnum(Literal lit) const
 {
   return sop_litnum(lit.varid(), lit.is_negative());
 }

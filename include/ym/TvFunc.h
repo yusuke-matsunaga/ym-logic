@@ -11,6 +11,7 @@
 
 #include "ym/ym_logic.h"
 #include "ym/VarId.h"
+#include "ym/Literal.h"
 #include "ym/HashBase.h"
 #include "ym/IDO.h"
 #include "ym/ODO.h"
@@ -29,6 +30,7 @@ public:
 
   /// @brief 入力数のみ指定したコンストラクタ
   /// @param[in] ni 入力数
+  ///
   /// 中身は恒偽関数
   explicit
   TvFunc(ymuint ni = 0);
@@ -36,6 +38,8 @@ public:
   /// @brief 入力数と真理値を指定したコンストラクタ
   /// @param[in] ni 入力数
   /// @param[in] values 真理値のベクタ
+  ///
+  /// values のサイズは 2^ni に等しくなければならない．
   TvFunc(ymuint ni,
 	 const vector<int>& values);
 
@@ -71,6 +75,28 @@ public:
   static
   TvFunc
   const_one(ymuint ni);
+
+  /// @brief リテラル関数を作る．
+  /// @param[in] ni 入力数
+  /// @param[in] varid リテラルの変数番号
+  /// @param[in] inv 極性
+  ///                - false: 反転なし (正極性)
+  ///                - true:  反転あり (負極性)
+  /// @return 生成したオブジェクト
+  static
+  TvFunc
+  literal(ymuint ni,
+	  VarId varid,
+	  bool inv);
+
+  /// @brief リテラル関数を作る．
+  /// @param[in] ni 入力数
+  /// @param[in] lit リテラル
+  /// @return 生成したオブジェクト
+  static
+  TvFunc
+  literal(ymuint ni,
+	  Literal lit);
 
   /// @brief 肯定のリテラル関数を作る．
   /// @param[in] ni 入力数
@@ -265,6 +291,11 @@ public:
   xform(const NpnMap& npnmap) const;
 
   /// @brief npn 変換の正規変換を求める．
+  ///
+  /// 正規変換とは，変換後の関数が以下の性質を持つもの．
+  /// - Walsh の0次の係数が非負である．
+  /// - Walsh の1次の係数が非負である．
+  /// - 他のNPN同値の関数と比較して(ある基準で)最大となる．
   NpnMap
   npn_cannonical_map() const;
 
@@ -364,10 +395,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  ymuint32 mInputNum;
+  ymuint mInputNum;
 
   // ブロック数
-  ymuint32 mBlockNum;
+  ymuint mBlockNum;
 
   // パックされた真理値ベクトル
   ymuint64* mVector;
@@ -513,6 +544,68 @@ struct HashFunc<TvFunc>
 //////////////////////////////////////////////////////////////////////
 // インライン関数の定義
 //////////////////////////////////////////////////////////////////////
+
+// 恒偽関数を作る．
+inline
+TvFunc
+TvFunc::const_zero(ymuint ni)
+{
+  return TvFunc(ni);
+}
+
+// 恒真関数を作る．
+inline
+TvFunc
+TvFunc::const_one(ymuint ni)
+{
+  return TvFunc(ni, 0);
+}
+
+// @brief リテラル関数を作る．
+// @param[in] ni 入力数
+// @param[in] varid リテラルの変数番号
+// @param[in] inv 極性
+//                - false: 反転なし (正極性)
+//                - true:  反転あり (負極性)
+// @return 生成したオブジェクト
+inline
+TvFunc
+TvFunc::literal(ymuint ni,
+		VarId varid,
+		bool inv)
+{
+  return TvFunc(ni, varid, inv);
+}
+
+// @brief リテラル関数を作る．
+// @param[in] ni 入力数
+// @param[in] lit リテラル
+// @return 生成したオブジェクト
+inline
+TvFunc
+TvFunc::literal(ymuint ni,
+		Literal lit)
+{
+  return TvFunc(ni, lit.varid(), lit.is_negative());
+}
+
+// 肯定のリテラル関数を作る．
+inline
+TvFunc
+TvFunc::posi_literal(ymuint ni,
+		     VarId varid)
+{
+  return TvFunc(ni, varid, false);
+}
+
+// 否定のリテラル関数を作る．
+inline
+TvFunc
+TvFunc::nega_literal(ymuint ni,
+		     VarId varid)
+{
+  return TvFunc(ni, varid, true);
+}
 
 // 入力数を得る．
 inline
