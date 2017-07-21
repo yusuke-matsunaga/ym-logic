@@ -10,11 +10,14 @@
 
 
 #include "ym/NpnMap.h"
+#include "InputInfo.h"
+#include "PolConf.h"
 #include "ym/UnitAlloc.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
+class IgPartition;
 class NpnConf;
 
 //////////////////////////////////////////////////////////////////////
@@ -26,10 +29,7 @@ class NpnMgr
 public:
 
   /// @brief コンストラクタ
-  /// @param[in] func 対象の論理関数
-  /// @param[in] algorithm アルゴリズムの種類を表す番号
-  NpnMgr(const TvFunc& func,
-	 int algorithm = 0);
+  NpnMgr();
 
   /// @brief デストラクタ
   ~NpnMgr();
@@ -39,6 +39,41 @@ public:
   //////////////////////////////////////////////////////////////////////
   // 外部に公開している関数
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief 論理関数の正規化を行う．
+  /// @param[in] func 対象の論理関数
+  /// @param[in] algorithm アルゴリズムの種類を表す番号
+  void
+  cannonical(const TvFunc& func,
+	     int algorithm = 0);
+
+  /// @brief Walsh の0次/1次係数を用いた正規化を行う．
+  /// @param[in] func 対象の論理関数
+  /// @param[out] xmap 変換マップ
+  /// @return 出力極性が決まっていたら true を返す．
+  ///
+  /// 結果として mInputInfo に情報がセットされる．
+  bool
+  walsh01_normalize(const TvFunc& func,
+		    NpnMap& xmap);
+
+  /// @brief 重み別 w0 を用いて極性を確定させる．
+  /// @param[in] polconf_list 極性割当候補のリスト
+  /// @param[in] func 対象の関数
+  static
+  void
+  walsh_w0_refine(vector<PolConf>& polconf_list,
+		  const TvFunc& func);
+
+  /// @brief 重み別 w1 を用いて極性を確定させる．
+  /// @param[in] polconf_list 極性割当候補のリスト
+  /// @param[in] func 対象の関数
+  /// @param[in] var 対象の変数
+  static
+  void
+  walsh_w1_refine(vector<PolConf>& polconf_list,
+		  const TvFunc& func,
+		  VarId var);
 
   /// @brief 正規化マップの先頭を返す．
   NpnMap
@@ -66,13 +101,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief 論理関数の正規化を行う．
-  /// @param[in] func 対象の論理関数
-  /// @param[in] algorithm アルゴリズムの種類を表す番号
-  void
-  cannonical(const TvFunc& func,
-	     int algorithm);
 
   /// @brief DFS
   void
@@ -104,6 +132,10 @@ private:
   w2max_recur(vector<NpnConf>& conf_list,
 	      ymuint g0);
 
+  void
+  tvmax_recur(const IgPartition& igpart,
+	      ymuint pid0);
+
   /// @brief mMaxFunc を設定する．
   void
   set_maxfunc(const TvFunc& func);
@@ -134,7 +166,14 @@ private:
   // w2max_recur で用いる現在の最大値
   TvFunc mMaxFunc;
 
-  TvFunc mTmpFunc;
+  // tvmax_recur で用いる元の関数
+  TvFunc mBaseFunc;
+
+  // tvmax_recur で用いる入力グループの情報
+  InputInfo mInputInfo;
+
+  // tvmax_recur で用いる極性情報
+  PolConf mPolConf;
 
   // w2max_recur で用いる現在の w2 ベクタ
   int mMaxW2[TvFunc::kMaxNi * TvFunc::kMaxNi];

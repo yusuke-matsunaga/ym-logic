@@ -4942,7 +4942,8 @@ TvFunc::xform(const NpnMap& npnmap) const
 NpnMap
 TvFunc::npn_cannonical_map() const
 {
-  nsLogic::NpnMgr npn_mgr(*this);
+  nsLogic::NpnMgr npn_mgr;
+  npn_mgr.cannonical(*this);
   return npn_mgr.cmap();
 }
 
@@ -4951,7 +4952,8 @@ TvFunc::npn_cannonical_map() const
 void
 TvFunc::npn_cannonical_all_map(vector<NpnMap>& map_list) const
 {
-  nsLogic::NpnMgr npn_mgr(*this);
+  nsLogic::NpnMgr npn_mgr;
+  npn_mgr.cannonical(*this);
   npn_mgr.all_cmap(map_list);
 }
 

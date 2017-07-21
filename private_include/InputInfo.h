@@ -10,6 +10,10 @@
 
 
 #include "ym/ym_logic.h"
+#include "ym/TvFunc.h"
+
+
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 /// @class InputInfo InputInfo.h "InputInfo.h"
@@ -36,18 +40,14 @@ public:
   void
   clear();
 
-  /// @brief w0とw1をセットする．
-  void
-  set_w01(ymuint ni,
-	  int w0,
-	  int w1[]);
-
   /// @brief 新しい等価グループを作る．
   /// @param[in] id 変数番号
+  /// @param[in] w1 Walsh の1次係数
   ///
   /// id だけを要素として持つ新しいグループを作る．
   void
-  new_group(ymuint id);
+  new_group(ymuint id,
+	    int w1);
 
   /// @brief 既存のグループに要素を追加する．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
@@ -80,9 +80,14 @@ public:
   ymuint
   polundet_gid(ymuint pos) const;
 
+  /// @brief Walsh の 1次係数を返す．
+  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
+  int
+  w1(ymuint gid) const;
+
   /// @brief 等価グループの要素数を返す．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-  ymiunt
+  ymuint
   elem_num(ymuint gid) const;
 
   /// @brief 等価グループの要素を返す．
@@ -91,11 +96,6 @@ public:
   ymuint
   elem(ymuint gid,
        ymuint pos) const;
-
-  /// @brief 極性が決まっている時 true を返す．
-  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-  bool
-  polfixed(ymuint gid) const;
 
   /// @brief 等価グループの bi-symmetry フラグを返す．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
@@ -112,13 +112,13 @@ public:
 
   /// @brief w1:elem_num:bisym を用いた比較関数
   bool
-  w1gt(ymuint pos1,
-       ymuint pos2);
+  w1gt(ymuint gid1,
+       ymuint gid2) const;
 
   /// @brief w1:elem_num:bisym を用いた等価関数
   bool
-  w1eq(ymuint pos1,
-       ymuint pos2);
+  w1eq(ymuint gid1,
+       ymuint gid2) const;
 
 
 private:
@@ -132,14 +132,12 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // Walsh の0次係数
-  int mW0;
-
-  // Walsh の1次係数
-  int mW1[TvFunc::kMaxNi];
-
   // 等価グループ数
   ymuint mGroupNum;
+
+  // Walsh の1次係数
+  // キーはグループ番号
+  int mW1[TvFunc::kMaxNi];
 
   // 等価グループの要素のリストの配列
   vector<ymuint> mElemListArray[TvFunc::kMaxNi];
@@ -152,9 +150,6 @@ private:
 
   // 反転ビットパタンの配列
   ymuint mInvBitsArray[TvFunc::kMaxNi];
-
-  // 等価グループの極性情報を入れるビットベクタ
-  ymuint PolBits;
 
   // 等価グループの bi-symmetry フラグのビットベクタ
   ymuint mBiSymmBits;
@@ -194,38 +189,24 @@ InputInfo::clear()
     mElemListArray[i].clear();
   }
   mPolUndetNum = 0;
-  mPolBits = 0U;
   mBiSymmBits = 0U;
-}
-
-// @brief w0とw1をセットする．
-inline
-void
-InputInfo::set_w01(ymuint ni,
-		   int w0,
-		   int w1[])
-{
-  mW0 = w0;
-  for (ymuint i = 0; i < ni; ++ i) {
-    mW1[i] = w1[i];
-  }
 }
 
 // @brief 新しい等価グループを作る．
 // @param[in] id 変数番号
+// @param[in] w1 Walsh の1次係数
 //
 // id だけを要素として持つ新しいグループを作る．
 inline
 void
-InputInfo::new_group(ymuint id)
+InputInfo::new_group(ymuint id,
+		     int w1)
 {
   ymuint gid = mGroupNum;
   ++ mGroupNum;
+  mW1[gid] = w1;
   mElemListArray[gid].clear();
-  if ( mW1[id] != 0 ) {
-    mPolBits |= (1U << gid);
-  }
-  else {
+  if ( w1 == 0 ) {
     mPolUndetArray[mPolUndetNum] = gid;
     ++ mPolUndetNum;
     mInvBitsArray[gid] = (1U << id);
@@ -270,7 +251,7 @@ InputInfo::group_num() const
 // @brief 等価グループの要素数を返す．
 // @param[in] gid グループ番号 ( 0 <= gid < group_num() )
 inline
-ymiunt
+ymuint
 InputInfo::elem_num(ymuint gid) const
 {
   ASSERT_COND( gid < mGroupNum );
@@ -308,14 +289,14 @@ InputInfo::polundet_gid(ymuint pos) const
   return mPolUndetArray[pos];
 }
 
-// @brief 極性が決まっている時 true を返す．
+// @brief Walsh の 1次係数を返す．
 // @param[in] gid グループ番号 ( 0 <= gid < group_num() )
 inline
-bool
-InputInfo::polfixed(ymuint gid) const
+int
+InputInfo::w1(ymuint gid) const
 {
   ASSERT_COND( gid < mGroupNum );
-  return static_cast<bool>((mPolBits >> gid) & 1U);
+  return mW1[gid];
 }
 
 // @brief 等価グループの bi-symmetry フラグを返す．
@@ -344,16 +325,23 @@ InputInfo::inv_bits(ymuint gid) const
 // @brief w1:elem_num:bisym を用いた比較関数
 inline
 bool
-InputInfo::w1gt(ymuint pos1,
-		ymuint pos2)
+InputInfo::w1gt(ymuint gid1,
+		ymuint gid2) const
 {
-  if ( mW1[pos1] > mW1[pos2] ) {
+  int diff1 = w1(gid1) - w1(gid2);
+  if ( diff1 > 0 ) {
     return true;
   }
-  ymuint gid1 = mGroupIdArray[pos1];
-  ymuint gid2 = mGroupIdArray[pos2];
-  if ( mElemListArray[gid1].size() > mElemListArray[gid2].size() ) {
+  else if ( diff1 < 0 ) {
+    return false;
+  }
+
+  int diff2 = elem_num(gid1) - elem_num(gid2);
+  if ( diff2 > 0 ) {
     return true;
+  }
+  else if ( diff2 < 0 ) {
+    return false;
   }
   if ( bisym(gid1) && !bisym(gid2) ) {
     return true;
@@ -364,18 +352,18 @@ InputInfo::w1gt(ymuint pos1,
 // @brief w1:elem_num:bisym を用いた等価関数
 inline
 bool
-InputInfo::w1eq(ymuint pos1,
-		ymuint pos2)
+InputInfo::w1eq(ymuint gid1,
+		ymuint gid2) const
 {
-  if ( mW1[pos1] != mW1[pos2] ) {
+  if ( w1(gid1) != w1(gid2) ) {
     return false;
   }
-  ymuint gid1 = mGroupIdArray[pos1];
-  ymuint gid2 = mGroupIdArray[pos2];
-  if ( mElemListArray[gid1].size() == mElemListArray[gid2].size() ) {
+  if ( elem_num(gid1) != elem_num(gid2) ) {
     return false;
   }
   return bisym(gid1) == bisym(gid2);
 }
+
+END_NAMESPACE_YM_LOGIC
 
 #endif // INPUTINFO_H

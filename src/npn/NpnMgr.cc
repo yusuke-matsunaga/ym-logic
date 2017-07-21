@@ -10,9 +10,9 @@
 #include "NpnMgr.h"
 #include "ym/TvFunc.h"
 #include "InputInfo.h"
-#include "NpnBaseConf.h"
+#include "IgPartition.h"
+#include "PolConf.h"
 #include "NpnConf.h"
-
 
 BEGIN_NONAMESPACE
 
@@ -132,11 +132,9 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 // コンストラクタ
-NpnMgr::NpnMgr(const TvFunc& func,
-	       int algorithm) :
+NpnMgr::NpnMgr() :
   mAlloc(sizeof(NpnConf), 1024)
 {
-  cannonical(func, algorithm);
 }
 
 // デストラクタ
@@ -207,45 +205,169 @@ ww0_refine(vector<NpnConf>& pollist)
 #endif
 
 void
-print_invbits(ymuint bits,
+print_polconf(const PolConf& polconf,
 	      ymuint ni)
 {
+  ymuint inv_bits = polconf.iinv_bits();
   for (ymuint i = 0; i < ni; ++ i) {
-    if ( bits & (1U << i) ) {
+    if ( inv_bits & (1U << i) ) {
       cout << "N";
     }
     else {
       cout << "P";
     }
   }
-  cout << endl;n
+  cout << "|";
+  if ( polconf.oinv() ) {
+    cout << "N";
+  }
+  else {
+    cout << "P";
+  }
+  cout << endl;
+}
+
+END_NONAMESPACE
+
+
+// @brief Walsh の0次/1次係数を用いた正規化を行う．
+// @param[in] func 対象の論理関数
+// @param[out] xmap 変換マップ
+// @return 出力極性が決まっていたら true を返す．
+bool
+NpnMgr::walsh01_normalize(const TvFunc& func,
+			  NpnMap& xmap)
+{
+  // Walsh の0次と1次の係数を計算する．
+  int w0;
+  int w1[TvFunc::kMaxNi];
+  w0 = func.walsh_01(w1);
+
+  ymuint ni = func.input_num();
+
+  xmap.clear();
+  xmap.resize(ni);
+
+  bool opol_fixed = false;
+
+  // w0 が非負になるように出力極性を決める．
+  if ( w0 < 0 ) {
+    xmap.set_oinv(true);
+    opol_fixed = true;
+    w0 = -w0;
+    // w1 も反転させる．
+    for (ymuint i = 0; i < ni; ++ i) {
+      w1[i] = -w1[i];
+    }
+  }
+  else if ( w0 > 0 ) {
+    // そのままの極性で固定する．
+    xmap.set_oinv(false);
+    opol_fixed = true;
+  }
+
+  // w1 に従って入力極性の調整を行う．
+  for (ymuint i = 0; i < ni; ++ i) {
+    VarId var(i);
+    if ( w1[i] < 0 ) {
+      // 反転させる．
+      xmap.set(var, var, true);
+      w1[i] = -w1[i];
+    }
+    else if ( w1[i] > 0 ) {
+      // そのままの極性で固定する．
+      xmap.set(var, var, false);
+    }
+    else { // w1[i] == 0
+      // 独立な変数かどうか調べる．
+      if ( !func.check_sup(var) ) {
+	// 独立だった．
+	;
+      }
+    }
+  }
+
+  // xmap に従って関数を変換する．
+  TvFunc func0 = func.xform(xmap);
+
+  // 等価な入力グループを探す．
+  // 副産物として入力の極性が決まる場合がある．
+  mInputInfo.clear();
+  for (ymuint i = 0; i < ni; ++ i) {
+    bool found = false;
+    VarId var(i);
+    for (ymuint gid = 0; gid < mInputInfo.group_num(); ++ gid) {
+      if ( w1[i] != mInputInfo.w1(gid) ) {
+	// w1 の値が異なる．
+	continue;
+      }
+
+      // 対称性のチェックを行う．
+      ymuint pos1 = mInputInfo.elem(gid, 0);
+      VarId var1(pos1);
+      bool stat1 = func0.check_sym(var, var1, false);
+      if ( stat1 ) {
+	// 対称だった．
+	found = true;
+	if ( w1[pos1] == 0 && mInputInfo.elem_num(gid) == 1 ) {
+	  // 係数が0で最初の等価対の場合には bi-simmetry のチェックを行う．
+	  bool stat2 = func0.check_sym(var, var1, true);
+	  if ( stat2 ) {
+	    // bi-symmetry の印を付けておく．
+	    mInputInfo.set_bisym(gid);
+	  }
+	}
+	// 要素を追加しておく．
+	mInputInfo.add_elem(gid, i);
+	break;
+      }
+      else if ( w1[pos1] == 0 ) {
+	// 逆極性で対称の場合もあるのでチェックしておく．
+	bool stat3 = func0.check_sym(var, var1, true);
+	if ( stat3 ) {
+	  // 逆相で対称だった．
+	  found = true;
+	  mInputInfo.add_elem(gid, i);
+	  xmap.set(var, var, true);
+	  break;
+	}
+      }
+    }
+    if ( !found ) {
+      // 新しい等価グループを作る．
+      mInputInfo.new_group(i, w1[i]);
+    }
+  }
+
+  return opol_fixed;
 }
 
 // @brief 重み別 w0 を用いて極性を確定させる．
+// @param[in] polconf_list 極性割当候補のリスト
+// @param[in] func 対象の関数
 void
-ww0_refine(vector<ymuint>& pol_list,
-	   const TvFunc& func,
-	   bool oinv)
+NpnMgr::walsh_w0_refine(vector<PolConf>& polconf_list,
+			const TvFunc& func)
 {
   ymuint ni = func.input_num();
 
   if ( debug & debug_ww0_refine ) {
-    cout << "before ww0_refine()" << endl;
-    for (ymuint i = 0; i < pol_list.size(); ++ i) {
-      print_invbits(pol_list[i], ni);
+    cout << "before walsh_w0_refine()" << endl;
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      print_polconf(polconf_list[i], ni);
     }
     cout << endl;
   }
 
   // 重み別 w0 係数を用いて極性の決定を行う．
   ymuint w = 0;
-  for (w = 0; w <= ni && pol_list.size() > 1; ++ w) {
+  for (w = 0; w <= ni && polconf_list.size() > 1; ++ w) {
     bool first = true;
     int max_d0 = 0;
     ymuint wpos = 0;
-    for (ymuint i = 0; i < pol_list.size(); ++ i) {
-      ymuint invbits = pol_list[i];
-      int d0 = func.walsh_w0(w, oinv, invbits);
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      PolConf polconf = polconf_list[i];
+      int d0 = func.walsh_w0(w, polconf.oinv(), polconf.iinv_bits());
 
       int stat = -1;
       if ( first ) {
@@ -259,26 +381,82 @@ ww0_refine(vector<ymuint>& pol_list,
 	  wpos = 0;
 	  max_d0 = d0;
 	}
-	pol_list[wpos] = conf;
+	polconf_list[wpos] = polconf;
 	++ wpos;
       }
     }
-    if ( wpos < pol_list.size() ) {
-      pol_list.erase(pol_list.begin() + wpos, pol_list.end());
+    if ( wpos < polconf_list.size() ) {
+      polconf_list.erase(polconf_list.begin() + wpos, polconf_list.end());
     }
   }
 
   if ( debug & debug_ww0_refine ) {
-    cout << "after ww0_refine()" << endl;
-    for (ymuint i = 0; i < pol_list.size(); ++ i) {
-      print_invbits(pol_list[i], ni);
+    cout << "after walsh_w0_refine()" << endl;
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      print_polconf(polconf_list[i], ni);
     }
     cout << endl;
   }
 }
 
-END_NONAMESPACE
+// @brief 重み別 w1 を用いて極性を確定させる．
+// @param[in] polconf_list 極性割当候補のリスト
+// @param[in] func 対象の関数
+// @param[in] var 対象の変数
+void
+NpnMgr::walsh_w1_refine(vector<PolConf>& polconf_list,
+			const TvFunc& func,
+			VarId var)
+{
+  ymuint ni = func.input_num();
 
+  if ( debug & debug_ww0_refine ) {
+    cout << "before walsh_w1_refine()" << endl;
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      print_polconf(polconf_list[i], ni);
+    }
+    cout << endl;
+  }
+
+  // 重み別 w0 係数を用いて極性の決定を行う．
+  ymuint w = 0;
+  for (w = 0; w <= ni && polconf_list.size() > 1; ++ w) {
+    bool first = true;
+    int max_d0 = 0;
+    ymuint wpos = 0;
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      PolConf polconf = polconf_list[i];
+      int d0 = func.walsh_w1(var, w, polconf.oinv(), polconf.iinv_bits());
+
+      int stat = -1;
+      if ( first ) {
+	first = false;
+      }
+      else {
+	stat = max_d0 - d0;
+      }
+      if ( stat <= 0 ) {
+	if ( stat < 0 ) {
+	  wpos = 0;
+	  max_d0 = d0;
+	}
+	polconf_list[wpos] = polconf;
+	++ wpos;
+      }
+    }
+    if ( wpos < polconf_list.size() ) {
+      polconf_list.erase(polconf_list.begin() + wpos, polconf_list.end());
+    }
+  }
+
+  if ( debug & debug_ww0_refine ) {
+    cout << "after walsh_w1_refine()" << endl;
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      print_polconf(polconf_list[i], ni);
+    }
+    cout << endl;
+  }
+}
 
 // @brief func の正規化を行う．
 void
@@ -328,128 +506,20 @@ NpnMgr::cannonical(const TvFunc& func,
     return;
   }
 
-  // Walsh の0次と1次の係数を計算する．
-  int w0;
-  int w1[TvFunc::kMaxNi];
-  w0 = func.walsh_01(w1);
+  // Walsh の0次と1次の係数を用いて正規化する．
+  NpnMap xmap0;
+  bool opol_fixed = walsh01_normalize(func, xmap0);
 
-  // w0 が非負になるように出力極性を決める．
-  int opol = 0;
-  if ( w0 < 0 ) {
-    opol = 2;
-    w0 = -w0;
-    // w1 も反転させる．
-    for (ymuint i = 0; i < ni; ++ i) {
-      w1[i] = -w1[i];
-    }
-  }
-  else if ( w0 > 0 ) {
-    // そのままの極性で固定する．
-    opol = 1;
+  // w1:group_num:bisym でグループを分割する．
+  IgPartition igpart(mInputInfo);
+
+  if ( opol_fixed && mInputInfo.polundet_num() == 0 && igpart.is_resolved() ) {
+    // 解決した．
+    mMaxList.push_back(xmap0);
+    return;
   }
 
-  // w1 に従って極性の調整を行う．
-  // ついでに独立な変数のリストを作る．
-  ymuint ipol[TvFunc::kMaxNi];
-  for (ymuint i = 0; i < ni; ++ i) {
-    if ( w1[i] < 0 ) {
-      // 反転させる．
-      w1[i] = -w1[i];
-      ipol[i] = 2;
-    }
-    else if ( w1[i] > 0 ) {
-      // そのままの極性で固定する．
-      ipol[i] = 1;
-    }
-    else { // w1[i] == 0
-      // 独立な変数かどうか調べる．
-      if ( func.check_sup(VarId(i)) ) {
-	// 独立でなかったので
-	// 極性は固定できない．
-	ipol[i] = 0;
-      }
-      else {
-	// 独立だった．
-	indep_list.push_back(i);
-	// 極性が決まったとみなす．
-	ipol[i] = 3;
-      }
-    }
-  }
-
-  // opol と ipol に従って関数を変換する．
-  NpnMap xmap0(ni);
-  {
-    bool oinv = (opol == 2);
-    xmap0.set_oinv(oinv);
-    for (ymuint i = 0; i < ni; ++ i) {
-      VarId var(i);
-      bool iinv = (ipol[i] == 2);
-      xmap0.set(var, var, iinv);
-    }
-  }
-
-  // w0, w1 の値は func0 でも同じ
-  TvFunc func0 = func * xmap0;
-
-  // 等価な入力グループを探す．
-  // 副産物として入力の極性が決まる場合がある．
-  InputInfo iinfo;
-  iinfo.set_w01(ni, w0, w1);
-  NpnMap xmap1(ni);
-  for (ymuint i = 0; i < ni; ++ i) {
-    bool found = false;
-    VarId var(i);
-    // デフォルトの変換をセットしておく．
-    xmap1.set(var, var, false);
-    for (ymuint gid = 0; gid < iinfo.group_num(); ++ gid) {
-      ymuint pos1 = iinfo.elem(gid, 0);
-      if ( w1[i] != w1[pos1] ) {
-	// w1 の値が異なる．
-	continue;
-      }
-
-      // 対称性のチェックを行う．
-      VarId var1(pos1);
-      bool stat1 = func0.check_sym(var, var1, false);
-      if ( stat ) {
-	// 対称だった．
-	found = true;
-	if ( w1[pos1] == 0 && iinfo.elem_num(gid) == 1 ) {
-	  // 係数が0で最初の等価対の場合には bi-simmetry のチェックを行う．
-	  bool stat2 = func0.check_sym(var, var1, true);
-	  if ( stat2 ) {
-	    // bi-symmetry の印を付けておく．
-	    iinfo.set_bisym(gid);
-	  }
-	}
-	// 要素を追加しておく．
-	iinfo.add_elem(gid, i);
-	break;
-      }
-      else if ( w1[pos1] == 0 ) {
-	// 逆極性で対称の場合もあるのでチェックしておく．
-	bool stat3 = func0.check_sym(var, var1, true);
-	if ( stat3 ) {
-	  // 逆相で対称だった．
-	  found = true;
-	  iinfo.add_elem(gid, i);
-	  xmap1.set(var, var, true);
-	  break;
-	}
-      }
-    }
-    if ( !found ) {
-      // 新しい等価グループを作る．
-      iinfo.new_group(i);
-    }
-  }
-
-  // 入力の極性反転を考慮しておく．
-  TvFunc func1 = func0 * xmap1;
-
-  // この時点で極性の変換は xmap0 * xmap1
-  // 入力の等価グループは iinfo に入っている．
+  // 入力の等価グループは mInputInfo に入っている．
   // 以降は等価グループごとに極性と順序を考えればよい．
   // 極性に関しては
   // - 通常の対称グループ: そのままか全部反転
@@ -457,26 +527,81 @@ NpnMgr::cannonical(const TvFunc& func,
   // となる．
 
   // polundet_num の指数乗だけ極性の割り当てがある．
-  ymuint nug = iinfo.polundet_num();
+  ymuint nug = mInputInfo.polundet_num();
   ymuint nug_exp = 1U << nug;
-  vector<ymuint> pol_list(nug_exp);
+  ymuint n = nug_exp;
+  if ( !opol_fixed ) {
+    n *= 2;
+  }
+  vector<PolConf> polconf_list(n);
   for (ymuint p = 0; p < nug_exp; ++ p) {
-    ymuint bits = 0U;
+    ymuint input_bits = 0U;
     for (ymuint i = 0; i < nug; ++ i) {
-      ymuint gid = iinfo.polundet_gid(i);
+      ymuint gid = mInputInfo.polundet_gid(i);
       if ( p & (1U << i) ) {
-	bits |= iinfo.inv_bits(gid);
+	input_bits |= mInputInfo.inv_bits(gid);
       }
     }
-    pol_list[p] = bits;
+    if ( opol_fixed ) {
+      polconf_list[p] = PolConf(false, input_bits);
+    }
+    else {
+      polconf_list[p * 2 + 0] = PolConf(false, input_bits);
+      polconf_list[p * 2 + 1] = PolConf(true, input_bits);
+    }
   }
 
-  // 極性割り当ての候補を重み別 Walsh_0 でフィルタリングする．
-  refine_with_ww0(pol_list, func1);
+  // xmap0 に従って func を変換する．
+  mBaseFunc = func.xform(xmap0);
 
+  // 極性割り当ての候補を重み別 Walsh_0 でフィルタリングする．
+  walsh_w0_refine(polconf_list, mBaseFunc);
+
+  if ( debug ) {
+    cout << "# of polarity candidates: " << polconf_list.size() << endl;
+    cout << "Partition: ";
+    for (ymuint pid = 0; pid < igpart.partition_num(); ++ pid) {
+      cout << " " << igpart.partition_size(pid);
+    }
+    cout << endl;
+  }
+
+  // 順序の確定している変数を用いて重み別 Walsh_1 でフィルタリングする．
+  vector<ymuint> pid_list;
+  for (ymuint pid = 0; pid < igpart.partition_num(); ++ pid) {
+    ymuint n = igpart.partition_size(pid);
+    if ( n == 1 ) {
+      // この入力は確定している．
+      ymuint pos = igpart.partition_begin(pid);
+      ymuint gid = igpart.group_id(pos);
+      ymuint iid = mInputInfo.elem(gid, 0);
+      walsh_w1_refine(polconf_list, mBaseFunc, VarId(iid));
+
+      if ( debug ) {
+	cout << "After walsh_w1_refine(" << VarId(iid) << ")" << endl;
+	cout << "# of polarity candidates: " << polconf_list.size() << endl;
+      }
+    }
+    else {
+      // この分割は確定していない．
+      pid_list.push_back(pid);
+    }
+  }
+
+  // 残りはすべて展開して真理値ベクタが最大となるものを探す．
+  mMaxFunc = TvFunc::const_zero(ni);
+  mMaxList.clear();
+  for (vector<PolConf>::iterator p = polconf_list.begin();
+       p != polconf_list.end(); ++ p) {
+    mPolConf = *p;
+    tvmax_recur(igpart, 0);
+  }
+
+
+#if 0
   NpnConf conf0(base_conf);
 
-  if ( !conf0.is_resolved() && conf0.nc() > 1 ) {
+  if ( !conf0.is_resolvoed() && conf0.nc() > 1 ) {
     if ( debug ) {
       cout << "Before step1" << endl;
       conf0.print(cout);
@@ -535,6 +660,43 @@ NpnMgr::cannonical(const TvFunc& func,
     }
     cout << endl;
   }
+#endif
+}
+
+void
+NpnMgr::tvmax_recur(const IgPartition& igpart,
+		    ymuint pid0)
+{
+  ymuint pid;
+  for (pid = pid0; pid < igpart.partition_num(); ++ pid) {
+    if ( igpart.partition_size(pid) > 1 ) {
+      break;
+    }
+  }
+  ASSERT_COND( pid < igpart.partition_num() );
+
+  // pid の分割から要素を一つ取り出し，分離する．
+  ymuint begin = igpart.partition_begin(pid);
+  ymuint end = igpart.partition_end(pid);
+  for (ymuint i = begin; i < end; ++ i) {
+    IgPartition igpart1(igpart);
+    igpart1._refine(pid, i);
+    if ( igpart1.is_resolved() ) {
+      NpnMap xmap = igpart1.to_npnmap(mBaseFunc.input_num(), mInputInfo, mPolConf);
+      TvFunc func1 = mBaseFunc.xform(xmap);
+      int diff = compare(mMaxFunc, func1);
+      if ( diff < 0 ) {
+	mMaxFunc = func1;
+	mMaxList.clear();
+      }
+      if ( diff <= 0 ) {
+	mMaxList.push_back(xmap);
+      }
+    }
+    else {
+      tvmax_recur(igpart1, pid + 1);
+    }
+  }
 }
 
 // @brief 正規化マップの先頭を返す．
@@ -572,6 +734,7 @@ NpnMgr::tvmax_count() const
   return mTvmax_count;
 }
 
+#if 0
 // @brief DFS
 void
 NpnMgr::algorithm0(const NpnConf& conf)
@@ -1190,6 +1353,7 @@ NpnMgr::w2max_recur(vector<NpnConf>& conf_list,
     ++ g0;
   }
 }
+#endif
 
 // @brief NpnConf を取り出す．
 NpnConf*
