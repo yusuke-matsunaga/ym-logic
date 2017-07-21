@@ -32,12 +32,10 @@ set (expr_SOURCES
   )
 
 set (npn_SOURCES
-  src/npn/NpnBaseConf.cc
   src/npn/NpnConf.cc
   src/npn/NpnMap.cc
   src/npn/NpnMapM.cc
   src/npn/NpnMgr.cc
-  src/npn/NpnRawSig.cc
   src/npn/IgPartition.cc
   )
 
