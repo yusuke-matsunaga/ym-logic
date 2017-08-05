@@ -625,7 +625,7 @@ inline
 ymuint
 count_onebits_1(ymuint64 word)
 {
-  const ymuint64 mask1 = 0x3;
+  const ymuint64 mask1 = 0x1;
 
   word = (word & mask1) + ((word >> 1) & mask1);
   return word;

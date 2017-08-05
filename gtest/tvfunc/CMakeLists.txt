@@ -25,6 +25,11 @@ include_directories (
 #  ターゲットの設定
 # ===================================================================
 
+ym_add_gtest(TvFuncTest
+  TvFuncTest.cc
+  $<TARGET_OBJECTS:ym_base_d>
+  $<TARGET_OBJECTS:ym_logic_d>
+  )
 
 
 # ===================================================================

@@ -16,8 +16,8 @@ include_directories (
 # ===================================================================
 
 add_subdirectory(expr)
-add_subdirectory(npn)
 add_subdirectory(tvfunc)
+add_subdirectory(npn)
 
 
 # ===================================================================
