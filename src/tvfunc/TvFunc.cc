@@ -1236,13 +1236,22 @@ walsh_01_19b(ymuint64* src_vec,
   return ans0 + ans1;
 }
 
+// 0入力の walsh_01 本体
+inline
+ymint
+walsh_01_0(ymuint64* src_vec,
+	   ymint vec[])
+{
+  return 1 - src_vec[0] * 2;
+}
+
 // 1入力の walsh_01 本体
 inline
 ymint
 walsh_01_1(ymuint64* src_vec,
 	   ymint vec[])
 {
-  const ymuint64 mask1   = 0x3;
+  const ymuint64 mask1   = 0x1;
 
   const ymint n = (1 << 1);
 
@@ -1721,6 +1730,7 @@ ymint
 TvFunc::walsh_01(ymint vec[]) const
 {
   switch ( input_num() ) {
+  case  0: return walsh_01_0(mVector, vec);
   case  1: return walsh_01_1(mVector, vec);
   case  2: return walsh_01_2(mVector, vec);
   case  3: return walsh_01_3(mVector, vec);
@@ -2745,6 +2755,24 @@ walsh_012_20b(ymuint64* src_vec,
   return ans0 + ans1;
 }
 
+// 0入力の walsh_012 本体
+ymint
+walsh_012_0(ymuint64* src_vec,
+	    ymint vec1[],
+	    ymint vec2[])
+{
+  return walsh_01_0(src_vec, vec1);
+}
+
+// 1入力の walsh_012 本体
+ymint
+walsh_012_1(ymuint64* src_vec,
+	    ymint vec1[],
+	    ymint vec2[])
+{
+  return walsh_01_1(src_vec, vec1);
+}
+
 // 2入力の walsh_012 本体
 ymint
 walsh_012_2(ymuint64* src_vec,
@@ -3246,6 +3274,8 @@ TvFunc::walsh_012(int vec1[],
 		  int vec2[]) const
 {
   switch ( input_num() ) {
+  case  0: return walsh_012_0(mVector, vec1, vec2);
+  case  1: return walsh_012_1(mVector, vec1, vec2);
   case  2: return walsh_012_2(mVector, vec1, vec2);
   case  3: return walsh_012_3(mVector, vec1, vec2);
   case  4: return walsh_012_4(mVector, vec1, vec2);
@@ -3273,6 +3303,56 @@ TvFunc::walsh_012(int vec1[],
 }
 
 BEGIN_NONAMESPACE
+
+inline
+int
+walsh_w0_0(ymuint64* src_vec,
+	   ymuint ibits,
+	   ymuint w)
+{
+  ymuint64 tmp = src_vec[0];
+  int nall;
+  int c;
+  switch ( w ) {
+  case 0:
+    nall = 1;
+    c = (tmp >> (0 ^ ibits)) & 1;
+    break;
+  default:
+    ASSERT_NOT_REACHED;
+    nall = 0;
+    c = 0;
+  }
+
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_1(ymuint64* src_vec,
+	   ymuint ibits,
+	   ymuint w)
+{
+  ymuint64 tmp = src_vec[0];
+  int nall;
+  int c;
+  switch ( w ) {
+  case 0:
+    nall = 1;
+    c = (tmp >> (0 ^ ibits)) & 1;
+    break;
+  case 1:
+    nall = 1;
+    c  = (tmp >> (1 ^ ibits)) & 1;
+    break;
+  default:
+    ASSERT_NOT_REACHED;
+    nall = 0;
+    c = 0;
+  }
+
+  return nall - c * 2;
+}
 
 inline
 int
@@ -4237,6 +4317,8 @@ TvFunc::walsh_w0(ymuint w,
 {
   int ans;
   switch ( input_num() ) {
+  case  0: ans = walsh_w0_0(mVector, ibits, w); break;
+  case  1: ans = walsh_w0_1(mVector, ibits, w); break;
   case  2: ans = walsh_w0_2(mVector, ibits, w); break;
   case  3: ans = walsh_w0_3(mVector, ibits, w); break;
   case  4: ans = walsh_w0_4(mVector, ibits, w); break;
@@ -4473,7 +4555,7 @@ TvFunc::walsh_w0(ymuint w,
     ASSERT_NOT_REACHED;
     break;
 #endif
-  default: // input_num() > 20
+  default: // input_num() > 10
     {
       int nall = 0;
       int c = 0;
@@ -4489,7 +4571,7 @@ TvFunc::walsh_w0(ymuint w,
 	ymuint start2 = s_pidx[v];
 	ymuint end2 = s_pidx[v + 1];
 	ymuint n2 = end2 - start2;
-	ymuint pat = 0;
+	ymuint64 pat = 0;
 	ymuint* endp2 = &s_plist[end2];
 	for (ymuint* p2 = &s_plist[start2]; p2 != endp2; ++ p2) {
 	  ymuint pos2 = *p2 ^ ibits2;
@@ -4507,6 +4589,8 @@ TvFunc::walsh_w0(ymuint w,
       ans = nall - c * 2;
     }
   }
+
+  cout << " oinv = " << oinv << ", ans = " << ans << endl;
 
   if ( oinv ) {
     ans = -ans;
