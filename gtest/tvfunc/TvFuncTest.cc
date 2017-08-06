@@ -14,10 +14,21 @@
 
 BEGIN_NAMESPACE_YM
 
+bool debug = false;
+
 class TvFuncTestWithParam :
   public ::testing::TestWithParam<int>
 {
 public:
+
+  void
+  init_values()
+  {
+    ymuint ni = GetParam();
+    ymuint ni_exp = 1 << ni;
+    mValues.clear();
+    mValues.resize(ni_exp, 0);
+  }
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -25,15 +36,15 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   // ベクタの値を格納するバッファ
-  int mValues[1024 * 1024];
+  vector<int> mValues;
 
 };
 
 
 void
 check_func(const TvFunc& func,
-	   int exp_values[],
-	   const string& str)
+	   const vector<int>& exp_values,
+	   const string& str = string())
 {
   // value() のテスト
   // 同時に0と1の数も数えておく．
@@ -135,15 +146,16 @@ check_func(const TvFunc& func,
     }
   }
 
-  if ( 1 ) {
+
+  if ( debug ) {
     cout << "func:";
     func.print(cout);
     cout << endl;
   }
-  // walsh_w0() のテスト
+  // walsh_w0(), walsh_w1() のテスト
   RandGen rg;
-  // 100回ランダムな極性割り当てを試す．
-  for (ymuint c = 0; c < 100; ++ c) {
+  // 10回ランダムな極性割り当てを試す．
+  for (ymuint c = 0; c < 10; ++ c) {
     for (int oinv = 0; oinv < 2; ++ oinv) {
       ymuint ibits = 0U;
       for (ymuint j = 0; j < ni; ++ j) {
@@ -154,7 +166,7 @@ check_func(const TvFunc& func,
       if ( c == 0 ) {
 	ibits = 0U;
       }
-      if ( 1 ) {
+      if ( debug ) {
 	cout << "oinv = " << oinv << endl;
 	cout << "ibits = ";
 	for (ymuint i = 0; i < ni; ++ i) {
@@ -170,6 +182,12 @@ check_func(const TvFunc& func,
       int ww0[21];
       for (ymuint j = 0; j <= ni; ++ j) {
 	ww0[j] = 0;
+      }
+      int ww1[20][21];
+      for (ymuint j = 0; j < ni; ++ j) {
+	for (ymuint k = 0; k <= ni; ++ k) {
+	  ww1[j][k] = 0;
+	}
       }
       for (ymuint p = 0; p < ni_exp; ++ p) {
 	ymuint q = p ^ ibits;
@@ -189,13 +207,30 @@ check_func(const TvFunc& func,
 	else {
 	  ww0[cur_w] += 1;
 	}
+	for (ymuint j = 0; j < ni; ++ j) {
+	  ymuint i_bit = 1U << j;
+	  int v1 = v;
+	  if ( q & i_bit ) {
+	    v1 = 1 - v1;
+	  }
+	  if ( v1 ) {
+	    ww1[j][cur_w] -= 1;
+	  }
+	  else {
+	    ww1[j][cur_w] += 1;
+	  }
+	}
       }
       for (ymuint w = 0; w <= ni; ++ w) {
-	if ( 1 ) {
+	if ( debug ) {
 	  cout << "  w = " << w << endl;
 	}
 	EXPECT_EQ( ww0[w], func.walsh_w0(w, oinv, ibits) );
-	if ( 1 ) {
+	for (ymuint j = 0; j < ni; ++ j) {
+	  VarId var(j);
+	  EXPECT_EQ( ww1[j][w], func.walsh_w1(var, w, oinv, ibits) );
+	}
+	if ( debug ) {
 	  cout << endl;
 	}
       }
@@ -220,13 +255,20 @@ check_op(const TvFunc& func1,
     exp_xor[p] = v1 ^ v2;
   }
   TvFunc f_and = func1 & func2;
-  check_func(f_and, exp_and, "func1 & func2");
-
   TvFunc f_or  = func1 | func2;
-  check_func(f_or, exp_or, "func1 | func2");
-
   TvFunc f_xor = func1 ^ func2;
-  check_func(f_xor, exp_xor, "func1 ^ func2");
+
+  for (ymuint p = 0; p < ni_exp; ++ p) {
+    int v_and = f_and.value(p);
+    EXPECT_EQ( exp_and[p], v_and );
+
+    int v_or = f_or.value(p);
+    EXPECT_EQ( exp_or[p], v_or );
+
+    int v_xor = f_xor.value(p);
+    EXPECT_EQ( exp_xor[p], v_xor );
+  }
+
 }
 
 TEST_P(TvFuncTestWithParam, input_num)
@@ -238,11 +280,8 @@ TEST_P(TvFuncTestWithParam, input_num)
 
 TEST_P(TvFuncTestWithParam, empty_constr)
 {
+  init_values();
   ymuint ni = GetParam();
-  ymuint ni_exp = 1U << ni;
-  for (ymuint i = 0; i < ni_exp; ++ i) {
-    mValues[i] = 0;
-  }
   TvFunc f0(ni);
   ostringstream buf;
   buf << "TvFunc(" << ni << ")";
@@ -251,11 +290,8 @@ TEST_P(TvFuncTestWithParam, empty_constr)
 
 TEST_P(TvFuncTestWithParam, const_zero)
 {
+  init_values();
   ymuint ni = GetParam();
-  ymuint ni_exp = 1U << ni;
-  for (ymuint i = 0; i < ni_exp; ++ i) {
-    mValues[i] = 0;
-  }
   TvFunc f0 = TvFunc::const_zero(ni);
   ostringstream buf;
   buf << "TvFunc::const_zero(" << ni << ")";
@@ -264,10 +300,11 @@ TEST_P(TvFuncTestWithParam, const_zero)
 
 TEST_P(TvFuncTestWithParam, const_one)
 {
+  init_values();
   ymuint ni = GetParam();
   ymuint ni_exp = 1U << ni;
-  for (ymuint i = 0; i < ni_exp; ++ i) {
-    mValues[i] = 0;
+  for (ymuint p = 0; p < ni_exp; ++ p) {
+    mValues[p] = 1;
   }
   TvFunc f0 = TvFunc::const_one(ni);
   ostringstream buf;
@@ -277,6 +314,7 @@ TEST_P(TvFuncTestWithParam, const_one)
 
 TEST_P(TvFuncTestWithParam, literal1)
 {
+  init_values();
   ymuint ni = GetParam();
   ymuint ni_exp = 1U << ni;
   for (ymuint i = 0; i < ni; ++ i) {
@@ -310,6 +348,7 @@ TEST_P(TvFuncTestWithParam, literal1)
 
 TEST_P(TvFuncTestWithParam, literal2)
 {
+  init_values();
   ymuint ni = GetParam();
   ymuint ni_exp = 1U << ni;
   for (ymuint i = 0; i < ni; ++ i) {
@@ -345,6 +384,7 @@ TEST_P(TvFuncTestWithParam, literal2)
 
 TEST_P(TvFuncTestWithParam, posi_literal)
 {
+  init_values();
   ymuint ni = GetParam();
   ymuint ni_exp = 1U << ni;
   for (ymuint i = 0; i < ni; ++ i) {
@@ -365,6 +405,7 @@ TEST_P(TvFuncTestWithParam, posi_literal)
 
 TEST_P(TvFuncTestWithParam, nega_literal)
 {
+  init_values();
   ymuint ni = GetParam();
   ymuint ni_exp = 1U << ni;
   for (ymuint i = 0; i < ni; ++ i) {
@@ -380,6 +421,23 @@ TEST_P(TvFuncTestWithParam, nega_literal)
     ostringstream buf1;
     buf1 << "TvFunc::posi_literal(" << ni << ", " << i << ")";
     check_func(f1, mValues, buf1.str());
+  }
+}
+
+TEST_P(TvFuncTestWithParam, random_func)
+{
+  RandGen rg;
+  init_values();
+  ymuint ni = GetParam();
+  ymuint ni_exp = 1 << ni;
+  for (ymuint n = 0; n < 100; ++ n) {
+    for (ymuint p = 0; p < ni_exp; ++ p) {
+      if ( rg.real1() > 0.5 ) {
+	mValues[p] = 1;
+      }
+    }
+    TvFunc func(ni, mValues);
+    check_func(func, mValues);
   }
 }
 

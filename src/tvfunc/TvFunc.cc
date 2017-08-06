@@ -69,6 +69,8 @@ ymuint64 sym_masks3[] = {
   0x000000000000FFFF  // (5, 4)
 };
 
+// 0 - 63 までの数をその数を2進表記したときの1のビット数ごとにならべたもの
+// 以下行ごとに 0, 1, 2, 3, 4, 5, 6 ビットの順になっている．
 ymuint s_plist[] = {
   0,
   1,  2,  4,  8, 16, 32,
@@ -79,12 +81,12 @@ ymuint s_plist[] = {
   63
 };
 
+// s_plist 中の各行の最初の位置を記したリスト
+// sentinel として 7 つめの要素がある．
 ymuint s_pidx[] = {
   0, 1, 7, 22, 42, 57, 63, 64
 };
 
-
-#include "w_table.h"
 
 END_NONAMESPACE
 
@@ -4556,46 +4558,281 @@ TvFunc::walsh_w0(ymuint w,
     break;
 #endif
   default: // input_num() > 10
-    {
+    { // 汎用のコード
+      //
+      // 基本的なアルゴリズムは全てのワードをスキャンしてその中から
+      // 位置の重みが w であるビット位置の数 nall と1であるビット位置の
+      // 数 c を求めて nall - c * 2 を返す．
+      //
+      // ただし複数のワードにまたがっているので対象の重みのビットマスクは
+      // ワードごとに異なる．
+      // s 番目のブロックの t ビット目は s * 64 + t 番目の位置に対応している．
+      // なのでその位置の重みは s のビット重みと t のビット重みを足したものとなる．
+
+      // そこで u + v = w であるような2つの整数 u, v を用意して
+      // ブロック番号中の1の重み
       int nall = 0;
       int c = 0;
+      // ブロック番号に対する入力反転ビットマスク
       ymuint ibits1 = ibits >> NIPW;
-      ymuint ibits2 = ibits & 0x001F;
-      for (ymuint u = 0; u <= w; ++ u ) {
+      // ブロック内の入力反転ビットマスク
+      ymuint ibits2 = ibits & ((1UL << NIPW) - 1UL);
+      for (ymuint pos0 = 0; pos0 < mBlockNum; ++ pos0) {
+	// ブロック番号中の1の重み
+	ymuint u = count_onebits(pos0);
+	if ( u > w ) {
+	  continue;
+	}
+	// ブロックの中の1の重み
 	ymuint v = w - u;
-	if ( v > NIPW ) continue;
-	// u: ブロック番号中の1の重み
-	// v: ブロックの中の1の重み
-	ymuint start1 = pidx[u];
-	ymuint end1 = pidx[u + 1];
-	ymuint start2 = s_pidx[v];
-	ymuint end2 = s_pidx[v + 1];
-	ymuint n2 = end2 - start2;
-	ymuint64 pat = 0;
-	ymuint* endp2 = &s_plist[end2];
-	for (ymuint* p2 = &s_plist[start2]; p2 != endp2; ++ p2) {
-	  ymuint pos2 = *p2 ^ ibits2;
-	  pat |= (1UL << pos2);
+	if ( v > NIPW ) {
+	  continue;
 	}
-	ymuint* endp1 = &plist[end1];
-	for (ymuint* p1 = &plist[start1]; p1 != endp1; ++ p1) {
-	  ymuint pos0 = *p1;
-	  if ( pos0 >= mBlockNum ) break;
-	  ymuint pos1 = pos0 ^ ibits1;
-	  c += count_onebits(mVector[pos1] & pat);
-	  nall += n2;
+	ymuint start = s_pidx[v];
+	ymuint end = s_pidx[v + 1];
+	ymuint* endp = &s_plist[end];
+	ymuint64 mask = 0UL;
+	for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
+	  ymuint pos = *p ^ ibits2;
+	  mask |= (1UL << pos);
 	}
+	nall += (end - start);
+	ymuint pos1 = pos0 ^ ibits1;
+	c += count_onebits(mVector[pos1] & mask);
       }
       ans = nall - c * 2;
     }
   }
 
-  cout << " oinv = " << oinv << ", ans = " << ans << endl;
-
   if ( oinv ) {
     ans = -ans;
   }
   return ans;
+}
+
+inline
+int
+walsh_w1_0(ymuint64* src_vec,
+	   ymuint idx,
+	   ymuint ibits,
+	   ymuint w)
+{
+  ASSERT_NOT_REACHED;
+  return 0;
+}
+
+inline
+int
+walsh_w1_1(ymuint64* src_vec,
+	   ymuint idx,
+	   ymuint ibits,
+	   ymuint w)
+{
+  ymuint64 tmp = src_vec[0];
+  if ( ibits & (1U << idx) ) {
+    tmp ^= ~c_masks[idx];
+  }
+  else {
+    tmp ^= c_masks[idx];
+  }
+  int nall;
+  int c;
+  switch ( w ) {
+  case 0:
+    nall = 1;
+    c = (tmp >> (0 ^ ibits)) & 1;
+    break;
+  case 1:
+    nall = 1;
+    c  = (tmp >> (1 ^ ibits)) & 1;
+    break;
+  default:
+    ASSERT_NOT_REACHED;
+    nall = 0;
+    c = 0;
+  }
+
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w1_2(ymuint64* src_vec,
+	   ymuint idx,
+	   ymuint ibits,
+	   ymuint w)
+{
+  int tmp = src_vec[0];
+  if ( ibits & (1U << idx) ) {
+    tmp ^= ~c_masks[idx];
+  }
+  else {
+    tmp ^= c_masks[idx];
+  }
+  ymuint mask;
+  switch ( w ) {
+  case 0:
+    mask = (1 << (0 ^ ibits));
+    return 1 - count_onebits_2(tmp & mask) * 2;
+  case 1:
+    mask = (1 << (1 ^ ibits)) | (1 << (2 ^ ibits));
+    return 2 - count_onebits_2(tmp & mask) * 2;
+  case 2:
+    mask = (1 << (3 ^ ibits));
+    return 1 - count_onebits_2(tmp & mask) * 2;
+  }
+  ASSERT_NOT_REACHED;
+  return 0;
+}
+
+inline
+int
+walsh_w1_3(ymuint64* src_vec,
+	   ymuint idx,
+	   ymuint ibits,
+	   ymuint w)
+{
+  int tmp = src_vec[0];
+  if ( ibits & (1 << idx) ) {
+    tmp ^= ~c_masks[idx];
+  }
+  else {
+    tmp ^= c_masks[idx];
+  }
+  ymuint mask;
+  switch ( w ) {
+  case 0:
+    mask = (1 << (0 ^ ibits));
+    return 1 - count_onebits_3(tmp & mask) * 2;
+  case 1:
+    mask = (1 << (1 ^ ibits)) | (1 << (2 ^ ibits)) | (1 << (4 ^ ibits));
+    return 3 - count_onebits_3(tmp & mask) * 2;
+  case 2:
+    mask = (1 << (3 ^ ibits)) | (1 << (5 ^ ibits)) | (1 << (6 ^ ibits));
+    return 3 - count_onebits_3(tmp & mask) * 2;
+  case 3:
+    mask = (1 << (7 ^ ibits));
+    return 1 - count_onebits_3(tmp & mask) * 2;
+  }
+  ASSERT_NOT_REACHED;
+  return 0;
+}
+
+inline
+int
+walsh_w1_4(ymuint64* src_vec,
+	   ymuint idx,
+	   ymuint ibits,
+	   ymuint w)
+{
+  int tmp = src_vec[0];
+  if ( ibits & (1 << idx) ) {
+    tmp ^= ~c_masks[idx];
+  }
+  else {
+    tmp ^= c_masks[idx];
+  }
+  ymuint mask;
+  switch ( w ) {
+  case 0:
+    mask = (1 << (0 ^ ibits));
+    return 1 - count_onebits_4(tmp & mask) * 2;
+  case 1:
+    mask =
+      (1 << (1 ^ ibits)) | (1 << (2 ^ ibits)) | (1 << (4 ^ ibits)) |
+      (1 << (8 ^ ibits));
+    return 4 - count_onebits_4(tmp & mask) * 2;
+  case 2:
+    mask =
+      (1 << (3 ^ ibits)) | (1 << (5 ^ ibits)) | (1 << (6 ^ ibits)) |
+      (1 << (9 ^ ibits)) | (1 << (10 ^ ibits)) | (1 << (12 ^ ibits));
+    return 6 - count_onebits_4(tmp & mask) * 2;
+  case 3:
+    mask =
+      (1 << (7 ^ ibits)) | (1 << (11 ^ ibits)) |
+      (1 << (13 ^ ibits)) | (1 << (14 ^ ibits));
+    return 4 - count_onebits_4(tmp & mask) * 2;
+  case 4:
+    mask = (1 << (15 ^ ibits));
+    return 1 - count_onebits_4(tmp & mask) * 2;
+  }
+  ASSERT_NOT_REACHED;
+  return 0;
+}
+
+inline
+int
+walsh_w1_5(ymuint64* src_vec,
+	   ymuint idx,
+	   ymuint ibits,
+	   ymuint w)
+{
+  int tmp = src_vec[0];
+  if ( ibits & (1 << idx) ) {
+    tmp ^= ~c_masks[idx];
+  }
+  else {
+    tmp ^= c_masks[idx];
+  }
+  int nall;
+  int c;
+  switch ( w ) {
+  case 0:
+    nall = 1;
+    c  = (tmp >> ( 0 ^ ibits)) & 1;
+    break;
+  case 1:
+    nall = 5;
+    c  = (tmp >> ( 1 ^ ibits)) & 1;
+    c += (tmp >> ( 2 ^ ibits)) & 1;
+    c += (tmp >> ( 4 ^ ibits)) & 1;
+    c += (tmp >> ( 8 ^ ibits)) & 1;
+    c += (tmp >> (16 ^ ibits)) & 1;
+    break;
+  case 2:
+    nall = 10;
+    c  = (tmp >> ( 3 ^ ibits)) & 1;
+    c += (tmp >> ( 5 ^ ibits)) & 1;
+    c += (tmp >> ( 6 ^ ibits)) & 1;
+    c += (tmp >> ( 9 ^ ibits)) & 1;
+    c += (tmp >> (10 ^ ibits)) & 1;
+    c += (tmp >> (12 ^ ibits)) & 1;
+    c += (tmp >> (17 ^ ibits)) & 1;
+    c += (tmp >> (18 ^ ibits)) & 1;
+    c += (tmp >> (20 ^ ibits)) & 1;
+    c += (tmp >> (24 ^ ibits)) & 1;
+    break;
+  case 3:
+    nall = 10;
+    c  = (tmp >> ( 7 ^ ibits)) & 1;
+    c += (tmp >> (11 ^ ibits)) & 1;
+    c += (tmp >> (13 ^ ibits)) & 1;
+    c += (tmp >> (14 ^ ibits)) & 1;
+    c += (tmp >> (19 ^ ibits)) & 1;
+    c += (tmp >> (21 ^ ibits)) & 1;
+    c += (tmp >> (22 ^ ibits)) & 1;
+    c += (tmp >> (25 ^ ibits)) & 1;
+    c += (tmp >> (26 ^ ibits)) & 1;
+    c += (tmp >> (28 ^ ibits)) & 1;
+    break;
+  case 4:
+    nall = 5;
+    c  = (tmp >> (15 ^ ibits)) & 1;
+    c += (tmp >> (23 ^ ibits)) & 1;
+    c += (tmp >> (27 ^ ibits)) & 1;
+    c += (tmp >> (29 ^ ibits)) & 1;
+    c += (tmp >> (30 ^ ibits)) & 1;
+    break;
+  case 5:
+    nall = 1;
+    c  = (tmp >> (31 ^ ibits)) & 1;
+    break;
+  default:
+    ASSERT_NOT_REACHED;
+    nall = 0;
+    c = 0;
+  }
+  return nall - c * 2;
 }
 
 // 重み別の 1 次の Walsh 係数を求める．
@@ -4606,251 +4843,87 @@ TvFunc::walsh_w1(VarId var,
 		 ymuint ibits) const
 {
   ymuint idx = var.val();
+  int ans;
   switch ( input_num() ) {
-  case 2:
-    {
-      int tmp = mVector[0];
-      if ( oinv ) {
-	tmp ^= 0x0000000F;
-      }
-      if ( ibits & (1 << idx) ) {
-	tmp ^= ~c_masks[idx];
-      }
-      else {
-	tmp ^= c_masks[idx];
-      }
-      ymuint mask;
-      switch ( w ) {
-      case 0:
-	mask = (1 << (0 ^ ibits));
-	return 1 - count_onebits_2(tmp & mask) * 2;
-      case 1:
-	mask = (1 << (1 ^ ibits)) | (1 << (2 ^ ibits));
-	return 2 - count_onebits_2(tmp & mask) * 2;
-      case 2:
-	mask = (1 << (3 ^ ibits));
-	return 1 - count_onebits_2(tmp & mask) * 2;
-      }
-    }
-    break;
-  case 3:
-    {
-      int tmp = mVector[0];
-      if ( oinv ) {
-	tmp ^= 0x000000FF;
-      }
-      if ( ibits & (1 << idx) ) {
-	tmp ^= ~c_masks[idx];
-      }
-      else {
-	tmp ^= c_masks[idx];
-      }
-      ymuint mask;
-      switch ( w ) {
-      case 0:
-	mask = (1 << (0 ^ ibits));
-	return 1 - count_onebits_3(tmp & mask) * 2;
-      case 1:
-	mask = (1 << (1 ^ ibits)) | (1 << (2 ^ ibits)) | (1 << (4 ^ ibits));
-	return 3 - count_onebits_3(tmp & mask) * 2;
-      case 2:
-	mask = (1 << (3 ^ ibits)) | (1 << (5 ^ ibits)) | (1 << (6 ^ ibits));
-	return 3 - count_onebits_3(tmp & mask) * 2;
-      case 3:
-	mask = (1 << (7 ^ ibits));
-	return 1 - count_onebits_3(tmp & mask) * 2;
-      }
-    }
-    break;
-  case 4:
-    {
-      int tmp = mVector[0];
-      if ( oinv ) {
-	tmp ^= 0x0000FFFF;
-      }
-      if ( ibits & (1 << idx) ) {
-	tmp ^= ~c_masks[idx];
-      }
-      else {
-	tmp ^= c_masks[idx];
-      }
-      ymuint mask;
-      switch ( w ) {
-      case 0:
-	mask = (1 << (0 ^ ibits));
-	return 1 - count_onebits_4(tmp & mask) * 2;
-      case 1:
-	mask =
-	  (1 << (1 ^ ibits)) | (1 << (2 ^ ibits)) | (1 << (4 ^ ibits)) |
-	  (1 << (8 ^ ibits));
-	return 4 - count_onebits_4(tmp & mask) * 2;
-      case 2:
-	mask =
-	  (1 << (3 ^ ibits)) | (1 << (5 ^ ibits)) | (1 << (6 ^ ibits)) |
-	  (1 << (9 ^ ibits)) | (1 << (10 ^ ibits)) | (1 << (12 ^ ibits));
-	return 6 - count_onebits_4(tmp & mask) * 2;
-      case 3:
-	mask =
-	  (1 << (7 ^ ibits)) | (1 << (11 ^ ibits)) |
-	  (1 << (13 ^ ibits)) | (1 << (14 ^ ibits));
-	return 4 - count_onebits_4(tmp & mask) * 2;
-      case 4:
-	mask = (1 << (15 ^ ibits));
-	return 1 - count_onebits_4(tmp & mask) * 2;
-      }
-    }
-    break;
-  case 5:
-    {
-      int tmp;
-      if ( oinv ) {
-	tmp = ~mVector[0];
-      }
-      else {
-	tmp = mVector[0];
-      }
-      if ( ibits & (1 << idx) ) {
-	tmp ^= ~c_masks[idx];
-      }
-      else {
-	tmp ^= c_masks[idx];
-      }
-      int nall;
-      int c;
-      switch ( w ) {
-      case 0:
-	nall = 1;
-	c = (tmp >> (0 ^ ibits)) & 1;
-	break;
-      case 1:
-	nall = 5;
-	c  = (tmp >> (1 ^ ibits)) & 1;
-	c += (tmp >> (2 ^ ibits)) & 1;
-	c += (tmp >> (4 ^ ibits)) & 1;
-	c += (tmp >> (8 ^ ibits)) & 1;
-	c += (tmp >> (16 ^ ibits)) & 1;
-	break;
-      case 2:
-	nall = 10;
-	c  = (tmp >> (3 ^ ibits)) & 1;
-	c += (tmp >> (5 ^ ibits)) & 1;
-	c += (tmp >> (6 ^ ibits)) & 1;
-	c += (tmp >> (9 ^ ibits)) & 1;
-	c += (tmp >> (10 ^ ibits)) & 1;
-	c += (tmp >> (12 ^ ibits)) & 1;
-	c += (tmp >> (17 ^ ibits)) & 1;
-	c += (tmp >> (18 ^ ibits)) & 1;
-	c += (tmp >> (20 ^ ibits)) & 1;
-	c += (tmp >> (24 ^ ibits)) & 1;
-	break;
-      case 3:
-	nall = 10;
-	c  = (tmp >> (7 ^ ibits)) & 1;
-	c += (tmp >> (11 ^ ibits)) & 1;
-	c += (tmp >> (13 ^ ibits)) & 1;
-	c += (tmp >> (14 ^ ibits)) & 1;
-	c += (tmp >> (19 ^ ibits)) & 1;
-	c += (tmp >> (21 ^ ibits)) & 1;
-	c += (tmp >> (22 ^ ibits)) & 1;
-	c += (tmp >> (25 ^ ibits)) & 1;
-	c += (tmp >> (26 ^ ibits)) & 1;
-	c += (tmp >> (28 ^ ibits)) & 1;
-	break;
-      case 4:
-	nall = 5;
-	c  = (tmp >> (15 ^ ibits)) & 1;
-	c += (tmp >> (23 ^ ibits)) & 1;
-	c += (tmp >> (27 ^ ibits)) & 1;
-	c += (tmp >> (29 ^ ibits)) & 1;
-	c += (tmp >> (30 ^ ibits)) & 1;
-	break;
-      case 5:
-	nall = 1;
-	c = (tmp >> (31 ^ ibits)) & 1;
-	break;
-      default:
-	ASSERT_NOT_REACHED;
-	nall = 0;
-	c = 0;
-      }
-      return nall - c * 2;
-    }
-    break;
+  case  0: ans = walsh_w1_0(mVector, idx, ibits, w); break;
+  case  1: ans = walsh_w1_1(mVector, idx, ibits, w); break;
+  case  2: ans = walsh_w1_2(mVector, idx, ibits, w); break;
+  case  3: ans = walsh_w1_3(mVector, idx, ibits, w); break;
+  case  4: ans = walsh_w1_4(mVector, idx, ibits, w); break;
+  case  5: ans = walsh_w1_5(mVector, idx, ibits, w); break;
   default: // input_num() > 5
-    ;
+    { // 汎用のコード
+      int nall = 0;
+      int c = 0;
+      // ブロック番号に対する入力反転ビットマスク
+      ymuint ibits1 = ibits >> NIPW;
+      // ブロック内の入力反転ビットマスク
+      ymuint ibits2 = ibits & ((1UL << NIPW) - 1UL);
+      if ( idx < NIPW ) {
+	ymuint64 mask2;
+	if ( ibits2 & (1 << idx) ) {
+	  mask2 = ~c_masks[idx];
+	}
+	else {
+	  mask2 = c_masks[idx];
+	}
+	for (ymuint pos0 = 0; pos0 < mBlockNum; ++ pos0) {
+	  // ブロック番号中の1の重み
+	  ymuint u = count_onebits(pos0);
+	  if ( u > w ) {
+	    continue;
+	  }
+	  // ブロックの中の1の重み
+	  ymuint v = w - u;
+	  if ( v > NIPW ) {
+	    continue;
+	  }
+	  ymuint start = s_pidx[v];
+	  ymuint end = s_pidx[v + 1];
+	  ymuint* endp = &s_plist[end];
+	  ymuint64 mask1 = 0UL;
+	  for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
+	    ymuint bitpos = *p ^ ibits2;
+	    mask1 |= (1UL << bitpos);
+	  }
+	  nall += (end - start);
+	  ymuint pos1 = pos0 ^ ibits1;
+	  c += count_onebits((mVector[pos1] ^ mask2) & mask1);
+	}
+      }
+      else {
+	ymuint var5 = idx - NIPW;
+	for (ymuint pos0 = 0; pos0 < mBlockNum; ++ pos0) {
+	  // ブロック番号中の1の重み
+	  ymuint u = count_onebits(pos0);
+	  if ( u > w ) {
+	    continue;
+	  }
+	  // ブロックの中の1の重み
+	  ymuint v = w - u;
+	  if ( v > NIPW ) {
+	    continue;
+	  }
+	  ymuint start = s_pidx[v];
+	  ymuint end = s_pidx[v + 1];
+	  ymuint* endp = &s_plist[end];
+	  ymuint64 mask1 = 0UL;
+	  for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
+	    ymuint bitpos = *p ^ ibits2;
+	    mask1 |= (1UL << bitpos);
+	  }
+	  nall += (end - start);
+	  ymuint pos1 = pos0 ^ ibits1;
+	  // 2行下の式は1行下の式と同じ意味
+	  // ymuint mask3 = (pos0 & (1 << var5)) ? 0xFFFFFFFF : 0x00000000;
+	  ymuint64 mask3 = 0UL - ((pos0 >> var5) & 1UL);
+	  c += count_onebits((mVector[pos1] ^ mask3) & mask1);
+	}
+      }
+      ans = nall - c * 2;
+    }
   }
 
-  int n = 0;
-  int c = 0;
-  ymuint ibits1 = ibits >> NIPW;
-  ymuint ibits2 = ibits & ((1UL << NIPW) - 1UL);
-  if ( idx < NIPW ) {
-    ymuint mask2;
-    if ( ibits2 & (1 << idx) ) {
-      mask2 = ~c_masks[idx];
-    }
-    else {
-      mask2 = c_masks[idx];
-    }
-    for (ymuint u = 0; u <= w; ++ u ) {
-      ymuint v = w - u;
-      if ( v > NIPW ) continue;
-      // u: ブロック番号中の1の重み
-      // v: ブロックの中の1の重み
-      ymuint start1 = pidx[u];
-      ymuint end1 = pidx[u + 1];
-      ymuint start2 = s_pidx[v];
-      ymuint end2 = s_pidx[v + 1];
-      ymuint n2 = end2 - start2;
-      ymuint pat = 0;
-      ymuint* endp2 = &s_plist[end2];
-      for (ymuint* p2 = &s_plist[start2]; p2 != endp2; ++ p2) {
-	ymuint pos2 = *p2 ^ ibits2;
-	pat |= (1UL << pos2);
-      }
-      ymuint* endp1 = &plist[end1];
-      for (ymuint* p1 = &plist[start1]; p1 != endp1; ++ p1) {
-	ymuint pos0 = *p1;
-	if ( pos0 >= mBlockNum ) break;
-	ymuint pos1 = pos0 ^ ibits1;
-	c += count_onebits((mVector[pos1] ^ mask2) & pat);
-	n += n2;
-      }
-    }
-  }
-  else {
-    ymuint var5 = idx - NIPW;
-    for (ymuint u = 0; u <= w; ++ u ) {
-      ymuint v = w - u;
-      if ( v > NIPW ) continue;
-      // u: ブロック番号中の1の重み
-      // v: ブロックの中の1の重み
-      ymuint start1 = pidx[u];
-      ymuint end1 = pidx[u + 1];
-      ymuint start2 = s_pidx[v];
-      ymuint end2 = s_pidx[v + 1];
-      ymuint n2 = end2 - start2;
-      ymuint pat = 0;
-      ymuint* endp2 = &s_plist[end2];
-      for (ymuint* p2 = &s_plist[start2]; p2 != endp2; ++ p2) {
-	ymuint pos2 = *p2 ^ ibits2;
-	pat |= (1UL << pos2);
-      }
-      ymuint* endp1 = &plist[end1];
-      for (ymuint* p1 = &plist[start1]; p1 != endp1; ++ p1) {
-	ymuint pos0 = *p1;
-	if ( pos0 >= mBlockNum ) break;
-	ymuint pos1 = pos0 ^ ibits1;
-	// 2行下の式は1行下の式と同じ意味
-	// ymuint mask3 = (pos0 & (1 << var5)) ? 0xFFFFFFFF : 0x00000000;
-	ymuint mask3 = 0UL - ((pos0 >> var5) & 1UL);
-	c += count_onebits((mVector[pos1] ^ mask3) & pat);
-	n += n2;
-      }
-    }
-  }
-
-  int ans = n - c * 2;
   if ( oinv ) {
     ans = -ans;
   }
