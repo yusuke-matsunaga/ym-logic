@@ -20,6 +20,11 @@
 BEGIN_NONAMESPACE
 
 // コファクターマスク
+// 0〜5番目の変数に対するリテラル関数
+// のビットパタン
+// これで AND を取れば正のコファクター
+// 否定の AND を取れば負のコファクター
+// が得られる．
 ymuint64 c_masks[] = {
   0xAAAAAAAAAAAAAAAA,
   0xCCCCCCCCCCCCCCCC,
@@ -87,6 +92,26 @@ ymuint s_pidx[] = {
   0, 1, 7, 22, 42, 57, 63, 64
 };
 
+// @brief リテラル関数のビットパタンを得る
+// @param[in] var_id 変数番号
+// @param[in] block_id ブロック番号
+inline
+ymuint64
+lit_pat(ymuint var_id,
+	ymuint block_id)
+{
+  if ( var_id < NIPW ) {
+    // block_id に無関係
+    return c_masks[var_id];
+  }
+  else {
+    // ちょっとトリッキーなコード
+    // block_id の var_id1 ビットめが1の時 0 - 1 = ~0が
+    // 0 の 0 が返される．
+    ymuint var_id1 = var_id - NIPW;
+    return 0UL - ((block_id >> var_id1) & 1UL);
+  }
+}
 
 END_NONAMESPACE
 
@@ -160,268 +185,20 @@ TvFunc::TvFunc(ymuint ni,
   mBlockNum(nblock(ni)),
   mVector(new ymuint64[mBlockNum])
 {
-  ASSERT_COND( varid.val() < ni );
-  switch ( ni ) {
-  case 1:
+  ymuint idx = varid.val();
+  ASSERT_COND( idx < ni );
+
+  for (ymuint b = 0; b < mBlockNum; ++ b) {
+    ymuint64 pat = lit_pat(idx, b);
     if ( inv ) {
-      mVector[0] = 0x1;
+      pat = ~pat;
     }
-    else {
-      mVector[0] = 0x2;
-    }
-    break;
-
-  case 2:
-    switch ( varid.val() ) {
-    case 0:
-      if ( inv ) {
-	mVector[0] = 0x5;
-      }
-      else {
-	mVector[0] = 0xA;
-      }
-      break;
-
-    case 1:
-      if ( inv ) {
-	mVector[0] = 0x3;
-      }
-      else {
-	mVector[0] = 0xC;
-      }
-      break;
-
-    default:
-      ASSERT_NOT_REACHED;
-      break;
-    }
-    break;
-
-  case 3:
-    switch ( varid.val() ) {
-    case 0:
-      if ( inv ) {
-	mVector[0] = 0x55;
-      }
-      else {
-	mVector[0] = 0xAA;
-      }
-      break;
-
-    case 1:
-      if ( inv ) {
-	mVector[0] = 0x33;
-      }
-      else {
-	mVector[0] = 0xCC;
-      }
-      break;
-
-    case 2:
-      if ( inv ) {
-	mVector[0] = 0x0F;
-      }
-      else {
-	mVector[0] = 0xF0;
-      }
-      break;
-
-    default:
-      ASSERT_NOT_REACHED;
-      break;
-    }
-    break;
-
-  case 4:
-    switch ( varid.val() ) {
-    case 0:
-      if ( inv ) {
-	mVector[0] = 0x5555;
-      }
-      else {
-	mVector[0] = 0xAAAA;
-      }
-      break;
-
-    case 1:
-      if ( inv ) {
-	mVector[0] = 0x3333;
-      }
-      else {
-	mVector[0] = 0xCCCC;
-      }
-      break;
-
-    case 2:
-      if ( inv ) {
-	mVector[0] = 0x0F0F;
-      }
-      else {
-	mVector[0] = 0xF0F0;
-      }
-      break;
-
-    case 3:
-      if ( inv ) {
-	mVector[0] = 0x00FF;
-      }
-      else {
-	mVector[0] = 0xFF00;
-      }
-      break;
-
-    default:
-      ASSERT_NOT_REACHED;
-      break;
-    }
-    break;
-
-  case 5:
-    switch ( varid.val() ) {
-    case 0:
-      if ( inv ) {
-	mVector[0] = 0x55555555;
-      }
-      else {
-	mVector[0] = 0xAAAAAAAA;
-      }
-      break;
-
-    case 1:
-      if ( inv ) {
-	mVector[0] = 0x33333333;
-      }
-      else {
-	mVector[0] = 0xCCCCCCCC;
-      }
-      break;
-
-    case 2:
-      if ( inv ) {
-	mVector[0] = 0x0F0F0F0F;
-      }
-      else {
-	mVector[0] = 0xF0F0F0F0;
-      }
-      break;
-
-    case 3:
-      if ( inv ) {
-	mVector[0] = 0x00FF00FF;
-      }
-      else {
-	mVector[0] = 0xFF00FF00;
-      }
-      break;
-
-    case 4:
-      if ( inv ) {
-	mVector[0] = 0x0000FFFF;
-      }
-      else {
-	mVector[0] = 0xFFFF0000;
-      }
-      break;
-
-    default:
-      ASSERT_NOT_REACHED;
-      break;
-    }
-    break;
-
-  case 6:
-    switch ( varid.val() ) {
-    case 0:
-      if ( inv ) {
-	mVector[0] = 0x5555555555555555;
-      }
-      else {
-	mVector[0] = 0xAAAAAAAAAAAAAAAA;
-      }
-      break;
-
-    case 1:
-      if ( inv ) {
-	mVector[0] = 0x3333333333333333;
-      }
-      else {
-	mVector[0] = 0xCCCCCCCCCCCCCCCC;
-      }
-      break;
-
-    case 2:
-      if ( inv ) {
-	mVector[0] = 0x0F0F0F0F0F0F0F0F;
-      }
-      else {
-	mVector[0] = 0xF0F0F0F0F0F0F0F0;
-      }
-      break;
-
-    case 3:
-      if ( inv ) {
-	mVector[0] = 0x00FF00FF00FF00FF;
-      }
-      else {
-	mVector[0] = 0xFF00FF00FF00FF00;
-      }
-      break;
-
-    case 4:
-      if ( inv ) {
-	mVector[0] = 0x0000FFFF0000FFFF;
-      }
-      else {
-	mVector[0] = 0xFFFF0000FFFF0000;
-      }
-      break;
-
-    case 5:
-      if ( inv ) {
-	mVector[0] = 0x00000000FFFFFFFF;
-      }
-      else {
-	mVector[0] = 0xFFFFFFFF00000000;
-      }
-      break;
-
-    default:
-      ASSERT_NOT_REACHED;
-      break;
-    }
-    break;
-
-  default:
-    if ( varid.val() < NIPW ) {
-      ymuint64 pat = c_masks[varid.val()];
-      if ( inv ) {
-	pat = ~pat;
-      }
-      for (ymuint b = 0; b < mBlockNum; ++ b) {
-	mVector[b] = pat;
-      }
-    }
-    else {
-      ymuint i5 = varid.val() - NIPW;
-      ymuint check = 1U << i5;
-      ymuint64 pat0;
-      if ( inv ) {
-	pat0 = 0UL;
-      }
-      else {
-	pat0 = ~(0UL);
-      }
-      ymuint64 pat1 = ~pat0;
-      for (ymuint b = 0; b < mBlockNum; ++ b) {
-	if ( b & check ) {
-	  mVector[b] = pat0;
-	}
-	else {
-	  mVector[b] = pat1;
-	}
-      }
-    }
-    break;
+    mVector[b] = pat;
+  }
+  if ( ni < NIPW ) {
+    ymuint ni_exp = 1 << ni;
+    ymuint64 mask = (1UL << ni_exp) - 1UL;
+    mVector[0] &= mask;
   }
 }
 
@@ -497,40 +274,13 @@ TvFunc::~TvFunc()
 const TvFunc&
 TvFunc::negate()
 {
-  switch ( mInputNum ) {
-  case 0:
-    mVector[0] ^= 0x1;
-    break;
-
-  case 1:
-    mVector[0] ^= 0x3;
-    break;
-
-  case 2:
-    mVector[0] ^= 0xF;
-    break;
-
-  case 3:
-    mVector[0] ^= 0xFF;
-    break;
-
-  case 4:
-    mVector[0] ^= 0xFFFF;
-    break;
-
-  case 5:
-    mVector[0] ^= 0xFFFFFFFF;
-    break;
-
-  case 6:
-    mVector[0] ^= 0xFFFFFFFFFFFFFFFF;
-    break;
-
-  default:
-    for (ymuint b = 0; b < mBlockNum; ++ b) {
-      mVector[b] ^= ~(0UL);
-    }
-    break;
+  ymuint64 neg_mask = ~0UL;
+  if ( mInputNum < NIPW ) {
+    ymuint ni_exp = 1U << mInputNum;
+    neg_mask &= ((1UL << ni_exp) - 1UL);
+  }
+  for (ymuint b = 0; b < mBlockNum; ++ b) {
+    mVector[b] ^= neg_mask;
   }
   return *this;
 }
@@ -823,29 +573,12 @@ TvFunc::walsh_1(VarId varid) const
     ;
   }
 
-  // n > 5
+  // n > 6
   int c = 0;
   int n = 1 << input_num();
-  if ( pos < NIPW ) {
-    ymuint64 mask = c_masks[pos];
-    for (ymuint i = 0; i < mBlockNum; ++ i) {
-      c += count_onebits(mVector[i] ^ mask);
-    }
-  }
-  else {
-    ymuint i5 = pos - NIPW;
-    // ymuint check = 1 << i5;
-    // for (ymuint b = 0; b < mBlockNum; ++ b) {
-    //   if ( b & check ) {
-    //     c += count_onebits(~mVector[b]);
-    //   } else {
-    //     c += count_onebits(mVector[b]);
-    //   }
-    // }
-    for (ymuint b = 0; b < mBlockNum; ++ b) {
-      ymuint64 mask = 0UL - ((b >> i5) & 1UL);
-      c += count_onebits(mVector[b] ^ mask);
-    }
+  for (ymuint b = 0; b < mBlockNum; ++ b) {
+    ymuint64 mask = lit_pat(pos, b);
+    c += count_onebits(mVector[b] ^ mask);
   }
   return n - c * 2;
 }
@@ -867,22 +600,16 @@ TvFunc::walsh_2(VarId var1,
   case 1:
     ASSERT_NOT_REACHED;
     break;
-
   case 2:
     return (1 << 2) - count_onebits_2(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-
   case 3:
     return (1 << 3) - count_onebits_3(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-
   case 4:
     return (1 << 4) - count_onebits_4(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-
   case 5:
     return (1 << 5) - count_onebits_5(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-
   case 6:
     return (1 << 6) - count_onebits_6(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-
   default:
     ;
   }
@@ -4922,67 +4649,6 @@ TvFunc::walsh_w1(VarId var,
 	}
 	nall += (end - start);
       }
-#if 0
-      if ( idx < NIPW ) {
-	ymuint64 mask2;
-	if ( ibits2 & (1 << idx) ) {
-	  mask2 = ~c_masks[idx];
-	}
-	else {
-	  mask2 = c_masks[idx];
-	}
-	for (ymuint pos0 = 0; pos0 < mBlockNum; ++ pos0) {
-	  // ブロック番号中の1の重み
-	  ymuint u = count_onebits(pos0);
-	  if ( u > w ) {
-	    continue;
-	  }
-	  // ブロックの中の1の重み
-	  ymuint v = w - u;
-	  if ( v > NIPW ) {
-	    continue;
-	  }
-	  ymuint start = s_pidx[v];
-	  ymuint end = s_pidx[v + 1];
-	  ymuint* endp = &s_plist[end];
-	  ymuint pos1 = pos0 ^ ibits1;
-	  ymuint64 bitvec = mVector[pos1] ^ mask2;
-	  for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
-	    ymuint bitpos = *p ^ ibits2;
-	    c += (bitvec >> bitpos) & 1;
-	  }
-	  nall += (end - start);
-	}
-      }
-      else {
-	ymuint var5 = idx - NIPW;
-	for (ymuint pos0 = 0; pos0 < mBlockNum; ++ pos0) {
-	  // ブロック番号中の1の重み
-	  ymuint u = count_onebits(pos0);
-	  if ( u > w ) {
-	    continue;
-	  }
-	  // ブロックの中の1の重み
-	  ymuint v = w - u;
-	  if ( v > NIPW ) {
-	    continue;
-	  }
-	  ymuint start = s_pidx[v];
-	  ymuint end = s_pidx[v + 1];
-	  ymuint* endp = &s_plist[end];
-	  ymuint pos1 = pos0 ^ ibits1;
-	  // 2行下の式は1行下の式と同じ意味
-	  // ymuint mask3 = (pos0 & (1 << var5)) ? 0xFFFFFFFF : 0x00000000;
-	  ymuint64 mask3 = 0UL - ((pos0 >> var5) & 1UL);
-	  ymuint64 bitvec = mVector[pos1] ^ mask3;
-	  for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
-	    ymuint bitpos = *p ^ ibits2;
-	    c += (bitvec >> bitpos) & 1;
-	  }
-	  nall += (end - start);
-	}
-      }
-#endif
       ans = nall - c * 2;
     }
   }
