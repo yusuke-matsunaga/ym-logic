@@ -80,7 +80,10 @@ check_func(const TvFunc& func,
   // walsh_012() のテスト
   int vec1[20];
   int vec2[20 * 20];
-  int w0_2 = func.walsh_012(vec1, vec2);
+  int w0_2;
+  if ( ni < 16 ) {
+    w0_2 = func.walsh_012(vec1, vec2);
+  }
 
   // walsh_0() のテスト
   int exp_w0 = 0;
@@ -95,7 +98,9 @@ check_func(const TvFunc& func,
   }
   EXPECT_EQ( exp_w0, func.walsh_0() );
   EXPECT_EQ( exp_w0, w0 );
-  EXPECT_EQ( exp_w0, w0_2 );
+  if ( ni < 16 ) {
+    EXPECT_EQ( exp_w0, w0_2 );
+  }
 
   // walsh_1() のテスト
   for (ymuint i = 0; i < ni; ++ i) {
@@ -116,36 +121,39 @@ check_func(const TvFunc& func,
     }
     EXPECT_EQ( exp_w1, func.walsh_1(vid) );
     EXPECT_EQ( exp_w1, vec[i] );
-    EXPECT_EQ( exp_w1, vec1[i] );
-  }
-
-  // walsh_2() のテスト
-  for (ymuint i1 = 0; i1 < ni; ++ i1) {
-    VarId vid1(i1);
-    ymuint i1_bit = 1U << i1;
-    for (ymuint i2 = i1 + 1; i2 < ni; ++ i2) {
-      VarId vid2(i2);
-      ymuint i2_bit = 1U << i2;
-      int exp_w2 = 0;
-      for (ymuint p = 0; p < ni_exp; ++ p) {
-	int v = exp_values[p];
-	bool i1_on = (p & i1_bit) == i1_bit;
-	bool i2_on = (p & i2_bit) == i2_bit;
-	if ( i1_on ^ i2_on ) {
-	  v = 1 - v;
-	}
-	if ( v == 0 ) {
-	  exp_w2 += 1;
-	}
-	else {
-	  exp_w2 -= 1;
-	}
-      }
-      EXPECT_EQ( exp_w2, func.walsh_2(vid1, vid2) );
-      EXPECT_EQ( exp_w2, vec2[i1 * ni + i2] );
+    if ( ni < 16 ) {
+      EXPECT_EQ( exp_w1, vec1[i] );
     }
   }
 
+  if ( ni < 16 ) {
+    // walsh_2() のテスト
+    for (ymuint i1 = 0; i1 < ni; ++ i1) {
+      VarId vid1(i1);
+      ymuint i1_bit = 1U << i1;
+      for (ymuint i2 = i1 + 1; i2 < ni; ++ i2) {
+	VarId vid2(i2);
+	ymuint i2_bit = 1U << i2;
+	int exp_w2 = 0;
+	for (ymuint p = 0; p < ni_exp; ++ p) {
+	  int v = exp_values[p];
+	  bool i1_on = (p & i1_bit) == i1_bit;
+	  bool i2_on = (p & i2_bit) == i2_bit;
+	  if ( i1_on ^ i2_on ) {
+	    v = 1 - v;
+	  }
+	  if ( v == 0 ) {
+	    exp_w2 += 1;
+	  }
+	  else {
+	    exp_w2 -= 1;
+	  }
+	}
+	EXPECT_EQ( exp_w2, func.walsh_2(vid1, vid2) );
+	EXPECT_EQ( exp_w2, vec2[i1 * ni + i2] );
+      }
+    }
+  }
 
   if ( debug ) {
     cout << "func:";
@@ -184,9 +192,11 @@ check_func(const TvFunc& func,
 	ww0[j] = 0;
       }
       int ww1[20][21];
-      for (ymuint j = 0; j < ni; ++ j) {
-	for (ymuint k = 0; k <= ni; ++ k) {
-	  ww1[j][k] = 0;
+      if ( ni < 16 ) {
+	for (ymuint j = 0; j < ni; ++ j) {
+	  for (ymuint k = 0; k <= ni; ++ k) {
+	    ww1[j][k] = 0;
+	  }
 	}
       }
       for (ymuint p = 0; p < ni_exp; ++ p) {
@@ -207,17 +217,19 @@ check_func(const TvFunc& func,
 	else {
 	  ww0[cur_w] += 1;
 	}
-	for (ymuint j = 0; j < ni; ++ j) {
-	  ymuint i_bit = 1U << j;
-	  int v1 = v;
-	  if ( q & i_bit ) {
-	    v1 = 1 - v1;
-	  }
-	  if ( v1 ) {
-	    ww1[j][cur_w] -= 1;
-	  }
-	  else {
-	    ww1[j][cur_w] += 1;
+	if ( ni < 16 ) {
+	  for (ymuint j = 0; j < ni; ++ j) {
+	    ymuint i_bit = 1U << j;
+	    int v1 = v;
+	    if ( q & i_bit ) {
+	      v1 = 1 - v1;
+	    }
+	    if ( v1 ) {
+	      ww1[j][cur_w] -= 1;
+	    }
+	    else {
+	      ww1[j][cur_w] += 1;
+	    }
 	  }
 	}
       }
@@ -226,9 +238,11 @@ check_func(const TvFunc& func,
 	  cout << "  w = " << w << endl;
 	}
 	EXPECT_EQ( ww0[w], func.walsh_w0(w, oinv, ibits) );
-	for (ymuint j = 0; j < ni; ++ j) {
-	  VarId var(j);
-	  EXPECT_EQ( ww1[j][w], func.walsh_w1(var, w, oinv, ibits) );
+	if ( ni < 16 ) {
+	  for (ymuint j = 0; j < ni; ++ j) {
+	    VarId var(j);
+	    EXPECT_EQ( ww1[j][w], func.walsh_w1(var, w, oinv, ibits) );
+	  }
 	}
 	if ( debug ) {
 	  cout << endl;
