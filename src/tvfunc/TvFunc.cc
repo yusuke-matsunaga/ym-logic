@@ -3308,24 +3308,46 @@ BEGIN_NONAMESPACE
 
 inline
 int
+walsh_w0_0_0(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (0 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
 walsh_w0_0(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  ymuint64 tmp = src_vec[0];
-  int nall;
-  int c;
+  ymuint64 bitvec = src_vec[0];
   switch ( w ) {
-  case 0:
-    nall = 1;
-    c = (tmp >> (0 ^ ibits)) & 1;
-    break;
-  default:
-    ASSERT_NOT_REACHED;
-    nall = 0;
-    c = 0;
+  case 0: return walsh_w0_0_0(bitvec, ibits);
   }
 
+  ASSERT_NOT_REACHED;
+  return 0;
+}
+
+inline
+int
+walsh_w0_1_0(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (0 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_1_1(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (1 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
@@ -3335,24 +3357,45 @@ walsh_w0_1(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  ymuint64 tmp = src_vec[0];
-  int nall;
-  int c;
+  ymuint64 bitvec = src_vec[0];
   switch ( w ) {
-  case 0:
-    nall = 1;
-    c = (tmp >> (0 ^ ibits)) & 1;
-    break;
-  case 1:
-    nall = 1;
-    c  = (tmp >> (1 ^ ibits)) & 1;
-    break;
-  default:
-    ASSERT_NOT_REACHED;
-    nall = 0;
-    c = 0;
+  case 0: return walsh_w0_1_0(bitvec, ibits);
+  case 1: return walsh_w0_1_1(bitvec, ibits);
   }
 
+  ASSERT_NOT_REACHED;
+  return 0;
+}
+
+inline
+int
+walsh_w0_2_0(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (0 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_2_1(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 2;
+  int c;
+  c  = (bitvec >> (1 ^ ibits)) & 1;
+  c += (bitvec >> (2 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_2_2(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (3 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
@@ -3362,29 +3405,59 @@ walsh_w0_2(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  ymuint64 tmp = src_vec[0];
-  int nall;
-  int c;
+  ymuint64 bitvec = src_vec[0];
   switch ( w ) {
-  case 0:
-    nall = 1;
-    c = (tmp >> (0 ^ ibits)) & 1;
-    break;
-  case 1:
-    nall = 2;
-    c  = (tmp >> (1 ^ ibits)) & 1;
-    c += (tmp >> (2 ^ ibits)) & 1;
-    break;
-  case 2:
-    nall = 1;
-    c = (tmp >> (3 ^ ibits)) & 1;
-    break;
-  default:
-    ASSERT_NOT_REACHED;
-    nall = 0;
-    c = 0;
+  case 0: return walsh_w0_2_0(bitvec, ibits);
+  case 1: return walsh_w0_2_1(bitvec, ibits);
+  case 2: return walsh_w0_2_2(bitvec, ibits);
   }
+  ASSERT_NOT_REACHED;
+  return 0;
+}
 
+inline
+int
+walsh_w0_3_0(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (0 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_3_1(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 3;
+  int c;
+  c  = (bitvec >> (1 ^ ibits)) & 1;
+  c += (bitvec >> (2 ^ ibits)) & 1;
+  c += (bitvec >> (4 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_3_2(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 3;
+  int c;
+  c  = (bitvec >> (3 ^ ibits)) & 1;
+  c += (bitvec >> (5 ^ ibits)) & 1;
+  c += (bitvec >> (6 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_3_3(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (7 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
@@ -3394,36 +3467,79 @@ walsh_w0_3(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  ymuint64 tmp = src_vec[0];
-  int nall;
-  int c;
+  ymuint64 bitvec = src_vec[0];
   switch ( w ) {
-  case 0:
-    nall = 1;
-    c = (tmp >> (0 ^ ibits)) & 1;
-    break;
-  case 1:
-    nall = 3;
-    c  = (tmp >> (1 ^ ibits)) & 1;
-    c += (tmp >> (2 ^ ibits)) & 1;
-    c += (tmp >> (4 ^ ibits)) & 1;
-    break;
-  case 2:
-    nall = 3;
-    c  = (tmp >> (3 ^ ibits)) & 1;
-    c += (tmp >> (5 ^ ibits)) & 1;
-    c += (tmp >> (6 ^ ibits)) & 1;
-    break;
-  case 3:
-    nall = 1;
-    c = (tmp >> (7 ^ ibits)) & 1;
-    break;
-  default:
-    ASSERT_NOT_REACHED;
-    nall = 0;
-    c = 0;
+  case 0: return walsh_w0_3_0(bitvec, ibits);
+  case 1: return walsh_w0_3_1(bitvec, ibits);
+  case 2: return walsh_w0_3_2(bitvec, ibits);
+  case 3: return walsh_w0_3_3(bitvec, ibits);
   }
 
+  ASSERT_NOT_REACHED;
+  return 0;
+}
+
+inline
+int
+walsh_w0_4_0(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (0 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_4_1(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 4;
+  int c;
+  c  = (bitvec >> (1 ^ ibits)) & 1;
+  c += (bitvec >> (2 ^ ibits)) & 1;
+  c += (bitvec >> (4 ^ ibits)) & 1;
+  c += (bitvec >> (8 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_4_2(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 6;
+  int c;
+  c  = (bitvec >> ( 3 ^ ibits)) & 1;
+  c += (bitvec >> ( 5 ^ ibits)) & 1;
+  c += (bitvec >> ( 6 ^ ibits)) & 1;
+  c += (bitvec >> ( 9 ^ ibits)) & 1;
+  c += (bitvec >> (10 ^ ibits)) & 1;
+  c += (bitvec >> (12 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_4_3(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 4;
+  int c;
+  c  = (bitvec >> ( 7 ^ ibits)) & 1;
+  c += (bitvec >> (11 ^ ibits)) & 1;
+  c += (bitvec >> (13 ^ ibits)) & 1;
+  c += (bitvec >> (14 ^ ibits)) & 1;
+  return nall - c * 2;
+}
+
+inline
+int
+walsh_w0_4_4(ymuint64 bitvec,
+	     ymuint ibits)
+{
+  int nall = 1;
+  int c = (bitvec >> (15 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
@@ -3433,139 +3549,106 @@ walsh_w0_4(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  ymuint64 tmp = src_vec[0];
-  int nall;
-  int c;
+  ymuint64 bitvec = src_vec[0];
   switch ( w ) {
-  case 0:
-    nall = 1;
-    c = (tmp >> (0 ^ ibits)) & 1;
-    break;
-  case 1:
-    nall = 4;
-    c  = (tmp >> (1 ^ ibits)) & 1;
-    c += (tmp >> (2 ^ ibits)) & 1;
-    c += (tmp >> (4 ^ ibits)) & 1;
-    c += (tmp >> (8 ^ ibits)) & 1;
-    break;
-  case 2:
-    nall = 6;
-    c  = (tmp >> (3 ^ ibits)) & 1;
-    c += (tmp >> (5 ^ ibits)) & 1;
-    c += (tmp >> (6 ^ ibits)) & 1;
-    c += (tmp >> (9 ^ ibits)) & 1;
-    c += (tmp >> (10 ^ ibits)) & 1;
-    c += (tmp >> (12 ^ ibits)) & 1;
-    break;
-  case 3:
-    nall = 4;
-    c  = (tmp >> (7 ^ ibits)) & 1;
-    c += (tmp >> (11 ^ ibits)) & 1;
-    c += (tmp >> (13 ^ ibits)) & 1;
-    c += (tmp >> (14 ^ ibits)) & 1;
-    break;
-  case 4:
-    nall = 1;
-    c = (tmp >> (15 ^ ibits)) & 1;
-    break;
-  default:
-    ASSERT_NOT_REACHED;
-    nall = 0;
-    c = 0;
+  case 0: return walsh_w0_4_0(bitvec, ibits);
+  case 1: return walsh_w0_4_1(bitvec, ibits);
+  case 2: return walsh_w0_4_2(bitvec, ibits);
+  case 3: return walsh_w0_4_3(bitvec, ibits);
+  case 4: return walsh_w0_4_4(bitvec, ibits);
   }
 
-  return nall - c * 2;
+  ASSERT_NOT_REACHED;
+  return 0;
 }
 
 inline
 int
-walsh_w0_5_0(ymuint64* src_vec,
+walsh_w0_5_0(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int nall = 1;
-  int c = (tmp >> (0 ^ ibits)) & 1;
+  int c = (bitvec >> (0 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
 inline
 int
-walsh_w0_5_1(ymuint64* src_vec,
+walsh_w0_5_1(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int nall = 5;
-  int c = (tmp >> (1 ^ ibits)) & 1;
-  c += (tmp >> (2 ^ ibits)) & 1;
-  c += (tmp >> (4 ^ ibits)) & 1;
-  c += (tmp >> (8 ^ ibits)) & 1;
-  c += (tmp >> (16 ^ ibits)) & 1;
+  int c;
+  c  = (bitvec >> ( 1 ^ ibits)) & 1;
+  c += (bitvec >> ( 2 ^ ibits)) & 1;
+  c += (bitvec >> ( 4 ^ ibits)) & 1;
+  c += (bitvec >> ( 8 ^ ibits)) & 1;
+  c += (bitvec >> (16 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
 inline
 int
-walsh_w0_5_2(ymuint64* src_vec,
+walsh_w0_5_2(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int nall = 10;
-  int c  = (tmp >> (3 ^ ibits)) & 1;
-  c += (tmp >> (5 ^ ibits)) & 1;
-  c += (tmp >> (6 ^ ibits)) & 1;
-  c += (tmp >> (9 ^ ibits)) & 1;
-  c += (tmp >> (10 ^ ibits)) & 1;
-  c += (tmp >> (12 ^ ibits)) & 1;
-  c += (tmp >> (17 ^ ibits)) & 1;
-  c += (tmp >> (18 ^ ibits)) & 1;
-  c += (tmp >> (20 ^ ibits)) & 1;
-  c += (tmp >> (24 ^ ibits)) & 1;
+  int c;
+  c  = (bitvec >> ( 3 ^ ibits)) & 1;
+  c += (bitvec >> ( 5 ^ ibits)) & 1;
+  c += (bitvec >> ( 6 ^ ibits)) & 1;
+  c += (bitvec >> ( 9 ^ ibits)) & 1;
+  c += (bitvec >> (10 ^ ibits)) & 1;
+  c += (bitvec >> (12 ^ ibits)) & 1;
+  c += (bitvec >> (17 ^ ibits)) & 1;
+  c += (bitvec >> (18 ^ ibits)) & 1;
+  c += (bitvec >> (20 ^ ibits)) & 1;
+  c += (bitvec >> (24 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
 inline
 int
-walsh_w0_5_3(ymuint64* src_vec,
+walsh_w0_5_3(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int nall = 10;
-  int c  = (tmp >> (7 ^ ibits)) & 1;
-  c += (tmp >> (11 ^ ibits)) & 1;
-  c += (tmp >> (13 ^ ibits)) & 1;
-  c += (tmp >> (14 ^ ibits)) & 1;
-  c += (tmp >> (19 ^ ibits)) & 1;
-  c += (tmp >> (21 ^ ibits)) & 1;
-  c += (tmp >> (22 ^ ibits)) & 1;
-  c += (tmp >> (25 ^ ibits)) & 1;
-  c += (tmp >> (26 ^ ibits)) & 1;
-  c += (tmp >> (28 ^ ibits)) & 1;
+  int c;
+  c  = (bitvec >> ( 7 ^ ibits)) & 1;
+  c += (bitvec >> (11 ^ ibits)) & 1;
+  c += (bitvec >> (13 ^ ibits)) & 1;
+  c += (bitvec >> (14 ^ ibits)) & 1;
+  c += (bitvec >> (19 ^ ibits)) & 1;
+  c += (bitvec >> (21 ^ ibits)) & 1;
+  c += (bitvec >> (22 ^ ibits)) & 1;
+  c += (bitvec >> (25 ^ ibits)) & 1;
+  c += (bitvec >> (26 ^ ibits)) & 1;
+  c += (bitvec >> (28 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
 inline
 int
-walsh_w0_5_4(ymuint64* src_vec,
+walsh_w0_5_4(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int nall = 5;
-  int c  = (tmp >> (15 ^ ibits)) & 1;
-  c += (tmp >> (23 ^ ibits)) & 1;
-  c += (tmp >> (27 ^ ibits)) & 1;
-  c += (tmp >> (29 ^ ibits)) & 1;
-  c += (tmp >> (30 ^ ibits)) & 1;
+  int c;
+  c  = (bitvec >> (15 ^ ibits)) & 1;
+  c += (bitvec >> (23 ^ ibits)) & 1;
+  c += (bitvec >> (27 ^ ibits)) & 1;
+  c += (bitvec >> (29 ^ ibits)) & 1;
+  c += (bitvec >> (30 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
 inline
 int
-walsh_w0_5_5(ymuint64* src_vec,
+walsh_w0_5_5(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int nall = 1;
-  int c = (tmp >> (31 ^ ibits)) & 1;
+  int c = (bitvec >> (31 ^ ibits)) & 1;
   return nall - c * 2;
 }
 
@@ -3575,151 +3658,149 @@ walsh_w0_5(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
+  ymuint64 bitvec = src_vec[0];
   switch ( w ) {
-  case 0: return walsh_w0_5_0(src_vec, ibits);
-  case 1: return walsh_w0_5_1(src_vec, ibits);
-  case 2: return walsh_w0_5_2(src_vec, ibits);
-  case 3: return walsh_w0_5_3(src_vec, ibits);
-  case 4: return walsh_w0_5_4(src_vec, ibits);
-  case 5: return walsh_w0_5_5(src_vec, ibits);
-  default:
-    ASSERT_NOT_REACHED;
+  case 0: return walsh_w0_5_0(bitvec, ibits);
+  case 1: return walsh_w0_5_1(bitvec, ibits);
+  case 2: return walsh_w0_5_2(bitvec, ibits);
+  case 3: return walsh_w0_5_3(bitvec, ibits);
+  case 4: return walsh_w0_5_4(bitvec, ibits);
+  case 5: return walsh_w0_5_5(bitvec, ibits);
   }
 
+  ASSERT_NOT_REACHED;
   return 0;
 }
 
 inline
 int
-walsh_w0_6_0(ymuint64* src_vec,
+walsh_w0_6_0(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
-  int n = 1;
-  int c = (tmp >> (0 ^ ibits)) & 1;
-  return n - c * 2;
+  int nall = 1;
+  int c = (bitvec >> (0 ^ ibits)) & 1;
+  return nall - c * 2;
 }
 
 inline
 int
-walsh_w0_6_1(ymuint64* src_vec,
+walsh_w0_6_1(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
-  int n = 6;
-  int c = (tmp >> (1 ^ ibits)) & 1;
-  c += (tmp >> (2 ^ ibits)) & 1;
-  c += (tmp >> (4 ^ ibits)) & 1;
-  c += (tmp >> (8 ^ ibits)) & 1;
-  c += (tmp >> (16 ^ ibits)) & 1;
-  c += (tmp >> (32 ^ ibits)) & 1;
-  return n - c * 2;
+  int nall = 6;
+  int c;
+  c  = (bitvec >> ( 1 ^ ibits)) & 1;
+  c += (bitvec >> ( 2 ^ ibits)) & 1;
+  c += (bitvec >> ( 4 ^ ibits)) & 1;
+  c += (bitvec >> ( 8 ^ ibits)) & 1;
+  c += (bitvec >> (16 ^ ibits)) & 1;
+  c += (bitvec >> (32 ^ ibits)) & 1;
+  return nall - c * 2;
 }
 
 inline
 int
-walsh_w0_6_2(ymuint64* src_vec,
+walsh_w0_6_2(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int n = 15;
-  int c = (tmp >> (3 ^ ibits)) & 1;
-  c += (tmp >> (5 ^ ibits)) & 1;
-  c += (tmp >> (6 ^ ibits)) & 1;
-  c += (tmp >> (9 ^ ibits)) & 1;
-  c += (tmp >> (10 ^ ibits)) & 1;
-  c += (tmp >> (12 ^ ibits)) & 1;
-  c += (tmp >> (17 ^ ibits)) & 1;
-  c += (tmp >> (18 ^ ibits)) & 1;
-  c += (tmp >> (20 ^ ibits)) & 1;
-  c += (tmp >> (24 ^ ibits)) & 1;
-  c += (tmp >> (33 ^ ibits)) & 1;
-  c += (tmp >> (34 ^ ibits)) & 1;
-  c += (tmp >> (36 ^ ibits)) & 1;
-  c += (tmp >> (40 ^ ibits)) & 1;
-  c += (tmp >> (48 ^ ibits)) & 1;
+  int c;
+  c  = (bitvec >> ( 3 ^ ibits)) & 1;
+  c += (bitvec >> ( 5 ^ ibits)) & 1;
+  c += (bitvec >> ( 6 ^ ibits)) & 1;
+  c += (bitvec >> ( 9 ^ ibits)) & 1;
+  c += (bitvec >> (10 ^ ibits)) & 1;
+  c += (bitvec >> (12 ^ ibits)) & 1;
+  c += (bitvec >> (17 ^ ibits)) & 1;
+  c += (bitvec >> (18 ^ ibits)) & 1;
+  c += (bitvec >> (20 ^ ibits)) & 1;
+  c += (bitvec >> (24 ^ ibits)) & 1;
+  c += (bitvec >> (33 ^ ibits)) & 1;
+  c += (bitvec >> (34 ^ ibits)) & 1;
+  c += (bitvec >> (36 ^ ibits)) & 1;
+  c += (bitvec >> (40 ^ ibits)) & 1;
+  c += (bitvec >> (48 ^ ibits)) & 1;
   return n - c * 2;
 }
 
 inline
 int
-walsh_w0_6_3(ymuint64* src_vec,
+walsh_w0_6_3(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int n = 20;
-  int c = (tmp >> (7 ^ ibits)) & 1;
-  c += (tmp >> (11 ^ ibits)) & 1;
-  c += (tmp >> (13 ^ ibits)) & 1;
-  c += (tmp >> (14 ^ ibits)) & 1;
-  c += (tmp >> (19 ^ ibits)) & 1;
-  c += (tmp >> (21 ^ ibits)) & 1;
-  c += (tmp >> (22 ^ ibits)) & 1;
-  c += (tmp >> (25 ^ ibits)) & 1;
-  c += (tmp >> (26 ^ ibits)) & 1;
-  c += (tmp >> (28 ^ ibits)) & 1;
-  c += (tmp >> (35 ^ ibits)) & 1;
-  c += (tmp >> (37 ^ ibits)) & 1;
-  c += (tmp >> (38 ^ ibits)) & 1;
-  c += (tmp >> (41 ^ ibits)) & 1;
-  c += (tmp >> (42 ^ ibits)) & 1;
-  c += (tmp >> (44 ^ ibits)) & 1;
-  c += (tmp >> (49 ^ ibits)) & 1;
-  c += (tmp >> (50 ^ ibits)) & 1;
-  c += (tmp >> (52 ^ ibits)) & 1;
-  c += (tmp >> (56 ^ ibits)) & 1;
+  int c;
+  c  = (bitvec >> ( 7 ^ ibits)) & 1;
+  c += (bitvec >> (11 ^ ibits)) & 1;
+  c += (bitvec >> (13 ^ ibits)) & 1;
+  c += (bitvec >> (14 ^ ibits)) & 1;
+  c += (bitvec >> (19 ^ ibits)) & 1;
+  c += (bitvec >> (21 ^ ibits)) & 1;
+  c += (bitvec >> (22 ^ ibits)) & 1;
+  c += (bitvec >> (25 ^ ibits)) & 1;
+  c += (bitvec >> (26 ^ ibits)) & 1;
+  c += (bitvec >> (28 ^ ibits)) & 1;
+  c += (bitvec >> (35 ^ ibits)) & 1;
+  c += (bitvec >> (37 ^ ibits)) & 1;
+  c += (bitvec >> (38 ^ ibits)) & 1;
+  c += (bitvec >> (41 ^ ibits)) & 1;
+  c += (bitvec >> (42 ^ ibits)) & 1;
+  c += (bitvec >> (44 ^ ibits)) & 1;
+  c += (bitvec >> (49 ^ ibits)) & 1;
+  c += (bitvec >> (50 ^ ibits)) & 1;
+  c += (bitvec >> (52 ^ ibits)) & 1;
+  c += (bitvec >> (56 ^ ibits)) & 1;
   return n - c * 2;
 }
 
 inline
 int
-walsh_w0_6_4(ymuint64* src_vec,
+walsh_w0_6_4(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int n = 15;
-  int c = (tmp >> (15 ^ ibits)) & 1;
-  c += (tmp >> (23 ^ ibits)) & 1;
-  c += (tmp >> (27 ^ ibits)) & 1;
-  c += (tmp >> (29 ^ ibits)) & 1;
-  c += (tmp >> (30 ^ ibits)) & 1;
-  c += (tmp >> (39 ^ ibits)) & 1;
-  c += (tmp >> (43 ^ ibits)) & 1;
-  c += (tmp >> (45 ^ ibits)) & 1;
-  c += (tmp >> (46 ^ ibits)) & 1;
-  c += (tmp >> (51 ^ ibits)) & 1;
-  c += (tmp >> (53 ^ ibits)) & 1;
-  c += (tmp >> (54 ^ ibits)) & 1;
-  c += (tmp >> (57 ^ ibits)) & 1;
-  c += (tmp >> (58 ^ ibits)) & 1;
-  c += (tmp >> (60 ^ ibits)) & 1;
+  int c;
+  c  = (bitvec >> (15 ^ ibits)) & 1;
+  c += (bitvec >> (23 ^ ibits)) & 1;
+  c += (bitvec >> (27 ^ ibits)) & 1;
+  c += (bitvec >> (29 ^ ibits)) & 1;
+  c += (bitvec >> (30 ^ ibits)) & 1;
+  c += (bitvec >> (39 ^ ibits)) & 1;
+  c += (bitvec >> (43 ^ ibits)) & 1;
+  c += (bitvec >> (45 ^ ibits)) & 1;
+  c += (bitvec >> (46 ^ ibits)) & 1;
+  c += (bitvec >> (51 ^ ibits)) & 1;
+  c += (bitvec >> (53 ^ ibits)) & 1;
+  c += (bitvec >> (54 ^ ibits)) & 1;
+  c += (bitvec >> (57 ^ ibits)) & 1;
+  c += (bitvec >> (58 ^ ibits)) & 1;
+  c += (bitvec >> (60 ^ ibits)) & 1;
   return n - c * 2;
 }
 
 inline
 int
-walsh_w0_6_5(ymuint64* src_vec,
+walsh_w0_6_5(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int n = 6;
-  int c = (tmp >> (31 ^ ibits)) & 1;
-  c += (tmp >> (47 ^ ibits)) & 1;
-  c += (tmp >> (55 ^ ibits)) & 1;
-  c += (tmp >> (59 ^ ibits)) & 1;
-  c += (tmp >> (61 ^ ibits)) & 1;
-  c += (tmp >> (62 ^ ibits)) & 1;
+  int c;
+  c  = (bitvec >> (31 ^ ibits)) & 1;
+  c += (bitvec >> (47 ^ ibits)) & 1;
+  c += (bitvec >> (55 ^ ibits)) & 1;
+  c += (bitvec >> (59 ^ ibits)) & 1;
+  c += (bitvec >> (61 ^ ibits)) & 1;
+  c += (bitvec >> (62 ^ ibits)) & 1;
   return n - c * 2;
 }
 
 inline
 int
-walsh_w0_6_6(ymuint64* src_vec,
+walsh_w0_6_6(ymuint64 bitvec,
 	     ymuint ibits)
 {
-  ymuint64 tmp = src_vec[0];
   int n = 1;
-  int c = (tmp >> (63 ^ ibits)) & 1;
+  int c = (bitvec >> (63 ^ ibits)) & 1;
   return n - c * 2;
 }
 
@@ -3729,18 +3810,18 @@ walsh_w0_6(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
+  ymuint64 bitvec = src_vec[0];
   switch ( w ) {
-  case 0: return walsh_w0_6_0(src_vec, ibits);
-  case 1: return walsh_w0_6_1(src_vec, ibits);
-  case 2: return walsh_w0_6_2(src_vec, ibits);
-  case 3: return walsh_w0_6_3(src_vec, ibits);
-  case 4: return walsh_w0_6_4(src_vec, ibits);
-  case 5: return walsh_w0_6_5(src_vec, ibits);
-  case 6: return walsh_w0_6_6(src_vec, ibits);
-  default:
-    ASSERT_NOT_REACHED;
+  case 0: return walsh_w0_6_0(bitvec, ibits);
+  case 1: return walsh_w0_6_1(bitvec, ibits);
+  case 2: return walsh_w0_6_2(bitvec, ibits);
+  case 3: return walsh_w0_6_3(bitvec, ibits);
+  case 4: return walsh_w0_6_4(bitvec, ibits);
+  case 5: return walsh_w0_6_5(bitvec, ibits);
+  case 6: return walsh_w0_6_6(bitvec, ibits);
   }
 
+  ASSERT_NOT_REACHED;
   return 0;
 }
 
@@ -3751,7 +3832,7 @@ walsh_w0_7_0(ymuint64* src_vec,
 {
   ymuint flag = ((ibits >> 6) & 1);
   ymuint offset = flag * (1 << (6 - NIPW));
-  return walsh_w0_6_0(src_vec + offset, ibits);
+  return walsh_w0_6(src_vec + offset, ibits, 0);
 }
 
 inline
@@ -3762,8 +3843,8 @@ walsh_w0_7_1(ymuint64* src_vec,
   ymuint flag = ((ibits >> 6) & 1);
   ymuint offset1 = flag * (1 << (6 - NIPW));
   ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6_1(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_6_0(src_vec + offset2, ibits);
+  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 1);
+  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 0);
   return ans1 + ans2;
 }
 
@@ -3775,8 +3856,8 @@ walsh_w0_7_2(ymuint64* src_vec,
   ymuint flag = ((ibits >> 6) & 1);
   ymuint offset1 = flag * (1 << (6 - NIPW));
   ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6_2(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_6_1(src_vec + offset2, ibits);
+  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 2);
+  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 1);
   return ans1 + ans2;
 }
 
@@ -3788,8 +3869,8 @@ walsh_w0_7_3(ymuint64* src_vec,
   ymuint flag = ((ibits >> 6) & 1);
   ymuint offset1 = flag * (1 << (6 - NIPW));
   ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6_3(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_6_2(src_vec + offset2, ibits);
+  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 3);
+  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 2);
   return ans1 + ans2;
 }
 
@@ -3801,8 +3882,8 @@ walsh_w0_7_4(ymuint64* src_vec,
   ymuint flag = ((ibits >> 6) & 1);
   ymuint offset1 = flag * (1 << (6 - NIPW));
   ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6_4(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_6_3(src_vec + offset2, ibits);
+  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 4);
+  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 3);
   return ans1 + ans2;
 }
 
@@ -3814,8 +3895,8 @@ walsh_w0_7_5(ymuint64* src_vec,
   ymuint flag = ((ibits >> 6) & 1);
   ymuint offset1 = flag * (1 << (6 - NIPW));
   ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6_5(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_6_4(src_vec + offset2, ibits);
+  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 5);
+  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 4);
   return ans1 + ans2;
 }
 
@@ -3827,8 +3908,8 @@ walsh_w0_7_6(ymuint64* src_vec,
   ymuint flag = ((ibits >> 6) & 1);
   ymuint offset1 = flag * (1 << (6 - NIPW));
   ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6_6(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_6_5(src_vec + offset2, ibits);
+  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 6);
+  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 5);
   return ans1 + ans2;
 }
 
@@ -3839,7 +3920,7 @@ walsh_w0_7_7(ymuint64* src_vec,
 {
   ymuint flag = ((ibits >> 6) & 1);
   ymuint offset = (1 - flag) * (1 << (6 - NIPW));
-  return walsh_w0_6_6(src_vec + offset, ibits);
+  return walsh_w0_6(src_vec + offset, ibits, 6);
 }
 
 inline
@@ -3857,10 +3938,9 @@ walsh_w0_7(ymuint64* src_vec,
   case 5: return walsh_w0_7_5(src_vec, ibits);
   case 6: return walsh_w0_7_6(src_vec, ibits);
   case 7: return walsh_w0_7_7(src_vec, ibits);
-  default:
-    ASSERT_NOT_REACHED;
   }
 
+  ASSERT_NOT_REACHED;
   return 0;
 }
 
@@ -4591,14 +4671,13 @@ TvFunc::walsh_w0(ymuint w,
 	ymuint start = s_pidx[v];
 	ymuint end = s_pidx[v + 1];
 	ymuint* endp = &s_plist[end];
-	ymuint64 mask = 0UL;
+	ymuint pos1 = pos0 ^ ibits1;
+	ymuint64 bitvec = mVector[pos1];
 	for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
-	  ymuint pos = *p ^ ibits2;
-	  mask |= (1UL << pos);
+	  ymuint bitpos = *p ^ ibits2;
+	  c += (bitvec >> bitpos) & 1;
 	}
 	nall += (end - start);
-	ymuint pos1 = pos0 ^ ibits1;
-	c += count_onebits(mVector[pos1] & mask);
       }
       ans = nall - c * 2;
     }
@@ -4628,31 +4707,21 @@ walsh_w1_1(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  ymuint64 tmp = src_vec[0];
+  ymuint64 bitvec = src_vec[0];
   if ( ibits & (1U << idx) ) {
-    tmp ^= ~c_masks[idx];
+    bitvec ^= ~c_masks[idx];
   }
   else {
-    tmp ^= c_masks[idx];
-  }
-  int nall;
-  int c;
-  switch ( w ) {
-  case 0:
-    nall = 1;
-    c = (tmp >> (0 ^ ibits)) & 1;
-    break;
-  case 1:
-    nall = 1;
-    c  = (tmp >> (1 ^ ibits)) & 1;
-    break;
-  default:
-    ASSERT_NOT_REACHED;
-    nall = 0;
-    c = 0;
+    bitvec ^= c_masks[idx];
   }
 
-  return nall - c * 2;
+  switch ( w ) {
+  case 0: return walsh_w0_1_0(bitvec, ibits);
+  case 1: return walsh_w0_1_1(bitvec, ibits);
+  }
+
+  ASSERT_NOT_REACHED;
+  return 0;
 }
 
 inline
@@ -4662,25 +4731,20 @@ walsh_w1_2(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  int tmp = src_vec[0];
+  ymuint64 bitvec = src_vec[0];
   if ( ibits & (1U << idx) ) {
-    tmp ^= ~c_masks[idx];
+    bitvec ^= ~c_masks[idx];
   }
   else {
-    tmp ^= c_masks[idx];
+    bitvec ^= c_masks[idx];
   }
-  ymuint mask;
+
   switch ( w ) {
-  case 0:
-    mask = (1 << (0 ^ ibits));
-    return 1 - count_onebits_2(tmp & mask) * 2;
-  case 1:
-    mask = (1 << (1 ^ ibits)) | (1 << (2 ^ ibits));
-    return 2 - count_onebits_2(tmp & mask) * 2;
-  case 2:
-    mask = (1 << (3 ^ ibits));
-    return 1 - count_onebits_2(tmp & mask) * 2;
+  case 0: return walsh_w0_2_0(bitvec, ibits);
+  case 1: return walsh_w0_2_1(bitvec, ibits);
+  case 2: return walsh_w0_2_2(bitvec, ibits);
   }
+
   ASSERT_NOT_REACHED;
   return 0;
 }
@@ -4692,28 +4756,21 @@ walsh_w1_3(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  int tmp = src_vec[0];
-  if ( ibits & (1 << idx) ) {
-    tmp ^= ~c_masks[idx];
+  ymuint64 bitvec = src_vec[0];
+  if ( ibits & (1U << idx) ) {
+    bitvec ^= ~c_masks[idx];
   }
   else {
-    tmp ^= c_masks[idx];
+    bitvec ^= c_masks[idx];
   }
-  ymuint mask;
+
   switch ( w ) {
-  case 0:
-    mask = (1 << (0 ^ ibits));
-    return 1 - count_onebits_3(tmp & mask) * 2;
-  case 1:
-    mask = (1 << (1 ^ ibits)) | (1 << (2 ^ ibits)) | (1 << (4 ^ ibits));
-    return 3 - count_onebits_3(tmp & mask) * 2;
-  case 2:
-    mask = (1 << (3 ^ ibits)) | (1 << (5 ^ ibits)) | (1 << (6 ^ ibits));
-    return 3 - count_onebits_3(tmp & mask) * 2;
-  case 3:
-    mask = (1 << (7 ^ ibits));
-    return 1 - count_onebits_3(tmp & mask) * 2;
+  case 0: return walsh_w0_3_0(bitvec, ibits);
+  case 1: return walsh_w0_3_1(bitvec, ibits);
+  case 2: return walsh_w0_3_2(bitvec, ibits);
+  case 3: return walsh_w0_3_3(bitvec, ibits);
   }
+
   ASSERT_NOT_REACHED;
   return 0;
 }
@@ -4725,37 +4782,22 @@ walsh_w1_4(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  int tmp = src_vec[0];
-  if ( ibits & (1 << idx) ) {
-    tmp ^= ~c_masks[idx];
+  ymuint64 bitvec = src_vec[0];
+  if ( ibits & (1U << idx) ) {
+    bitvec ^= ~c_masks[idx];
   }
   else {
-    tmp ^= c_masks[idx];
+    bitvec ^= c_masks[idx];
   }
-  ymuint mask;
+
   switch ( w ) {
-  case 0:
-    mask = (1 << (0 ^ ibits));
-    return 1 - count_onebits_4(tmp & mask) * 2;
-  case 1:
-    mask =
-      (1 << (1 ^ ibits)) | (1 << (2 ^ ibits)) | (1 << (4 ^ ibits)) |
-      (1 << (8 ^ ibits));
-    return 4 - count_onebits_4(tmp & mask) * 2;
-  case 2:
-    mask =
-      (1 << (3 ^ ibits)) | (1 << (5 ^ ibits)) | (1 << (6 ^ ibits)) |
-      (1 << (9 ^ ibits)) | (1 << (10 ^ ibits)) | (1 << (12 ^ ibits));
-    return 6 - count_onebits_4(tmp & mask) * 2;
-  case 3:
-    mask =
-      (1 << (7 ^ ibits)) | (1 << (11 ^ ibits)) |
-      (1 << (13 ^ ibits)) | (1 << (14 ^ ibits));
-    return 4 - count_onebits_4(tmp & mask) * 2;
-  case 4:
-    mask = (1 << (15 ^ ibits));
-    return 1 - count_onebits_4(tmp & mask) * 2;
+  case 0: return walsh_w0_4_0(bitvec, ibits);
+  case 1: return walsh_w0_4_1(bitvec, ibits);
+  case 2: return walsh_w0_4_2(bitvec, ibits);
+  case 3: return walsh_w0_4_3(bitvec, ibits);
+  case 4: return walsh_w0_4_4(bitvec, ibits);
   }
+
   ASSERT_NOT_REACHED;
   return 0;
 }
@@ -4767,72 +4809,54 @@ walsh_w1_5(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  int tmp = src_vec[0];
-  if ( ibits & (1 << idx) ) {
-    tmp ^= ~c_masks[idx];
+  ymuint64 bitvec = src_vec[0];
+  if ( ibits & (1U << idx) ) {
+    bitvec ^= ~c_masks[idx];
   }
   else {
-    tmp ^= c_masks[idx];
+    bitvec ^= c_masks[idx];
   }
-  int nall;
-  int c;
+
   switch ( w ) {
-  case 0:
-    nall = 1;
-    c  = (tmp >> ( 0 ^ ibits)) & 1;
-    break;
-  case 1:
-    nall = 5;
-    c  = (tmp >> ( 1 ^ ibits)) & 1;
-    c += (tmp >> ( 2 ^ ibits)) & 1;
-    c += (tmp >> ( 4 ^ ibits)) & 1;
-    c += (tmp >> ( 8 ^ ibits)) & 1;
-    c += (tmp >> (16 ^ ibits)) & 1;
-    break;
-  case 2:
-    nall = 10;
-    c  = (tmp >> ( 3 ^ ibits)) & 1;
-    c += (tmp >> ( 5 ^ ibits)) & 1;
-    c += (tmp >> ( 6 ^ ibits)) & 1;
-    c += (tmp >> ( 9 ^ ibits)) & 1;
-    c += (tmp >> (10 ^ ibits)) & 1;
-    c += (tmp >> (12 ^ ibits)) & 1;
-    c += (tmp >> (17 ^ ibits)) & 1;
-    c += (tmp >> (18 ^ ibits)) & 1;
-    c += (tmp >> (20 ^ ibits)) & 1;
-    c += (tmp >> (24 ^ ibits)) & 1;
-    break;
-  case 3:
-    nall = 10;
-    c  = (tmp >> ( 7 ^ ibits)) & 1;
-    c += (tmp >> (11 ^ ibits)) & 1;
-    c += (tmp >> (13 ^ ibits)) & 1;
-    c += (tmp >> (14 ^ ibits)) & 1;
-    c += (tmp >> (19 ^ ibits)) & 1;
-    c += (tmp >> (21 ^ ibits)) & 1;
-    c += (tmp >> (22 ^ ibits)) & 1;
-    c += (tmp >> (25 ^ ibits)) & 1;
-    c += (tmp >> (26 ^ ibits)) & 1;
-    c += (tmp >> (28 ^ ibits)) & 1;
-    break;
-  case 4:
-    nall = 5;
-    c  = (tmp >> (15 ^ ibits)) & 1;
-    c += (tmp >> (23 ^ ibits)) & 1;
-    c += (tmp >> (27 ^ ibits)) & 1;
-    c += (tmp >> (29 ^ ibits)) & 1;
-    c += (tmp >> (30 ^ ibits)) & 1;
-    break;
-  case 5:
-    nall = 1;
-    c  = (tmp >> (31 ^ ibits)) & 1;
-    break;
-  default:
-    ASSERT_NOT_REACHED;
-    nall = 0;
-    c = 0;
+  case 0: return walsh_w0_5_0(bitvec, ibits);
+  case 1: return walsh_w0_5_1(bitvec, ibits);
+  case 2: return walsh_w0_5_2(bitvec, ibits);
+  case 3: return walsh_w0_5_3(bitvec, ibits);
+  case 4: return walsh_w0_5_4(bitvec, ibits);
+  case 5: return walsh_w0_5_5(bitvec, ibits);
   }
-  return nall - c * 2;
+
+  ASSERT_NOT_REACHED;
+  return 0;
+}
+
+inline
+int
+walsh_w1_6(ymuint64* src_vec,
+	   ymuint idx,
+	   ymuint ibits,
+	   ymuint w)
+{
+  ymuint64 bitvec = src_vec[0];
+  if ( ibits & (1U << idx) ) {
+    bitvec ^= ~c_masks[idx];
+  }
+  else {
+    bitvec ^= c_masks[idx];
+  }
+
+  switch ( w ) {
+  case 0: return walsh_w0_6_0(bitvec, ibits);
+  case 1: return walsh_w0_6_1(bitvec, ibits);
+  case 2: return walsh_w0_6_2(bitvec, ibits);
+  case 3: return walsh_w0_6_3(bitvec, ibits);
+  case 4: return walsh_w0_6_4(bitvec, ibits);
+  case 5: return walsh_w0_6_5(bitvec, ibits);
+  case 6: return walsh_w0_6_6(bitvec, ibits);
+  }
+
+  ASSERT_NOT_REACHED;
+  return 0;
 }
 
 // 重み別の 1 次の Walsh 係数を求める．
@@ -4851,6 +4875,7 @@ TvFunc::walsh_w1(VarId var,
   case  3: ans = walsh_w1_3(mVector, idx, ibits, w); break;
   case  4: ans = walsh_w1_4(mVector, idx, ibits, w); break;
   case  5: ans = walsh_w1_5(mVector, idx, ibits, w); break;
+  case  6: ans = walsh_w1_6(mVector, idx, ibits, w); break;
   default: // input_num() > 5
     { // 汎用のコード
       int nall = 0;
@@ -4859,6 +4884,45 @@ TvFunc::walsh_w1(VarId var,
       ymuint ibits1 = ibits >> NIPW;
       // ブロック内の入力反転ビットマスク
       ymuint ibits2 = ibits & ((1UL << NIPW) - 1UL);
+
+      for (ymuint pos0 = 0; pos0 < mBlockNum; ++ pos0) {
+	// ブロック番号中の1の重み
+	ymuint u = count_onebits(pos0);
+	if ( u > w ) {
+	  continue;
+	}
+	// ブロックの中の1の重み
+	ymuint v = w - u;
+	if ( v > NIPW ) {
+	  continue;
+	}
+	ymuint start = s_pidx[v];
+	ymuint end = s_pidx[v + 1];
+	ymuint* endp = &s_plist[end];
+	ymuint pos1 = pos0 ^ ibits1;
+	ymuint64 mask;
+	if ( idx < NIPW ) {
+	  if ( ibits2 & (1 << idx) ) {
+	    mask = ~c_masks[idx];
+	  }
+	  else {
+	    mask = c_masks[idx];
+	  }
+	}
+	else {
+	  ymuint var5 = idx - NIPW;
+	  // 2行下の式は1行下の式と同じ意味
+	  // mask = (pos0 & (1 << var5)) ? 0xFFFFFFFF : 0x00000000;
+	  mask = 0UL - ((pos0 >> var5) & 1UL);
+	}
+	ymuint64 bitvec = mVector[pos1] ^ mask;
+	for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
+	  ymuint bitpos = *p ^ ibits2;
+	  c += (bitvec >> bitpos) & 1;
+	}
+	nall += (end - start);
+      }
+#if 0
       if ( idx < NIPW ) {
 	ymuint64 mask2;
 	if ( ibits2 & (1 << idx) ) {
@@ -4881,14 +4945,13 @@ TvFunc::walsh_w1(VarId var,
 	  ymuint start = s_pidx[v];
 	  ymuint end = s_pidx[v + 1];
 	  ymuint* endp = &s_plist[end];
-	  ymuint64 mask1 = 0UL;
+	  ymuint pos1 = pos0 ^ ibits1;
+	  ymuint64 bitvec = mVector[pos1] ^ mask2;
 	  for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
 	    ymuint bitpos = *p ^ ibits2;
-	    mask1 |= (1UL << bitpos);
+	    c += (bitvec >> bitpos) & 1;
 	  }
 	  nall += (end - start);
-	  ymuint pos1 = pos0 ^ ibits1;
-	  c += count_onebits((mVector[pos1] ^ mask2) & mask1);
 	}
       }
       else {
@@ -4907,19 +4970,19 @@ TvFunc::walsh_w1(VarId var,
 	  ymuint start = s_pidx[v];
 	  ymuint end = s_pidx[v + 1];
 	  ymuint* endp = &s_plist[end];
-	  ymuint64 mask1 = 0UL;
-	  for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
-	    ymuint bitpos = *p ^ ibits2;
-	    mask1 |= (1UL << bitpos);
-	  }
-	  nall += (end - start);
 	  ymuint pos1 = pos0 ^ ibits1;
 	  // 2行下の式は1行下の式と同じ意味
 	  // ymuint mask3 = (pos0 & (1 << var5)) ? 0xFFFFFFFF : 0x00000000;
 	  ymuint64 mask3 = 0UL - ((pos0 >> var5) & 1UL);
-	  c += count_onebits((mVector[pos1] ^ mask3) & mask1);
+	  ymuint64 bitvec = mVector[pos1] ^ mask3;
+	  for (ymuint* p = &s_plist[start]; p != endp; ++ p) {
+	    ymuint bitpos = *p ^ ibits2;
+	    c += (bitvec >> bitpos) & 1;
+	  }
+	  nall += (end - start);
 	}
       }
+#endif
       ans = nall - c * 2;
     }
   }
