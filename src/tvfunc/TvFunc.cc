@@ -113,6 +113,20 @@ lit_pat(ymuint var_id,
   }
 }
 
+// @brief 入力数が NIPW 以下の時のマスクを返す関数
+// @param[in] ni 入力数
+inline
+ymuint64
+vec_mask(ymuint ni)
+{
+  ymuint64 mask = ~0UL;
+  if ( ni < NIPW ) {
+    ymuint ni_exp = 1 << ni;
+    mask >>= (64 - ni_exp);
+  }
+  return mask;
+}
+
 END_NONAMESPACE
 
 BEGIN_NAMESPACE_YM
@@ -141,39 +155,9 @@ TvFunc::TvFunc(ymuint ni,
   mBlockNum(nblock(ni)),
   mVector(new ymuint64[mBlockNum])
 {
-  switch ( mInputNum ) {
-  case 0:
-    mVector[0] = 0x1;
-    break;
-
-  case 1:
-    mVector[0] = 0x3;
-    break;
-
-  case 2:
-    mVector[0] = 0xF;
-    break;
-
-  case 3:
-    mVector[0] = 0xFF;
-    break;
-
-  case 4:
-    mVector[0] = 0xFFFF;
-    break;
-
-  case 5:
-    mVector[0] = 0xFFFFFFFF;
-    break;
-
-  case 6:
-    mVector[0] = 0xFFFFFFFFFFFFFFFF;
-    break;
-
-  default:
-    for (ymuint i = 0; i < mBlockNum; ++ i) {
-      mVector[i] = ~(0UL);
-    }
+  ymuint64 mask = vec_mask(ni);
+  for (ymuint b = 0; b < mBlockNum; ++ b) {
+    mVector[b] = mask;
   }
 }
 
@@ -195,11 +179,7 @@ TvFunc::TvFunc(ymuint ni,
     }
     mVector[b] = pat;
   }
-  if ( ni < NIPW ) {
-    ymuint ni_exp = 1 << ni;
-    ymuint64 mask = (1UL << ni_exp) - 1UL;
-    mVector[0] &= mask;
-  }
+  mVector[0] &= vec_mask(ni);
 }
 
 // 入力数と真理値を指定したコンストラクタ
@@ -211,27 +191,24 @@ TvFunc::TvFunc(ymuint ni,
 {
   ymuint ni_pow = 1U << ni;
   ASSERT_COND( values.size() == ni_pow );
-  if ( ni <= NIPW ) {
-    ymuint64 pat = 0UL;
-    for (ymuint i = 0; i < ni_pow; ++ i) {
-      if ( values[i] ) {
-	pat |= 1UL << i;
-      }
+  ymuint base = 0;
+  ymuint64 bitpat = 0UL;
+  ymuint64 bitmask = 1UL;
+  for (ymuint p = 0; p < ni_pow; ++ p) {
+    if ( values[p] ) {
+      bitpat |= bitmask;
     }
-    mVector[0] = pat;
+    bitmask <<= 1;
+    if ( bitmask == 0UL ) {
+      mVector[base] = bitpat;
+      ++ base;
+      bitmask = 1UL;
+      bitpat = 0UL;
+    }
   }
-  else {
-    ymuint nipb_pow = 1U << NIPW;
-    ymuint base = 0;
-    for (ymuint i = 0; i < mBlockNum; ++ i, base += nipb_pow) {
-      ymuint64 pat = 0UL;
-      for (ymuint j = 0; j < nipb_pow; ++ j) {
-	if ( values[base + j] ) {
-	  pat |= 1UL << j;
-	}
-      }
-      mVector[i] = pat;
-    }
+  if ( bitmask != 1UL ) {
+    mVector[base] = bitpat;
+    ++ base;
   }
 }
 
@@ -274,11 +251,7 @@ TvFunc::~TvFunc()
 const TvFunc&
 TvFunc::negate()
 {
-  ymuint64 neg_mask = ~0UL;
-  if ( mInputNum < NIPW ) {
-    ymuint ni_exp = 1U << mInputNum;
-    neg_mask &= ((1UL << ni_exp) - 1UL);
-  }
+  ymuint64 neg_mask = vec_mask(mInputNum);
   for (ymuint b = 0; b < mBlockNum; ++ b) {
     mVector[b] ^= neg_mask;
   }
@@ -344,15 +317,15 @@ TvFunc::set_cofactor(VarId varid,
   else {
     pos -= NIPW;
     ymuint bit = 1U << pos;
-    for (ymuint i = 0; i < mBlockNum; ++ i) {
+    for (ymuint b = 0; b < mBlockNum; ++ b) {
       if ( inv ) {
-	if ( (i & bit) == bit ) {
-	  mVector[i] = mVector[i ^ bit];
+	if ( (b & bit) == bit ) {
+	  mVector[b] = mVector[b ^ bit];
 	}
       }
       else {
-	if ( (i & bit) == 0U ) {
-	  mVector[i] = mVector[i ^ bit];
+	if ( (b & bit) == 0U ) {
+	  mVector[b] = mVector[b ^ bit];
 	}
       }
     }
@@ -532,7 +505,7 @@ TvFunc::count_one() const
 }
 
 // 0次の Walsh 係数を求める．
-ymint
+int
 TvFunc::walsh_0() const
 {
   switch ( input_num() ) {
@@ -548,7 +521,7 @@ TvFunc::walsh_0() const
     ;
   }
 
-  ymint ans = 0;
+  int ans = 0;
   for (ymuint i = 0; i < mBlockNum; ++ i) {
     ans += count_onebits(mVector[i]);
   }
@@ -556,7 +529,7 @@ TvFunc::walsh_0() const
 }
 
 // 1次の Walsh 係数を求める．
-ymint
+int
 TvFunc::walsh_1(VarId varid) const
 {
   ymuint pos = varid.val();
@@ -584,7 +557,7 @@ TvFunc::walsh_1(VarId varid) const
 }
 
 // 2次の Walsh 係数を求める．
-ymint
+int
 TvFunc::walsh_2(VarId var1,
 		VarId var2) const
 {
@@ -597,21 +570,12 @@ TvFunc::walsh_2(VarId var1,
 
   switch ( input_num() ) {
   case 0:
-  case 1:
-    ASSERT_NOT_REACHED;
-    break;
-  case 2:
-    return (1 << 2) - count_onebits_2(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-  case 3:
-    return (1 << 3) - count_onebits_3(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-  case 4:
-    return (1 << 4) - count_onebits_4(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-  case 5:
-    return (1 << 5) - count_onebits_5(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-  case 6:
-    return (1 << 6) - count_onebits_6(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
-  default:
-    ;
+  case 1: ASSERT_NOT_REACHED; return 0;
+  case 2: return (1 << 2) - count_onebits_2(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
+  case 3: return (1 << 3) - count_onebits_3(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
+  case 4: return (1 << 4) - count_onebits_4(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
+  case 5: return (1 << 5) - count_onebits_5(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
+  case 6: return (1 << 6) - count_onebits_6(mVector[0] ^ c_masks[i] ^ c_masks[j]) * 2;
   }
 
   // i と j を正規化する．
@@ -621,11 +585,11 @@ TvFunc::walsh_2(VarId var1,
     j = tmp;
   }
 
-  ymint c = 0;
+  int c = 0;
   if ( i < NIPW ) {
     ymuint64 mask = c_masks[i] ^ c_masks[j];
-    for (ymuint i = 0; i < mBlockNum; ++ i) {
-      c += count_onebits(mVector[i] ^ mask);
+    for (ymuint b = 0; b < mBlockNum; ++ b) {
+      c += count_onebits(mVector[b] ^ mask);
     }
   }
   else if ( j < NIPW ) {
@@ -641,9 +605,9 @@ TvFunc::walsh_2(VarId var1,
     // }
     ymuint i5 = i - NIPW;
     ymuint64 mask = c_masks[j];
-    for (ymuint i = 0; i < mBlockNum; ++ i) {
-      ymuint64 mask1 = 0UL - ((i >> i5) & 1UL);
-      c += count_onebits(mVector[i] ^ mask ^ mask1);
+    for (ymuint b = 0; b < mBlockNum; ++ b) {
+      ymuint64 mask1 = 0UL - ((b >> i5) & 1UL);
+      c += count_onebits(mVector[b] ^ mask ^ mask1);
     }
   }
   else {
@@ -660,9 +624,9 @@ TvFunc::walsh_2(VarId var1,
     // }
     ymuint i5 = i - NIPW;
     ymuint j5 = j - NIPW;
-    for (ymuint i = 0; i < mBlockNum; ++ i) {
-      ymuint64 mask = 0UL - (((i >> i5) ^ (i >> j5)) & 1UL);
-      c += count_onebits(mVector[i] ^ mask);
+    for (ymuint b = 0; b < mBlockNum; ++ b) {
+      ymuint64 mask = 0UL - (((b >> i5) ^ (b >> j5)) & 1UL);
+      c += count_onebits(mVector[b] ^ mask);
     }
   }
   return (1 << input_num()) - c * 2;
@@ -672,9 +636,9 @@ BEGIN_NONAMESPACE
 
 // 5入力の walsh_01 用サブルーティン
 inline
-ymint
+int
 walsh_01_5b(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   const ymuint64 mask1   = 0x55555555;
   const ymuint64 mask2   = 0x33333333;
@@ -739,9 +703,9 @@ walsh_01_5b(ymuint64* src_vec,
 
 // 6 入力の walsh_01 用サブルーティン
 inline
-ymint
+int
 walsh_01_6b(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   const ymuint64 mask1   = 0x5555555555555555;
   const ymuint64 mask2   = 0x3333333333333333;
@@ -820,169 +784,169 @@ walsh_01_6b(ymuint64* src_vec,
 
 // 7入力の walsh_01 用サブルーティン
 inline
-ymint
+int
 walsh_01_7b(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
-  ymint ans0 = walsh_01_6b(src_vec,                     vec);
-  ymint ans1 = walsh_01_6b(src_vec + (1 << (6 - NIPW)), vec);
+  int ans0 = walsh_01_6b(src_vec,                     vec);
+  int ans1 = walsh_01_6b(src_vec + (1 << (6 - NIPW)), vec);
   vec[6] += ans0 + ((1 << 6) - ans1);
   return ans0 + ans1;
 }
 
 // 8入力の walsh_01 用サブルーティン
 inline
-ymint
+int
 walsh_01_8b(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
-  ymint ans0 = walsh_01_7b(src_vec,                     vec);
-  ymint ans1 = walsh_01_7b(src_vec + (1 << (7 - NIPW)), vec);
+  int ans0 = walsh_01_7b(src_vec,                     vec);
+  int ans1 = walsh_01_7b(src_vec + (1 << (7 - NIPW)), vec);
   vec[7] += ans0 + ((1 << 7) - ans1);
   return ans0 + ans1;
 }
 
 // 9入力の walsh_01 用サブルーティン
 inline
-ymint
+int
 walsh_01_9b(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
-  ymint ans0 = walsh_01_8b(src_vec,                     vec);
-  ymint ans1 = walsh_01_8b(src_vec + (1 << (8 - NIPW)), vec);
+  int ans0 = walsh_01_8b(src_vec,                     vec);
+  int ans1 = walsh_01_8b(src_vec + (1 << (8 - NIPW)), vec);
   vec[8] += ans0 + ((1 << 8) - ans1);
   return ans0 + ans1;
 }
 
 // 10入力の walsh_01 用サブルーティン
 inline
-ymint
+int
 walsh_01_10b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_9b(src_vec,                     vec);
-  ymint ans1 = walsh_01_9b(src_vec + (1 << (9 - NIPW)), vec);
+  int ans0 = walsh_01_9b(src_vec,                     vec);
+  int ans1 = walsh_01_9b(src_vec + (1 << (9 - NIPW)), vec);
   vec[9] += ans0 + ((1 << 9) - ans1);
   return ans0 + ans1;
 }
 
 // 11入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_11b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_10b(src_vec,                      vec);
-  ymint ans1 = walsh_01_10b(src_vec + (1 << (10 - NIPW)), vec);
+  int ans0 = walsh_01_10b(src_vec,                      vec);
+  int ans1 = walsh_01_10b(src_vec + (1 << (10 - NIPW)), vec);
   vec[10] += ans0 + ((1 << 10) - ans1);
   return ans0 + ans1;
 }
 
 // 12入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_12b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_11b(src_vec,                      vec);
-  ymint ans1 = walsh_01_11b(src_vec + (1 << (11 - NIPW)), vec);
+  int ans0 = walsh_01_11b(src_vec,                      vec);
+  int ans1 = walsh_01_11b(src_vec + (1 << (11 - NIPW)), vec);
   vec[11] += ans0 + ((1 << 11) - ans1);
   return ans0 + ans1;
 }
 
 // 13入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_13b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_12b(src_vec,                      vec);
-  ymint ans1 = walsh_01_12b(src_vec + (1 << (12 - NIPW)), vec);
+  int ans0 = walsh_01_12b(src_vec,                      vec);
+  int ans1 = walsh_01_12b(src_vec + (1 << (12 - NIPW)), vec);
   vec[12] += ans0 + ((1 << 12) - ans1);
   return ans0 + ans1;
 }
 
 // 14入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_14b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_13b(src_vec,                      vec);
-  ymint ans1 = walsh_01_13b(src_vec + (1 << (13 - NIPW)), vec);
+  int ans0 = walsh_01_13b(src_vec,                      vec);
+  int ans1 = walsh_01_13b(src_vec + (1 << (13 - NIPW)), vec);
   vec[13] += ans0 + ((1 << 13) - ans1);
   return ans0 + ans1;
 }
 
 // 15入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_15b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_14b(src_vec,                      vec);
-  ymint ans1 = walsh_01_14b(src_vec + (1 << (14 - NIPW)), vec);
+  int ans0 = walsh_01_14b(src_vec,                      vec);
+  int ans1 = walsh_01_14b(src_vec + (1 << (14 - NIPW)), vec);
   vec[14] += ans0 + ((1 << 14) - ans1);
   return ans0 + ans1;
 }
 
 // 16入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_16b(ymuint64* src_vec,
 	     int vec[])
 {
-  ymint ans0 = walsh_01_15b(src_vec,                      vec);
-  ymint ans1 = walsh_01_15b(src_vec + (1 << (15 - NIPW)), vec);
+  int ans0 = walsh_01_15b(src_vec,                      vec);
+  int ans1 = walsh_01_15b(src_vec + (1 << (15 - NIPW)), vec);
   vec[15] += ans0 + ((1 << 15) - ans1);
   return ans0 + ans1;
 }
 
 // 17入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_17b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_16b(src_vec,                      vec);
-  ymint ans1 = walsh_01_16b(src_vec + (1 << (16 - NIPW)), vec);
+  int ans0 = walsh_01_16b(src_vec,                      vec);
+  int ans1 = walsh_01_16b(src_vec + (1 << (16 - NIPW)), vec);
   vec[16] += ans0 + ((1 << 16) - ans1);
   return ans0 + ans1;
 }
 
 // 18入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_18b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_17b(src_vec,                      vec);
-  ymint ans1 = walsh_01_17b(src_vec + (1 << (17 - NIPW)), vec);
+  int ans0 = walsh_01_17b(src_vec,                      vec);
+  int ans1 = walsh_01_17b(src_vec + (1 << (17 - NIPW)), vec);
   vec[17] += ans0 + ((1 << 17) - ans1);
   return ans0 + ans1;
 }
 
 // 19入力の walsh_01 用サブルーティン
-ymint
+int
 walsh_01_19b(ymuint64* src_vec,
-	     ymint vec[])
+	     int vec[])
 {
-  ymint ans0 = walsh_01_18b(src_vec,                      vec);
-  ymint ans1 = walsh_01_18b(src_vec + (1 << (18 - NIPW)), vec);
+  int ans0 = walsh_01_18b(src_vec,                      vec);
+  int ans1 = walsh_01_18b(src_vec + (1 << (18 - NIPW)), vec);
   vec[18] += ans0 + ((1 << 18) - ans1);
   return ans0 + ans1;
 }
 
 // 0入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_0(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   return 1 - src_vec[0] * 2;
 }
 
 // 1入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_1(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   const ymuint64 mask1   = 0x1;
 
-  const ymint n = (1 << 1);
+  const int n = (1 << 1);
 
   ymuint64 tmp;
   {
@@ -999,14 +963,14 @@ walsh_01_1(ymuint64* src_vec,
 
 // 2入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_2(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   const ymuint64 mask1   = 0x5;
   const ymuint64 mask2   = 0x3;
 
-  const ymint n = (1 << 2);
+  const int n = (1 << 2);
 
   ymuint64 tmp;
   {
@@ -1032,15 +996,15 @@ walsh_01_2(ymuint64* src_vec,
 
 // 3入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_3(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   const ymuint64 mask1   = 0x55;
   const ymuint64 mask2   = 0x33;
   const ymuint64 mask4   = 0x0f;
 
-  const ymint n = (1 << 3);
+  const int n = (1 << 3);
 
   ymuint64 tmp;
   {
@@ -1076,16 +1040,16 @@ walsh_01_3(ymuint64* src_vec,
 
 // 4入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_4(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   const ymuint64 mask1   = 0x5555;
   const ymuint64 mask2   = 0x3333;
   const ymuint64 mask4   = 0x0f0f;
   const ymuint64 mask8   = 0x00ff;
 
-  const ymint n = (1 << 4);
+  const int n = (1 << 4);
 
   ymuint64 tmp;
   {
@@ -1132,17 +1096,17 @@ walsh_01_4(ymuint64* src_vec,
 
 // 5入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_5(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   for (ymuint i = 0; i < 5; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans = walsh_01_5b(src_vec, vec);
+  int ans = walsh_01_5b(src_vec, vec);
 
-  const ymint n = (1 << 5);
+  const int n = (1 << 5);
   for (ymuint i = 0; i < 5; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1151,17 +1115,17 @@ walsh_01_5(ymuint64* src_vec,
 
 // 6入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_6(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   for (ymuint i = 0; i < 6; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans = walsh_01_6b(src_vec, vec);
+  int ans = walsh_01_6b(src_vec, vec);
 
-  const ymint n = (1 << 6);
+  const int n = (1 << 6);
   for (ymuint i = 0; i < 6; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1170,18 +1134,18 @@ walsh_01_6(ymuint64* src_vec,
 
 // 7入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_7(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   for (ymuint i = 0; i < 6; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_6b(src_vec, vec);
-  ymint ans1 = walsh_01_6b(src_vec + (1 << (6 - NIPW)), vec);
+  int ans0 = walsh_01_6b(src_vec, vec);
+  int ans1 = walsh_01_6b(src_vec + (1 << (6 - NIPW)), vec);
 
-  const ymint n = (1 << 7);
+  const int n = (1 << 7);
   for (ymuint i = 0; i < 6; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1191,18 +1155,18 @@ walsh_01_7(ymuint64* src_vec,
 
 // 8入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_8(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   for (ymuint i = 0; i < 7; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_7b(src_vec, vec);
-  ymint ans1 = walsh_01_7b(src_vec + (1 << (7 - NIPW)), vec);
+  int ans0 = walsh_01_7b(src_vec, vec);
+  int ans1 = walsh_01_7b(src_vec + (1 << (7 - NIPW)), vec);
 
-  const ymint n = (1 << 8);
+  const int n = (1 << 8);
   for (ymuint i = 0; i < 7; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1212,18 +1176,18 @@ walsh_01_8(ymuint64* src_vec,
 
 // 9入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_9(ymuint64* src_vec,
-	   ymint vec[])
+	   int vec[])
 {
   for (ymuint i = 0; i < 8; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_8b(src_vec, vec);
-  ymint ans1 = walsh_01_8b(src_vec + (1 << (8 - NIPW)), vec);
+  int ans0 = walsh_01_8b(src_vec, vec);
+  int ans1 = walsh_01_8b(src_vec + (1 << (8 - NIPW)), vec);
 
-  const ymint n = (1 << 9);
+  const int n = (1 << 9);
   for (ymuint i = 0; i < 8; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1233,7 +1197,7 @@ walsh_01_9(ymuint64* src_vec,
 
 // 10入力の walsh_01 本体
 inline
-ymint
+int
 walsh_01_10(ymuint64* src_vec,
 	    int vec[])
 {
@@ -1241,10 +1205,10 @@ walsh_01_10(ymuint64* src_vec,
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_9b(src_vec, vec);
-  ymint ans1 = walsh_01_9b(src_vec + (1 << (9 - NIPW)), vec);
+  int ans0 = walsh_01_9b(src_vec, vec);
+  int ans1 = walsh_01_9b(src_vec + (1 << (9 - NIPW)), vec);
 
-  const ymint n = (1 << 10);
+  const int n = (1 << 10);
   for (ymuint i = 0; i < 9; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1253,18 +1217,18 @@ walsh_01_10(ymuint64* src_vec,
 }
 
 // 11入力の walsh_01 本体
-ymint
+int
 walsh_01_11(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 10; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_10b(src_vec, vec);
-  ymint ans1 = walsh_01_10b(src_vec + (1 << (10 - NIPW)), vec);
+  int ans0 = walsh_01_10b(src_vec, vec);
+  int ans1 = walsh_01_10b(src_vec + (1 << (10 - NIPW)), vec);
 
-  const ymint n = (1 << 11);
+  const int n = (1 << 11);
   for (ymuint i = 0; i < 10; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1273,18 +1237,18 @@ walsh_01_11(ymuint64* src_vec,
 }
 
 // 12入力の walsh_01 本体
-ymint
+int
 walsh_01_12(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 11; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_11b(src_vec, vec);
-  ymint ans1 = walsh_01_11b(src_vec + (1 << (11 - NIPW)), vec);
+  int ans0 = walsh_01_11b(src_vec, vec);
+  int ans1 = walsh_01_11b(src_vec + (1 << (11 - NIPW)), vec);
 
-  const ymint n = (1 << 12);
+  const int n = (1 << 12);
   for (ymuint i = 0; i < 11; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1293,18 +1257,18 @@ walsh_01_12(ymuint64* src_vec,
 }
 
 // 13入力の walsh_01 本体
-ymint
+int
 walsh_01_13(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 12; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_12b(src_vec, vec);
-  ymint ans1 = walsh_01_12b(src_vec + (1 << (12 - NIPW)), vec);
+  int ans0 = walsh_01_12b(src_vec, vec);
+  int ans1 = walsh_01_12b(src_vec + (1 << (12 - NIPW)), vec);
 
-  const ymint n = (1 << 13);
+  const int n = (1 << 13);
   for (ymuint i = 0; i < 12; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1313,18 +1277,18 @@ walsh_01_13(ymuint64* src_vec,
 }
 
 // 14入力の walsh_01 本体
-ymint
+int
 walsh_01_14(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 13; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_13b(src_vec, vec);
-  ymint ans1 = walsh_01_13b(src_vec + (1 << (13 - NIPW)), vec);
+  int ans0 = walsh_01_13b(src_vec, vec);
+  int ans1 = walsh_01_13b(src_vec + (1 << (13 - NIPW)), vec);
 
-  const ymint n = (1 << 14);
+  const int n = (1 << 14);
   for (ymuint i = 0; i < 13; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1333,18 +1297,18 @@ walsh_01_14(ymuint64* src_vec,
 }
 
 // 15入力の walsh_01 本体
-ymint
+int
 walsh_01_15(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 14; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_14b(src_vec, vec);
-  ymint ans1 = walsh_01_14b(src_vec + (1 << (14 - NIPW)), vec);
+  int ans0 = walsh_01_14b(src_vec, vec);
+  int ans1 = walsh_01_14b(src_vec + (1 << (14 - NIPW)), vec);
 
-  const ymint n = (1 << 15);
+  const int n = (1 << 15);
   for (ymuint i = 0; i < 14; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1353,18 +1317,18 @@ walsh_01_15(ymuint64* src_vec,
 }
 
 // 16入力の walsh_01 本体
-ymint
+int
 walsh_01_16(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 15; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_15b(src_vec, vec);
-  ymint ans1 = walsh_01_15b(src_vec + (1 << (15 - NIPW)), vec);
+  int ans0 = walsh_01_15b(src_vec, vec);
+  int ans1 = walsh_01_15b(src_vec + (1 << (15 - NIPW)), vec);
 
-  const ymint n = (1 << 16);
+  const int n = (1 << 16);
   for (ymuint i = 0; i < 15; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1373,18 +1337,18 @@ walsh_01_16(ymuint64* src_vec,
 }
 
 // 17入力の walsh_01 本体
-ymint
+int
 walsh_01_17(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 16; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_16b(src_vec, vec);
-  ymint ans1 = walsh_01_16b(src_vec + (1 << (16 - NIPW)), vec);
+  int ans0 = walsh_01_16b(src_vec, vec);
+  int ans1 = walsh_01_16b(src_vec + (1 << (16 - NIPW)), vec);
 
-  const ymint n = (1 << 17);
+  const int n = (1 << 17);
   for (ymuint i = 0; i < 16; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1393,18 +1357,18 @@ walsh_01_17(ymuint64* src_vec,
 }
 
 // 18入力の walsh_01 本体
-ymint
+int
 walsh_01_18(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 17; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_17b(src_vec, vec);
-  ymint ans1 = walsh_01_17b(src_vec + (1 << (17 - NIPW)), vec);
+  int ans0 = walsh_01_17b(src_vec, vec);
+  int ans1 = walsh_01_17b(src_vec + (1 << (17 - NIPW)), vec);
 
-  const ymint n = (1 << 18);
+  const int n = (1 << 18);
   for (ymuint i = 0; i < 17; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1413,18 +1377,18 @@ walsh_01_18(ymuint64* src_vec,
 }
 
 // 19入力の walsh_01 本体
-ymint
+int
 walsh_01_19(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 18; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_18b(src_vec, vec);
-  ymint ans1 = walsh_01_18b(src_vec + (1 << (18 - NIPW)), vec);
+  int ans0 = walsh_01_18b(src_vec, vec);
+  int ans1 = walsh_01_18b(src_vec + (1 << (18 - NIPW)), vec);
 
-  const ymint n = (1 << 19);
+  const int n = (1 << 19);
   for (ymuint i = 0; i < 18; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1433,18 +1397,18 @@ walsh_01_19(ymuint64* src_vec,
 }
 
 // 20入力の walsh_01 本体
-ymint
+int
 walsh_01_20(ymuint64* src_vec,
-	    ymint vec[])
+	    int vec[])
 {
   for (ymuint i = 0; i < 19; ++ i) {
     vec[i] = 0;
   }
 
-  ymint ans0 = walsh_01_19b(src_vec, vec);
-  ymint ans1 = walsh_01_19b(src_vec + (1 << (19 - NIPW)), vec);
+  int ans0 = walsh_01_19b(src_vec, vec);
+  int ans1 = walsh_01_19b(src_vec + (1 << (19 - NIPW)), vec);
 
-  const ymint n = (1 << 20);
+  const int n = (1 << 20);
   for (ymuint64 i = 0; i < 19; ++ i) {
     vec[i] = n - vec[i] * 2;
   }
@@ -1455,8 +1419,8 @@ walsh_01_20(ymuint64* src_vec,
 END_NONAMESPACE
 
 // 0次と 1次の Walsh 係数を求める．
-ymint
-TvFunc::walsh_01(ymint vec[]) const
+int
+TvFunc::walsh_01(int vec[]) const
 {
   switch ( input_num() ) {
   case  0: return walsh_01_0(mVector, vec);
@@ -1860,15 +1824,15 @@ w2pos(ymuint ni,
 
 // 5入力の walsh_012 用サブルーティン
 inline
-ymint
+int
 walsh_012_5b(ymuint64* src_vec,
 	     ymuint ni,
-	     ymint vec1[],
-	     ymint vec2[])
+	     int vec1[],
+	     int vec2[])
 {
-  const ymint n = 1 << 5;
+  const int n = 1 << 5;
 
-  ymint ans;
+  int ans;
 
   ymuint64 tmp_1;
   ymuint64 tmp = pm5_1(src_vec[0], tmp_1);
@@ -1999,15 +1963,15 @@ walsh_012_5b(ymuint64* src_vec,
 
 // 6 入力の walsh_012 用サブルーティン
 inline
-ymint
+int
 walsh_012_6b(ymuint64* src_vec,
 	     ymuint ni,
-	     ymint vec1[],
-	     ymint vec2[])
+	     int vec1[],
+	     int vec2[])
 {
-  const ymint n = 1 << 6;
+  const int n = 1 << 6;
 
-  ymint ans;
+  int ans;
 
   ymuint64 tmp_1;
   ymuint64 tmp = pm6_1(src_vec[0], tmp_1);
@@ -2200,15 +2164,15 @@ walsh_012_6b(ymuint64* src_vec,
 
 // 7入力の walsh_012 用サブルーティン
 inline
-ymint
+int
 walsh_012_7b(ymuint64* src_vec,
 	     ymuint ni,
-	     ymint vec1[],
-	     ymint vec2[])
+	     int vec1[],
+	     int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_6b(src_vec,                     ni, vec1  , vec2);
-  ymint ans1 = walsh_012_6b(src_vec + (1 << (6 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_6b(src_vec,                     ni, vec1  , vec2);
+  int ans1 = walsh_012_6b(src_vec + (1 << (6 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 6; ++ i) {
     vec2[w2pos(ni, i, 6)] += vec1[i] - vec1_1[i];
   }
@@ -2221,15 +2185,15 @@ walsh_012_7b(ymuint64* src_vec,
 
 // 8入力の walsh_012 用サブルーティン
 inline
-ymint
+int
 walsh_012_8b(ymuint64* src_vec,
 	     ymuint ni,
-	     ymint vec1[],
-	     ymint vec2[])
+	     int vec1[],
+	     int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_7b(src_vec,                     ni, vec1  , vec2);
-  ymint ans1 = walsh_012_7b(src_vec + (1 << (7 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_7b(src_vec,                     ni, vec1  , vec2);
+  int ans1 = walsh_012_7b(src_vec + (1 << (7 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 7; ++ i) {
     vec2[w2pos(ni, i, 7)] += vec1[i] - vec1_1[i];
   }
@@ -2242,15 +2206,15 @@ walsh_012_8b(ymuint64* src_vec,
 
 // 9入力の walsh_012 用サブルーティン
 inline
-ymint
+int
 walsh_012_9b(ymuint64* src_vec,
 	     ymuint ni,
-	     ymint vec1[],
-	     ymint vec2[])
+	     int vec1[],
+	     int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_8b(src_vec,                     ni, vec1,   vec2);
-  ymint ans1 = walsh_012_8b(src_vec + (1 << (8 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_8b(src_vec,                     ni, vec1,   vec2);
+  int ans1 = walsh_012_8b(src_vec + (1 << (8 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 8; ++ i) {
     vec2[w2pos(ni, i, 8)] += vec1[i] - vec1_1[i];
   }
@@ -2263,15 +2227,15 @@ walsh_012_9b(ymuint64* src_vec,
 
 // 10入力の walsh_012 用サブルーティン
 inline
-ymint
+int
 walsh_012_10b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_9b(src_vec,                     ni, vec1  , vec2);
-  ymint ans1 = walsh_012_9b(src_vec + (1 << (9 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_9b(src_vec,                     ni, vec1  , vec2);
+  int ans1 = walsh_012_9b(src_vec + (1 << (9 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 9; ++ i) {
     vec2[w2pos(ni, i, 9)] += vec1[i] - vec1_1[i];
   }
@@ -2284,15 +2248,15 @@ walsh_012_10b(ymuint64* src_vec,
 
 // 11入力の walsh_012 用サブルーティン
 inline
-ymint
+int
 walsh_012_11b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_10b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_10b(src_vec + (1 << (10 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_10b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_10b(src_vec + (1 << (10 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 10; ++ i) {
     vec2[w2pos(ni, i, 10)] += vec1[i] - vec1_1[i];
   }
@@ -2305,15 +2269,15 @@ walsh_012_11b(ymuint64* src_vec,
 
 // 12入力の walsh_012 用サブルーティン
 inline
-ymint
+int
 walsh_012_12b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_11b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_11b(src_vec + (1 << (11 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_11b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_11b(src_vec + (1 << (11 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 11; ++ i) {
     vec2[w2pos(ni, i, 11)] += vec1[i] - vec1_1[i];
   }
@@ -2325,15 +2289,15 @@ walsh_012_12b(ymuint64* src_vec,
 }
 
 // 13入力の walsh_012 用サブルーティン
-ymint
+int
 walsh_012_13b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_12b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_12b(src_vec + (1 << (12 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_12b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_12b(src_vec + (1 << (12 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 12; ++ i) {
     vec2[w2pos(ni, i, 12)] += vec1[i] - vec1_1[i];
   }
@@ -2345,15 +2309,15 @@ walsh_012_13b(ymuint64* src_vec,
 }
 
 // 14入力の walsh_012 用サブルーティン
-ymint
+int
 walsh_012_14b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_13b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_13b(src_vec + (1 << (13 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_13b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_13b(src_vec + (1 << (13 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 13; ++ i) {
     vec2[w2pos(ni, i, 13)] += vec1[i] - vec1_1[i];
   }
@@ -2365,15 +2329,15 @@ walsh_012_14b(ymuint64* src_vec,
 }
 
 // 15入力の walsh_012 用サブルーティン
-ymint
+int
 walsh_012_15b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_14b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_14b(src_vec + (1 << (14 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_14b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_14b(src_vec + (1 << (14 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 14; ++ i) {
     vec2[w2pos(ni, i, 14)] += vec1[i] - vec1_1[i];
   }
@@ -2385,15 +2349,15 @@ walsh_012_15b(ymuint64* src_vec,
 }
 
 // 16入力の walsh_012 用サブルーティン
-ymint
+int
 walsh_012_16b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_15b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_15b(src_vec + (1 << (15 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_15b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_15b(src_vec + (1 << (15 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 15; ++ i) {
     vec2[w2pos(ni, i, 15)] += vec1[i] - vec1_1[i];
   }
@@ -2405,15 +2369,15 @@ walsh_012_16b(ymuint64* src_vec,
 }
 
 // 17入力の walsh_012 用サブルーティン
-ymint
+int
 walsh_012_17b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_16b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_16b(src_vec + (1 << (16 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_16b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_16b(src_vec + (1 << (16 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 16; ++ i) {
     vec2[w2pos(ni, i, 16)] += vec1[i] - vec1_1[i];
   }
@@ -2425,15 +2389,15 @@ walsh_012_17b(ymuint64* src_vec,
 }
 
 // 18入力の walsh_012 用サブルーティン
-ymint
+int
 walsh_012_18b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_17b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_17b(src_vec + (1 << (17 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_17b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_17b(src_vec + (1 << (17 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 17; ++ i) {
     vec2[w2pos(ni, i, 17)] += vec1[i] - vec1_1[i];
   }
@@ -2445,15 +2409,15 @@ walsh_012_18b(ymuint64* src_vec,
 }
 
 // 19入力の walsh_012 用サブルーティン
-ymint
+int
 walsh_012_19b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_18b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_18b(src_vec + (1 << (18 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_18b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_18b(src_vec + (1 << (18 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 18; ++ i) {
     vec2[w2pos(ni, i, 18)] += vec1[i] - vec1_1[i];
   }
@@ -2465,15 +2429,15 @@ walsh_012_19b(ymuint64* src_vec,
 }
 
 // 20入力の walsh_012 用サブルーティン
-ymint
+int
 walsh_012_20b(ymuint64* src_vec,
 	      ymuint ni,
-	      ymint vec1[],
-	      ymint vec2[])
+	      int vec1[],
+	      int vec2[])
 {
-  ymint vec1_1[TvFunc::kMaxNi];
-  ymint ans0 = walsh_012_19b(src_vec,                      ni, vec1  , vec2);
-  ymint ans1 = walsh_012_19b(src_vec + (1 << (19 - NIPW)), ni, vec1_1, vec2);
+  int vec1_1[TvFunc::kMaxNi];
+  int ans0 = walsh_012_19b(src_vec,                      ni, vec1  , vec2);
+  int ans1 = walsh_012_19b(src_vec + (1 << (19 - NIPW)), ni, vec1_1, vec2);
   for (ymuint i = 0; i < 19; ++ i) {
     vec2[w2pos(ni, i, 19)] += vec1[i] - vec1_1[i];
   }
@@ -2485,32 +2449,32 @@ walsh_012_20b(ymuint64* src_vec,
 }
 
 // 0入力の walsh_012 本体
-ymint
+int
 walsh_012_0(ymuint64* src_vec,
-	    ymint vec1[],
-	    ymint vec2[])
+	    int vec1[],
+	    int vec2[])
 {
   return walsh_01_0(src_vec, vec1);
 }
 
 // 1入力の walsh_012 本体
-ymint
+int
 walsh_012_1(ymuint64* src_vec,
-	    ymint vec1[],
-	    ymint vec2[])
+	    int vec1[],
+	    int vec2[])
 {
   return walsh_01_1(src_vec, vec1);
 }
 
 // 2入力の walsh_012 本体
-ymint
+int
 walsh_012_2(ymuint64* src_vec,
-	    ymint vec1[],
-	    ymint vec2[])
+	    int vec1[],
+	    int vec2[])
 {
-  const ymint n = 1 << 2;
+  const int n = 1 << 2;
 
-  ymint ans;
+  int ans;
 
   ymuint64 tmp_1;
   ymuint64 tmp = pm2_1(src_vec[0], tmp_1);
@@ -2531,14 +2495,14 @@ walsh_012_2(ymuint64* src_vec,
 }
 
 // 3入力の walsh_012 本体
-ymint
+int
 walsh_012_3(ymuint64* src_vec,
-	    ymint vec1[],
-	    ymint vec2[])
+	    int vec1[],
+	    int vec2[])
 {
-  const ymint n = 1 << 3;
+  const int n = 1 << 3;
 
-  ymint ans;
+  int ans;
 
   ymuint64 tmp_1;
   ymuint64 tmp = pm3_1(src_vec[0], tmp_1);
@@ -2577,14 +2541,14 @@ walsh_012_3(ymuint64* src_vec,
 }
 
 // 4入力の walsh_012 本体
-ymint
+int
 walsh_012_4(ymuint64* src_vec,
-	    ymint vec1[],
-	    ymint vec2[])
+	    int vec1[],
+	    int vec2[])
 {
-  const ymint n = 1 << 4;
+  const int n = 1 << 4;
 
-  ymint ans;
+  int ans;
 
   ymuint64 tmp_1;
   ymuint64 tmp = pm4_1(src_vec[0], tmp_1);
@@ -2644,10 +2608,10 @@ walsh_012_4(ymuint64* src_vec,
 }
 
 // 5入力の walsh_012 本体
-ymint
+int
 walsh_012_5(ymuint64* src_vec,
-	    ymint vec1[],
-	    ymint vec2[])
+	    int vec1[],
+	    int vec2[])
 {
   const ymuint nn = 5 * 5;
   for (ymuint i = 0; i < nn; ++ i) {
@@ -3035,27 +2999,16 @@ BEGIN_NONAMESPACE
 
 inline
 int
-walsh_w0_0_0(ymuint64 bitvec,
-	     ymuint ibits)
-{
-  int nall = 1;
-  int c = (bitvec >> (0 ^ ibits)) & 1;
-  return nall - c * 2;
-}
-
-inline
-int
 walsh_w0_0(ymuint64* src_vec,
 	   ymuint ibits,
 	   ymuint w)
 {
-  ymuint64 bitvec = src_vec[0];
-  switch ( w ) {
-  case 0: return walsh_w0_0_0(bitvec, ibits);
-  }
+  ASSERT_COND( w == 0 );
 
-  ASSERT_NOT_REACHED;
-  return 0;
+  ymuint64 bitvec = src_vec[0];
+  int nall = 1;
+  int c = (bitvec >> (0 ^ ibits)) & 1;
+  return nall - c * 2;
 }
 
 inline
@@ -3552,570 +3505,6 @@ walsh_w0_6(ymuint64* src_vec,
   return 0;
 }
 
-inline
-int
-walsh_w0_7_0(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 6) & 1);
-  ymuint offset = flag * (1 << (6 - NIPW));
-  return walsh_w0_6(src_vec + offset, ibits, 0);
-}
-
-inline
-int
-walsh_w0_7_1(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 6) & 1);
-  ymuint offset1 = flag * (1 << (6 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 1);
-  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 0);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_7_2(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 6) & 1);
-  ymuint offset1 = flag * (1 << (6 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 2);
-  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 1);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_7_3(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 6) & 1);
-  ymuint offset1 = flag * (1 << (6 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 3);
-  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 2);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_7_4(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 6) & 1);
-  ymuint offset1 = flag * (1 << (6 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 4);
-  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 3);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_7_5(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 6) & 1);
-  ymuint offset1 = flag * (1 << (6 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 5);
-  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 4);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_7_6(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 6) & 1);
-  ymuint offset1 = flag * (1 << (6 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (6 - NIPW));
-  int ans1 = walsh_w0_6(src_vec + offset1, ibits, 6);
-  int ans2 = walsh_w0_6(src_vec + offset2, ibits, 5);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_7_7(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 6) & 1);
-  ymuint offset = (1 - flag) * (1 << (6 - NIPW));
-  return walsh_w0_6(src_vec + offset, ibits, 6);
-}
-
-inline
-int
-walsh_w0_7(ymuint64* src_vec,
-	   ymuint ibits,
-	   ymuint w)
-{
-  switch ( w ) {
-  case 0: return walsh_w0_7_0(src_vec, ibits);
-  case 1: return walsh_w0_7_1(src_vec, ibits);
-  case 2: return walsh_w0_7_2(src_vec, ibits);
-  case 3: return walsh_w0_7_3(src_vec, ibits);
-  case 4: return walsh_w0_7_4(src_vec, ibits);
-  case 5: return walsh_w0_7_5(src_vec, ibits);
-  case 6: return walsh_w0_7_6(src_vec, ibits);
-  case 7: return walsh_w0_7_7(src_vec, ibits);
-  }
-
-  ASSERT_NOT_REACHED;
-  return 0;
-}
-
-inline
-int
-walsh_w0_8_0(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset = flag * (1 << (7 - NIPW));
-  return walsh_w0_7_0(src_vec + offset, ibits);
-}
-
-inline
-int
-walsh_w0_8_1(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset1 = flag * (1 << (7 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (7 - NIPW));
-  int ans1 = walsh_w0_7_1(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_7_0(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_8_2(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset1 = flag * (1 << (7 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (7 - NIPW));
-  int ans1 = walsh_w0_7_2(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_7_1(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_8_3(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset1 = flag * (1 << (7 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (7 - NIPW));
-  int ans1 = walsh_w0_7_3(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_7_2(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_8_4(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset1 = flag * (1 << (7 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (7 - NIPW));
-  int ans1 = walsh_w0_7_4(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_7_3(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_8_5(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset1 = flag * (1 << (7 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (7 - NIPW));
-  int ans1 = walsh_w0_7_5(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_7_4(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_8_6(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset1 = flag * (1 << (7 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (7 - NIPW));
-  int ans1 = walsh_w0_7_6(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_7_5(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_8_7(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset1 = flag * (1 << (7 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (7 - NIPW));
-  int ans1 = walsh_w0_7_7(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_7_6(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_8_8(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 7) & 1);
-  ymuint offset = (1 - flag) * (1 << (7 - NIPW));
-  return walsh_w0_7_7(src_vec + offset, ibits);
-}
-
-inline
-int
-walsh_w0_8(ymuint64* src_vec,
-	   ymuint ibits,
-	   ymuint w)
-{
-  switch ( w ) {
-  case 0: return walsh_w0_8_0(src_vec, ibits);
-  case 1: return walsh_w0_8_1(src_vec, ibits);
-  case 2: return walsh_w0_8_2(src_vec, ibits);
-  case 3: return walsh_w0_8_3(src_vec, ibits);
-  case 4: return walsh_w0_8_4(src_vec, ibits);
-  case 5: return walsh_w0_8_5(src_vec, ibits);
-  case 6: return walsh_w0_8_6(src_vec, ibits);
-  case 7: return walsh_w0_8_7(src_vec, ibits);
-  case 8: return walsh_w0_8_8(src_vec, ibits);
-  default:
-    ASSERT_NOT_REACHED;
-  }
-
-  return 0;
-}
-
-inline
-int
-walsh_w0_9_0(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset = flag * (1 << (8 - NIPW));
-  return walsh_w0_8_0(src_vec + offset, ibits);
-}
-
-inline
-int
-walsh_w0_9_1(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset1 = flag * (1 << (8 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (8 - NIPW));
-  int ans1 = walsh_w0_8_1(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_8_0(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_9_2(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset1 = flag * (1 << (8 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (8 - NIPW));
-  int ans1 = walsh_w0_8_2(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_8_1(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_9_3(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset1 = flag * (1 << (8 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (8 - NIPW));
-  int ans1 = walsh_w0_8_3(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_8_2(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_9_4(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset1 = flag * (1 << (8 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (8 - NIPW));
-  int ans1 = walsh_w0_8_4(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_8_3(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_9_5(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset1 = flag * (1 << (8 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (8 - NIPW));
-  int ans1 = walsh_w0_8_5(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_8_4(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_9_6(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset1 = flag * (1 << (8 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (8 - NIPW));
-  int ans1 = walsh_w0_8_6(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_8_5(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_9_7(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset1 = flag * (1 << (8 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (8 - NIPW));
-  int ans1 = walsh_w0_8_7(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_8_6(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_9_8(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset1 = flag * (1 << (8 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (8 - NIPW));
-  int ans1 = walsh_w0_8_8(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_8_7(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_9_9(ymuint64* src_vec,
-	     ymuint ibits)
-{
-  ymuint flag = ((ibits >> 8) & 1);
-  ymuint offset = (1 - flag) * (1 << (8 - NIPW));
-  return walsh_w0_8_8(src_vec + offset, ibits);
-}
-
-inline
-int
-walsh_w0_9(ymuint64* src_vec,
-	   ymuint ibits,
-	   ymuint w)
-{
-  switch ( w ) {
-  case 0: return walsh_w0_9_0(src_vec, ibits);
-  case 1: return walsh_w0_9_1(src_vec, ibits);
-  case 2: return walsh_w0_9_2(src_vec, ibits);
-  case 3: return walsh_w0_9_3(src_vec, ibits);
-  case 4: return walsh_w0_9_4(src_vec, ibits);
-  case 5: return walsh_w0_9_5(src_vec, ibits);
-  case 6: return walsh_w0_9_6(src_vec, ibits);
-  case 7: return walsh_w0_9_7(src_vec, ibits);
-  case 8: return walsh_w0_9_8(src_vec, ibits);
-  case 9: return walsh_w0_9_9(src_vec, ibits);
-  default:
-    ASSERT_NOT_REACHED;
-  }
-
-  return 0;
-}
-
-inline
-int
-walsh_w0_10_0(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset = flag * (1 << (9 - NIPW));
-  return walsh_w0_9_0(src_vec + offset, ibits);
-}
-
-inline
-int
-walsh_w0_10_1(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_1(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_0(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_2(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_2(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_1(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_3(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_3(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_2(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_4(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_4(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_3(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_5(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_5(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_4(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_6(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_6(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_5(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_7(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_7(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_6(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_8(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_8(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_7(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_9(ymuint64* src_vec,
-	      ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset1 = flag * (1 << (9 - NIPW));
-  ymuint offset2 = (1 - flag) * (1 << (9 - NIPW));
-  int ans1 = walsh_w0_9_9(src_vec + offset1, ibits);
-  int ans2 = walsh_w0_9_8(src_vec + offset2, ibits);
-  return ans1 + ans2;
-}
-
-inline
-int
-walsh_w0_10_10(ymuint64* src_vec,
-	       ymuint ibits)
-{
-  ymuint flag = ((ibits >> 9) & 1);
-  ymuint offset = (1 - flag) * (1 << (9 - NIPW));
-  return walsh_w0_9_9(src_vec + offset, ibits);
-}
-
-inline
-int
-walsh_w0_10(ymuint64* src_vec,
-	    ymuint ibits,
-	    ymuint w)
-{
-  switch ( w ) {
-  case 0: return walsh_w0_10_0(src_vec, ibits);
-  case 1: return walsh_w0_10_1(src_vec, ibits);
-  case 2: return walsh_w0_10_2(src_vec, ibits);
-  case 3: return walsh_w0_10_3(src_vec, ibits);
-  case 4: return walsh_w0_10_4(src_vec, ibits);
-  case 5: return walsh_w0_10_5(src_vec, ibits);
-  case 6: return walsh_w0_10_6(src_vec, ibits);
-  case 7: return walsh_w0_10_7(src_vec, ibits);
-  case 8: return walsh_w0_10_8(src_vec, ibits);
-  case 9: return walsh_w0_10_9(src_vec, ibits);
-  case 10: return walsh_w0_10_10(src_vec, ibits);
-  default:
-    ASSERT_NOT_REACHED;
-  }
-
-  return 0;
-}
-
-
 END_NONAMESPACE
 
 // 重み別の 0 次の Walsh 係数を求める．
@@ -4133,238 +3522,7 @@ TvFunc::walsh_w0(ymuint w,
   case  4: ans = walsh_w0_4(mVector, ibits, w); break;
   case  5: ans = walsh_w0_5(mVector, ibits, w); break;
   case  6: ans = walsh_w0_6(mVector, ibits, w); break;
-  case  7: ans = walsh_w0_7(mVector, ibits, w); break;
-  case  8: ans = walsh_w0_8(mVector, ibits, w); break;
-  case  9: ans = walsh_w0_9(mVector, ibits, w); break;
-  case 10: ans = walsh_w0_10(mVector, ibits, w); break;
-
-#if 0
-  case 11:
-    switch ( w ) {
-    case 0: ans = walsh_w0_11_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_11_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_11_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_11_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_11_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_11_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_11_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_11_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_11_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_11_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_11_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_11_11(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 12:
-    switch ( w ) {
-    case 0: ans = walsh_w0_12_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_12_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_12_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_12_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_12_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_12_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_12_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_12_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_12_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_12_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_12_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_12_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_12_12(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 13:
-    switch ( w ) {
-    case 0: ans = walsh_w0_13_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_13_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_13_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_13_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_13_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_13_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_13_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_13_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_13_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_13_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_13_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_13_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_13_12(mVector, ibits); break;
-    case 13: ans = walsh_w0_13_13(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 14:
-    switch ( w ) {
-    case 0: ans = walsh_w0_14_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_14_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_14_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_14_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_14_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_14_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_14_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_14_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_14_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_14_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_14_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_14_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_14_12(mVector, ibits); break;
-    case 13: ans = walsh_w0_14_13(mVector, ibits); break;
-    case 14: ans = walsh_w0_14_14(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 15:
-    switch ( w ) {
-    case 0: ans = walsh_w0_15_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_15_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_15_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_15_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_15_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_15_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_15_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_15_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_15_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_15_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_15_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_15_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_15_12(mVector, ibits); break;
-    case 13: ans = walsh_w0_15_13(mVector, ibits); break;
-    case 14: ans = walsh_w0_15_14(mVector, ibits); break;
-    case 15: ans = walsh_w0_15_15(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 16:
-    switch ( w ) {
-    case 0: ans = walsh_w0_16_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_16_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_16_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_16_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_16_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_16_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_16_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_16_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_16_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_16_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_16_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_16_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_16_12(mVector, ibits); break;
-    case 13: ans = walsh_w0_16_13(mVector, ibits); break;
-    case 14: ans = walsh_w0_16_14(mVector, ibits); break;
-    case 15: ans = walsh_w0_16_15(mVector, ibits); break;
-    case 16: ans = walsh_w0_16_16(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 17:
-    switch ( w ) {
-    case 0: ans = walsh_w0_17_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_17_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_17_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_17_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_17_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_17_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_17_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_17_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_17_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_17_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_17_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_17_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_17_12(mVector, ibits); break;
-    case 13: ans = walsh_w0_17_13(mVector, ibits); break;
-    case 14: ans = walsh_w0_17_14(mVector, ibits); break;
-    case 15: ans = walsh_w0_17_15(mVector, ibits); break;
-    case 16: ans = walsh_w0_17_16(mVector, ibits); break;
-    case 17: ans = walsh_w0_17_17(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 18:
-    switch ( w ) {
-    case 0: ans = walsh_w0_18_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_18_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_18_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_18_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_18_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_18_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_18_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_18_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_18_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_18_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_18_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_18_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_18_12(mVector, ibits); break;
-    case 13: ans = walsh_w0_18_13(mVector, ibits); break;
-    case 14: ans = walsh_w0_18_14(mVector, ibits); break;
-    case 15: ans = walsh_w0_18_15(mVector, ibits); break;
-    case 16: ans = walsh_w0_18_16(mVector, ibits); break;
-    case 17: ans = walsh_w0_18_17(mVector, ibits); break;
-    case 18: ans = walsh_w0_18_18(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 19:
-    switch ( w ) {
-    case 0: ans = walsh_w0_19_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_19_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_19_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_19_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_19_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_19_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_19_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_19_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_19_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_19_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_19_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_19_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_19_12(mVector, ibits); break;
-    case 13: ans = walsh_w0_19_13(mVector, ibits); break;
-    case 14: ans = walsh_w0_19_14(mVector, ibits); break;
-    case 15: ans = walsh_w0_19_15(mVector, ibits); break;
-    case 16: ans = walsh_w0_19_16(mVector, ibits); break;
-    case 17: ans = walsh_w0_19_17(mVector, ibits); break;
-    case 18: ans = walsh_w0_19_18(mVector, ibits); break;
-    case 19: ans = walsh_w0_19_19(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED; break;
-    break;
-
-  case 20:
-    switch ( w ) {
-    case 0: ans = walsh_w0_20_0(mVector, ibits); break;
-    case 1: ans = walsh_w0_20_1(mVector, ibits); break;
-    case 2: ans = walsh_w0_20_2(mVector, ibits); break;
-    case 3: ans = walsh_w0_20_3(mVector, ibits); break;
-    case 4: ans = walsh_w0_20_4(mVector, ibits); break;
-    case 5: ans = walsh_w0_20_5(mVector, ibits); break;
-    case 6: ans = walsh_w0_20_6(mVector, ibits); break;
-    case 7: ans = walsh_w0_20_7(mVector, ibits); break;
-    case 8: ans = walsh_w0_20_8(mVector, ibits); break;
-    case 9: ans = walsh_w0_20_9(mVector, ibits); break;
-    case 10: ans = walsh_w0_20_10(mVector, ibits); break;
-    case 11: ans = walsh_w0_20_11(mVector, ibits); break;
-    case 12: ans = walsh_w0_20_12(mVector, ibits); break;
-    case 13: ans = walsh_w0_20_13(mVector, ibits); break;
-    case 14: ans = walsh_w0_20_14(mVector, ibits); break;
-    case 15: ans = walsh_w0_20_15(mVector, ibits); break;
-    case 16: ans = walsh_w0_20_16(mVector, ibits); break;
-    case 17: ans = walsh_w0_20_17(mVector, ibits); break;
-    case 18: ans = walsh_w0_20_18(mVector, ibits); break;
-    case 19: ans = walsh_w0_20_19(mVector, ibits); break;
-    case 20: ans = walsh_w0_20_20(mVector, ibits); break;
-    }
-    ASSERT_NOT_REACHED;
-    break;
-#endif
-  default: // input_num() > 10
+  default: // input_num() > 6
     { // 汎用のコード
       //
       // 基本的なアルゴリズムは全てのワードをスキャンしてその中から
