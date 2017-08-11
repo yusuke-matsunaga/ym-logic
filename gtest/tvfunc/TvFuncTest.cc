@@ -164,8 +164,9 @@ check_func(const TvFunc& func,
   }
   // walsh_w0(), walsh_w1() のテスト
   RandGen rg;
-  // 10回ランダムな極性割り当てを試す．
-  for (ymuint c = 0; c < 10; ++ c) {
+  // ランダムな極性割り当てを試す．
+  ymuint n = ni < 16 ? 20 : 5;
+  for (ymuint c = 0; c < n; ++ c) {
     for (int oinv = 0; oinv < 2; ++ oinv) {
       ymuint ibits = 0U;
       for (ymuint j = 0; j < ni; ++ j) {
@@ -455,7 +456,8 @@ TEST_P(TvFuncTestWithParam, random_func)
   init_values();
   ymuint ni = GetParam();
   ymuint ni_exp = 1 << ni;
-  for (ymuint n = 0; n < 100; ++ n) {
+  ymuint n = ni < 13 ? 100 : ni < 16 ? 20 : 5;
+  for (ymuint c = 0; c < n; ++ c) {
     for (ymuint p = 0; p < ni_exp; ++ p) {
       if ( rg.real1() > 0.5 ) {
 	mValues[p] = 1;
@@ -502,7 +504,8 @@ TEST_P(TvFuncTestWithParam, check_op2)
   ymuint ni_exp = 1 << ni;
   vector<int> values1(ni_exp, 0);
   vector<int> values2(ni_exp, 0);
-  for (ymuint n = 0; n < 100; ++ n) {
+  ymuint n = ni < 19 ? 100 : 20;
+  for (ymuint c = 0; c < n; ++ c) {
     for (ymuint p = 0; p < ni_exp; ++ p) {
       if ( rg.real1() > 0.5 ) {
 	values1[p] = 1;
@@ -523,7 +526,8 @@ TEST_P(TvFuncTestWithParam, check_sup1)
   ymuint ni = GetParam();
   ymuint ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
-  for (ymuint n = 0; n < 100; ++ n) {
+  ymuint n = ni < 17 ? 100 : ni < 19 ? 20 : 5;
+  for (ymuint c = 0; c < n; ++ c) {
     for (ymuint i = 0; i < ni; ++ i) {
       ymuint i_bit = 1U << i;
       // i 番目の変数を独立にする．
@@ -562,7 +566,8 @@ TEST_P(TvFuncTestWithParam, check_sup2)
   ymuint ni = GetParam();
   ymuint ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
-  for (ymuint n = 0; n < 200; ++ n) {
+  ymuint n = ni < 19 ? 200 : 50;
+  for (ymuint c = 0; c < n; ++ c) {
     ymuint i_bits = 0;
     for (ymuint i = 0; i < ni; ++ i) {
       if ( rg.real1() > 0.5 ) {
@@ -635,9 +640,9 @@ TEST_P(TvFuncTestWithParam, check_sym)
   }
   ymuint ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
-  ymuint c0 = 0;
-  ymuint c1 = 0;
-  for (ymuint n = 0; n < 50; ++ n) {
+  ymuint n1 = ni < 11 ? 50 : 10;
+  ymuint n2 = ni < 11 ? 50 : 10;
+  for (ymuint c1 = 0; c1 < n1; ++ c1) {
     for (ymuint i1 = 0; i1 < ni; ++ i1) {
       ymuint i1_bit = 1U << i1;
       for (ymuint i2 = i1 + 1; i2 < ni; ++ i2) {
@@ -665,7 +670,7 @@ TEST_P(TvFuncTestWithParam, check_sym)
 	  EXPECT_EQ( exp_sym0, func.check_sym(VarId(i2), VarId(i1), false) );
 	  EXPECT_EQ( exp_sym1, func.check_sym(VarId(i1), VarId(i2), true) );
 	  EXPECT_EQ( exp_sym1, func.check_sym(VarId(i2), VarId(i1), true) );
-	  for (ymuint c = 0; c < 50; ++ c) {
+	  for (ymuint c2 = 0; c2 < n2; ++ c2) {
 	    ymuint j1 = rg.int31() % ni;
 	    ymuint j2 = rg.int31() % ni;
 	    if ( j1 == j2 ) {
@@ -689,7 +694,8 @@ TEST_P(TvFuncTestWithParam, cofactor)
   ymuint ni = GetParam();
   ymuint ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
-  for (ymuint c = 0; c < 100; ++ c) {
+  ymuint n = ni < 17 ? 100 : ni < 19 ? 20 : 5;
+  for (ymuint c = 0; c < n; ++ c) {
     for (ymuint p = 0; p < ni_exp; ++ p) {
       if ( rg.real1() > 0.5 ) {
 	values[p] = 1;
@@ -738,7 +744,9 @@ TEST_P(TvFuncTestWithParam, xform)
   ymuint ni = GetParam();
   ymuint ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
-  for (ymuint c1 = 0; c1 < 20; ++ c1) {
+  ymuint n1 = ni < 12 ? 30 : ni < 19 ? 5 : 2;
+  ymuint n2 = ni < 15 ? 30 : 5;
+  for (ymuint c1 = 0; c1 < n1; ++ c1) {
     for (ymuint p = 0; p < ni_exp; ++ p) {
       if ( rg.real1() > 0.5 ) {
 	values[p] = 1;
@@ -749,7 +757,7 @@ TEST_P(TvFuncTestWithParam, xform)
     }
     TvFunc func(ni, values);
     RandPermGen rpg(ni);
-    for (ymuint c2 = 0; c2 < 20; ++ c2) {
+    for (ymuint c2 = 0; c2 < n2; ++ c2) {
       bool oinv = (rg.real1() > 0.5);
       NpnMap map(ni, oinv);
       rpg.generate(rg);
