@@ -458,6 +458,101 @@ NpnMgr::walsh_w1_refine(vector<PolConf>& polconf_list,
   }
 }
 
+// @brief 重み別 w1 を用いて極性を確定させる．
+// @param[in] polconf_list 極性割当候補のリスト
+// @param[in] func 対象の関数
+// @param[in] var_list 対象の変数のリスト
+void
+NpnMgr::walsh_w1_refine(vector<PolConf>& polconf_list,
+			const TvFunc& func,
+			const vector<VarId>& var_list)
+{
+  ymuint nv = var_list.size();
+  vector<PolConf> tmp_polconf_list(nv);
+  for (ymuint i = 0; i < nv; ++ i) {
+    // 個々の変数ごとに walsh_w1_refine() を適用してみる．
+    tmp_polconf_list[i] = polconf_list[i];
+    walsh_w1_refine(tmp_polconf_list, func, var_list[i]);
+  }
+  // その中で重み別 w1 が最大のものを求める．
+  ymuint ni = func.input_num();
+  vector<int> max_ww1(ni + 1);
+  {
+    VarId var = var_list[0];
+    const PolConf& polconf = tmp_polconf_list[0][0];
+    for (ymuint w = 0; w <= ni; ++ w) {
+      max_ww1[w] = func.walsh_w1(var, w, polconf.oinv(), polconf.iinv_bits());
+    }
+  }
+  vector<ymuint> max_pos_list;
+  max_pos_list.push_back(0);
+  for (ymuint i = 1; i < nv; ++ i) {
+    VarId var = var_list[i];
+    const PolConf& polconf = tmp_polconf_list[i][0];
+    vector<int> tmp_ww1(ni + 1);
+    for (ymuint w = 0; w <= ni; ++ w) {
+      int tmp_ww1 = func.walsh_w1(var, w, polconf.oinv(), polconf.iinv_bits());
+      int diff = max_ww1[w] - tmp_ww1;
+      if ( diff < 0 ) {
+	max_ww1[w] = tmp_ww1;
+	max_pos_list.clear();
+      }
+      if ( diff <= 0 ) {
+	max_pos_list.push_back(i);
+      }
+    }
+  }
+
+  ymuint ni = func.input_num();
+
+  if ( debug & debug_ww0_refine ) {
+    cout << "before walsh_w1_refine()" << endl;
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      print_polconf(polconf_list[i], ni);
+    }
+    cout << endl;
+  }
+
+  // 重み別 w0 係数を用いて極性の決定を行う．
+  ymuint w = 0;
+  for (w = 0; w <= ni && polconf_list.size() > 1; ++ w) {
+    bool first = true;
+    int max_d0 = 0;
+    ymuint wpos = 0;
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      PolConf polconf = polconf_list[i];
+      int d0 = func.walsh_w1(var, w, polconf.oinv(), polconf.iinv_bits());
+
+      int stat = -1;
+      if ( first ) {
+	first = false;
+      }
+      else {
+	stat = max_d0 - d0;
+      }
+      if ( stat <= 0 ) {
+	if ( stat < 0 ) {
+	  wpos = 0;
+	  max_d0 = d0;
+	}
+	polconf_list[wpos] = polconf;
+	++ wpos;
+      }
+    }
+    if ( wpos < polconf_list.size() ) {
+      polconf_list.erase(polconf_list.begin() + wpos, polconf_list.end());
+    }
+  }
+
+  if ( debug & debug_ww0_refine ) {
+    cout << "after walsh_w1_refine()" << endl;
+    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+      print_polconf(polconf_list[i], ni);
+    }
+    cout << endl;
+  }
+}
+
 // @brief func の正規化を行う．
 void
 NpnMgr::cannonical(const TvFunc& func,

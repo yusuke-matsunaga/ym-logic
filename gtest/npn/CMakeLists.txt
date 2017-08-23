@@ -38,6 +38,12 @@ ym_add_gtest(IgPartitionTest
   $<TARGET_OBJECTS:ym_logic_d>
   )
 
+ym_add_gtest(NpnMapTest
+  NpnMapTest.cc
+  $<TARGET_OBJECTS:ym_base_d>
+  $<TARGET_OBJECTS:ym_logic_d>
+  )
+
 ym_add_gtest(NpnMgrTest
   NpnMgrTest.cc
   $<TARGET_OBJECTS:ym_base_d>

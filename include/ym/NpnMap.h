@@ -180,6 +180,13 @@ NpnMap
 operator*(const NpnMap& src1,
 	  const NpnMap& src2);
 
+/// @brief 非等価演算子
+/// @param[in] src1, src2 オペランド
+/// @return src1 と src2 が等しくないときに true を返す．
+bool
+operator!=(const NpnMap& src1,
+	   const NpnMap& src2);
+
 /// @relates NpnMap
 /// @brief 内容を表示する(主にデバッグ用)．
 /// @param[in] s 出力ストリーム
@@ -254,6 +261,17 @@ NpnMap::set(VarId src_var,
 	    bool inv)
 {
   set(src_var, NpnVmap(dst_var, inv));
+}
+
+// @brief 非等価演算子
+// @param[in] src1, src2 オペランド
+// @return src1 と src2 が等しくないときに true を返す．
+inline
+bool
+operator!=(const NpnMap& src1,
+	   const NpnMap& src2)
+{
+  return !src1.operator==(src2);
 }
 
 END_NAMESPACE_YM_LOGIC
