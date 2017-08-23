@@ -507,6 +507,7 @@ NpnMgr::cannonical(const TvFunc& func,
   }
 
   // Walsh の0次と1次の係数を用いて正規化する．
+  // 結果の等価入力グループの情報は mInputInfo に格納される．
   NpnMap xmap0;
   bool opol_fixed = walsh01_normalize(func, xmap0);
 
