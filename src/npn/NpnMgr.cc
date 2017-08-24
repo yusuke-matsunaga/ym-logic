@@ -458,6 +458,7 @@ NpnMgr::walsh_w1_refine(vector<PolConf>& polconf_list,
   }
 }
 
+#if 0
 // @brief 重み別 w1 を用いて極性を確定させる．
 // @param[in] polconf_list 極性割当候補のリスト
 // @param[in] func 対象の関数
@@ -552,6 +553,7 @@ NpnMgr::walsh_w1_refine(vector<PolConf>& polconf_list,
     cout << endl;
   }
 }
+#endif
 
 // @brief func の正規化を行う．
 void
