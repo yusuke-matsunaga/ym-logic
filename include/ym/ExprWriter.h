@@ -5,11 +5,11 @@
 /// @brief ExprWriter のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
 /// All rights reserved.
 
 
-#include "ym/ym_logic.h"
+#include "ym/logic.h"
 #include "ym/VarId.h"
 #include "ym/HashMap.h"
 

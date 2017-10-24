@@ -1,16 +1,16 @@
-﻿#ifndef YM_YM_LOGIC_H
-#define YM_YM_LOGIC_H
+﻿#ifndef YM_LOGIC_H
+#define YM_LOGIC_H
 
-/// @file ym/ym_logic.h
+/// @file ym/logic.h
 /// @brief ym-logic パッケージの基本ヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
 /// All rights reserved.
 
-/// @defgroup ExprGroup 論理式を扱うクラス
+/// @defgroup LogicGroup 論理式と論理関数を扱うクラス
 ///
-/// 論理式(ファクタードフォーム)を扱うためのクラスライブラリ
+/// 論理式(ファクタードフォーム)と論理関数を扱うためのクラスライブラリ
 /// C++ の機能を活かして論理演算子のオーバーロードを使っている．
 
 
@@ -26,6 +26,7 @@ BEGIN_NAMESPACE(nsLogic)
 #define END_NAMESPACE_YM_LOGIC \
 END_NAMESPACE(nsLogic) \
 END_NAMESPACE_YM
+
 
 BEGIN_NAMESPACE_YM_LOGIC
 
@@ -55,4 +56,4 @@ class TvFuncM;
 
 END_NAMESPACE_YM
 
-#endif // YM_YM_LOGIC_H
+#endif // YM_LOGIC_H

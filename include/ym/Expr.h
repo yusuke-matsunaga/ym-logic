@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 
-#include "ym/ym_logic.h"
+#include "ym/logic.h"
 #include "ym/Literal.h"
 #include "ym/HashMap.h"
 #include "ym/IDO.h"
