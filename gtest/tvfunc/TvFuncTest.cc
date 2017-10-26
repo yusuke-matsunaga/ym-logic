@@ -798,6 +798,173 @@ TEST_P(TvFuncTestWithParam, xform)
   }
 }
 
+TEST(TvFuncTest, shrink_0)
+{
+  ymuint ni = 10;
+  TvFunc func0 = TvFunc::const_zero(ni);
+
+  NpnMap map;
+  TvFunc func1 = func0.shrink(map);
+
+  EXPECT_EQ( TvFunc::const_zero(0), func1 );
+
+  EXPECT_EQ( ni, map.input_num() );
+  for (ymuint i = 0; i < ni; ++ i) {
+    NpnVmap imap = map.imap(VarId(i));
+    EXPECT_TRUE( imap.is_invalid() );
+  }
+}
+
+TEST(TvFuncTest, shrink_1)
+{
+  ymuint ni = 10;
+  TvFunc func0 = TvFunc::const_one(ni);
+
+  NpnMap map;
+  TvFunc func1 = func0.shrink(map);
+
+  EXPECT_EQ( TvFunc::const_one(0), func1 );
+
+  EXPECT_EQ( ni, map.input_num() );
+  for (ymuint i = 0; i < ni; ++ i) {
+    NpnVmap imap = map.imap(VarId(i));
+    EXPECT_TRUE( imap.is_invalid() );
+  }
+}
+
+TEST(TvFuncTest, shrink_lit1)
+{
+  ymuint ni = 10;
+  TvFunc func0 = TvFunc::literal(ni, VarId(0), false);
+
+  NpnMap map;
+  TvFunc func1 = func0.shrink(map);
+
+  EXPECT_EQ( TvFunc::literal(1, VarId(0), false), func1);
+
+  EXPECT_EQ( ni, map.input_num() );
+
+  {
+    NpnVmap imap = map.imap(VarId(0));
+    EXPECT_FALSE( imap.is_invalid() );
+    EXPECT_EQ( VarId(0), imap.var() );
+    EXPECT_FALSE( imap.inv() );
+  }
+
+  for (ymuint i = 1; i < ni; ++ i) {
+    NpnVmap imap = map.imap(VarId(i));
+    EXPECT_TRUE( imap.is_invalid() );
+  }
+}
+
+TEST(TvFuncTest, shrink_lit2)
+{
+  ymuint ni = 10;
+  TvFunc func0 = TvFunc::literal(ni, VarId(2), false);
+
+  NpnMap map;
+  TvFunc func1 = func0.shrink(map);
+
+  EXPECT_EQ( TvFunc::literal(1, VarId(0), false), func1);
+
+  EXPECT_EQ( ni, map.input_num() );
+
+  {
+    NpnVmap imap = map.imap(VarId(2));
+    EXPECT_FALSE( imap.is_invalid() );
+    EXPECT_EQ( VarId(0), imap.var() );
+    EXPECT_FALSE( imap.inv() );
+  }
+
+  for (ymuint i = 0; i < ni; ++ i) {
+    if ( i == 2 ) {
+      continue;
+    }
+    NpnVmap imap = map.imap(VarId(i));
+    EXPECT_TRUE( imap.is_invalid() );
+  }
+}
+
+TEST(TvFuncTest, shrink_lit3)
+{
+  ymuint ni = 10;
+  TvFunc lit1 = TvFunc::literal(ni, VarId(2), false);
+  TvFunc lit2 = TvFunc::literal(ni, VarId(5), false);
+  TvFunc func0 = lit1 & ~lit2;
+
+  NpnMap map;
+  TvFunc func1 = func0.shrink(map);
+
+  TvFunc func2;
+  {
+    TvFunc lit1 = TvFunc::literal(2, VarId(0), false);
+    TvFunc lit2 = TvFunc::literal(2, VarId(1), false);
+    func2 = lit1 & ~lit2;
+  }
+
+  EXPECT_EQ( func2, func1);
+
+  EXPECT_EQ( ni, map.input_num() );
+
+  {
+    NpnVmap imap = map.imap(VarId(2));
+    EXPECT_FALSE( imap.is_invalid() );
+    EXPECT_EQ( VarId(0), imap.var() );
+    EXPECT_FALSE( imap.inv() );
+  }
+
+  {
+    NpnVmap imap = map.imap(VarId(5));
+    EXPECT_FALSE( imap.is_invalid() );
+    EXPECT_EQ( VarId(1), imap.var() );
+    EXPECT_FALSE( imap.inv() );
+  }
+
+  for (ymuint i = 0; i < ni; ++ i) {
+    if ( i == 2 || i == 5 ) {
+      continue;
+    }
+    NpnVmap imap = map.imap(VarId(i));
+    EXPECT_TRUE( imap.is_invalid() );
+  }
+}
+
+TEST(TvFuncTest, expand_0)
+{
+  TvFunc func0 = TvFunc::const_zero(0);
+
+  TvFunc func1 = func0.expand(10);
+
+  EXPECT_EQ( TvFunc::const_zero(10), func1 );
+}
+
+TEST(TvFuncTest, expand_1)
+{
+  TvFunc func0 = TvFunc::const_one(0);
+
+  TvFunc func1 = func0.expand(10);
+
+  EXPECT_EQ( TvFunc::const_one(10), func1 );
+}
+
+TEST(TvFuncTest, expand_lit1)
+{
+  TvFunc func0 = TvFunc::literal(1, VarId(0), false);
+
+  TvFunc func1 = func0.expand(10);
+
+  EXPECT_EQ( TvFunc::literal(10, VarId(0), false), func1 );
+}
+
+TEST(TvFuncTest, expand_lit2)
+{
+  TvFunc func0 = TvFunc::literal(2, VarId(1), false);
+
+  TvFunc func1 = func0.expand(10);
+
+  EXPECT_EQ( TvFunc::literal(10, VarId(1), false), func1 );
+}
+
 INSTANTIATE_TEST_CASE_P(Test0to20,
 			TvFuncTestWithParam,
 			::testing::Range(0, 21));

@@ -233,10 +233,12 @@ END_NONAMESPACE
 // @brief Walsh の0次/1次係数を用いた正規化を行う．
 // @param[in] func 対象の論理関数
 // @param[out] xmap 変換マップ
+// @param[out] input_info 入力グループの情報
 // @return 出力極性が決まっていたら true を返す．
 bool
 NpnMgr::walsh01_normalize(const TvFunc& func,
-			  NpnMap& xmap)
+			  NpnMap& xmap,
+			  InputInfo& input_info)
 {
   // Walsh の0次と1次の係数を計算する．
   int w0;
@@ -265,6 +267,10 @@ NpnMgr::walsh01_normalize(const TvFunc& func,
     xmap.set_oinv(false);
     opol_fixed = true;
   }
+  else {
+    // とりあえずそのままの極性で固定する．
+    xmap.set_oinv(false);
+  }
 
   // w1 に従って入力極性の調整を行う．
   for (ymuint i = 0; i < ni; ++ i) {
@@ -280,7 +286,11 @@ NpnMgr::walsh01_normalize(const TvFunc& func,
     }
     else { // w1[i] == 0
       // 独立な変数かどうか調べる．
-      if ( !func.check_sup(var) ) {
+      if ( func.check_sup(var) ) {
+	// とりあえずそのままの極性で固定する．
+	xmap.set(var, var, false);
+      }
+      else {
 	// 独立だった．
 	;
       }
@@ -292,33 +302,33 @@ NpnMgr::walsh01_normalize(const TvFunc& func,
 
   // 等価な入力グループを探す．
   // 副産物として入力の極性が決まる場合がある．
-  mInputInfo.clear();
+  input_info.clear();
   for (ymuint i = 0; i < ni; ++ i) {
     bool found = false;
     VarId var(i);
-    for (ymuint gid = 0; gid < mInputInfo.group_num(); ++ gid) {
-      if ( w1[i] != mInputInfo.w1(gid) ) {
+    for (ymuint gid = 0; gid < input_info.group_num(); ++ gid) {
+      if ( w1[i] != input_info.w1(gid) ) {
 	// w1 の値が異なる．
 	continue;
       }
 
       // 対称性のチェックを行う．
-      ymuint pos1 = mInputInfo.elem(gid, 0);
+      ymuint pos1 = input_info.elem(gid, 0);
       VarId var1(pos1);
       bool stat1 = func0.check_sym(var, var1, false);
       if ( stat1 ) {
 	// 対称だった．
 	found = true;
-	if ( w1[pos1] == 0 && mInputInfo.elem_num(gid) == 1 ) {
+	if ( w1[pos1] == 0 && input_info.elem_num(gid) == 1 ) {
 	  // 係数が0で最初の等価対の場合には bi-simmetry のチェックを行う．
 	  bool stat2 = func0.check_sym(var, var1, true);
 	  if ( stat2 ) {
 	    // bi-symmetry の印を付けておく．
-	    mInputInfo.set_bisym(gid);
+	    input_info.set_bisym(gid);
 	  }
 	}
 	// 要素を追加しておく．
-	mInputInfo.add_elem(gid, i);
+	input_info.add_elem(gid, i);
 	break;
       }
       else if ( w1[pos1] == 0 ) {
@@ -327,7 +337,7 @@ NpnMgr::walsh01_normalize(const TvFunc& func,
 	if ( stat3 ) {
 	  // 逆相で対称だった．
 	  found = true;
-	  mInputInfo.add_elem(gid, i);
+	  input_info.add_elem(gid, i);
 	  xmap.set(var, var, true);
 	  break;
 	}
@@ -335,7 +345,7 @@ NpnMgr::walsh01_normalize(const TvFunc& func,
     }
     if ( !found ) {
       // 新しい等価グループを作る．
-      mInputInfo.new_group(i, w1[i]);
+      input_info.new_group(i, w1[i]);
     }
   }
 
@@ -604,20 +614,20 @@ NpnMgr::cannonical(const TvFunc& func,
   }
 
   // Walsh の0次と1次の係数を用いて正規化する．
-  // 結果の等価入力グループの情報は mInputInfo に格納される．
   NpnMap xmap0;
-  bool opol_fixed = walsh01_normalize(func, xmap0);
+  InputInfo input_info;
+  bool opol_fixed = walsh01_normalize(func, xmap0, input_info);
 
   // w1:group_num:bisym でグループを分割する．
-  IgPartition igpart(mInputInfo);
+  IgPartition igpart(input_info);
 
-  if ( opol_fixed && mInputInfo.polundet_num() == 0 && igpart.is_resolved() ) {
+  if ( opol_fixed && input_info.polundet_num() == 0 && igpart.is_resolved() ) {
     // 解決した．
     mMaxList.push_back(xmap0);
     return;
   }
 
-  // 入力の等価グループは mInputInfo に入っている．
+  // 入力の等価グループは input_info に入っている．
   // 以降は等価グループごとに極性と順序を考えればよい．
   // 極性に関しては
   // - 通常の対称グループ: そのままか全部反転
@@ -625,7 +635,7 @@ NpnMgr::cannonical(const TvFunc& func,
   // となる．
 
   // polundet_num の指数乗だけ極性の割り当てがある．
-  ymuint nug = mInputInfo.polundet_num();
+  ymuint nug = input_info.polundet_num();
   ymuint nug_exp = 1U << nug;
   ymuint n = nug_exp;
   if ( !opol_fixed ) {
@@ -635,9 +645,9 @@ NpnMgr::cannonical(const TvFunc& func,
   for (ymuint p = 0; p < nug_exp; ++ p) {
     ymuint input_bits = 0U;
     for (ymuint i = 0; i < nug; ++ i) {
-      ymuint gid = mInputInfo.polundet_gid(i);
+      ymuint gid = input_info.polundet_gid(i);
       if ( p & (1U << i) ) {
-	input_bits |= mInputInfo.inv_bits(gid);
+	input_bits |= input_info.inv_bits(gid);
       }
     }
     if ( opol_fixed ) {
@@ -672,7 +682,7 @@ NpnMgr::cannonical(const TvFunc& func,
       // この入力は確定している．
       ymuint pos = igpart.partition_begin(pid);
       ymuint gid = igpart.group_id(pos);
-      ymuint iid = mInputInfo.elem(gid, 0);
+      ymuint iid = input_info.elem(gid, 0);
       walsh_w1_refine(polconf_list, mBaseFunc, VarId(iid));
 
       if ( debug ) {

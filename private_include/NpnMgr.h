@@ -50,12 +50,14 @@ public:
   /// @brief Walsh の0次/1次係数を用いた正規化を行う．
   /// @param[in] func 対象の論理関数
   /// @param[out] xmap 変換マップ
+  /// @param[out] input_info 入力グループの情報
   /// @return 出力極性が決まっていたら true を返す．
   ///
   /// 結果として mInputInfo に情報がセットされる．
   bool
   walsh01_normalize(const TvFunc& func,
-		    NpnMap& xmap);
+		    NpnMap& xmap,
+		    InputInfo& input_info);
 
   /// @brief 重み別 w0 を用いて極性を確定させる．
   /// @param[in] polconf_list 極性割当候補のリスト

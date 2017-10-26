@@ -147,7 +147,12 @@ inline
 VarId
 NpnVmap::var() const
 {
-  return VarId(mPosPol >> 1);
+  if ( is_invalid() ) {
+    return kVarIdIllegal;
+  }
+  else {
+    return VarId(mPosPol >> 1);
+  }
 }
 
 // @brief 反転属性を取り出す．
