@@ -577,9 +577,15 @@ NpnMgr::cannonical(const TvFunc& func,
 
   ymuint ni = func.input_num();
 
+  // まず独立な変数を取り除く
+  NpnMap map0 = func.shrink_map();
+  TvFunc func0 = func.xform(map0);
+
+  ymuint ni0 = func0.input_num();
+
   // 特例
-  if ( ni == 0 ) {
-    if ( func.value(0) == 0 ) {
+  if ( ni0 == 0 ) {
+    if ( func0.value(0) == 0 ) {
       // 定数0関数
       mMaxList.push_back(NpnMap(0));
     }

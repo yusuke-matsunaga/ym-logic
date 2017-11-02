@@ -803,8 +803,8 @@ TEST(TvFuncTest, shrink_0)
   ymuint ni = 10;
   TvFunc func0 = TvFunc::const_zero(ni);
 
-  NpnMap map;
-  TvFunc func1 = func0.shrink(map);
+  NpnMap map = func0.shrink_map();
+  TvFunc func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::const_zero(0), func1 );
 
@@ -820,8 +820,8 @@ TEST(TvFuncTest, shrink_1)
   ymuint ni = 10;
   TvFunc func0 = TvFunc::const_one(ni);
 
-  NpnMap map;
-  TvFunc func1 = func0.shrink(map);
+  NpnMap map = func0.shrink_map();
+  TvFunc func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::const_one(0), func1 );
 
@@ -837,8 +837,8 @@ TEST(TvFuncTest, shrink_lit1)
   ymuint ni = 10;
   TvFunc func0 = TvFunc::literal(ni, VarId(0), false);
 
-  NpnMap map;
-  TvFunc func1 = func0.shrink(map);
+  NpnMap map = func0.shrink_map();;
+  TvFunc func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::literal(1, VarId(0), false), func1);
 
@@ -862,8 +862,8 @@ TEST(TvFuncTest, shrink_lit2)
   ymuint ni = 10;
   TvFunc func0 = TvFunc::literal(ni, VarId(2), false);
 
-  NpnMap map;
-  TvFunc func1 = func0.shrink(map);
+  NpnMap map = func0.shrink_map();
+  TvFunc func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::literal(1, VarId(0), false), func1);
 
@@ -892,8 +892,8 @@ TEST(TvFuncTest, shrink_lit3)
   TvFunc lit2 = TvFunc::literal(ni, VarId(5), false);
   TvFunc func0 = lit1 & ~lit2;
 
-  NpnMap map;
-  TvFunc func1 = func0.shrink(map);
+  NpnMap map = func0.shrink_map();
+  TvFunc func1 = func0.xform(map);
 
   TvFunc func2;
   {
@@ -933,7 +933,8 @@ TEST(TvFuncTest, expand_0)
 {
   TvFunc func0 = TvFunc::const_zero(0);
 
-  TvFunc func1 = func0.expand(10);
+  NpnMap map(0, 10);
+  TvFunc func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::const_zero(10), func1 );
 }
@@ -942,7 +943,8 @@ TEST(TvFuncTest, expand_1)
 {
   TvFunc func0 = TvFunc::const_one(0);
 
-  TvFunc func1 = func0.expand(10);
+  NpnMap map(0, 10);
+  TvFunc func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::const_one(10), func1 );
 }
@@ -951,7 +953,9 @@ TEST(TvFuncTest, expand_lit1)
 {
   TvFunc func0 = TvFunc::literal(1, VarId(0), false);
 
-  TvFunc func1 = func0.expand(10);
+  NpnMap map(0, 10);
+  map.set(VarId(0), VarId(0), false);
+  TvFunc func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::literal(10, VarId(0), false), func1 );
 }
@@ -960,9 +964,11 @@ TEST(TvFuncTest, expand_lit2)
 {
   TvFunc func0 = TvFunc::literal(2, VarId(1), false);
 
-  TvFunc func1 = func0.expand(10);
+  NpnMap map(0, 10);
+  map.set(VarId(1), VarId(2), false);
+  TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::literal(10, VarId(1), false), func1 );
+  EXPECT_EQ( TvFunc::literal(10, VarId(2), false), func1 );
 }
 
 INSTANTIATE_TEST_CASE_P(Test0to20,

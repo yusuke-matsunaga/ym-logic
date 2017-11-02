@@ -16,7 +16,8 @@ BEGIN_NAMESPACE_YM_LOGIC
 TEST(NpnMapTest, base)
 {
   // (3', 1, 4, 2', 0)'
-  NpnMap map1(5, true);
+  NpnMap map1(5);
+  map1.set_oinv(true);
   map1.set(VarId(0), VarId(4), false);
   map1.set(VarId(1), VarId(1), false);
   map1.set(VarId(2), VarId(3), true);
@@ -41,7 +42,8 @@ TEST(NpnMapTest, base)
   EXPECT_EQ( VarId(2), map1.imap(VarId(4)).var() );
   EXPECT_EQ( false, map1.imap(VarId(4)).inv() );
 
-  NpnMap map2(5, true);
+  NpnMap map2(5);
+  map2.set_oinv(true);
   map2.set(VarId(0), VarId(4), false);
   map2.set(VarId(1), VarId(1), false);
   map2.set(VarId(2), VarId(3), true);
@@ -58,7 +60,8 @@ TEST(NpnMapTest, base)
 TEST(NpnMapTest, inverse)
 {
   // (3', 1, 4, 2', 0)'
-  NpnMap map1(5, true);
+  NpnMap map1(5);
+  map1.set_oinv(true);
   map1.set(VarId(0), VarId(4), false);
   map1.set(VarId(1), VarId(1), false);
   map1.set(VarId(2), VarId(3), true);

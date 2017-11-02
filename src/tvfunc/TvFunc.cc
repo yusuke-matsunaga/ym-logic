@@ -3581,8 +3581,6 @@ TvFunc::check_sym(VarId var1,
 TvFunc
 TvFunc::xform(const NpnMap& npnmap) const
 {
-  ymuint ni_pow = 1UL << mInputNum;
-
 #if defined(DEBUG)
   cout << "xform" << endl
        << *this << endl
@@ -3595,6 +3593,7 @@ TvFunc::xform(const NpnMap& npnmap) const
     VarId src_var(i);
     NpnVmap imap = npnmap.imap(src_var);
     if ( imap.is_invalid() ) {
+      ipat[i] = 0;
       continue;
     }
     if ( imap.inv() ) {
@@ -3606,7 +3605,8 @@ TvFunc::xform(const NpnMap& npnmap) const
   }
   ymuint omask = npnmap.oinv() ? 1U : 0U;
 
-  TvFunc ans(mInputNum);
+  TvFunc ans(npnmap.input_num2());
+  ymuint ni_pow = 1UL << mInputNum;
   for (ymuint i = 0; i < ni_pow; ++ i) {
     ymuint new_i = 0;
     ymuint tmp = i;
@@ -3626,86 +3626,39 @@ TvFunc::xform(const NpnMap& npnmap) const
   return ans;
 }
 
-// @brief 独立な変数を取り除いた関数を返す．
-// @param[out] npnmap 変換マップを格納する変数
-// @return 結果の関数を返す．
-TvFunc
-TvFunc::shrink(NpnMap& npnmap) const
+// @brief 独立な変数を取り除く変換を返す．
+NpnMap
+TvFunc::shrink_map() const
 {
   // まず独立な変数を求める．
   ymuint varmap = 0U;
+  ymuint dst_ni = 0;
   for (ymuint i = 0; i < mInputNum; ++ i) {
     if ( !check_sup(VarId(i)) ) {
       varmap |= (1U << i);
+    }
+    else {
+      ++ dst_ni;
     }
   }
   // varmap に 1 のビットが立っているところが独立な変数
   if ( varmap == 0U ) {
     // 独立な変数はなかった．
-    // npnmap を恒等変換にして自分自身のコピーを返す．
-    npnmap.set_identity(mInputNum);
-    return TvFunc(*this);
+    // 恒等変換を返す．
+    return NpnMap(mInputNum);
   }
 
   // npnmap を設定する．
-  npnmap.resize(mInputNum);
+  NpnMap ans(mInputNum, dst_ni);
   ymuint j = 0;
   ymuint rmap[kMaxNi];
   for (ymuint i = 0; i < mInputNum; ++ i) {
     if ( (varmap & (1U << i)) == 0U ) {
-      npnmap.set(VarId(i), VarId(j), false);
+      ans.set(VarId(i), VarId(j), false);
       rmap[j] = i;
       ++ j;
     }
   }
-
-  ymuint new_ni = j;
-  TvFunc ans(new_ni);
-  ymuint ni_pow = 1U << new_ni;
-  for (ymuint p = 0U; p < ni_pow; ++ p) {
-    ymuint orig_p = 0U;
-    for (ymuint i = 0; i < new_ni; ++ i) {
-      if ( (p & (1U << i)) ) {
-	ymuint orig_i = rmap[i];
-	orig_p |= (1U << orig_i);
-      }
-    }
-    ymuint64 bit = value(orig_p);
-    ymuint64 pat = bit << shift(p);
-    ans.mVector[block(p)] |= pat;
-  }
-
-  return ans;
-}
-
-// @brief 入力のブール空間を拡大した関数を返す．
-// @param[in] ni 結果の関数の入力数 ( ni >= input_num() )
-// @return 結果の関数を返す．
-//
-// もちろん追加された変数は独立な変数となる．
-TvFunc
-TvFunc::expand(ymuint ni) const
-{
-  if ( ni <= input_num() ) {
-    // ni が入力数より小さい時
-    // エラーだが自分自身を返す．
-    // ni が入力数と等しい時も自分自身を返す．
-    return TvFunc(*this);
-  }
-
-  TvFunc ans(ni);
-  ymuint ni_pow = 1U << ni;
-  ymuint64 mask = (1UL << mInputNum) - 1UL;
-  for (ymuint p = 0; p < ni_pow; ++ p) {
-    // 1ビットづつコピーするベタなコード
-    // 時間があったらワード単位の処理に書き換える．
-#warning "TODO: 2017-10-26-1"
-    ymuint orig_p = p & mask;
-    ymuint64 bit = value(orig_p);
-    ymuint64 pat = bit << shift(p);
-    ans.mVector[block(p)] |= pat;
-  }
-
   return ans;
 }
 

@@ -40,16 +40,20 @@ public:
   /// 内容は不定
   NpnMap();
 
-  /// @brief 入力数(と出力極性)を指定したコンストラクタ
+  /// @brief 入力数を指定したコンストラクタ
   /// @param[in] ni 入力数
-  /// @param[in] oinv 出力極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   ///
   /// 恒等変換になる．
   explicit
+  NpnMap(ymuint ni);
+
+  /// @brief 写像前と後の入力数を指定したコンストラクタ
+  /// @param[in] ni 写像前の入力数
+  /// @param[in] ni2 写像後の入力数
+  ///
+  /// 内容は不定
   NpnMap(ymuint ni,
-	 bool oinv = false);
+	 ymuint ni2);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
@@ -80,9 +84,19 @@ public:
   /// @brief 入力数を再設定する．
   /// @param[in] ni 入力数
   ///
+  /// 写像前と写像後の入力数が等しい場合．
   /// 以前の内容はクリアされる．
   void
   resize(ymuint ni);
+
+  /// @brief 入力数を再設定する．
+  /// @param[in] ni 写像前の入力数
+  /// @param[in] ni2 写像後の入力数
+  ///
+  /// 以前の内容はクリアされる．
+  void
+  resize(ymuint ni,
+	 ymuint ni2);
 
   /// @brief 恒等変換を表すように設定する．
   /// @param[in] ni 入力数
@@ -121,10 +135,15 @@ public:
   // 内容を取得する関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 入力数を得る．
+  /// @brief 写像前の入力数を得る．
   /// @return 入力数
   ymuint
   input_num() const;
+
+  /// @brief 写像後の入力数を得る．
+  /// @return 入力数
+  ymuint
+  input_num2() const;
 
   /// @brief 入力の変換情報の取得
   /// @param[in] var 入力変数
@@ -149,10 +168,25 @@ public:
 
 private:
   //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる下請け関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 入力数をセットする．
+  /// @param[in] ni 写像前の入力数
+  /// @param[in] ni2 写像後の入力数
+  ///
+  /// 出力の極性は変化しない．
+  void
+  set_ni(ymuint ni,
+	 ymuint ni2);
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 入力数 + 出力の極性
+  // 入力数(8bit x 2) + 出力の極性
   ymuint32 mNiPol;
 
   // 入力のマッピング情報
@@ -230,7 +264,16 @@ inline
 ymuint
 NpnMap::input_num() const
 {
-  return mNiPol >> 1;
+  return (mNiPol >> 1) & 0xffU;
+}
+
+// @brief 写像後の入力数を得る．
+// @return 入力数
+inline
+ymuint
+NpnMap::input_num2() const
+{
+  return (mNiPol >> 9) & 0xffU;
 }
 
 // var に対応するマッピング情報を得る．
@@ -266,6 +309,20 @@ NpnMap::set(VarId src_var,
 	    bool inv)
 {
   set(src_var, NpnVmap(dst_var, inv));
+}
+
+// @brief 入力数をセットする．
+// @param[in] ni 写像前の入力数
+// @param[in] ni2 写像後の入力数
+//
+// 出力の極性は変化しない．
+inline
+void
+NpnMap::set_ni(ymuint ni,
+	       ymuint ni2)
+{
+  mNiPol &= 1U;
+  mNiPol |= (ni << 1) | (ni2 << 9);
 }
 
 // @brief 非等価演算子

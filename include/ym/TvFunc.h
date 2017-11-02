@@ -290,19 +290,9 @@ public:
   TvFunc
   xform(const NpnMap& npnmap) const;
 
-  /// @brief 独立な変数を取り除いた関数を返す．
-  /// @param[out] npnmap 変換マップを格納する変数
-  /// @return 結果の関数を返す．
-  TvFunc
-  shrink(NpnMap& npnmap) const;
-
-  /// @brief 入力のブール空間を拡大した関数を返す．
-  /// @param[in] ni 結果の関数の入力数 ( ni >= input_num() )
-  /// @return 結果の関数を返す．
-  ///
-  /// もちろん追加された変数は独立な変数となる．
-  TvFunc
-  expand(ymuint ni) const;
+  /// @brief 独立な変数を取り除く変換を返す．
+  NpnMap
+  shrink_map() const;
 
   /// @brief npn 変換の正規変換を求める．
   ///
