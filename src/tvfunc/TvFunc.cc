@@ -3587,13 +3587,16 @@ TvFunc::xform(const NpnMap& npnmap) const
        << npnmap << endl;
 #endif
 
+  ymuint new_ni = npnmap.input_num2();
   ymuint imask = 0UL;
   ymuint ipat[kMaxNi];
+  for (ymuint j = 0; j < new_ni; ++ j) {
+    ipat[j] = 0U;
+  }
   for (ymuint i = 0; i < mInputNum; ++ i) {
     VarId src_var(i);
     NpnVmap imap = npnmap.imap(src_var);
     if ( imap.is_invalid() ) {
-      ipat[i] = 0;
       continue;
     }
     if ( imap.inv() ) {
@@ -3601,22 +3604,22 @@ TvFunc::xform(const NpnMap& npnmap) const
     }
     VarId dst_var = imap.var();
     ymuint j = dst_var.val();
-    ipat[i] = 1UL << j;
+    ipat[j] = 1UL << i;
   }
   ymuint omask = npnmap.oinv() ? 1U : 0U;
 
-  TvFunc ans(npnmap.input_num2());
-  ymuint ni_pow = 1UL << mInputNum;
-  for (ymuint i = 0; i < ni_pow; ++ i) {
-    ymuint new_i = 0;
-    ymuint tmp = i;
-    for (ymuint b = 0; b < mInputNum; ++ b, tmp >>= 1) {
+  TvFunc ans(new_ni);
+  ymuint ni_pow = 1UL << new_ni;
+  for (ymuint b = 0; b < ni_pow; ++ b) {
+    ymuint orig_b = 0;
+    ymuint tmp = b;
+    for (ymuint j = 0; j < new_ni; ++ j, tmp >>= 1) {
       if ( tmp & 1 ) {
-	new_i |= ipat[b];
+	orig_b |= ipat[j];
       }
     }
-    ymuint64 pat = (value(i ^ imask) ^ omask);
-    ans.mVector[block(new_i)] |= pat << shift(new_i);
+    ymuint64 pat = (value(orig_b ^ imask) ^ omask);
+    ans.mVector[block(b)] |= pat << shift(b);
   }
 
 #if defined(DEBUG)

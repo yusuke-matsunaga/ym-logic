@@ -759,7 +759,8 @@ TEST_P(TvFuncTestWithParam, xform)
     RandPermGen rpg(ni);
     for (ymuint c2 = 0; c2 < n2; ++ c2) {
       bool oinv = (rg.real1() > 0.5);
-      NpnMap map(ni, oinv);
+      NpnMap map(ni);
+      map.set_oinv(oinv);
       rpg.generate(rg);
       for (ymuint i = 0; i < ni; ++ i) {
 	bool iinv = (rg.real1() > 0.5);
@@ -953,7 +954,7 @@ TEST(TvFuncTest, expand_lit1)
 {
   TvFunc func0 = TvFunc::literal(1, VarId(0), false);
 
-  NpnMap map(0, 10);
+  NpnMap map(1, 10);
   map.set(VarId(0), VarId(0), false);
   TvFunc func1 = func0.xform(map);
 
@@ -964,7 +965,7 @@ TEST(TvFuncTest, expand_lit2)
 {
   TvFunc func0 = TvFunc::literal(2, VarId(1), false);
 
-  NpnMap map(0, 10);
+  NpnMap map(2, 10);
   map.set(VarId(1), VarId(2), false);
   TvFunc func1 = func0.xform(map);
 
