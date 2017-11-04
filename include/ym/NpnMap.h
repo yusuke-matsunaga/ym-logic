@@ -35,6 +35,16 @@ class NpnMap
 {
 public:
 
+  /// @brief 恒等変換を返すクラスメソッド
+  /// @param[in] ni 入力数
+  /// @param[in] oinv 出力を反転する時 true にするフラグ
+  ///
+  /// 当たり前だが定義域と値域のサイズ(入力数)は同じ
+  static
+  NpnMap
+  identity(ymuint ni,
+	   bool oinv = false);
+
   /// @brief 空のコンストラクタ．
   ///
   /// 内容は不定
@@ -43,7 +53,8 @@ public:
   /// @brief 入力数を指定したコンストラクタ
   /// @param[in] ni 入力数
   ///
-  /// 恒等変換になる．
+  /// 定義域と値域のサイズは同じになる．
+  /// 内容は不定
   explicit
   NpnMap(ymuint ni);
 
@@ -100,8 +111,10 @@ public:
 
   /// @brief 恒等変換を表すように設定する．
   /// @param[in] ni 入力数
+  /// @param[in] oinv 出力を反転する時 true にするフラグ
   void
-  set_identity(ymuint ni);
+  set_identity(ymuint ni,
+	       bool oinv = false);
 
   /// @brief 入力の変換内容の設定
   /// @param[in] src_var 入力変数
@@ -258,6 +271,21 @@ operator>>(IDO& s,
 //////////////////////////////////////////////////////////////////////
 // インライン関数の定義
 //////////////////////////////////////////////////////////////////////
+
+// @brief 恒等変換を返すクラスメソッド
+// @param[in] ni 入力数
+// @param[in] oinv 出力を反転する時 true にするフラグ
+//
+// 当たり前だが定義域と値域のサイズ(入力数)は同じ
+inline
+NpnMap
+NpnMap::identity(ymuint ni,
+		 bool oinv)
+{
+  NpnMap ans;
+  ans.set_identity(ni, oinv);
+  return ans;
+}
 
 // 入力数を得る．
 inline

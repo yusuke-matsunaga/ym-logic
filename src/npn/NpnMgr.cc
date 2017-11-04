@@ -587,34 +587,25 @@ NpnMgr::cannonical(const TvFunc& func,
   if ( ni0 == 0 ) {
     if ( func0.value(0) == 0 ) {
       // 定数0関数
-      mMaxList.push_back(NpnMap(0));
+      mMaxList.push_back(NpnMap::identity(0));
     }
     else {
       // 定数1関数
-      mMaxList.push_back(NpnMap(0, true));
+      mMaxList.push_back(NpnMap::identity(0, true));
     }
     return;
   }
   if ( ni == 1 ) {
     if ( func.value(0) == 0 ) {
-      if ( func.value(1) == 0 ) {
-	// 1入力の定数0関数
-	mMaxList.push_back(NpnMap(1));
-      }
-      else {
-	// 肯定のリテラル関数
-	mMaxList.push_back(NpnMap(1));
-      }
+      ASSERT_COND ( func.value(1) == 1 );
+
+      // 肯定のリテラル関数
+      mMaxList.push_back(NpnMap::identity(1));
     }
     else {
-      if ( func.value(1) == 0 ) {
-	// 否定のリテラル関数
-	mMaxList.push_back(NpnMap(1, true));
-      }
-      else {
-	// 1入力の定数1関数
-	mMaxList.push_back(NpnMap(1, true));
-      }
+      ASSERT_COND( func.value(1) == 0 );
+      // 否定のリテラル関数
+      mMaxList.push_back(NpnMap::identity(1, true));
     }
     return;
   }
@@ -622,14 +613,14 @@ NpnMgr::cannonical(const TvFunc& func,
   // Walsh の0次と1次の係数を用いて正規化する．
   NpnMap xmap0;
   InputInfo input_info;
-  bool opol_fixed = walsh01_normalize(func, xmap0, input_info);
+  bool opol_fixed = walsh01_normalize(func0, xmap0, input_info);
 
   // w1:group_num:bisym でグループを分割する．
   IgPartition igpart(input_info);
 
   if ( opol_fixed && input_info.polundet_num() == 0 && igpart.is_resolved() ) {
     // 解決した．
-    mMaxList.push_back(xmap0);
+    mMaxList.push_back(map0 * xmap0);
     return;
   }
 
@@ -666,7 +657,7 @@ NpnMgr::cannonical(const TvFunc& func,
   }
 
   // xmap0 に従って func を変換する．
-  mBaseFunc = func.xform(xmap0);
+  mBaseFunc = func0.xform(xmap0);
 
   // 極性割り当ての候補を重み別 Walsh_0 でフィルタリングする．
   walsh_w0_refine(polconf_list, mBaseFunc);

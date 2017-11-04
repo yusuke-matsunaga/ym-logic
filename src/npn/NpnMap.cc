@@ -115,12 +115,14 @@ NpnMap::resize(ymuint ni,
 
 // 恒等変換を表すように設定する．
 void
-NpnMap::set_identity(ymuint new_ni)
+NpnMap::set_identity(ymuint new_ni,
+		     bool oinv)
 {
   set_ni(new_ni, new_ni);
   for (ymuint i = 0; i < new_ni; ++ i) {
     mImap[i] = NpnVmap(VarId(i), false);
   }
+  set_oinv(oinv);
 }
 
 // @brief 入力の変換内容の設定
@@ -186,7 +188,7 @@ inverse(const NpnMap& src)
 	if ( debug_npn_map ) {
 	  cerr << "inverse(src): srcの値域と定義域が一致しません．";
 	}
-	return NpnMap(src_ni);
+	return NpnMap();
       }
       bool inv = imap.inv();
       dst_map.set(dst_var, src_var, inv);
