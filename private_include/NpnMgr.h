@@ -10,15 +10,15 @@
 
 
 #include "ym/NpnMap.h"
-#include "InputInfo.h"
 #include "PolConf.h"
-#include "ym/UnitAlloc.h"
+//#include "ym/UnitAlloc.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
+class InputInfo;
 class IgPartition;
-class NpnConf;
+//class NpnConf;
 
 //////////////////////////////////////////////////////////////////////
 /// @class NpnMgr NpnMgr.h "NpnMgr.h"
@@ -52,20 +52,21 @@ public:
   /// @param[out] xmap 変換マップ
   /// @param[out] input_info 入力グループの情報
   /// @return 出力極性が決まっていたら true を返す．
-  ///
-  /// 結果として mInputInfo に情報がセットされる．
+  static
   bool
   walsh01_normalize(const TvFunc& func,
 		    NpnMap& xmap,
 		    InputInfo& input_info);
 
   /// @brief 重み別 w0 を用いて極性を確定させる．
-  /// @param[in] polconf_list 極性割当候補のリスト
   /// @param[in] func 対象の関数
+  /// @param[inout] polconf_list 極性割当候補のリスト
+  ///
+  /// 結果として有効な polconf_list の要素のみが残る．
   static
   void
-  walsh_w0_refine(vector<PolConf>& polconf_list,
-		  const TvFunc& func);
+  walsh_w0_refine(const TvFunc& func,
+		  vector<PolConf>& polconf_list);
 
   /// @brief 重み別 w1 を用いて極性を確定させる．
   /// @param[in] polconf_list 極性割当候補のリスト
@@ -73,9 +74,9 @@ public:
   /// @param[in] var 対象の変数
   static
   void
-  walsh_w1_refine(vector<PolConf>& polconf_list,
-		  const TvFunc& func,
-		  VarId var);
+  walsh_w1_refine(const TvFunc& func,
+		  VarId var,
+		  vector<PolConf>& polconf_list);
 
   /// @brief 正規化マップの先頭を返す．
   NpnMap
@@ -104,6 +105,7 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
+#if 0
   /// @brief DFS
   void
   algorithm0(const NpnConf& conf);
@@ -149,7 +151,7 @@ private:
   /// @brief NpnConf を使用可能リストに戻す．
   void
   free_npnconf(NpnConf* conf);
-
+#endif
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -168,22 +170,15 @@ private:
   // w2max_recur で用いる現在の最大値
   TvFunc mMaxFunc;
 
-  // tvmax_recur で用いる元の関数
-  TvFunc mBaseFunc;
-
-  // tvmax_recur で用いる入力グループの情報
-  InputInfo mInputInfo;
-
-  // tvmax_recur で用いる極性情報
-  PolConf mPolConf;
-
   // w2max_recur で用いる現在の w2 ベクタ
   int mMaxW2[TvFunc::kMaxNi * TvFunc::kMaxNi];
 
   bool mMaxW2Valid;
 
+#if 0
   // NpnConf 用のアロケータ
   UnitAlloc mAlloc;
+#endif
 
 };
 

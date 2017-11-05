@@ -132,8 +132,7 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 // コンストラクタ
-NpnMgr::NpnMgr() :
-  mAlloc(sizeof(NpnConf), 1024)
+NpnMgr::NpnMgr()
 {
 }
 
@@ -353,11 +352,11 @@ NpnMgr::walsh01_normalize(const TvFunc& func,
 }
 
 // @brief 重み別 w0 を用いて極性を確定させる．
-// @param[in] polconf_list 極性割当候補のリスト
 // @param[in] func 対象の関数
+// @param[in] polconf_list 極性割当候補のリスト
 void
-NpnMgr::walsh_w0_refine(vector<PolConf>& polconf_list,
-			const TvFunc& func)
+NpnMgr::walsh_w0_refine(const TvFunc& func,
+			vector<PolConf>& polconf_list)
 {
   ymuint ni = func.input_num();
 
@@ -414,9 +413,9 @@ NpnMgr::walsh_w0_refine(vector<PolConf>& polconf_list,
 // @param[in] func 対象の関数
 // @param[in] var 対象の変数
 void
-NpnMgr::walsh_w1_refine(vector<PolConf>& polconf_list,
-			const TvFunc& func,
-			VarId var)
+NpnMgr::walsh_w1_refine(const TvFunc& func,
+			VarId var,
+			vector<PolConf>& polconf_list)
 {
   ymuint ni = func.input_num();
 
@@ -632,6 +631,10 @@ NpnMgr::cannonical(const TvFunc& func,
   // となる．
 
   // polundet_num の指数乗だけ極性の割り当てがある．
+  //
+  // 改良のヒント: ここで一旦 polconf_list を作ってから
+  // walsh_w0_refine でフィルタリングするのではなく，
+  // walsh_w0_refine で polconf_list を作ったほうが良いかもしれない．
   ymuint nug = input_info.polundet_num();
   ymuint nug_exp = 1U << nug;
   ymuint n = nug_exp;
@@ -656,11 +659,11 @@ NpnMgr::cannonical(const TvFunc& func,
     }
   }
 
-  // xmap0 に従って func を変換する．
-  mBaseFunc = func0.xform(xmap0);
+  // xmap0 に従って func0 を変換する．
+  TvFunc func1 = func0.xform(xmap0);
 
   // 極性割り当ての候補を重み別 Walsh_0 でフィルタリングする．
-  walsh_w0_refine(polconf_list, mBaseFunc);
+  walsh_w0_refine(func1, polconf_list);
 
   if ( debug ) {
     cout << "# of polarity candidates: " << polconf_list.size() << endl;
@@ -680,7 +683,7 @@ NpnMgr::cannonical(const TvFunc& func,
       ymuint pos = igpart.partition_begin(pid);
       ymuint gid = igpart.group_id(pos);
       ymuint iid = input_info.elem(gid, 0);
-      walsh_w1_refine(polconf_list, mBaseFunc, VarId(iid));
+      walsh_w1_refine(func1, VarId(iid), polconf_list);
 
       if ( debug ) {
 	cout << "After walsh_w1_refine(" << VarId(iid) << ")" << endl;
@@ -694,6 +697,7 @@ NpnMgr::cannonical(const TvFunc& func,
   }
 
   // 残りはすべて展開して真理値ベクタが最大となるものを探す．
+#if 0
   mMaxFunc = TvFunc::const_zero(ni);
   mMaxList.clear();
   for (vector<PolConf>::iterator p = polconf_list.begin();
@@ -701,7 +705,7 @@ NpnMgr::cannonical(const TvFunc& func,
     mPolConf = *p;
     tvmax_recur(igpart, 0);
   }
-
+#endif
 
 #if 0
   NpnConf conf0(base_conf);
@@ -768,6 +772,7 @@ NpnMgr::cannonical(const TvFunc& func,
 #endif
 }
 
+#if 0
 void
 NpnMgr::tvmax_recur(const IgPartition& igpart,
 		    ymuint pid0)
@@ -803,6 +808,7 @@ NpnMgr::tvmax_recur(const IgPartition& igpart,
     }
   }
 }
+#endif
 
 // @brief 正規化マップの先頭を返す．
 NpnMap
@@ -1460,6 +1466,7 @@ NpnMgr::w2max_recur(vector<NpnConf>& conf_list,
 }
 #endif
 
+#if 0
 // @brief NpnConf を取り出す．
 NpnConf*
 NpnMgr::new_npnconf()
@@ -1474,5 +1481,6 @@ NpnMgr::free_npnconf(NpnConf* conf)
 {
   mAlloc.put_memory(sizeof(NpnConf), conf);
 }
+#endif
 
 END_NAMESPACE_YM_LOGIC
