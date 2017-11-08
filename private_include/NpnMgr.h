@@ -11,14 +11,12 @@
 
 #include "ym/NpnMap.h"
 #include "PolConf.h"
-//#include "ym/UnitAlloc.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
 class InputInfo;
 class IgPartition;
-//class NpnConf;
 
 //////////////////////////////////////////////////////////////////////
 /// @class NpnMgr NpnMgr.h "NpnMgr.h"
@@ -69,13 +67,23 @@ public:
 		  vector<PolConf>& polconf_list);
 
   /// @brief 重み別 w1 を用いて極性を確定させる．
-  /// @param[in] polconf_list 極性割当候補のリスト
   /// @param[in] func 対象の関数
   /// @param[in] var 対象の変数
+  /// @param[inout] polconf_list 極性割当候補のリスト
   static
   void
   walsh_w1_refine(const TvFunc& func,
 		  VarId var,
+		  vector<PolConf>& polconf_list);
+
+  /// @brief 重み別 w1 を用いて極性を確定させる．
+  /// @param[in] func 対象の関数
+  /// @param[in] var_list 対象の変数のリスト
+  /// @param[inout] polconf_list 極性割当候補のリスト
+  static
+  void
+  walsh_w1_refine(const TvFunc& func,
+		  const vector<VarId>& var_list,
 		  vector<PolConf>& polconf_list);
 
   /// @brief 正規化マップの先頭を返す．
