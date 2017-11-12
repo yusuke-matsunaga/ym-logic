@@ -11,11 +11,11 @@
 
 #include "ym/logic.h"
 #include "ym/TvFunc.h"
+#include "InputInfo.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
-class InputInfo;
 class PolConf;
 
 //////////////////////////////////////////////////////////////////////
@@ -54,6 +54,11 @@ public:
   ymuint
   group_id(ymuint pos) const;
 
+  /// @brief グループの先頭の入力番号を返す．
+  /// @param[in] gid グループ番号
+  ymuint
+  input_id(ymuint gid) const;
+
   /// @brief 分割数を返す．
   ymuint
   partition_num() const;
@@ -85,13 +90,9 @@ public:
   is_resolved(ymuint pid) const;
 
   /// @brief 現在の状態を NpnMap に変換する．
-  /// @param[in] ni 入力数
-  /// @param[in] iinfo 入力グループの情報
   /// @param[in] polconf 極性情報
   NpnMap
-  to_npnmap(ymuint ni,
-	    const InputInfo& iinfo,
-	    const PolConf& polconf) const;
+  to_npnmap(const PolConf& polconf) const;
 
   /// @brief 分割の細分化を行う．
   /// @param[in] pid0 対象の分割番号
@@ -109,6 +110,11 @@ public:
   _refine(ymuint pid,
 	  ymuint pos);
 
+  /// @brief 内容を出力する．
+  /// @param[in] s 出力先のストリーム
+  void
+  display(ostream& s) const;
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -120,6 +126,9 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief 入力の情報
+  InputInfo mInputInfo;
 
   /// @brief グループ数
   ymuint mGroupNum;
@@ -134,6 +143,11 @@ private:
   ymuint mBeginArray[TvFunc::kMaxNi];
 
 };
+
+/// @brief IgPart のストリーム出力演算子
+ostream&
+operator<<(ostream& s,
+	   const IgPartition& igpart);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -156,6 +170,15 @@ IgPartition::group_id(ymuint pos) const
 {
   ASSERT_COND( pos < group_num() );
   return mGidArray[pos];
+}
+
+// @brief グループの先頭の入力番号を返す．
+// @param[in] gid グループ番号
+inline
+ymuint
+IgPartition::input_id(ymuint gid) const
+{
+  return mInputInfo.elem(gid, 0);
 }
 
 // @brief 分割数を返す．
@@ -255,8 +278,8 @@ IgPartition::refine(ymuint pid0,
 	mBeginArray[pid + 1] = mBeginArray[pid];
       }
       ++ mPartitionNum;
-      ymuint pid1 = pid0 + 1;
-      mBeginArray[pid1] = i;
+      ++ pid0;
+      mBeginArray[pid0] = i;
       prev_gid = cur_gid;
     }
   }

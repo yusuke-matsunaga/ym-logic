@@ -10,6 +10,7 @@
 
 
 #include "ym/NpnMap.h"
+#include "InputInfo.h"
 #include "PolConf.h"
 
 
@@ -40,10 +41,9 @@ public:
 
   /// @brief 論理関数の正規化を行う．
   /// @param[in] func 対象の論理関数
-  /// @param[in] algorithm アルゴリズムの種類を表す番号
-  void
-  cannonical(const TvFunc& func,
-	     int algorithm = 0);
+  /// @return 正規化された関数を返す．
+  TvFunc
+  cannonical(const TvFunc& func);
 
   /// @brief Walsh の0次/1次係数を用いた正規化を行う．
   /// @param[in] func 対象の論理関数
@@ -67,12 +67,11 @@ public:
 		  vector<PolConf>& polconf_list);
 
   /// @brief 重み別 w1 を用いて極性を確定させる．
-  /// @param[in] func 対象の関数
+  /// @param[in] pos 位置番号
   /// @param[in] var 対象の変数
   /// @param[inout] polconf_list 極性割当候補のリスト
-  static
   void
-  walsh_w1_refine(const TvFunc& func,
+  walsh_w1_refine(ymuint pos,
 		  VarId var,
 		  vector<PolConf>& polconf_list);
 
@@ -113,58 +112,35 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-#if 0
-  /// @brief DFS
-  void
-  algorithm0(const NpnConf& conf);
-
-  /// @brief BFS
-  void
-  algorithm1(const NpnConf& conf);
-
-  /// @brief 極性を展開した後で DFS
-  void
-  algorithm2(const NpnConf& conf);
-
-  /// @brief 極性を展開した後で BFS
-  void
-  algorithm3(const NpnConf& conf);
-
-  /// @brief シグネチャが最大になるように極性と順序を決める．
-  /// @param[out] conf
-  /// @param[in] g0 調べ始める最初のグループ番号
-  void
-  w2max_recur(NpnConf& conf,
-	      ymuint g0);
-
-  /// @brief w2シグネチャが最大になるように極性と順序を決める．
-  /// @param[in] conf_list
-  /// @param[in] g0 調べ始める最初のグループ番号
-  void
-  w2max_recur(vector<NpnConf>& conf_list,
-	      ymuint g0);
-
   void
   tvmax_recur(const IgPartition& igpart,
-	      ymuint pid0);
+	      ymuint pid,
+	      const vector<PolConf>& polconf_list);
 
-  /// @brief mMaxFunc を設定する．
   void
-  set_maxfunc(const TvFunc& func);
+  clear_max(ymuint pos,
+	    ymuint w);
 
-  /// @brief NpnConf を取り出す．
-  NpnConf*
-  new_npnconf();
-
-  /// @brief NpnConf を使用可能リストに戻す．
   void
-  free_npnconf(NpnConf* conf);
-#endif
+  add_map(const NpnMap& map);
+
 
 private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
+
+  // 正規化マップ
+  NpnMap mXmap0;
+
+  // 正規化後の関数
+  TvFunc mBaseFunc;
+
+  // tvmax_recur で用いる最大の関数
+  TvFunc mMaxFunc;
+
+  // tvmax_recur で用いる weighted_walsh1 の最大値
+  int mMaxW1[TvFunc::kMaxNi][TvFunc::kMaxNi + 1];
 
   // w2max_recur で用いる現在の最適解のリスト
   vector<NpnMap> mMaxList;
@@ -174,19 +150,6 @@ private:
 
   // 1回の cannonical あたりの tvmax_recur の起動回数
   ymuint64 mTvmax_count;
-
-  // w2max_recur で用いる現在の最大値
-  TvFunc mMaxFunc;
-
-  // w2max_recur で用いる現在の w2 ベクタ
-  int mMaxW2[TvFunc::kMaxNi * TvFunc::kMaxNi];
-
-  bool mMaxW2Valid;
-
-#if 0
-  // NpnConf 用のアロケータ
-  UnitAlloc mAlloc;
-#endif
 
 };
 

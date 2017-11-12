@@ -31,9 +31,10 @@ class InputInfo
 public:
 
   /// @brief コンストラクタ
+  /// @param[in] input_num 入力数
   ///
   /// 空の状態で初期化される．
-  InputInfo();
+  InputInfo(ymuint input_num = 0);
 
   /// @brief デストラクタ
   ~InputInfo();
@@ -47,6 +48,11 @@ public:
   /// @brief クリアする．
   void
   clear();
+
+  /// @brief 入力数を設定する．
+  /// @param[in] input_num 入力数
+  void
+  set_input_num(ymuint input_num);
 
   /// @brief 新しい等価グループを作る．
   /// @param[in] id 変数番号
@@ -74,6 +80,10 @@ public:
   //////////////////////////////////////////////////////////////////////
   // 情報を取得する関数
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief 入力数を返す．
+  ymuint
+  input_num() const;
 
   /// @brief 等価グループ数を返す．
   ymuint
@@ -128,6 +138,11 @@ public:
   w1eq(ymuint gid1,
        ymuint gid2) const;
 
+  /// @brief 内容を出力する．
+  /// @param[in] s 出力先のストリーム
+  void
+  display(ostream& s) const;
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -139,6 +154,9 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
+
+  // 入力数
+  ymuint mInputNum;
 
   // 等価グループ数
   ymuint mGroupNum;
@@ -173,10 +191,13 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 // @brief コンストラクタ
+// @param[in] input_num 入力数
 //
 // 空の状態で初期化される．
+// 空の状態で初期化される．
 inline
-InputInfo::InputInfo()
+InputInfo::InputInfo(ymuint input_num) :
+  mInputNum(input_num)
 {
   clear();
 }
@@ -198,6 +219,14 @@ InputInfo::clear()
   }
   mPolUndetNum = 0;
   mBiSymmBits = 0U;
+}
+
+// @brief 入力数を設定する．
+inline
+void
+InputInfo::set_input_num(ymuint input_num)
+{
+  mInputNum = input_num;
 }
 
 // @brief 新しい等価グループを作る．
@@ -246,6 +275,14 @@ InputInfo::set_bisym(ymuint gid)
 {
   ASSERT_COND( gid < mGroupNum );
   mBiSymmBits |= (1U << gid);
+}
+
+// @brief 入力数を返す．
+inline
+ymuint
+InputInfo::input_num() const
+{
+  return mInputNum;
 }
 
 // @brief 等価グループ数を返す．
@@ -370,6 +407,26 @@ InputInfo::w1eq(ymuint gid1,
     return false;
   }
   return bisym(gid1) == bisym(gid2);
+}
+
+// @brief 内容を出力する．
+// @param[in] s 出力先のストリーム
+inline
+void
+InputInfo::display(ostream& s) const
+{
+  for (ymuint gid = 0; gid < group_num(); ++ gid) {
+    s << "G#" << gid << ": " << w1(gid) << ": ";
+    if ( bisym(gid) ) {
+      s << "*: ";
+    }
+    s << "{";
+    for (ymuint i = 0; i < elem_num(gid); ++ i) {
+      s << " " << elem(gid, i);
+    }
+    s << "}" << endl;
+  }
+  s << endl;
 }
 
 END_NAMESPACE_YM_LOGIC
