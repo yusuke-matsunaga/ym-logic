@@ -605,7 +605,7 @@ NpnMgr::clear_max(ymuint pos,
   for (ymuint i = pos; i < ni; ++ i) {
     ymuint w0 = (i == pos) ? w : 0;
     for (ymuint j = w0; j <= ni; ++ j) {
-      mMaxW1[i][j] = TvFunc::kMaxNi * -10;
+      mMaxW1[i][j] = -INT_MAX / 2;
     }
   }
 }
