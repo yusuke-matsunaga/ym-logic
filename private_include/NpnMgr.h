@@ -10,14 +10,13 @@
 
 
 #include "ym/NpnMap.h"
-#include "InputInfo.h"
-#include "PolConf.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
 class InputInfo;
 class IgPartition;
+class PolConf;
 
 //////////////////////////////////////////////////////////////////////
 /// @class NpnMgr NpnMgr.h "NpnMgr.h"
@@ -45,27 +44,6 @@ public:
   TvFunc
   cannonical(const TvFunc& func);
 
-  /// @brief Walsh の0次/1次係数を用いた正規化を行う．
-  /// @param[in] func 対象の論理関数
-  /// @param[out] xmap 変換マップ
-  /// @param[out] input_info 入力グループの情報
-  /// @return 出力極性が決まっていたら true を返す．
-  static
-  bool
-  walsh01_normalize(const TvFunc& func,
-		    NpnMap& xmap,
-		    InputInfo& input_info);
-
-  /// @brief 重み別 w0 を用いて極性を確定させる．
-  /// @param[in] func 対象の関数
-  /// @param[inout] polconf_list 極性割当候補のリスト
-  ///
-  /// 結果として有効な polconf_list の要素のみが残る．
-  static
-  void
-  walsh_w0_refine(const TvFunc& func,
-		  vector<PolConf>& polconf_list);
-
   /// @brief 重み別 w1 を用いて極性を確定させる．
   /// @param[in] pos 位置番号
   /// @param[in] var 対象の変数
@@ -73,16 +51,6 @@ public:
   void
   walsh_w1_refine(ymuint pos,
 		  VarId var,
-		  vector<PolConf>& polconf_list);
-
-  /// @brief 重み別 w1 を用いて極性を確定させる．
-  /// @param[in] func 対象の関数
-  /// @param[in] var_list 対象の変数のリスト
-  /// @param[inout] polconf_list 極性割当候補のリスト
-  static
-  void
-  walsh_w1_refine(const TvFunc& func,
-		  const vector<VarId>& var_list,
 		  vector<PolConf>& polconf_list);
 
   /// @brief 正規化マップの先頭を返す．

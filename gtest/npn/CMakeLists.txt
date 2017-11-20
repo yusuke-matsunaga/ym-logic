@@ -44,6 +44,12 @@ ym_add_gtest(NpnMapTest
   $<TARGET_OBJECTS:ym_logic_d>
   )
 
+ym_add_gtest(w01test
+  w01test.cc
+  $<TARGET_OBJECTS:ym_base_d>
+  $<TARGET_OBJECTS:ym_logic_d>
+  )
+
 ym_add_gtest(NpnMgrTest
   NpnMgrTest.cc
   $<TARGET_OBJECTS:ym_base_d>

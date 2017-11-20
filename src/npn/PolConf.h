@@ -76,6 +76,26 @@ private:
 
 };
 
+/// @relates PolConf
+/// @brief PolConf の内容を出力する．
+/// @param[in] s 出力先のストリーム
+/// @param[in] polconf PolConf
+/// @param[in] ni 入力数
+void
+print_polconf(ostream& s,
+	      const PolConf& polconf,
+	      ymuint ni);
+
+/// @relates PolConf
+/// @brief PolConf リストのの内容を出力する．
+/// @param[in] s 出力先のストリーム
+/// @param[in] polconf_list PolConf のリスト
+/// @param[in] ni 入力数
+void
+print_polconf_list(ostream& s,
+		   const vector<PolConf>& polconf_list,
+		   ymuint ni);
+
 
 //////////////////////////////////////////////////////////////////////
 // インライン関数の定義
