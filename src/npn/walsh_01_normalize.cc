@@ -1,6 +1,6 @@
 ﻿
-/// @file walsh01_normalize.cc
-/// @brief walsh01_normalize の実装ファイル
+/// @file walsh_01_normalize.cc
+/// @brief walsh_01_normalize の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
@@ -20,9 +20,9 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @param[out] input_info 入力グループの情報
 // @return 出力極性が決まっていたら true を返す．
 bool
-walsh01_normalize(const TvFunc& func,
-		  NpnMap& xmap,
-		  InputInfo& input_info)
+walsh_01_normalize(const TvFunc& func,
+		   NpnMap& xmap,
+		   InputInfo& input_info)
 {
   // Walsh の0次と1次の係数を計算する．
   int w0;

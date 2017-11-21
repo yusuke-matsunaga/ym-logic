@@ -44,20 +44,10 @@ public:
   TvFunc
   cannonical(const TvFunc& func);
 
-  /// @brief 正規化マップの先頭を返す．
-  NpnMap
-  cmap() const;
-
   /// @brief すべての正規化マップを返す．
   /// @param[out] map_list 変換マップを格納するリスト
   void
   all_cmap(vector<NpnMap>& map_list) const;
-
-  /// @brief w2max_recur の起動回数を返す．
-  /// 直前の cannonical の呼び出しにおける
-  /// w2max_recur の起動回数を返す．
-  ymulong
-  w2max_count() const;
 
   /// @brief w2max_recur の起動回数を返す．
   /// 直前の cannonical の呼び出しにおける
@@ -73,7 +63,6 @@ private:
 
   void
   tvmax_recur(const TvFunc& func,
-	      const NpnMap& map1,
 	      const IgPartition& igpart,
 	      ymuint pid);
 
@@ -86,23 +75,15 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 元の関数(デバッグ用)
-  TvFunc mOrigFunc;
-
   // 正規化マップ
+  // add_map() 中で常に適用される．
   NpnMap mXmap0;
-
-  // 正規化後の関数
-  TvFunc mBaseFunc;
 
   // tvmax_recur で用いる最大の関数
   TvFunc mMaxFunc;
 
   // w2max_recur で用いる現在の最適解のリスト
   vector<NpnMap> mMaxList;
-
-  // 1回の cannonical あたりの w2max_recur の起動回数
-  ymuint64 mW2max_count;
 
   // 1回の cannonical あたりの tvmax_recur の起動回数
   ymuint64 mTvmax_count;

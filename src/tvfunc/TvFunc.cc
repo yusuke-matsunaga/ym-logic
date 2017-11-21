@@ -3671,7 +3671,10 @@ TvFunc::npn_cannonical_map() const
 {
   nsLogic::NpnMgr npn_mgr;
   npn_mgr.cannonical(*this);
-  return npn_mgr.cmap();
+  vector<NpnMap> cmap_list;
+  npn_mgr.all_cmap(cmap_list);
+  ASSERT_COND( !cmap_list.empty() );
+  return cmap_list.front();
 }
 
 // @brief npn 変換の正規変換をすべて求める．

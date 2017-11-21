@@ -46,7 +46,7 @@ walsh_w1_refine(const TvFunc& func,
     cout << endl;
   }
 
-  // 重み別 w0 係数を用いて極性の決定を行う．
+  // 重み別 w1 係数を用いて極性の決定を行う．
   for (ymuint w = 0; w <= ni; ++ w) {
     bool first = true;
     int max_d0 = 0;
@@ -164,7 +164,7 @@ walsh_w1_refine(const TvFunc& func,
     cout << igpart << endl;
   }
 
-  // 重み別 w0 係数を用いて極性の決定を行う．
+  // 重み別 w1 係数を用いて極性の決定を行う．
   for (ymuint w = 0; w <= ni; ++ w) {
     for (ymuint pid = 0; pid < igpart.partition_num(); ++ pid) {
       if ( igpart.is_resolved(pid) ) {

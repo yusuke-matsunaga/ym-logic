@@ -17,11 +17,11 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 extern
 bool
-walsh01_normalize(const TvFunc& func,
-		  NpnMap& xmap,
-		  InputInfo& input_info);
+walsh_01_normalize(const TvFunc& func,
+		   NpnMap& xmap,
+		   InputInfo& input_info);
 
-TEST(w01test, walsh01_normalize_and2)
+TEST(w01test, walsh_01_normalize_and2)
 {
   TvFunc lit0 = TvFunc::literal(2, Literal(VarId(0)));
   TvFunc lit1 = TvFunc::literal(2, Literal(VarId(1)));
@@ -30,7 +30,7 @@ TEST(w01test, walsh01_normalize_and2)
 
   NpnMap xmap;
   InputInfo input_info;
-  bool opol_fixed = walsh01_normalize(and2, xmap, input_info);
+  bool opol_fixed = walsh_01_normalize(and2, xmap, input_info);
 
   EXPECT_TRUE( opol_fixed );
 
@@ -54,7 +54,7 @@ TEST(w01test, walsh01_normalize_and2)
   EXPECT_FALSE( xmap.imap(var1).inv() );
 }
 
-TEST(w01test, walsh01_normalize_xor2)
+TEST(w01test, walsh_01_normalize_xor2)
 {
   TvFunc lit0 = TvFunc::literal(2, Literal(VarId(0)));
   TvFunc lit1 = TvFunc::literal(2, Literal(VarId(1)));
@@ -63,7 +63,7 @@ TEST(w01test, walsh01_normalize_xor2)
 
   NpnMap xmap;
   InputInfo input_info;
-  bool opol_fixed = walsh01_normalize(xor2, xmap, input_info);
+  bool opol_fixed = walsh_01_normalize(xor2, xmap, input_info);
 
   EXPECT_FALSE( opol_fixed );
 
@@ -87,7 +87,7 @@ TEST(w01test, walsh01_normalize_xor2)
   EXPECT_FALSE( xmap.imap(var1).inv() );
 }
 
-TEST(w01test, walsh01_normalize_ao221)
+TEST(w01test, walsh_01_normalize_ao221)
 {
   TvFunc lit0 = TvFunc::literal(5, Literal(VarId(0)));
   TvFunc lit1 = TvFunc::literal(5, Literal(VarId(1)));
@@ -99,7 +99,7 @@ TEST(w01test, walsh01_normalize_ao221)
 
   NpnMap xmap;
   InputInfo input_info;
-  bool opol_fixed = walsh01_normalize(ao221, xmap, input_info);
+  bool opol_fixed = walsh_01_normalize(ao221, xmap, input_info);
 
   EXPECT_TRUE( opol_fixed );
 

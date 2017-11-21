@@ -38,10 +38,10 @@ set (npn_SOURCES
   src/npn/NpnMapM.cc
   src/npn/NpnMgr.cc
   src/npn/PolConf.cc
-  src/npn/walsh01_normalize.cc
+  src/npn/walsh_01_normalize.cc
+  src/npn/walsh_2_refine.cc
   src/npn/walsh_w0_refine.cc
   src/npn/walsh_w1_refine.cc
-  src/npn/walsh_2_refine.cc
   )
 
 set (tvfunc_SOURCES

@@ -23,6 +23,7 @@ npn_test(int argc,
   ymuint nf = 10000;
   ymuint tvcount = 0;
   ymuint tvmax = 0;
+  ymuint redmax = 0;
 
   if ( argc != 2 && argc != 3 ) {
     cerr << "USAGE: npn_test <# of inputs> [<# of functions>]" << endl;
@@ -56,9 +57,15 @@ npn_test(int argc,
       NpnMgr npnmgr;
       TvFunc cf = npnmgr.cannonical(f);
       ymuint tv = npnmgr.tvmax_count();
+      vector<NpnMap> cmap_list;
+      npnmgr.all_cmap(cmap_list);
       tvcount += tv;
+      ymuint red_num = tv > 0 ? tv - cmap_list.size() : 0;
       if ( tvmax < tv ) {
 	tvmax = tv;
+      }
+      if ( redmax < red_num ) {
+	tvmax = red_num;
       }
     }
   }
@@ -78,9 +85,15 @@ npn_test(int argc,
       NpnMgr npnmgr;
       TvFunc cf = npnmgr.cannonical(f);
       ymuint tv = npnmgr.tvmax_count();
+      vector<NpnMap> cmap_list;
+      npnmgr.all_cmap(cmap_list);
       tvcount += tv;
+      ymuint red_num = tv > 0 ? tv - cmap_list.size() : 0;
       if ( tvmax < tv ) {
 	tvmax = tv;
+      }
+      if ( redmax < red_num ) {
+	tvmax = red_num;
       }
     }
   }
@@ -91,7 +104,8 @@ npn_test(int argc,
        << "# of functions:  " << nf << " functions" << endl
        << "CPU time:        " << time << endl
        << "Total recursion: " << tvcount << endl
-       << "Max recursion:   " << tvmax << endl;
+       << "Max recursion:   " << tvmax << endl
+       << "Max redundant:   " << redmax << endl;
   return 0;
 }
 

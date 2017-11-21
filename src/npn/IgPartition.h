@@ -12,11 +12,10 @@
 #include "ym/logic.h"
 #include "ym/TvFunc.h"
 #include "InputInfo.h"
+#include "PolConf.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
-
-class PolConf;
 
 //////////////////////////////////////////////////////////////////////
 /// @class IgPartition IgPartition.h "IgPartition.h"
@@ -90,13 +89,11 @@ public:
   is_resolved(ymuint pid) const;
 
   /// @brief 現在の状態を NpnMap に変換する．
-  NpnMap
-  to_npnmap() const;
-
-  /// @brief 現在の状態を NpnMap に変換する．
   /// @param[in] polconf 極性情報
+  ///
+  /// polconf が省略された時は極性の反転はなしとみなす．
   NpnMap
-  to_npnmap(const PolConf& polconf) const;
+  to_npnmap(const PolConf& polconf = PolConf()) const;
 
   /// @brief 分割の細分化を行う．
   /// @param[in] pid0 対象の分割番号

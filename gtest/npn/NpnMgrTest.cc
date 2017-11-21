@@ -223,7 +223,12 @@ TEST_P(NpnMgrRandomTest, func_test)
     return;
   }
 
-  if ( ni > 12 ) {
+  if ( ni > 15 ) {
+    nfunc = 50;
+    nperm = 5;
+    nphase = 5;
+  }
+  else if ( ni > 11 ) {
     nperm = 10;
     nphase = 5;
   }

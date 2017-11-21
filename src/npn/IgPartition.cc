@@ -114,25 +114,6 @@ IgPartition::is_resolved() const
 }
 
 // @brief 現在の状態を NpnMap に変換する．
-NpnMap
-IgPartition::to_npnmap() const
-{
-  NpnMap npnmap(mInputInfo.input_num());
-  ymuint dst_id = 0;
-  for (ymuint i = 0; i < group_num(); ++ i) {
-    ymuint gid = group_id(i);
-    ymuint n = mInputInfo.elem_num(gid);
-    for (ymuint j = 0; j < n; ++ j, ++ dst_id) {
-      VarId dst_var(dst_id);
-      ymuint src_id = mInputInfo.elem(gid, j);
-      VarId src_var(src_id);
-      npnmap.set(src_var, dst_var, false);
-    }
-  }
-  return npnmap;
-}
-
-// @brief 現在の状態を NpnMap に変換する．
 // @param[in] polconf 極性情報
 NpnMap
 IgPartition::to_npnmap(const PolConf& polconf) const
