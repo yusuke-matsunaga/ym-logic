@@ -114,6 +114,25 @@ IgPartition::is_resolved() const
 }
 
 // @brief 現在の状態を NpnMap に変換する．
+NpnMap
+IgPartition::to_npnmap() const
+{
+  NpnMap npnmap(mInputInfo.input_num());
+  ymuint dst_id = 0;
+  for (ymuint i = 0; i < group_num(); ++ i) {
+    ymuint gid = group_id(i);
+    ymuint n = mInputInfo.elem_num(gid);
+    for (ymuint j = 0; j < n; ++ j, ++ dst_id) {
+      VarId dst_var(dst_id);
+      ymuint src_id = mInputInfo.elem(gid, j);
+      VarId src_var(src_id);
+      npnmap.set(src_var, dst_var, false);
+    }
+  }
+  return npnmap;
+}
+
+// @brief 現在の状態を NpnMap に変換する．
 // @param[in] polconf 極性情報
 NpnMap
 IgPartition::to_npnmap(const PolConf& polconf) const
@@ -132,6 +151,65 @@ IgPartition::to_npnmap(const PolConf& polconf) const
     }
   }
   return npnmap;
+}
+
+// @brief 分割の要素数が1の分割を前に持ってくる．
+void
+IgPartition::reorder()
+{
+  if ( is_resolved() ) {
+    return;
+  }
+
+  ymuint n = partition_num();
+
+  // pid をキーにしてグループ番号のリストを持つ配列
+  // 要するに mGidArray をデコードしたもの
+  vector<vector<ymuint> > gid_lists(n);
+  // 要素数が1の pid のリスト
+  vector<ymuint> pid_list1;
+  // 要素数が2以上の pid のリスト
+  vector<ymuint> pid_list2;
+  for (ymuint pid = 0; pid < n; ++ pid) {
+    ymuint ps = partition_size(pid);
+    gid_lists[pid].reserve(ps);
+    if ( ps == 1 ) {
+      pid_list1.push_back(pid);
+    }
+    else {
+      pid_list2.push_back(pid);
+    }
+    for (ymuint pos = partition_begin(pid); pos < partition_end(pid); ++ pos) {
+      ymuint gid = group_id(pos);
+      gid_lists[pid].push_back(gid);
+    }
+  }
+
+  // pid_list1, pid_list2, gid_lists をもとに結果をエンコードする．
+  ymuint wpos = 0;
+  ymuint pid = 0;
+  for (ymuint j = 0; j < pid_list1.size(); ++ j, ++ pid) {
+    ymuint old_pid = pid_list1[j];
+    mBeginArray[pid] = wpos;
+    for (ymuint i = 0; i < gid_lists[old_pid].size(); ++ i) {
+      ymuint gid = gid_lists[old_pid][i];
+      mGidArray[wpos] = gid;
+      ++ wpos;
+    }
+  }
+  for (ymuint j = 0; j < pid_list2.size(); ++ j, ++ pid) {
+    ymuint old_pid = pid_list2[j];
+    mBeginArray[pid] = wpos;
+    for (ymuint i = 0; i < gid_lists[old_pid].size(); ++ i) {
+      ymuint gid = gid_lists[old_pid][i];
+      mGidArray[wpos] = gid;
+      ++ wpos;
+    }
+  }
+  mBeginArray[pid] = wpos;
+
+  ASSERT_COND( pid == partition_num() );
+  ASSERT_COND( wpos == group_num() );
 }
 
 // @brief 分割の要素を一つ取り出して独立した分割とする．

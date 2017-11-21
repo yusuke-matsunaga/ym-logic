@@ -127,9 +127,6 @@ TEST_P(NpnMgrTestWithParam, func_test2)
     if ( func_hash.check(f) ) {
       continue;
     }
-    if ( 0 ) {
-      cout << "F  = " << f << endl;
-    }
 
     NpnMgr npnmgr;
     TvFunc cfunc = npnmgr.cannonical(f);
@@ -138,9 +135,14 @@ TEST_P(NpnMgrTestWithParam, func_test2)
       vector<NpnMap> map_list;
       npnmgr.all_cmap(map_list);
 
-      NpnMap map = map_list[0];
-      TvFunc xformed_cfunc = f.xform(map);
-      EXPECT_EQ( cfunc, xformed_cfunc );
+      for (ymuint i = 0; i < map_list.size(); ++ i) {
+	NpnMap map = map_list[i];
+	TvFunc xformed_cfunc = f.xform(map);
+	EXPECT_EQ( cfunc, xformed_cfunc );
+	if ( cfunc != xformed_cfunc ) {
+	  cout << "f = " << f << endl;
+	}
+      }
     }
 
     if ( ni > 0 ) {
@@ -156,10 +158,6 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	    }
 	    TvFunc f1 = f.xform(map);
 	    func_hash.add(f1);
-	    if ( 0 ) {
-	      cout << "F1 = " << f1 << endl
-		   << " map = " << map << endl;
-	    }
 
 	    NpnMgr npnmgr;
 	    TvFunc cfunc1 = npnmgr.cannonical(f1);
@@ -168,9 +166,14 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	      vector<NpnMap> map_list;
 	      npnmgr.all_cmap(map_list);
 
-	      NpnMap cmap = map_list[0];
-	      TvFunc xformed_cfunc1 = f1.xform(cmap);
-	      EXPECT_EQ( cfunc1, xformed_cfunc1 );
+	      for (ymuint i = 0; i < map_list.size(); ++ i) {
+		NpnMap cmap = map_list[i];
+		TvFunc xformed_cfunc1 = f1.xform(cmap);
+		EXPECT_EQ( cfunc1, xformed_cfunc1 );
+		if ( cfunc1 != xformed_cfunc1 ) {
+		  cout << "f1 = " << f1 << endl;
+		}
+	      }
 	    }
 	    if ( cfunc != cfunc1 ) {
 	      cout << "f  = " << f << endl
@@ -196,14 +199,6 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	NpnMgr npnmgr;
 	TvFunc cfunc1 = npnmgr.cannonical(f1);
 
-	{
-	  vector<NpnMap> map_list;
-	  npnmgr.all_cmap(map_list);
-
-	  NpnMap cmap = map_list[0];
-	  TvFunc xformed_cfunc1 = f1.xform(cmap);
-	  EXPECT_EQ( cfunc1, xformed_cfunc1 );
-	}
 	EXPECT_EQ( cfunc, cfunc1 );
       }
     }
@@ -228,6 +223,11 @@ TEST_P(NpnMgrRandomTest, func_test)
     return;
   }
 
+  if ( ni > 12 ) {
+    nperm = 10;
+    nphase = 5;
+  }
+
   RandGen rg;
   for (ymuint i = 0; i < nfunc; ++ i) {
     vector<int> values(ni_exp);
@@ -240,9 +240,6 @@ TEST_P(NpnMgrRandomTest, func_test)
       }
     }
     TvFunc f(ni, values);
-    if ( 0 ) {
-      cout << "F  = " << f << endl;
-    }
 
     NpnMgr npnmgr;
     TvFunc cfunc = npnmgr.cannonical(f);
@@ -254,11 +251,14 @@ TEST_P(NpnMgrRandomTest, func_test)
       if ( map_list.empty() ) {
 	cout << "f = " << f << endl
 	     << "cfunc = " << cfunc << endl;
+	ASSERT_TRUE( false );
       }
 
-      NpnMap map = map_list[0];
-      TvFunc xformed_cfunc = f.xform(map);
-      EXPECT_EQ( cfunc, xformed_cfunc );
+      for (ymuint i = 0; i < map_list.size(); ++ i) {
+	NpnMap map = map_list[i];
+	TvFunc xformed_cfunc = f.xform(map);
+	EXPECT_EQ( cfunc, xformed_cfunc );
+      }
     }
 
     RandPermGen rpg(ni);
@@ -278,22 +278,9 @@ TEST_P(NpnMgrRandomTest, func_test)
 	    map.set(VarId(i), VarId(dst_map[i]), iinv);
 	  }
 	  TvFunc f1 = f.xform(map);
-	  if ( 0 ) {
-	    cout << "F1 = " << f1 << endl
-		 << " map = " << map << endl;
-	  }
 
 	  NpnMgr npnmgr;
 	  TvFunc cfunc1 = npnmgr.cannonical(f1);
-
-	  {
-	    vector<NpnMap> map_list;
-	    npnmgr.all_cmap(map_list);
-
-	    NpnMap cmap = map_list[0];
-	    TvFunc xformed_cfunc1 = f1.xform(cmap);
-	    EXPECT_EQ( cfunc1, xformed_cfunc1 );
-	  }
 
 	  if ( cfunc != cfunc1 ) {
 	    cout << "f  = " << f << endl
@@ -429,6 +416,60 @@ TEST(NpnMgrTest1, bug6)
 	 << "cfunc = " << cfunc << endl;
   }
   EXPECT_FALSE( map_list.empty() );
+}
+
+TEST(NpnMgrTest1, bug7)
+{
+  TvFunc func = str_to_func(4, "1111011110000000");
+
+  NpnMgr npnmgr;
+  TvFunc cfunc = npnmgr.cannonical(func);
+
+  NpnMap map1(4);
+  map1.set(VarId(0), VarId(0), true);
+  map1.set(VarId(1), VarId(1), false);
+  map1.set(VarId(2), VarId(2), false);
+  map1.set(VarId(3), VarId(3), false);
+  map1.set_oinv(false);
+  TvFunc func1 = func.xform(map1);
+
+  TvFunc cfunc1 = npnmgr.cannonical(func1);
+
+  EXPECT_EQ( cfunc, cfunc1 );
+}
+
+TEST(NpnMgrTest1, bug8)
+{
+  TvFunc func = str_to_func(2, "0110");
+
+  NpnMgr npnmgr;
+  TvFunc cfunc = npnmgr.cannonical(func);
+
+  NpnMap map1(2);
+  map1.set_oinv(false);
+  map1.set(VarId(0), VarId(0), true);
+  map1.set(VarId(1), VarId(1), false);
+  TvFunc func1 = func.xform(map1);
+
+  TvFunc cfunc1 = npnmgr.cannonical(func1);
+
+  EXPECT_EQ( cfunc, cfunc1 );
+}
+
+TEST(NpnMgrTest1, bug9)
+{
+  TvFunc func = str_to_func(2, "1001");
+
+  NpnMgr npnmgr;
+  TvFunc cfunc = npnmgr.cannonical(func);
+
+  vector<NpnMap> cmap_list;
+  npnmgr.all_cmap(cmap_list);
+
+  NpnMap map = cmap_list[0];
+  TvFunc xformed_cfunc = func.xform(map);
+
+  EXPECT_EQ( cfunc, xformed_cfunc );
 }
 
 END_NAMESPACE_YM_LOGIC

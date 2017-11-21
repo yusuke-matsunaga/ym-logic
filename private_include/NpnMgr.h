@@ -44,15 +44,6 @@ public:
   TvFunc
   cannonical(const TvFunc& func);
 
-  /// @brief 重み別 w1 を用いて極性を確定させる．
-  /// @param[in] pos 位置番号
-  /// @param[in] var 対象の変数
-  /// @param[inout] polconf_list 極性割当候補のリスト
-  void
-  walsh_w1_refine(ymuint pos,
-		  VarId var,
-		  vector<PolConf>& polconf_list);
-
   /// @brief 正規化マップの先頭を返す．
   NpnMap
   cmap() const;
@@ -81,13 +72,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   void
-  tvmax_recur(const IgPartition& igpart,
-	      ymuint pid,
-	      const vector<PolConf>& polconf_list);
-
-  void
-  clear_max(ymuint pos,
-	    ymuint w);
+  tvmax_recur(const TvFunc& func,
+	      const NpnMap& map1,
+	      const IgPartition& igpart,
+	      ymuint pid);
 
   void
   add_map(const NpnMap& map);
@@ -98,6 +86,9 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
+  // 元の関数(デバッグ用)
+  TvFunc mOrigFunc;
+
   // 正規化マップ
   NpnMap mXmap0;
 
@@ -106,9 +97,6 @@ private:
 
   // tvmax_recur で用いる最大の関数
   TvFunc mMaxFunc;
-
-  // tvmax_recur で用いる weighted_walsh1 の最大値
-  int mMaxW1[TvFunc::kMaxNi][TvFunc::kMaxNi + 1];
 
   // w2max_recur で用いる現在の最適解のリスト
   vector<NpnMap> mMaxList;

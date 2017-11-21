@@ -90,6 +90,10 @@ public:
   is_resolved(ymuint pid) const;
 
   /// @brief 現在の状態を NpnMap に変換する．
+  NpnMap
+  to_npnmap() const;
+
+  /// @brief 現在の状態を NpnMap に変換する．
   /// @param[in] polconf 極性情報
   NpnMap
   to_npnmap(const PolConf& polconf) const;
@@ -102,6 +106,10 @@ public:
   ymuint
   refine(ymuint pid0,
 	 T cmp);
+
+  /// @brief 分割の要素数が1の分割を前に持ってくる．
+  void
+  reorder();
 
   /// @brief 分割の要素を一つ取り出して独立した分割とする．
   /// @param[in] pid 分轄番号 ( 0 <= pid << partition_num() )

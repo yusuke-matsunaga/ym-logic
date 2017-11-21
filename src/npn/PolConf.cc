@@ -8,8 +8,23 @@
 
 
 #include "PolConf.h"
+#include "ym/NpnMap.h"
+
 
 BEGIN_NAMESPACE_YM_LOGIC
+
+// @brief NpnMap に変換する．
+// @param[in] ni 入力数
+NpnMap
+PolConf::to_npnmap(ymuint ni) const
+{
+  NpnMap map(ni);
+  map.set_oinv(oinv());
+  for (ymuint i = 0; i < ni; ++ i) {
+    map.set(VarId(i), VarId(i), iinv(i));
+  }
+  return map;
+}
 
 void
 print_polconf(ostream& s,

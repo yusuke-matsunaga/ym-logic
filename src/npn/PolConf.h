@@ -58,6 +58,11 @@ public:
   bool
   iinv(ymuint pos) const;
 
+  /// @brief NpnMap に変換する．
+  /// @param[in] ni 入力数
+  NpnMap
+  to_npnmap(ymuint ni) const;
+
 
 private:
   //////////////////////////////////////////////////////////////////////

@@ -49,6 +49,23 @@ void
 walsh_w0_refine(const TvFunc& func,
 		vector<PolConf>& polconf_list);
 
+extern
+void
+walsh_w1_refine(const TvFunc& func,
+		VarId var,
+		vector<PolConf>& polconf_list);
+
+extern
+void
+walsh_w1_refine(const TvFunc& func,
+		IgPartition& igpart);
+
+extern
+void
+walsh_2_refine(const TvFunc& func,
+	       VarId var,
+	       IgPartition& igpart);
+
 
 //////////////////////////////////////////////////////////////////////
 // クラス NpnMgr
@@ -64,56 +81,6 @@ NpnMgr::~NpnMgr()
 {
 }
 
-// @brief 重み別 w1 を用いて極性を確定させる．
-// @param[in] pos 位置番号
-// @param[in] var 対象の変数
-// @param[in] polconf_list 極性割当候補のリスト
-void
-NpnMgr::walsh_w1_refine(ymuint pos,
-			VarId var,
-			vector<PolConf>& polconf_list)
-{
-  ymuint ni = mBaseFunc.input_num();
-
-  if ( debug & debug_ww1_refine ) {
-    cout << "before walsh_w1_refine(" << pos << ")" << endl;
-    print_polconf_list(cout, polconf_list, ni);
-    cout << endl;
-  }
-
-  // 重み別 w0 係数を用いて極性の決定を行う．
-  for (ymuint w = 0; w <= ni; ++ w) {
-    int max_d0 = 0;
-    ymuint wpos = 0;
-    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
-      PolConf polconf = polconf_list[i];
-      int d0 = mBaseFunc.walsh_w1(var, w, polconf.oinv(), polconf.iinv_bits());
-      if ( debug & debug_ww1_refine ) {
-	cout << " walsh_w1(" << var << ", " << w << ") = " << d0 << endl;
-      }
-      int stat = mMaxW1[pos][w] - d0;
-      if ( stat <= 0 ) {
-	if ( stat < 0 ) {
-	  wpos = 0;
-	  mMaxW1[pos][w] = d0;
-	  clear_max(pos, w + 1);
-	}
-	polconf_list[wpos] = polconf;
-	++ wpos;
-      }
-    }
-    if ( wpos < polconf_list.size() ) {
-      polconf_list.erase(polconf_list.begin() + wpos, polconf_list.end());
-    }
-  }
-
-  if ( debug & debug_ww1_refine ) {
-    cout << "after walsh_w1_refine()" << endl;
-    print_polconf_list(cout, polconf_list, ni);
-    cout << endl;
-  }
-}
-
 // @brief func の正規化を行う．
 TvFunc
 NpnMgr::cannonical(const TvFunc& func)
@@ -121,6 +88,8 @@ NpnMgr::cannonical(const TvFunc& func)
   mMaxList.clear();
   mW2max_count = 0;
   mTvmax_count = 0;
+
+  mOrigFunc = func;
 
   // まず独立な変数を取り除く
   mXmap0 = func.shrink_map();
@@ -237,6 +206,18 @@ NpnMgr::cannonical(const TvFunc& func)
   // 極性割り当ての候補を重み別 Walsh_0 でフィルタリングする．
   walsh_w0_refine(mBaseFunc, polconf_list);
 
+  // 極性割り当ての候補を確定した入力の重み別 Walsh_1 でフィルタリングする．
+  for (ymuint pid = 0;
+       polconf_list.size() > 1 && pid < igpart.partition_num();
+       ++ pid) {
+    if ( igpart.is_resolved(pid) ) {
+      ymuint pos = igpart.partition_begin(pid);
+      ymuint gid = igpart.group_id(pos);
+      ymuint iid = igpart.input_id(gid);
+      walsh_w1_refine(mBaseFunc, VarId(iid), polconf_list);
+    }
+  }
+
   if ( debug ) {
     cout << "  # of polarity candidates: " << polconf_list.size() << endl;
     for (ymuint i = 0; i < polconf_list.size(); ++ i) {
@@ -247,11 +228,50 @@ NpnMgr::cannonical(const TvFunc& func)
 	 << endl;
   }
 
-  clear_max(0, 0);
-
   // 残りはすべて展開して真理値ベクタが最大となるものを探す．
+  mMaxFunc = TvFunc::const_zero(ni0);
   mMaxList.clear();
-  tvmax_recur(igpart, 0, polconf_list);
+
+  for (vector<PolConf>::const_iterator p = polconf_list.begin();
+       p != polconf_list.end(); ++ p) {
+    const PolConf& polconf = *p;
+
+    // まずpolconfの内容を mBaseFunc に適用する．
+    NpnMap map1 = polconf.to_npnmap(ni0);
+    TvFunc func1 = mBaseFunc.xform(map1);
+
+    if ( debug ) {
+      cout << endl;
+      cout << "current PolConf: ";
+      print_polconf(cout, polconf, ni0);
+      cout << endl
+	   << " map(polconf) = " << map1 << endl
+	   << " func1 = " << func1 << endl;
+    }
+
+    // この極性割り当てのもとで重み別 walsh_1 が最大になる変数順のみを試す．
+    IgPartition igpart1(igpart);
+    walsh_w1_refine(func1, igpart1);
+
+    // 入力順の確定したグループを前に持ってくる．
+    igpart1.reorder();
+
+    // 入力順の確定している入力との Walsh_2 で細分化する．
+    for (ymuint pid = 0; pid < igpart1.partition_num(); ++ pid) {
+      if ( igpart1.is_resolved() ) {
+	break;
+      }
+      if ( igpart1.is_resolved(pid) ) {
+	ymuint pos = igpart1.partition_begin(pid);
+	ymuint gid = igpart1.group_id(pos);
+	ymuint iid = igpart1.input_id(gid);
+	walsh_2_refine(func1, VarId(iid), igpart1);
+	// igpart1 の細分化は pid より後ろで起こるので pid は修正の必要はない．
+      }
+    }
+
+    tvmax_recur(func1, map1, igpart1, 0);
+  }
 
   if ( debug ) {
     cout << "  final result" << endl
@@ -262,56 +282,47 @@ NpnMgr::cannonical(const TvFunc& func)
 }
 
 void
-NpnMgr::tvmax_recur(const IgPartition& igpart,
-		    ymuint pid,
-		    const vector<PolConf>& polconf_list)
+NpnMgr::tvmax_recur(const TvFunc& func,
+		    const NpnMap& map1,
+		    const IgPartition& igpart,
+		    ymuint pid)
 {
   if ( debug ) {
     cout << "tvmax_recur(" << igpart << ", pid = " << pid << ")" << endl;
-    print_polconf_list(cout, polconf_list, mBaseFunc.input_num());
-    cout << endl;
   }
+
   if ( igpart.is_resolved() ) {
-    for (vector<PolConf>::const_iterator p = polconf_list.begin();
-	 p != polconf_list.end(); ++ p) {
-      const PolConf& polconf = *p;
-      NpnMap map = igpart.to_npnmap(polconf);
-      TvFunc func1 = mBaseFunc.xform(map);
+    ++ mTvmax_count;
+    NpnMap map = igpart.to_npnmap();
+    TvFunc func1 = func.xform(map);
+    if ( debug ) {
+      cout << "func1 = " << func1 << endl
+	   << "map   = " << map << endl;
+    }
+    if ( mMaxFunc <= func1 ) {
       if ( mMaxFunc < func1 ) {
 	mMaxFunc = func1;
 	mMaxList.clear();
-	add_map(map);
-	if ( debug ) {
-	  cout << "mMaxFunc = " << func1 << endl
-	       << "map      = " << map << endl;
-	}
       }
-      else if ( mMaxFunc == func1 ) {
-	add_map(map);
-	if ( debug ) {
-	  cout << "mMaxFunc = " << func1 << endl
-	       << "map      += " << map << endl;
-	}
+      add_map(map1 * map);
+      if ( debug ) {
+	cout << "mMaxFunc = " << func1 << endl
+	     << "map      = " << map << endl;
       }
     }
+  }
+  else if ( igpart.is_resolved(pid) ) {
+    tvmax_recur(func, map1, igpart, pid + 1);
   }
   else {
     for (ymuint pos = igpart.partition_begin(pid);
 	 pos < igpart.partition_end(pid); ++ pos) {
       ymuint gid = igpart.group_id(pos);
       ymuint iid = igpart.input_id(gid);
-      vector<PolConf> polconf_list1(polconf_list);
-      walsh_w1_refine(pid, VarId(iid), polconf_list1);
-      if ( !polconf_list1.empty() ) {
-	if ( igpart.is_resolved(pid) ) {
-	  tvmax_recur(igpart, pid + 1, polconf_list1);
-	}
-	else {
-	  IgPartition igpart1(igpart);
-	  igpart1._refine(pid, pos);
-	  tvmax_recur(igpart1, pid + 1, polconf_list1);
-	}
-      }
+      IgPartition igpart1(igpart);
+      igpart1._refine(pid, pos);
+      walsh_2_refine(func, VarId(iid), igpart1);
+      tvmax_recur(func, map1, igpart1, pid + 1);
     }
   }
 }
@@ -349,23 +360,6 @@ ymulong
 NpnMgr::tvmax_count() const
 {
   return mTvmax_count;
-}
-
-void
-NpnMgr::clear_max(ymuint pos,
-		  ymuint w)
-{
-  if ( debug ) {
-    cout << "clear_max(" << pos << ", " << w << ")" << endl;
-  }
-  ymuint ni = mBaseFunc.input_num();
-  mMaxFunc = TvFunc::const_zero(ni);
-  for (ymuint i = pos; i < ni; ++ i) {
-    ymuint w0 = (i == pos) ? w : 0;
-    for (ymuint j = w0; j <= ni; ++ j) {
-      mMaxW1[i][j] = -INT_MAX / 2;
-    }
-  }
 }
 
 void
