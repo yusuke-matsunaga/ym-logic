@@ -64,7 +64,7 @@ private:
   void
   tvmax_recur(const TvFunc& func,
 	      const IgPartition& igpart,
-	      ymuint pid);
+	      vector<bool>& w1_mark);
 
   void
   add_map(const NpnMap& map);

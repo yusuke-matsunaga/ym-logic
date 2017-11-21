@@ -65,7 +65,7 @@ npn_test(int argc,
 	tvmax = tv;
       }
       if ( redmax < red_num ) {
-	tvmax = red_num;
+	redmax = red_num;
       }
     }
   }
@@ -93,7 +93,7 @@ npn_test(int argc,
 	tvmax = tv;
       }
       if ( redmax < red_num ) {
-	tvmax = red_num;
+	redmax = red_num;
       }
     }
   }

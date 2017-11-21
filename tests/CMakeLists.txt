@@ -16,6 +16,7 @@ include_directories(
 # サブディレクトリの設定
 # ===================================================================
 
+
 # ===================================================================
 #  npn_test
 # ===================================================================
@@ -28,10 +29,6 @@ add_executable ( npn_test
   ${npn_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic>
   $<TARGET_OBJECTS:ym_base>
-  )
-
-target_compile_options ( npn_test
-  PRIVATE "-g"
   )
 
 target_link_libraries ( npn_test
@@ -54,5 +51,43 @@ target_compile_options ( npn_test_d
   )
 
 target_link_libraries ( npn_test_d
+  ${YM_LIB_DEPENDS}
+  )
+
+
+# ===================================================================
+#  npn_test2
+# ===================================================================
+
+set ( npn_test2_SOURCES
+  npn_test2.cc
+  )
+
+add_executable ( npn_test2
+  ${npn_test2_SOURCES}
+  $<TARGET_OBJECTS:ym_logic>
+  $<TARGET_OBJECTS:ym_base>
+  )
+
+target_link_libraries ( npn_test2
+  ${YM_LIB_DEPENDS}
+  )
+
+
+# ===================================================================
+#  npn_test2_d
+# ===================================================================
+
+add_executable ( npn_test2_d
+  ${npn_test2_SOURCES}
+  $<TARGET_OBJECTS:ym_logic_d>
+  $<TARGET_OBJECTS:ym_base_d>
+  )
+
+target_compile_options ( npn_test2_d
+  PRIVATE "-g"
+  )
+
+target_link_libraries ( npn_test2_d
   ${YM_LIB_DEPENDS}
   )

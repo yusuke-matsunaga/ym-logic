@@ -125,7 +125,9 @@ NpnMgr::cannonical(const TvFunc& func)
   }
 
   if ( debug ) {
-    cout << "NpnMgr::cannonical: func0 = " << func0 << endl;
+    if ( ni0 < 10 ) {
+      cout << "NpnMgr::cannonical: func0 = " << func0 << endl;
+    }
   }
 
   // Walsh の0次と1次の係数を用いて正規化する．
@@ -141,9 +143,11 @@ NpnMgr::cannonical(const TvFunc& func)
   IgPartition igpart(iinfo);
 
   if ( debug ) {
-    cout << "  after walsh01_normalize" << endl
-	 << "    func1  = " << func1 << endl
-	 << "    map1   = " << map1 << endl
+    cout << "  after walsh01_normalize" << endl;
+    if ( ni0 < 10 ) {
+      cout << "    func1  = " << func1 << endl;
+    }
+    cout << "    map1   = " << map1 << endl
 	 << "    igpart = " << igpart << endl
 	 << endl;
     }
@@ -154,9 +158,11 @@ NpnMgr::cannonical(const TvFunc& func)
     add_map(map);
     TvFunc func2 = func1.xform(map);
     if ( debug ) {
-      cout << "  resolved" << endl
-	   << "  func2 = " << func2 << endl
-	   << "  map2  = " << map << endl;
+      cout << "  resolved" << endl;
+      if ( ni0 < 10 ) {
+	cout << "  func2 = " << func2 << endl;
+      }
+      cout << "  map2  = " << map << endl;
     }
     return func2;
   }
@@ -239,8 +245,10 @@ NpnMgr::cannonical(const TvFunc& func)
       cout << "current PolConf: ";
       print_polconf(cout, polconf, ni0);
       cout << endl
-	   << " map(polconf) = " << map2 << endl
-	   << " func2 = " << func2 << endl;
+	   << " map(polconf) = " << map2 << endl;
+      if ( ni0 < 10 ) {
+	cout << " func2 = " << func2 << endl;
+      }
     }
 
     // この極性割り当てのもとで重み別 walsh_1 が最大になる変数順のみを試す．
@@ -251,13 +259,16 @@ NpnMgr::cannonical(const TvFunc& func)
     igpart1.reorder();
 
     // あとは全ての順番を試す．
-    tvmax_recur(func2, igpart1, 0);
+    vector<bool> w1_mark(ni0, false);
+    tvmax_recur(func2, igpart1, w1_mark);
   }
 
   if ( debug ) {
-    cout << "  final result" << endl
-	 << "  cfunc = " << mMaxFunc << endl
-	 << "  cmap  = " << mMaxList[0] << endl;
+    if ( ni0 < 10 ) {
+      cout << "  final result" << endl
+	   << "  cfunc = " << mMaxFunc << endl
+	   << "  cmap  = " << mMaxList[0] << endl;
+    }
   }
   return mMaxFunc;
 }
@@ -265,51 +276,88 @@ NpnMgr::cannonical(const TvFunc& func)
 void
 NpnMgr::tvmax_recur(const TvFunc& func,
 		    const IgPartition& igpart,
-		    ymuint pid)
+		    vector<bool>& w1_mark)
 {
   if ( debug ) {
-    cout << "tvmax_recur(" << igpart << ", pid = " << pid << ")" << endl;
+    cout << endl;
+    cout << "tvmax_recur(" << igpart << ")" << endl;
   }
 
   if ( igpart.is_resolved() ) {
+    // 全ての入力順が解決している．
     ++ mTvmax_count;
     NpnMap map = igpart.to_npnmap();
     TvFunc func1 = func.xform(map);
     if ( debug ) {
-      cout << "func1 = " << func1 << endl
-	   << "map   = " << map << endl;
+      if ( func.input_num() < 10 ) {
+	cout << "func1 = " << func1 << endl
+	     << "map   = " << map << endl;
+      }
     }
+    // 真理値表が最大のものを記録する．
     if ( mMaxFunc <= func1 ) {
       if ( mMaxFunc < func1 ) {
 	mMaxFunc = func1;
 	mMaxList.clear();
+	if ( debug ) {
+	  if ( func.input_num() < 10 ) {
+	    cout << "mMaxFunc = " << func1 << endl;
+	  }
+	  else {
+	    cout << "mMaxFunc updated" << endl;
+	  }
+	}
       }
       add_map(map);
       if ( debug ) {
-	cout << "mMaxFunc = " << func1 << endl
-	     << "map      = " << map << endl;
+	cout << "map      += " << map << endl;
       }
     }
   }
-  else if ( igpart.is_resolved(pid) ) {
-    // 解決している分割を使って残りの分割を細分化する．
-    ymuint pos = igpart.partition_begin(pid);
-    ymuint gid = igpart.group_id(pos);
-    ymuint iid = igpart.input_id(gid);
-    IgPartition igpart1(igpart);
-    walsh_2_refine(func, VarId(iid), igpart1);
-    tvmax_recur(func, igpart1, pid + 1);
-  }
   else {
-    // 解決していない分割から１つづつ取り出してそれを先頭にして再帰する．
-    for (ymuint pos = igpart.partition_begin(pid);
-	 pos < igpart.partition_end(pid); ++ pos) {
-      ymuint gid = igpart.group_id(pos);
-      ymuint iid = igpart.input_id(gid);
+    ymuint pid = 0;
+    ymuint iid = 0;
+    for ( ; pid < igpart.partition_num(); ++ pid) {
+      if ( igpart.is_resolved(pid) ) {
+	// 解決している分割を使って残りの分割を細分化する．
+	ymuint pos = igpart.partition_begin(pid);
+	ymuint gid = igpart.group_id(pos);
+	iid = igpart.input_id(gid);
+	if ( w1_mark[iid] ) {
+	  // すでに処理済み
+	  continue;
+	}
+	else {
+	  // この変数で細分化する．
+	  break;
+	}
+      }
+      else {
+	// 解決していない分割を見つけた．
+	break;
+      }
+    }
+    if ( igpart.is_resolved(pid) ) {
+      // この分割の変数との Walsh_2 係数で細分化する．
+      w1_mark[iid] = true;
       IgPartition igpart1(igpart);
-      igpart1._refine(pid, pos);
       walsh_2_refine(func, VarId(iid), igpart1);
-      tvmax_recur(func, igpart1, pid + 1);
+      igpart1.reorder();
+      tvmax_recur(func, igpart1, w1_mark);
+      w1_mark[iid] = false;
+    }
+    else {
+      // この分割は解決していないので一つづつを細分化して再帰する．
+      for (ymuint pos = igpart.partition_begin(pid);
+	   pos < igpart.partition_end(pid); ++ pos) {
+	ymuint gid = igpart.group_id(pos);
+	ymuint iid = igpart.input_id(gid);
+	IgPartition igpart1(igpart);
+	igpart1._refine(pid, pos);
+	walsh_2_refine(func, VarId(iid), igpart1);
+	igpart1.reorder();
+	tvmax_recur(func, igpart1, w1_mark);
+      }
     }
   }
 }
