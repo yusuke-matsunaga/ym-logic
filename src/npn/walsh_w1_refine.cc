@@ -183,6 +183,9 @@ walsh_w1_refine(const TvFunc& func,
     }
   }
 
+  // 確定した分割を前に持ってくる．
+  igpart.reorder();
+
   if ( debug ) {
     cout << "after walsh_w1_refine" << endl
 	 << igpart << endl;

@@ -255,9 +255,6 @@ NpnMgr::cannonical(const TvFunc& func)
     IgPartition igpart1(igpart);
     walsh_w1_refine(func2, igpart1);
 
-    // 入力順の確定したグループを前に持ってくる．
-    igpart1.reorder();
-
     // あとは全ての順番を試す．
     vector<bool> w1_mark(ni0, false);
     tvmax_recur(func2, igpart1, w1_mark);
@@ -342,7 +339,7 @@ NpnMgr::tvmax_recur(const TvFunc& func,
       w1_mark[iid] = true;
       IgPartition igpart1(igpart);
       walsh_2_refine(func, VarId(iid), igpart1);
-      igpart1.reorder();
+
       tvmax_recur(func, igpart1, w1_mark);
       w1_mark[iid] = false;
     }
@@ -355,7 +352,7 @@ NpnMgr::tvmax_recur(const TvFunc& func,
 	IgPartition igpart1(igpart);
 	igpart1._refine(pid, pos);
 	walsh_2_refine(func, VarId(iid), igpart1);
-	igpart1.reorder();
+
 	tvmax_recur(func, igpart1, w1_mark);
       }
     }
