@@ -41,7 +41,7 @@ public:
   /// val は数値だが同じ数値の変数が同じ変数を表す
   /// という以外に意味はない．
   explicit
-  VarId(ymuint val);
+  VarId(int val);
 
   /// @brief デストラクタ
   ~VarId();
@@ -53,7 +53,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 値を取り出す．
-  ymuint
+  int
   val() const;
 
   /// @brief 比較関数
@@ -88,7 +88,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 実際の値
-  ymuint mVal;
+  int mVal;
 
 };
 
@@ -160,9 +160,9 @@ template<>
 struct
 HashFunc<VarId>
 {
-  ymuint
+  HashType
   operator()(VarId key) const {
-    return key.val();
+    return static_cast<HashType>(key.val());
   }
 };
 
@@ -185,13 +185,13 @@ const VarId kVarIdIllegal;
 inline
 VarId::VarId()
 {
-  mVal = static_cast<ymuint>(-1);
+  mVal = -1;
   // この値は kVarIdIllegal となる．
 }
 
 // @brief 値を指定したコンストラクタ
 inline
-VarId::VarId(ymuint val) :
+VarId::VarId(int val) :
   mVal(val)
 {
 }
@@ -204,7 +204,7 @@ VarId::~VarId()
 
 // @brief 値を取り出す．
 inline
-ymuint
+int
 VarId::val() const
 {
   return mVal;

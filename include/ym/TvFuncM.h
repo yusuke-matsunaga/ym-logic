@@ -29,8 +29,8 @@ public:
   ///
   /// 中身は恒偽関数となる．
   explicit
-  TvFuncM(ymuint ni = 0,
-	  ymuint no = 1);
+  TvFuncM(int ni = 0,
+	  int no = 1);
 
   /// @brief コピーコンストラクタ
   TvFuncM(const TvFuncM& src);
@@ -153,11 +153,11 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 入力数を得る．
-  ymuint
+  int
   input_num() const;
 
   /// @brief 出力数を得る．
-  ymuint
+  int
   output_num() const;
 
   /// @brief 1出力の論理関数を切り出す．
@@ -171,7 +171,7 @@ public:
   /// 答は 0 か 1 だが int 型
   int
   value(VarId ovar,
-	ymuint pos) const;
+	int pos) const;
 
   /// @brief varid 番目の変数がサポートの時 true を返す．
   /// @param[in] varid 変数番号
@@ -189,7 +189,7 @@ public:
 	    bool inv = false) const;
 
   /// @brief ハッシュ値を返す．
-  ymuint
+  HashType
   hash() const;
 
 
@@ -251,12 +251,12 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief ブロック数を得る．
-  ymuint
+  int
   nblk() const;
 
   /// @brief 生のデータを得る．
   ymuint64
-  raw_data(ymuint blk) const;
+  raw_data(int blk) const;
 
 
 public:
@@ -268,7 +268,7 @@ public:
   /// 特に根拠はないが，これなら Walsh 係数が 32 ビット整数で収まる．
   /// あと真理値表ベースの手法ではこれくらいが限度
   static
-  const ymuint kMaxNi = 20;
+  const int kMaxNi = 20;
 
 
 public:
@@ -295,18 +295,18 @@ private:
 
   /// @brief 入力数 ni のベクタを納めるのに必要なブロック数を計算する．
   static
-  ymuint
-  nblock(ymuint ni);
+  int
+  nblock(int ni);
 
   /// @brief ipos 番目の要素のブロック位置を計算する．
   static
-  ymuint
-  block(ymuint pos);
+  int
+  block(int pos);
 
   /// @brief ipos 番目の要素のシフト量を計算する．
   static
-  ymuint
-  shift(ymuint pos);
+  int
+  shift(int pos);
 
 
 private:
@@ -315,16 +315,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  ymuint mInputNum;
+  int mInputNum;
 
   // 出力数
-  ymuint mOutputNum;
+  int mOutputNum;
 
   // 1出力分のブロック数
-  ymuint mBlockNum1;
+  int mBlockNum1;
 
   // ブロック数
-  ymuint mBlockNum;
+  int mBlockNum;
 
   // パックされた真理値ベクトル
   ymuint64* mVector;
@@ -459,7 +459,7 @@ operator>>(IDO& s,
 template <>
 struct HashFunc<TvFuncM>
 {
-  ymuint
+  HashType
   operator()(const TvFuncM& f) const
   {
     return f.hash();
@@ -473,7 +473,7 @@ struct HashFunc<TvFuncM>
 
 // 入力数を得る．
 inline
-ymuint
+int
 TvFuncM::input_num() const
 {
   return mInputNum;
@@ -481,7 +481,7 @@ TvFuncM::input_num() const
 
 // @brief 出力数を得る．
 inline
-ymuint
+int
 TvFuncM::output_num() const
 {
   return mOutputNum;
@@ -492,15 +492,15 @@ TvFuncM::output_num() const
 inline
 int
 TvFuncM::value(VarId ovar,
-	       ymuint pos) const
+	       int pos) const
 {
-  ymuint opos = ovar.val();
+  int opos = ovar.val();
   return (mVector[block(pos) + opos * mBlockNum1] >> shift(pos)) & 1;
 }
 
 // ブロック数を得る．
 inline
-ymuint
+int
 TvFuncM::nblk() const
 {
   return mBlockNum;
@@ -509,35 +509,35 @@ TvFuncM::nblk() const
 // 生のデータを得る．
 inline
 ymuint64
-TvFuncM::raw_data(ymuint blk) const
+TvFuncM::raw_data(int blk) const
 {
   return mVector[blk];
 }
 
 // 入力数 ni, 出力数 no のベクタを納めるのに必要なブロック数を計算する．
 inline
-ymuint
-TvFuncM::nblock(ymuint ni)
+int
+TvFuncM::nblock(int ni)
 {
-  const ymuint wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(ymuint64) * 8;
   return ((1 << ni) + wsize - 1) / wsize;
 }
 
 // pos 番目の要素のブロック位置を計算する．
 inline
-ymuint
-TvFuncM::block(ymuint pos)
+int
+TvFuncM::block(int pos)
 {
-  const ymuint wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(ymuint64) * 8;
   return pos / wsize;
 }
 
 // pos 番目の要素のシフト量を計算する．
 inline
-ymuint
-TvFuncM::shift(ymuint pos)
+int
+TvFuncM::shift(int pos)
 {
-  const ymuint wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(ymuint64) * 8;
   return pos % wsize;
 }
 

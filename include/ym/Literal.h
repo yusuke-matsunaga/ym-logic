@@ -99,7 +99,7 @@ public:
   make_negative() const;
 
   /// @brief ハッシュ用の関数
-  ymuint
+  HashType
   hash() const;
 
   /// @brief 配列のインデックスとして使用可能な数を返す．
@@ -238,7 +238,7 @@ operator>>(IDO& s,
 template <>
 struct HashFunc<Literal>
 {
-  ymuint
+  HashType
   operator()(Literal lit) const
   {
     return lit.hash();
@@ -455,7 +455,7 @@ operator>>(IDO& s,
 
 // ハッシュ用の関数
 inline
-ymuint
+HashType
 Literal::hash() const
 {
   return mBody;

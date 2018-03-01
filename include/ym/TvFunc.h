@@ -33,14 +33,14 @@ public:
   ///
   /// 中身は恒偽関数
   explicit
-  TvFunc(ymuint ni = 0);
+  TvFunc(int ni = 0);
 
   /// @brief 入力数と真理値を指定したコンストラクタ
   /// @param[in] ni 入力数
   /// @param[in] values 真理値のベクタ
   ///
   /// values のサイズは 2^ni に等しくなければならない．
-  TvFunc(ymuint ni,
+  TvFunc(int ni,
 	 const vector<int>& values);
 
   /// @brief コピーコンストラクタ
@@ -67,14 +67,14 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  const_zero(ymuint ni);
+  const_zero(int ni);
 
   /// @brief 恒真関数を作る．
   /// @param[in] ni 入力数
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  const_one(ymuint ni);
+  const_one(int ni);
 
   /// @brief リテラル関数を作る．
   /// @param[in] ni 入力数
@@ -85,7 +85,7 @@ public:
   /// @return 生成したオブジェクト
   static
   TvFunc
-  literal(ymuint ni,
+  literal(int ni,
 	  VarId varid,
 	  bool inv);
 
@@ -95,7 +95,7 @@ public:
   /// @return 生成したオブジェクト
   static
   TvFunc
-  literal(ymuint ni,
+  literal(int ni,
 	  Literal lit);
 
   /// @brief 肯定のリテラル関数を作る．
@@ -104,7 +104,7 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  posi_literal(ymuint ni,
+  posi_literal(int ni,
 	       VarId varid);
 
   /// @brief 否定のリテラル関数を作る．
@@ -113,7 +113,7 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  nega_literal(ymuint ni,
+  nega_literal(int ni,
 	       VarId varid);
 
 
@@ -162,21 +162,21 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 入力数を得る．
-  ymuint
+  int
   input_num() const;
 
   /// @brief 入力値を2進数と見なしたときの pos 番目の値を得る．
   /// @param[in] pos 位置番号 ( 0 <= pos < 2^(input_num()) )
   /// 答は 0 か 1 だが int 型
   int
-  value(ymuint pos) const;
+  value(int pos) const;
 
   /// @brief 0 の数を数える．
-  ymuint
+  int
   count_zero() const;
 
   /// @brief 1 の数を数える．
-  ymuint
+  int
   count_one() const;
 
   /// @brief 0次の Walsh 係数を求める．
@@ -210,16 +210,16 @@ public:
   /// @param[in] oinv
   /// @param[in] ibits
   int
-  walsh_w0(ymuint w,
+  walsh_w0(int w,
 	   bool oinv,
-	   ymuint ibits) const;
+	   int ibits) const;
 
   /// @brief 重み別の 1 次の Walsh 係数を求める．
   int
   walsh_w1(VarId i,
-	   ymuint w,
+	   int w,
 	   bool oinv,
-	   ymuint ibits) const;
+	   int ibits) const;
 
   /// @brief pos 番目の変数がサポートの時 true を返す．
   /// @param[in] pos 変数番号
@@ -235,7 +235,7 @@ public:
 	    bool inv = false) const;
 
   /// @brief ハッシュ値を返す．
-  ymuint
+  HashType
   hash() const;
 
 
@@ -315,12 +315,12 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief ブロック数を得る．
-  ymuint
+  int
   nblk() const;
 
   /// @brief 生のデータを得る．
   ymuint64
-  raw_data(ymuint blk) const;
+  raw_data(int blk) const;
 
 
 public:
@@ -332,7 +332,7 @@ public:
   /// 特に根拠はないが，これなら Walsh 係数が 32 ビット整数で収まる．
   /// あと真理値表ベースの手法ではこれくらいが限度
   static
-  const ymuint kMaxNi = 20;
+  const int kMaxNi = 20;
 
 
 public:
@@ -361,7 +361,7 @@ private:
   /// @param[in] ni 入力数
   /// @param[in] dummy ダミー
   /// 2番目の引数はダミー
-  TvFunc(ymuint ni,
+  TvFunc(int ni,
 	 int dummy);
 
   /// @brief リテラル関数を作るコンストラクタ
@@ -370,27 +370,27 @@ private:
   /// @param[in] inv 極性
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
-  TvFunc(ymuint ni,
+  TvFunc(int ni,
 	 VarId varid,
 	 bool inv);
 
   /// @brief 入力数 ni のベクタを納めるのに必要なブロック数を計算する．
   /// @param[in] ni 入力数
   static
-  ymuint
-  nblock(ymuint ni);
+  int
+  nblock(int ni);
 
   /// @brief pos 番目の要素のブロック位置を計算する．
   /// @param[in] pos 位置番号
   static
-  ymuint
-  block(ymuint pos);
+  int
+  block(int pos);
 
   /// @brief pos 番目の要素のシフト量を計算する．
   /// @param[in] pos 位置番号
   static
-  ymuint
-  shift(ymuint pos);
+  int
+  shift(int pos);
 
 
 private:
@@ -399,10 +399,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  ymuint mInputNum;
+  int mInputNum;
 
   // ブロック数
-  ymuint mBlockNum;
+  int mBlockNum;
 
   // パックされた真理値ベクトル
   ymuint64* mVector;
@@ -537,7 +537,7 @@ operator>>(IDO& s,
 template <>
 struct HashFunc<TvFunc>
 {
-  ymuint
+  HashType
   operator()(const TvFunc& f) const
   {
     return f.hash();
@@ -552,7 +552,7 @@ struct HashFunc<TvFunc>
 // 恒偽関数を作る．
 inline
 TvFunc
-TvFunc::const_zero(ymuint ni)
+TvFunc::const_zero(int ni)
 {
   return TvFunc(ni);
 }
@@ -560,7 +560,7 @@ TvFunc::const_zero(ymuint ni)
 // 恒真関数を作る．
 inline
 TvFunc
-TvFunc::const_one(ymuint ni)
+TvFunc::const_one(int ni)
 {
   return TvFunc(ni, 0);
 }
@@ -574,7 +574,7 @@ TvFunc::const_one(ymuint ni)
 // @return 生成したオブジェクト
 inline
 TvFunc
-TvFunc::literal(ymuint ni,
+TvFunc::literal(int ni,
 		VarId varid,
 		bool inv)
 {
@@ -587,7 +587,7 @@ TvFunc::literal(ymuint ni,
 // @return 生成したオブジェクト
 inline
 TvFunc
-TvFunc::literal(ymuint ni,
+TvFunc::literal(int ni,
 		Literal lit)
 {
   return TvFunc(ni, lit.varid(), lit.is_negative());
@@ -596,7 +596,7 @@ TvFunc::literal(ymuint ni,
 // 肯定のリテラル関数を作る．
 inline
 TvFunc
-TvFunc::posi_literal(ymuint ni,
+TvFunc::posi_literal(int ni,
 		     VarId varid)
 {
   return TvFunc(ni, varid, false);
@@ -605,7 +605,7 @@ TvFunc::posi_literal(ymuint ni,
 // 否定のリテラル関数を作る．
 inline
 TvFunc
-TvFunc::nega_literal(ymuint ni,
+TvFunc::nega_literal(int ni,
 		     VarId varid)
 {
   return TvFunc(ni, varid, true);
@@ -613,7 +613,7 @@ TvFunc::nega_literal(ymuint ni,
 
 // 入力数を得る．
 inline
-ymuint
+int
 TvFunc::input_num() const
 {
   return mInputNum;
@@ -623,14 +623,14 @@ TvFunc::input_num() const
 // 答は 0 か 1 だが int 型
 inline
 int
-TvFunc::value(ymuint pos) const
+TvFunc::value(int pos) const
 {
   return (mVector[block(pos)] >> shift(pos)) & 1;
 }
 
 // ブロック数を得る．
 inline
-ymuint
+int
 TvFunc::nblk() const
 {
   return mBlockNum;
@@ -639,35 +639,35 @@ TvFunc::nblk() const
 // 生のデータを得る．
 inline
 ymuint64
-TvFunc::raw_data(ymuint blk) const
+TvFunc::raw_data(int blk) const
 {
   return mVector[blk];
 }
 
 // 入力数 ni のベクタを納めるのに必要なブロック数を計算する．
 inline
-ymuint
-TvFunc::nblock(ymuint ni)
+int
+TvFunc::nblock(int ni)
 {
-  const ymuint wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(ymuint64) * 8;
   return ((1 << ni) + wsize - 1) / wsize;
 }
 
 // pos 番目の要素のブロック位置を計算する．
 inline
-ymuint
-TvFunc::block(ymuint pos)
+int
+TvFunc::block(int pos)
 {
-  const ymuint wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(ymuint64) * 8;
   return pos / wsize;
 }
 
 // pos 番目の要素のシフト量を計算する．
 inline
-ymuint
-TvFunc::shift(ymuint pos)
+int
+TvFunc::shift(int pos)
 {
-  const ymuint wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(ymuint64) * 8;
   return pos % wsize;
 }
 
