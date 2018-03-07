@@ -3688,10 +3688,10 @@ TvFunc::npn_cannonical_all_map(vector<NpnMap>& map_list) const
 }
 
 // ハッシュ値を返す．
-HashType
+SizeType
 TvFunc::hash() const
 {
-  HashType ans = 0;
+  SizeType ans = 0;
   for ( int i = 0; i < mBlockNum; ++ i ) {
     ymuint64 tmp = mVector[i];
     ymuint64 tmp_l = (tmp >>  0) & 0xFFFFFFFFULL;

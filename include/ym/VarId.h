@@ -160,9 +160,9 @@ template<>
 struct
 HashFunc<VarId>
 {
-  HashType
+  SizeType
   operator()(VarId key) const {
-    return static_cast<HashType>(key.val());
+    return static_cast<SizeType>(key.val());
   }
 };
 

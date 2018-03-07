@@ -493,10 +493,10 @@ TvFuncM::xform(const NpnMapM& npnmap) const
 }
 
 // ハッシュ値を返す．
-HashType
+SizeType
 TvFuncM::hash() const
 {
-  HashType ans = 0;
+  SizeType ans = 0;
   for ( int i = 0; i < mBlockNum; ++ i ) {
     ymuint64 tmp = mVector[i];
     ymuint64 tmp_l = (tmp >> 0) & 0xFFFFFFFFULL;

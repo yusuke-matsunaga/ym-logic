@@ -189,7 +189,7 @@ public:
 	    bool inv = false) const;
 
   /// @brief ハッシュ値を返す．
-  HashType
+  SizeType
   hash() const;
 
 
@@ -459,7 +459,7 @@ operator>>(IDO& s,
 template <>
 struct HashFunc<TvFuncM>
 {
-  HashType
+  SizeType
   operator()(const TvFuncM& f) const
   {
     return f.hash();
