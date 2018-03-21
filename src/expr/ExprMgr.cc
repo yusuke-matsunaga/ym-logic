@@ -370,8 +370,12 @@ ExprMgr::complement(const ExprNode* node)
 
   int n = node->child_num();
   int begin = nodestack_top();
-  for (int i = 0; i < n; ++ i) {
-    nodestack_push(complement(node->child(i)));
+  for ( int i = 0; i < n; ++ i ) {
+    auto child = node->child(i);
+    if ( node->type() != ExprType::Xor || i == 0 ) {
+      child = complement(child);
+    }
+    nodestack_push(child);
   }
 
   switch ( node->type() ) {
