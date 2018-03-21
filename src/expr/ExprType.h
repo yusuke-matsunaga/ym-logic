@@ -18,14 +18,14 @@ BEGIN_NAMESPACE_YM_LOGIC
 ///
 /// 定数やリテラルも含む．
 /// 型判定の dirty trick のために値の指定が必要．
-enum tType {
-  kConst0      = 0,
-  kConst1      = 1,
-  kPosiLiteral = 2,
-  kNegaLiteral = 3,
-  kAnd         = 4,
-  kOr          = 5,
-  kXor         = 6
+enum class ExprType {
+  Const0      = 0,
+  Const1      = 1,
+  PosiLiteral = 2,
+  NegaLiteral = 3,
+  And         = 4,
+  Or          = 5,
+  Xor         = 6
 };
 
 /// @brief 参照回数の最大値

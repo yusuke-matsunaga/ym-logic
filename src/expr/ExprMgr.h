@@ -10,7 +10,7 @@
 
 
 #include "ym/Expr.h"
-#include "expr_types.h"
+#include "ExprType.h"
 #include "ExprNode.h"
 #include "ExprNodePtr.h"
 
@@ -234,7 +234,7 @@ private:
 
   // ExprNode を確保して内容を設定する．
   ExprNode*
-  alloc_node(tType type);
+  alloc_node(ExprType type);
 
   // ExprNode を削除する．
   void

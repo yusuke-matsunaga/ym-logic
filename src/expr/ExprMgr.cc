@@ -58,7 +58,7 @@ ExprNodePtr
 ExprMgr::make_zero()
 {
   if ( !mConst0 ) {
-    mConst0 = alloc_node(kConst0);
+    mConst0 = alloc_node(ExprType::Const0);
     ++ mStuckNodeNum;
   }
   return mConst0;
@@ -69,7 +69,7 @@ ExprNodePtr
 ExprMgr::make_one()
 {
   if ( !mConst1 ) {
-    mConst1 = alloc_node(kConst1);
+    mConst1 = alloc_node(ExprType::Const1);
     ++ mStuckNodeNum;
   }
   return mConst1;
@@ -109,12 +109,12 @@ ExprMgr::make_and(int begin)
   mTmpNodeList.reserve(end - begin);
   for ( int i = begin; i < end; ++ i ) {
     const ExprNode* node = mNodeStack[i];
-    tType type = node->type();
-    if ( type == kConst0 ) {
+    ExprType type = node->type();
+    if ( type == ExprType::Const0 ) {
       const0 = true;
       break;
     }
-    if ( type == kAnd ) {
+    if ( type == ExprType::And ) {
       int ni = node->child_num();
       for (int j = 0; j < ni; ++ j) {
 	const ExprNode* node1 = node->child(j);
@@ -128,7 +128,7 @@ ExprMgr::make_and(int begin)
 	break;
       }
     }
-    else if ( type == kConst1 ) {
+    else if ( type == ExprType::Const1 ) {
       ; // 無視
     }
     else {
@@ -153,7 +153,7 @@ ExprMgr::make_and(int begin)
     node = mTmpNodeList.front();
   }
   else {
-    node = alloc_node(kAnd);
+    node = alloc_node(ExprType::And);
   }
   return node;
 }
@@ -172,12 +172,12 @@ ExprMgr::make_or(int begin)
   mTmpNodeList.reserve(end - begin);
   for ( int i = begin; i < end; ++ i ) {
     ExprNodePtr node = mNodeStack[i];
-    tType type = node->type();
-    if ( type == kConst1 ) {
+    ExprType type = node->type();
+    if ( type == ExprType::Const1 ) {
       const1 = true;
       break;
     }
-    if ( type == kOr ) {
+    if ( type == ExprType::Or ) {
       int ni = node->child_num();
       for (int j = 0; j < ni; ++ j) {
 	const ExprNode* node1 = node->child(j);
@@ -191,7 +191,7 @@ ExprMgr::make_or(int begin)
 	break;
       }
     }
-    else if ( type == kConst0 ) {
+    else if ( type == ExprType::Const0 ) {
       ; // 無視
     }
     else {
@@ -216,7 +216,7 @@ ExprMgr::make_or(int begin)
     node = mTmpNodeList.front();
   }
   else {
-    node = alloc_node(kOr);
+    node = alloc_node(ExprType::Or);
   }
   return node;
 }
@@ -235,11 +235,11 @@ ExprMgr::make_xor(int begin)
   mTmpNodeList.reserve(end - begin);
   for ( int i = begin; i < end; ++ i ) {
     ExprNodePtr node = mNodeStack[i];
-    tType type = node->type();
-    if ( type == kConst1 ) {
+    ExprType type = node->type();
+    if ( type == ExprType::Const1 ) {
       inv = !inv;
     }
-    else if ( type == kXor ) {
+    else if ( type == ExprType::Xor ) {
       int ni = node->child_num();
       for (int j = 0; j < ni; ++ j) {
 	const ExprNode* node1 = node->child(j);
@@ -248,7 +248,7 @@ ExprMgr::make_xor(int begin)
 	}
       }
     }
-    else if ( type == kConst0 ) {
+    else if ( type == ExprType::Const0 ) {
       ; // 無視
     } else {
       if ( check_node2(node) ) {
@@ -268,7 +268,7 @@ ExprMgr::make_xor(int begin)
       node = mTmpNodeList.front();
     }
     else {
-      node = alloc_node(kXor);
+      node = alloc_node(ExprType::Xor);
     }
   }
   if ( inv ) {
@@ -361,48 +361,30 @@ ExprNodePtr
 ExprMgr::complement(const ExprNode* node)
 {
   switch ( node->type() ) {
-  case kConst0:
-    return make_one();
-  case kConst1:
-    return make_zero();
-  case kPosiLiteral:
-    return make_negaliteral(node->varid());
-  case kNegaLiteral:
-    return make_posiliteral(node->varid());
-  case kAnd:
-    {
-      int n = node->child_num();
-      int begin = nodestack_top();
-      for (int i = 0; i < n; ++ i) {
-	nodestack_push(complement(node->child(i)));
-      }
-      return make_or(begin);
-    }
-  case kOr:
-    {
-      int n = node->child_num();
-      int begin = nodestack_top();
-      for (int i = 0; i < n; ++ i) {
-	nodestack_push(complement(node->child(i)));
-      }
-      return make_and(begin);
-    }
-  case kXor:
-    {
-      int n = node->child_num();
-      int begin = nodestack_top();
-      nodestack_push(complement(node->child(0)));
-      for (int i = 1; i < n; ++ i) {
-	nodestack_push(node->child(i));
-      }
-      return make_xor(begin);
-    }
+  case ExprType::Const0:      return make_one();
+  case ExprType::Const1:      return make_zero();
+  case ExprType::PosiLiteral: return make_negaliteral(node->varid());
+  case ExprType::NegaLiteral: return make_posiliteral(node->varid());
+  default: break;
+  }
+
+  int n = node->child_num();
+  int begin = nodestack_top();
+  for (int i = 0; i < n; ++ i) {
+    nodestack_push(complement(node->child(i)));
+  }
+
+  switch ( node->type() ) {
+  case ExprType::And: return make_or(begin);
+  case ExprType::Or:  return make_and(begin);
+  case ExprType::Xor: return make_xor(begin);
+  default: break;
   }
 
   // ここに来ることはない．
   ASSERT_NOT_REACHED;
 
-  return 0;
+  return nullptr;
 }
 
 // id 番目の変数を sub に置き換える．
@@ -412,17 +394,17 @@ ExprMgr::compose(const ExprNode* node,
 		 const ExprNodePtr& sub)
 {
   switch ( node->type() ) {
-  case kConst0:
-  case kConst1:
+  case ExprType::Const0:
+  case ExprType::Const1:
     return node;
 
-  case kPosiLiteral:
+  case ExprType::PosiLiteral:
     if ( node->varid() == id ) {
       return sub;
     }
     return node;
 
-  case kNegaLiteral:
+  case ExprType::NegaLiteral:
     if ( node->varid() == id ) {
       return complement(sub);
     }
@@ -447,11 +429,10 @@ ExprMgr::compose(const ExprNode* node,
   }
 
   switch ( node->type() ) {
-  case kAnd: return make_and(begin);
-  case kOr:  return make_or(begin);
-  case kXor: return make_xor(begin);
-  default:
-    break;
+  case ExprType::And: return make_and(begin);
+  case ExprType::Or:  return make_or(begin);
+  case ExprType::Xor: return make_xor(begin);
+  default: break;
   }
 
   ASSERT_NOT_REACHED;
@@ -464,11 +445,11 @@ ExprMgr::compose(const ExprNode* node,
 		 const HashMap<VarId, Expr>& comp_map)
 {
   switch ( node->type() ) {
-  case kConst0:
-  case kConst1:
+  case ExprType::Const0:
+  case ExprType::Const1:
     return node;
 
-  case kPosiLiteral:
+  case ExprType::PosiLiteral:
     {
       Expr ans;
       if ( comp_map.find(node->varid(), ans) ) {
@@ -477,7 +458,7 @@ ExprMgr::compose(const ExprNode* node,
     }
     return node;
 
-  case kNegaLiteral:
+  case ExprType::NegaLiteral:
     {
       Expr ans;
       if ( comp_map.find(node->varid(), ans) ) {
@@ -506,9 +487,9 @@ ExprMgr::compose(const ExprNode* node,
   }
 
   switch ( node->type() ) {
-  case kAnd: return make_and(begin);
-  case kOr:  return make_or(begin);
-  case kXor: return make_xor(begin);
+  case ExprType::And: return make_and(begin);
+  case ExprType::Or:  return make_or(begin);
+  case ExprType::Xor: return make_xor(begin);
   default:   break;
   }
 
@@ -522,11 +503,11 @@ ExprMgr::remap_var(const ExprNode* node,
 		   const HashMap<VarId, VarId>& varmap)
 {
   switch ( node->type() ) {
-  case kConst0:
-  case kConst1:
+  case ExprType::Const0:
+  case ExprType::Const1:
     return node;
 
-  case kPosiLiteral:
+  case ExprType::PosiLiteral:
     {
       VarId ans;
       if ( varmap.find(node->varid(), ans) ) {
@@ -535,7 +516,7 @@ ExprMgr::remap_var(const ExprNode* node,
     }
     return node;
 
-  case kNegaLiteral:
+  case ExprType::NegaLiteral:
     {
       VarId ans;
       if ( varmap.find(node->varid(), ans) ) {
@@ -563,9 +544,9 @@ ExprMgr::remap_var(const ExprNode* node,
   }
 
   switch ( node->type() ) {
-  case kAnd: return make_and(begin);
-  case kOr:  return make_or(begin);
-  case kXor: return make_xor(begin);
+  case ExprType::And: return make_and(begin);
+  case ExprType::Or:  return make_or(begin);
+  case ExprType::Xor: return make_xor(begin);
   default:   break;
   }
 
@@ -578,10 +559,10 @@ ExprNodePtr
 ExprMgr::simplify(const ExprNode* node)
 {
   switch ( node->type() ) {
-  case kConst0:
-  case kConst1:
-  case kPosiLiteral:
-  case kNegaLiteral:
+  case ExprType::Const0:
+  case ExprType::Const1:
+  case ExprType::PosiLiteral:
+  case ExprType::NegaLiteral:
     return node;
 
   default:
@@ -604,9 +585,9 @@ ExprMgr::simplify(const ExprNode* node)
   }
 
   switch ( node->type() ) {
-  case kAnd: return make_and(begin);
-  case kOr:  return make_or(begin);
-  case kXor: return make_xor(begin);
+  case ExprType::And: return make_and(begin);
+  case ExprType::Or:  return make_or(begin);
+  case ExprType::Xor: return make_xor(begin);
   default:   break;
   }
 
@@ -678,12 +659,12 @@ ExprMgr::make_literals(VarId id)
 {
   int last = mLiteralArray.size() / 2;
   while ( last <= id.val() ) {
-    ExprNode* posi = alloc_node(kPosiLiteral);
+    ExprNode* posi = alloc_node(ExprType::PosiLiteral);
     posi->mNc = last;
     mLiteralArray.push_back(posi);
     ++ mStuckNodeNum;
 
-    ExprNode* nega = alloc_node(kNegaLiteral);
+    ExprNode* nega = alloc_node(ExprType::NegaLiteral);
     nega->mNc = last;
     mLiteralArray.push_back(nega);
     ++ mStuckNodeNum;
@@ -693,7 +674,7 @@ ExprMgr::make_literals(VarId id)
 
 // ExprNode を確保して内容を設定する．
 ExprNode*
-ExprMgr::alloc_node(tType type)
+ExprMgr::alloc_node(ExprType type)
 {
   ++ mNodeNum;
   if ( mMaxNodeNum < mNodeNum ) {
@@ -701,7 +682,7 @@ ExprMgr::alloc_node(tType type)
   }
 
   int nc = 0;
-  if ( type == kAnd || type == kOr || type == kXor ) {
+  if ( type == ExprType::And || type == ExprType::Or || type == ExprType::Xor ) {
     nc = mTmpNodeList.size();
   }
 

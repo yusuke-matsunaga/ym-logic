@@ -402,8 +402,8 @@ ExprNode::soplit(bool inverted) const
     return SopLit(1, 1);
   }
 
-  if ( (type() == kAnd && ! inverted) ||
-       (type() == kOr && inverted) ) {
+  if ( (type() == ExprType::And && ! inverted) ||
+       (type() == ExprType::Or && inverted) ) {
     SopLit l(1, 0);
     int n = child_num();
     for (int i = 0; i < n; ++ i) {
@@ -413,8 +413,8 @@ ExprNode::soplit(bool inverted) const
     return l;
   }
 
-  if ( (type() == kOr && ! inverted) ||
-       (type() == kAnd && inverted) ) {
+  if ( (type() == ExprType::Or && ! inverted) ||
+       (type() == ExprType::And && inverted) ) {
     SopLit l(0, 0);
     int n = child_num();
     for (int i = 0; i < n; ++ i) {
@@ -424,7 +424,7 @@ ExprNode::soplit(bool inverted) const
     return l;
   }
 
-  if ( type() == kXor ) {
+  if ( type() == ExprType::Xor ) {
     int n = child_num();
     const ExprNode* chd = child(0);
     SopLit lp = chd->soplit(inverted);
@@ -458,8 +458,8 @@ ExprNode::soplit(bool inverted,
     }
   }
 
-  if ( (type() == kAnd && ! inverted) ||
-       (type() == kOr  && inverted) ) {
+  if ( (type() == ExprType::And && ! inverted) ||
+       (type() == ExprType::Or  && inverted) ) {
     SopLit l(1, 0);
     int n = child_num();
     for (int i = 0; i < n; ++ i) {
@@ -469,8 +469,8 @@ ExprNode::soplit(bool inverted,
     return l;
   }
 
-  if ( (type() == kOr && ! inverted) ||
-       (type() == kAnd && inverted) ) {
+  if ( (type() == ExprType::Or && ! inverted) ||
+       (type() == ExprType::And && inverted) ) {
     SopLit l(0, 0);
     int n = child_num();
     for (int i = 0; i < n; ++ i) {
@@ -480,7 +480,7 @@ ExprNode::soplit(bool inverted,
     return l;
   }
 
-  if ( type() == kXor ) {
+  if ( type() == ExprType::Xor ) {
     int n = child_num();
     const ExprNode* chd = child(0);
     SopLit lp = chd->soplit(inverted);
@@ -515,8 +515,8 @@ ExprNode::soplit(bool inverted,
     }
   }
 
-  if ( (type() == kAnd && ! inverted) ||
-       (type() == kOr && inverted) ) {
+  if ( (type() == ExprType::And && ! inverted) ||
+       (type() == ExprType::Or && inverted) ) {
     SopLit l(1, 0);
     int n = child_num();
     for (int i = 0; i < n; ++ i) {
@@ -526,8 +526,8 @@ ExprNode::soplit(bool inverted,
     return l;
   }
 
-  if ( (type() == kOr && ! inverted) ||
-       (type() == kAnd && inverted) ) {
+  if ( (type() == ExprType::Or && ! inverted) ||
+       (type() == ExprType::And && inverted) ) {
     SopLit l(0, 0);
     int n = child_num();
     for (int i = 0; i < n; ++ i) {
@@ -537,7 +537,7 @@ ExprNode::soplit(bool inverted,
     return l;
   }
 
-  if ( type() == kXor ) {
+  if ( type() == ExprType::Xor ) {
     int n = child_num();
     const ExprNode* chd = child(0);
     SopLit lp = chd->soplit(inverted);

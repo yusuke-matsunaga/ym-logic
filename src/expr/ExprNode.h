@@ -10,7 +10,7 @@
 
 
 #include "ym/Expr.h"
-#include "expr_types.h"
+#include "ExprType.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -36,7 +36,7 @@ public:
   /// @{
 
   /// @brief 型を返す
-  tType
+  ExprType
   type() const;
 
   /// @brief 恒偽関数を表している時に真となる．
@@ -275,46 +275,46 @@ ExprNode::~ExprNode()
 }
 
 inline
-tType
+ExprType
 ExprNode::type() const
 {
-  return static_cast<tType>(mRefType & 7U);
+  return static_cast<ExprType>(mRefType & 7U);
 }
 
 inline
 bool
 ExprNode::is_zero() const
 {
-  return type() == kConst0;
+  return type() == ExprType::Const0;
 }
 
 inline
 bool
 ExprNode::is_one() const
 {
-  return type() == kConst1;
+  return type() == ExprType::Const1;
 }
 
 inline
 bool
 ExprNode::is_constant() const
 {
-  // ちょっとキタナイコード．
-  return (int(type()) & ~1) == kConst0;
+  // ちょっときたないコード
+  return static_cast<ExprType>(mRefType & 6U) == ExprType::Const0;
 }
 
 inline
 bool
 ExprNode::is_posiliteral() const
 {
-  return type() == kPosiLiteral;
+  return type() == ExprType::PosiLiteral;
 }
 
 inline
 bool
 ExprNode::is_negaliteral() const
 {
-  return type() == kNegaLiteral;
+  return type() == ExprType::NegaLiteral;
 }
 
 inline
@@ -322,7 +322,7 @@ bool
 ExprNode::is_literal() const
 {
   // ちょっとキタナイコード．
-  return (static_cast<int>(type()) & ~1) == kPosiLiteral;
+  return static_cast<ExprType>(mRefType & 6U) == ExprType::PosiLiteral;
 }
 
 inline
@@ -343,28 +343,29 @@ inline
 bool
 ExprNode::is_and() const
 {
-  return type() == kAnd;
+  return type() == ExprType::And;
 }
 
 inline
 bool
 ExprNode::is_or() const
 {
-  return type() == kOr;
+  return type() == ExprType::Or;
 }
 
 inline
 bool
 ExprNode::is_xor() const
 {
-  return type() == kXor;
+  return type() == ExprType::Xor;
 }
 
 inline
 bool
 ExprNode::is_op() const
 {
-  return type() >= kAnd;
+  // ちょっときたないコード
+  return (mRefType & 4U) == 4U;
 }
 
 inline
@@ -378,7 +379,8 @@ inline
 const ExprNode*
 ExprNode::child(int pos) const
 {
-  ASSERT_COND(pos < child_num() );
+  ASSERT_COND( pos >= 0 && pos < child_num() );
+
   return mChildArray[pos];
 }
 
