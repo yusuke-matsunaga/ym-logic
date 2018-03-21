@@ -105,12 +105,12 @@ Expr::nega_literal(VarId varid)
 Expr
 Expr::make_and(const vector<Expr>& chd_list)
 {
-  ASSERT_COND(chd_list.size() > 0 );
+  ASSERT_COND( chd_list.size() > 0 );
+
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
-  for (vector<Expr>::const_iterator p = chd_list.begin();
-       p != chd_list.end(); ++ p) {
-    mgr.nodestack_push((*p).root());
+  int begin = mgr.nodestack_top();
+  for ( auto expr: chd_list ) {
+    mgr.nodestack_push(expr.root());
   }
   return Expr(mgr.make_and(begin));
 }
@@ -118,12 +118,12 @@ Expr::make_and(const vector<Expr>& chd_list)
 Expr
 Expr::make_and(const list<Expr>& chd_list)
 {
-  ASSERT_COND(chd_list.size() > 0 );
+  ASSERT_COND( chd_list.size() > 0 );
+
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
-  for (list<Expr>::const_iterator p = chd_list.begin();
-       p != chd_list.end(); ++ p) {
-    mgr.nodestack_push((*p).root());
+  int begin = mgr.nodestack_top();
+  for ( auto expr: chd_list ) {
+    mgr.nodestack_push(expr.root());
   }
   return Expr(mgr.make_and(begin));
 }
@@ -132,12 +132,12 @@ Expr::make_and(const list<Expr>& chd_list)
 Expr
 Expr::make_or(const vector<Expr>& chd_list)
 {
-  ASSERT_COND(chd_list.size() > 0 );
+  ASSERT_COND( chd_list.size() > 0 );
+
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
-  for (vector<Expr>::const_iterator p = chd_list.begin();
-       p != chd_list.end(); ++ p) {
-    mgr.nodestack_push((*p).root());
+  int begin = mgr.nodestack_top();
+  for ( auto expr: chd_list ) {
+    mgr.nodestack_push(expr.root());
   }
   return Expr(mgr.make_or(begin));
 }
@@ -145,12 +145,12 @@ Expr::make_or(const vector<Expr>& chd_list)
 Expr
 Expr::make_or(const list<Expr>& chd_list)
 {
-  ASSERT_COND(chd_list.size() > 0 );
+  ASSERT_COND( chd_list.size() > 0 );
+
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
-  for (list<Expr>::const_iterator p = chd_list.begin();
-       p != chd_list.end(); ++ p) {
-    mgr.nodestack_push((*p).root());
+  int begin = mgr.nodestack_top();
+  for ( auto expr: chd_list ) {
+    mgr.nodestack_push(expr.root());
   }
   return Expr(mgr.make_or(begin));
 }
@@ -159,12 +159,12 @@ Expr::make_or(const list<Expr>& chd_list)
 Expr
 Expr::make_xor(const vector<Expr>& chd_list)
 {
-  ASSERT_COND(chd_list.size() > 0 );
+  ASSERT_COND( chd_list.size() > 0 );
+
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
-  for (vector<Expr>::const_iterator p = chd_list.begin();
-       p != chd_list.end(); ++ p) {
-    mgr.nodestack_push((*p).root());
+  int begin = mgr.nodestack_top();
+  for ( auto expr: chd_list ) {
+    mgr.nodestack_push(expr.root());
   }
   return Expr(mgr.make_xor(begin));
 }
@@ -172,12 +172,12 @@ Expr::make_xor(const vector<Expr>& chd_list)
 Expr
 Expr::make_xor(const list<Expr>& chd_list)
 {
-  ASSERT_COND(chd_list.size() > 0 );
+  ASSERT_COND( chd_list.size() > 0 );
+
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
-  for (list<Expr>::const_iterator p = chd_list.begin();
-       p != chd_list.end(); ++ p) {
-    mgr.nodestack_push((*p).root());
+  int begin = mgr.nodestack_top();
+  for ( auto expr: chd_list ) {
+    mgr.nodestack_push(expr.root());
   }
   return Expr(mgr.make_xor(begin));
 }
@@ -203,7 +203,7 @@ operator&(const Expr& src1,
 	  const Expr& src2)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
+  int begin = mgr.nodestack_top();
   mgr.nodestack_push(src1.root());
   mgr.nodestack_push(src2.root());
   return Expr(mgr.make_and(begin));
@@ -214,7 +214,7 @@ const Expr&
 Expr::operator&=(const Expr& src)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
+  int begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.make_and(begin));
@@ -227,7 +227,7 @@ operator|(const Expr& src1,
 	  const Expr& src2)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
+  int begin = mgr.nodestack_top();
   mgr.nodestack_push(src1.root());
   mgr.nodestack_push(src2.root());
   return Expr(mgr.make_or(begin));
@@ -238,7 +238,7 @@ const Expr&
 Expr::operator|=(const Expr& src)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
+  int begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.make_or(begin));
@@ -251,7 +251,7 @@ operator^(const Expr& src1,
 	  const Expr& src2)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
+  int begin = mgr.nodestack_top();
   mgr.nodestack_push(src1.root());
   mgr.nodestack_push(src2.root());
   return Expr(mgr.make_xor(begin));
@@ -263,7 +263,7 @@ const Expr&
 Expr::operator^=(const Expr& src)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
-  ymuint begin = mgr.nodestack_top();
+  int begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.make_xor(begin));
@@ -316,9 +316,9 @@ Expr::eval(const vector<ymulong>& vals,
 
 // @brief 真理値表の作成
 TvFunc
-Expr::make_tv(ymuint ni) const
+Expr::make_tv(int ni) const
 {
-  ymuint ni2 = input_size();
+  int ni2 = input_size();
   if ( ni < ni2 ) {
     ni = ni2;
   }
@@ -326,20 +326,20 @@ Expr::make_tv(ymuint ni) const
 }
 #if 0
   // とりあえずベタなやり方．
-  ymuint ni = input_size();
-  ymuint nv = 1 << ni;
-  const ymuint BPW = sizeof(ymulong) * 8;
-  ymuint nt = (nv + BPW - 1) / BPW;
+  int ni = input_size();
+  int nv = 1 << ni;
+  const int BPW = sizeof(ymulong) * 8;
+  int nt = (nv + BPW - 1) / BPW;
   tv.clear();
   tv.resize(nt);
 
   const ExprNode* node = root();
-  ymuint b = 0;
+  int b = 0;
   ymulong s = 1UL;
   ymulong mask = 0UL;
   vector<ymulong> ivec(ni, 0UL);
-  for (ymuint p = 0; p < nv; ++ p) {
-    for (ymuint i = 0; i < ni; ++ i) {
+  for (int p = 0; p < nv; ++ p) {
+    for (int i = 0; i < ni; ++ i) {
       if ( p & (1 << i) ) {
 	ivec[i] |= s;
       }
@@ -350,7 +350,7 @@ Expr::make_tv(ymuint ni) const
       tv[b] = node->eval(ivec, ~0UL);
       ++ b;
       s = 1UL;
-      for (ymuint i = 0; i < ni; ++ i) {
+      for (int i = 0; i < ni; ++ i) {
 	ivec[i] = 0UL;
       }
     }
@@ -456,7 +456,7 @@ compare_type(const Expr& src1,
 
 // AND/OR/XOR の時に子供の項の数を返す．
 // それ以外のノードの時には 0 を返す．
-ymuint
+int
 Expr::child_num() const
 {
   return root()->child_num();
@@ -464,7 +464,7 @@ Expr::child_num() const
 
 // pos 番目の子供を返す．
 Expr
-Expr::child(ymuint pos) const
+Expr::child(int pos) const
 {
   return Expr(root()->child(pos));
 }
@@ -507,21 +507,21 @@ Expr::is_sop() const
 }
 
 // リテラル数を得る．
-ymuint
+int
 Expr::litnum() const
 {
   return root()->litnum();
 }
 
 // 特定の変数のリテラル数を得る．
-ymuint
+int
 Expr::litnum(VarId varid) const
 {
   return root()->litnum(varid);
 }
 
 // 特定の変数の特定の極性のリテラル数を得る．
-ymuint
+int
 Expr::litnum(VarId varid,
 		bool inv) const
 {
@@ -529,14 +529,14 @@ Expr::litnum(VarId varid,
 }
 
 // @brief 使われている変数の最大の番号を得る．
-ymuint
+int
 Expr::input_size() const
 {
   return root()->input_size();
 }
 
 // SOP形式に展開したときのキューブ数を得る．
-ymuint
+int
 Expr::sop_cubenum() const
 {
   SopLit l = root()->soplit(false);
@@ -544,7 +544,7 @@ Expr::sop_cubenum() const
 }
 
 // SOP形式に展開した時のリテラル数を見積もる．
-ymuint
+int
 Expr::sop_litnum() const
 {
   SopLit l = root()->soplit(false);
@@ -552,7 +552,7 @@ Expr::sop_litnum() const
 }
 
 // SOP形式に展開した時の varid 番めの変数のリテラルの出現回数を得る．
-ymuint
+int
 Expr::sop_litnum(VarId varid) const
 {
   SopLit l = root()->soplit(false, varid);
@@ -561,51 +561,51 @@ Expr::sop_litnum(VarId varid) const
 
 // SOP形式に展開した時の varid 番めの変数の極性が pol のリテラル
 // の出現回数を得る．
-ymuint
+int
 Expr::sop_litnum(VarId varid,
-		    bool inv) const
+		 bool inv) const
 {
   SopLit l = root()->soplit(false, varid, inv);
   return l.nl();
 }
 
 // @brief 使用されているメモリ量を返す．
-ymuint
+int
 Expr::used_size()
 {
   return ExprMgr::the_obj().used_size();
 }
 
 // 現在使用中のノード数を返す．
-ymuint
+int
 Expr::node_num()
 {
   return ExprMgr::the_obj().node_num();
 }
 
 // @brief used_size() の最大値を返す．
-ymuint
+int
 Expr::max_used_size()
 {
   return ExprMgr::the_obj().max_used_size();
 }
 
 // @brief nodenum() の最大値を返す．
-ymuint
+int
 Expr::max_node_num()
 {
   return ExprMgr::the_obj().max_node_num();
 }
 
 // @brief 実際に確保したメモリ量を返す．
-ymuint
+int
 Expr::allocated_size()
 {
   return ExprMgr::the_obj().allocated_size();
 }
 
 // @brief 実際に確保した回数を返す．
-ymuint
+int
 Expr::allocated_count()
 {
   return ExprMgr::the_obj().allocated_count();
@@ -622,7 +622,7 @@ Expr::print_stats(ostream& s)
 // エラーが起きたら msg にエラーメッセージをセットし, false を返す．
 bool
 Expr::read_from_stream(istream& in,
-			  string& err_msg)
+		       string& err_msg)
 {
   Expr expr = stream_to_expr(in, err_msg);
   if ( err_msg != string() ) {
@@ -638,12 +638,12 @@ Expr::read_from_stream(istream& in,
 // エラーが起きたら msg にエラーメッセージをセットする．
 Expr
 Expr::stream_to_expr(istream& in,
-			string& err_msg)
+		     string& err_msg)
 {
   err_msg = string();
   try {
     ExprParser p(&in);
-    return p.get_expr(kTokenEND);
+    return p.get_expr(ExprToken::END);
   }
   catch ( SyntaxError e ) {
     err_msg = e.mMsg;
@@ -693,10 +693,10 @@ write_expr(ODO& s,
     ASSERT_NOT_REACHED;
   }
 
-  ymuint32 nc = expr.child_num();
+  int nc = expr.child_num();
   s << type
     << nc;
-  for (ymuint i = 0; i < nc; ++ i) {
+  for (int i = 0; i < nc; ++ i) {
     write_expr(s, expr.child(i));
   }
 }
@@ -730,10 +730,10 @@ read_expr(IDO& s)
   }
 
   // 残りは論理演算
-  ymuint32 nc;
+  int nc;
   s >> nc;
   vector<Expr> child_list(nc);
-  for (ymuint i = 0; i < nc; ++ i) {
+  for (int i = 0; i < nc; ++ i) {
     child_list[i] = read_expr(s);
   }
 

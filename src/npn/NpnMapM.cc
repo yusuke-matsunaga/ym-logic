@@ -30,8 +30,8 @@ NpnMapM::NpnMapM() :
 // @param[in] ni 入力数
 // @param[in] no 出力数
 // @note 各変数の変換内容は不正な値になっている．
-NpnMapM::NpnMapM(ymuint ni,
-		 ymuint no) :
+NpnMapM::NpnMapM(int ni,
+		 int no) :
   mInputNum(0),
   mOutputNum(0),
   mMapArray(nullptr)
@@ -65,11 +65,11 @@ NpnMapM::operator=(const NpnMapM& src)
 void
 NpnMapM::copy(const NpnMapM& src)
 {
-  ymuint ni = src.mInputNum;
-  ymuint no = src.mOutputNum;
+  int ni = src.mInputNum;
+  int no = src.mOutputNum;
   resize(ni, no);
-  ymuint n = ni + no;
-  for (ymuint i = 0; i < n; ++ i) {
+  int n = ni + no;
+  for (int i = 0; i < n; ++ i) {
     mMapArray[i] = src.mMapArray[i];
   }
 }
@@ -82,7 +82,7 @@ NpnMapM::NpnMapM(const NpnMap& src) :
   mMapArray(nullptr)
 {
   resize(src.input_num(), 1);
-  for (ymuint i = 0; i < mInputNum; ++ i) {
+  for (int i = 0; i < mInputNum; ++ i) {
     mMapArray[i] = src.imap(VarId(i));
   }
   set_omap(VarId(0), VarId(0), src.oinv());
@@ -99,8 +99,8 @@ NpnMapM::~NpnMapM()
 void
 NpnMapM::clear()
 {
-  ymuint n = mInputNum + mOutputNum;
-  for (ymuint i = 0; i < n; ++ i) {
+  int n = mInputNum + mOutputNum;
+  for (int i = 0; i < n; ++ i) {
     mMapArray[i] = NpnVmap::invalid();
   }
 }
@@ -110,10 +110,10 @@ NpnMapM::clear()
 // @param[in] no 出力数
 // @note 以前の内容はクリアされる．
 void
-NpnMapM::resize(ymuint ni,
-		ymuint no)
+NpnMapM::resize(int ni,
+		int no)
 {
-  ymuint n = ni + no;
+  int n = ni + no;
   if ( mInputNum + mOutputNum != n ) {
     delete [] mMapArray;
     mMapArray = new NpnVmap[n];
@@ -127,14 +127,14 @@ NpnMapM::resize(ymuint ni,
 // @param[in] ni 入力数
 // @param[in] no 出力数
 void
-NpnMapM::set_identity(ymuint ni,
-		      ymuint no)
+NpnMapM::set_identity(int ni,
+		      int no)
 {
   resize(ni, no);
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     set_imap(VarId(i), VarId(i), false);
   }
-  for (ymuint i = 0; i < no; ++ i) {
+  for (int i = 0; i < no; ++ i) {
     set_omap(VarId(i), VarId(i), false);
   }
 }
@@ -147,7 +147,7 @@ void
 NpnMapM::set_imap(VarId var,
 		  NpnVmap imap)
 {
-  ymuint pos = var.val();
+  int pos = var.val();
   if ( pos < input_num() ) {
     mMapArray[pos] = imap;
   }
@@ -161,7 +161,7 @@ void
 NpnMapM::set_omap(VarId var,
 		  NpnVmap omap)
 {
-  ymuint pos = var.val();
+  int pos = var.val();
   if ( pos < output_num() ) {
     mMapArray[pos + mInputNum] = omap;
   }
@@ -176,8 +176,8 @@ NpnMapM::operator==(const NpnMapM& src) const
   if ( src.mInputNum != mInputNum || src.mOutputNum != mOutputNum ) {
     return false;
   }
-  ymuint n = mInputNum + mOutputNum;
-  for (ymuint i = 0; i < n; ++ i) {
+  int n = mInputNum + mOutputNum;
+  for (int i = 0; i < n; ++ i) {
     if ( mMapArray[i] != src.mMapArray[i] ) {
       return false;
     }
@@ -192,12 +192,12 @@ NpnMapM::operator==(const NpnMapM& src) const
 NpnMapM
 inverse(const NpnMapM& src)
 {
-  ymuint ni = src.input_num();
-  ymuint no = src.output_num();
+  int ni = src.input_num();
+  int no = src.output_num();
 
   NpnMapM ans(ni, no);
 
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     VarId src_var(i);
     NpnVmap imap = src.imap(src_var);
     if ( imap.is_invalid() ) {
@@ -208,7 +208,7 @@ inverse(const NpnMapM& src)
     bool inv = imap.inv();
     ans.set_imap(dst_var, src_var, inv);
   }
-  for (ymuint i = 0; i < no; ++ i) {
+  for (int i = 0; i < no; ++ i) {
     VarId src_var(i);
     NpnVmap omap = src.omap(src_var);
     if ( omap.is_invalid() ) {
@@ -232,8 +232,8 @@ NpnMapM
 operator*(const NpnMapM& src1,
 	  const NpnMapM& src2)
 {
-  ymuint ni = src1.input_num();
-  ymuint no = src1.output_num();
+  int ni = src1.input_num();
+  int no = src1.output_num();
   if ( ni != src2.input_num() || no != src2.output_num() ) {
     // 不正な値を返す．
     return NpnMapM(ni, no);
@@ -241,7 +241,7 @@ operator*(const NpnMapM& src1,
 
   NpnMapM ans(ni, no);
 
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     VarId var1(i);
     NpnVmap imap1 = src1.imap(var1);
     if ( imap1.is_invalid() ) {
@@ -258,7 +258,7 @@ operator*(const NpnMapM& src1,
     ans.set_imap(var1, var3, inv2 ^ inv3);
   }
 
-  for (ymuint i = 0; i < no; ++ i) {
+  for (int i = 0; i < no; ++ i) {
     VarId var1(i);
     NpnVmap omap1 = src1.omap(var1);
     if ( omap1.is_invalid() ) {
@@ -289,7 +289,7 @@ operator<<(ostream& s,
   const char* comma = "";
 
   s << "INPUT(";
-  for (ymuint i = 0; i < map.input_num(); ++ i) {
+  for (int i = 0; i < map.input_num(); ++ i) {
     s << comma;
     comma = ", ";
     s << i << " ==> ";
@@ -310,7 +310,7 @@ operator<<(ostream& s,
 
   comma = "";
   s << " OUTPUT(";
-  for (ymuint i = 0; i < map.output_num(); ++ i) {
+  for (int i = 0; i < map.output_num(); ++ i) {
     s << comma;
     comma = ", ";
     s << i << " ==> ";
@@ -337,18 +337,18 @@ ODO&
 operator<<(ODO& bos,
 	   const NpnMapM& map)
 {
-  ymuint32 ni = map.input_num();
+  int ni = map.input_num();
   bos << ni;
 
-  ymuint32 no = map.output_num();
+  int no = map.output_num();
   bos << no;
 
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     NpnVmap vmap = map.imap(VarId(i));
     bos << vmap;
   }
 
-  for (ymuint i = 0; i < no; ++ i) {
+  for (int i = 0; i < no; ++ i) {
     NpnVmap vmap = map.omap(VarId(i));
     bos << vmap;
   }
@@ -361,18 +361,18 @@ IDO&
 operator>>(IDO& bis,
 	   NpnMapM& map)
 {
-  ymuint32 ni;
-  ymuint32 no;
+  int ni;
+  int no;
   bis >> ni >> no;
   map.resize(ni, no);
 
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     NpnVmap vmap;
     bis >> vmap;
     map.set_imap(VarId(i), vmap);
   }
 
-  for (ymuint i = 0; i < no; ++ i) {
+  for (int i = 0; i < no; ++ i) {
     NpnVmap vmap;
     bis >> vmap;
     map.set_omap(VarId(i), vmap);

@@ -17,34 +17,34 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 /// @brief トークンの種類を表す列挙型．
 //////////////////////////////////////////////////////////////////////
-enum tToken {
+enum class ExprToken {
   /// 終了
-  kTokenEND,
+  END,
   /// 0
-  kTokenZERO,
+  ZERO,
   /// 1
-  kTokenONE,
+  ONE,
   /// 数字(変数番号)
-  kTokenNUM,
+  NUM,
   /// 左かっこ
-  kTokenLP,
+  LP,
   /// 右かっこ
-  kTokenRP,
+  RP,
   /// 論理積
-  kTokenAND,
+  AND,
   /// 論理和
-  kTokenOR,
+  OR,
   /// 排他的論理和
-  kTokenXOR,
+  XOR,
   /// 否定
-  kTokenNOT,
+  NOT,
   /// エラー
-  kTokenERR
+  ERR
 };
 
 /// @brief トークンを出力する．主にデバッグ用
 ostream& operator<<(ostream& s,
-		    tToken token);
+		    ExprToken token);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -87,9 +87,9 @@ public:
   str_to_literal(const string& str);
 
   /// @brief トークンを一つ読み出す．
-  /// @param[out] lit_id トークンが kTokenNUM の時にはリテラル番号を入れる．
+  /// @param[out] lit_id トークンが ExprToken::NUM の時にはリテラル番号を入れる．
   /// @return 読み出されたトークン値
-  tToken
+  ExprToken
   get_token(VarId& lit_id);
 
   /// @brief 次のトークンが AND ならそれを読み出し true を返す．
@@ -108,7 +108,7 @@ public:
 
   /// @brief end_token で終わる論理式を読み出し Expr に変換する．
   Expr
-  get_expr(tToken end_token);
+  get_expr(ExprToken end_token);
 
 
 private:

@@ -91,7 +91,7 @@ public:
   is_op() const;
 
   /// @brief 演算子ノードの場合に項の数を返す．
-  ymuint
+  int
   child_num() const;
 
   /// @brief 演算子ノードの場合に子供のノードを返す．
@@ -99,7 +99,7 @@ public:
   /// @note 演算子ノード以外の場合と pos が範囲外の場合には定数0を返す．
   /// 通常は定数ノードが子供に含まれることはないのでエラーとわかる．
   const ExprNode*
-  child(ymuint pos) const;
+  child(int pos) const;
 
   /// @brief vals の値にしたがった評価を行う．
   ymulong
@@ -109,7 +109,7 @@ public:
   /// @brief 真理値表を作成する．
   /// @param[in] ni 入力数
   TvFunc
-  make_tv(ymuint ni) const;
+  make_tv(int ni) const;
 
   /// @brief 定数,リテラルもしくは子供がリテラルのノードの時に true を返す．
   bool
@@ -132,12 +132,12 @@ public:
   is_sop() const;
 
   /// @brief リテラル数を返す．
-  ymuint
+  int
   litnum() const;
 
   /// @brief 特定の変数のリテラルの出現回数を返す．
   /// @param[in] varid 計測対象の変数番号
-  ymuint
+  int
   litnum(VarId varid) const;
 
   /// @brief 特定の変数の特定の極性のリテラルの出現回数を返す．
@@ -145,12 +145,12 @@ public:
   /// @param[in] inv 計測対象の極性
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
-  ymuint
+  int
   litnum(VarId varid,
 	 bool inv) const;
 
   /// @brief 使われている変数の最大の番号 + 1を得る．
-  ymuint
+  int
   input_size() const;
 
   /// @brief SOP 形式に展開したときの積項数とリテラル数を見積もる．
@@ -215,12 +215,12 @@ public:
 private:
 
   // 参照回数を得る．
-  ymuint
+  int
   ref() const;
 
   // 参照回数をセットする．
   void
-  ref(ymuint ref) const;
+  ref(int ref) const;
 
   // 自殺する．
   void
@@ -233,10 +233,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 参照回数＋ノードタイプ(3ビット)
-  ymuint32 mRefType;
+  int mRefType;
 
   // 子供の数 もしくは 変数番号
-  ymuint32 mNc;
+  int mNc;
 
   // 子を指すポインタの配列
   const ExprNode* mChildArray[1];
@@ -368,7 +368,7 @@ ExprNode::is_op() const
 }
 
 inline
-ymuint
+int
 ExprNode::child_num() const
 {
   return is_op() ? mNc : 0;
@@ -376,22 +376,22 @@ ExprNode::child_num() const
 
 inline
 const ExprNode*
-ExprNode::child(ymuint pos) const
+ExprNode::child(int pos) const
 {
   ASSERT_COND(pos < child_num() );
   return mChildArray[pos];
 }
 
 inline
-ymuint
+int
 ExprNode::ref() const
 {
-  return static_cast<ymuint>(mRefType >> 3);
+  return static_cast<int>(mRefType >> 3);
 }
 
 inline
 void
-ExprNode::ref(ymuint ref) const
+ExprNode::ref(int ref) const
 {
   ExprNode* node = const_cast<ExprNode*>(this);
   // 昔の参照回数を落とす．
@@ -415,7 +415,7 @@ inline
 void
 ExprNode::dec_ref() const
 {
-  ymuint r = ref();
+  int r = ref();
   // MAX の時は減らさない．
   if ( r < kRefMax ) {
     ExprNode* node = const_cast<ExprNode*>(this);

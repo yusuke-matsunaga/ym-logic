@@ -38,7 +38,7 @@ void
 walsh_w0_refine(const TvFunc& func,
 		vector<PolConf>& polconf_list)
 {
-  ymuint ni = func.input_num();
+  int ni = func.input_num();
 
   if ( debug ) {
     cout << "before walsh_w0_refine()" << endl;
@@ -46,12 +46,12 @@ walsh_w0_refine(const TvFunc& func,
   }
 
   // 重み別 w0 係数を用いて極性の決定を行う．
-  ymuint w = 0;
+  int w = 0;
   for (w = 0; w <= ni && polconf_list.size() > 1; ++ w) {
     bool first = true;
     int max_d0 = 0;
-    ymuint wpos = 0;
-    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+    int wpos = 0;
+    for (int i = 0; i < polconf_list.size(); ++ i) {
       PolConf polconf = polconf_list[i];
       int d0 = func.walsh_w0(w, polconf.oinv(), polconf.iinv_bits());
 

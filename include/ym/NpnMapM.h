@@ -37,8 +37,8 @@ public:
   /// @param[in] ni 入力数
   /// @param[in] no 出力数
   /// @note 各変数の変換内容は不正な値になっている．
-  NpnMapM(ymuint ni,
-	  ymuint no);
+  NpnMapM(int ni,
+	  int no);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
@@ -74,15 +74,15 @@ public:
   /// @param[in] no 出力数
   /// @note 以前の内容はクリアされる．
   void
-  resize(ymuint ni,
-	 ymuint no);
+  resize(int ni,
+	 int no);
 
   /// @brief 恒等変換を表すように設定する．
   /// @param[in] ni 入力数
   /// @param[in] no 出力数
   void
-  set_identity(ymuint ni,
-	       ymuint no);
+  set_identity(int ni,
+	       int no);
 
   /// @brief 入力の変換内容の設定
   /// @param[in] src_var 入力番号
@@ -130,11 +130,11 @@ public:
 
   /// @brief 入力数を得る．
   /// @return 入力数
-  ymuint
+  int
   input_num() const;
 
   /// @brief 出力数を得る．
-  ymuint
+  int
   output_num() const;
 
   /// @brief 入力の変換情報の取得
@@ -176,10 +176,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  ymuint32 mInputNum;
+  int mInputNum;
 
   // 出力数
-  ymuint32 mOutputNum;
+  int mOutputNum;
 
   // 入力と出力のマッピング情報
   NpnVmap* mMapArray;
@@ -243,7 +243,7 @@ operator>>(IDO& s,
 
 // 入力数を得る．
 inline
-ymuint
+int
 NpnMapM::input_num() const
 {
   return mInputNum;
@@ -251,7 +251,7 @@ NpnMapM::input_num() const
 
 // @brief 出力数を得る．
 inline
-ymuint
+int
 NpnMapM::output_num() const
 {
   return mOutputNum;
@@ -262,7 +262,7 @@ inline
 NpnVmap
 NpnMapM::imap(VarId var) const
 {
-  ymuint idx = var.val();
+  int idx = var.val();
   if ( idx < input_num() ) {
     return mMapArray[idx];
   }
@@ -279,7 +279,7 @@ inline
 NpnVmap
 NpnMapM::omap(VarId var) const
 {
-  ymuint idx = var.val();
+  int idx = var.val();
   if ( idx < output_num() ) {
     return mMapArray[idx + input_num()];
   }

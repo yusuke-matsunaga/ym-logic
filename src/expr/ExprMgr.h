@@ -83,7 +83,7 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には重複を取り除く
   ExprNodePtr
-  make_and(ymuint begin);
+  make_and(int begin);
 
   /// @brief OR ノードの生成
   /// @param[in] begin ノードスタック中の開始位置
@@ -92,7 +92,7 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には重複を取り除く
   ExprNodePtr
-  make_or(ymuint begin);
+  make_or(int begin);
 
   /// @brief XOR ノードの生成
   /// @param[in] begin ノードスタック中の開始位置
@@ -101,21 +101,21 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には個数の偶奇に応じた処理を行う．
   ExprNodePtr
-  make_xor(ymuint begin);
+  make_xor(int begin);
 
   /// @brief ノードスタックにノードを入れる．
   void
   nodestack_push(const ExprNode* node);
 
   /// @brief ノードスタックの先頭位置を返す．
-  ymuint
+  int
   nodestack_top();
 
   /// @brief ノードスタックの先頭位置を戻す．
   /// @note この関数を明示的に使う必要があるののはノードを
   /// プッシュしておきながら make_XXX を呼ばないとき
   void
-  nodestack_pop(ymuint oldtop);
+  nodestack_pop(int oldtop);
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -169,27 +169,27 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 使用されているメモリ量を返す．
-  ymuint
+  int
   used_size();
 
   /// @brief 使用されているノード数を返す．
-  ymuint
+  int
   node_num();
 
   /// @brief used_size() の最大値を返す．
-  ymuint
+  int
   max_used_size();
 
   /// @brief nodenum() の最大値を返す．
-  ymuint
+  int
   max_node_num();
 
   /// @brief 実際に確保したメモリ量を返す．
-  ymuint
+  int
   allocated_size();
 
   /// @brief 実際に確保した回数を返す．
-  ymuint
+  int
   allocated_count();
 
   /// @brief 内部状態を出力する．
@@ -242,8 +242,8 @@ private:
 
   // ExprNode の入力数から必要なサイズを計算する．
   static
-  ymuint
-  calc_size(ymuint nc);
+  int
+  calc_size(int nc);
 
 
 private:
@@ -270,13 +270,13 @@ private:
   ExprNodeList mNodeStack;
 
   // 使用中のノード数
-  ymuint32 mNodeNum;
+  int mNodeNum;
 
   // 使用した最大のノード数
-  ymuint32 mMaxNodeNum;
+  int mMaxNodeNum;
 
   // 絶対に開放されないノード数
-  ymuint32 mStuckNodeNum;
+  int mStuckNodeNum;
 
 };
 

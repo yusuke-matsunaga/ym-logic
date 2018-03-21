@@ -22,6 +22,7 @@ BEGIN_NAMESPACE_YM
 class TvFuncM
 {
 public:
+  using WordType = TvFunc::WordType;
 
   /// @brief 入力数と出力数を指定したコンストラクタ
   /// @param[in] ni 入力数
@@ -255,7 +256,7 @@ public:
   nblk() const;
 
   /// @brief 生のデータを得る．
-  ymuint64
+  WordType
   raw_data(int blk) const;
 
 
@@ -327,7 +328,7 @@ private:
   int mBlockNum;
 
   // パックされた真理値ベクトル
-  ymuint64* mVector;
+  WordType* mVector;
 
 };
 
@@ -508,7 +509,7 @@ TvFuncM::nblk() const
 
 // 生のデータを得る．
 inline
-ymuint64
+TvFuncM::WordType
 TvFuncM::raw_data(int blk) const
 {
   return mVector[blk];
@@ -519,7 +520,7 @@ inline
 int
 TvFuncM::nblock(int ni)
 {
-  const int wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(WordType) * 8;
   return ((1 << ni) + wsize - 1) / wsize;
 }
 
@@ -528,7 +529,7 @@ inline
 int
 TvFuncM::block(int pos)
 {
-  const int wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(WordType) * 8;
   return pos / wsize;
 }
 
@@ -537,7 +538,7 @@ inline
 int
 TvFuncM::shift(int pos)
 {
-  const int wsize = sizeof(ymuint64) * 8;
+  const int wsize = sizeof(WordType) * 8;
   return pos % wsize;
 }
 

@@ -30,11 +30,11 @@ NpnMap::NpnMap() :
 
 // 入力数を指定したコンストラクタ
 // 恒等変換になる．
-NpnMap::NpnMap(ymuint ni) :
+NpnMap::NpnMap(int ni) :
   mNiPol(0)
 {
   set_ni(ni, ni);
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     mImap[i] = NpnVmap(VarId(i), false);
   }
 }
@@ -44,8 +44,8 @@ NpnMap::NpnMap(ymuint ni) :
 // @param[in] ni2 写像後の入力数
 //
 // 内容は不定
-NpnMap::NpnMap(ymuint ni,
-	       ymuint ni2) :
+NpnMap::NpnMap(int ni,
+	       int ni2) :
   mNiPol(0)
 {
   set_ni(ni, ni2);
@@ -55,7 +55,7 @@ NpnMap::NpnMap(ymuint ni,
 NpnMap::NpnMap(const NpnMap& src) :
   mNiPol(src.mNiPol)
 {
-  for (ymuint i = 0; i < input_num(); ++ i) {
+  for (int i = 0; i < input_num(); ++ i) {
     mImap[i] = src.mImap[i];
   }
 }
@@ -65,7 +65,7 @@ const NpnMap&
 NpnMap::operator=(const NpnMap& src)
 {
   mNiPol = src.mNiPol;
-  for (ymuint i = 0; i < input_num(); ++ i) {
+  for (int i = 0; i < input_num(); ++ i) {
     mImap[i] = src.mImap[i];
   }
   return *this;
@@ -83,17 +83,17 @@ void
 NpnMap::clear()
 {
   mNiPol &= ~(1UL);
-  for (ymuint i = 0; i < input_num(); ++ i) {
+  for (int i = 0; i < input_num(); ++ i) {
     mImap[i] = NpnVmap::invalid();
   }
 }
 
 // 入力数を再設定して内容をクリアする．
 void
-NpnMap::resize(ymuint new_ni)
+NpnMap::resize(int new_ni)
 {
   set_ni(new_ni, new_ni);
-  for (ymuint i = 0; i < new_ni; ++ i) {
+  for (int i = 0; i < new_ni; ++ i) {
     mImap[i] = NpnVmap::invalid();
   }
 }
@@ -104,22 +104,22 @@ NpnMap::resize(ymuint new_ni)
 //
 // 以前の内容はクリアされる．
 void
-NpnMap::resize(ymuint ni,
-	       ymuint ni2)
+NpnMap::resize(int ni,
+	       int ni2)
 {
   set_ni(ni, ni2);
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     mImap[i] = NpnVmap::invalid();
   }
 }
 
 // 恒等変換を表すように設定する．
 void
-NpnMap::set_identity(ymuint new_ni,
+NpnMap::set_identity(int new_ni,
 		     bool oinv)
 {
   set_ni(new_ni, new_ni);
-  for (ymuint i = 0; i < new_ni; ++ i) {
+  for (int i = 0; i < new_ni; ++ i) {
     mImap[i] = NpnVmap(VarId(i), false);
   }
   set_oinv(oinv);
@@ -133,7 +133,7 @@ void
 NpnMap::set(VarId var,
 	    NpnVmap imap)
 {
-  ymuint src_pos = var.val();
+  int src_pos = var.val();
   if ( src_pos < input_num() ) {
     mImap[src_pos] = imap;
   }
@@ -158,7 +158,7 @@ NpnMap::operator==(const NpnMap& src) const
   if ( mNiPol != src.mNiPol ) {
     return false;
   }
-  for (ymuint i = 0; i < input_num(); ++ i) {
+  for (int i = 0; i < input_num(); ++ i) {
     if ( mImap[i] != src.mImap[i] ) {
       return false;
     }
@@ -176,10 +176,10 @@ inverse(const NpnMap& src)
 	 << endl;
   }
 
-  ymuint src_ni = src.input_num();
-  ymuint dst_ni = src.input_num2();
+  int src_ni = src.input_num();
+  int dst_ni = src.input_num2();
   NpnMap dst_map(dst_ni, src_ni);
-  for (ymuint i = 0; i < src_ni; ++ i) {
+  for (int i = 0; i < src_ni; ++ i) {
     VarId src_var(i);
     NpnVmap imap = src.imap(src_var);
     if ( !imap.is_invalid() ) {
@@ -221,10 +221,10 @@ operator*(const NpnMap& src1,
 	 << endl;
   }
 
-  ymuint ni1 = src1.input_num();
-  ymuint ni1_2 = src1.input_num2();
-  ymuint ni2 = src2.input_num();
-  ymuint ni2_2 = src2.input_num2();
+  int ni1 = src1.input_num();
+  int ni1_2 = src1.input_num2();
+  int ni2 = src2.input_num();
+  int ni2_2 = src2.input_num2();
   if ( ni1_2 != ni2 ) {
     if ( debug_npn_map ) {
       cerr << "src1 * src2: src1の値域とsrc2の定義域が一致しません．";
@@ -234,7 +234,7 @@ operator*(const NpnMap& src1,
 
   NpnMap dst_map(ni1, ni2_2);
   dst_map.set_oinv(src1.oinv() ^ src2.oinv());
-  for (ymuint i1 = 0; i1 < ni1; ++ i1) {
+  for (int i1 = 0; i1 < ni1; ++ i1) {
     VarId var1(i1);
     NpnVmap imap1 = src1.imap(var1);
     if ( imap1.is_invalid() ) {
@@ -275,7 +275,7 @@ operator<<(ostream& s,
   const char* comma = "";
   s << "MAP: " << map.input_num() << " -> " << map.input_num2() << ", "
     << "INPUT(";
-  for (ymuint i = 0; i < map.input_num(); ++ i) {
+  for (int i = 0; i < map.input_num(); ++ i) {
     s << comma;
     comma = ", ";
     s << i << " ==> ";
@@ -308,10 +308,10 @@ ODO&
 operator<<(ODO& bos,
 	   const NpnMap& map)
 {
-  ymuint32 ni = map.input_num();
-  ymuint32 ni2 = map.input_num2();
+  int ni = map.input_num();
+  int ni2 = map.input_num2();
   bos << ni << ni2;
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     NpnVmap vmap = map.imap(VarId(i));
     bos << vmap;
   }
@@ -325,11 +325,11 @@ IDO&
 operator>>(IDO& bis,
 	   NpnMap& map)
 {
-  ymuint32 ni;
-  ymuint32 ni2;
+  int ni;
+  int ni2;
   bis >> ni >> ni2;
   map.resize(ni, ni2);
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     NpnVmap vmap;
     bis >> vmap;
     map.set(VarId(i), vmap);

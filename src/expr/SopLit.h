@@ -22,15 +22,15 @@ class SopLit
 {
 public:
   /// コンストラクタ
-  SopLit(ymuint np = 0,
-	 ymuint nl = 0);
+  SopLit(int np = 0,
+	 int nl = 0);
 
   /// 積項数を得る．
-  ymuint
+  int
   np() const;
 
   /// リテラル数を得る．
-  ymuint
+  int
   nl() const;
 
   /// 和を取って代入する．
@@ -59,10 +59,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 積項数
-  ymuint32 mNp;
+  int mNp;
 
   // リテラル数
-  ymuint32 mNl;
+  int mNl;
 };
 
 
@@ -72,22 +72,22 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 inline
-SopLit::SopLit(ymuint np,
-	       ymuint nl) :
+SopLit::SopLit(int np,
+	       int nl) :
   mNp(np),
   mNl(nl)
 {
 }
 
 inline
-ymuint
+int
 SopLit::np() const
 {
   return mNp;
 }
 
 inline
-ymuint
+int
 SopLit::nl() const
 {
   return mNl;
@@ -106,7 +106,7 @@ inline
 const SopLit&
 SopLit::operator*=(const SopLit& src)
 {
-  ymuint old_np = mNp;
+  int old_np = mNp;
   mNp *= src.mNp;
   mNl = mNl * src.mNp + src.mNl * old_np;
   return *this;

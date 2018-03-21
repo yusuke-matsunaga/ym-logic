@@ -42,7 +42,7 @@ public:
   /// 当たり前だが定義域と値域のサイズ(入力数)は同じ
   static
   NpnMap
-  identity(ymuint ni,
+  identity(int ni,
 	   bool oinv = false);
 
   /// @brief 空のコンストラクタ．
@@ -56,15 +56,15 @@ public:
   /// 定義域と値域のサイズは同じになる．
   /// 内容は不定
   explicit
-  NpnMap(ymuint ni);
+  NpnMap(int ni);
 
   /// @brief 写像前と後の入力数を指定したコンストラクタ
   /// @param[in] ni 写像前の入力数
   /// @param[in] ni2 写像後の入力数
   ///
   /// 内容は不定
-  NpnMap(ymuint ni,
-	 ymuint ni2);
+  NpnMap(int ni,
+	 int ni2);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
@@ -98,7 +98,7 @@ public:
   /// 写像前と写像後の入力数が等しい場合．
   /// 以前の内容はクリアされる．
   void
-  resize(ymuint ni);
+  resize(int ni);
 
   /// @brief 入力数を再設定する．
   /// @param[in] ni 写像前の入力数
@@ -106,14 +106,14 @@ public:
   ///
   /// 以前の内容はクリアされる．
   void
-  resize(ymuint ni,
-	 ymuint ni2);
+  resize(int ni,
+	 int ni2);
 
   /// @brief 恒等変換を表すように設定する．
   /// @param[in] ni 入力数
   /// @param[in] oinv 出力を反転する時 true にするフラグ
   void
-  set_identity(ymuint ni,
+  set_identity(int ni,
 	       bool oinv = false);
 
   /// @brief 入力の変換内容の設定
@@ -150,12 +150,12 @@ public:
 
   /// @brief 写像前の入力数を得る．
   /// @return 入力数
-  ymuint
+  int
   input_num() const;
 
   /// @brief 写像後の入力数を得る．
   /// @return 入力数
-  ymuint
+  int
   input_num2() const;
 
   /// @brief 入力の変換情報の取得
@@ -190,8 +190,8 @@ private:
   ///
   /// 出力の極性は変化しない．
   void
-  set_ni(ymuint ni,
-	 ymuint ni2);
+  set_ni(int ni,
+	 int ni2);
 
 
 private:
@@ -200,7 +200,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数(8bit x 2) + 出力の極性
-  ymuint32 mNiPol;
+  ymuint mNiPol;
 
   // 入力のマッピング情報
   NpnVmap mImap[TvFunc::kMaxNi];
@@ -279,7 +279,7 @@ operator>>(IDO& s,
 // 当たり前だが定義域と値域のサイズ(入力数)は同じ
 inline
 NpnMap
-NpnMap::identity(ymuint ni,
+NpnMap::identity(int ni,
 		 bool oinv)
 {
   NpnMap ans;
@@ -289,7 +289,7 @@ NpnMap::identity(ymuint ni,
 
 // 入力数を得る．
 inline
-ymuint
+int
 NpnMap::input_num() const
 {
   return (mNiPol >> 1) & 0xffU;
@@ -298,7 +298,7 @@ NpnMap::input_num() const
 // @brief 写像後の入力数を得る．
 // @return 入力数
 inline
-ymuint
+int
 NpnMap::input_num2() const
 {
   return (mNiPol >> 9) & 0xffU;
@@ -309,7 +309,7 @@ inline
 NpnVmap
 NpnMap::imap(VarId var) const
 {
-  ymuint idx = var.val();
+  int idx = var.val();
   if ( idx < input_num() ) {
     return mImap[idx];
   }
@@ -346,8 +346,8 @@ NpnMap::set(VarId src_var,
 // 出力の極性は変化しない．
 inline
 void
-NpnMap::set_ni(ymuint ni,
-	       ymuint ni2)
+NpnMap::set_ni(int ni,
+	       int ni2)
 {
   mNiPol &= 1U;
   mNiPol |= (ni << 1) | (ni2 << 9);

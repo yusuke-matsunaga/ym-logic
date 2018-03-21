@@ -16,11 +16,11 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @brief NpnMap に変換する．
 // @param[in] ni 入力数
 NpnMap
-PolConf::to_npnmap(ymuint ni) const
+PolConf::to_npnmap(int ni) const
 {
   NpnMap map(ni);
   map.set_oinv(oinv());
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     map.set(VarId(i), VarId(i), iinv(i));
   }
   return map;
@@ -29,10 +29,10 @@ PolConf::to_npnmap(ymuint ni) const
 void
 print_polconf(ostream& s,
 	      const PolConf& polconf,
-	      ymuint ni)
+	      int ni)
 {
-  ymuint inv_bits = polconf.iinv_bits();
-  for (ymuint i = 0; i < ni; ++ i) {
+  ymuint32 inv_bits = polconf.iinv_bits();
+  for (int i = 0; i < ni; ++ i) {
     if ( inv_bits & (1U << i) ) {
       s << "N";
     }
@@ -53,7 +53,7 @@ print_polconf(ostream& s,
 void
 print_polconf_list(ostream& s,
 		   const vector<PolConf>& polconf_list,
-		   ymuint ni)
+		   int ni)
 {
   for (vector<PolConf>::const_iterator p = polconf_list.begin();
        p != polconf_list.end(); ++ p) {

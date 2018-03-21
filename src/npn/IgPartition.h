@@ -45,39 +45,39 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief グループ数を返す．
-  ymuint
+  int
   group_num() const;
 
   /// @brief グループ番号を返す．
   /// @param[in] pos 位置番号 ( 0 <= pos < group_num() )
-  ymuint
-  group_id(ymuint pos) const;
+  int
+  group_id(int pos) const;
 
   /// @brief グループの先頭の入力番号を返す．
   /// @param[in] gid グループ番号
-  ymuint
-  input_id(ymuint gid) const;
+  int
+  input_id(int gid) const;
 
   /// @brief 分割数を返す．
-  ymuint
+  int
   partition_num() const;
 
   /// @brief 分割のサイズを返す．
   /// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
-  ymuint
-  partition_size(ymuint pid) const;
+  int
+  partition_size(int pid) const;
 
   /// @brief 分割の開始位置を返す．
   /// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
-  ymuint
-  partition_begin(ymuint pid) const;
+  int
+  partition_begin(int pid) const;
 
   /// @brief 分割の終了位置を返す．
   /// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
   ///
   /// この位置は分割には含まれない．
-  ymuint
-  partition_end(ymuint pid) const;
+  int
+  partition_end(int pid) const;
 
   /// @brief すべての分割の要素数が1の時 true を返す．
   bool
@@ -86,7 +86,7 @@ public:
   /// @brief 指定した分割の要素数が1の時 true を返す．
   /// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
   bool
-  is_resolved(ymuint pid) const;
+  is_resolved(int pid) const;
 
   /// @brief 現在の状態を NpnMap に変換する．
   /// @param[in] polconf 極性情報
@@ -100,8 +100,8 @@ public:
   /// @param[in] cmp 2つの入力グループの大小比較関数オブジェクト
   /// @return 増えたグループ数を返す．
   template <typename T>
-  ymuint
-  refine(ymuint pid0,
+  int
+  refine(int pid0,
 	 T cmp);
 
   /// @brief 分割の要素数が1の分割を前に持ってくる．
@@ -112,8 +112,8 @@ public:
   /// @param[in] pid 分轄番号 ( 0 <= pid << partition_num() )
   /// @param[in] pos 要素の位置番号 ( partition_begin(pid) <= pos < partition_end(pid) )
   void
-  _refine(ymuint pid,
-	  ymuint pos);
+  _refine(int pid,
+	  int pos);
 
   /// @brief 内容を出力する．
   /// @param[in] s 出力先のストリーム
@@ -136,16 +136,16 @@ private:
   InputInfo mInputInfo;
 
   /// @brief グループ数
-  ymuint mGroupNum;
+  int mGroupNum;
 
   /// @brief 分割数
-  ymuint mPartitionNum;
+  int mPartitionNum;
 
   /// @brief グループ番号の配列
-  ymuint mGidArray[TvFunc::kMaxNi];
+  int mGidArray[TvFunc::kMaxNi];
 
   /// @brief 分割の開始位置
-  ymuint mBeginArray[TvFunc::kMaxNi];
+  int mBeginArray[TvFunc::kMaxNi];
 
 };
 
@@ -161,7 +161,7 @@ operator<<(ostream& s,
 
 // @brief グループ数を返す．
 inline
-ymuint
+int
 IgPartition::group_num() const
 {
   return mGroupNum;
@@ -170,8 +170,8 @@ IgPartition::group_num() const
 // @brief グループ番号を返す．
 // @param[in] pos 位置番号 ( 0 <= pos < group_num() )
 inline
-ymuint
-IgPartition::group_id(ymuint pos) const
+int
+IgPartition::group_id(int pos) const
 {
   ASSERT_COND( pos < group_num() );
   return mGidArray[pos];
@@ -180,15 +180,15 @@ IgPartition::group_id(ymuint pos) const
 // @brief グループの先頭の入力番号を返す．
 // @param[in] gid グループ番号
 inline
-ymuint
-IgPartition::input_id(ymuint gid) const
+int
+IgPartition::input_id(int gid) const
 {
   return mInputInfo.elem(gid, 0);
 }
 
 // @brief 分割数を返す．
 inline
-ymuint
+int
 IgPartition::partition_num() const
 {
   return mPartitionNum;
@@ -197,8 +197,8 @@ IgPartition::partition_num() const
 // @brief 分割のサイズを返す．
 // @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
 inline
-ymuint
-IgPartition::partition_size(ymuint pid) const
+int
+IgPartition::partition_size(int pid) const
 {
   return partition_end(pid) - partition_begin(pid);
 }
@@ -206,8 +206,8 @@ IgPartition::partition_size(ymuint pid) const
 // @brief 分割の開始位置を返す．
 // @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
 inline
-ymuint
-IgPartition::partition_begin(ymuint pid) const
+int
+IgPartition::partition_begin(int pid) const
 {
   ASSERT_COND( pid < partition_num() );
   return mBeginArray[pid];
@@ -218,8 +218,8 @@ IgPartition::partition_begin(ymuint pid) const
 //
 // この位置は分割には含まれない．
 inline
-ymuint
-IgPartition::partition_end(ymuint pid) const
+int
+IgPartition::partition_end(int pid) const
 {
   ASSERT_COND( pid < partition_num() );
   return mBeginArray[pid + 1];
@@ -229,7 +229,7 @@ IgPartition::partition_end(ymuint pid) const
 // @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
 inline
 bool
-IgPartition::is_resolved(ymuint pid) const
+IgPartition::is_resolved(int pid) const
 {
   return partition_size(pid) == 1;
 }
@@ -240,24 +240,24 @@ IgPartition::is_resolved(ymuint pid) const
 // @return 増えたグループ数を返す．
 template <typename T>
 inline
-ymuint
-IgPartition::refine(ymuint pid0,
+int
+IgPartition::refine(int pid0,
 		    T cmp)
 {
-  ymuint old_size = partition_num();
-  ymuint s = partition_begin(pid0);
-  ymuint e = partition_end(pid0);
+  int old_size = partition_num();
+  int s = partition_begin(pid0);
+  int e = partition_end(pid0);
   // mGidArray[s] 〜 mGidArray[e - 1] までを
   // cmp の降順に整列させる．
   // つまり
   // forall i, cmp.gt(mGidArray[i], mGidArray[i + 1]) == true
   // が成り立つ．
   // 要素数は多くないので単純なバブルソートを用いる．
-  for (ymuint i = s; i < e - 1; ++ i) {
-    ymuint max_gid = mGidArray[i];
-    ymuint max_pos = i;
-    for (ymuint j = i + 1; j < e; ++ j) {
-      ymuint gid1 = mGidArray[j];
+  for (int i = s; i < e - 1; ++ i) {
+    int max_gid = mGidArray[i];
+    int max_pos = i;
+    for (int j = i + 1; j < e; ++ j) {
+      int gid1 = mGidArray[j];
       if ( cmp.gt(gid1, max_gid) ) {
 	max_gid = gid1;
 	max_pos = j;
@@ -265,7 +265,7 @@ IgPartition::refine(ymuint pid0,
     }
     if ( max_pos != i ) {
       // i + 1 から max_pos までを1つずらす．
-      for (ymuint j = max_pos; j > i; -- j) {
+      for (int j = max_pos; j > i; -- j) {
 	mGidArray[j] = mGidArray[j - 1];
       }
       mGidArray[i] = max_gid;
@@ -273,13 +273,13 @@ IgPartition::refine(ymuint pid0,
   }
 
   // 等価なグループをまとめる．
-  ymuint prev_gid = mGidArray[s];
-  for (ymuint i = s + 1; i < e; ++ i) {
-    ymuint cur_gid = mGidArray[i];
+  int prev_gid = mGidArray[s];
+  for (int i = s + 1; i < e; ++ i) {
+    int cur_gid = mGidArray[i];
     if ( !cmp.eq(prev_gid, cur_gid) ) {
       // 新しい分割を作る．
       // pid0 以降の分割の情報を一つ右にずらす．
-      for (ymuint pid = mPartitionNum; pid > pid0; -- pid) {
+      for (int pid = mPartitionNum; pid > pid0; -- pid) {
 	mBeginArray[pid + 1] = mBeginArray[pid];
       }
       ++ mPartitionNum;

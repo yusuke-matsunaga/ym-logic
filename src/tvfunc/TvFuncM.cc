@@ -16,10 +16,12 @@
 
 //#define DEBUG
 
+BEGIN_NAMESPACE_YM
+
 BEGIN_NONAMESPACE
 
 // コファクターマスク
-ymuint64 c_masks[] = {
+TvFuncM::WordType c_masks[] = {
   0xAAAAAAAAAAAAAAAAULL,
   0xCCCCCCCCCCCCCCCCULL,
   0xF0F0F0F0F0F0F0F0ULL,
@@ -30,7 +32,7 @@ ymuint64 c_masks[] = {
 
 // 対称性を調べるためのテーブルその1
 // 同位相の時に用いる．
-ymuint64 sym_masks2[] = {
+TvFuncM::WordType sym_masks2[] = {
   0x2222222222222222ULL, // (1, 0)
   0x0A0A0A0A0A0A0A0AULL, // (2, 0)
   0x0C0C0C0C0C0C0C0CULL, // (2, 1)
@@ -50,7 +52,7 @@ ymuint64 sym_masks2[] = {
 
 // 対称性を調べるためのテーブルその2
 // 逆位相の時に用いる．
-ymuint64 sym_masks3[] = {
+TvFuncM::WordType sym_masks3[] = {
   0x1111111111111111ULL, // (1, 0)
   0x0505050505050505ULL, // (2, 0)
   0x0303030303030303ULL, // (2, 1)
@@ -70,8 +72,6 @@ ymuint64 sym_masks3[] = {
 
 END_NONAMESPACE
 
-BEGIN_NAMESPACE_YM
-
 //////////////////////////////////////////////////////////////////////
 // 論理関数を表すクラス
 //////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ TvFuncM::TvFuncM(int ni,
   mOutputNum(no),
   mBlockNum1(nblock(ni)),
   mBlockNum(mBlockNum1 * no),
-  mVector(new ymuint64[mBlockNum])
+  mVector(new TvFuncM::WordType[mBlockNum])
 {
   for ( int i = 0; i < mBlockNum; ++ i ) {
     mVector[i] = 0ULL;
@@ -108,7 +108,7 @@ TvFuncM::TvFuncM(const vector<TvFunc>& src_list)
   mOutputNum = no;
   mBlockNum1 = nblock(ni);
   mBlockNum = mBlockNum1 * no;
-  mVector = new ymuint64[mBlockNum];
+  mVector = new TvFuncM::WordType[mBlockNum];
   for ( int i = 0; i < no; ++ i ) {
     int offset = i * mBlockNum1;
     const TvFunc& src1 = src_list[i];
@@ -124,7 +124,7 @@ TvFuncM::TvFuncM(const TvFuncM& src) :
   mOutputNum(src.mOutputNum),
   mBlockNum1(src.mBlockNum1),
   mBlockNum(src.mBlockNum),
-  mVector(new ymuint64[mBlockNum])
+  mVector(new TvFuncM::WordType[mBlockNum])
 {
   for ( int i = 0; i < mBlockNum; ++ i ) {
     mVector[i] = src.mVector[i];
@@ -139,7 +139,7 @@ TvFuncM::TvFuncM(const TvFunc& src)
   mOutputNum = 1;
   mBlockNum1 = nblock(ni);
   mBlockNum = mBlockNum1;
-  mVector = new ymuint64[mBlockNum];
+  mVector = new TvFuncM::WordType[mBlockNum];
   for ( int i = 0; i < mBlockNum; ++ i ) {
     mVector[i] = src.raw_data(i);
   }
@@ -153,7 +153,7 @@ TvFuncM::operator=(const TvFuncM& src)
     delete [] mVector;
     mBlockNum1 = src.mBlockNum1;
     mBlockNum = src.mBlockNum;
-    mVector = new ymuint64[mBlockNum];
+    mVector = new TvFuncM::WordType[mBlockNum];
   }
   mInputNum = src.mInputNum;
   mOutputNum = src.mOutputNum;
@@ -220,8 +220,8 @@ TvFuncM::negate()
 
   default:
     {
-      ymuint64* endp = mVector + mBlockNum;
-      for ( ymuint64* bp = mVector; bp != endp; ++ bp ) {
+      TvFuncM::WordType* endp = mVector + mBlockNum;
+      for ( TvFuncM::WordType* bp = mVector; bp != endp; ++ bp ) {
 	*bp ^= ~(0ULL);
       }
     }
@@ -269,13 +269,13 @@ TvFuncM::set_cofactor(VarId varid,
 {
   int pos = varid.val();
   if ( pos < NIPW ) {
-    ymuint64 mask = c_masks[pos];
+    TvFuncM::WordType mask = c_masks[pos];
     if ( inv ) {
       mask = ~mask;
     }
     int shift = 1 << pos;
     for ( int i = 0; i < mBlockNum; ++ i ) {
-      ymuint64 pat = mVector[i] & mask;
+      TvFuncM::WordType pat = mVector[i] & mask;
       if ( inv ) {
 	pat |= (pat << shift);
       }
@@ -289,7 +289,7 @@ TvFuncM::set_cofactor(VarId varid,
     pos -= NIPW;
     int bit = 1U << pos;
     for ( int j = 0; j < mOutputNum; ++ j ) {
-      ymuint offset = j * mBlockNum1;
+      int offset = j * mBlockNum1;
       for ( int i = 0; i < mBlockNum1; ++ i ) {
 	if ( inv ) {
 	  if ( (i & bit) == bit ) {
@@ -330,9 +330,9 @@ TvFuncM::check_sup(VarId var) const
   if ( i < NIPW ) {
     // ブロックごとにチェック
     int dist = 1U << i;
-    ymuint64 mask = c_masks[i];
+    TvFuncM::WordType mask = c_masks[i];
     for ( int i = 0; i < mBlockNum; ++ i ) {
-      ymuint64 word = mVector[i];
+      TvFuncM::WordType word = mVector[i];
       if ( (word ^ (word << dist)) & mask ) {
 	return true;
       }
@@ -397,7 +397,7 @@ TvFuncM::check_sym(VarId var1,
     // j < NIPW
     int mask_i = (1U << (i - NIPW));
     int cond = inv ? 0UL : mask_i;
-    ymuint64 mask2 = ~c_masks[j];
+    TvFuncM::WordType mask2 = ~c_masks[j];
     int s = 1 << j;
     for ( int i = 0; i < mOutputNum; ++ i ) {
       int offset = i * mBlockNum1;
@@ -414,10 +414,10 @@ TvFuncM::check_sym(VarId var1,
     // i < NIPW
     // j < NIPW
     if ( inv ) {
-      ymuint64 mask = sym_masks3[(i * (i - 1)) / 2 + j];
+      TvFuncM::WordType mask = sym_masks3[(i * (i - 1)) / 2 + j];
       int s = (1U << i) + (1U << j);
       for ( int i = 0; i < mBlockNum; ++ i ) {
-	ymuint64 word = mVector[i];
+	TvFuncM::WordType word = mVector[i];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
 	  break;
@@ -425,10 +425,10 @@ TvFuncM::check_sym(VarId var1,
       }
     }
     else {
-      ymuint64 mask = sym_masks2[(i * (i - 1)) / 2 + j];
+      TvFuncM::WordType mask = sym_masks2[(i * (i - 1)) / 2 + j];
       int s = (1U << i) - (1U << j);
       for ( int i = 0; i < mBlockNum; ++ i ) {
-	ymuint64 word = mVector[i];
+	TvFuncM::WordType word = mVector[i];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
 	  break;
@@ -471,7 +471,7 @@ TvFuncM::xform(const NpnMapM& npnmap) const
     NpnVmap omap = npnmap.omap(src_var);
     VarId dst_var = omap.var();
     int dst_pos = dst_var.val();
-    ymuint64 omask = omap.inv() ? 1ULL : 0ULL;
+    TvFuncM::WordType omask = omap.inv() ? 1ULL : 0ULL;
     for ( int i = 0; i < ni_pow; ++ i ) {
       int new_i = 0;
       int tmp = i;
@@ -480,7 +480,7 @@ TvFuncM::xform(const NpnMapM& npnmap) const
 	  new_i |= ipat[b];
 	}
       }
-      ymuint64 pat = (value(VarId(o), i ^ imask) ^ omask);
+      TvFuncM::WordType pat = (value(VarId(o), i ^ imask) ^ omask);
       ans.mVector[block(new_i) + dst_pos * mBlockNum1] |= pat << shift(new_i);
     }
   }
@@ -498,9 +498,9 @@ TvFuncM::hash() const
 {
   SizeType ans = 0;
   for ( int i = 0; i < mBlockNum; ++ i ) {
-    ymuint64 tmp = mVector[i];
-    ymuint64 tmp_l = (tmp >> 0) & 0xFFFFFFFFULL;
-    ymuint64 tmp_h = (tmp >> 32) & 0xFFFFFFFFULL;
+    TvFuncM::WordType tmp = mVector[i];
+    TvFuncM::WordType tmp_l = (tmp >> 0) & 0xFFFFFFFFULL;
+    TvFuncM::WordType tmp_h = (tmp >> 32) & 0xFFFFFFFFULL;
     ans ^= (tmp_l ^ tmp_h);
   }
   return ans + mInputNum + (mOutputNum << 8);
@@ -533,8 +533,8 @@ compare(const TvFuncM& left,
 
   int n = left.mBlockNum;
   for ( int i = 0; i < n; ++ i ) {
-    ymuint64 w1 = left.mVector[i];
-    ymuint64 w2 = right.mVector[i];
+    TvFuncM::WordType w1 = left.mVector[i];
+    TvFuncM::WordType w2 = right.mVector[i];
     if ( w1 < w2 ) {
       return -1;
     }
@@ -559,8 +559,8 @@ operator&&(const TvFuncM& func1,
 
   int n = func1.mBlockNum;
   for ( int i = 0; i < n; ++ i ) {
-    ymuint64 w1 = func1.mVector[i];
-    ymuint64 w2 = func2.mVector[i];
+    TvFuncM::WordType w1 = func1.mVector[i];
+    TvFuncM::WordType w2 = func2.mVector[i];
     if ( (w1 & w2) != 0U ) {
       return true;
     }
@@ -575,10 +575,10 @@ TvFuncM::print(ostream& s,
 	       int mode) const
 {
   int ni_pow = 1UL << mInputNum;
-  const int wordsize = sizeof(ymuint64) * 8;
+  const int wordsize = sizeof(TvFuncM::WordType) * 8;
   if ( mode == 2 ) {
-    ymuint64* bp = mVector;
-    ymuint64 tmp = *bp;
+    TvFuncM::WordType* bp = mVector;
+    TvFuncM::WordType tmp = *bp;
     const char* del = "";
     for ( int j = 0; j < mOutputNum; ++ j ) {
       s << del;
@@ -602,15 +602,15 @@ TvFuncM::print(ostream& s,
   }
   else if ( mode == 16 ) {
     int ni_pow4 = ni_pow / 4;
-    ymuint64* bp = mVector;
-    ymuint64 tmp = *bp;
+    TvFuncM::WordType* bp = mVector;
+    TvFuncM::WordType tmp = *bp;
     for ( int j = 0; j < mOutputNum; ++ j ) {
       const char* del = "";
       int offset = 0;
       for ( int i = 0; i < ni_pow4; ++ i ) {
 	s << del;
 	del = "|";
-	ymuint64 tmp1 = (tmp & 0xFULL);
+	TvFuncM::WordType tmp1 = (tmp & 0xFULL);
 	if ( tmp1 < 10 ) {
 	  s << static_cast<char>('0' + tmp1);
 	}
@@ -665,7 +665,7 @@ TvFuncM::restore(IDO& s)
   if ( mBlockNum != nblk ) {
     delete [] mVector;
     mBlockNum = nblk;
-    mVector = new ymuint64[mBlockNum];
+    mVector = new TvFuncM::WordType[mBlockNum];
   }
   for ( int i = 0; i < mBlockNum; ++ i ) {
     s >> mVector[i];

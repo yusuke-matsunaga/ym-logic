@@ -46,7 +46,7 @@ public:
   /// @param[in] index 変数番号を極性をエンコードしたもの
   static
   Literal
-  index2literal(ymuint index);
+  index2literal(int index);
 
   // コピーコンストラクタ,代入演算子,デストラクタはデフォルト
   // のものがそのまま使える．
@@ -103,7 +103,7 @@ public:
   hash() const;
 
   /// @brief 配列のインデックスとして使用可能な数を返す．
-  ymuint
+  int
   index() const;
 
 
@@ -130,7 +130,7 @@ private:
 
   /// @brief 内部でのみ用いるコンストラクタ
   explicit
-  Literal(ymuint body);
+  Literal(int body);
 
 
 private:
@@ -139,7 +139,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数番号と極性をパックしたもの
-  ymuint mBody;
+  int mBody;
 
 };
 
@@ -256,14 +256,14 @@ void
 Literal::set(VarId varid,
 	     bool inv)
 {
-  mBody = (varid.val() << 1) + static_cast<ymuint>(inv);
+  mBody = (varid.val() << 1) + static_cast<int>(inv);
 }
 
 // デフォルトコンストラクタ
 inline
 Literal::Literal()
 {
-  mBody = static_cast<ymuint>(-1);
+  mBody = -1;
   mBody <<= 1;
 }
 
@@ -277,7 +277,7 @@ Literal::Literal(VarId varid,
 
 // 内部でのみ用いるコンストラクタ
 inline
-Literal::Literal(ymuint body) :
+Literal::Literal(int body) :
   mBody(body)
 {
 }
@@ -285,7 +285,7 @@ Literal::Literal(ymuint body) :
 // @brief index からの変換関数
 inline
 Literal
-Literal::index2literal(ymuint index)
+Literal::index2literal(int index)
 {
   return Literal(index);
 }
@@ -463,7 +463,7 @@ Literal::hash() const
 
 // @brief 配列のインデックスとして使用可能な数を返す．
 inline
-ymuint
+int
 Literal::index() const
 {
   return mBody;

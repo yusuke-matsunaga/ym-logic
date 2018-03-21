@@ -31,16 +31,16 @@ public:
 
   // 大小比較関数
   bool
-  gt(ymuint gid1,
-     ymuint gid2)
+  gt(int gid1,
+     int gid2)
   {
     return mInfo.w1gt(gid1, gid2);
   }
 
   // 等価比較関数
   bool
-  eq(ymuint gid1,
-     ymuint gid2)
+  eq(int gid1,
+     int gid2)
   {
     return mInfo.w1eq(gid1, gid2);
   }
@@ -70,7 +70,7 @@ IgPartition::IgPartition(const InputInfo& iinfo) :
 {
   // 最初は1つの分割から始める．
   mGroupNum = iinfo.group_num();
-  for (ymuint i = 0; i < mGroupNum; ++ i) {
+  for (int i = 0; i < mGroupNum; ++ i) {
     mGidArray[i] = i;
   }
   mPartitionNum = 1;
@@ -88,10 +88,10 @@ IgPartition::IgPartition(const IgPartition& src) :
 {
   mGroupNum = src.mGroupNum;
   mPartitionNum = src.mPartitionNum;
-  for (ymuint i = 0; i < mGroupNum; ++ i) {
+  for (int i = 0; i < mGroupNum; ++ i) {
     mGidArray[i] = src.mGidArray[i];
   }
-  for (ymuint i = 0; i <= mPartitionNum; ++ i) {
+  for (int i = 0; i <= mPartitionNum; ++ i) {
     mBeginArray[i] = src.mBeginArray[i];
   }
 }
@@ -105,7 +105,7 @@ IgPartition::~IgPartition()
 bool
 IgPartition::is_resolved() const
 {
-  for (ymuint i = 0; i < partition_num(); ++ i) {
+  for (int i = 0; i < partition_num(); ++ i) {
     if ( !is_resolved(i) ) {
       return false;
     }
@@ -120,13 +120,13 @@ IgPartition::to_npnmap(const PolConf& polconf) const
 {
   NpnMap npnmap(mInputInfo.input_num());
   npnmap.set_oinv(polconf.oinv());
-  ymuint dst_id = 0;
-  for (ymuint i = 0; i < group_num(); ++ i) {
-    ymuint gid = group_id(i);
-    ymuint n = mInputInfo.elem_num(gid);
-    for (ymuint j = 0; j < n; ++ j, ++ dst_id) {
+  int dst_id = 0;
+  for (int i = 0; i < group_num(); ++ i) {
+    int gid = group_id(i);
+    int n = mInputInfo.elem_num(gid);
+    for (int j = 0; j < n; ++ j, ++ dst_id) {
       VarId dst_var(dst_id);
-      ymuint src_id = mInputInfo.elem(gid, j);
+      int src_id = mInputInfo.elem(gid, j);
       VarId src_var(src_id);
       npnmap.set(src_var, dst_var, polconf.iinv(src_id));
     }
@@ -142,17 +142,17 @@ IgPartition::reorder()
     return;
   }
 
-  ymuint n = partition_num();
+  int n = partition_num();
 
   // pid をキーにしてグループ番号のリストを持つ配列
   // 要するに mGidArray をデコードしたもの
-  vector<vector<ymuint> > gid_lists(n);
+  vector<vector<int> > gid_lists(n);
   // 要素数が1の pid のリスト
-  vector<ymuint> pid_list1;
+  vector<int> pid_list1;
   // 要素数が2以上の pid のリスト
-  vector<ymuint> pid_list2;
-  for (ymuint pid = 0; pid < n; ++ pid) {
-    ymuint ps = partition_size(pid);
+  vector<int> pid_list2;
+  for (int pid = 0; pid < n; ++ pid) {
+    int ps = partition_size(pid);
     gid_lists[pid].reserve(ps);
     if ( ps == 1 ) {
       pid_list1.push_back(pid);
@@ -160,29 +160,29 @@ IgPartition::reorder()
     else {
       pid_list2.push_back(pid);
     }
-    for (ymuint pos = partition_begin(pid); pos < partition_end(pid); ++ pos) {
-      ymuint gid = group_id(pos);
+    for (int pos = partition_begin(pid); pos < partition_end(pid); ++ pos) {
+      int gid = group_id(pos);
       gid_lists[pid].push_back(gid);
     }
   }
 
   // pid_list1, pid_list2, gid_lists をもとに結果をエンコードする．
-  ymuint wpos = 0;
-  ymuint pid = 0;
-  for (ymuint j = 0; j < pid_list1.size(); ++ j, ++ pid) {
-    ymuint old_pid = pid_list1[j];
+  int wpos = 0;
+  int pid = 0;
+  for (int j = 0; j < pid_list1.size(); ++ j, ++ pid) {
+    int old_pid = pid_list1[j];
     mBeginArray[pid] = wpos;
-    for (ymuint i = 0; i < gid_lists[old_pid].size(); ++ i) {
-      ymuint gid = gid_lists[old_pid][i];
+    for (int i = 0; i < gid_lists[old_pid].size(); ++ i) {
+      int gid = gid_lists[old_pid][i];
       mGidArray[wpos] = gid;
       ++ wpos;
     }
   }
-  for (ymuint j = 0; j < pid_list2.size(); ++ j, ++ pid) {
-    ymuint old_pid = pid_list2[j];
+  for (int j = 0; j < pid_list2.size(); ++ j, ++ pid) {
+    int old_pid = pid_list2[j];
     mBeginArray[pid] = wpos;
-    for (ymuint i = 0; i < gid_lists[old_pid].size(); ++ i) {
-      ymuint gid = gid_lists[old_pid][i];
+    for (int i = 0; i < gid_lists[old_pid].size(); ++ i) {
+      int gid = gid_lists[old_pid][i];
       mGidArray[wpos] = gid;
       ++ wpos;
     }
@@ -197,24 +197,24 @@ IgPartition::reorder()
 // @param[in] pid 分轄番号 ( 0 <= pid << partition_num() )
 // @param[in] pos 要素の位置番号 ( partition_begin(pid) <= pos < partition_end(pid) )
 void
-IgPartition::_refine(ymuint pid,
-		     ymuint pos)
+IgPartition::_refine(int pid,
+		     int pos)
 {
   ASSERT_COND( pid < partition_num() );
   ASSERT_COND( partition_begin(pid) <= pos );
   ASSERT_COND( pos < partition_end(pid) );
 
   // pid 以降の分割の情報を一つ右にずらす．
-  for (ymuint pid1 = mPartitionNum; pid1 > pid; -- pid1) {
+  for (int pid1 = mPartitionNum; pid1 > pid; -- pid1) {
     mBeginArray[pid1 + 1] = mBeginArray[pid1];
   }
   ++ mPartitionNum;
   mBeginArray[pid + 1] = mBeginArray[pid] + 1;
 
   // partition_begin(pid) から pos までの要素を右にずらす．
-  ymuint gid = mGidArray[pos];
-  ymuint pos0 = mBeginArray[pid];
-  for (ymuint pos1 = pos; pos1 > pos0; -- pos1) {
+  int gid = mGidArray[pos];
+  int pos0 = mBeginArray[pid];
+  for (int pos1 = pos; pos1 > pos0; -- pos1) {
     mGidArray[pos1] = mGidArray[pos1 - 1];
   }
   mGidArray[pos0] = gid;
@@ -225,16 +225,16 @@ IgPartition::_refine(ymuint pid,
 void
 IgPartition::display(ostream& s) const
 {
-  for (ymuint i = 0; i < mPartitionNum; ++ i) {
+  for (int i = 0; i < mPartitionNum; ++ i) {
     s << "|";
-    for (ymuint j = mBeginArray[i]; j < mBeginArray[i + 1]; ++ j) {
-      ymuint g = mGidArray[j];
+    for (int j = mBeginArray[i]; j < mBeginArray[i + 1]; ++ j) {
+      int g = mGidArray[j];
       s << " W1: " << mInputInfo.w1(g);
       if ( mInputInfo.bisym(g) ) {
 	s << "*";
       }
       s << " (";
-      for (ymuint k = 0; k < mInputInfo.elem_num(g); ++ k) {
+      for (int k = 0; k < mInputInfo.elem_num(g); ++ k) {
 	s << " " << mInputInfo.elem(g, k);
       }
       s << ") ";

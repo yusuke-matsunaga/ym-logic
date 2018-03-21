@@ -44,7 +44,7 @@ ExprParser::str_to_literal(const string& str)
 }
 
 // トークンを一つ読み出す．
-tToken
+ExprToken
 ExprParser::get_token(VarId& lit_id)
 {
   string str;
@@ -52,18 +52,18 @@ ExprParser::get_token(VarId& lit_id)
 
   // 汚いのは承知で goto 文で状態遷移を書きます．
  state0:
-  if ( !mInput->get(c) ) return kTokenEND;
+  if ( !mInput->get(c) ) return ExprToken::END;
   switch (c) {
-  case '\0': return kTokenEND;
+  case '\0': return ExprToken::END;
   case '*':  // 次のケースとおなじ
-  case '&':  return kTokenAND;
+  case '&':  return ExprToken::AND;
   case '+':  // 次のケースとおなじ
-  case '|':  return kTokenOR;
-  case '^':  return kTokenXOR;
-  case '(':  return kTokenLP;
-  case ')':  return kTokenRP;
+  case '|':  return ExprToken::OR;
+  case '^':  return ExprToken::XOR;
+  case '(':  return ExprToken::LP;
+  case ')':  return ExprToken::RP;
   case '~':  // 次のケースとおなじ
-  case '!':  return kTokenNOT;
+  case '!':  return ExprToken::NOT;
   case ' ':  // 次のケースとおなじ
   case '\t': // 次のケースとおなじ
   case '\n': goto state0;
@@ -88,7 +88,7 @@ ExprParser::get_token(VarId& lit_id)
  state1:
   if ( !mInput->get(c) ) {
     lit_id = str_to_literal(str);
-    return kTokenNUM;
+    return ExprToken::NUM;
   }
   switch (c) {
   case '\0': // 次のケースとおなじ
@@ -106,7 +106,7 @@ ExprParser::get_token(VarId& lit_id)
   case '\n': // 次のケースとおなじ
     mInput->putback(c);
     lit_id = str_to_literal(str);
-    return kTokenNUM;
+    return ExprToken::NUM;
   case '0':  // 次のケースとおなじ
   case '1':  // 次のケースとおなじ
   case '2':  // 次のケースとおなじ
@@ -131,7 +131,7 @@ ExprParser::get_token(VarId& lit_id)
   if ( !mInput->get(c) || (c != 'o' && c != 'O') ) {
     throw SyntaxError("syntax error");
   }
-  return kTokenZERO;
+  return ExprToken::ZERO;
 
  stateO:
   if ( !mInput->get(c) || (c != 'n' && c != 'N') ) {
@@ -140,7 +140,7 @@ ExprParser::get_token(VarId& lit_id)
   if ( !mInput->get(c) || (c != 'e' && c != 'E') ) {
     throw SyntaxError("syntax error");
   }
-  return kTokenONE;
+  return ExprToken::ONE;
 }
 
 // 次のトークンが AND ならそれを読み出し true を返す．
@@ -167,25 +167,25 @@ ExprParser::get_literal()
   // ここに来る可能性のあるのは NUM, NOT, LP のみ
   // それ以外はエラー
   VarId id;
-  tToken token = get_token(id);
+  ExprToken token = get_token(id);
 
-  if ( token == kTokenZERO ) {
+  if ( token == ExprToken::ZERO ) {
     return Expr::const_zero();
   }
 
-  if ( token == kTokenONE ) {
+  if ( token == ExprToken::ONE ) {
     return Expr::const_one();
   }
 
-  if ( token == kTokenNUM ) {
+  if ( token == ExprToken::NUM ) {
     // id 番目の肯定のリテラルを作る．
     return Expr::posi_literal(id);
   }
 
-  if ( token == kTokenNOT ) {
+  if ( token == ExprToken::NOT ) {
     // 次のトークンをとって来る．
     token = get_token(id);
-    if ( token != kTokenNUM ) {
+    if ( token != ExprToken::NUM ) {
       // これは文字列でなければならない．
       throw SyntaxError("NUMBER is expected after NOT");
     }
@@ -193,9 +193,9 @@ ExprParser::get_literal()
     return Expr::nega_literal(id);
   }
 
-  if ( token == kTokenLP ) {
+  if ( token == ExprToken::LP ) {
     // RP で終る論理式をとって来る．
-    return get_expr(kTokenRP);
+    return get_expr(ExprToken::RP);
   }
 
   // それ以外はエラー
@@ -230,7 +230,7 @@ ExprParser::get_product()
 // OR もしくは XOR でつながった積項をとって来る．
 // 最後は end_token で終らなければ false を返す．
 Expr
-ExprParser::get_expr(tToken end_token)
+ExprParser::get_expr(ExprToken end_token)
 {
   // まず第一項めを取り出す．
   Expr expr = get_product();
@@ -238,11 +238,11 @@ ExprParser::get_expr(tToken end_token)
   for ( ; ; ) {
     // 次のトークンを調べる．
     VarId dummy;
-    tToken token = get_token(dummy);
+    ExprToken token = get_token(dummy);
     if ( token == end_token ) {
       return expr;
     }
-    if ( token != kTokenOR && token != kTokenXOR ) {
+    if ( token != ExprToken::OR && token != ExprToken::XOR ) {
       // OR か XOR で無ければならない．
       cerr << "token = " << token << endl;
       throw SyntaxError("syntax error");
@@ -250,7 +250,7 @@ ExprParser::get_expr(tToken end_token)
     // 次の積項を取り出す．
     Expr expr1 = get_product();
 
-    if ( token == kTokenOR ) {
+    if ( token == ExprToken::OR ) {
       // 和項を作る．
       expr |= expr1;
     }
@@ -265,20 +265,20 @@ ExprParser::get_expr(tToken end_token)
 // @brief トークンを出力する．主にデバッグ用
 ostream&
 operator<<(ostream& s,
-	   tToken token)
+	   ExprToken token)
 {
   switch (token) {
-  case kTokenEND:  s << "TokenEND"; break;
-  case kTokenZERO: s << "TokenZERO"; break;
-  case kTokenONE:  s << "TokenONE"; break;
-  case kTokenNUM:  s << "TokenNUM"; break;
-  case kTokenLP:   s << "TokenLP "; break;
-  case kTokenRP:   s << "TokenRP "; break;
-  case kTokenAND:  s << "TokenAND"; break;
-  case kTokenOR:   s << "TokenOR "; break;
-  case kTokenXOR:  s << "TokenXOR"; break;
-  case kTokenNOT:  s << "TokenNOT"; break;
-  case kTokenERR:  s << "TokenERR"; break;
+  case ExprToken::END:  s << "TokenEND"; break;
+  case ExprToken::ZERO: s << "TokenZERO"; break;
+  case ExprToken::ONE:  s << "TokenONE"; break;
+  case ExprToken::NUM:  s << "TokenNUM"; break;
+  case ExprToken::LP:   s << "TokenLP "; break;
+  case ExprToken::RP:   s << "TokenRP "; break;
+  case ExprToken::AND:  s << "TokenAND"; break;
+  case ExprToken::OR:   s << "TokenOR "; break;
+  case ExprToken::XOR:  s << "TokenXOR"; break;
+  case ExprToken::NOT:  s << "TokenNOT"; break;
+  case ExprToken::ERR:  s << "TokenERR"; break;
   }
   return s;
 }

@@ -74,7 +74,7 @@ ExprWriter::dump_to_string(const Expr& expr,
 void
 ExprWriter::set_opstr(const vector<string>& op)
 {
-  for (ymuint i = 0; i < 4; i ++) {
+  for ( auto i: { 0, 1, 2, 3 } ) {
     mOpStrArray[i] = op[i];
   }
 }
@@ -84,7 +84,7 @@ void
 ExprWriter::opstr(vector<string>& op) const
 {
   op.resize(4);
-  for (ymuint i = 0; i < 4; i ++) {
+  for ( auto i: { 0, 1, 2, 3 } ) {
     op[i] = mOpStrArray[i];
   }
 }
@@ -169,8 +169,8 @@ ExprWriter::dump_sub(ostream& s,
     }
     s << "( ";
     string delim1 = "";
-    ymuint n = expr.child_num();
-    for (ymuint i = 0; i < n; ++ i) {
+    int n = expr.child_num();
+    for ( int i = 0; i < n; ++ i ) {
       s << delim1;
       dump_sub(s, expr.child(i), var_names);
       delim1 = " " + delim + " ";

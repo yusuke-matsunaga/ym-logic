@@ -80,7 +80,7 @@ ExprNodePtr
 ExprMgr::make_posiliteral(VarId id)
 {
   make_literals(id);
-  ymuint pos = id.val() << 1;
+  int pos = id.val() << 1;
   ASSERT_COND(pos < mLiteralArray.size() );
   return mLiteralArray[pos];
 }
@@ -90,7 +90,7 @@ ExprNodePtr
 ExprMgr::make_negaliteral(VarId id)
 {
   make_literals(id);
-  ymuint pos = (id.val() << 1) + 1;
+  int pos = (id.val() << 1) + 1;
   ASSERT_COND(pos < mLiteralArray.size() );
   return mLiteralArray[pos];
 }
@@ -99,13 +99,15 @@ ExprMgr::make_negaliteral(VarId id)
 // 子供も AND ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
 ExprNodePtr
-ExprMgr::make_and(ymuint begin)
+ExprMgr::make_and(int begin)
 {
+  ASSERT_COND( begin >= 0 && begin < nodestack_top() );
+
   bool const0 = false;
-  ymuint end = nodestack_top();
+  int end = nodestack_top();
   mTmpNodeList.clear();
   mTmpNodeList.reserve(end - begin);
-  for (ymuint i = begin; i < end; ++ i) {
+  for ( int i = begin; i < end; ++ i ) {
     const ExprNode* node = mNodeStack[i];
     tType type = node->type();
     if ( type == kConst0 ) {
@@ -113,8 +115,8 @@ ExprMgr::make_and(ymuint begin)
       break;
     }
     if ( type == kAnd ) {
-      ymuint ni = node->child_num();
-      for (ymuint j = 0; j < ni; ++ j) {
+      int ni = node->child_num();
+      for (int j = 0; j < ni; ++ j) {
 	const ExprNode* node1 = node->child(j);
 	if ( check_node(node1) ) {
 	  // 逆相の入力があったら答は0
@@ -139,7 +141,7 @@ ExprMgr::make_and(ymuint begin)
   }
   nodestack_pop(begin);
 
-  ymuint n = mTmpNodeList.size();
+  int n = mTmpNodeList.size();
   ExprNodePtr node;
   if ( const0 ) {
     node = make_zero();
@@ -160,13 +162,15 @@ ExprMgr::make_and(ymuint begin)
 // 子供も OR ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
 ExprNodePtr
-ExprMgr::make_or(ymuint begin)
+ExprMgr::make_or(int begin)
 {
+  ASSERT_COND( begin >= 0 && begin < nodestack_top() );
+
   bool const1 = false;
-  ymuint end = nodestack_top();
+  int end = nodestack_top();
   mTmpNodeList.clear();
   mTmpNodeList.reserve(end - begin);
-  for (ymuint i = begin; i < end; ++ i) {
+  for ( int i = begin; i < end; ++ i ) {
     ExprNodePtr node = mNodeStack[i];
     tType type = node->type();
     if ( type == kConst1 ) {
@@ -174,8 +178,8 @@ ExprMgr::make_or(ymuint begin)
       break;
     }
     if ( type == kOr ) {
-      ymuint ni = node->child_num();
-      for (ymuint j = 0; j < ni; ++ j) {
+      int ni = node->child_num();
+      for (int j = 0; j < ni; ++ j) {
 	const ExprNode* node1 = node->child(j);
 	if ( check_node(node1) ) {
 	  // 逆相の入力があったら答は1
@@ -201,7 +205,7 @@ ExprMgr::make_or(ymuint begin)
   nodestack_pop(begin);
 
   ExprNodePtr node;
-  ymuint n = mTmpNodeList.size();
+  int n = mTmpNodeList.size();
   if ( const1 ) {
     node = make_one();
   }
@@ -221,21 +225,23 @@ ExprMgr::make_or(ymuint begin)
 // 子供も XOR ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
 ExprNodePtr
-ExprMgr::make_xor(ymuint begin)
+ExprMgr::make_xor(int begin)
 {
+  ASSERT_COND( begin >= 0 && begin < nodestack_top() );
+
   bool inv = false;
-  ymuint end = nodestack_top();
+  int end = nodestack_top();
   mTmpNodeList.clear();
   mTmpNodeList.reserve(end - begin);
-  for (ymuint i = begin; i < end; ++ i) {
+  for ( int i = begin; i < end; ++ i ) {
     ExprNodePtr node = mNodeStack[i];
     tType type = node->type();
     if ( type == kConst1 ) {
       inv = !inv;
     }
     else if ( type == kXor ) {
-      ymuint ni = node->child_num();
-      for (ymuint j = 0; j < ni; ++ j) {
+      int ni = node->child_num();
+      for (int j = 0; j < ni; ++ j) {
 	const ExprNode* node1 = node->child(j);
 	if ( check_node2(node1) ) {
 	  inv = !inv;
@@ -253,7 +259,7 @@ ExprMgr::make_xor(ymuint begin)
   nodestack_pop(begin);
 
   ExprNodePtr node;
-  ymuint n = mTmpNodeList.size();
+  int n = mTmpNodeList.size();
   if ( n == 0 ) {
     node = make_zero();
   }
@@ -281,9 +287,7 @@ ExprMgr::make_xor(ymuint begin)
 bool
 ExprMgr::check_node(const ExprNode* node)
 {
-  for (ExprNodeList::iterator p = mTmpNodeList.begin();
-       p != mTmpNodeList.end(); ++ p) {
-    const ExprNode* node1 = *p;
+  for ( auto node1: mTmpNodeList ) {
     if ( posi_equiv(node, node1) ) {
       // 同相で重なっていた場合
       return false;
@@ -307,7 +311,7 @@ ExprMgr::check_node(const ExprNode* node)
 bool
 ExprMgr::check_node2(const ExprNode* node)
 {
-  for (ExprNodeList::iterator p = mTmpNodeList.begin();
+  for ( ExprNodeList::iterator p = mTmpNodeList.begin();
        p != mTmpNodeList.end(); ) {
     const ExprNode* node1 = *p;
     // ループ中で削除する場合があるので反復子をコピーしてから進めておく
@@ -337,7 +341,7 @@ ExprMgr::nodestack_push(const ExprNode* node)
 }
 
 // @brief ノードスタックの先頭位置を返す．
-ymuint
+int
 ExprMgr::nodestack_top()
 {
   return mNodeStack.size();
@@ -345,9 +349,10 @@ ExprMgr::nodestack_top()
 
 // @brief ノードスタックの先頭位置を戻す．
 void
-ExprMgr::nodestack_pop(ymuint oldtop)
+ExprMgr::nodestack_pop(int oldtop)
 {
-  ASSERT_COND(oldtop < mNodeStack.size() );
+  ASSERT_COND( oldtop >= 0 && oldtop < mNodeStack.size() );
+
   mNodeStack.erase(mNodeStack.begin() + oldtop, mNodeStack.end());
 }
 
@@ -366,28 +371,28 @@ ExprMgr::complement(const ExprNode* node)
     return make_posiliteral(node->varid());
   case kAnd:
     {
-      ymuint n = node->child_num();
-      ymuint begin = nodestack_top();
-      for (ymuint i = 0; i < n; ++ i) {
+      int n = node->child_num();
+      int begin = nodestack_top();
+      for (int i = 0; i < n; ++ i) {
 	nodestack_push(complement(node->child(i)));
       }
       return make_or(begin);
     }
   case kOr:
     {
-      ymuint n = node->child_num();
-      ymuint begin = nodestack_top();
-      for (ymuint i = 0; i < n; ++ i) {
+      int n = node->child_num();
+      int begin = nodestack_top();
+      for (int i = 0; i < n; ++ i) {
 	nodestack_push(complement(node->child(i)));
       }
       return make_and(begin);
     }
   case kXor:
     {
-      ymuint n = node->child_num();
-      ymuint begin = nodestack_top();
+      int n = node->child_num();
+      int begin = nodestack_top();
       nodestack_push(complement(node->child(0)));
-      for (ymuint i = 1; i < n; ++ i) {
+      for (int i = 1; i < n; ++ i) {
 	nodestack_push(node->child(i));
       }
       return make_xor(begin);
@@ -426,10 +431,10 @@ ExprMgr::compose(const ExprNode* node,
     break;
   }
 
-  ymuint n = node->child_num();
-  ymuint begin = nodestack_top();
+  int n = node->child_num();
+  int begin = nodestack_top();
   bool ident = true;
-  for (ymuint i = 0; i < n; ++ i) {
+  for (int i = 0; i < n; ++ i) {
     ExprNodePtr chd = compose(node->child(i), id, sub);
     if ( chd != node->child(i) ) {
       ident = false;
@@ -485,10 +490,10 @@ ExprMgr::compose(const ExprNode* node,
     break;
   }
 
-  ymuint n = node->child_num();
-  ymuint begin = nodestack_top();
+  int n = node->child_num();
+  int begin = nodestack_top();
   bool ident = true;
-  for (ymuint i = 0; i < n; ++ i) {
+  for (int i = 0; i < n; ++ i) {
     ExprNodePtr chd = compose(node->child(i), comp_map);
     if ( chd != node->child(i) ) {
       ident = false;
@@ -542,10 +547,10 @@ ExprMgr::remap_var(const ExprNode* node,
   default: break;
   }
 
-  ymuint n = node->child_num();
-  ymuint begin = nodestack_top();
+  int n = node->child_num();
+  int begin = nodestack_top();
   bool ident = true;
-  for (ymuint i = 0; i < n; ++ i) {
+  for (int i = 0; i < n; ++ i) {
     ExprNodePtr chd = remap_var(node->child(i), varmap);
     if ( chd != node->child(i) ) {
       ident = false;
@@ -583,10 +588,10 @@ ExprMgr::simplify(const ExprNode* node)
     break;
   }
 
-  ymuint n = node->child_num();
-  ymuint begin = nodestack_top();
+  int n = node->child_num();
+  int begin = nodestack_top();
   bool ident = true;
-  for (ymuint i = 0; i < n; ++ i) {
+  for (int i = 0; i < n; ++ i) {
     ExprNodePtr chd = simplify(node->child(i));
     if ( chd != node->child(i) ) {
       ident = false;
@@ -612,42 +617,42 @@ ExprMgr::simplify(const ExprNode* node)
 }
 
 // @brief 使用されているメモリ量を返す．
-ymuint
+int
 ExprMgr::used_size()
 {
   return mNodeAlloc.used_size();
 }
 
 // @brief 使用されているノード数を返す．
-ymuint
+int
 ExprMgr::node_num()
 {
   return mNodeNum;
 }
 
 // @brief used_size() の最大値を返す．
-ymuint
+int
 ExprMgr::max_used_size()
 {
   return mNodeAlloc.max_used_size();
 }
 
 // @brief nodenum() の最大値を返す．
-ymuint
+int
 ExprMgr::max_node_num()
 {
   return mMaxNodeNum;
 }
 
 // @brief 実際に確保したメモリ量を返す．
-ymuint
+int
 ExprMgr::allocated_size()
 {
   return mNodeAlloc.allocated_size();
 }
 
 // @brief 実際に確保した回数を返す．
-ymuint
+int
 ExprMgr::allocated_count()
 {
   return mNodeAlloc.allocated_count();
@@ -671,7 +676,7 @@ ExprMgr::print_stats(ostream& s)
 void
 ExprMgr::make_literals(VarId id)
 {
-  ymuint last = mLiteralArray.size() / 2;
+  int last = mLiteralArray.size() / 2;
   while ( last <= id.val() ) {
     ExprNode* posi = alloc_node(kPosiLiteral);
     posi->mNc = last;
@@ -695,17 +700,17 @@ ExprMgr::alloc_node(tType type)
     mMaxNodeNum = mNodeNum;
   }
 
-  ymuint nc = 0;
+  int nc = 0;
   if ( type == kAnd || type == kOr || type == kXor ) {
     nc = mTmpNodeList.size();
   }
 
-  ymuint req_size = calc_size(nc);
+  int req_size = calc_size(nc);
   void* p = mNodeAlloc.get_memory(req_size);
   ExprNode* node = new (p) ExprNode;
-  node->mRefType = static_cast<ymuint32>(type);
+  node->mRefType = static_cast<int>(type);
   node->mNc = nc;
-  for (ymuint i = 0; i < nc; ++ i) {
+  for (int i = 0; i < nc; ++ i) {
     node->mChildArray[i] = mTmpNodeList[i];
     node->child(i)->inc_ref();
   }
@@ -716,20 +721,20 @@ ExprMgr::alloc_node(tType type)
 void
 ExprMgr::free_node(ExprNode* node)
 {
-  ymuint n = node->child_num();
-  for (ymuint i = 0; i < n; ++ i) {
+  int n = node->child_num();
+  for (int i = 0; i < n; ++ i) {
     node->child(i)->dec_ref();
   }
 
   -- mNodeNum;
 
-  ymuint req_size = calc_size(n);
+  int req_size = calc_size(n);
   mNodeAlloc.put_memory(req_size, node);
 }
 
 // ExprNode の入力数から必要なサイズを計算する．
-ymuint
-ExprMgr::calc_size(ymuint nc)
+int
+ExprMgr::calc_size(int nc)
 {
   return sizeof(ExprNode) + sizeof(ExprNode*) * (nc - 1);
 }

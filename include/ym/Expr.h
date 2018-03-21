@@ -269,7 +269,7 @@ public:
   /// @param[in] ni 入力数
   /// @note ni が省略された場合には input_size() が用いられる．
   TvFunc
-  make_tv(ymuint ni = 0) const;
+  make_tv(int ni = 0) const;
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -338,7 +338,7 @@ public:
   /// @brief オペランドの個数の取得
   /// @retval オペランドの個数 AND/OR/XOR の場合
   /// @retval 0 上記以外の場合
-  ymuint
+  int
   child_num() const;
 
   /// @brief オペランドの取得
@@ -347,7 +347,7 @@ public:
   /// ただし pos が範囲外の場合と演算子ノードでなかった場合には
   /// 0を表す式を返す．
   Expr
-  child(ymuint pos) const;
+  child(int pos) const;
 
   /// @brief "シンプル"な論理式のチェック
   /// @return シンプルな論理式のときに true を返す．
@@ -391,13 +391,13 @@ public:
 
   /// @brief リテラル数の取得
   /// @return リテラル数
-  ymuint
+  int
   litnum() const;
 
   /// @brief 変数の出現回数の取得
   /// @param[in] varid 変数番号
   /// @return varid 番めの変数のリテラルの出現回数を得る．
-  ymuint
+  int
   litnum(VarId varid) const;
 
   /// @brief リテラルの出現回数の取得
@@ -406,34 +406,34 @@ public:
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
   /// @return varid 番めの変数の極性が inv のリテラルの出現回数を得る．
-  ymuint
+  int
   litnum(VarId varid,
 	 bool inv) const;
 
   /// @brief リテラルの出現回数の取得
   /// @param[in] lit リテラル
   /// @return lit のリテラルの出現回数を得る．
-  ymuint
+  int
   litnum(Literal lit) const;
 
   /// @brief 使われている変数の最大の番号 + 1を得る．
-  ymuint
+  int
   input_size() const;
 
   /// @brief SOP形式に展開したときのキューブ数の見積もり
   /// @return SOP形式のキューブ (積項) 数
-  ymuint
+  int
   sop_cubenum() const;
 
   /// @brief SOP形式に展開した時のリテラル数の見積もり
   /// @return SOP形式のリテラル数
-  ymuint
+  int
   sop_litnum() const;
 
   /// @brief SOP形式に展開した時の変数の出現回数の見積もり
   /// @param[in] varid 変数番号
   /// @return SOP形式の varid 番めの変数のリテラルの出現回数
-  ymuint
+  int
   sop_litnum(VarId varid) const;
 
   /// @brief SOP形式に展開した時のテラルの出現回数の見積もり
@@ -443,14 +443,14 @@ public:
   ///                - true:  反転あり (負極性)
   /// @return SOP形式に展開した時の varid 番めの変数の極性が
   /// inv のリテラルの出現回数
-  ymuint
+  int
   sop_litnum(VarId varid,
 	     bool inv) const;
 
   /// @brief SOP形式に展開したときのリテラルの出現回数の見積もり
   /// @param[in] lit リテラル
   /// @return SOP形式に展開したときの lit のリテラルの出現回数
-  ymuint
+  int
   sop_litnum(Literal lit) const;
 
   /// @}
@@ -465,32 +465,32 @@ public:
 
   /// @brief 使用されているメモリ量を返す．
   static
-  ymuint
+  int
   used_size();
 
   /// @brief 現在使用中のノード数を返す．
   static
-  ymuint
+  int
   node_num();
 
   /// @brief used_size() の最大値を返す．
   static
-  ymuint
+  int
   max_used_size();
 
   /// @brief nodenum() の最大値を返す．
   static
-  ymuint
+  int
   max_node_num();
 
   /// @brief 実際に確保したメモリ量を返す．
   static
-  ymuint
+  int
   allocated_size();
 
   /// @brief 実際に確保した回数を返す．
   static
-  ymuint
+  int
   allocated_count();
 
   /// @brief 内部状態を出力する．
@@ -650,14 +650,14 @@ Expr::literal(Literal lit)
 }
 
 inline
-ymuint
+int
 Expr::litnum(Literal lit) const
 {
   return litnum(lit.varid(), lit.is_negative());
 }
 
 inline
-ymuint
+int
 Expr::sop_litnum(Literal lit) const
 {
   return sop_litnum(lit.varid(), lit.is_negative());

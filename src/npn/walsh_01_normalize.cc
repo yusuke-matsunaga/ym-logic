@@ -29,7 +29,7 @@ walsh_01_normalize(const TvFunc& func,
   int w1[TvFunc::kMaxNi];
   w0 = func.walsh_01(w1);
 
-  ymuint ni = func.input_num();
+  int ni = func.input_num();
 
   xmap.clear();
   xmap.resize(ni);
@@ -42,7 +42,7 @@ walsh_01_normalize(const TvFunc& func,
     opol_fixed = true;
     w0 = -w0;
     // w1 も反転させる．
-    for (ymuint i = 0; i < ni; ++ i) {
+    for (int i = 0; i < ni; ++ i) {
       w1[i] = -w1[i];
     }
   }
@@ -57,7 +57,7 @@ walsh_01_normalize(const TvFunc& func,
   }
 
   // w1 に従って入力極性の調整を行う．
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     VarId var(i);
     if ( w1[i] < 0 ) {
       // 反転させる．
@@ -88,17 +88,17 @@ walsh_01_normalize(const TvFunc& func,
   // 副産物として入力の極性が決まる場合がある．
   input_info.clear();
   input_info.set_input_num(ni);
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     bool found = false;
     VarId var(i);
-    for (ymuint gid = 0; gid < input_info.group_num(); ++ gid) {
+    for (int gid = 0; gid < input_info.group_num(); ++ gid) {
       if ( w1[i] != input_info.w1(gid) ) {
 	// w1 の値が異なる．
 	continue;
       }
 
       // 対称性のチェックを行う．
-      ymuint pos1 = input_info.elem(gid, 0);
+      int pos1 = input_info.elem(gid, 0);
       VarId var1(pos1);
       bool stat1 = func0.check_sym(var, var1, false);
       if ( stat1 ) {

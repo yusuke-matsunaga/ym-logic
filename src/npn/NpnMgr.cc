@@ -92,7 +92,7 @@ NpnMgr::cannonical(const TvFunc& func)
   mXmap0 = func.shrink_map();
   TvFunc func0 = func.xform(mXmap0);
 
-  ymuint ni0 = func0.input_num();
+  int ni0 = func0.input_num();
 
   // 特例
   if ( ni0 == 0 ) {
@@ -175,22 +175,22 @@ NpnMgr::cannonical(const TvFunc& func)
   // となる．
 
   // polundet_num の指数乗だけ極性の割り当てがある．
-  ymuint nug = iinfo.polundet_num();
-  ymuint nug_exp = 1U << nug;
-  ymuint n = nug_exp;
+  int nug = iinfo.polundet_num();
+  int nug_exp = 1U << nug;
+  int n = nug_exp;
   if ( !opol_fixed ) {
     n *= 2;
   }
   vector<PolConf> polconf_list;
   polconf_list.reserve(n);
-  ymuint input_mask = 0U;
-  for (ymuint i = 0; i < ni0; ++ i) {
+  int input_mask = 0U;
+  for (int i = 0; i < ni0; ++ i) {
     input_mask |= (1U << i);
   }
-  for (ymuint p = 0; p < nug_exp; ++ p) {
-    ymuint input_bits = 0U;
-    for (ymuint i = 0; i < nug; ++ i) {
-      ymuint gid = iinfo.polundet_gid(i);
+  for (int p = 0; p < nug_exp; ++ p) {
+    int input_bits = 0U;
+    for (int i = 0; i < nug; ++ i) {
+      int gid = iinfo.polundet_gid(i);
       if ( p & (1U << i) ) {
 	input_bits |= iinfo.inv_bits(gid);
       }
@@ -205,20 +205,20 @@ NpnMgr::cannonical(const TvFunc& func)
   walsh_w0_refine(func1, polconf_list);
 
   // 極性割り当ての候補を確定した入力の重み別 Walsh_1 でフィルタリングする．
-  for (ymuint pid = 0;
+  for (int pid = 0;
        polconf_list.size() > 1 && pid < igpart.partition_num();
        ++ pid) {
     if ( igpart.is_resolved(pid) ) {
-      ymuint pos = igpart.partition_begin(pid);
-      ymuint gid = igpart.group_id(pos);
-      ymuint iid = igpart.input_id(gid);
+      int pos = igpart.partition_begin(pid);
+      int gid = igpart.group_id(pos);
+      int iid = igpart.input_id(gid);
       walsh_w1_refine(func1, VarId(iid), polconf_list);
     }
   }
 
   if ( debug ) {
     cout << "  # of polarity candidates: " << polconf_list.size() << endl;
-    for (ymuint i = 0; i < polconf_list.size(); ++ i) {
+    for (int i = 0; i < polconf_list.size(); ++ i) {
       cout << "    ";
       print_polconf(cout, polconf_list[i], ni0);
     }
@@ -312,13 +312,13 @@ NpnMgr::tvmax_recur(const TvFunc& func,
     }
   }
   else {
-    ymuint pid = 0;
-    ymuint iid = 0;
+    int pid = 0;
+    int iid = 0;
     for ( ; pid < igpart.partition_num(); ++ pid) {
       if ( igpart.is_resolved(pid) ) {
 	// 解決している分割を使って残りの分割を細分化する．
-	ymuint pos = igpart.partition_begin(pid);
-	ymuint gid = igpart.group_id(pos);
+	int pos = igpart.partition_begin(pid);
+	int gid = igpart.group_id(pos);
 	iid = igpart.input_id(gid);
 	if ( w1_mark[iid] ) {
 	  // すでに処理済み
@@ -345,10 +345,10 @@ NpnMgr::tvmax_recur(const TvFunc& func,
     }
     else {
       // この分割は解決していないので一つづつを細分化して再帰する．
-      for (ymuint pos = igpart.partition_begin(pid);
+      for (int pos = igpart.partition_begin(pid);
 	   pos < igpart.partition_end(pid); ++ pos) {
-	ymuint gid = igpart.group_id(pos);
-	ymuint iid = igpart.input_id(gid);
+	int gid = igpart.group_id(pos);
+	int iid = igpart.input_id(gid);
 	IgPartition igpart1(igpart);
 	igpart1._refine(pid, pos);
 	walsh_2_refine(func, VarId(iid), igpart1);

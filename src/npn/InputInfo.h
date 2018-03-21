@@ -34,7 +34,7 @@ public:
   /// @param[in] input_num 入力数
   ///
   /// 空の状態で初期化される．
-  InputInfo(ymuint input_num = 0);
+  InputInfo(int input_num = 0);
 
   /// @brief デストラクタ
   ~InputInfo();
@@ -52,7 +52,7 @@ public:
   /// @brief 入力数を設定する．
   /// @param[in] input_num 入力数
   void
-  set_input_num(ymuint input_num);
+  set_input_num(int input_num);
 
   /// @brief 新しい等価グループを作る．
   /// @param[in] id 変数番号
@@ -60,20 +60,20 @@ public:
   ///
   /// id だけを要素として持つ新しいグループを作る．
   void
-  new_group(ymuint id,
+  new_group(int id,
 	    int w1);
 
   /// @brief 既存のグループに要素を追加する．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   /// @param[in] id 変数番号
   void
-  add_elem(ymuint gid,
-	   ymuint id);
+  add_elem(int gid,
+	   int id);
 
   /// @brief 既存のグループに bi-symmetry フラグをつける．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   void
-  set_bisym(ymuint gid);
+  set_bisym(int gid);
 
 
 public:
@@ -82,61 +82,61 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 入力数を返す．
-  ymuint
+  int
   input_num() const;
 
   /// @brief 等価グループ数を返す．
-  ymuint
+  int
   group_num() const;
 
   /// @brief 極性の決まっていないグループ数を返す．
-  ymuint
+  int
   polundet_num() const;
 
   /// @brief 極性の決まっていないグループ番号を返す．
   /// @param[in] pos 位置番号 ( 0 <= pos < polundet_num() )
-  ymuint
-  polundet_gid(ymuint pos) const;
+  int
+  polundet_gid(int pos) const;
 
   /// @brief Walsh の 1次係数を返す．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   int
-  w1(ymuint gid) const;
+  w1(int gid) const;
 
   /// @brief 等価グループの要素数を返す．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-  ymuint
-  elem_num(ymuint gid) const;
+  int
+  elem_num(int gid) const;
 
   /// @brief 等価グループの要素を返す．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   /// @param[in] pos 位置番号 ( 0 <= pos < elem_num(gid) )
-  ymuint
-  elem(ymuint gid,
-       ymuint pos) const;
+  int
+  elem(int gid,
+       int pos) const;
 
   /// @brief 等価グループの bi-symmetry フラグを返す．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   bool
-  bisym(ymuint gid) const;
+  bisym(int gid) const;
 
   /// @brief 等価グループの反転ビットパタンを求める．
   /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   ///
   /// 普通の等価グループは全要素のビットを反転させる．
   /// bi-symmetry の等価グループは先頭のビットのみ反転させる．
-  ymuint
-  inv_bits(ymuint gid) const;
+  int
+  inv_bits(int gid) const;
 
   /// @brief w1:elem_num:bisym を用いた比較関数
   bool
-  w1gt(ymuint gid1,
-       ymuint gid2) const;
+  w1gt(int gid1,
+       int gid2) const;
 
   /// @brief w1:elem_num:bisym を用いた等価関数
   bool
-  w1eq(ymuint gid1,
-       ymuint gid2) const;
+  w1eq(int gid1,
+       int gid2) const;
 
   /// @brief 内容を出力する．
   /// @param[in] s 出力先のストリーム
@@ -156,32 +156,32 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  ymuint mInputNum;
+  int mInputNum;
 
   // 等価グループ数
-  ymuint mGroupNum;
+  int mGroupNum;
 
   // Walsh の1次係数
   // キーはグループ番号
   int mW1[TvFunc::kMaxNi];
 
   // 等価グループの要素のリストの配列
-  vector<ymuint> mElemListArray[TvFunc::kMaxNi];
+  vector<int> mElemListArray[TvFunc::kMaxNi];
 
   // 極性の決まっていないグループ数
-  ymuint mPolUndetNum;
+  int mPolUndetNum;
 
   // 極性が決まっていないグループ番号のリスト
-  ymuint mPolUndetArray[TvFunc::kMaxNi];
+  int mPolUndetArray[TvFunc::kMaxNi];
 
   // 反転ビットパタンの配列
-  ymuint mInvBitsArray[TvFunc::kMaxNi];
+  int mInvBitsArray[TvFunc::kMaxNi];
 
   // 等価グループの bi-symmetry フラグのビットベクタ
-  ymuint mBiSymmBits;
+  int mBiSymmBits;
 
   // 各入力変数のグループ番号
-  ymuint mGroupIdArray[TvFunc::kMaxNi];
+  int mGroupIdArray[TvFunc::kMaxNi];
 
 };
 
@@ -196,7 +196,7 @@ private:
 // 空の状態で初期化される．
 // 空の状態で初期化される．
 inline
-InputInfo::InputInfo(ymuint input_num) :
+InputInfo::InputInfo(int input_num) :
   mInputNum(input_num)
 {
   clear();
@@ -214,7 +214,7 @@ void
 InputInfo::clear()
 {
   mGroupNum = 0;
-  for (ymuint i = 0; i < TvFunc::kMaxNi; ++ i) {
+  for (int i = 0; i < TvFunc::kMaxNi; ++ i) {
     mElemListArray[i].clear();
   }
   mPolUndetNum = 0;
@@ -224,7 +224,7 @@ InputInfo::clear()
 // @brief 入力数を設定する．
 inline
 void
-InputInfo::set_input_num(ymuint input_num)
+InputInfo::set_input_num(int input_num)
 {
   mInputNum = input_num;
 }
@@ -236,10 +236,10 @@ InputInfo::set_input_num(ymuint input_num)
 // id だけを要素として持つ新しいグループを作る．
 inline
 void
-InputInfo::new_group(ymuint id,
+InputInfo::new_group(int id,
 		     int w1)
 {
-  ymuint gid = mGroupNum;
+  int gid = mGroupNum;
   ++ mGroupNum;
   mW1[gid] = w1;
   mElemListArray[gid].clear();
@@ -256,8 +256,8 @@ InputInfo::new_group(ymuint id,
 // @param[in] id 変数番号
 inline
 void
-InputInfo::add_elem(ymuint gid,
-		    ymuint id)
+InputInfo::add_elem(int gid,
+		    int id)
 {
   ASSERT_COND( gid < mGroupNum );
   mElemListArray[gid].push_back(id);
@@ -271,7 +271,7 @@ InputInfo::add_elem(ymuint gid,
 // @param[in] gid グループ番号 ( 0 <= gid < group_num() )
 inline
 void
-InputInfo::set_bisym(ymuint gid)
+InputInfo::set_bisym(int gid)
 {
   ASSERT_COND( gid < mGroupNum );
   mBiSymmBits |= (1U << gid);
@@ -279,7 +279,7 @@ InputInfo::set_bisym(ymuint gid)
 
 // @brief 入力数を返す．
 inline
-ymuint
+int
 InputInfo::input_num() const
 {
   return mInputNum;
@@ -287,7 +287,7 @@ InputInfo::input_num() const
 
 // @brief 等価グループ数を返す．
 inline
-ymuint
+int
 InputInfo::group_num() const
 {
   return mGroupNum;
@@ -296,8 +296,8 @@ InputInfo::group_num() const
 // @brief 等価グループの要素数を返す．
 // @param[in] gid グループ番号 ( 0 <= gid < group_num() )
 inline
-ymuint
-InputInfo::elem_num(ymuint gid) const
+int
+InputInfo::elem_num(int gid) const
 {
   ASSERT_COND( gid < mGroupNum );
   return mElemListArray[gid].size();
@@ -307,9 +307,9 @@ InputInfo::elem_num(ymuint gid) const
 // @param[in] gid グループ番号 ( 0 <= gid < group_num() )
 // @param[in] pos 位置番号 ( 0 <= pos < elem_num(gid) )
 inline
-ymuint
-InputInfo::elem(ymuint gid,
-		ymuint pos) const
+int
+InputInfo::elem(int gid,
+		int pos) const
 {
   ASSERT_COND( gid < mGroupNum );
   ASSERT_COND( pos < elem_num(gid) );
@@ -318,7 +318,7 @@ InputInfo::elem(ymuint gid,
 
 // @brief 極性の決まっていないグループ数を返す．
 inline
-ymuint
+int
 InputInfo::polundet_num() const
 {
   return mPolUndetNum;
@@ -327,8 +327,8 @@ InputInfo::polundet_num() const
 // @brief 極性の決まっていないグループ番号を返す．
 // @param[in] pos 位置番号 ( 0 <= pos < polundet_num() )
 inline
-ymuint
-InputInfo::polundet_gid(ymuint pos) const
+int
+InputInfo::polundet_gid(int pos) const
 {
   ASSERT_COND( pos < polundet_num() );
   return mPolUndetArray[pos];
@@ -338,7 +338,7 @@ InputInfo::polundet_gid(ymuint pos) const
 // @param[in] gid グループ番号 ( 0 <= gid < group_num() )
 inline
 int
-InputInfo::w1(ymuint gid) const
+InputInfo::w1(int gid) const
 {
   ASSERT_COND( gid < mGroupNum );
   return mW1[gid];
@@ -348,7 +348,7 @@ InputInfo::w1(ymuint gid) const
 // @param[in] gid グループ番号 ( 0 <= gid < group_num() )
 inline
 bool
-InputInfo::bisym(ymuint gid) const
+InputInfo::bisym(int gid) const
 {
   ASSERT_COND( gid < mGroupNum );
   return static_cast<bool>((mBiSymmBits >> gid) & 1U);
@@ -360,8 +360,8 @@ InputInfo::bisym(ymuint gid) const
 // 普通の等価グループは全要素のビットを反転させる．
 // bi-symmetry の等価グループは先頭のビットのみ反転させる．
 inline
-ymuint
-InputInfo::inv_bits(ymuint gid) const
+int
+InputInfo::inv_bits(int gid) const
 {
   ASSERT_COND( gid < mGroupNum );
   return mInvBitsArray[gid];
@@ -370,8 +370,8 @@ InputInfo::inv_bits(ymuint gid) const
 // @brief w1:elem_num:bisym を用いた比較関数
 inline
 bool
-InputInfo::w1gt(ymuint gid1,
-		ymuint gid2) const
+InputInfo::w1gt(int gid1,
+		int gid2) const
 {
   int diff1 = w1(gid1) - w1(gid2);
   if ( diff1 > 0 ) {
@@ -397,8 +397,8 @@ InputInfo::w1gt(ymuint gid1,
 // @brief w1:elem_num:bisym を用いた等価関数
 inline
 bool
-InputInfo::w1eq(ymuint gid1,
-		ymuint gid2) const
+InputInfo::w1eq(int gid1,
+		int gid2) const
 {
   if ( w1(gid1) != w1(gid2) ) {
     return false;
@@ -415,13 +415,13 @@ inline
 void
 InputInfo::display(ostream& s) const
 {
-  for (ymuint gid = 0; gid < group_num(); ++ gid) {
+  for (int gid = 0; gid < group_num(); ++ gid) {
     s << "G#" << gid << ": " << w1(gid) << ": ";
     if ( bisym(gid) ) {
       s << "*: ";
     }
     s << "{";
-    for (ymuint i = 0; i < elem_num(gid); ++ i) {
+    for (int i = 0; i < elem_num(gid); ++ i) {
       s << " " << elem(gid, i);
     }
     s << "}" << endl;
