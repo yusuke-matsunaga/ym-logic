@@ -557,6 +557,36 @@ ExprNode::soplit(bool inverted,
   return SopLit(0, 0);
 }
 
+// @brief 内容を出力する．
+// @param[in] s 出力先のストリーム
+void
+ExprNode::print(ostream& s) const
+{
+  switch ( type() ) {
+  case ExprType::Const0:      s << "0"; return;
+  case ExprType::Const1:      s << "1"; return;
+  case ExprType::PosiLiteral: s << "P" << varid(); return;
+  case ExprType::NegaLiteral: s << "N" << varid(); return;
+  default: break;
+  }
+  int n = child_num();
+  const char* op = "";
+  const char* op1 = "";
+  s << "(";
+  switch ( type() ) {
+  case ExprType::And: op1 = " & "; break;
+  case ExprType::Or:  op1 = " | "; break;
+  case ExprType::Xor: op1 = " ^ "; break;
+  default: break;
+  }
+  for ( int i = 0; i < n; ++ i ) {
+    s << op;
+    child(i)->print(s);
+    op = op1;
+  }
+  s << ")";
+}
+
 // 自殺する．
 void
 ExprNode::suicide()
