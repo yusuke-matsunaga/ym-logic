@@ -30,7 +30,7 @@ posi_equiv(const ExprNode* node0,
   }
 
   int n = node0->child_num();
-  for (int i = 0; i < n; i ++) {
+  for ( int i = 0; i < n; i ++ ) {
     const ExprNode* chd0 = node0->child(i);
     const ExprNode* chd1 = node1->child(i);
     if ( !posi_equiv(chd0, chd1) ) {
@@ -73,7 +73,7 @@ nega_equiv(const ExprNode* node0,
     if ( !node1->is_or() ) {
       return false;
     }
-    for (int i = 0; i < n; i ++) {
+    for ( int i = 0; i < n; i ++ ) {
       const ExprNode* chd0 = node0->child(i);
       const ExprNode* chd1 = node1->child(i);
       if ( !nega_equiv(chd0, chd1) ) {
@@ -86,7 +86,7 @@ nega_equiv(const ExprNode* node0,
     if ( !node1->is_and() ) {
       return false;
     }
-    for (int i = 0; i < n; i ++) {
+    for ( int i = 0; i < n; i ++ ) {
       const ExprNode* chd0 = node0->child(i);
       const ExprNode* chd1 = node1->child(i);
       if ( !nega_equiv(chd0, chd1) ) {
@@ -101,7 +101,7 @@ nega_equiv(const ExprNode* node0,
     }
     int n = node0->child_num();
     bool inv = false;
-    for (int i = 0; i < n; i ++) {
+    for ( int i = 0; i < n; i ++ ) {
       const ExprNode* chd0 = node0->child(i);
       const ExprNode* chd1 = node1->child(i);
       if ( !nega_equiv(chd0, chd1) ) {
@@ -120,9 +120,9 @@ nega_equiv(const ExprNode* node0,
 }
 
 // @brief vals の値にしたがった評価を行う．
-ymulong
-ExprNode::eval(const vector<ymulong>& vals,
-	       ymulong mask) const
+ExprNode::BitVectType
+ExprNode::eval(const vector<BitVectType>& vals,
+	       BitVectType mask) const
 {
   if ( is_zero() ) {
     return 0UL;
@@ -137,30 +137,29 @@ ExprNode::eval(const vector<ymulong>& vals,
     return ~vals[varid().val()] & mask;
   }
 
-  int ni = child_num();
+  int nc = child_num();
+  ASSERT_COND( nc > 0 );
+
+  BitVectType ans = child(0)->eval(vals, mask);
   if ( is_and() ) {
-    ymulong ans = child(0)->eval(vals, mask);
-    for (int i = 1; i < ni; ++ i) {
+    for ( int i = 1; i < nc; ++ i ) {
       ans &= child(i)->eval(vals, mask);
     }
-    return ans;
   }
-  if ( is_or() ) {
-    ymulong ans = child(0)->eval(vals, mask);
-    for (int i = 1; i < ni; ++ i) {
+  else if ( is_or() ) {
+    for ( int i = 1; i < nc; ++ i ) {
       ans |= child(i)->eval(vals, mask);
     }
-    return ans;
   }
-  if ( is_xor() ) {
-    ymulong ans = child(0)->eval(vals, mask);
-    for (int i = 1; i < ni; ++ i) {
+  else if ( is_xor() ) {
+    for ( int i = 1; i < nc; ++ i ) {
       ans ^= child(i)->eval(vals, mask);
     }
-    return ans;
   }
-  ASSERT_NOT_REACHED;
-  return 0UL;
+  else {
+    ASSERT_NOT_REACHED;
+  }
+  return ans;
 }
 
 // @brief 真理値表を作成する．
@@ -183,93 +182,36 @@ ExprNode::make_tv(int ni) const
 
   // あとは AND/OR/XOR のみ
   int nc = child_num();
+  ASSERT_COND( nc > 0 );
+
+  TvFunc ans = child(0)->make_tv(ni);
   if ( is_and() ) {
-    TvFunc ans = child(0)->make_tv(ni);
-    for (int i = 1; i < nc; ++ i) {
+    for ( int i = 1; i < nc; ++ i ) {
       ans &= child(i)->make_tv(ni);
     }
-    return ans;
   }
-  if ( is_or() ) {
-    TvFunc ans = child(0)->make_tv(ni);
-    for (int i = 1; i < nc; ++ i) {
+  else if ( is_or() ) {
+    for ( int i = 1; i < nc; ++ i ) {
       ans |= child(i)->make_tv(ni);
     }
-    return ans;
   }
-  if ( is_xor() ) {
-    TvFunc ans = child(0)->make_tv(ni);
-    for (int i = 1; i < nc; ++ i) {
+  else if ( is_xor() ) {
+    for ( int i = 1; i < nc; ++ i ) {
       ans ^= child(i)->make_tv(ni);
     }
-    return ans;
   }
-  ASSERT_NOT_REACHED;
-  return TvFunc();
+  else {
+    ASSERT_NOT_REACHED;
+  }
+  return ans;
 }
 
-// 定数,リテラルもしくは子供がリテラルのノードの時に true を返す．
+// 子供が全てリテラルの時に true を返す．
 bool
-ExprNode::is_simple() const
+ExprNode::is_simple_op() const
 {
-  if ( !is_op() ) {
-    return true;
-  }
-
-  int n = child_num();
-  for (int i = 0; i < n; ++ i) {
-    if ( !child(i)->is_literal() ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-// 子供がすべてリテラルの AND ノードの時に true を返す．
-bool
-ExprNode::is_simple_and() const
-{
-  if ( !is_and() ) {
-    return false;
-  }
-
-  int n = child_num();
-  for (int i = 0; i < n; ++ i) {
-    if ( !child(i)->is_literal() ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-// 子供がすべてリテラルの OR ノードの時に true を返す．
-bool
-ExprNode::is_simple_or() const
-{
-  if ( !is_or() ) {
-    return false;
-  }
-
-  int n = child_num();
-  for (int i = 0; i < n; ++ i) {
-    if ( !child(i)->is_literal() ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-// 子供がすべてリテラルの XOR ノードの時に true を返す．
-bool
-ExprNode::is_simple_xor() const
-{
-  if ( !is_xor() ) {
-    return false;
-  }
-
-  int n = child_num();
-  for (int i = 0; i < n; ++ i) {
-    if ( !child(i)->is_literal() ) {
+  for ( auto child: child_list() ) {
+    if ( !child->is_literal() ) {
       return false;
     }
   }
@@ -290,10 +232,8 @@ ExprNode::is_sop() const
     return false;
   }
 
-  int n = child_num();
-  for (int i = 0; i < n; ++ i) {
-    const ExprNode* chd = child(i);
-    if ( !chd->is_literal() && !chd->is_simple_and() ) {
+  for ( auto child: child_list() ){
+    if ( !child->is_literal() && !child->is_simple_and() ) {
       return false;
     }
   }
@@ -309,18 +249,16 @@ ExprNode::litnum() const
     return 1;
   }
 
+  int num = 0;
+
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
-    int num = 0;
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      num += child(i)->litnum();
+    for ( auto child: child_list() ) {
+      num += child->litnum();
     }
-    return num;
   }
 
-  // それ以外は0
-  return 0;
+  return num;
 }
 
 // 特定の変数のリテラル数を返す．
@@ -332,18 +270,17 @@ ExprNode::litnum(VarId id) const
     return 1;
   }
 
+  int num = 0;
+
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
-    int num = 0;
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      num += child(i)->litnum(id);
+    for ( auto child: child_list() ) {
+      num += child->litnum(id);
     }
     return num;
   }
 
-  // それ以外は0
-  return 0;
+  return num;
 }
 
 // 特定の変数の特定の極性のリテラル数を返す．
@@ -356,18 +293,16 @@ ExprNode::litnum(VarId id,
     return 1;
   }
 
+  int num = 0;
+
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
-    int num = 0;
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      num += child(i)->litnum(id, inv);
+    for ( auto child: child_list() ) {
+      num += child->litnum(id, inv);
     }
-    return num;
   }
 
-  // それ以外は0
-  return 0;
+  return num;
 }
 
 // @brief 使われている変数の最大の番号 + 1を得る．
@@ -378,20 +313,18 @@ ExprNode::input_size() const
     return varid().val() + 1;
   }
 
+  int ans = 0;
+
   if ( is_op() ) {
-    int ans = 0;
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      int ans1 = child(i)->input_size();
+    for ( auto child: child_list() ) {
+      int ans1 = child->input_size();
       if ( ans < ans1 ) {
 	ans = ans1;
       }
     }
-    return ans;
   }
 
-  // それ以外は 0
-  return 0;
+  return ans;
 }
 
 // SOP形式の積項数とリテラル数を計算する．
@@ -402,34 +335,32 @@ ExprNode::soplit(bool inverted) const
     return SopLit(1, 1);
   }
 
-  if ( (type() == ExprType::And && ! inverted) ||
+  if ( (type() == ExprType::And && !inverted) ||
        (type() == ExprType::Or && inverted) ) {
     SopLit l(1, 0);
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      SopLit l1 = child(i)->soplit(inverted);
+    for ( auto child: child_list() ) {
+      SopLit l1 = child->soplit(inverted);
       l *= l1;
     }
     return l;
   }
 
-  if ( (type() == ExprType::Or && ! inverted) ||
+  if ( (type() == ExprType::Or && !inverted) ||
        (type() == ExprType::And && inverted) ) {
     SopLit l(0, 0);
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      SopLit l1 = child(i)->soplit(inverted);
+    for ( auto child: child_list() ) {
+      SopLit l1 = child->soplit(inverted);
       l += l1;
     }
     return l;
   }
 
   if ( type() == ExprType::Xor ) {
-    int n = child_num();
     const ExprNode* chd = child(0);
     SopLit lp = chd->soplit(inverted);
     SopLit ln = chd->soplit(inverted);
-    for (int i = 1; i < n; ++ i) {
+    int nc = child_num();
+    for ( int i = 1; i < nc; ++ i ) {
       const ExprNode* chd = child(i);
       SopLit l1p = lp;
       SopLit l1n = ln;
@@ -458,34 +389,32 @@ ExprNode::soplit(bool inverted,
     }
   }
 
-  if ( (type() == ExprType::And && ! inverted) ||
+  if ( (type() == ExprType::And && !inverted) ||
        (type() == ExprType::Or  && inverted) ) {
     SopLit l(1, 0);
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      SopLit l1 = child(i)->soplit(inverted, id);
+    for ( auto child: child_list() ) {
+      SopLit l1 = child->soplit(inverted, id);
       l *= l1;
     }
     return l;
   }
 
-  if ( (type() == ExprType::Or && ! inverted) ||
+  if ( (type() == ExprType::Or && !inverted) ||
        (type() == ExprType::And && inverted) ) {
     SopLit l(0, 0);
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      SopLit l1 = child(i)->soplit(inverted, id);
+    for ( auto child: child_list() ) {
+      SopLit l1 = child->soplit(inverted, id);
       l += l1;
     }
     return l;
   }
 
   if ( type() == ExprType::Xor ) {
-    int n = child_num();
     const ExprNode* chd = child(0);
     SopLit lp = chd->soplit(inverted);
     SopLit ln = chd->soplit(inverted);
-    for (int i = 1; i < n; ++ i) {
+    int nc = child_num();
+    for ( int i = 1; i < nc; ++ i ) {
       const ExprNode* chd = child(i);
       SopLit l1p = lp;
       SopLit l1n = ln;
@@ -515,23 +444,21 @@ ExprNode::soplit(bool inverted,
     }
   }
 
-  if ( (type() == ExprType::And && ! inverted) ||
+  if ( (type() == ExprType::And && !inverted) ||
        (type() == ExprType::Or && inverted) ) {
     SopLit l(1, 0);
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      SopLit l1 = child(i)->soplit(inverted, id, inv);
+    for ( auto child: child_list() ) {
+      SopLit l1 = child->soplit(inverted, id, inv);
       l *= l1;
     }
     return l;
   }
 
-  if ( (type() == ExprType::Or && ! inverted) ||
+  if ( (type() == ExprType::Or && !inverted) ||
        (type() == ExprType::And && inverted) ) {
     SopLit l(0, 0);
-    int n = child_num();
-    for (int i = 0; i < n; ++ i) {
-      SopLit l1 = child(i)->soplit(inverted, id, inv);
+    for ( auto child: child_list() ) {
+      SopLit l1 = child->soplit(inverted, id, inv);
       l += l1;
     }
     return l;
@@ -542,7 +469,7 @@ ExprNode::soplit(bool inverted,
     const ExprNode* chd = child(0);
     SopLit lp = chd->soplit(inverted);
     SopLit ln = chd->soplit(inverted);
-    for (int i = 1; i < n; ++ i) {
+    for ( int i = 1; i < n; ++ i ) {
       const ExprNode* chd = child(i);
       SopLit l1p = lp;
       SopLit l1n = ln;
@@ -569,7 +496,6 @@ ExprNode::print(ostream& s) const
   case ExprType::NegaLiteral: s << "N" << varid(); return;
   default: break;
   }
-  int n = child_num();
   const char* op = "";
   const char* op1 = "";
   s << "(";
@@ -579,9 +505,9 @@ ExprNode::print(ostream& s) const
   case ExprType::Xor: op1 = " ^ "; break;
   default: break;
   }
-  for ( int i = 0; i < n; ++ i ) {
+  for ( auto child: child_list() ) {
     s << op;
-    child(i)->print(s);
+    child->print(s);
     op = op1;
   }
   s << ")";

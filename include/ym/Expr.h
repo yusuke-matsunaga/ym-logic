@@ -5,7 +5,7 @@
 /// @brief Expr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -42,6 +42,15 @@ class Expr
 
 public:
   //////////////////////////////////////////////////////////////////////
+  // このクラスで用いられる型の定義
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief eval() で用いられるビットベクタの型
+  using BitVectType = ymuint64;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
   /// @name コンストラクタ/デストラクタ/代入演算子/生成用クラスメソッド
   /// @{
 
@@ -58,7 +67,7 @@ public:
   /// @brief 代入演算子
   /// @param[in] src コピー元のオブジェクト
   /// @return 自分自身
-  const Expr&
+  Expr&
   operator=(const Expr& src);
 
   /// @brief デストラクタ
@@ -177,7 +186,7 @@ public:
   /// @note メモリリークチェックのための関数なので通常は使用しない．
   static
   void
-  clear_memory();
+  __clear_memory();
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -197,7 +206,7 @@ public:
   /// @return 自分自身
   ///
   /// 自分の論理式と src の論理式の AND を計算し自分に代入する．
-  const Expr&
+  Expr&
   operator&=(const Expr& src);
 
   /// @brief OR つき代入
@@ -205,7 +214,7 @@ public:
   /// @return 自分自身
   ///
   /// 自分の論理式と src の論理式の OR を計算し自分に代入する．
-  const Expr&
+  Expr&
   operator|=(const Expr& src);
 
   /// @brief XOR つき代入
@@ -213,7 +222,7 @@ public:
   /// @return 自分自身
   ///
   /// 自分の論理式と src の論理式の XOR を計算し自分に代入する．
-  const Expr&
+  Expr&
   operator^=(const Expr& src);
 
   /// @brief compose 演算
@@ -261,9 +270,9 @@ public:
   /// @param[in] mask 使用するビットのためのマスク
   /// @return 評価値
   /// @note 演算はビット毎に独立に行われる．
-  ymulong
-  eval(const vector<ymulong>& vals,
-       ymulong mask = ~0UL) const;
+  BitVectType
+  eval(const vector<BitVectType>& vals,
+       BitVectType mask = ~0UL) const;
 
   /// @brief 真理値表の作成
   /// @param[in] ni 入力数
@@ -535,6 +544,9 @@ public:
 
 
 private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
 
   // @brief 内部で用いるコンストラクタ
   // @param[in] node 根のノード

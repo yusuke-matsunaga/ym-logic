@@ -5,12 +5,13 @@
 /// @brief ExprNode のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
 #include "ym/Expr.h"
 #include "ExprType.h"
+#include "ym/Array.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -28,6 +29,10 @@ class ExprNode
   friend class Expr;
   friend class ExprNodePtr;
   friend class ExprMgr;
+
+public:
+
+  using BitVectType = Expr::BitVectType;
 
 public:
 
@@ -101,10 +106,14 @@ public:
   const ExprNode*
   child(int pos) const;
 
+  /// @brief 演算子ノードの場合に子供のノードのリストを返す．
+  Array<const ExprNode*>
+  child_list() const;
+
   /// @brief vals の値にしたがった評価を行う．
-  ymulong
-  eval(const vector<ymulong>& vals,
-       ymulong mask) const;
+  BitVectType
+  eval(const vector<BitVectType>& vals,
+       BitVectType mask) const;
 
   /// @brief 真理値表を作成する．
   /// @param[in] ni 入力数
@@ -230,6 +239,10 @@ private:
   // 自殺する．
   void
   suicide();
+
+  // 子供が全てリテラルの時に true を返す．
+  bool
+  is_simple_op() const;
 
 
 private:
@@ -373,6 +386,38 @@ ExprNode::is_op() const
   return (mRefType & 4U) == 4U;
 }
 
+// 定数,リテラルもしくは子供がリテラルのノードの時に true を返す．
+inline
+bool
+ExprNode::is_simple() const
+{
+  return !is_op() || is_simple_op();
+}
+
+// 子供がすべてリテラルの AND ノードの時に true を返す．
+inline
+bool
+ExprNode::is_simple_and() const
+{
+  return is_and() && is_simple_op();
+}
+
+// 子供がすべてリテラルの OR ノードの時に true を返す．
+inline
+bool
+ExprNode::is_simple_or() const
+{
+  return is_or() && is_simple_op();
+}
+
+// 子供がすべてリテラルの XOR ノードの時に true を返す．
+inline
+bool
+ExprNode::is_simple_xor() const
+{
+  return is_xor() && is_simple_op();
+}
+
 inline
 int
 ExprNode::child_num() const
@@ -387,6 +432,20 @@ ExprNode::child(int pos) const
   ASSERT_COND( pos >= 0 && pos < child_num() );
 
   return mChildArray[pos];
+}
+
+// @brief 演算子ノードの場合に子供のノードのリストを返す．
+inline
+Array<const ExprNode*>
+ExprNode::child_list() const
+{
+  if ( is_op() ) {
+    auto arrayptr = const_cast<const ExprNode**>(mChildArray);
+    return Array<const ExprNode*>(arrayptr, 0, mNc);
+  }
+  else {
+    return Array<const ExprNode*>(nullptr, 0, 0);
+  }
 }
 
 inline

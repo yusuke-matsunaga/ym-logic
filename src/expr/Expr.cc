@@ -3,7 +3,7 @@
 /// @brief Expr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2016 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2016, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -60,7 +60,7 @@ Expr::set_root(const ExprNode* node)
 }
 
 // 代入演算子
-const Expr&
+Expr&
 Expr::operator=(const Expr& src)
 {
   set_root(src.root());
@@ -185,7 +185,7 @@ Expr::make_xor(const list<Expr>& chd_list)
 // @brief 確保していたメモリを開放する．
 // @note メモリリークチェックのための関数なので通常は使用しない．
 void
-Expr::clear_memory()
+Expr::__clear_memory()
 {
   ExprMgr::clear_memory();
 }
@@ -210,7 +210,7 @@ operator&(const Expr& src1,
 }
 
 // 自分の論理式と src の論理式の論理積を計算し自分に代入する．
-const Expr&
+Expr&
 Expr::operator&=(const Expr& src)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
@@ -234,7 +234,7 @@ operator|(const Expr& src1,
 }
 
 // 自分の論理式と src の論理式の論理和を計算し自分に代入する．
-const Expr&
+Expr&
 Expr::operator|=(const Expr& src)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
@@ -255,11 +255,10 @@ operator^(const Expr& src1,
   mgr.nodestack_push(src1.root());
   mgr.nodestack_push(src2.root());
   return Expr(mgr.make_xor(begin));
-  ExprNodeList node_list;
 }
 
 // 自分の論理式と src の論理式の排他的論理和を計算し自分に代入する．
-const Expr&
+Expr&
 Expr::operator^=(const Expr& src)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
@@ -307,9 +306,9 @@ Expr::simplify()
 // @brief 値の評価
 // @param[in] vals 変数の値割り当て
 // @return 評価値
-ymulong
-Expr::eval(const vector<ymulong>& vals,
-	      ymulong mask) const
+Expr::BitVectType
+Expr::eval(const vector<BitVectType>& vals,
+	   BitVectType mask) const
 {
   return root()->eval(vals, mask);
 }
@@ -324,42 +323,6 @@ Expr::make_tv(int ni) const
   }
   return root()->make_tv(ni);
 }
-#if 0
-  // とりあえずベタなやり方．
-  int ni = input_size();
-  int nv = 1 << ni;
-  const int BPW = sizeof(ymulong) * 8;
-  int nt = (nv + BPW - 1) / BPW;
-  tv.clear();
-  tv.resize(nt);
-
-  const ExprNode* node = root();
-  int b = 0;
-  ymulong s = 1UL;
-  ymulong mask = 0UL;
-  vector<ymulong> ivec(ni, 0UL);
-  for (int p = 0; p < nv; ++ p) {
-    for (int i = 0; i < ni; ++ i) {
-      if ( p & (1 << i) ) {
-	ivec[i] |= s;
-      }
-    }
-    mask |= s;
-    s <<= 1;
-    if ( s == 0UL ) {
-      tv[b] = node->eval(ivec, ~0UL);
-      ++ b;
-      s = 1UL;
-      for (int i = 0; i < ni; ++ i) {
-	ivec[i] = 0UL;
-      }
-    }
-  }
-  if ( s != 1UL ) {
-    tv[b] = node->eval(ivec, mask);
-  }
-}
-#endif
 
 // 恒偽関数を表している時に真となる．
 bool
@@ -696,7 +659,7 @@ write_expr(ODO& s,
   int nc = expr.child_num();
   s << type
     << nc;
-  for (int i = 0; i < nc; ++ i) {
+  for ( int i = 0; i < nc; ++ i ) {
     write_expr(s, expr.child(i));
   }
 }
