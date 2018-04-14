@@ -223,8 +223,20 @@ TvFunc::TvFunc(const TvFunc& src) :
   }
 }
 
-// 代入演算子
-const TvFunc&
+// @brief ムーブコンストラクタ
+// @param[in] src ムーブ元のソースオブジェクト
+TvFunc::TvFunc(TvFunc&& src) :
+  mInputNum(src.mInputNum),
+  mBlockNum(src.mBlockNum),
+  mVector(src.mVector)
+{
+  src.mInputNum = 0;
+  src.mBlockNum = 0;
+  src.mVector = nullptr;
+}
+
+// コピー代入演算子
+TvFunc&
 TvFunc::operator=(const TvFunc& src)
 {
   if ( mBlockNum != src.mBlockNum ) {
@@ -241,6 +253,27 @@ TvFunc::operator=(const TvFunc& src)
   return *this;
 }
 
+// @brief ムーブ代入演算子
+// @param[in] src コピー元のソースオブジェクト
+// @return 自分自身への参照を返す．
+TvFunc&
+TvFunc::operator=(TvFunc&& src)
+{
+  if ( mVector != nullptr ) {
+    delete [] mVector;
+  }
+
+  mInputNum = src.mInputNum;
+  mBlockNum = src.mBlockNum;
+  mVector = src.mVector;
+
+  src.mInputNum = 0;
+  src.mBlockNum = 0;
+  src.mVector = nullptr;
+
+  return *this;
+}
+
 // デストラクタ
 TvFunc::~TvFunc()
 {
@@ -248,7 +281,7 @@ TvFunc::~TvFunc()
 }
 
 // 自分自身を否定する．
-const TvFunc&
+TvFunc&
 TvFunc::negate()
 {
   TvFunc::WordType neg_mask = vec_mask(mInputNum);
@@ -259,7 +292,7 @@ TvFunc::negate()
 }
 
 // src1 との論理積を計算し自分に代入する．
-const TvFunc&
+TvFunc&
 TvFunc::operator&=(const TvFunc& src1)
 {
   for ( int b = 0; b < mBlockNum; ++ b ) {
@@ -269,7 +302,7 @@ TvFunc::operator&=(const TvFunc& src1)
 }
 
 // src1 との論理和を計算し自分に代入する．
-const TvFunc&
+TvFunc&
 TvFunc::operator|=(const TvFunc& src1)
 {
   for ( int b = 0; b < mBlockNum; ++ b ) {
@@ -279,7 +312,7 @@ TvFunc::operator|=(const TvFunc& src1)
 }
 
 // src1 との排他的論理和を計算し自分に代入する．
-const TvFunc&
+TvFunc&
 TvFunc::operator^=(const TvFunc& src1)
 {
   for ( int b = 0; b < mBlockNum; ++ b ) {
@@ -292,7 +325,7 @@ TvFunc::operator^=(const TvFunc& src1)
 // @param[in] varid 変数番号
 // @param[in] pol 極性
 // @return 自身への参照を返す．
-const TvFunc&
+TvFunc&
 TvFunc::set_cofactor(VarId varid,
 		     bool inv)
 {

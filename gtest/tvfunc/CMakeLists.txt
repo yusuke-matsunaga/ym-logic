@@ -31,6 +31,12 @@ ym_add_gtest(TvFuncTest
   $<TARGET_OBJECTS:ym_logic_d>
   )
 
+ym_add_gtest(TvFuncMove
+  TvFuncMove.cc
+  $<TARGET_OBJECTS:ym_base_d>
+  $<TARGET_OBJECTS:ym_logic_d>
+  )
+
 
 # ===================================================================
 #  インストールターゲットの設定

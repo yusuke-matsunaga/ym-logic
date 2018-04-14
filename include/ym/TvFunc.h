@@ -29,6 +29,7 @@ class TvFunc
 public:
   using WordType = ymuint64;
 
+public:
   /// @brief 入力数のみ指定したコンストラクタ
   /// @param[in] ni 入力数
   ///
@@ -48,11 +49,21 @@ public:
   /// @param[in] src コピー元のソースオブジェクト
   TvFunc(const TvFunc& src);
 
-  /// @brief 代入演算子
+  /// @brief ムーブコンストラクタ
+  /// @param[in] src ムーブ元のソースオブジェクト
+  TvFunc(TvFunc&& src);
+
+  /// @brief コピー代入演算子
   /// @param[in] src コピー元のソースオブジェクト
   /// @return 自分自身への参照を返す．
-  const TvFunc&
+  TvFunc&
   operator=(const TvFunc& src);
+
+  /// @brief ムーブ代入演算子
+  /// @param[in] src コピー元のソースオブジェクト
+  /// @return 自分自身への参照を返す．
+  TvFunc&
+  operator=(TvFunc&& src);
 
   /// @brief デストラクタ
   ~TvFunc();
@@ -125,25 +136,25 @@ public:
 
   /// @brief 自分自身を否定する．
   /// @return 自身への参照を返す．
-  const TvFunc&
+  TvFunc&
   negate();
 
   /// @brief src1 との論理積を計算し自分に代入する．
   /// @param[in] src1 演算対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFunc&
+  TvFunc&
   operator&=(const TvFunc& src1);
 
   /// @brief src1 との論理和を計算し自分に代入する．
   /// @param[in] src1 演算対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFunc&
+  TvFunc&
   operator|=(const TvFunc& src1);
 
   /// @brief src1 との排他的論理和を計算し自分に代入する．
   /// @param[in] src1 演算対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFunc&
+  TvFunc&
   operator^=(const TvFunc& src1);
 
   /// @brief コファクターを計算し自分に代入する．
@@ -152,7 +163,7 @@ public:
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
   /// @return 自身への参照を返す．
-  const TvFunc&
+  TvFunc&
   set_cofactor(VarId varid,
 	       bool inv);
 
@@ -181,12 +192,12 @@ public:
   count_one() const;
 
   /// @brief 0次の Walsh 係数を求める．
-  ymint
+  int
   walsh_0() const;
 
   /// @brief 1次の Walsh 係数を求める．
   /// @param[in] varid 変数番号
-  ymint
+  int
   walsh_1(VarId varid) const;
 
   /// @brief 2次の Walsh 係数を求める．
@@ -333,7 +344,7 @@ public:
   /// 特に根拠はないが，これなら Walsh 係数が 32 ビット整数で収まる．
   /// あと真理値表ベースの手法ではこれくらいが限度
   static
-  const int kMaxNi = 20;
+  constexpr int kMaxNi = 20;
 
 
 public:
