@@ -3,7 +3,7 @@
 /// @brief TvFuncM の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -131,22 +131,49 @@ TvFuncM::TvFuncM(const TvFuncM& src) :
   }
 }
 
-// @brief TvFunc からの変換用コンストラクタ
-TvFuncM::TvFuncM(const TvFunc& src)
+// ムーブコンストラクタ
+TvFuncM::TvFuncM(TvFuncM&& src) :
+  mInputNum(src.mInputNum),
+  mOutputNum(src.mOutputNum),
+  mBlockNum1(src.mBlockNum1),
+  mBlockNum(src.mBlockNum),
+  mVector(src.mVector)
 {
-  int ni = src.input_num();
-  mInputNum = ni;
-  mOutputNum = 1;
-  mBlockNum1 = nblock(ni);
-  mBlockNum = mBlockNum1;
-  mVector = new TvFuncM::WordType[mBlockNum];
+  src.mInputNum = 0;
+  src.mOutputNum = 1;
+  src.mBlockNum1 = 0;
+  src.mBlockNum = 0;
+  src.mVector = nullptr;
+}
+
+// @brief TvFunc からの変換用コンストラクタ
+TvFuncM::TvFuncM(const TvFunc& src) :
+  mInputNum(src.mInputNum),
+  mOutputNum(1),
+  mBlockNum1(nblock(mInputNum)),
+  mBlockNum(mBlockNum1),
+  mVector(new TvFuncM::WordType[mBlockNum])
+{
   for ( int i = 0; i < mBlockNum; ++ i ) {
     mVector[i] = src.raw_data(i);
   }
 }
 
-// 代入演算子
-const TvFuncM&
+// @brief TvFunc からの変換用ムーブコンストラクタ
+TvFuncM::TvFuncM(TvFunc&& src) :
+  mInputNum(src.input_num()),
+  mOutputNum(1),
+  mBlockNum1(nblock(mInputNum)),
+  mBlockNum(mBlockNum1),
+  mVector(src.mVector)
+{
+  src.mInputNum = 0;
+  src.mBlockNum = 0;
+  src.mVector = nullptr;
+}
+
+// コピー代入演算子
+TvFuncM&
 TvFuncM::operator=(const TvFuncM& src)
 {
   if ( mBlockNum != src.mBlockNum ) {
@@ -165,6 +192,25 @@ TvFuncM::operator=(const TvFuncM& src)
   return *this;
 }
 
+// ムーブ代入演算子
+TvFuncM&
+TvFuncM::operator=(TvFuncM&& src)
+{
+  mInputNum = src.mInputNum;
+  mOutputNum = src.mOutputNum;
+  mBlockNum1 = src.mBlockNum1;
+  mBlockNum = src.mBlockNum;
+  mVector = src.mVector;
+
+  src.mInputNum = 0;
+  src.mOutputNum = 1;
+  src.mBlockNum1 = 0;
+  src.mBlockNum = 0;
+  src.mVector = nullptr;
+
+  return *this;
+}
+
 // デストラクタ
 TvFuncM::~TvFuncM()
 {
@@ -172,7 +218,7 @@ TvFuncM::~TvFuncM()
 }
 
 // 自分自身を否定する．
-const TvFuncM&
+TvFuncM&
 TvFuncM::negate()
 {
   switch ( mInputNum ) {
@@ -230,7 +276,7 @@ TvFuncM::negate()
 }
 
 // src1 との論理積を計算し自分に代入する．
-const TvFuncM&
+TvFuncM&
 TvFuncM::operator&=(const TvFuncM& src1)
 {
   for ( int i = 0; i < mBlockNum; ++ i ) {
@@ -240,7 +286,7 @@ TvFuncM::operator&=(const TvFuncM& src1)
 }
 
 // src1 との論理和を計算し自分に代入する．
-const TvFuncM&
+TvFuncM&
 TvFuncM::operator|=(const TvFuncM& src1)
 {
   for ( int i = 0; i < mBlockNum; ++ i ) {
@@ -250,7 +296,7 @@ TvFuncM::operator|=(const TvFuncM& src1)
 }
 
 // src1 との排他的論理和を計算し自分に代入する．
-const TvFuncM&
+TvFuncM&
 TvFuncM::operator^=(const TvFuncM& src1)
 {
   for ( int i = 0; i < mBlockNum; ++ i ) {
@@ -263,7 +309,7 @@ TvFuncM::operator^=(const TvFuncM& src1)
 // @param[in] varid 変数番号
 // @param[in] pol 極性
 // @return 自身への参照を返す．
-const TvFuncM&
+TvFuncM&
 TvFuncM::set_cofactor(VarId varid,
 		      bool inv)
 {

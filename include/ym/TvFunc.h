@@ -26,6 +26,8 @@ BEGIN_NAMESPACE_YM
 //////////////////////////////////////////////////////////////////////
 class TvFunc
 {
+  friend class TvFuncM;
+
 public:
   using WordType = ymuint64;
 

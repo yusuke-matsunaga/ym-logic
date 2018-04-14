@@ -5,7 +5,7 @@
 /// @brief TvFuncM のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2017, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -36,9 +36,16 @@ public:
   /// @brief コピーコンストラクタ
   TvFuncM(const TvFuncM& src);
 
-  /// @brief TvFunc からの変換用コンストラクタ
+  /// @brief ムーブコンストラクタ
+  TvFuncM(TvFuncM&& src);
+
+  /// @brief TvFunc からの変換用コピーコンストラクタ
   explicit
   TvFuncM(const TvFunc& src);
+
+  /// @brief TvFunc からの変換用ムーブコンストラクタ
+  explicit
+  TvFuncM(TvFunc&& src);
 
   /// @brief TvFunc のリストを用いたコンストラクタ
   /// @param[in] src_list 各出力の論理関数
@@ -52,9 +59,13 @@ public:
   /// src_list の関数の入力数は等しくなければならない．
   TvFuncM(const list<TvFunc>& src_list);
 
-  /// @brief 代入演算子
-  const TvFuncM&
+  /// @brief コピー代入演算子
+  TvFuncM&
   operator=(const TvFuncM& src);
+
+  /// @brief ムーブ代入演算子
+  TvFuncM&
+  operator=(TvFuncM&& src);
 
   /// @brief デストラクタ
   ~TvFuncM();
@@ -67,25 +78,25 @@ public:
 
   /// @brief 自分自身を否定する．
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   negate();
 
   /// @brief right との論理積を計算し自分に代入する．
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   operator&=(const TvFuncM& right);
 
   /// @brief right との論理和を計算し自分に代入する．
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   operator|=(const TvFuncM& right);
 
   /// @brief right との排他的論理和を計算し自分に代入する．
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   operator^=(const TvFuncM& right);
 
   /// @brief コファクターを計算し自分に代入する．
@@ -94,7 +105,7 @@ public:
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   set_cofactor(VarId varid,
 	       bool inv);
 
@@ -108,14 +119,14 @@ public:
   /// @brief 自分自身を否定する．
   /// @param[in] ovar 出力番号
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   negate(VarId ovar);
 
   /// @brief right との論理積を計算し自分に代入する．
   /// @param[in] ovar 出力番号
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   and_assign(VarId ovar,
 	     const TvFunc& right);
 
@@ -123,7 +134,7 @@ public:
   /// @param[in] ovar 出力番号
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   or_assign(VarId ovar,
 	    const TvFunc& right);
 
@@ -131,7 +142,7 @@ public:
   /// @param[in] ovar 出力番号
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   xor_assign(VarId ovar,
 	     const TvFunc& right);
 
@@ -142,7 +153,7 @@ public:
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
   /// @return 自身への参照を返す．
-  const TvFuncM&
+  TvFuncM&
   set_cofactor(VarId ovar,
 	       VarId varid,
 	       bool inv);
@@ -150,7 +161,7 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  //　情報の取得
+  // 情報の取得
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 入力数を得る．
