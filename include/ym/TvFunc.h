@@ -442,6 +442,27 @@ operator&(const TvFunc& left,
 	  const TvFunc& right);
 
 /// @relates TvFunc
+/// @brief 論理積を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator&(const TvFunc&& left,
+	  const TvFunc& right);
+
+/// @relates TvFunc
+/// @brief 論理積を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator&(const TvFunc& left,
+	  const TvFunc&& right);
+
+/// @relates TvFunc
+/// @brief 論理積を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator&(const TvFunc&& left,
+	  const TvFunc&& right);
+
+/// @relates TvFunc
 /// @brief 論理和を求める．
 /// @param[in] left, right オペランド
 TvFunc
@@ -449,11 +470,53 @@ operator|(const TvFunc& left,
 	  const TvFunc& right);
 
 /// @relates TvFunc
+/// @brief 論理和を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator|(const TvFunc&& left,
+	  const TvFunc& right);
+
+/// @relates TvFunc
+/// @brief 論理和を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator|(const TvFunc& left,
+	  const TvFunc&& right);
+
+/// @relates TvFunc
+/// @brief 論理和を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator|(const TvFunc&& left,
+	  const TvFunc&& right);
+
+/// @relates TvFunc
 /// @brief 排他的論理和を求める．
 /// @param[in] left, right オペランド
 TvFunc
 operator^(const TvFunc& left,
 	  const TvFunc& right);
+
+/// @relates TvFunc
+/// @brief 排他的論理和を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator^(const TvFunc&& left,
+	  const TvFunc& right);
+
+/// @relates TvFunc
+/// @brief 排他的論理和を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator^(const TvFunc& left,
+	  const TvFunc&& right);
+
+/// @relates TvFunc
+/// @brief 排他的論理和を求める．
+/// @param[in] left, right オペランド
+TvFunc
+operator^(const TvFunc&& left,
+	  const TvFunc&& right);
 
 /// @relates TvFunc
 /// @brief 比較関数
@@ -702,6 +765,33 @@ operator&(const TvFunc& left,
   return TvFunc(left).operator&=(right);
 }
 
+// 論理積を求める．
+inline
+TvFunc
+operator&(const TvFunc&& left,
+	  const TvFunc& right)
+{
+  return TvFunc(left).operator&=(right);
+}
+
+// 論理積を求める．
+inline
+TvFunc
+operator&(const TvFunc& left,
+	  const TvFunc&& right)
+{
+  return TvFunc(right).operator&=(left);
+}
+
+// 論理積を求める．
+inline
+TvFunc
+operator&(const TvFunc&& left,
+	  const TvFunc&& right)
+{
+  return TvFunc(left).operator&=(right);
+}
+
 // 論理和を求める．
 inline
 TvFunc
@@ -711,11 +801,65 @@ operator|(const TvFunc& left,
   return TvFunc(left).operator|=(right);
 }
 
+// 論理和を求める．
+inline
+TvFunc
+operator|(const TvFunc&& left,
+	  const TvFunc& right)
+{
+  return TvFunc(left).operator|=(right);
+}
+
+// 論理和を求める．
+inline
+TvFunc
+operator|(const TvFunc& left,
+	  const TvFunc&& right)
+{
+  return TvFunc(right).operator|=(left);
+}
+
+// 論理和を求める．
+inline
+TvFunc
+operator|(const TvFunc&& left,
+	  const TvFunc&& right)
+{
+  return TvFunc(left).operator|=(right);
+}
+
 // 排他的論理和を求める．
 inline
 TvFunc
 operator^(const TvFunc& left,
 	  const TvFunc& right)
+{
+  return TvFunc(left).operator^=(right);
+}
+
+// 排他的論理和を求める．
+inline
+TvFunc
+operator^(const TvFunc&& left,
+	  const TvFunc& right)
+{
+  return TvFunc(left).operator^=(right);
+}
+
+// 排他的論理和を求める．
+inline
+TvFunc
+operator^(const TvFunc& left,
+	  const TvFunc&& right)
+{
+  return TvFunc(right).operator^=(left);
+}
+
+// 排他的論理和を求める．
+inline
+TvFunc
+operator^(const TvFunc&& left,
+	  const TvFunc&& right)
 {
   return TvFunc(left).operator^=(right);
 }
