@@ -28,32 +28,32 @@ include_directories (
 
 ym_add_gtest(InputInfoTest
   InputInfoTest.cc
-  $<TARGET_OBJECTS:ym_base_d>
-  $<TARGET_OBJECTS:ym_logic_d>
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
   )
 
 ym_add_gtest(IgPartitionTest
   IgPartitionTest.cc
-  $<TARGET_OBJECTS:ym_base_d>
-  $<TARGET_OBJECTS:ym_logic_d>
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
   )
 
 ym_add_gtest(NpnMapTest
   NpnMapTest.cc
-  $<TARGET_OBJECTS:ym_base_d>
-  $<TARGET_OBJECTS:ym_logic_d>
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
   )
 
 ym_add_gtest(w01test
   w01test.cc
-  $<TARGET_OBJECTS:ym_base_d>
-  $<TARGET_OBJECTS:ym_logic_d>
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
   )
 
 ym_add_gtest(NpnMgrTest
   NpnMgrTest.cc
-  $<TARGET_OBJECTS:ym_base_d>
-  $<TARGET_OBJECTS:ym_logic_d>
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
   )
 
 

@@ -26,14 +26,14 @@ include_directories (
 
 ym_add_gtest ( VarIdTest
   VarIdTest.cc
-  $<TARGET_OBJECTS:ym_base_d>
-  $<TARGET_OBJECTS:ym_logic_d>
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
   )
 
 ym_add_gtest ( LiteralTest
   LiteralTest.cc
-  $<TARGET_OBJECTS:ym_base_d>
-  $<TARGET_OBJECTS:ym_logic_d>
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
   )
 
 
