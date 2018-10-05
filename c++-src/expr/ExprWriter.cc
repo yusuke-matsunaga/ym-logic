@@ -141,7 +141,7 @@ ExprWriter::dump_sub(ostream& s,
     s << "1";
   }
   else if ( expr.is_literal() ) {
-    if ( expr.is_negaliteral() ) {
+    if ( expr.is_nega_literal() ) {
       s << not_str();
     }
     VarId id = expr.varid();

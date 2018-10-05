@@ -24,29 +24,29 @@ add_subdirectory(tests)
 # ===================================================================
 
 set (expr_SOURCES
-  src/expr/Expr.cc
-  src/expr/ExprMgr.cc
-  src/expr/ExprNode.cc
-  src/expr/ExprParser.cc
-  src/expr/ExprWriter.cc
-  src/expr/Literal.cc
+  c++-src/expr/Expr.cc
+  c++-src/expr/ExprMgr.cc
+  c++-src/expr/ExprNode.cc
+  c++-src/expr/ExprParser.cc
+  c++-src/expr/ExprWriter.cc
+  c++-src/expr/Literal.cc
   )
 
 set (npn_SOURCES
-  src/npn/IgPartition.cc
-  src/npn/NpnMap.cc
-  src/npn/NpnMapM.cc
-  src/npn/NpnMgr.cc
-  src/npn/PolConf.cc
-  src/npn/walsh_01_normalize.cc
-  src/npn/walsh_2_refine.cc
-  src/npn/walsh_w0_refine.cc
-  src/npn/walsh_w1_refine.cc
+  c++-src/npn/IgPartition.cc
+  c++-src/npn/NpnMap.cc
+  c++-src/npn/NpnMapM.cc
+  c++-src/npn/NpnMgr.cc
+  c++-src/npn/PolConf.cc
+  c++-src/npn/walsh_01_normalize.cc
+  c++-src/npn/walsh_2_refine.cc
+  c++-src/npn/walsh_w0_refine.cc
+  c++-src/npn/walsh_w1_refine.cc
   )
 
 set (tvfunc_SOURCES
-  src/tvfunc/TvFunc.cc
-  src/tvfunc/TvFuncM.cc
+  c++-src/tvfunc/TvFunc.cc
+  c++-src/tvfunc/TvFuncM.cc
   )
 
 set (ym_logic_SOURCES

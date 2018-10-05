@@ -170,11 +170,11 @@ ExprParser::get_literal()
   ExprToken token = get_token(id);
 
   if ( token == ExprToken::ZERO ) {
-    return Expr::const_zero();
+    return Expr::zero();
   }
 
   if ( token == ExprToken::ONE ) {
-    return Expr::const_one();
+    return Expr::one();
   }
 
   if ( token == ExprToken::NUM ) {
@@ -202,7 +202,7 @@ ExprParser::get_literal()
   throw SyntaxError("syntax error");
 
   // ダミー
-  return Expr::const_zero();
+  return Expr::zero();
 }
 
 // AND でつながった積項をとって来る．

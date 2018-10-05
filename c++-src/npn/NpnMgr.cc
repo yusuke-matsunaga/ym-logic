@@ -227,14 +227,11 @@ NpnMgr::cannonical(const TvFunc& func)
   }
 
   // 残りはすべて展開して真理値ベクタが最大となるものを探す．
-  mMaxFunc = TvFunc::const_zero(ni0);
+  mMaxFunc = TvFunc::zero(ni0);
   mMaxList.clear();
 
   NpnMap xmap0_orig = mXmap0;
-  for (vector<PolConf>::const_iterator p = polconf_list.begin();
-       p != polconf_list.end(); ++ p) {
-    const PolConf& polconf = *p;
-
+  for ( auto polconf: polconf_list ) {
     // まずpolconfの内容を func1 に適用する．
     NpnMap map2 = polconf.to_npnmap(ni0);
     TvFunc func2 = func1.xform(map2);
@@ -365,9 +362,7 @@ NpnMgr::all_cmap(vector<NpnMap>& map_list) const
 {
   map_list.clear();
   map_list.reserve(mMaxList.size());
-  for (vector<NpnMap>::const_iterator p = mMaxList.begin();
-       p != mMaxList.end(); ++ p) {
-    const NpnMap& map = *p;
+  for ( auto map: mMaxList ) {
     map_list.push_back(map);
   }
 }

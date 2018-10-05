@@ -81,14 +81,14 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  const_zero(int ni);
+  zero(int ni);
 
   /// @brief 恒真関数を作る．
   /// @param[in] ni 入力数
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  const_one(int ni);
+  one(int ni);
 
   /// @brief リテラル関数を作る．
   /// @param[in] ni 入力数
@@ -629,7 +629,7 @@ struct HashFunc<TvFunc>
 // 恒偽関数を作る．
 inline
 TvFunc
-TvFunc::const_zero(int ni)
+TvFunc::zero(int ni)
 {
   return TvFunc(ni);
 }
@@ -637,7 +637,7 @@ TvFunc::const_zero(int ni)
 // 恒真関数を作る．
 inline
 TvFunc
-TvFunc::const_one(int ni)
+TvFunc::one(int ni)
 {
   return TvFunc(ni, 0);
 }

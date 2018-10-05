@@ -168,10 +168,10 @@ TvFunc
 ExprNode::make_tv(int ni) const
 {
   if ( is_zero() ) {
-    return TvFunc::const_zero(ni);
+    return TvFunc::zero(ni);
   }
   if ( is_one() ) {
-    return TvFunc::const_one(ni);
+    return TvFunc::one(ni);
   }
   if ( is_posiliteral() ) {
     return TvFunc::posi_literal(ni, varid());

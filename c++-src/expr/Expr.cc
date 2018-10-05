@@ -75,14 +75,14 @@ Expr::~Expr()
 
 // 定数 0 の論理式を作る
 Expr
-Expr::const_zero()
+Expr::zero()
 {
   return Expr(ExprMgr::the_obj().make_zero());
 }
 
 // 定数 1 の論理式を作る
 Expr
-Expr::const_one()
+Expr::one()
 {
   return Expr(ExprMgr::the_obj().make_one());
 }
@@ -99,6 +99,18 @@ Expr
 Expr::nega_literal(VarId varid)
 {
   return Expr(ExprMgr::the_obj().make_negaliteral(varid));
+}
+
+// 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
+Expr
+Expr::__and(const Expr& chd1,
+	    const Expr& chd2)
+{
+  ExprMgr& mgr = ExprMgr::the_obj();
+  int begin = mgr.nodestack_top();
+  mgr.nodestack_push(chd1.root());
+  mgr.nodestack_push(chd2.root());
+  return Expr(mgr.make_and(begin));
 }
 
 // 与えられた論理式を部分論理式に持つ n 入力ANDの論理式を作るクラス・メソッド
@@ -128,6 +140,18 @@ Expr::make_and(const list<Expr>& chd_list)
   return Expr(mgr.make_and(begin));
 }
 
+// 与えられた論理式を部分論理式に持つ 2 入力ORの論理式を作るクラス・メソッド
+Expr
+Expr::__or(const Expr& chd1,
+	   const Expr& chd2)
+{
+  ExprMgr& mgr = ExprMgr::the_obj();
+  int begin = mgr.nodestack_top();
+  mgr.nodestack_push(chd1.root());
+  mgr.nodestack_push(chd2.root());
+  return Expr(mgr.make_or(begin));
+}
+
 // 与えられた論理式を部分論理式に持つ n 入力ORの論理式を作るクラス・メソッド
 Expr
 Expr::make_or(const vector<Expr>& chd_list)
@@ -153,6 +177,18 @@ Expr::make_or(const list<Expr>& chd_list)
     mgr.nodestack_push(expr.root());
   }
   return Expr(mgr.make_or(begin));
+}
+
+// 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
+Expr
+Expr::__xor(const Expr& chd1,
+	    const Expr& chd2)
+{
+  ExprMgr& mgr = ExprMgr::the_obj();
+  int begin = mgr.nodestack_top();
+  mgr.nodestack_push(chd1.root());
+  mgr.nodestack_push(chd2.root());
+  return Expr(mgr.make_xor(begin));
 }
 
 // 与えられた論理式を部分論理式に持つ n 入力XORの論理式を作るクラス・メソッド
@@ -190,23 +226,11 @@ Expr::__clear_memory()
   ExprMgr::clear_memory();
 }
 
-// 否定の論理式を与える演算子
+// @brief operator~() の別名
 Expr
-Expr::operator~() const
+Expr::invert() const
 {
   return Expr(ExprMgr::the_obj().complement(root()));
-}
-
-// src1 の論理式と src2 の論理式の論理積を計算する．
-Expr
-operator&(const Expr& src1,
-	  const Expr& src2)
-{
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
-  mgr.nodestack_push(src1.root());
-  mgr.nodestack_push(src2.root());
-  return Expr(mgr.make_and(begin));
 }
 
 // 自分の論理式と src の論理式の論理積を計算し自分に代入する．
@@ -221,18 +245,6 @@ Expr::operator&=(const Expr& src)
   return *this;
 }
 
-// src1 の論理式と src2 の論理式の論理和を計算する．
-Expr
-operator|(const Expr& src1,
-	  const Expr& src2)
-{
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
-  mgr.nodestack_push(src1.root());
-  mgr.nodestack_push(src2.root());
-  return Expr(mgr.make_or(begin));
-}
-
 // 自分の論理式と src の論理式の論理和を計算し自分に代入する．
 Expr&
 Expr::operator|=(const Expr& src)
@@ -243,18 +255,6 @@ Expr::operator|=(const Expr& src)
   mgr.nodestack_push(src.root());
   set_root(mgr.make_or(begin));
   return *this;
-}
-
-// src1 の論理式と src2 の論理式の排他的論理和を計算する．
-Expr
-operator^(const Expr& src1,
-	  const Expr& src2)
-{
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
-  mgr.nodestack_push(src1.root());
-  mgr.nodestack_push(src2.root());
-  return Expr(mgr.make_xor(begin));
 }
 
 // 自分の論理式と src の論理式の排他的論理和を計算し自分に代入する．
@@ -347,14 +347,14 @@ Expr::is_constant() const
 
 // 肯定のリテラルを表している時に真となる．
 bool
-Expr::is_posiliteral() const
+Expr::is_posi_literal() const
 {
   return root()->is_posiliteral();
 }
 
 // 否定のリテラルを表している時に真となる．
 bool
-Expr::is_negaliteral() const
+Expr::is_nega_literal() const
 {
   return root()->is_negaliteral();
 }
@@ -486,7 +486,7 @@ Expr::litnum(VarId varid) const
 // 特定の変数の特定の極性のリテラル数を得る．
 int
 Expr::litnum(VarId varid,
-		bool inv) const
+	     bool inv) const
 {
   return root()->litnum(varid, inv);
 }
@@ -610,7 +610,7 @@ Expr::stream_to_expr(istream& in,
   }
   catch ( SyntaxError e ) {
     err_msg = e.mMsg;
-    return const_zero();
+    return zero();
   }
 }
 
@@ -630,12 +630,12 @@ write_expr(ODO& s,
     s << static_cast<ymuint8>(1);
     return;
   }
-  if ( expr.is_posiliteral() ) {
+  if ( expr.is_posi_literal() ) {
     s << static_cast<ymuint8>(2)
       << expr.varid();
     return;
   }
-  if ( expr.is_negaliteral() ) {
+  if ( expr.is_nega_literal() ) {
     s << static_cast<ymuint8>(3)
       << expr.varid();
     return;
@@ -672,10 +672,10 @@ read_expr(IDO& s)
   s >> type;
   switch ( type ) {
   case 0:
-    return Expr::const_zero();
+    return Expr::zero();
 
   case 1:
-    return Expr::const_one();
+    return Expr::one();
 
   case 2:
     {
@@ -715,7 +715,7 @@ read_expr(IDO& s)
   }
 
   // ダミー
-  return Expr::const_zero();
+  return Expr::zero();
 }
 
 END_NONAMESPACE

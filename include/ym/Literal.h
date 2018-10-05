@@ -90,6 +90,10 @@ public:
   Literal
   operator~() const;
 
+  /// @brief 極性の反転の別名
+  Literal
+  invert() const;
+
   /// @brief 同じ変数の正極性リテラルを返す．
   Literal
   make_positive() const;
@@ -318,6 +322,14 @@ Literal::is_negative() const
 inline
 Literal
 Literal::operator~() const
+{
+  return invert();
+}
+
+// @brief 極性の反転の別名
+inline
+Literal
+Literal::invert() const
 {
   return Literal(mBody ^ 1U);
 }

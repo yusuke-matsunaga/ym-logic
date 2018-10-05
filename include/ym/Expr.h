@@ -98,13 +98,13 @@ public:
   /// @return 生成したオブジェクト
   static
   Expr
-  const_zero();
+  zero();
 
   /// @brief 恒真関数の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  const_one();
+  one();
 
   /// @brief リテラル式の生成
   /// @param[in] varid 変数番号
@@ -139,6 +139,14 @@ public:
   nega_literal(VarId varid);
 
   /// @brief AND 式の生成
+  /// @param[in] chd1, chd2 オペランド
+  /// @return chd1, chd2 を部分論理式に持つ AND 式を生成し，返す．
+  static
+  Expr
+  __and(const Expr& chd1,
+	const Expr& chd2);
+
+  /// @brief AND 式の生成
   /// @param[in] chd_list オペランドのベクタ
   /// @return chd_list を部分論理式に持つ AND 式を生成し，返す．
   static
@@ -151,6 +159,14 @@ public:
   static
   Expr
   make_and(const list<Expr>& chd_list);
+
+  /// @brief OR 式の生成
+  /// @param[in] chd1, chd2 オペランド
+  /// @return chd1, chd2 を部分論理式に持つ OR 式を生成し，返す．
+  static
+  Expr
+  __or(const Expr& chd1,
+       const Expr& chd2);
 
   /// @brief OR 式の生成
   /// @param[in] chd_list オペランドのベクタ
@@ -167,6 +183,14 @@ public:
   static
   Expr
   make_or(const list<Expr>& chd_list);
+
+  /// @brief XOR 式の生成
+  /// @param[in] chd1, chd2 オペランド
+  /// @return chd1, chd2 を部分論理式に持つ XOR 式を生成し，返す．
+  static
+  Expr
+  __xor(const Expr& chd1,
+	const Expr& chd2);
 
   /// @brief XOR 式の生成
   /// @param[in] chd_list オペランドのベクタ
@@ -200,6 +224,10 @@ public:
   /// @return 自分自身を否定した形の論理式を返す．
   Expr
   operator~() const;
+
+  /// @brief operator~() の別名
+  Expr
+  invert() const;
 
   /// @brief AND つき代入
   /// @param[in] src オペランド
@@ -306,12 +334,12 @@ public:
   /// @brief 肯定のリテラルのチェック
   /// @return 肯定のリテラルを表している時に true を返す．
   bool
-  is_posiliteral() const;
+  is_posi_literal() const;
 
   /// @brief 否定のリテラルのチェック
   /// @return 否定のリテラルを表している時に true を返す．
   bool
-  is_negaliteral() const;
+  is_nega_literal() const;
 
   /// @brief リテラルのチェック
   /// @return リテラルを表している時に true を返す．
@@ -666,6 +694,41 @@ int
 Expr::litnum(Literal lit) const
 {
   return litnum(lit.varid(), lit.is_negative());
+}
+
+// 否定の論理式を与える演算子
+inline
+Expr
+Expr::operator~() const
+{
+  return invert();
+}
+
+// src1 の論理式と src2 の論理式の論理積を計算する．
+inline
+Expr
+operator&(const Expr& src1,
+	  const Expr& src2)
+{
+  return Expr::__and(src1, src2);
+}
+
+// src1 の論理式と src2 の論理式の論理和を計算する．
+inline
+Expr
+operator|(const Expr& src1,
+	  const Expr& src2)
+{
+  return Expr::__or(src1, src2);
+}
+
+// src1 の論理式と src2 の論理式の排他的論理和を計算する．
+inline
+Expr
+operator^(const Expr& src1,
+	  const Expr& src2)
+{
+  return Expr::__xor(src1, src2);
 }
 
 inline

@@ -318,9 +318,9 @@ TEST_P(TvFuncTestWithParam, const_zero)
 {
   init_values();
   ymuint ni = GetParam();
-  TvFunc f0 = TvFunc::const_zero(ni);
+  TvFunc f0 = TvFunc::zero(ni);
   ostringstream buf;
-  buf << "TvFunc::const_zero(" << ni << ")";
+  buf << "TvFunc::zero(" << ni << ")";
   check_func(f0, mValues, buf.str());
 }
 
@@ -332,9 +332,9 @@ TEST_P(TvFuncTestWithParam, const_one)
   for (ymuint p = 0; p < ni_exp; ++ p) {
     mValues[p] = 1;
   }
-  TvFunc f0 = TvFunc::const_one(ni);
+  TvFunc f0 = TvFunc::one(ni);
   ostringstream buf;
-  buf << "TvFunc::const_one(" << ni << ")";
+  buf << "TvFunc::one(" << ni << ")";
   check_func(f0, mValues, buf.str());
 }
 
@@ -802,12 +802,12 @@ TEST_P(TvFuncTestWithParam, xform)
 TEST(TvFuncTest, shrink_0)
 {
   ymuint ni = 10;
-  TvFunc func0 = TvFunc::const_zero(ni);
+  TvFunc func0 = TvFunc::zero(ni);
 
   NpnMap map = func0.shrink_map();
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::const_zero(0), func1 );
+  EXPECT_EQ( TvFunc::zero(0), func1 );
 
   EXPECT_EQ( ni, map.input_num() );
   for (ymuint i = 0; i < ni; ++ i) {
@@ -819,12 +819,12 @@ TEST(TvFuncTest, shrink_0)
 TEST(TvFuncTest, shrink_1)
 {
   ymuint ni = 10;
-  TvFunc func0 = TvFunc::const_one(ni);
+  TvFunc func0 = TvFunc::one(ni);
 
   NpnMap map = func0.shrink_map();
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::const_one(0), func1 );
+  EXPECT_EQ( TvFunc::one(0), func1 );
 
   EXPECT_EQ( ni, map.input_num() );
   for (ymuint i = 0; i < ni; ++ i) {
@@ -932,22 +932,22 @@ TEST(TvFuncTest, shrink_lit3)
 
 TEST(TvFuncTest, expand_0)
 {
-  TvFunc func0 = TvFunc::const_zero(0);
+  TvFunc func0 = TvFunc::zero(0);
 
   NpnMap map(0, 10);
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::const_zero(10), func1 );
+  EXPECT_EQ( TvFunc::zero(10), func1 );
 }
 
 TEST(TvFuncTest, expand_1)
 {
-  TvFunc func0 = TvFunc::const_one(0);
+  TvFunc func0 = TvFunc::one(0);
 
   NpnMap map(0, 10);
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::const_one(10), func1 );
+  EXPECT_EQ( TvFunc::one(10), func1 );
 }
 
 TEST(TvFuncTest, expand_lit1)

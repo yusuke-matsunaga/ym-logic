@@ -16,8 +16,8 @@ BEGIN_NAMESPACE_YM
 
 TEST(TvFuncMove, copy)
 {
-  auto f = TvFunc::const_zero(20);
-  auto g = TvFunc::const_one(20);
+  auto f = TvFunc::zero(20);
+  auto g = TvFunc::one(20);
 
   for ( auto i = 0; i < 10000; ++ i ) {
     auto tmp = f;
@@ -25,14 +25,14 @@ TEST(TvFuncMove, copy)
     g = tmp;
   }
 
-  EXPECT_EQ( TvFunc::const_zero(20), f );
-  EXPECT_EQ( TvFunc::const_one(20), g );
+  EXPECT_EQ( TvFunc::zero(20), f );
+  EXPECT_EQ( TvFunc::one(20), g );
 }
 
 TEST(TvFuncMove, move)
 {
-  auto f = TvFunc::const_zero(20);
-  auto g = TvFunc::const_one(20);
+  auto f = TvFunc::zero(20);
+  auto g = TvFunc::one(20);
 
   for ( auto i = 0; i < 10000; ++ i ) {
     auto tmp = std::move(f);
@@ -40,15 +40,15 @@ TEST(TvFuncMove, move)
     g = std::move(tmp);
   }
 
-  EXPECT_EQ( TvFunc::const_zero(20), f );
-  EXPECT_EQ( TvFunc::const_one(20), g );
+  EXPECT_EQ( TvFunc::zero(20), f );
+  EXPECT_EQ( TvFunc::one(20), g );
 }
 
 TEST(TvFuncMove, copy_m)
 {
   vector<TvFunc> f_list(2);
-  f_list[0] = TvFunc::const_zero(20);
-  f_list[1] = TvFunc::const_one(20);
+  f_list[0] = TvFunc::zero(20);
+  f_list[1] = TvFunc::one(20);
   TvFuncM f(f_list);
 
   vector<TvFunc> g_list(2);
@@ -62,8 +62,8 @@ TEST(TvFuncMove, copy_m)
     g = tmp;
   }
 
-  EXPECT_EQ( TvFunc::const_zero(20), f.output(VarId(0)) );
-  EXPECT_EQ( TvFunc::const_one(20), f.output(VarId(1)) );
+  EXPECT_EQ( TvFunc::zero(20), f.output(VarId(0)) );
+  EXPECT_EQ( TvFunc::one(20), f.output(VarId(1)) );
   EXPECT_EQ( TvFunc::posi_literal(20, VarId(0)), g.output(VarId(0)) );
   EXPECT_EQ( TvFunc::nega_literal(20, VarId(1)), g.output(VarId(1)) );
 }
@@ -71,8 +71,8 @@ TEST(TvFuncMove, copy_m)
 TEST(TvFuncMove, move_m)
 {
   vector<TvFunc> f_list(2);
-  f_list[0] = TvFunc::const_zero(20);
-  f_list[1] = TvFunc::const_one(20);
+  f_list[0] = TvFunc::zero(20);
+  f_list[1] = TvFunc::one(20);
   TvFuncM f(f_list);
 
   vector<TvFunc> g_list(2);
@@ -86,8 +86,8 @@ TEST(TvFuncMove, move_m)
     g = std::move(tmp);
   }
 
-  EXPECT_EQ( TvFunc::const_zero(20), f.output(VarId(0)) );
-  EXPECT_EQ( TvFunc::const_one(20), f.output(VarId(1)) );
+  EXPECT_EQ( TvFunc::zero(20), f.output(VarId(0)) );
+  EXPECT_EQ( TvFunc::one(20), f.output(VarId(1)) );
   EXPECT_EQ( TvFunc::posi_literal(20, VarId(0)), g.output(VarId(0)) );
   EXPECT_EQ( TvFunc::nega_literal(20, VarId(1)), g.output(VarId(1)) );
 }
