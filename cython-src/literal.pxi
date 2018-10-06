@@ -7,39 +7,39 @@
 ### All rights reserved.
 
 from libcpp cimport bool
-from CXX_VarId cimport VarId as CXX_VarId
-from CXX_Literal cimport Literal as CXX_Literal
 
 
 ### @brief Literal クラスの Python バージョン
+###
+### 実は C++ の Literal とは無関係なクラス
 cdef class Literal :
 
     # データメンバ
-    cdef CXX_Literal _this
+    cdef int _val
 
     ### @brief 初期化
     def __init__(self, VarId var = VarId(), bool inv = False) :
-        cdef CXX_VarId c_var = CXX_VarId(var.val)
-        self._this.set(c_var, inv)
+        self._val = var.val + 1
+        if inv :
+            self._val = - self._val
 
     ### @brief 適正な値を持っている時に true を返す．
     def is_valid(self) :
-        return self._this.is_valid()
+        return self._val != 0
 
     ### @brief 変数を返す．
     @property
     def varid(self) :
-        cdef CXX_VarId c_var = self._this.varid()
-        cdef int val = c_var.val()
-        return VarId(val)
+        cdef int val = abs(self._val)
+        return VarId(val - 1)
 
     ### @brief 肯定のリテラルか調べる．
     def is_positive(self) :
-        return self._this.is_positive()
+        return self._val > 0
 
     ### @brief 否定のリテラルか調べる．
     def is_negative(self) :
-        return self._this.is_negative()
+        return self._val < 0
 
     ### @brief 極性を反転したリテラルを返す．
     def __invert__(self) :
@@ -56,7 +56,11 @@ cdef class Literal :
     ### @brief インデックスを返す．
     @property
     def index(self) :
-        return self._this.index()
+        cdef int val = abs(self._val)
+        val *= 2
+        if self.is_negative() :
+            val += 1
+        return val
 
     ### @brief 等価比較演算子
     def __eq__(self, other) :

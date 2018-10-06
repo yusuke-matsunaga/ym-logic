@@ -150,7 +150,7 @@ ExprWriter::dump_sub(ostream& s,
       s << ans;
     }
     else {
-      s << "V" << id;
+      s << id;
     }
   }
   else { // AND/OR/XOR

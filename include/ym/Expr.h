@@ -143,8 +143,8 @@ public:
   /// @return chd1, chd2 を部分論理式に持つ AND 式を生成し，返す．
   static
   Expr
-  __and(const Expr& chd1,
-	const Expr& chd2);
+  and_op(const Expr& chd1,
+	 const Expr& chd2);
 
   /// @brief AND 式の生成
   /// @param[in] chd_list オペランドのベクタ
@@ -165,8 +165,8 @@ public:
   /// @return chd1, chd2 を部分論理式に持つ OR 式を生成し，返す．
   static
   Expr
-  __or(const Expr& chd1,
-       const Expr& chd2);
+  or_op(const Expr& chd1,
+	const Expr& chd2);
 
   /// @brief OR 式の生成
   /// @param[in] chd_list オペランドのベクタ
@@ -189,8 +189,8 @@ public:
   /// @return chd1, chd2 を部分論理式に持つ XOR 式を生成し，返す．
   static
   Expr
-  __xor(const Expr& chd1,
-	const Expr& chd2);
+  xor_op(const Expr& chd1,
+	 const Expr& chd2);
 
   /// @brief XOR 式の生成
   /// @param[in] chd_list オペランドのベクタ
@@ -710,7 +710,7 @@ Expr
 operator&(const Expr& src1,
 	  const Expr& src2)
 {
-  return Expr::__and(src1, src2);
+  return Expr::and_op(src1, src2);
 }
 
 // src1 の論理式と src2 の論理式の論理和を計算する．
@@ -719,7 +719,7 @@ Expr
 operator|(const Expr& src1,
 	  const Expr& src2)
 {
-  return Expr::__or(src1, src2);
+  return Expr::or_op(src1, src2);
 }
 
 // src1 の論理式と src2 の論理式の排他的論理和を計算する．
@@ -728,7 +728,7 @@ Expr
 operator^(const Expr& src1,
 	  const Expr& src2)
 {
-  return Expr::__xor(src1, src2);
+  return Expr::xor_op(src1, src2);
 }
 
 inline

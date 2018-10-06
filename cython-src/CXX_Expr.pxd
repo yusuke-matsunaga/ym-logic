@@ -27,15 +27,15 @@ cdef extern from "ym/Expr.h" namespace "nsYm::nsLogic" :
         @staticmethod
         Expr nega_literal(VarId)
         @staticmethod
-        Expr __and(const Expr& opr1, const Expr& opr2);
+        Expr and_op(const Expr& opr1, const Expr& opr2);
         @staticmethod
         Expr make_and(const vector[Expr]& child_list)
         @staticmethod
-        Expr __or(const Expr& opr1, const Expr& opr2);
+        Expr or_op(const Expr& opr1, const Expr& opr2);
         @staticmethod
         Expr make_or(const vector[Expr]& child_list)
         @staticmethod
-        Expr __xor(const Expr& opr1, const Expr& opr2);
+        Expr xor_op(const Expr& opr1, const Expr& opr2);
         @staticmethod
         Expr make_xor(const vector[Expr]& child_list)
         Expr invert()

@@ -103,8 +103,8 @@ Expr::nega_literal(VarId varid)
 
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
 Expr
-Expr::__and(const Expr& chd1,
-	    const Expr& chd2)
+Expr::and_op(const Expr& chd1,
+	     const Expr& chd2)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
   int begin = mgr.nodestack_top();
@@ -142,8 +142,8 @@ Expr::make_and(const list<Expr>& chd_list)
 
 // 与えられた論理式を部分論理式に持つ 2 入力ORの論理式を作るクラス・メソッド
 Expr
-Expr::__or(const Expr& chd1,
-	   const Expr& chd2)
+Expr::or_op(const Expr& chd1,
+	    const Expr& chd2)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
   int begin = mgr.nodestack_top();
@@ -181,8 +181,8 @@ Expr::make_or(const list<Expr>& chd_list)
 
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
 Expr
-Expr::__xor(const Expr& chd1,
-	    const Expr& chd2)
+Expr::xor_op(const Expr& chd1,
+	     const Expr& chd2)
 {
   ExprMgr& mgr = ExprMgr::the_obj();
   int begin = mgr.nodestack_top();

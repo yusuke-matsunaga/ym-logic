@@ -59,7 +59,7 @@ cdef class Expr :
         if type(other) != Expr :
             return NotImplemented
         ans = Expr()
-        ans._this = CXX_Expr.__and(self._this, other._this)
+        ans._this = CXX_Expr.and_op(self._this, other._this)
         return ans
 
     ### @brief OR 演算子
@@ -67,7 +67,7 @@ cdef class Expr :
         if type(other) != Expr :
             return NotImplemented
         ans = Expr()
-        ans._this = CXX_Expr.__or(self._this, other._this)
+        ans._this = CXX_Expr.or_op(self._this, other._this)
         return ans
 
     ### @brief XOR 演算子
@@ -75,7 +75,7 @@ cdef class Expr :
         if type(other) != Expr :
             return NotImplemented
         ans = Expr()
-        ans._this = CXX_Expr.__xor(self._this, other._this)
+        ans._this = CXX_Expr.xor_op(self._this, other._this)
         return ans
 
     ### @brief 否定演算子
