@@ -13,22 +13,24 @@
 
 BEGIN_NAMESPACE_YM
 
+#if 0
 // 実はデフォルトコンストラクタが未定義リテラルを作っている．
 const Literal kLiteralX;
+#endif
 
 // ostream に対する書出し
 ostream&
 operator<<(ostream& s,
 	   const Literal& lit)
 {
-  if ( lit == kLiteralX ) {
-    s << "-X-";
-  }
-  else {
+  if ( lit.is_valid() ) {
     s << lit.varid();
     if ( lit.is_negative() ) {
       s << "'";
     }
+  }
+  else {
+    s << "-X-";
   }
   return s;
 }

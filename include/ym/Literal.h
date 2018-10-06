@@ -28,9 +28,14 @@ class Literal
 {
 public:
 
+  /// @brief 不正値を返す．
+  static
+  Literal
+  x();
+
   /// @brief デフォルトコンストラクタ
   ///
-  /// 未定義リテラル(kLiteralX)になる．
+  /// 未定義リテラル( = Literal::x())になる．
   Literal();
 
   /// @brief 変数番号と極性を指定したコンストラクタ
@@ -71,6 +76,10 @@ public:
   //////////////////////////////////////////////////////////////////////
   // 内容を取得する関数
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief 適正な値を持っている時 true を返す．
+  bool
+  is_valid() const;
 
   /// @brief 変数番号を得る．
   /// @return 変数番号
@@ -147,10 +156,12 @@ private:
 
 };
 
+#if 0
 /// @relates Literal
 /// @brief 未定義リテラル
 extern
 const Literal kLiteralX;
+#endif
 
 /// @relates Literal
 /// @brief 比較関数
@@ -254,6 +265,14 @@ struct HashFunc<Literal>
 // inline 関数の定義
 //////////////////////////////////////////////////////////////////////
 
+// @brief 不正値を返す．
+inline
+Literal
+Literal::x()
+{
+  return Literal();
+}
+
 // 内容を設定する．
 inline
 void
@@ -292,6 +311,14 @@ Literal
 Literal::index2literal(int index)
 {
   return Literal(index);
+}
+
+// @brief 適正な値を持っている時 true を返す．
+inline
+bool
+Literal::is_valid() const
+{
+  return mBody != x().mBody;
 }
 
 // 変数番号を得る．
@@ -479,6 +506,24 @@ int
 Literal::index() const
 {
   return mBody;
+}
+
+// ostream に対する書出し
+inline
+ostream&
+operator<<(ostream& s,
+	   const Literal& lit)
+{
+  if ( lit.is_valid() ) {
+    s << lit.varid();
+    if ( lit.is_negative() ) {
+      s << "'";
+    }
+  }
+  else {
+    s << "-X-";
+  }
+  return s;
 }
 
 END_NAMESPACE_YM

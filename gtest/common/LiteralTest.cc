@@ -17,7 +17,11 @@ TEST(LiteralTest, empty_constr)
 {
   Literal lit;
 
-  EXPECT_EQ( kLiteralX, lit );
+  EXPECT_FALSE( lit.is_valid() );
+
+  ostringstream oss;
+  oss << lit;
+  EXPECT_EQ( string("-X-"), oss.str() );
 }
 
 TEST(LiteralTest, simple_constr)
@@ -25,7 +29,7 @@ TEST(LiteralTest, simple_constr)
   VarId var(3);
   Literal lit(var);
 
-  EXPECT_NE( kLiteralX, lit );
+  EXPECT_TRUE( lit.is_valid() );
 
   VarId var1 = lit.varid();
   EXPECT_EQ( var, var1 );
@@ -46,6 +50,66 @@ TEST(LiteralTest, simple_constr)
   EXPECT_NE( lit_n, lit_n.make_positive() );
   EXPECT_EQ( lit_n, lit_n.make_negative() );
 
+  {
+    ostringstream oss;
+    oss << lit;
+    EXPECT_EQ( string("V_3"), oss.str() );
+  }
+  {
+    ostringstream oss;
+    oss << lit_n;
+    EXPECT_EQ( string("V_3'"), oss.str() );
+  }
+}
+
+TEST(LiteralTest, compare)
+{
+  VarId var1(1);
+  VarId var2(2);
+  Literal lit1p(var1);
+  Literal lit1n(var1, true);
+  Literal lit2p(var2);
+  Literal lit2n(var2, true);
+
+  // lit1p vs lit1p
+  EXPECT_TRUE(  lit1p == lit1p );
+  EXPECT_FALSE( lit1p != lit1p );
+  EXPECT_FALSE( lit1p <  lit1p );
+  EXPECT_FALSE( lit1p >  lit1p );
+  EXPECT_TRUE(  lit1p <= lit1p );
+  EXPECT_TRUE(  lit1p >= lit1p );
+
+  // lit1p vs lit1n
+  EXPECT_FALSE( lit1p == lit1n );
+  EXPECT_TRUE(  lit1p != lit1n );
+  EXPECT_TRUE( lit1p <  lit1n );
+  EXPECT_FALSE(  lit1p >  lit1n );
+  EXPECT_TRUE( lit1p <= lit1n );
+  EXPECT_FALSE(  lit1p >= lit1n );
+
+  // lit1n vs lit2p
+  EXPECT_FALSE( lit1n == lit2p );
+  EXPECT_TRUE(  lit1n != lit2p );
+  EXPECT_TRUE(  lit1n <  lit2p );
+  EXPECT_FALSE( lit1n >  lit2p );
+  EXPECT_TRUE(  lit1n <= lit2p );
+  EXPECT_FALSE( lit1n >= lit2p );
+
+  // lit1p vs lit2n
+  EXPECT_FALSE( lit1p == lit2n );
+  EXPECT_TRUE(  lit1p != lit2n );
+  EXPECT_TRUE(  lit1p <  lit2n );
+  EXPECT_FALSE( lit1p >  lit2n );
+  EXPECT_TRUE(  lit1p <= lit2n );
+  EXPECT_FALSE( lit1p >= lit2n );
+
+  // lit2p vs lit1n
+  EXPECT_FALSE( lit2p == lit1n );
+  EXPECT_TRUE(  lit2p != lit1n );
+  EXPECT_FALSE( lit2p <  lit1n );
+  EXPECT_TRUE(  lit2p >  lit1n );
+  EXPECT_FALSE( lit2p <= lit1n );
+  EXPECT_TRUE(  lit2p >= lit1n );
 }
 
 END_NAMESPACE_YM

@@ -24,10 +24,6 @@ add_subdirectory(tests)
 #  ソースファイルの設定
 # ===================================================================
 
-set (common_SOURCES
-  c++-src/common/Literal.cc
-  )
-
 set (expr_SOURCES
   c++-src/expr/Expr.cc
   c++-src/expr/ExprMgr.cc
@@ -54,7 +50,6 @@ set (tvfunc_SOURCES
   )
 
 set (ym_logic_SOURCES
-  ${common_SOURCES}
   ${expr_SOURCES}
   ${npn_SOURCES}
   ${tvfunc_SOURCES}

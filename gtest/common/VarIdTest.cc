@@ -38,4 +38,23 @@ TEST(VarIdTest, int_constr)
   EXPECT_EQ( string("V_2"), oss.str() );
 }
 
+TEST(VarIdTest, compare)
+{
+  int val_list[] = {3, 5, 9};
+  VarId var_list[] = { VarId(val_list[0]), VarId(val_list[1]), VarId(val_list[2]) };
+
+  for ( int i1: { 0, 1, 2} ) {
+    VarId var1 = var_list[i1];
+    for ( int i2: { 0, 1, 2} ) {
+      VarId var2 = var_list[i2];
+      EXPECT_EQ( val_list[i1] == val_list[i2], var1 == var2 );
+      EXPECT_EQ( val_list[i1] != val_list[i2], var1 != var2 );
+      EXPECT_EQ( val_list[i1] < val_list[i2],  var1 < var2 );
+      EXPECT_EQ( val_list[i1] > val_list[i2],  var1 > var2 );
+      EXPECT_EQ( val_list[i1] <= val_list[i2], var1 <= var2 );
+      EXPECT_EQ( val_list[i1] >= val_list[i2], var1 >= var2 );
+    }
+  }
+}
+
 END_NAMESPACE_YM

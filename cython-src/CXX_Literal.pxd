@@ -18,6 +18,7 @@ cdef extern from "ym/Literal.h" namespace "nsYm" :
         @staticmethod
         Literal index2literal(int)
         void set(VarId, bool)
+        bool is_valid()
         VarId varid()
         bool is_positive()
         bool is_negative()
