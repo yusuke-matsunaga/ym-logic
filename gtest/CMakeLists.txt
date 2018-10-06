@@ -38,6 +38,12 @@ ym_add_gtest ( LiteralTest
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
+ym_add_gtest ( ExprTest
+  expr/ExprTest.cc
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
+  )
+
 ym_add_gtest(TvFuncTest
   tvfunc/TvFuncTest.cc
   $<TARGET_OBJECTS:ym_base_ad>

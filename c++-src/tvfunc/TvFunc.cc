@@ -9,6 +9,7 @@
 
 #include "ym/TvFunc.h"
 #include "ym/NpnMap.h"
+#include "ym/Range.h"
 #include "NpnMgr.h"
 
 
@@ -142,8 +143,8 @@ TvFunc::TvFunc(int ni) :
   mBlockNum(nblock(ni)),
   mVector(new TvFunc::WordType[mBlockNum])
 {
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    mVector[i] = 0UL;
+  for ( int b: Range(mBlockNum) ) {
+    mVector[b] = 0UL;
   }
 }
 
@@ -156,7 +157,7 @@ TvFunc::TvFunc(int ni,
   mVector(new TvFunc::WordType[mBlockNum])
 {
   TvFunc::WordType mask = vec_mask(ni);
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] = mask;
   }
 }
@@ -172,7 +173,7 @@ TvFunc::TvFunc(int ni,
   int idx = varid.val();
   ASSERT_COND( idx < ni );
 
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     TvFunc::WordType pat = lit_pat(idx, b);
     if ( inv ) {
       pat = ~pat;
@@ -194,7 +195,7 @@ TvFunc::TvFunc(int ni,
   int base = 0;
   TvFunc::WordType bitpat = 0ULL;
   TvFunc::WordType bitmask = 1ULL;
-  for ( int p = 0; p < ni_pow; ++ p ) {
+  for ( int p: Range(ni_pow) ) {
     if ( values[p] ) {
       bitpat |= bitmask;
     }
@@ -218,7 +219,7 @@ TvFunc::TvFunc(const TvFunc& src) :
   mBlockNum(src.mBlockNum),
   mVector(new TvFunc::WordType[mBlockNum])
 {
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] = src.mVector[b];
   }
 }
@@ -246,7 +247,7 @@ TvFunc::operator=(const TvFunc& src)
   }
   mInputNum = src.mInputNum;
 
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] = src.mVector[b];
   }
 
@@ -282,10 +283,10 @@ TvFunc::~TvFunc()
 
 // 自分自身を否定する．
 TvFunc&
-TvFunc::negate()
+TvFunc::invert_int()
 {
   TvFunc::WordType neg_mask = vec_mask(mInputNum);
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] ^= neg_mask;
   }
   return *this;
@@ -293,9 +294,9 @@ TvFunc::negate()
 
 // src1 との論理積を計算し自分に代入する．
 TvFunc&
-TvFunc::operator&=(const TvFunc& src1)
+TvFunc::and_int(const TvFunc& src1)
 {
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] &= src1.mVector[b];
   }
   return *this;
@@ -303,9 +304,9 @@ TvFunc::operator&=(const TvFunc& src1)
 
 // src1 との論理和を計算し自分に代入する．
 TvFunc&
-TvFunc::operator|=(const TvFunc& src1)
+TvFunc::or_int(const TvFunc& src1)
 {
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] |= src1.mVector[b];
   }
   return *this;
@@ -313,9 +314,9 @@ TvFunc::operator|=(const TvFunc& src1)
 
 // src1 との排他的論理和を計算し自分に代入する．
 TvFunc&
-TvFunc::operator^=(const TvFunc& src1)
+TvFunc::xor_int(const TvFunc& src1)
 {
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] ^= src1.mVector[b];
   }
   return *this;
@@ -326,7 +327,7 @@ TvFunc::operator^=(const TvFunc& src1)
 // @param[in] pol 極性
 // @return 自身への参照を返す．
 TvFunc&
-TvFunc::set_cofactor(VarId varid,
+TvFunc::cofactor_int(VarId varid,
 		     bool inv)
 {
   int pos = varid.val();
@@ -336,7 +337,7 @@ TvFunc::set_cofactor(VarId varid,
       mask = ~mask;
     }
     int shift = 1 << pos;
-    for ( int b = 0; b < mBlockNum; ++ b ) {
+    for ( int b: Range(mBlockNum) ) {
       TvFunc::WordType pat = mVector[b] & mask;
       if ( inv ) {
 	pat |= (pat << shift);
@@ -350,7 +351,7 @@ TvFunc::set_cofactor(VarId varid,
   else {
     pos -= NIPW;
     int bit = 1U << pos;
-    for ( int b = 0; b < mBlockNum; ++ b ) {
+    for ( int b: Range(mBlockNum) ) {
       if ( inv ) {
 	if ( (b & bit) == bit ) {
 	  mVector[b] = mVector[b ^ bit];
@@ -507,8 +508,8 @@ TvFunc::count_zero() const
   }
 
   int ans = 0;
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    ans += count_onebits(mVector[i]);
+  for ( int b: Range(mBlockNum) ) {
+    ans += count_onebits(mVector[b]);
   }
   return (1 << input_num()) - ans;
 }
@@ -531,8 +532,8 @@ TvFunc::count_one() const
   }
 
   int ans = 0;
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    ans += count_onebits(mVector[i]);
+  for ( int b: Range(mBlockNum) ) {
+    ans += count_onebits(mVector[b]);
   }
   return ans;
 }
@@ -555,8 +556,8 @@ TvFunc::walsh_0() const
   }
 
   int ans = 0;
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    ans += count_onebits(mVector[i]);
+  for ( int b: Range(mBlockNum) ) {
+    ans += count_onebits(mVector[b]);
   }
   return (1 << input_num()) - ans * 2;
 }
@@ -582,7 +583,7 @@ TvFunc::walsh_1(VarId varid) const
   // n > 6
   int c = 0;
   int n = 1 << input_num();
-  for ( int b = 0; b < mBlockNum; ++ b ) {
+  for ( int b: Range(mBlockNum) ) {
     TvFunc::WordType mask = lit_pat(pos, b);
     c += count_onebits(mVector[b] ^ mask);
   }
@@ -621,7 +622,7 @@ TvFunc::walsh_2(VarId var1,
   int c = 0;
   if ( i < NIPW ) {
     TvFunc::WordType mask = c_masks[i] ^ c_masks[j];
-    for ( int b = 0; b < mBlockNum; ++ b ) {
+    for ( int b: Range(mBlockNum) ) {
       c += count_onebits(mVector[b] ^ mask);
     }
   }
@@ -629,7 +630,7 @@ TvFunc::walsh_2(VarId var1,
     // int check = 1 << (i - 5);
     // int mask1 = c_masks[j];
     // int mask0 = ~mask1;
-    // for (int b = 0; b < mBlockNum; ++ b) {
+    // for (int b: Range(mBlockNum)) {
     //   if ( b & check ) {
     //     c += count_onebits(mVector[b] ^ mask0);
     //   } else {
@@ -638,7 +639,7 @@ TvFunc::walsh_2(VarId var1,
     // }
     int i5 = i - NIPW;
     TvFunc::WordType mask = c_masks[j];
-    for ( int b = 0; b < mBlockNum; ++ b ) {
+    for ( int b: Range(mBlockNum) ) {
       TvFunc::WordType mask1 = 0UL - ((b >> i5) & 1UL);
       c += count_onebits(mVector[b] ^ mask ^ mask1);
     }
@@ -647,7 +648,7 @@ TvFunc::walsh_2(VarId var1,
     // int check1 = 1 << (i - 5);
     // int check2 = 1 << (j - 5);
     // int check = check1 | check2;
-    // for (int b = 0; b < mBlockNum; ++ b) {
+    // for (int b: Range(mBlockNum)) {
     //   int tmp = b & check;
     //   if ( tmp == check1 || tmp == check2 ) {
     //     c += count_onebits(~mVector[b]);
@@ -657,7 +658,7 @@ TvFunc::walsh_2(VarId var1,
     // }
     int i5 = i - NIPW;
     int j5 = j - NIPW;
-    for ( int b = 0; b < mBlockNum; ++ b ) {
+    for ( int b: Range(mBlockNum) ) {
       TvFunc::WordType mask = 0UL - (((b >> i5) ^ (b >> j5)) & 1UL);
       c += count_onebits(mVector[b] ^ mask);
     }
@@ -1133,14 +1134,14 @@ int
 walsh_01_5(TvFunc::WordType* src_vec,
 	   int vec[])
 {
-  for ( int i = 0; i < 5; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4} ) {
     vec[i] = 0;
   }
 
   int ans = walsh_01_5b(src_vec, vec);
 
   const int n = (1 << 5);
-  for ( int i = 0; i < 5; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4} ) {
     vec[i] = n - vec[i] * 2;
   }
   return n - ans * 2;
@@ -1152,14 +1153,14 @@ int
 walsh_01_6(TvFunc::WordType* src_vec,
 	   int vec[])
 {
-  for ( int i = 0; i < 6; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5} ) {
     vec[i] = 0;
   }
 
   int ans = walsh_01_6b(src_vec, vec);
 
   const int n = (1 << 6);
-  for ( int i = 0; i < 6; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5} ) {
     vec[i] = n - vec[i] * 2;
   }
   return n - ans * 2;
@@ -1171,7 +1172,7 @@ int
 walsh_01_7(TvFunc::WordType* src_vec,
 	   int vec[])
 {
-  for ( int i = 0; i < 6; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5} ) {
     vec[i] = 0;
   }
 
@@ -1179,7 +1180,7 @@ walsh_01_7(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_6b(src_vec + (1 << (6 - NIPW)), vec);
 
   const int n = (1 << 7);
-  for ( int i = 0; i < 6; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[6] = (ans1 - ans0) * 2;
@@ -1192,7 +1193,7 @@ int
 walsh_01_8(TvFunc::WordType* src_vec,
 	   int vec[])
 {
-  for ( int i = 0; i < 7; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6} ) {
     vec[i] = 0;
   }
 
@@ -1200,7 +1201,7 @@ walsh_01_8(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_7b(src_vec + (1 << (7 - NIPW)), vec);
 
   const int n = (1 << 8);
-  for ( int i = 0; i < 7; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[7] = (ans1 - ans0) * 2;
@@ -1213,7 +1214,7 @@ int
 walsh_01_9(TvFunc::WordType* src_vec,
 	   int vec[])
 {
-  for ( int i = 0; i < 8; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7} ) {
     vec[i] = 0;
   }
 
@@ -1221,7 +1222,7 @@ walsh_01_9(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_8b(src_vec + (1 << (8 - NIPW)), vec);
 
   const int n = (1 << 9);
-  for ( int i = 0; i < 8; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[8] = (ans1 - ans0) * 2;
@@ -1234,7 +1235,7 @@ int
 walsh_01_10(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 9; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8} ) {
     vec[i] = 0;
   }
 
@@ -1242,7 +1243,7 @@ walsh_01_10(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_9b(src_vec + (1 << (9 - NIPW)), vec);
 
   const int n = (1 << 10);
-  for ( int i = 0; i < 9; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[9] = (ans1 - ans0) * 2;
@@ -1254,7 +1255,7 @@ int
 walsh_01_11(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 10; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
     vec[i] = 0;
   }
 
@@ -1262,7 +1263,7 @@ walsh_01_11(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_10b(src_vec + (1 << (10 - NIPW)), vec);
 
   const int n = (1 << 11);
-  for ( int i = 0; i < 10; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[10] = (ans1 - ans0) * 2;
@@ -1274,7 +1275,7 @@ int
 walsh_01_12(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 11; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} ) {
     vec[i] = 0;
   }
 
@@ -1282,7 +1283,7 @@ walsh_01_12(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_11b(src_vec + (1 << (11 - NIPW)), vec);
 
   const int n = (1 << 12);
-  for ( int i = 0; i < 11; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[11] = (ans1 - ans0) * 2;
@@ -1294,7 +1295,7 @@ int
 walsh_01_13(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 12; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11} ) {
     vec[i] = 0;
   }
 
@@ -1302,7 +1303,7 @@ walsh_01_13(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_12b(src_vec + (1 << (12 - NIPW)), vec);
 
   const int n = (1 << 13);
-  for ( int i = 0; i < 12; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[12] = (ans1 - ans0) * 2;
@@ -1314,7 +1315,7 @@ int
 walsh_01_14(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 13; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} ) {
     vec[i] = 0;
   }
 
@@ -1322,7 +1323,7 @@ walsh_01_14(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_13b(src_vec + (1 << (13 - NIPW)), vec);
 
   const int n = (1 << 14);
-  for ( int i = 0; i < 13; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[13] = (ans1 - ans0) * 2;
@@ -1334,7 +1335,7 @@ int
 walsh_01_15(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 14; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13} ) {
     vec[i] = 0;
   }
 
@@ -1342,7 +1343,7 @@ walsh_01_15(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_14b(src_vec + (1 << (14 - NIPW)), vec);
 
   const int n = (1 << 15);
-  for ( int i = 0; i < 14; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[14] = (ans1 - ans0) * 2;
@@ -1354,7 +1355,7 @@ int
 walsh_01_16(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 15; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14} ) {
     vec[i] = 0;
   }
 
@@ -1362,7 +1363,7 @@ walsh_01_16(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_15b(src_vec + (1 << (15 - NIPW)), vec);
 
   const int n = (1 << 16);
-  for ( int i = 0; i < 15; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[15] = (ans1 - ans0) * 2;
@@ -1374,7 +1375,7 @@ int
 walsh_01_17(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 16; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15} ) {
     vec[i] = 0;
   }
 
@@ -1382,7 +1383,7 @@ walsh_01_17(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_16b(src_vec + (1 << (16 - NIPW)), vec);
 
   const int n = (1 << 17);
-  for ( int i = 0; i < 16; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[16] = (ans1 - ans0) * 2;
@@ -1394,7 +1395,7 @@ int
 walsh_01_18(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 17; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16} ) {
     vec[i] = 0;
   }
 
@@ -1402,7 +1403,7 @@ walsh_01_18(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_17b(src_vec + (1 << (17 - NIPW)), vec);
 
   const int n = (1 << 18);
-  for ( int i = 0; i < 17; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[17] = (ans1 - ans0) * 2;
@@ -1414,7 +1415,7 @@ int
 walsh_01_19(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 18; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17} ) {
     vec[i] = 0;
   }
 
@@ -1422,7 +1423,7 @@ walsh_01_19(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_18b(src_vec + (1 << (18 - NIPW)), vec);
 
   const int n = (1 << 19);
-  for ( int i = 0; i < 18; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[18] = (ans1 - ans0) * 2;
@@ -1434,7 +1435,7 @@ int
 walsh_01_20(TvFunc::WordType* src_vec,
 	    int vec[])
 {
-  for ( int i = 0; i < 19; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18} ) {
     vec[i] = 0;
   }
 
@@ -1442,7 +1443,7 @@ walsh_01_20(TvFunc::WordType* src_vec,
   int ans1 = walsh_01_19b(src_vec + (1 << (19 - NIPW)), vec);
 
   const int n = (1 << 20);
-  for ( int i = 0; i < 19; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18} ) {
     vec[i] = n - vec[i] * 2;
   }
   vec[19] = (ans1 - ans0) * 2;
@@ -2206,10 +2207,10 @@ walsh_012_7b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_6b(src_vec,                     ni, vec1  , vec2);
   int ans1 = walsh_012_6b(src_vec + (1 << (6 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 6; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5} ) {
     vec2[w2pos(ni, i, 6)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 6; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[6] = ans0 - ans1;
@@ -2227,10 +2228,10 @@ walsh_012_8b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_7b(src_vec,                     ni, vec1  , vec2);
   int ans1 = walsh_012_7b(src_vec + (1 << (7 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 7; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6} ) {
     vec2[w2pos(ni, i, 7)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 7; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[7] = ans0 - ans1;
@@ -2248,10 +2249,10 @@ walsh_012_9b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_8b(src_vec,                     ni, vec1,   vec2);
   int ans1 = walsh_012_8b(src_vec + (1 << (8 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 8; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7} ) {
     vec2[w2pos(ni, i, 8)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 8; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[8] = ans0 - ans1;
@@ -2269,10 +2270,10 @@ walsh_012_10b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_9b(src_vec,                     ni, vec1  , vec2);
   int ans1 = walsh_012_9b(src_vec + (1 << (9 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 9; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8} ) {
     vec2[w2pos(ni, i, 9)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 9; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[9] = ans0 - ans1;
@@ -2290,10 +2291,10 @@ walsh_012_11b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_10b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_10b(src_vec + (1 << (10 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 10; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
     vec2[w2pos(ni, i, 10)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 10; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[10] = ans0 - ans1;
@@ -2311,10 +2312,10 @@ walsh_012_12b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_11b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_11b(src_vec + (1 << (11 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 11; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} ) {
     vec2[w2pos(ni, i, 11)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 11; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[11] = ans0 - ans1;
@@ -2331,10 +2332,10 @@ walsh_012_13b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_12b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_12b(src_vec + (1 << (12 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 12; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11} ) {
     vec2[w2pos(ni, i, 12)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 12; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[12] = ans0 - ans1;
@@ -2351,10 +2352,10 @@ walsh_012_14b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_13b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_13b(src_vec + (1 << (13 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 13; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} ) {
     vec2[w2pos(ni, i, 13)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 13; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[13] = ans0 - ans1;
@@ -2371,10 +2372,10 @@ walsh_012_15b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_14b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_14b(src_vec + (1 << (14 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 14; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13} ) {
     vec2[w2pos(ni, i, 14)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 14; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[14] = ans0 - ans1;
@@ -2391,10 +2392,10 @@ walsh_012_16b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_15b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_15b(src_vec + (1 << (15 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 15; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14} ) {
     vec2[w2pos(ni, i, 15)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 15; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[15] = ans0 - ans1;
@@ -2411,10 +2412,10 @@ walsh_012_17b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_16b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_16b(src_vec + (1 << (16 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 16; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15} ) {
     vec2[w2pos(ni, i, 16)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 16; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[16] = ans0 - ans1;
@@ -2431,10 +2432,10 @@ walsh_012_18b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_17b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_17b(src_vec + (1 << (17 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 17; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16} ) {
     vec2[w2pos(ni, i, 17)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 17; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[17] = ans0 - ans1;
@@ -2451,10 +2452,10 @@ walsh_012_19b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_18b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_18b(src_vec + (1 << (18 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 18; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17} ) {
     vec2[w2pos(ni, i, 18)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 18; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[18] = ans0 - ans1;
@@ -2471,10 +2472,10 @@ walsh_012_20b(TvFunc::WordType* src_vec,
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_19b(src_vec,                      ni, vec1  , vec2);
   int ans1 = walsh_012_19b(src_vec + (1 << (19 - NIPW)), ni, vec1_1, vec2);
-  for ( int i = 0; i < 19; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18} ) {
     vec2[w2pos(ni, i, 19)] += vec1[i] - vec1_1[i];
   }
-  for ( int i = 0; i < 19; ++ i ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18} ) {
     vec1[i] += vec1_1[i];
   }
   vec1[19] = ans0 - ans1;
@@ -2647,14 +2648,14 @@ walsh_012_5(TvFunc::WordType* src_vec,
 	    int vec2[])
 {
   const int nn = 5 * 5;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_5b(src_vec, 5, vec1, vec2);
 
-  for ( int i = 0; i < 4; ++ i ) {
-    for ( int j = i + 1; j < 5; ++ j ) {
+  for ( int i: {0, 1, 2, 3} ) {
+    for ( int j: Range(i + 1, 5) ) {
       vec2[w2pos(5, j, i)] = vec2[w2pos(5, i, j)];
     }
   }
@@ -2669,14 +2670,14 @@ walsh_012_6(TvFunc::WordType* src_vec,
 	    int vec2[])
 {
   const int nn = 6 * 6;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_6b(src_vec, 6, vec1, vec2);
 
-  for ( int i = 0; i < 5; ++ i ) {
-    for ( int j = i + 1; j < 6; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4} ) {
+    for ( int j: Range(i + 1, 6) ) {
       vec2[w2pos(6, j, i)] = vec2[w2pos(6, i, j)];
     }
   }
@@ -2691,14 +2692,14 @@ walsh_012_7(TvFunc::WordType* src_vec,
 	    int vec2[])
 {
   const int nn = 7 * 7;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_7b(src_vec, 7, vec1, vec2);
 
-  for ( int i = 0; i < 6; ++ i ) {
-    for ( int j = i + 1; j < 7; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5} ) {
+    for ( int j: Range(i + 1, 7) ) {
       vec2[w2pos(7, j, i)] = vec2[w2pos(7, i, j)];
     }
   }
@@ -2713,14 +2714,14 @@ walsh_012_8(TvFunc::WordType* src_vec,
 	    int vec2[])
 {
   const int nn = 8 * 8;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_8b(src_vec, 8, vec1, vec2);
 
-  for ( int i = 0; i < 7; ++ i ) {
-    for ( int j = i + 1; j < 8; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6} ) {
+    for ( int j: Range(i + 1, 8) ) {
       vec2[w2pos(8, j, i)] = vec2[w2pos(8, i, j)];
     }
   }
@@ -2735,14 +2736,14 @@ walsh_012_9(TvFunc::WordType* src_vec,
 	    int vec2[])
 {
   const int nn = 9 * 9;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_9b(src_vec, 9, vec1, vec2);
 
-  for ( int i = 0; i < 8; ++ i ) {
-    for ( int j = i + 1; j < 9; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7} ) {
+    for ( int j: Range(i + 1, 9) ) {
       vec2[w2pos(9, j, i)] = vec2[w2pos(9, i, j)];
     }
   }
@@ -2757,14 +2758,14 @@ walsh_012_10(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 10 * 10;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_10b(src_vec, 10, vec1, vec2);
 
-  for ( int i = 0; i < 9; ++ i ) {
-    for ( int j = i + 1; j < 10; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 5, 6, 7, 8} ) {
+    for ( int j: Range(i + 1, 10) ) {
       vec2[w2pos(10, j, i)] = vec2[w2pos(10, i, j)];
     }
   }
@@ -2779,14 +2780,14 @@ walsh_012_11(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 11 * 11;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_11b(src_vec, 11, vec1, vec2);
 
-  for ( int i = 0; i < 10; ++ i ) {
-    for ( int j = i + 1; j < 11; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
+    for ( int j: Range(i + 1, 11) ) {
       vec2[w2pos(11, j, i)] = vec2[w2pos(11, i, j)];
     }
   }
@@ -2801,14 +2802,14 @@ walsh_012_12(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 12 * 12;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_12b(src_vec, 12, vec1, vec2);
 
-  for ( int i = 0; i < 11; ++ i ) {
-    for ( int j = i + 1; j < 12; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} ) {
+    for ( int j: Range(i + 1, 12) ) {
       vec2[w2pos(12, j, i)] = vec2[w2pos(12, i, j)];
     }
   }
@@ -2823,14 +2824,14 @@ walsh_012_13(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 13 * 13;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_13b(src_vec, 13, vec1, vec2);
 
-  for ( int i = 0; i < 12; ++ i ) {
-    for ( int j = i + 1; j < 13; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11} ) {
+    for ( int j: Range(i + 1, 13) ) {
       vec2[w2pos(13, j, i)] = vec2[w2pos(13, i, j)];
     }
   }
@@ -2845,14 +2846,14 @@ walsh_012_14(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 14 * 14;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_14b(src_vec, 14, vec1, vec2);
 
-  for ( int i = 0; i < 13; ++ i ) {
-    for ( int j = i + 1; j < 14; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12} ) {
+    for ( int j: Range(i + 1, 14) ) {
       vec2[w2pos(14, j, i)] = vec2[w2pos(14, i, j)];
     }
   }
@@ -2867,14 +2868,14 @@ walsh_012_15(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 15 * 15;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_15b(src_vec, 15, vec1, vec2);
 
-  for ( int i = 0; i < 14; ++ i ) {
-    for ( int j = i + 1; j < 15; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13} ) {
+    for ( int j: Range(i + 1, 15) ) {
       vec2[w2pos(15, j, i)] = vec2[w2pos(15, i, j)];
     }
   }
@@ -2889,14 +2890,14 @@ walsh_012_16(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 16 * 16;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_16b(src_vec, 16, vec1, vec2);
 
-  for ( int i = 0; i < 15; ++ i ) {
-    for ( int j = i + 1; j < 16; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14} ) {
+    for ( int j: Range(i + 1, 16) ) {
       vec2[w2pos(16, j, i)] = vec2[w2pos(16, i, j)];
     }
   }
@@ -2911,14 +2912,14 @@ walsh_012_17(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 17 * 17;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_17b(src_vec, 17, vec1, vec2);
 
-  for ( int i = 0; i < 16; ++ i ) {
-    for ( int j = i + 1; j < 17; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15} ) {
+    for ( int j: Range(i + 1, 17) ) {
       vec2[w2pos(17, j, i)] = vec2[w2pos(17, i, j)];
     }
   }
@@ -2933,14 +2934,14 @@ walsh_012_18(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 18 * 18;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_18b(src_vec, 18, vec1, vec2);
 
-  for ( int i = 0; i < 17; ++ i ) {
-    for ( int j = i + 1; j < 18; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16} ) {
+    for ( int j: Range(i + 1, 18) ) {
       vec2[w2pos(18, j, i)] = vec2[w2pos(18, i, j)];
     }
   }
@@ -2955,14 +2956,14 @@ walsh_012_19(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 19 * 19;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_19b(src_vec, 19, vec1, vec2);
 
-  for ( int i = 0; i < 18; ++ i ) {
-    for ( int j = i + 1; j < 19; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17} ) {
+    for ( int j: Range(i + 1, 19) ) {
       vec2[w2pos(19, j, i)] = vec2[w2pos(19, i, j)];
     }
   }
@@ -2977,14 +2978,14 @@ walsh_012_20(TvFunc::WordType* src_vec,
 	     int vec2[])
 {
   const int nn = 20 * 20;
-  for ( int i = 0; i < nn; ++ i ) {
+  for ( int i: Range(nn) ) {
     vec2[i] = 0;
   }
 
   int ans = walsh_012_20b(src_vec, 20, vec1, vec2);
 
-  for ( int i = 0; i < 19; ++ i ) {
-    for ( int j = i + 1; j < 20; ++ j ) {
+  for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18} ) {
+    for ( int j: Range(i + 1, 20) ) {
       vec2[w2pos(20, j, i)] = vec2[w2pos(20, i, j)];
     }
   }
@@ -3377,9 +3378,9 @@ TvFunc::walsh_w0(int w,
       int ibits1 = ibits >> NIPW;
       // ブロック内の入力反転ビットマスク
       int ibits2 = ibits & ((1UL << NIPW) - 1UL);
-      for (int pos0 = 0; pos0 < mBlockNum; ++ pos0) {
+      for ( int b0: Range(mBlockNum) ) {
 	// ブロック番号中の1の重み
-	int u = count_onebits(pos0);
+	int u = count_onebits(b0);
 	if ( u > w ) {
 	  continue;
 	}
@@ -3391,9 +3392,9 @@ TvFunc::walsh_w0(int w,
 	int start = s_pidx[v];
 	int end = s_pidx[v + 1];
 	int* endp = &s_plist[end];
-	int pos1 = pos0 ^ ibits1;
-	TvFunc::WordType bitvec = mVector[pos1];
-	for (int* p = &s_plist[start]; p != endp; ++ p) {
+	int b1 = b0 ^ ibits1;
+	TvFunc::WordType bitvec = mVector[b1];
+	for ( int* p = &s_plist[start]; p != endp; ++ p ) {
 	  int bitpos = *p ^ ibits2;
 	  c += (bitvec >> bitpos) & 1;
 	}
@@ -3445,9 +3446,9 @@ TvFunc::walsh_w1(VarId var,
     // ブロック内の入力反転ビットマスク
     int ibits2 = ibits & ((1UL << NIPW) - 1UL);
 
-    for ( int pos0 = 0; pos0 < mBlockNum; ++ pos0 ) {
+    for ( int b0: Range(mBlockNum) ) {
       // ブロック番号中の1の重み
-      int u = count_onebits(pos0);
+      int u = count_onebits(b0);
       if ( u > w ) {
 	continue;
       }
@@ -3459,7 +3460,7 @@ TvFunc::walsh_w1(VarId var,
       int start = s_pidx[v];
       int end = s_pidx[v + 1];
       int* endp = &s_plist[end];
-      int pos1 = pos0 ^ ibits1;
+      int b1 = b0 ^ ibits1;
       TvFunc::WordType mask;
       if ( idx < NIPW ) {
 	if ( ibits2 & (1 << idx) ) {
@@ -3472,10 +3473,10 @@ TvFunc::walsh_w1(VarId var,
       else {
 	int var5 = idx - NIPW;
 	// 2行下の式は1行下の式と同じ意味
-	// mask = (pos0 & (1 << var5)) ? 0xFFFFFFFF : 0x00000000;
-	mask = 0UL - ((pos0 >> var5) & 1UL);
+	// mask = (b0 & (1 << var5)) ? 0xFFFFFFFF : 0x00000000;
+	mask = 0UL - ((b0 >> var5) & 1UL);
       }
-      TvFunc::WordType bitvec = mVector[pos1] ^ mask;
+      TvFunc::WordType bitvec = mVector[b1] ^ mask;
       for ( int* p = &s_plist[start]; p != endp; ++ p ) {
 	int bitpos = *p ^ ibits2;
 	c += (bitvec >> bitpos) & 1;
@@ -3500,7 +3501,7 @@ TvFunc::check_sup(VarId var) const
     // ブロックごとにチェック
     int dist = 1 << i;
     TvFunc::WordType mask = c_masks[i];
-    for ( int b = 0; b < mBlockNum; ++ b ) {
+    for ( int b: Range(mBlockNum) ) {
       TvFunc::WordType word = mVector[b];
       if ( (word ^ (word << dist)) & mask ) {
 	return true;
@@ -3511,7 +3512,7 @@ TvFunc::check_sup(VarId var) const
     // ブロック単位でチェック
     int i5 = i - NIPW;
     int check = 1 << i5;
-    for ( int b = 0; b < mBlockNum; ++ b ) {
+    for ( int b: Range(mBlockNum) ) {
       if ( (b & check) && (mVector[b] != mVector[b ^ check]) ) {
 	return true;
       }
@@ -3552,9 +3553,9 @@ TvFunc::check_sym(VarId var1,
     else {
       cond = mask_j;
     }
-    for ( int v = 0; v < mBlockNum; ++ v ) {
-      if ( (v & mask_all) == cond &&
-	   mVector[v] != mVector[v ^ mask_all] ) {
+    for ( int b: Range(mBlockNum) ) {
+      if ( (b & mask_all) == cond &&
+	   mVector[b] != mVector[b ^ mask_all] ) {
 	ans = false;
 	break;
       }
@@ -3573,9 +3574,9 @@ TvFunc::check_sym(VarId var1,
     }
     TvFunc::WordType mask2 = ~c_masks[j];
     int s = 1 << j;
-    for ( int v = 0; v < mBlockNum; ++ v ) {
-      if ( (v & mask_i) == cond &&
-	   (mVector[v] ^ (mVector[v ^ mask_i] >> s)) & mask2 ) {
+    for ( int b: Range(mBlockNum) ) {
+      if ( (b & mask_i) == cond &&
+	   (mVector[b] ^ (mVector[b ^ mask_i] >> s)) & mask2 ) {
 	ans = false;
 	break;
       }
@@ -3587,7 +3588,7 @@ TvFunc::check_sym(VarId var1,
     if ( inv ) {
       TvFunc::WordType mask = sym_masks3[(i * (i - 1)) / 2 + j];
       int s = (1 << i) + (1 << j);
-      for ( int b = 0; b < mBlockNum; ++ b ) {
+      for ( int b: Range(mBlockNum) ) {
 	TvFunc::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
@@ -3598,7 +3599,7 @@ TvFunc::check_sym(VarId var1,
     else {
       TvFunc::WordType mask = sym_masks2[(i * (i - 1)) / 2 + j];
       int s = (1 << i) - (1 << j);
-      for ( int b = 0; b < mBlockNum; ++ b ) {
+      for ( int b: Range(mBlockNum) ) {
 	TvFunc::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
@@ -3623,10 +3624,10 @@ TvFunc::xform(const NpnMap& npnmap) const
   int new_ni = npnmap.input_num2();
   int imask = 0;
   int ipat[kMaxNi];
-  for ( int j = 0; j < new_ni; ++ j ) {
-    ipat[j] = 0;
+  for ( int i: Range(new_ni) ) {
+    ipat[i] = 0;
   }
-  for ( int i = 0; i < mInputNum; ++ i ) {
+  for ( int i: Range(mInputNum) ) {
     VarId src_var(i);
     NpnVmap imap = npnmap.imap(src_var);
     if ( imap.is_invalid() ) {
@@ -3643,13 +3644,14 @@ TvFunc::xform(const NpnMap& npnmap) const
 
   TvFunc ans(new_ni);
   int ni_pow = 1 << new_ni;
-  for ( int b = 0; b < ni_pow; ++ b ) {
+  for ( int b: Range(ni_pow) ) {
     int orig_b = 0;
     int tmp = b;
-    for ( int j = 0; j < new_ni; ++ j, tmp >>= 1 ) {
+    for ( int i: Range(new_ni) ) {
       if ( tmp & 1 ) {
-	orig_b |= ipat[j];
+	orig_b |= ipat[i];
       }
+      tmp >>= 1;
     }
     TvFunc::WordType pat = (value(orig_b ^ imask) ^ omask);
     ans.mVector[block(b)] |= pat << shift(b);
@@ -3669,7 +3671,7 @@ TvFunc::shrink_map() const
   // まず独立な変数を求める．
   ymuint varmap = 0U;
   int dst_ni = 0;
-  for ( int i = 0; i < mInputNum; ++ i ) {
+  for ( int i: Range(mInputNum) ) {
     if ( !check_sup(VarId(i)) ) {
       varmap |= (1U << i);
     }
@@ -3688,7 +3690,7 @@ TvFunc::shrink_map() const
   NpnMap ans(mInputNum, dst_ni);
   int j = 0;
   int rmap[kMaxNi];
-  for ( int i = 0; i < mInputNum; ++ i ) {
+  for ( int i: Range(mInputNum) ) {
     if ( (varmap & (1U << i)) == 0U ) {
       ans.set(VarId(i), VarId(j), false);
       rmap[j] = i;
@@ -3725,8 +3727,8 @@ SizeType
 TvFunc::hash() const
 {
   SizeType ans = 0;
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    TvFunc::WordType tmp = mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    TvFunc::WordType tmp = mVector[b];
     TvFunc::WordType tmp_l = (tmp >>  0) & 0xFFFFFFFFULL;
     TvFunc::WordType tmp_h = (tmp >> 32) & 0xFFFFFFFFULL;
     ans ^= tmp_l ^ tmp_h;
@@ -3749,9 +3751,9 @@ compare(const TvFunc& func1,
 
   // 以降は入力数が等しい場合
   int n = func1.mBlockNum;
-  for ( int i = 0; i < n; ++ i ) {
-    TvFunc::WordType w1 = func1.mVector[n - i - 1];
-    TvFunc::WordType w2 = func2.mVector[n - i - 1];
+  for ( int b: Range(n) ) {
+    TvFunc::WordType w1 = func1.mVector[n - b - 1];
+    TvFunc::WordType w2 = func2.mVector[n - b - 1];
     if ( w1 < w2 ) {
       return -1;
     }
@@ -3773,9 +3775,9 @@ operator&&(const TvFunc& func1,
   }
 
   int n = func1.mBlockNum;
-  for ( int i = 0; i < n; ++ i ) {
-    TvFunc::WordType w1 = func1.mVector[n - i - 1];
-    TvFunc::WordType w2 = func2.mVector[n - i - 1];
+  for ( int b: Range(n) ) {
+    TvFunc::WordType w1 = func1.mVector[n - b - 1];
+    TvFunc::WordType w2 = func2.mVector[n - b - 1];
     if ( (w1 & w2) != 0U ) {
       return true;
     }
@@ -3795,7 +3797,7 @@ TvFunc::print(ostream& s,
     TvFunc::WordType* bp = mVector;
     int offset = 0;
     TvFunc::WordType tmp = *bp;
-    for ( int i = 0; i < ni_pow; ++ i ) {
+    for ( int p: Range(ni_pow) ) {
       s << (tmp & 1LL);
       tmp >>= 1;
       ++ offset;
@@ -3811,7 +3813,7 @@ TvFunc::print(ostream& s,
     TvFunc::WordType* bp = mVector;
     int offset = 0;
     TvFunc::WordType tmp = *bp;
-    for ( int i = 0; i < ni_pow4; ++ i ) {
+    for ( int p: Range(ni_pow4) ) {
       TvFunc::WordType tmp1 = (tmp & 0xF);
       if ( tmp1 < 10 ) {
 	s << static_cast<char>('0' + tmp1);
@@ -3839,8 +3841,8 @@ void
 TvFunc::dump(ODO& s) const
 {
   s << mInputNum;
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    s << mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    s << mVector[b];
   }
 }
 
@@ -3856,8 +3858,8 @@ TvFunc::restore(IDO& s)
     mBlockNum = nblk;
     mVector = new TvFunc::WordType[mBlockNum];
   }
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    s >> mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    s >> mVector[b];
   }
 }
 
