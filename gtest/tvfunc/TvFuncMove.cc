@@ -62,10 +62,10 @@ TEST(TvFuncMove, copy_m)
     g = tmp;
   }
 
-  EXPECT_EQ( TvFunc::zero(20), f.output(VarId(0)) );
-  EXPECT_EQ( TvFunc::one(20), f.output(VarId(1)) );
-  EXPECT_EQ( TvFunc::posi_literal(20, VarId(0)), g.output(VarId(0)) );
-  EXPECT_EQ( TvFunc::nega_literal(20, VarId(1)), g.output(VarId(1)) );
+  EXPECT_EQ( TvFunc::zero(20), f.slice(VarId(0)) );
+  EXPECT_EQ( TvFunc::one(20), f.slice(VarId(1)) );
+  EXPECT_EQ( TvFunc::posi_literal(20, VarId(0)), g.slice(VarId(0)) );
+  EXPECT_EQ( TvFunc::nega_literal(20, VarId(1)), g.slice(VarId(1)) );
 }
 
 TEST(TvFuncMove, move_m)
@@ -86,10 +86,10 @@ TEST(TvFuncMove, move_m)
     g = std::move(tmp);
   }
 
-  EXPECT_EQ( TvFunc::zero(20), f.output(VarId(0)) );
-  EXPECT_EQ( TvFunc::one(20), f.output(VarId(1)) );
-  EXPECT_EQ( TvFunc::posi_literal(20, VarId(0)), g.output(VarId(0)) );
-  EXPECT_EQ( TvFunc::nega_literal(20, VarId(1)), g.output(VarId(1)) );
+  EXPECT_EQ( TvFunc::zero(20), f.slice(VarId(0)) );
+  EXPECT_EQ( TvFunc::one(20), f.slice(VarId(1)) );
+  EXPECT_EQ( TvFunc::posi_literal(20, VarId(0)), g.slice(VarId(0)) );
+  EXPECT_EQ( TvFunc::nega_literal(20, VarId(1)), g.slice(VarId(1)) );
 }
 
 END_NAMESPACE_YM

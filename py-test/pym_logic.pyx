@@ -9,3 +9,4 @@
 include "varid.pxi"
 include "literal.pxi"
 include "expr.pxi"
+include "tvfunc.pxi"

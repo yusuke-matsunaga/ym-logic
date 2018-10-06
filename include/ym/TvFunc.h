@@ -447,6 +447,20 @@ private:
 	 VarId varid,
 	 bool inv);
 
+  /// @brief コファクターマスクを得る．
+  /// @param[in] pos 入力番号 ( 0 <= pos <= 5 )
+  static
+  WordType
+  c_mask(int pos);
+
+  /// @brief リテラル関数のビットパタンを得る
+  /// @param[in] var_id 変数番号
+  /// @param[in] block_id ブロック番号
+  static
+  WordType
+  lit_pat(int var_id,
+	  int block_id);
+
   /// @brief 入力数 ni のベクタを納めるのに必要なブロック数を計算する．
   /// @param[in] ni 入力数
   static

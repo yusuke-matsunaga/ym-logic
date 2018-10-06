@@ -24,6 +24,7 @@ class TvFuncM
 public:
   using WordType = TvFunc::WordType;
 
+public:
   /// @brief 入力数と出力数を指定したコンストラクタ
   /// @param[in] ni 入力数
   /// @param[in] no 出力数 ( > 0 )
@@ -73,13 +74,72 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
+  // 論理演算
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 否定した関数を返す．
+  TvFuncM
+  invert() const;
+
+  /// @brief 論理積を返す．
+  /// @param[in] right オペランド
+  TvFuncM
+  and_op(const TvFuncM& right) const;
+
+  /// @brief 論理和を返す．
+  /// @param[in] right オペランド
+  TvFuncM
+  or_op(const TvFuncM& right) const;
+
+  /// @brief 排他的論理和を返す．
+  /// @param[in] right オペランド
+  TvFuncM
+  xor_op(const TvFuncM& right) const;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
   // 論理演算を伴った代入
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 自分自身を否定する．
   /// @return 自身への参照を返す．
   TvFuncM&
-  negate();
+  invert_int();
+
+  /// @brief right との論理積を計算し自分に代入する．
+  /// @param[in] right 論理対象のオブジェクト
+  /// @return 自身への参照を返す．
+  TvFuncM&
+  and_int(const TvFuncM& right);
+
+  /// @brief right との論理和を計算し自分に代入する．
+  /// @param[in] right 論理対象のオブジェクト
+  /// @return 自身への参照を返す．
+  TvFuncM&
+  or_int(const TvFuncM& right);
+
+  /// @brief right との排他的論理和を計算し自分に代入する．
+  /// @param[in] right 論理対象のオブジェクト
+  /// @return 自身への参照を返す．
+  TvFuncM&
+  xor_int(const TvFuncM& right);
+
+  /// @brief コファクターを計算し自分に代入する．
+  /// @param[in] varid 変数番号
+  /// @param[in] inv 極性
+  ///                - false: 反転なし (正極性)
+  ///                - true:  反転あり (負極性)
+  /// @return 自身への参照を返す．
+  TvFuncM&
+  cofactor_int(VarId varid,
+	       bool inv);
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // intern 演算のオーバーロード定義
+  //////////////////////////////////////////////////////////////////////
 
   /// @brief right との論理積を計算し自分に代入する．
   /// @param[in] right 論理対象のオブジェクト
@@ -99,16 +159,6 @@ public:
   TvFuncM&
   operator^=(const TvFuncM& right);
 
-  /// @brief コファクターを計算し自分に代入する．
-  /// @param[in] varid 変数番号
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
-  /// @return 自身への参照を返す．
-  TvFuncM&
-  set_cofactor(VarId varid,
-	       bool inv);
-
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -120,31 +170,31 @@ public:
   /// @param[in] ovar 出力番号
   /// @return 自身への参照を返す．
   TvFuncM&
-  negate(VarId ovar);
+  invert_int(VarId ovar);
 
   /// @brief right との論理積を計算し自分に代入する．
   /// @param[in] ovar 出力番号
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  and_assign(VarId ovar,
-	     const TvFunc& right);
+  and_int(VarId ovar,
+	  const TvFunc& right);
 
   /// @brief right との論理和を計算し自分に代入する．
   /// @param[in] ovar 出力番号
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  or_assign(VarId ovar,
-	    const TvFunc& right);
+  or_int(VarId ovar,
+	 const TvFunc& right);
 
   /// @brief right との排他的論理和を計算し自分に代入する．
   /// @param[in] ovar 出力番号
   /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  xor_assign(VarId ovar,
-	     const TvFunc& right);
+  xor_int(VarId ovar,
+	  const TvFunc& right);
 
   /// @brief コファクターを計算し自分に代入する．
   /// @param[in] ovar 出力番号
@@ -154,7 +204,7 @@ public:
   ///                - true:  反転あり (負極性)
   /// @return 自身への参照を返す．
   TvFuncM&
-  set_cofactor(VarId ovar,
+  cofactor_int(VarId ovar,
 	       VarId varid,
 	       bool inv);
 
@@ -175,7 +225,7 @@ public:
   /// @brief 1出力の論理関数を切り出す．
   /// @param[in] ovar 出力番号
   TvFunc
-  output(VarId ovar) const;
+  slice(VarId ovar) const;
 
   /// @brief 入力値を2進数と見なしたときの pos 番目の値を得る．
   /// @param[in] ovar 出力番号
@@ -280,7 +330,7 @@ public:
   /// 特に根拠はないが，これなら Walsh 係数が 32 ビット整数で収まる．
   /// あと真理値表ベースの手法ではこれくらいが限度
   static
-  const int kMaxNi = 20;
+  constexpr int kMaxNi = 20;
 
 
 public:
@@ -353,6 +403,12 @@ private:
 /// @param[in] src ソースの関数
 TvFuncM
 operator~(const TvFuncM& src);
+
+/// @relates TvFuncM
+/// @brief 否定を求める．
+/// @param[in] src ソースの関数
+TvFuncM
+operator~(const TvFuncM&& src);
 
 /// @relates TvFuncM
 /// @brief 論理積を求める．
@@ -616,12 +672,85 @@ TvFuncM::shift(int pos)
   return pos % wsize;
 }
 
+// @brief 否定した関数を返す．
+inline
+TvFuncM
+TvFuncM::invert() const
+{
+  return TvFuncM(*this).invert_int();
+}
+
+// @brief 論理積を返す．
+// @param[in] right オペランド
+inline
+TvFuncM
+TvFuncM::and_op(const TvFuncM& right) const
+{
+  return TvFuncM(*this).and_int(right);
+}
+
+// @brief 論理和を返す．
+// @param[in] right オペランド
+inline
+TvFuncM
+TvFuncM::or_op(const TvFuncM& right) const
+{
+  return TvFuncM(*this).or_int(right);
+}
+
+// @brief 排他的論理和を返す．
+// @param[in] right オペランド
+inline
+TvFuncM
+TvFuncM::xor_op(const TvFuncM& right) const
+{
+  return TvFuncM(*this).xor_int(right);
+}
+
+// @brief right との論理積を計算し自分に代入する．
+// @param[in] right 論理対象のオブジェクト
+// @return 自身への参照を返す．
+inline
+TvFuncM&
+TvFuncM::operator&=(const TvFuncM& right)
+{
+  return and_int(right);
+}
+
+// @brief right との論理和を計算し自分に代入する．
+// @param[in] right 論理対象のオブジェクト
+// @return 自身への参照を返す．
+inline
+TvFuncM&
+TvFuncM::operator|=(const TvFuncM& right)
+{
+  return or_int(right);
+}
+
+// @brief right との排他的論理和を計算し自分に代入する．
+// @param[in] right 論理対象のオブジェクト
+// @return 自身への参照を返す．
+inline
+TvFuncM&
+TvFuncM::operator^=(const TvFuncM& right)
+{
+  return xor_int(right);
+}
+
 // 否定を求める．
 inline
 TvFuncM
 operator~(const TvFuncM& src)
 {
-  return TvFuncM(src).negate();
+  return TvFuncM(src).invert_int();
+}
+
+// 否定を求める．
+inline
+TvFuncM
+operator~(const TvFuncM&& src)
+{
+  return TvFuncM(src).invert_int();
 }
 
 // 論理積を求める．
@@ -630,7 +759,7 @@ TvFuncM
 operator&(const TvFuncM& left,
 	  const TvFuncM& right)
 {
-  return TvFuncM(left).operator&=(right);
+  return TvFuncM(left).and_int(right);
 }
 
 // 論理積を求める．
@@ -639,7 +768,7 @@ TvFuncM
 operator&(const TvFuncM&& left,
 	  const TvFuncM& right)
 {
-  return TvFuncM(left).operator&=(right);
+  return TvFuncM(left).and_int(right);
 }
 
 // 論理積を求める．
@@ -648,7 +777,7 @@ TvFuncM
 operator&(const TvFuncM& left,
 	  const TvFuncM&& right)
 {
-  return TvFuncM(right).operator&=(left);
+  return TvFuncM(right).and_int(left);
 }
 
 // 論理積を求める．
@@ -657,7 +786,7 @@ TvFuncM
 operator&(const TvFuncM&& left,
 	  const TvFuncM&& right)
 {
-  return TvFuncM(left).operator&=(right);
+  return TvFuncM(left).and_int(right);
 }
 
 // 論理和を求める．
@@ -666,7 +795,7 @@ TvFuncM
 operator|(const TvFuncM& left,
 	  const TvFuncM& right)
 {
-  return TvFuncM(left).operator|=(right);
+  return TvFuncM(left).or_int(right);
 }
 
 // 論理和を求める．
@@ -675,7 +804,7 @@ TvFuncM
 operator|(const TvFuncM&& left,
 	  const TvFuncM& right)
 {
-  return TvFuncM(left).operator|=(right);
+  return TvFuncM(left).or_int(right);
 }
 
 // 論理和を求める．
@@ -684,7 +813,7 @@ TvFuncM
 operator|(const TvFuncM& left,
 	  const TvFuncM&& right)
 {
-  return TvFuncM(right).operator|=(left);
+  return TvFuncM(right).or_int(left);
 }
 
 // 論理和を求める．
@@ -693,7 +822,7 @@ TvFuncM
 operator|(const TvFuncM&& left,
 	  const TvFuncM&& right)
 {
-  return TvFuncM(left).operator|=(right);
+  return TvFuncM(left).or_int(right);
 }
 
 // 排他的論理和を求める．
@@ -702,7 +831,7 @@ TvFuncM
 operator^(const TvFuncM& left,
 	  const TvFuncM& right)
 {
-  return TvFuncM(left).operator^=(right);
+  return TvFuncM(left).xor_int(right);
 }
 
 // 排他的論理和を求める．
@@ -711,7 +840,7 @@ TvFuncM
 operator^(const TvFuncM&& left,
 	  const TvFuncM& right)
 {
-  return TvFuncM(left).operator^=(right);
+  return TvFuncM(left).xor_int(right);
 }
 
 // 排他的論理和を求める．
@@ -720,7 +849,7 @@ TvFuncM
 operator^(const TvFuncM& left,
 	  const TvFuncM&& right)
 {
-  return TvFuncM(right).operator^=(left);
+  return TvFuncM(right).xor_int(left);
 }
 
 // 排他的論理和を求める．
@@ -729,7 +858,7 @@ TvFuncM
 operator^(const TvFuncM&& left,
 	  const TvFuncM&& right)
 {
-  return TvFuncM(left).operator^=(right);
+  return TvFuncM(left).xor_int(right);
 }
 
 // @brief コファクターを返す．
@@ -742,7 +871,7 @@ TvFuncM
 TvFuncM::cofactor(VarId varid,
 		  bool inv) const
 {
-  return TvFuncM(*this).set_cofactor(varid, inv);
+  return TvFuncM(*this).cofactor_int(varid, inv);
 }
 
 // @relates TvFuncM

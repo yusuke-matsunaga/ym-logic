@@ -9,6 +9,7 @@
 
 #include "ym/TvFuncM.h"
 #include "ym/NpnMapM.h"
+#include "ym/Range.h"
 
 
 // 1 ワード当たりの入力数
@@ -86,8 +87,8 @@ TvFuncM::TvFuncM(int ni,
   mBlockNum(mBlockNum1 * no),
   mVector(new TvFuncM::WordType[mBlockNum])
 {
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    mVector[i] = 0ULL;
+  for ( int b: Range(mBlockNum) ) {
+    mVector[b] = 0ULL;
   }
 }
 
@@ -100,8 +101,9 @@ TvFuncM::TvFuncM(const vector<TvFunc>& src_list)
   const TvFunc& first = src_list.front();
   int ni = first.input_num();
   int no = src_list.size();
-  for ( int i = 1; i < no; ++ i ) {
-    ASSERT_COND( src_list[i].input_num() == ni );
+  // 全ての関数の入力数が等しいことを確認しておく．
+  for ( auto f: src_list ) {
+    ASSERT_COND( f.input_num() == ni );
   }
 
   mInputNum = ni;
@@ -109,11 +111,11 @@ TvFuncM::TvFuncM(const vector<TvFunc>& src_list)
   mBlockNum1 = nblock(ni);
   mBlockNum = mBlockNum1 * no;
   mVector = new TvFuncM::WordType[mBlockNum];
-  for ( int i = 0; i < no; ++ i ) {
+  for ( int i: Range(no) ) {
     int offset = i * mBlockNum1;
     const TvFunc& src1 = src_list[i];
-    for ( int j = 0; j < mBlockNum1; ++ j ) {
-      mVector[offset + j] = src1.raw_data(j);
+    for ( int b: Range(mBlockNum1) ) {
+      mVector[offset + b] = src1.raw_data(b);
     }
   }
 }
@@ -126,8 +128,8 @@ TvFuncM::TvFuncM(const TvFuncM& src) :
   mBlockNum(src.mBlockNum),
   mVector(new TvFuncM::WordType[mBlockNum])
 {
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    mVector[i] = src.mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    mVector[b] = src.mVector[b];
   }
 }
 
@@ -154,8 +156,8 @@ TvFuncM::TvFuncM(const TvFunc& src) :
   mBlockNum(mBlockNum1),
   mVector(new TvFuncM::WordType[mBlockNum])
 {
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    mVector[i] = src.raw_data(i);
+  for ( int b: Range(mBlockNum) ) {
+    mVector[b] = src.raw_data(b);
   }
 }
 
@@ -185,8 +187,8 @@ TvFuncM::operator=(const TvFuncM& src)
   mInputNum = src.mInputNum;
   mOutputNum = src.mOutputNum;
 
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    mVector[i] = src.mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    mVector[b] = src.mVector[b];
   }
 
   return *this;
@@ -219,57 +221,54 @@ TvFuncM::~TvFuncM()
 
 // 自分自身を否定する．
 TvFuncM&
-TvFuncM::negate()
+TvFuncM::invert_int()
 {
   switch ( mInputNum ) {
   case 0:
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       mVector[i] ^= 0x1ULL;
     }
     break;
 
   case 1:
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       mVector[i] ^= 0x3ULL;
     }
     break;
 
   case 2:
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       mVector[i] ^= 0xFULL;
     }
     break;
 
   case 3:
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       mVector[i] ^= 0xFFULL;
     }
     break;
 
   case 4:
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       mVector[i] ^= 0xFFFFULL;
     }
     break;
 
   case 5:
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       mVector[i] ^= 0xFFFFFFFFULL;
     }
     break;
 
   case 6:
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       mVector[i] ^= 0xFFFFFFFFFFFFFFFFULL;
     }
     break;
 
   default:
-    {
-      TvFuncM::WordType* endp = mVector + mBlockNum;
-      for ( TvFuncM::WordType* bp = mVector; bp != endp; ++ bp ) {
-	*bp ^= ~(0ULL);
-      }
+    for ( int b: Range(mBlockNum) ) {
+      mVector[b] ^= 0xFFFFFFFFFFFFFFFULL;
     }
   }
   return *this;
@@ -277,30 +276,30 @@ TvFuncM::negate()
 
 // src1 との論理積を計算し自分に代入する．
 TvFuncM&
-TvFuncM::operator&=(const TvFuncM& src1)
+TvFuncM::and_int(const TvFuncM& src1)
 {
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    mVector[i] &= src1.mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    mVector[b] &= src1.mVector[b];
   }
   return *this;
 }
 
 // src1 との論理和を計算し自分に代入する．
 TvFuncM&
-TvFuncM::operator|=(const TvFuncM& src1)
+TvFuncM::or_int(const TvFuncM& src1)
 {
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    mVector[i] |= src1.mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    mVector[b] |= src1.mVector[b];
   }
   return *this;
 }
 
 // src1 との排他的論理和を計算し自分に代入する．
 TvFuncM&
-TvFuncM::operator^=(const TvFuncM& src1)
+TvFuncM::xor_int(const TvFuncM& src1)
 {
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    mVector[i] ^= src1.mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    mVector[b] ^= src1.mVector[b];
   }
   return *this;
 }
@@ -310,7 +309,7 @@ TvFuncM::operator^=(const TvFuncM& src1)
 // @param[in] pol 極性
 // @return 自身への参照を返す．
 TvFuncM&
-TvFuncM::set_cofactor(VarId varid,
+TvFuncM::cofactor_int(VarId varid,
 		      bool inv)
 {
   int pos = varid.val();
@@ -320,31 +319,31 @@ TvFuncM::set_cofactor(VarId varid,
       mask = ~mask;
     }
     int shift = 1 << pos;
-    for ( int i = 0; i < mBlockNum; ++ i ) {
-      TvFuncM::WordType pat = mVector[i] & mask;
+    for ( int b: Range(mBlockNum) ) {
+      TvFuncM::WordType pat = mVector[b] & mask;
       if ( inv ) {
 	pat |= (pat << shift);
       }
       else {
 	pat |= (pat >> shift);
       }
-      mVector[i] = pat;
+      mVector[b] = pat;
     }
   }
   else {
     pos -= NIPW;
     int bit = 1U << pos;
-    for ( int j = 0; j < mOutputNum; ++ j ) {
-      int offset = j * mBlockNum1;
-      for ( int i = 0; i < mBlockNum1; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
+      int offset = i * mBlockNum1;
+      for ( int b: Range(mBlockNum1) ) {
 	if ( inv ) {
-	  if ( (i & bit) == bit ) {
-	    mVector[i + offset] = mVector[(i ^ bit) + offset];
+	  if ( (b & bit) == bit ) {
+	    mVector[b + offset] = mVector[(b ^ bit) + offset];
 	  }
 	}
 	else {
-	  if ( (i & bit) == 0U ) {
-	    mVector[i + offset] = mVector[(i ^ bit) + offset];
+	  if ( (b & bit) == 0U ) {
+	    mVector[b + offset] = mVector[(b ^ bit) + offset];
 	  }
 	}
       }
@@ -356,8 +355,17 @@ TvFuncM::set_cofactor(VarId varid,
 // @brief 1出力の論理関数を切り出す．
 // @param[in] ovar 出力番号
 TvFunc
-TvFuncM::output(VarId ovar) const
+TvFuncM::slice(VarId ovar) const
 {
+#if 1
+  TvFunc ans(input_num());
+  int pos = ovar.val();
+  int offset = mBlockNum1 * pos;
+  for ( int b: Range(mBlockNum1) ) {
+    ans.mVector[b] = mVector[b + offset];
+  }
+  return ans;
+#else
 #warning "効率が悪い仮のコード"
 
   int np = 1U << input_num();
@@ -366,6 +374,7 @@ TvFuncM::output(VarId ovar) const
     tmp[i] = value(ovar, i);
   }
   return TvFunc(input_num(), tmp);
+#endif
 }
 
 // var がサポートの時 true を返す．
@@ -377,8 +386,8 @@ TvFuncM::check_sup(VarId var) const
     // ブロックごとにチェック
     int dist = 1U << i;
     TvFuncM::WordType mask = c_masks[i];
-    for ( int i = 0; i < mBlockNum; ++ i ) {
-      TvFuncM::WordType word = mVector[i];
+    for ( int b: Range(mBlockNum) ) {
+      TvFuncM::WordType word = mVector[b];
       if ( (word ^ (word << dist)) & mask ) {
 	return true;
       }
@@ -388,9 +397,9 @@ TvFuncM::check_sup(VarId var) const
     // ブロック単位でチェック
     int i5 = i - NIPW;
     int check = 1 << i5;
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       int offset = i * mBlockNum1;
-      for ( int b = 0; b < mBlockNum1; ++ b ) {
+      for ( int b: Range(mBlockNum1) ) {
 	if ( (b & check) &&
 	     (mVector[b + offset] != mVector[(b ^ check) + offset]) ) {
 	  return true;
@@ -427,9 +436,9 @@ TvFuncM::check_sym(VarId var1,
     int mask_j = (1 << (j - NIPW));
     int mask_all = mask_i | mask_j;
     int cond = inv ? 0 : mask_j;
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       int offset = i * mBlockNum1;
-      for ( int v = 0; v < mBlockNum1; ++ v ) {
+      for ( int v: Range(mBlockNum1) ) {
 	if ( (v & mask_all) == cond &&
 	     mVector[v + offset] != mVector[(v ^ mask_all) + offset] ) {
 	  ans = false;
@@ -445,9 +454,9 @@ TvFuncM::check_sym(VarId var1,
     int cond = inv ? 0UL : mask_i;
     TvFuncM::WordType mask2 = ~c_masks[j];
     int s = 1 << j;
-    for ( int i = 0; i < mOutputNum; ++ i ) {
+    for ( int i: Range(mOutputNum) ) {
       int offset = i * mBlockNum1;
-      for ( int v = 0; v < mBlockNum1; ++ v ) {
+      for ( int v: Range(mBlockNum1) ) {
 	if ( (v & mask_i) == cond &&
 	     (mVector[v + offset] ^ (mVector[(v ^ mask_i) + offset] >> s)) & mask2 ) {
 	  ans = false;
@@ -462,8 +471,8 @@ TvFuncM::check_sym(VarId var1,
     if ( inv ) {
       TvFuncM::WordType mask = sym_masks3[(i * (i - 1)) / 2 + j];
       int s = (1U << i) + (1U << j);
-      for ( int i = 0; i < mBlockNum; ++ i ) {
-	TvFuncM::WordType word = mVector[i];
+      for ( int b: Range(mBlockNum) ) {
+	TvFuncM::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
 	  break;
@@ -473,8 +482,8 @@ TvFuncM::check_sym(VarId var1,
     else {
       TvFuncM::WordType mask = sym_masks2[(i * (i - 1)) / 2 + j];
       int s = (1U << i) - (1U << j);
-      for ( int i = 0; i < mBlockNum; ++ i ) {
-	TvFuncM::WordType word = mVector[i];
+      for ( int b: Range(mBlockNum) ) {
+	TvFuncM::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
 	  break;
@@ -489,7 +498,7 @@ TvFuncM::check_sym(VarId var1,
 TvFuncM
 TvFuncM::xform(const NpnMapM& npnmap) const
 {
-  ymuint ni_pow = 1UL << mInputNum;
+  int ni_pow = 1UL << mInputNum;
 
 #if defined(DEBUG)
   cout << "xform" << endl
@@ -499,7 +508,7 @@ TvFuncM::xform(const NpnMapM& npnmap) const
 
   int imask = 0;
   int ipat[kMaxNi];
-  for ( int i = 0; i < mInputNum; ++ i ) {
+  for ( int i: Range(mInputNum) ) {
     VarId src_var(i);
     NpnVmap imap = npnmap.imap(src_var);
     if ( imap.inv() ) {
@@ -512,22 +521,23 @@ TvFuncM::xform(const NpnMapM& npnmap) const
 
   TvFuncM ans(mInputNum, mOutputNum);
 
-  for ( int o = 0; o < mOutputNum; ++ o ) {
+  for ( int o: Range(mOutputNum) ) {
     VarId src_var(o);
     NpnVmap omap = npnmap.omap(src_var);
     VarId dst_var = omap.var();
     int dst_pos = dst_var.val();
     TvFuncM::WordType omask = omap.inv() ? 1ULL : 0ULL;
-    for ( int i = 0; i < ni_pow; ++ i ) {
-      int new_i = 0;
-      int tmp = i;
-      for ( int b = 0; b < mInputNum; ++ b, tmp >>= 1 ) {
+    for ( int p: Range(ni_pow) ) {
+      int new_p = 0;
+      int tmp = p;
+      for ( int i: Range(mInputNum) ) {
 	if ( tmp & 1 ) {
-	  new_i |= ipat[b];
+	  new_p |= ipat[i];
 	}
+	tmp >>= 1;
       }
-      TvFuncM::WordType pat = (value(VarId(o), i ^ imask) ^ omask);
-      ans.mVector[block(new_i) + dst_pos * mBlockNum1] |= pat << shift(new_i);
+      TvFuncM::WordType pat = (value(VarId(o), p ^ imask) ^ omask);
+      ans.mVector[block(new_p) + dst_pos * mBlockNum1] |= pat << shift(new_p);
     }
   }
 
@@ -543,9 +553,9 @@ SizeType
 TvFuncM::hash() const
 {
   SizeType ans = 0;
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    TvFuncM::WordType tmp = mVector[i];
-    TvFuncM::WordType tmp_l = (tmp >> 0) & 0xFFFFFFFFULL;
+  for ( int b: Range(mBlockNum) ) {
+    TvFuncM::WordType tmp = mVector[b];
+    TvFuncM::WordType tmp_l = (tmp >>  0) & 0xFFFFFFFFULL;
     TvFuncM::WordType tmp_h = (tmp >> 32) & 0xFFFFFFFFULL;
     ans ^= (tmp_l ^ tmp_h);
   }
@@ -578,9 +588,9 @@ compare(const TvFuncM& left,
   }
 
   int n = left.mBlockNum;
-  for ( int i = 0; i < n; ++ i ) {
-    TvFuncM::WordType w1 = left.mVector[i];
-    TvFuncM::WordType w2 = right.mVector[i];
+  for ( int b: Range(n) ) {
+    TvFuncM::WordType w1 = left.mVector[b];
+    TvFuncM::WordType w2 = right.mVector[b];
     if ( w1 < w2 ) {
       return -1;
     }
@@ -604,9 +614,9 @@ operator&&(const TvFuncM& func1,
   }
 
   int n = func1.mBlockNum;
-  for ( int i = 0; i < n; ++ i ) {
-    TvFuncM::WordType w1 = func1.mVector[i];
-    TvFuncM::WordType w2 = func2.mVector[i];
+  for ( int b: Range(n) ) {
+    TvFuncM::WordType w1 = func1.mVector[b];
+    TvFuncM::WordType w2 = func2.mVector[b];
     if ( (w1 & w2) != 0U ) {
       return true;
     }
@@ -626,11 +636,11 @@ TvFuncM::print(ostream& s,
     TvFuncM::WordType* bp = mVector;
     TvFuncM::WordType tmp = *bp;
     const char* del = "";
-    for ( int j = 0; j < mOutputNum; ++ j ) {
+    for ( int o: Range(mOutputNum) ) {
       s << del;
       del = "|";
       int offset = 0;
-      for ( int i = 0; i < ni_pow; ++ i ) {
+      for ( int p: Range(ni_pow) ) {
 	s << (tmp & 1L);
 	tmp >>= 1;
 	++ offset;
@@ -650,10 +660,10 @@ TvFuncM::print(ostream& s,
     int ni_pow4 = ni_pow / 4;
     TvFuncM::WordType* bp = mVector;
     TvFuncM::WordType tmp = *bp;
-    for ( int j = 0; j < mOutputNum; ++ j ) {
+    for ( int o: Range(mOutputNum) ) {
       const char* del = "";
       int offset = 0;
-      for ( int i = 0; i < ni_pow4; ++ i ) {
+      for ( int p: Range(ni_pow4) ) {
 	s << del;
 	del = "|";
 	TvFuncM::WordType tmp1 = (tmp & 0xFULL);
@@ -692,8 +702,8 @@ TvFuncM::dump(ODO& s) const
     << mBlockNum1
     << mBlockNum;
 
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    s << mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    s << mVector[b];
   }
 }
 
@@ -713,8 +723,8 @@ TvFuncM::restore(IDO& s)
     mBlockNum = nblk;
     mVector = new TvFuncM::WordType[mBlockNum];
   }
-  for ( int i = 0; i < mBlockNum; ++ i ) {
-    s >> mVector[i];
+  for ( int b: Range(mBlockNum) ) {
+    s >> mVector[b];
   }
 }
 
