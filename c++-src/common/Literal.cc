@@ -16,9 +16,6 @@ BEGIN_NAMESPACE_YM
 // 実はデフォルトコンストラクタが未定義リテラルを作っている．
 const Literal kLiteralX;
 
-// 場所がないのでここに書いておく．
-const VarId kVarIdIllegal;
-
 // ostream に対する書出し
 ostream&
 operator<<(ostream& s,
@@ -28,7 +25,7 @@ operator<<(ostream& s,
     s << "-X-";
   }
   else {
-    s << "v_" << lit.varid();
+    s << lit.varid();
     if ( lit.is_negative() ) {
       s << "'";
     }

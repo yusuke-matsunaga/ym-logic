@@ -17,17 +17,25 @@ TEST(VarIdTest, empty_constr)
 {
   VarId var;
 
-  EXPECT_EQ( kVarIdIllegal, var );
+  EXPECT_FALSE( var.is_valid() );
   EXPECT_EQ( -1, var.val() );
+
+  ostringstream oss;
+  oss << var;
+  EXPECT_EQ( string("---"), oss.str() );
 }
 
 TEST(VarIdTest, int_constr)
 {
-  ymuint val = 2;
+  int val = 2;
   VarId var(val);
 
-  EXPECT_NE( kVarIdIllegal, var );
+  EXPECT_TRUE( var.is_valid() );
   EXPECT_EQ( val, var.val() );
+
+  ostringstream oss;
+  oss << var;
+  EXPECT_EQ( string("V_2"), oss.str() );
 }
 
 END_NAMESPACE_YM

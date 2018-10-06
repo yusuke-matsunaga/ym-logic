@@ -148,7 +148,7 @@ VarId
 NpnVmap::var() const
 {
   if ( is_invalid() ) {
-    return kVarIdIllegal;
+    return VarId::illegal();
   }
   else {
     return VarId(mPosPol >> 1);

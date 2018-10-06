@@ -16,6 +16,7 @@ include_directories (
 # ===================================================================
 
 add_subdirectory(gtest)
+add_subdirectory(py-test)
 add_subdirectory(tests)
 
 
@@ -23,13 +24,16 @@ add_subdirectory(tests)
 #  ソースファイルの設定
 # ===================================================================
 
+set (common_SOURCES
+  c++-src/common/Literal.cc
+  )
+
 set (expr_SOURCES
   c++-src/expr/Expr.cc
   c++-src/expr/ExprMgr.cc
   c++-src/expr/ExprNode.cc
   c++-src/expr/ExprParser.cc
   c++-src/expr/ExprWriter.cc
-  c++-src/expr/Literal.cc
   )
 
 set (npn_SOURCES
@@ -50,6 +54,7 @@ set (tvfunc_SOURCES
   )
 
 set (ym_logic_SOURCES
+  ${common_SOURCES}
   ${expr_SOURCES}
   ${npn_SOURCES}
   ${tvfunc_SOURCES}
