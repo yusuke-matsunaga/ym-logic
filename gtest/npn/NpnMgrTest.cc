@@ -208,6 +208,10 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 class NpnMgrRandomTest :
   public ::testing::TestWithParam<int>
 {
+public:
+
+  RandGen mRandGen;
+
 };
 
 TEST_P(NpnMgrRandomTest, func_test)
@@ -215,34 +219,24 @@ TEST_P(NpnMgrRandomTest, func_test)
   ymuint ni = GetParam();
   ymuint ni_exp = 1U << ni;
   ymuint ni_exp_exp = 1U << ni_exp;
-  ymuint nfunc = 100;
-  ymuint nperm = 50;
-  ymuint nphase = 10;
+  ymuint nfunc = 10;
+  ymuint nperm = 5;
+  ymuint nphase = 5;
 
   if ( ni == 0 ) {
     return;
   }
 
-  if ( ni == 20 ) {
-    nfunc = 20;
+  if ( ni >= 10 ) {
+    nfunc = 2;
     nperm = 3;
-    nphase = 3;
-  }
-  else if ( ni > 15 ) {
-    nfunc = 50;
-    nperm = 5;
-    nphase = 5;
-  }
-  else if ( ni > 11 ) {
-    nperm = 10;
-    nphase = 5;
+    nphase = 2;
   }
 
-  RandGen rg;
   for (ymuint i = 0; i < nfunc; ++ i) {
     vector<int> values(ni_exp);
     for (ymuint p = 0; p < ni_exp; ++ p) {
-      if ( rg.int32() % 2 ) {
+      if ( mRandGen.int32() % 2 ) {
 	values[p] = 1;
       }
       else {
@@ -274,7 +268,7 @@ TEST_P(NpnMgrRandomTest, func_test)
     RandPermGen rpg(ni);
     for (ymuint j = 0; j < nperm; ++ j) {
       vector<int> dst_map(ni);
-      rpg.generate(rg);
+      rpg.generate(mRandGen);
       for (ymuint k = 0; k < ni; ++ k) {
 	dst_map[k] = rpg.elem(k);
       }
@@ -284,7 +278,7 @@ TEST_P(NpnMgrRandomTest, func_test)
 	  NpnMap map(ni);
 	  map.set_oinv(oinv);
 	  for (ymuint i = 0; i < ni; ++ i) {
-	    bool iinv = (rg.int32() % 2) ? true : false;
+	    bool iinv = (mRandGen.int32() % 2) ? true : false;
 	    map.set(VarId(i), VarId(dst_map[i]), iinv);
 	  }
 	  TvFunc f1 = f.xform(map);
