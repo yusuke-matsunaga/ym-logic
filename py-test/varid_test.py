@@ -16,6 +16,7 @@ class VarIdTest(unittest.TestCase) :
     def runTest(self) :
         self.test_illegal_val()
         self.test_int_val()
+        self.test_compare()
 
     def test_illegal_val(self) :
         var = VarId()
@@ -39,7 +40,7 @@ class VarIdTest(unittest.TestCase) :
             var1 = var_list[i1]
             for i2 in range(n) :
                 val2 = val_list[i2]
-                var2 = val_list[i2]
+                var2 = var_list[i2]
                 self.assertEqual( var1 == var2, val1 == val2 )
                 self.assertEqual( var1 != var2, val1 != val2 )
                 self.assertEqual( var1 <  var2, val1 <  val2 )

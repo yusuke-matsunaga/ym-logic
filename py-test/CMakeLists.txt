@@ -43,8 +43,8 @@ set_source_files_properties (
 
 cython_add_module ( pym_logic
   ${CYTHON_SOURCES}
-  $<TARGET_OBJECTS:ym_base>
-  $<TARGET_OBJECTS:ym_logic>
+  $<TARGET_OBJECTS:ym_base_d>
+  $<TARGET_OBJECTS:ym_logic_d>
   )
 
 target_compile_options ( pym_logic

@@ -16,3 +16,8 @@ suite = unittest.TestSuite()
 suite.addTest(VarIdTest())
 suite.addTest(LiteralTest())
 suite.addTest(ExprTest())
+
+
+if __name__ == '__main__' :
+
+    unittest.main()
