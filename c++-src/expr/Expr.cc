@@ -39,7 +39,7 @@ Expr::Expr(const Expr& src) :
   set_root(src.root());
 }
 
-// @brief 根のノートのスマートポインタを得る．
+// @brief 根のノードを得る．
 const ExprNode*
 Expr::root() const
 {
@@ -71,6 +71,16 @@ Expr::operator=(const Expr& src)
 Expr::~Expr()
 {
   set_root(nullptr);
+}
+
+// @brief エラーオブジェクトの生成
+// @return 不適正なオブジェクトを返す．
+//
+// 返されたオブジェクトは is_valid() == false となる．
+Expr
+Expr::invalid()
+{
+  return Expr(nullptr);
 }
 
 // 定数 0 の論理式を作る
@@ -218,6 +228,23 @@ Expr::make_xor(const list<Expr>& chd_list)
   return Expr(mgr.make_xor(begin));
 }
 
+// 論理式をパーズしてファクタードフォームを作る．
+// エラーが起きたら msg にエラーメッセージをセットする．
+Expr
+Expr::from_string(const string& expr_str,
+		  string& err_msg)
+{
+  err_msg = string();
+  try {
+    ExprParser p(expr_str);
+    return p.get_expr(ExprToken::END);
+  }
+  catch ( SyntaxError e ) {
+    err_msg = e.mMsg;
+    return Expr::invalid();
+  }
+}
+
 // @brief 確保していたメモリを開放する．
 // @note メモリリークチェックのための関数なので通常は使用しない．
 void
@@ -284,10 +311,38 @@ Expr::compose(const HashMap<VarId, Expr>& comp_map) const
   return Expr(ExprMgr::the_obj().compose(root(), comp_map));
 }
 
+// @brief 複数変数の compose 演算
+// @param[in] comp_list 置き換える変数と置き換える先の
+// 論理式をペアとしてリスト
+// @return comp_list にしたがって置き換えを行った論理式
+//
+// - 一度に複数の置き換えを行う
+// - comp_list 中に変数の重複が有った場合の動作は不定となる．
+Expr
+Expr::compose(const vector<pair<VarId, Expr>>& comp_list) const
+{
+  HashMap<VarId, Expr> comp_map;
+  for ( auto p: comp_list ) {
+    comp_map.add(p.first, p.second);
+  }
+  return Expr(ExprMgr::the_obj().compose(root(), comp_map));
+}
+
 // 与えられた論理式のリテラル番号を再マップする．
 Expr
 Expr::remap_var(const HashMap<VarId, VarId>& varmap) const
 {
+  return Expr(ExprMgr::the_obj().remap_var(root(), varmap));
+}
+
+// 与えられた論理式のリテラル番号を再マップする．
+Expr
+Expr::remap_var(const vector<pair<VarId, VarId>>& varlist) const
+{
+  HashMap<VarId, VarId> varmap;
+  for ( auto p: varlist ) {
+    varmap.add(p.first, p.second);
+  }
   return Expr(ExprMgr::the_obj().remap_var(root(), varmap));
 }
 
@@ -581,39 +636,6 @@ Expr::print_stats(ostream& s)
   ExprMgr::the_obj().print_stats(s);
 }
 
-// 論理式をパーズしてファクタードフォームを作る．
-// エラーが起きたら msg にエラーメッセージをセットし, false を返す．
-bool
-Expr::read_from_stream(istream& in,
-		       string& err_msg)
-{
-  Expr expr = stream_to_expr(in, err_msg);
-  if ( err_msg != string() ) {
-    return false;
-  }
-  else {
-    operator=(expr);
-    return true;
-  }
-}
-
-// 論理式をパーズしてファクタードフォームを作る．
-// エラーが起きたら msg にエラーメッセージをセットする．
-Expr
-Expr::stream_to_expr(istream& in,
-		     string& err_msg)
-{
-  err_msg = string();
-  try {
-    ExprParser p(&in);
-    return p.get_expr(ExprToken::END);
-  }
-  catch ( SyntaxError e ) {
-    err_msg = e.mMsg;
-    return zero();
-  }
-}
-
 
 BEGIN_NONAMESPACE
 
@@ -719,6 +741,17 @@ read_expr(IDO& s)
 }
 
 END_NONAMESPACE
+
+// @relates Expr
+// @brief 論理式の内容を文字列にする．
+// @param[in] expr 論理式
+string
+to_string(const Expr& expr)
+{
+  ostringstream os;
+  os << expr;
+  return os.str();
+}
 
 // @relates Expr
 // @brief 論理式の内容のバイナリ出力

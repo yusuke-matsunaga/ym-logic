@@ -7,6 +7,8 @@
 ### All rights reserved.
 
 from libcpp cimport bool
+from libcpp.pair cimport pair
+from libcpp.string cimport string
 from libcpp.vector cimport vector
 from CXX_VarId cimport VarId
 
@@ -27,18 +29,24 @@ cdef extern from "ym/Expr.h" namespace "nsYm::nsLogic" :
         @staticmethod
         Expr nega_literal(VarId)
         @staticmethod
-        Expr and_op(const Expr& opr1, const Expr& opr2);
+        Expr and_op(const Expr& opr1, const Expr& opr2)
         @staticmethod
         Expr make_and(const vector[Expr]& child_list)
         @staticmethod
-        Expr or_op(const Expr& opr1, const Expr& opr2);
+        Expr or_op(const Expr& opr1, const Expr& opr2)
         @staticmethod
         Expr make_or(const vector[Expr]& child_list)
         @staticmethod
-        Expr xor_op(const Expr& opr1, const Expr& opr2);
+        Expr xor_op(const Expr& opr1, const Expr& opr2)
         @staticmethod
         Expr make_xor(const vector[Expr]& child_list)
+        @staticmethod
+        Expr from_string(const string&, string&)
         Expr invert()
+        Expr compose(VarId, const Expr&)
+        Expr compose(const vector[pair[VarId, Expr]]&)
+        Expr remap_var(const vector[pair[VarId, VarId]]&)
+        bool is_valid()
         bool is_zero()
         bool is_one()
         bool is_constant()
@@ -64,5 +72,8 @@ cdef extern from "ym/Expr.h" namespace "nsYm::nsLogic" :
 
         int input_size()
         int sop_cubenum()
+        int sop_litnum()
         int sop_litnum(VarId)
         int sop_litnum(VarId, bool)
+
+    string to_string(const Expr&)

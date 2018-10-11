@@ -95,3 +95,7 @@ cdef class Literal :
         else :
             s = '-X-'
         return s
+
+    ### @brief ハッシュ演算子
+    def __hash__(self) :
+        return self.index

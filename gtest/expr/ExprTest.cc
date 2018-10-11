@@ -18,6 +18,7 @@ TEST(ExprTest, empty_constr)
 {
   Expr expr;
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_TRUE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_TRUE( expr.is_constant() );
@@ -45,6 +46,7 @@ TEST(ExprTest, zero)
 {
   Expr expr = Expr::zero();
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_TRUE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_TRUE( expr.is_constant() );
@@ -72,6 +74,7 @@ TEST(ExprTest, one)
 {
   Expr expr = Expr::one();
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_TRUE( expr.is_one() );
   EXPECT_TRUE( expr.is_constant() );
@@ -100,6 +103,7 @@ TEST(ExprTest, literal1)
   VarId var(0);
   Expr expr = Expr::literal(var, false);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -132,6 +136,7 @@ TEST(ExprTest, literal2)
   Literal lit(var, true);
   Expr expr = Expr::literal(lit);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -163,6 +168,7 @@ TEST(ExprTest, posi_literal)
   VarId var(0);
   Expr expr = Expr::posi_literal(var);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -194,6 +200,7 @@ TEST(ExprTest, nega_literal)
   VarId var(0);
   Expr expr = Expr::nega_literal(var);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -228,6 +235,7 @@ TEST(ExprTest, and1)
   Expr lit1n = Expr::nega_literal(var1);
   Expr expr = Expr::and_op(lit0p, lit1n);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -274,6 +282,7 @@ TEST(ExprTest, and2)
   Expr lit1n = Expr::nega_literal(var1);
   Expr expr = lit0p & lit1n;
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -321,6 +330,7 @@ TEST(ExprTest, and3)
   vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_and(lit_list);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -368,6 +378,7 @@ TEST(ExprTest, and4)
   list<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_and(lit_list);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -415,6 +426,7 @@ TEST(ExprTest, and5)
   Expr expr = lit0p;
   expr &= lit1n;
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -461,6 +473,7 @@ TEST(ExprTest, or1)
   Expr lit1n = Expr::nega_literal(var1);
   Expr expr = Expr::or_op(lit0p, lit1n);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -507,6 +520,7 @@ TEST(ExprTest, or2)
   Expr lit1n = Expr::nega_literal(var1);
   Expr expr = lit0p | lit1n;
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -554,6 +568,7 @@ TEST(ExprTest, or3)
   vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_or(lit_list);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -601,6 +616,7 @@ TEST(ExprTest, or4)
   list<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_or(lit_list);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -648,6 +664,7 @@ TEST(ExprTest, or5)
   Expr expr = lit0p;
   expr |= lit1n;
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -694,6 +711,7 @@ TEST(ExprTest, xor1)
   Expr lit1n = Expr::nega_literal(var1);
   Expr expr = Expr::xor_op(lit0p, lit1n);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -740,6 +758,7 @@ TEST(ExprTest, xor2)
   Expr lit1n = Expr::nega_literal(var1);
   Expr expr = lit0p ^ lit1n;
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -787,6 +806,7 @@ TEST(ExprTest, xor3)
   vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_xor(lit_list);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -834,6 +854,7 @@ TEST(ExprTest, xor4)
   list<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_xor(lit_list);
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -881,6 +902,7 @@ TEST(ExprTest, xor5)
   Expr expr = lit0p;
   expr ^= lit1n;
 
+  EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
   EXPECT_FALSE( expr.is_constant() );
@@ -996,6 +1018,33 @@ TEST(ExprTest, compose2)
   EXPECT_EQ( string("( ( V_1 & V_3 ) | ( ~V_1 & V_2 ) )"), oss.str() );
 }
 
+TEST(ExprTest, compose3)
+{
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  VarId var4(4);
+  Expr lit0p = Expr::posi_literal(var0);
+  Expr lit1p = Expr::posi_literal(var1);
+  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit2p = Expr::posi_literal(var2);
+  Expr lit3p = Expr::posi_literal(var3);
+  Expr lit4n = Expr::nega_literal(var4);
+
+  Expr expr0 = lit0p | lit4n;
+  Expr expr1 = lit1p & lit3p;
+  Expr expr2 = ~(lit1n & lit2p);
+  vector<pair<VarId, Expr>> comp_list;
+  comp_list.push_back(make_pair(var0, expr1));
+  comp_list.push_back(make_pair(var4, expr2));
+  Expr expr = expr0.compose(comp_list);
+
+  ostringstream oss;
+  oss << expr;
+  EXPECT_EQ( string("( ( V_1 & V_3 ) | ( ~V_1 & V_2 ) )"), oss.str() );
+}
+
 TEST(ExprTest, remap_var1)
 {
   VarId var0(0);
@@ -1012,6 +1061,28 @@ TEST(ExprTest, remap_var1)
   HashMap<VarId, VarId> varmap;
   varmap.add(var0, var1);
   Expr expr = expr0.remap_var(varmap);
+
+  ostringstream oss;
+  oss << expr;
+  EXPECT_EQ( string("( ( V_1 & V_3 ) | ( ~V_1 & V_2 ) )"), oss.str() );
+}
+
+TEST(ExprTest, remap_var2)
+{
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  Expr lit0p = Expr::posi_literal(var0);
+  Expr lit1p = Expr::posi_literal(var1);
+  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit2p = Expr::posi_literal(var2);
+  Expr lit3p = Expr::posi_literal(var3);
+
+  Expr expr0 = (lit0p & lit3p) | (lit1n & lit2p);
+  vector<pair<VarId, VarId>> varlist;
+  varlist.push_back(make_pair(var0, var1));
+  Expr expr = expr0.remap_var(varlist);
 
   ostringstream oss;
   oss << expr;
@@ -1087,6 +1158,42 @@ TEST(ExprTest, make_tv1)
     int fval = f.value(p);
     EXPECT_EQ( exp_val, f.value(p) );
   }
+}
+
+TEST(ExprTest, from_string1)
+{
+  string expr_str("0 + (1 * ~2)");
+  string err_msg;
+  Expr expr = Expr::from_string(expr_str, err_msg);
+
+  EXPECT_TRUE( expr.is_valid() );
+
+  ostringstream oss;
+  oss << expr;
+  EXPECT_EQ( string("( V_0 | ( V_1 & ~V_2 ) )"), oss.str() );
+}
+
+TEST(ExprTest, from_string2)
+{
+  string expr_str("0 | (1 & !2)");
+  string err_msg;
+  Expr expr = Expr::from_string(expr_str, err_msg);
+
+  EXPECT_TRUE( expr.is_valid() );
+
+  ostringstream oss;
+  oss << expr;
+  EXPECT_EQ( string("( V_0 | ( V_1 & ~V_2 ) )"), oss.str() );
+}
+
+TEST(ExprTest, from_string3)
+{
+  string expr_str("0 + + (1 * ~2)");
+  string err_msg;
+  Expr expr = Expr::from_string(expr_str, err_msg);
+
+  EXPECT_FALSE( expr.is_valid() );
+  EXPECT_EQ( string("syntax error"), err_msg);
 }
 
 END_NAMESPACE_YM

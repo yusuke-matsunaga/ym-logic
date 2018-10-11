@@ -7,10 +7,13 @@
 ### All rights reserved.
 
 from libcpp cimport bool
+from libcpp.pair cimport pair
+from libcpp.string cimport string
 from libcpp.vector cimport vector
 from CXX_VarId cimport VarId as CXX_VarId
 from CXX_Literal cimport Literal as CXX_Literal
 from CXX_Expr cimport Expr as CXX_Expr
+from CXX_Expr cimport to_string
 
 ### @brief Expr クラスの Python バージョン
 cdef class Expr :
@@ -95,6 +98,81 @@ cdef class Expr :
             c_expr_list[i] = expr._this
         ans = Expr()
         ans._this = CXX_Expr.make_and(c_expr_list)
+        return ans
+
+    ### @brief 複数オペランドの OR
+    @staticmethod
+    def make_or(expr_list) :
+        cdef int n = len(expr_list)
+        cdef vector[CXX_Expr] c_expr_list = vector[CXX_Expr](n)
+        cdef Expr expr
+        for i in range(n) :
+            expr = expr_list[i]
+            c_expr_list[i] = expr._this
+        ans = Expr()
+        ans._this = CXX_Expr.make_or(c_expr_list)
+        return ans
+
+    ### @brief 複数オペランドの XOR
+    @staticmethod
+    def make_xor(expr_list) :
+        cdef int n = len(expr_list)
+        cdef vector[CXX_Expr] c_expr_list = vector[CXX_Expr](n)
+        cdef Expr expr
+        for i in range(n) :
+            expr = expr_list[i]
+            c_expr_list[i] = expr._this
+        ans = Expr()
+        ans._this = CXX_Expr.make_xor(c_expr_list)
+        return ans
+
+    ### @brief 文字列からの変換
+    @staticmethod
+    def from_string(str expr_str) :
+        cdef string c_expr_str = expr_str.encode('UTF-8')
+        cdef string c_err_msg
+        cdef CXX_Expr c_expr = CXX_Expr.from_string(c_expr_str, c_err_msg)
+        if c_expr.is_valid() :
+            ans = Expr()
+            ans._this = c_expr
+            return ans
+        else :
+            return None
+
+    ### @brief 変数を論理式に置き換える．
+    def compose(self, VarId var, Expr sub_expr) :
+        cdef CXX_VarId c_var = CXX_VarId(var.val)
+        ans = Expr()
+        ans._this = self._this.compose(c_var, sub_expr._this)
+        return ans
+
+    ### @brief 複数の変数を論理式に置き換える．
+    def compose_map(self, comp_map) :
+        cdef VarId var
+        cdef Expr sub_expr
+        cdef pair[CXX_VarId, CXX_Expr] c_pair
+        cdef vector[pair[CXX_VarId, CXX_Expr]] c_comp_list
+        for var, sub_expr in comp_map.items() :
+            c_pair.first = CXX_VarId(var.val)
+            c_pair.second = sub_expr._this
+            c_comp_list.push_back(c_pair)
+        ans = Expr()
+        ans._this = self._this.compose(c_comp_list)
+        return ans
+
+    ### @brief 変数の置き換えを行う．
+    def remap_var(self, var_map) :
+        cdef VarId var1
+        cdef VarId var2
+        cdef pair[CXX_VarId, CXX_VarId] c_pair
+        cdef vector[pair[CXX_VarId, CXX_VarId]] c_var_list
+        for var1, var2 in var_map.items() :
+            c_pair.first = CXX_VarId(var1.val)
+            c_pair.second = CXX_VarId(var2.val)
+            c_var_list.push_back(c_pair)
+        ans = Expr()
+        ans._this = self._this.remap_var(c_var_list)
+        return ans
 
     ### @brief 定数０か調べる．
     def is_zero(self) :
@@ -102,7 +180,7 @@ cdef class Expr :
 
     ### @brief 定数1か調べる．
     def is_one(self) :
-        return self._this.is_zero()
+        return self._this.is_one()
 
     ### @brief 定数か調べる．
     def is_constant(self) :
@@ -143,6 +221,7 @@ cdef class Expr :
         return self._this.is_op()
 
     ### @brief 根本が演算の場合，子供の数を返す．
+    @property
     def child_num(self) :
         if self.is_op() :
             return self._this.child_num()
@@ -214,6 +293,11 @@ cdef class Expr :
     def sop_cubenum(self) :
         return self._this.sop_cubenum()
 
+    ### @brief SOP形式に直した場合のリテラル数を返す．
+    @property
+    def sop_litnum(self) :
+        return self._this.sop_litnum()
+
     ### @brief SOP形式に直した場合の特定の変数に関するリテラル数を返す．
     def sop_litnum_var(self, VarId var) :
         cdef CXX_VarId c_var = CXX_VarId(var.val)
@@ -229,3 +313,8 @@ cdef class Expr :
         cdef CXX_VarId c_var = CXX_VarId(lit.varid.val)
         cdef bool inv = lit.is_negative()
         return self._this.sop_litnum(c_var, inv)
+
+    ### @brief 内容を表す文字列を返す．
+    def __repr__(self) :
+        cdef string c_str = to_string(self._this)
+        return c_str.decode('UTF-8')

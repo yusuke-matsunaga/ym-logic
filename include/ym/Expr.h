@@ -73,26 +73,13 @@ public:
   /// @brief デストラクタ
   ~Expr();
 
-  /// @brief 入力ストリームを読んで論理式に変換する．
-  /// @param[in] istr 入力ストリーム
-  /// @param[out] err_msg エラーメッセージを格納する文字列
-  /// @return 変換が成功したら true を返す．
-  /// @note 結果を自分自身に代入する．
-  /// @note エラーが起きたら err_msg にエラーメッセージを設定して false を返す．
-  bool
-  read_from_stream(istream& istr,
-		   string& err_msg);
-
-  /// @brief 論理式をパーズして Expr オブジェクトを作る．
-  /// @param[in] in 入力ストリーム
-  /// @param[out] err_msg エラーメッセージを格納する文字列
-  /// @return 変換された Expr オブジェクト
-  /// @note エラーが起きたら msg にエラーメッセージをセットする．
-  /// @note このインターフェイスでは err_msg が空かどうかでエラーを判断するしかない．
+  /// @brief エラーオブジェクトの生成
+  /// @return 不適正なオブジェクトを返す．
+  ///
+  /// 返されたオブジェクトは is_valid() == false となる．
   static
   Expr
-  stream_to_expr(istream& in,
-		 string& err_msg);
+  invalid();
 
   /// @brief 恒偽関数の生成
   /// @return 生成したオブジェクト
@@ -206,6 +193,18 @@ public:
   Expr
   make_xor(const list<Expr>& chd_list);
 
+  /// @brief 論理式をパーズして Expr オブジェクトを作る．
+  /// @param[in] expr_str 論理式を表す文字列
+  /// @param[out] err_msg エラーメッセージを格納する文字列
+  /// @return 変換された Expr オブジェクト
+  ///
+  /// - エラーが起きたら msg にエラーメッセージをセットする．
+  /// - エラーの場合，返される Expr オブジェクトは valid でない( is_valid() == false )．
+  static
+  Expr
+  from_string(const string& expr_str,
+	      string& err_msg);
+
   /// @brief 確保していたメモリを開放する．
   /// @note メモリリークチェックのための関数なので通常は使用しない．
   static
@@ -275,6 +274,16 @@ public:
   Expr
   compose(const HashMap<VarId, Expr>& comp_map) const;
 
+  /// @brief 複数変数の compose 演算
+  /// @param[in] comp_list 置き換える変数と置き換える先の
+  /// 論理式をペアとしてリスト
+  /// @return comp_list にしたがって置き換えを行った論理式
+  ///
+  /// - 一度に複数の置き換えを行う
+  /// - comp_list 中に変数の重複が有った場合の動作は不定となる．
+  Expr
+  compose(const vector<pair<VarId, Expr>>& comp_list) const;
+
   /// @brief 変数番号を再マップする．
   /// @param[in] varmap 置き換え元の変数番号をキーとして
   /// 置き換え先の変数番号を値とした連想配列
@@ -283,6 +292,15 @@ public:
   /// varmap に登録されていない場合には不変とする．
   Expr
   remap_var(const HashMap<VarId, VarId>& varmap) const;
+
+  /// @brief 変数番号を再マップする．
+  /// @param[in] varlist 置き換え元の変数番号と置き換え先の変数番号をペアとしたリスト
+  /// @return 置き換えた論理式
+  ///
+  /// - varlist に現れない場合には不変とする．
+  /// - varlist 中に変数の重複が有った場合の動作は不定となる．
+  Expr
+  remap_var(const vector<pair<VarId, VarId>>& varlist) const;
 
   /// @brief 簡単化
   /// - expr + expr = expr
@@ -315,6 +333,10 @@ public:
   //////////////////////////////////////////////////////////////////////
   /// @name 根本の演算子の情報を得る．
   /// @{
+
+  /// @brief 適正な値を持っているかチェックする．
+  bool
+  is_valid() const;
 
   /// @brief 恒偽関数のチェック
   /// @return 恒偽関数を表している時に true を返す．
@@ -578,7 +600,6 @@ private:
 
   // @brief 内部で用いるコンストラクタ
   // @param[in] node 根のノード
-  // node が 0 の場合には abort する．
   Expr(const ExprNode* node);
 
   // 根のノードをセットする．
@@ -643,6 +664,12 @@ compare_type(const Expr& src1,
 /// @}
 
 /// @relates Expr
+/// @brief 論理式の内容を文字列にする．
+/// @param[in] expr 論理式
+string
+to_string(const Expr& expr);
+
+/// @relates Expr
 /// @brief 論理式の内容のストリーム出力
 /// @param[in] s 出力ストリーム
 /// @param[in] expr 論理式
@@ -673,6 +700,14 @@ operator>>(IDO& s,
 //////////////////////////////////////////////////////////////////////
 // inline 関数の定義
 //////////////////////////////////////////////////////////////////////
+
+// @brief 適正な値を持っているかチェックする．
+inline
+bool
+Expr::is_valid() const
+{
+  return mRootPtr != nullptr;
+}
 
 inline
 Expr

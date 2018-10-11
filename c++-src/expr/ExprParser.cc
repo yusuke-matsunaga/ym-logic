@@ -19,9 +19,10 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 
 // @brief コンストラクタ
-// @param[in] input 入力ファイルストリーム
-ExprParser::ExprParser(istream* input) :
-  mInput(input)
+// @param[in] expr_str 論理式を表す文字列
+ExprParser::ExprParser(const string& expr_str) :
+  mExprStr(expr_str),
+  mInput(mExprStr)
 {
 }
 
@@ -34,9 +35,8 @@ ExprParser::~ExprParser()
 VarId
 ExprParser::str_to_literal(const string& str)
 {
-  ymuint id = 0;
-  for (string::const_iterator p = str.begin(); p != str.end(); ++p) {
-    char c = *p;
+  int id = 0;
+  for ( char c: str ) {
     id *= 10;
     id += static_cast<ymuint>(c - '0');
   }
@@ -52,7 +52,7 @@ ExprParser::get_token(VarId& lit_id)
 
   // 汚いのは承知で goto 文で状態遷移を書きます．
  state0:
-  if ( !mInput->get(c) ) return ExprToken::END;
+  if ( !mInput.get(c) ) return ExprToken::END;
   switch (c) {
   case '\0': return ExprToken::END;
   case '*':  // 次のケースとおなじ
@@ -86,7 +86,7 @@ ExprParser::get_token(VarId& lit_id)
   }
 
  state1:
-  if ( !mInput->get(c) ) {
+  if ( !mInput.get(c) ) {
     lit_id = str_to_literal(str);
     return ExprToken::NUM;
   }
@@ -104,7 +104,7 @@ ExprParser::get_token(VarId& lit_id)
   case ' ':  // 次のケースとおなじ
   case '\t': // 次のケースとおなじ
   case '\n': // 次のケースとおなじ
-    mInput->putback(c);
+    mInput.putback(c);
     lit_id = str_to_literal(str);
     return ExprToken::NUM;
   case '0':  // 次のケースとおなじ
@@ -122,22 +122,22 @@ ExprParser::get_token(VarId& lit_id)
   }
 
  stateZ:
-  if ( !mInput->get(c) || (c != 'e' && c != 'E') ) {
+  if ( !mInput.get(c) || (c != 'e' && c != 'E') ) {
     throw SyntaxError("syntax error");
   }
-  if ( !mInput->get(c) || (c != 'r' && c != 'R') ) {
+  if ( !mInput.get(c) || (c != 'r' && c != 'R') ) {
     throw SyntaxError("syntax error");
   }
-  if ( !mInput->get(c) || (c != 'o' && c != 'O') ) {
+  if ( !mInput.get(c) || (c != 'o' && c != 'O') ) {
     throw SyntaxError("syntax error");
   }
   return ExprToken::ZERO;
 
  stateO:
-  if ( !mInput->get(c) || (c != 'n' && c != 'N') ) {
+  if ( !mInput.get(c) || (c != 'n' && c != 'N') ) {
     throw SyntaxError("syntax error");
   }
-  if ( !mInput->get(c) || (c != 'e' && c != 'E') ) {
+  if ( !mInput.get(c) || (c != 'e' && c != 'E') ) {
     throw SyntaxError("syntax error");
   }
   return ExprToken::ONE;
@@ -150,10 +150,10 @@ ExprParser::get_and_token()
 {
   for ( ; ; ) {
     char c;
-    if ( !mInput->get(c) )       return false;
+    if ( !mInput.get(c) )       return false;
     if ( c == '*' || c == '&' ) return true;
     if ( c != ' ' && c != '\t' && c != '\n' ) {
-      mInput->putback(c);
+      mInput.putback(c);
       return false;
     }
   }

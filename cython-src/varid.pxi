@@ -67,3 +67,7 @@ cdef class VarId :
             return 'V_{}'.format(self._val)
         else :
             return '---'
+
+    ### @brief ハッシュ演算子
+    def __hash__(VarId self) :
+        return self._val

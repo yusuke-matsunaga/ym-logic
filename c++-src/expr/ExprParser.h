@@ -73,14 +73,17 @@ class ExprParser
 public:
 
   /// @brief コンストラクタ
-  /// @param[in] input 入力ファイルストリーム
-  ExprParser(istream* input);
+  /// @param[in] expr_str 論理式を表す文字列
+  ExprParser(const string& expr_str);
 
   /// @brief デストラクタ
   ~ExprParser();
 
 
 public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
 
   /// @brief リテラル文字列からリテラル番号を得る．
   VarId
@@ -116,8 +119,11 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
+  // 元の文字列
+  string mExprStr;
+
   // 入力用の stream ポインタ
-  istream* mInput;
+  istringstream mInput;
 
 };
 
