@@ -156,13 +156,6 @@ private:
 
 };
 
-#if 0
-/// @relates Literal
-/// @brief 未定義リテラル
-extern
-const Literal kLiteralX;
-#endif
-
 /// @relates Literal
 /// @brief 比較関数
 /// @param[in] lit1, lit2 比較対象のリテラル
