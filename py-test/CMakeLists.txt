@@ -64,15 +64,15 @@ set ( RUN_PYM_LOGIC
   env PYTHONPATH=${PROJECT_BINARY_DIR}/ym-logic/py-test
   ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pym_logic_test.py)
 
-add_test ( PyVarIdTest
+add_test ( logic_py_VarId_test
   ${RUN_PYM_LOGIC} VarIdTest
   )
 
-add_test ( PyLiteralTest
+add_test ( logic_py_Literal_test
   ${RUN_PYM_LOGIC} LiteralTest
   )
 
-add_test ( PyExprTest
+add_test ( logic_py_Expr_test
   ${RUN_PYM_LOGIC} ExprTest
   )
 
