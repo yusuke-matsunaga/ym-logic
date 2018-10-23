@@ -7,7 +7,7 @@
 # インクルードパスの設定
 # ===================================================================
 include_directories (
-  ${CMAKE_CURRENT_SOURCE_DIR}/../c++-src/npn
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-src/npn
   ${GTEST_INCLUDE_DIR}
   )
 
@@ -26,61 +26,61 @@ include_directories (
 #  ターゲットの設定
 # ===================================================================
 
-ym_add_gtest ( VarIdTest
+ym_add_gtest ( logic_VarId_test
   common/VarIdTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest ( LiteralTest
+ym_add_gtest ( logic_Literal_test
   common/LiteralTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest ( ExprTest
+ym_add_gtest ( logic_Expr_test
   expr/ExprTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest(TvFuncTest
+ym_add_gtest ( logic_TvFunc_test
   tvfunc/TvFuncTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest(TvFuncMove
+ym_add_gtest ( logic_TvFuncMove_test
   tvfunc/TvFuncMove.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest(InputInfoTest
+ym_add_gtest ( logic_InputInfo_test
   npn/InputInfoTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest(IgPartitionTest
+ym_add_gtest ( logic_IgPartition_test
   npn/IgPartitionTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest(NpnMapTest
+ym_add_gtest ( logic_NpnMap_test
   npn/NpnMapTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest(w01test
+ym_add_gtest ( logic_w01_test
   npn/w01test.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest(NpnMgrTest
+ym_add_gtest ( logic_NpnMgr_test
   npn/NpnMgrTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
