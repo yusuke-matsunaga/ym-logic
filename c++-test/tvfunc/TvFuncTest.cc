@@ -10,9 +10,9 @@
 #include "gtest/gtest.h"
 #include "ym/TvFunc.h"
 #include "ym/NpnMap.h"
-#include "ym/RandGen.h"
 #include "ym/RandPermGen.h"
 #include "ym/Range.h"
+#include <random>
 
 
 BEGIN_NAMESPACE_YM
@@ -23,6 +23,9 @@ class TvFuncTestWithParam :
   public ::testing::TestWithParam<int>
 {
 public:
+
+  // コンストラクタ
+  TvFuncTestWithParam();
 
   void
   init_values()
@@ -48,10 +51,19 @@ public:
   vector<int> mValues;
 
   // 乱数生成器
-  RandGen mRandGen;
+  std::mt19937 mRandGen;
+
+  // 0, 1 の一様分布生成器
+  std::uniform_int_distribution<int> mRandDist;
 
 };
 
+
+// コンストラクタ
+TvFuncTestWithParam::TvFuncTestWithParam() :
+  mRandDist(0, 1)
+{
+}
 
 void
 TvFuncTestWithParam::check_func(const TvFunc& func,
@@ -184,7 +196,7 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
     for ( int oinv: {0, 1} ) {
       int ibits = 0U;
       for ( int j: Range(ni) ) {
-	if ( mRandGen.real1() > 0.5 ) {
+	if ( mRandDist(mRandGen) ) {
 	  ibits |= (1U << j);
 	}
       }
@@ -472,7 +484,7 @@ TEST_P(TvFuncTestWithParam, random_func)
   int n = ni < 13 ? 100 : ni < 14 ? 20 : 5;
   for ( int c: Range(n) ) {
     for ( int p: Range(ni_exp) ) {
-      if ( mRandGen.real1() > 0.5 ) {
+      if ( mRandDist(mRandGen) ) {
 	mValues[p] = 1;
       }
     }
@@ -520,10 +532,10 @@ TEST_P(TvFuncTestWithParam, check_op2)
   int n = ni < 19 ? 100 : 1;
   for ( int c: Range(n) ) {
     for ( int p: Range(ni_exp) ) {
-      if ( mRandGen.real1() > 0.5 ) {
+      if ( mRandDist(mRandGen) ) {
 	values1[p] = 1;
       }
-      if ( mRandGen.real1() > 0.5 ) {
+      if ( mRandDist(mRandGen) ) {
 	values2[p] = 1;
       }
     }
@@ -547,7 +559,7 @@ TEST_P(TvFuncTestWithParam, check_sup1)
 	if ( p & i_bit ) {
 	  values[p] = values[p ^ i_bit];
 	}
-	else if ( mRandGen.real1() > 0.5 ) {
+	else if ( mRandDist(mRandGen) ) {
 	  values[p] = 1;
 	}
 	else {
@@ -581,7 +593,7 @@ TEST_P(TvFuncTestWithParam, check_sup2)
   for ( int c: Range(n) ) {
     int i_bits = 0;
     for ( int i: Range(ni) ) {
-      if ( mRandGen.real1() > 0.5 ) {
+      if ( mRandDist(mRandGen) ) {
 	i_bits |= (1U << i);
       }
     }
@@ -590,7 +602,7 @@ TEST_P(TvFuncTestWithParam, check_sup2)
       if ( p & i_bits ) {
 	values[p] = values[p & ~i_bits];
       }
-      else if ( mRandGen.real1() > 0.5 ) {
+      else if ( mRandDist(mRandGen) ) {
 	values[p] = 1;
       }
       else {
@@ -648,6 +660,7 @@ TEST_P(TvFuncTestWithParam, check_sym)
   if ( ni > 15 ) {
     return;
   }
+  std::uniform_int_distribution<int> rd(0, ni - 1);
   int ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
   int n1 = ni < 11 ? 50 : 10;
@@ -665,7 +678,7 @@ TEST_P(TvFuncTestWithParam, check_sym)
 	    else if ( (inv & 2) == 2 && (p & i1_bit) == i1_bit && (p & i2_bit) == i2_bit ) {
 	      values[p] = values[p ^ i1_bit ^ i2_bit];
 	    }
-	    else if ( mRandGen.real1() > 0.5 ) {
+	    else if ( mRandDist(mRandGen) ) {
 	      values[p] = 1;
 	    }
 	    else {
@@ -681,8 +694,8 @@ TEST_P(TvFuncTestWithParam, check_sym)
 	  EXPECT_EQ( exp_sym1, func.check_sym(VarId(i1), VarId(i2), true) );
 	  EXPECT_EQ( exp_sym1, func.check_sym(VarId(i2), VarId(i1), true) );
 	  for ( int c2: Range(n2) ) {
-	    int j1 = mRandGen.int31() % ni;
-	    int j2 = mRandGen.int31() % ni;
+	    int j1 = rd(mRandGen);
+	    int j2 = rd(mRandGen);
 	    if ( j1 == j2 ) {
 	      continue;
 	    }
@@ -706,7 +719,7 @@ TEST_P(TvFuncTestWithParam, cofactor)
   int n = ni < 17 ? 100 : ni < 19 ? 10 : 1;
   for ( int c: Range(n) ) {
     for ( int p: Range(ni_exp) ) {
-      if ( mRandGen.real1() > 0.5 ) {
+      if ( mRandDist(mRandGen) ) {
 	values[p] = 1;
       }
       else {
@@ -756,7 +769,7 @@ TEST_P(TvFuncTestWithParam, xform)
   int n2 = ni < 15 ? 30 : 5;
   for ( int c1: Range(n1) ) {
     for ( int p: Range(ni_exp) ) {
-      if ( mRandGen.real1() > 0.5 ) {
+      if ( mRandDist(mRandGen) ) {
 	values[p] = 1;
       }
       else {
@@ -766,12 +779,12 @@ TEST_P(TvFuncTestWithParam, xform)
     TvFunc func(ni, values);
     RandPermGen rpg(ni);
     for ( int c2: Range(n2) ) {
-      bool oinv = (mRandGen.real1() > 0.5);
+      bool oinv = mRandDist(mRandGen) ? true : false;
       NpnMap map(ni);
       map.set_oinv(oinv);
       rpg.generate(mRandGen);
       for ( int i: Range(ni) ) {
-	bool iinv = (mRandGen.real1() > 0.5);
+	bool iinv = mRandDist(mRandGen) ? true : false;
 	map.set(VarId(i), VarId(rpg.elem(i)), iinv);
       }
       TvFunc xfunc = func.xform(map);

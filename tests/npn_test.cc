@@ -9,8 +9,9 @@
 
 #include "ym/TvFunc.h"
 #include "NpnMgr.h"
+#include "ym/Range.h"
 #include "ym/StopWatch.h"
-#include "ym/RandGen.h"
+#include <random>
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -19,11 +20,11 @@ int
 npn_test(int argc,
 	 char** argv)
 {
-  ymuint ni = 4;
-  ymuint nf = 10000;
-  ymuint tvcount = 0;
-  ymuint tvmax = 0;
-  ymuint redmax = 0;
+  int ni = 4;
+  int nf = 10000;
+  int tvcount = 0;
+  int tvmax = 0;
+  int redmax = 0;
 
   if ( argc != 2 && argc != 3 ) {
     cerr << "USAGE: npn_test <# of inputs> [<# of functions>]" << endl;
@@ -36,16 +37,16 @@ npn_test(int argc,
   }
 
   StopWatch timer;
-  RandGen rg;
+  std::mt19937 rg;
   timer.start();
-  ymuint ni_exp = 1U << ni;
+  int ni_exp = 1U << ni;
   if ( ni <= 4 ) {
     // 全探索
-    ymuint ni_exp_exp = 1U << ni_exp;
+    int ni_exp_exp = 1U << ni_exp;
     nf = ni_exp_exp;
-    for (ymuint p = 0; p < ni_exp_exp; ++ p) {
+    for ( int p: Range(ni_exp_exp) ) {
       vector<int> values(ni_exp);
-      for (ymuint b = 0; b < ni_exp; ++ b) {
+      for ( int b: Range(ni_exp) ) {
 	if ( p & (1U << b) ) {
 	  values[b] = 1;
 	}
@@ -71,10 +72,11 @@ npn_test(int argc,
   }
   else {
     // ランダムサンプリング
-    for (ymuint i = 0; i < nf; ++ i) {
+    std::uniform_int_distribution<int> rd2(0, 1);
+    for ( int i: Range(nf) ) {
       vector<int> values(ni_exp);
-      for (ymuint b = 0; b < ni_exp; ++ b) {
-	if ( rg.int32() % 2 ) {
+      for ( int b: Range(ni_exp) ) {
+	if ( rd2(rg) ) {
 	  values[b] = 1;
 	}
 	else {

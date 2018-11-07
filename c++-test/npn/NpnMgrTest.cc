@@ -12,8 +12,8 @@
 #include "ym/TvFunc.h"
 #include "ym/HashSet.h"
 #include "ym/PermGen.h"
-#include "ym/RandGen.h"
 #include "ym/RandPermGen.h"
+#include "ym/Range.h"
 #include "InputInfo.h"
 
 
@@ -62,13 +62,13 @@ class NpnMgrTestWithParam :
 
 TEST_P(NpnMgrTestWithParam, func_test)
 {
-  ymuint ni = GetParam();
-  ymuint ni_exp = 1U << ni;
-  ymuint ni_exp_exp = 1U << ni_exp;
+  int ni = GetParam();
+  int ni_exp = 1U << ni;
+  int ni_exp_exp = 1U << ni_exp;
   HashSet<TvFunc> func_hash;
-  for (ymuint sig = 0; sig < ni_exp_exp; ++ sig) {
+  for ( int sig: Range(ni_exp_exp) ) {
     vector<int> values(ni_exp);
-    for (ymuint p = 0; p < ni_exp; ++ p) {
+    for ( int p: Range(ni_exp) ) {
       if ( sig & (1U << p) ) {
 	values[p] = 1;
       }
@@ -96,7 +96,7 @@ TEST_P(NpnMgrTestWithParam, func_test)
     }
   }
 
-  ymuint exp_num[] = {
+  int exp_num[] = {
     1,
     2,
     4,
@@ -109,13 +109,13 @@ TEST_P(NpnMgrTestWithParam, func_test)
 
 TEST_P(NpnMgrTestWithParam, func_test2)
 {
-  ymuint ni = GetParam();
-  ymuint ni_exp = 1U << ni;
-  ymuint ni_exp_exp = 1U << ni_exp;
+  int ni = GetParam();
+  int ni_exp = 1U << ni;
+  int ni_exp_exp = 1U << ni_exp;
   HashSet<TvFunc> func_hash;
-  for (ymuint sig = 0; sig < ni_exp_exp; ++ sig) {
+  for ( int sig: Range(ni_exp_exp) ) {
     vector<int> values(ni_exp);
-    for (ymuint p = 0; p < ni_exp; ++ p) {
+    for ( int p: Range(ni_exp) ) {
       if ( sig & (1U << p) ) {
 	values[p] = 1;
       }
@@ -135,8 +135,7 @@ TEST_P(NpnMgrTestWithParam, func_test2)
       vector<NpnMap> map_list;
       npnmgr.all_cmap(map_list);
 
-      for (ymuint i = 0; i < map_list.size(); ++ i) {
-	NpnMap map = map_list[i];
+      for ( auto map: map_list ) {
 	TvFunc xformed_cfunc = f.xform(map);
 	EXPECT_EQ( cfunc, xformed_cfunc );
 	if ( cfunc != xformed_cfunc ) {
@@ -146,13 +145,13 @@ TEST_P(NpnMgrTestWithParam, func_test2)
     }
 
     if ( ni > 0 ) {
-      for (PermGen pg(ni, ni); !pg.is_end(); ++ pg) {
-	for (ymuint op = 0; op < 2; ++ op) {
-	  for (ymuint ip = 0; ip < ni_exp; ++ ip) {
+      for ( PermGen pg(ni, ni); !pg.is_end(); ++ pg ) {
+	for ( int op: { 0, 1 } ) {
+	  for ( int ip: Range(ni_exp) ) {
 	    NpnMap map(ni);
 	    bool oinv = op ? true : false;
 	    map.set_oinv(oinv);
-	    for (ymuint i = 0; i < ni; ++ i) {
+	    for ( int i: Range(ni) ) {
 	      bool iinv = (ip & (1U << i)) ? true : false;
 	      map.set(VarId(i), VarId(pg(i)), iinv);
 	    }
@@ -166,8 +165,7 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	      vector<NpnMap> map_list;
 	      npnmgr.all_cmap(map_list);
 
-	      for (ymuint i = 0; i < map_list.size(); ++ i) {
-		NpnMap cmap = map_list[i];
+	      for ( auto cmap: map_list ) {
 		TvFunc xformed_cfunc1 = f1.xform(cmap);
 		EXPECT_EQ( cfunc1, xformed_cfunc1 );
 		if ( cfunc1 != xformed_cfunc1 ) {
@@ -186,7 +184,7 @@ TEST_P(NpnMgrTestWithParam, func_test2)
       }
     }
     else {
-      for (ymuint op = 0; op < 2; ++ op) {
+      for ( int op: { 0, 1 } ) {
 	NpnMap map(0);
 	bool oinv = op ? true : false;
 	map.set_oinv(oinv);
@@ -210,18 +208,18 @@ class NpnMgrRandomTest :
 {
 public:
 
-  RandGen mRandGen;
+  std::mt19937 mRandGen;
 
 };
 
 TEST_P(NpnMgrRandomTest, func_test)
 {
-  ymuint ni = GetParam();
-  ymuint ni_exp = 1U << ni;
-  ymuint ni_exp_exp = 1U << ni_exp;
-  ymuint nfunc = 10;
-  ymuint nperm = 5;
-  ymuint nphase = 5;
+  int ni = GetParam();
+  int ni_exp = 1U << ni;
+  int ni_exp_exp = 1U << ni_exp;
+  int nfunc = 10;
+  int nperm = 5;
+  int nphase = 5;
 
   if ( ni == 0 ) {
     return;
@@ -233,10 +231,11 @@ TEST_P(NpnMgrRandomTest, func_test)
     nphase = 2;
   }
 
-  for (ymuint i = 0; i < nfunc; ++ i) {
+  std::uniform_int_distribution<int> rd2(0, 1);
+  for ( int i: Range(nfunc) ) {
     vector<int> values(ni_exp);
-    for (ymuint p = 0; p < ni_exp; ++ p) {
-      if ( mRandGen.int32() % 2 ) {
+    for ( int p: Range(ni_exp) ) {
+      if ( rd2(mRandGen) ) {
 	values[p] = 1;
       }
       else {
@@ -258,27 +257,26 @@ TEST_P(NpnMgrRandomTest, func_test)
 	ASSERT_TRUE( false );
       }
 
-      for (ymuint i = 0; i < map_list.size(); ++ i) {
-	NpnMap map = map_list[i];
+      for ( auto map: map_list ) {
 	TvFunc xformed_cfunc = f.xform(map);
 	EXPECT_EQ( cfunc, xformed_cfunc );
       }
     }
 
     RandPermGen rpg(ni);
-    for (ymuint j = 0; j < nperm; ++ j) {
+    for ( int j: Range(nperm) ) {
       vector<int> dst_map(ni);
       rpg.generate(mRandGen);
-      for (ymuint k = 0; k < ni; ++ k) {
+      for ( int k: Range(ni) ) {
 	dst_map[k] = rpg.elem(k);
       }
-      for (ymuint op = 0; op < 2; ++ op) {
+      for ( int op: { 0, 1} ) {
 	bool oinv = op ? true : false;
-	for (ymuint k = 0; k < nphase; ++ k) {
+	for ( int k: Range(nphase) ) {
 	  NpnMap map(ni);
 	  map.set_oinv(oinv);
-	  for (ymuint i = 0; i < ni; ++ i) {
-	    bool iinv = (mRandGen.int32() % 2) ? true : false;
+	  for ( int i: Range(ni) ) {
+	    bool iinv = rd2(mRandGen) ? true : false;
 	    map.set(VarId(i), VarId(dst_map[i]), iinv);
 	  }
 	  TvFunc f1 = f.xform(map);
@@ -307,12 +305,12 @@ INSTANTIATE_TEST_CASE_P(Test5to20,
 			::testing::Range(5, 20));
 
 TvFunc
-str_to_func(ymuint ni,
+str_to_func(int ni,
 	    const string& func_str)
 {
-  ymuint ni_exp = 1 << ni;
+  int ni_exp = 1 << ni;
   vector<int> values(ni_exp);
-  for (ymuint i = 0; i < ni_exp; ++ i) {
+  for ( int i: Range(ni_exp) ) {
     values[i] = func_str[i] == '1' ? 1 : 0;
   }
   return TvFunc(ni, values);
