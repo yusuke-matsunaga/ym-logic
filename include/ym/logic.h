@@ -45,14 +45,16 @@ END_NAMESPACE_YM_LOGIC
 
 BEGIN_NAMESPACE_YM
 
+class VarId;
+class Literal;
+class TvFunc;
+class TvFuncM;
+
 using nsLogic::Expr;
 using nsLogic::ExprWriter;
 using nsLogic::NpnMap;
 using nsLogic::NpnMapM;
 using nsLogic::NpnVmap;
-
-class TvFunc;
-class TvFuncM;
 
 END_NAMESPACE_YM
 
