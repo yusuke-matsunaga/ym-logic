@@ -7,26 +7,21 @@
 /// All rights reserved.
 
 
-#include "ym/AlgMgr.h"
-#include "ym/AlgCover.h"
+#include "AlgMgr.h"
+#include "AlgBlock.h"
 #include "ym/AlgCube.h"
+#include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM_ALG
 
 BEGIN_NONAMESPACE
 
-// 名前を作る．
-string
-_varname(int id)
+inline
+AlgBitVect
+lit2bv(Literal lit)
 {
-  string ans;
-  if ( id >= 26 ) {
-    ans = _varname(id / 26);
-  }
-  char c = static_cast<char>('a' + (id % 26));
-  ans += c;
-  return ans;
+  return static_cast<AlgBitVect>(lit.is_positive() ? AlgPol::P : AlgPol::N);
 }
 
 END_NONAMESPACE
@@ -37,38 +32,9 @@ END_NONAMESPACE
 
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
-//
-// 変数名はデフォルトのものが使用される．
 AlgMgr::AlgMgr(int variable_num) :
-  mVarNum(variable_num),
-  mVarNameList(mVarNum)
+  mVarNum(variable_num)
 {
-  // 変数名を作る．
-  // 変数番号を26進数で表して文字列にする．
-  for ( int i: Range(mVarNum) ) {
-    string name = _varname(i);
-    mVarNameList[i] = name;
-    mVarNameMap.add(name, i);
-  }
-
-  _init_buff();
-}
-
-// @brief コンストラクタ
-// @param[in] varname_list 変数名のリスト
-//
-// varname_list のサイズが変数の数になる．
-AlgMgr::AlgMgr(const vector<string>& varname_list) :
-  mVarNum(varname_list.size()),
-  mVarNameList(varname_list)
-{
-  // 変数名を登録する．
-  int i = 0;
-  for ( auto& name: varname_list ) {
-    mVarNameMap.add(name, i);
-    ++ i;
-  }
-
   _init_buff();
 }
 
@@ -113,11 +79,11 @@ END_NONAMESPACE
 // @brief ビットベクタ上のリテラル数を数える．
 // @param[in] src 対象のブロック
 int
-AlgMgr::literal_num(const Block& src)
+AlgMgr::literal_num(const AlgBlock& src)
 {
   // 8 ビットごとに区切って表引きで計算する．
-  const AlgBitVect* bv = src.mBitVect;
-  int n = src.mCubeNum * _cube_size();
+  const AlgBitVect* bv = src.bitvect();
+  int n = src.cube_num() * _cube_size();
   const AlgBitVect* bv_end = bv + n;
   int ans = 0;
   for ( ; bv != bv_end; ++ bv ) {
@@ -146,16 +112,16 @@ AlgMgr::literal_num(const Block& src)
 // @param[in] src 対象のブロック
 // @param[in] lit 対象のリテラル
 int
-AlgMgr::literal_num(const Block& src,
+AlgMgr::literal_num(const AlgBlock& src,
 		    Literal lit)
 {
   VarId var_id = lit.varid();
   int blk = _block_pos(var_id);
   int sft = _shift_num(var_id);
-  AlgBitVect pat = lit.is_positive() ? AlgPol::P : AlgPol::N;
+  AlgBitVect pat = lit2bv(lit);
   AlgBitVect mask = pat << sft;
-  const AlgBitVect* bv = src.mBitVect;
-  int n = src.mCubeNum * _cube_size();
+  const AlgBitVect* bv = src.bitvect();
+  int n = src.cube_num() * _cube_size();
   const AlgBitVect* bv_end = bv + n;
   int ans = 0;
   for ( ; bv != bv_end; bv += _cube_size() ) {
@@ -193,194 +159,41 @@ AlgMgr::delete_body(AlgBitVect* p,
   delete [] p;
 }
 
-
-BEGIN_NONAMESPACE
-
-// 変数名として適切な文字なら true を返す．
-inline
-bool
-is_validchar(char c)
-{
-  // utils/gen_validchar_tbl.py で生成
-  bool table[] = {
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   true , true , true , true , true , true , true , true , true , true , false, false, false, false, false, false,
-   false, true , true , true , true , true , true , true , true , true , true , true , true , true , true , true ,
-   true , true , true , true , true , true , true , true , true , true , true , false, false, false, false, true ,
-   false, true , true , true , true , true , true , true , true , true , true , true , true , true , true , true ,
-   true , true , true , true , true , true , true , true , true , true , true , false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-   false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-  };
-  return table[c];
-}
-
-END_NONAMESPACE
-
-// @brief カバー/キューブを表す文字列をパーズする．
-// @param[in] str 対象の文字列
-// @param[out] lit_list パーズ結果のリテラルのリスト
-// @return キューブ数を返す．
-//
-// lit_list 中の kAlgLiteralUndef はキューブの区切りとみなす．
-int
-AlgMgr::parse(const char* str,
-	      vector<Literal>& lit_list)
-{
-  lit_list.clear();
-
-  char c;
-  string name;
-  VarId var;
-
-  // 有限状態機械で実装する．
-  // なんか書いててスッキリしないコード
- state0:
-  c = *str;
-  // EOF なら終わる．
-  if ( c == '\0' ) {
-    goto state_end;
-  }
-  // 空白文字ならこの状態にとどまる．
-  if ( isspace(c) ) {
-    ++ str;
-    goto state0;
-  }
-  // [a-zA-Z0-9_] なら state1 に遷移する．
-  if ( is_validchar(c) ) {
-    name = string();
-    goto state1;
-  }
-  // '+' ならキューブの区切りマークを追加する．
-  if ( c == '+' ) {
-    ++ str;
-    lit_list.push_back(Literal::X);
-    goto state0;
-  }
-  // それ以外はエラー
-  goto state_error;
-
- state1:
-  c = *str;
-  // [a-zA-Z0-9_]* ならこの状態にとどまる．
-  if ( is_validchar(c) ) {
-    name += c;
-    ++ str;
-    goto state1;
-  }
-  // ' なら inv をセットしたあとで name を処理する．
-  if ( c == '\'' ) {
-    ++ str;
-    if ( !mVarNameMap.find(name, var) ) {
-      goto state_error;
-    }
-    lit_list.push_back(Literal(var, true));
-    goto state0;
-  }
-  // それ以外なら一旦現在の name を登録する．
-  if ( !mVarNameMap.find(name, var) ) {
-    goto state_error;
-  }
-  lit_list.push_back(Literal(var, false));
-  goto state0;
-
- state_error:
-  lit_list.clear();
-  return 0;
-
- state_end:
-  int cube_num = 0;
-  bool first = true;
-  for ( auto lit: lit_list ) {
-    if ( lit == Literal::X ) {
-      first = true;
-    }
-    else if ( first ) {
-      first = false;
-      ++ cube_num;
-    }
-  }
-  return cube_num;
-}
-
-// @brief リテラルをセットする．
-// @param[in] dst_bv 対象のビットベクタ
-// @param[in] dst_pos 対象のキューブ位置
-// @param[in] lit_list リテラルのリスト
-//
-// lit_list 中の Literal::X はキューブの区切りとみなす．
-void
-AlgMgr::set_literal(AlgBitVect* dst_bv,
-		    int dst_pos,
-		    const vector<Literal>& lit_list)
-{
-  int nb = _cube_size();
-  AlgBitVect* _dst = dst_bv + dst_pos * nb;
-  for ( auto lit: lit_list ) {
-    if ( lit == Literal::X ) {
-      _dst += nb;
-    }
-    else {
-      VarId var = lit.varid();
-      int blk = _block_pos(var);
-      int sft = _shift_num(var);
-      AlgBitVect pat = lit.is_negative() ? AlgPol::N : AlgPol::P;
-      _dst[blk] |= (pat << sft);
-    }
-  }
-}
-
 // @brief 2つのカバーの論理和を計算する．
 // @param[in] dst_bv 結果を格納するビットベクタ
 // @param[in] src1 1つめのブロック
 // @param[in] src2 2つめのブロック
 // @return 結果のキューブ数を返す．
 //
-// dst_bv には十分な容量があると仮定する．<br>
-// dst_bv == bv1 の場合もあり得る．<br>
+// * dst_bv には十分な容量があると仮定する．
+// * dst_bv != src1.bitvect() を仮定する．
+// * dst_bv != src2.bitvect() を仮定する．
 int
 AlgMgr::sum(AlgBitVect* dst_bv,
-	    const Block& src1,
-	    const Block& src2)
+	    const AlgBlock& src1,
+	    const AlgBlock& src2)
 {
-  const AlgBitVect* bv1 = src1.mBitVect;
-  if ( dst_bv == bv1 ) {
-    // dst_bv == bv1 の時は bv1 のコピーを作る．
-    _resize_buff(src1.mCubeNum);
-    copy(src1.mCubeNum, mTmpBuff, 0, src1.mBitVect, 0);
-    bv1 = mTmpBuff;
-  }
-  const AlgBitVect* bv1_end = bv1 + src1.mCubeNum * _cube_size();
+  const AlgBitVect* bv1 = src1.bitvect();
+  ASSERT_COND ( dst_bv != bv1 );
+  const AlgBitVect* bv1_end = bv1 + src1.cube_num() * _cube_size();
 
-  const AlgBitVect* bv2 = src2.mBitVect;
-  if ( dst_bv == bv2 ) {
-    _resize_buff(src2.mCubeNum);
-    copy(src2.mCubeNum, mTmpBuff, 0, src2.mBitVect, 0);
-    bv2 = mTmpBuff;
-  }
-  const AlgBitVect* bv2_end = bv2 + src2.mCubeNum * _cube_size();
+  const AlgBitVect* bv2 = src2.bitvect();
+  ASSERT_COND ( dst_bv != bv2 );
+  const AlgBitVect* bv2_end = bv2 + src2.cube_num() * _cube_size();
 
   int nc = 0;
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int res = cube_compare(bv1, bv2);
     if ( res > 0 ) {
-      cube_copy(dst_bv, bv1);
+      copy(dst_bv, bv1, 1);
       bv1 += _cube_size();
     }
     else if ( res < 0 ) {
-      cube_copy(dst_bv, bv2);
+      copy(dst_bv, bv2, 1);
       bv2 += _cube_size();
     }
     else {
-      cube_copy(dst_bv, bv1);
+      copy(dst_bv, bv1, 1);
       bv1 += _cube_size();
       bv2 += _cube_size();
     }
@@ -388,19 +201,19 @@ AlgMgr::sum(AlgBitVect* dst_bv,
     ++ nc;
   }
   while ( bv1 != bv1_end ) {
-    cube_copy(dst_bv, bv1);
+    copy(dst_bv, bv1, 1);
     bv1 += _cube_size();
     dst_bv += _cube_size();
     ++ nc;
   }
   while ( bv2 != bv2_end ) {
-    cube_copy(dst_bv, bv2);
+    copy(dst_bv, bv2, 1);
     bv2 += _cube_size();
     dst_bv += _cube_size();
     ++ nc;
   }
 
-  return wpos;
+  return nc;
 }
 
 // @brief 2つのカバーの差分を計算する．
@@ -408,20 +221,26 @@ AlgMgr::sum(AlgBitVect* dst_bv,
 // @param[in] src1 1つめのブロック
 // @param[in] src2 2つめのブロック
 // @return 結果のキューブ数を返す．
+//
+// * dst_bv には十分な容量があると仮定する．
+// * dst_bv != src2.bitvect() を仮定する．
+// * dst_bv == src1.bitvect() でも正しく動く
 int
 AlgMgr::diff(AlgBitVect* dst_bv,
-	     const Block& src1,
-	     const Block& src2)
+	     const AlgBlock& src1,
+	     const AlgBlock& src2)
 {
-  const AlgBitVect* bv1 = src1.mBitVect;
-  const AlgBitVect* bv1_end = bv1 + src1.mCubeNum * _cube_size();
-  const AlgBitVect* bv2 = src2.mBitVect;
-  const AlgBitVect* bv2_end = bv2 + src2.mCubeNum * _cube_size();
+  const AlgBitVect* bv1 = src1.bitvect();
+  const AlgBitVect* bv1_end = bv1 + src1.cube_num() * _cube_size();
+  const AlgBitVect* bv2 = src2.bitvect();
+  ASSERT_COND ( dst_bv != bv2 );
+  const AlgBitVect* bv2_end = bv2 + src2.cube_num() * _cube_size();
+
   int nc = 0;
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int res = cube_compare(bv1, bv2);
     if ( res > 0 ) {
-      cube_copy(dst_bv, bv1);
+      copy(dst_bv, bv1, 1);
       bv1 += _cube_size();
       dst_bv += _cube_size();
       ++ nc;
@@ -435,7 +254,7 @@ AlgMgr::diff(AlgBitVect* dst_bv,
     }
   }
   while ( bv1 != bv1_end ) {
-    cube_copy(dst_bv, bv1);
+    copy(dst_bv, bv1, 1);
     bv1 += _cube_size();
     dst_bv += _cube_size();
     ++ nc;
@@ -448,32 +267,29 @@ AlgMgr::diff(AlgBitVect* dst_bv,
 // @param[in] src1 1つめのブロック
 // @param[in] src2 2つめのブロック
 // @return 結果のキューブ数を返す．
+//
+// * dst_bv には十分な容量があると仮定する．
+// * dst_bv != src2.bitvect() を仮定する．
+// * src2.cubenum() > 1 の時は dst_bv != src1.bitvect()
+//   を仮定する．
+// * src2.cubenum() == 1 の時は dst_bv == src1.bitvect()
+//   でも正しく動く．
 int
 AlgMgr::product(AlgBitVect* dst_bv,
-		const Block& src1,
-		const Block& src2)
+		const AlgBlock& src1,
+		const AlgBlock& src2)
 {
-  // dst_bv == bv1 の時は bv1 のコピーを作る．
-  const AlgBitVect* bv1 = src1.mBitVect;
-  if ( dst_bv == bv1 ) {
-    _resize_buff(src1.mCubeNum);
-    copy(src1.mCubeNum, mTmpBuff, 0, bv1, 0);
-    bv1 = mTmpBuff;
-  }
-
-  const AlgBitVect* bv2_start = src2.mBitVect;
-  if ( dst_bv == bv2_start ) {
-    _resize_buff(src2.mCubeNum);
-    copy(src2.mCubeNum, mTmpBuff, 0, bv2_start, 0);
-    bv2_start = mTmpBuff;
-  }
+  const AlgBitVect* bv1 = src1.bitvect();
+  ASSERT_COND( dst_bv != bv1 || src2.cube_num() == 1 );
+  const AlgBitVect* bv2_start = src2.bitvect();
+  ASSERT_COND( dst_bv == bv2_start );
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
   int nc = 0;
-  const AlgBitVect* bv1_end = bv1 + src1.mCubeNum * _cube_size();
-  const AlgBitVect* bv2_end = bv2_start + src2.mCubeNum * _cube_size();
-  for ( bv1 != bv1_end; bv1 += _cube_size() ) {
+  const AlgBitVect* bv1_end = bv1 + src1.cube_num() * _cube_size();
+  const AlgBitVect* bv2_end = bv2_start + src2.cube_num() * _cube_size();
+  for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
     for ( const AlgBitVect* bv2 = bv2_start; bv2 != bv2_end; bv2 += _cube_size() ) {
       if ( cube_product(dst_bv, bv1, bv2) ) {
 	dst_bv += _cube_size();
@@ -489,22 +305,25 @@ AlgMgr::product(AlgBitVect* dst_bv,
 // @param[in] src1 1つめのブロック
 // @param[in] lit 対象のリテラル
 // @return 結果のキューブ数を返す．
+//
+// * dst_bv には十分な容量があると仮定する．
+// * dst_bv == src1.bitvect() でも正しく動く．
 int
 AlgMgr::product(AlgBitVect* dst_bv,
-		const Block& src1,
+		const AlgBlock& src1,
 		Literal lit)
 {
   VarId var_id = lit.varid();
   int blk = _block_pos(var_id);
   int sft = _shift_num(var_id);
-  AlgBitVect pat = lit.is_positive() ? kAlgPolP : kAlgPolN;
+  AlgBitVect pat = lit2bv(lit);
   AlgBitVect pat1 = pat << sft;
   AlgBitVect mask = 3UL << sft;
   AlgBitVect nmask = ~mask;
   int nb = _cube_size();
 
-  const AlgBitVect* bv1 = src1.mBitVect;
-  const AlgBitVect* bv1_end = bv1 + src1.mCubeNum * nb;
+  const AlgBitVect* bv1 = src1.bitvect();
+  const AlgBitVect* bv1_end = bv1 + src1.cube_num() * nb;
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
   int nc = 0;
@@ -514,7 +333,7 @@ AlgMgr::product(AlgBitVect* dst_bv,
       // 相反するリテラルがあった．
       continue;
     }
-    cube_copy(dst_bv, bv1);
+    copy(dst_bv, bv1, 1);
     dst_bv[blk] = tmp;
     dst_bv += nb;
     ++ nc;
@@ -528,19 +347,25 @@ AlgMgr::product(AlgBitVect* dst_bv,
 // @param[in] src1 1つめのブロック
 // @param[in] src2 2つめのブロック
 // @return 結果のキューブ数を返す．
+//
+// * dst_bv には十分な容量があると仮定する．
+// * dst_bv == src1.bitvect() でも正しく動く．
+// * dst_bv == src2.bitvect() でも正しく動く．
 int
-AlgMgr::division(AlgBitVect* dst_bv,
-		 const Block& src1,
-		 const Block& src2)
+AlgMgr::quotient(AlgBitVect* dst_bv,
+		 const AlgBlock& src1,
+		 const AlgBlock& src2)
 {
+  int nc1 = src1.cube_num();
+  int nc2 = src2.cube_num();
+
   // 作業領域のビットベクタを確保する．
-  int nc1 = src1.mCubeNum;
   _resize_buff(nc1);
 
-  const AlgBitVect* bv1 = src1.mBitVect;
-  const AlgBitVect* bv1_end = bv1 + src1.mCubeNum * _cube_size();
-  const AlgBitVect* bv2 = src2.mBitVect;
-  const AlgBitVect* bv2_end = bv2 + src2.mCubeNum * _cube_size();
+  const AlgBitVect* bv1 = src1.bitvect();
+  const AlgBitVect* bv1_end = bv1 + nc1 * _cube_size();
+  const AlgBitVect* bv2 = src2.bitvect();
+  const AlgBitVect* bv2_end = bv2 + nc2 * _cube_size();
 
   // bv1 の各キューブは高々1つのキューブでしか割ることはできない．
   // ただし，除数も被除数も algebraic expression の場合
@@ -551,7 +376,7 @@ AlgMgr::division(AlgBitVect* dst_bv,
   const AlgBitVect* bv1_tmp = bv1;
   for ( int i = 0; i < nc1; ++ i ) {
     for ( const AlgBitVect* bv2_tmp = bv2; bv2_tmp != bv2_end; bv2_tmp += _cube_size() ) {
-      if ( cube_division(tmp_dst, bv1_tmp, tv2_tmp) ) {
+      if ( cube_division(tmp_dst, bv1_tmp, bv2_tmp) ) {
 	mark[i] = true;
 	break;
       }
@@ -592,8 +417,8 @@ AlgMgr::division(AlgBitVect* dst_bv,
 
   for ( int pos: pos_list ) {
     const AlgBitVect* tmp = mTmpBuff + pos * _cube_size();
-    cube_copy(dst_bv, tmp);
-    dst_bv += _cube_size()
+    copy(dst_bv, tmp, 1);
+    dst_bv += _cube_size();
   }
 
   return pos_list.size();
@@ -604,25 +429,28 @@ AlgMgr::division(AlgBitVect* dst_bv,
 // @param[in] src1 1つめのブロック
 // @param[in] lit 対象のリテラル
 // @return 結果のキューブ数を返す．
+//
+// * dst_bv には十分な容量があると仮定する．
+// * dst_bv == src1.bitvect() でも正しく動く．
 int
-AlgMgr::division(AlgBitVect* dst_bv,
-		 const Block& src1,
+AlgMgr::quotient(AlgBitVect* dst_bv,
+		 const AlgBlock& src1,
 		 Literal lit)
 {
   VarId var_id = lit.varid();
   int blk = _block_pos(var_id);
   int sft = _shift_num(var_id);
-  AlgBitVect pat = lit.is_positive() ? AlgPol::P : AlgPol::N;
+  AlgBitVect pat = lit2bv(lit);
   AlgBitVect pat1 = pat << sft;
   AlgBitVect mask = 3UL << sft;
   AlgBitVect nmask = ~mask;
   int nb = _cube_size();
   int nc = 0;
-  const AlgBitVect* bv1 = src1.mBitVect;
-  const AlgBitVect* bv1_end = bv1 + (nb * src1.mCubeNum);
+  const AlgBitVect* bv1 = src1.bitvect();
+  const AlgBitVect* bv1_end = bv1 + (nb * src1.cube_num());
   for ( ; bv1 != bv1_end; bv1 += nb ) {
     if ( (bv1[blk] & mask) == pat1 ) {
-      cube_copy(dst_bv, bv1);
+      copy(dst_bv, bv1, 1);
       dst_bv[blk] &= nmask;
       dst_bv += nb;
       ++ nc;
@@ -636,18 +464,19 @@ AlgMgr::division(AlgBitVect* dst_bv,
 // @param[in] dst_bv 結果を格納するビットベクタ
 // @param[in] src1 1つめのブロック
 //
-// 共通部分がないときは空のキューブとなる．
+// * 共通部分がないときは空のキューブとなる．
+// * dst_bv には十分な容量があると仮定する．
 void
 AlgMgr::common_cube(AlgBitVect* dst_bv,
-		    const Block& src1)
+		    const AlgBlock& src1)
 {
   int nb = _cube_size();
 
-  const AlgBitVect* bv1 = src1.mBitVect;
-  const AlgBitVect* bv1_end = bv1 + src1.mCubeNum * _cube_size();
+  const AlgBitVect* bv1 = src1.bitvect();
+  const AlgBitVect* bv1_end = bv1 + src1.cube_num() * _cube_size();
 
   // 最初のキューブをコピーする．
-  cube_copy(dst_bv, bv1);
+  copy(dst_bv, bv1, 1);
 
   // 2番目以降のキューブとの共通部分を求める．
   bv1 += _cube_size();
@@ -665,26 +494,54 @@ AlgMgr::common_cube(AlgBitVect* dst_bv,
 }
 
 // @brief カバー(を表すビットベクタ)のコピーを行う．
-// @param[in] cube_num キューブ数
 // @param[in] dst_bv コピー先のビットベクタ
-// @param[in] dst_pos コピー先のキューブ位置
 // @param[in] src_bv ソースのビットベクタ
-// @param[in] src_pos ソースのキューブ位置
+// @param[in] cube_num キューブ数
 void
-AlgMgr::copy(int cube_num,
-	     AlgBitVect* dst_bv,
-	     int dst_pos,
+AlgMgr::copy(AlgBitVect* dst_bv,
 	     const AlgBitVect* src_bv,
-	     int src_pos)
+	     int cube_num)
 {
-  int nb = _cube_size();
-  int n = nb * cube_num;
-  AlgBitVect* dst = dst_bv + dst_pos * nb;
-  const AlgBitVect* src = src_bv + src_pos * nb;
-  for ( int i = 0; i < n; ++ i ) {
-    *dst = *src;
-    ++ dst;
-    ++ src;
+  const AlgBitVect* src_end = src_bv + cube_num * _cube_size();
+  for ( ; src_bv != src_end; ++ src_bv, ++ dst_bv ) {
+    *dst_bv = *src_bv;
+  }
+}
+
+// @brief AlgCube のリストからカバー(を表すビットベクタ)のコピーを行う．
+// @param[in] dst_bv コピー先のビットベクタ
+// @param[in] cube_list キューブのリスト
+void
+AlgMgr::copy_from_cube_list(AlgBitVect* dst_bv,
+			    const vector<AlgCube>& cube_list)
+{
+  for ( auto& cube: cube_list ) {
+    copy(dst_bv, cube.mBody, 1);
+    dst_bv += _cube_size();
+  }
+}
+
+// @brief Literal のリストからカバー(を表すビットベクタ)のコピーを行う．
+// @param[in] dst_bv コピー先のビットベクタ
+// @param[in] lit_list キューブのリスト
+//
+// lit_list 中に Literal::x() があるとキューブの区切りになる．
+void
+AlgMgr::copy_from_lit_list(AlgBitVect* dst_bv,
+			   const vector<Literal>& lit_list)
+{
+  for ( auto lit: lit_list ) {
+    if ( lit == Literal::x() ) {
+      dst_bv += _cube_size();
+    }
+    else {
+      VarId var_id = lit.varid();
+      int blk = _block_pos(var_id);
+      int sft = _shift_num(var_id);
+      AlgBitVect pat = lit2bv(lit);
+      AlgBitVect mask = pat << sft;
+      dst_bv[blk] |= mask;
+    }
   }
 }
 
@@ -705,8 +562,8 @@ AlgMgr::_sort(AlgBitVect* bv,
   }
   if ( n == 2 ) {
     // (0, 1) と (1, 0) の2通りだけ
-    const AlgBitVect* bv0 = bv + start * _cube_size();
-    const AlgBitVect* bv1 = bv0 + _cube_size();
+    AlgBitVect* bv0 = bv + start * _cube_size();
+    AlgBitVect* bv1 = bv0 + _cube_size();
     if ( cube_compare(bv0, bv1) < 0 ) {
       // (1, 0) だったので交換する．
       _resize_buff(1);
@@ -717,9 +574,9 @@ AlgMgr::_sort(AlgBitVect* bv,
   if ( n == 3 ) {
     // (0, 1, 2), (0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0)
     // の6通りなので虱潰し
-    const AlgBitVect* bv0 = bv + start * _cube_size();
-    const AlgBitVect* bv1 = bv0 + _cube_size();
-    const AlgBitVect* bv2 = bv1 + _cube_size();
+    AlgBitVect* bv0 = bv + start * _cube_size();
+    AlgBitVect* bv1 = bv0 + _cube_size();
+    AlgBitVect* bv2 = bv1 + _cube_size();
     if ( cube_compare(bv0, bv1) < 0 ) {
       // (1, 0, 2), (1, 2, 0), (2, 1, 0)
       if ( cube_compare(bv0, bv2) < 0 ) {
@@ -769,10 +626,10 @@ AlgMgr::_sort(AlgBitVect* bv,
     return;
   }
   if ( n == 4 ) {
-    const AlgBitVect* bv0 = bv + start * _cube_size();
-    const AlgBitVect* bv1 = bv0 + _cube_size();
-    const AlgBitVect* bv2 = bv1 + _cube_size();
-    const AlgBitVect* bv3 = bv2 + _cube_size();
+    AlgBitVect* bv0 = bv + start * _cube_size();
+    AlgBitVect* bv1 = bv0 + _cube_size();
+    AlgBitVect* bv2 = bv1 + _cube_size();
+    AlgBitVect* bv3 = bv2 + _cube_size();
     _resize_buff(1);
     // 0 と 1 を整列
     if ( cube_compare(bv0, bv1) < 0 ) {
@@ -835,21 +692,21 @@ AlgMgr::_sort(AlgBitVect* bv,
   // マージする．
   // 前半部分を一旦 mTmpBuff にコピーする．
   _resize_buff(hn);
-  copy(hn, mTmpBuff, 0, bv, start1);
-  const AlgBitVect* bv1 = mTmpBuff;
-  const AlgBitVect* bv1_end = bv1 + hn * _cube_size();
-  const AlgBitVect* bv2 = bv + start2 * _cube_size();
-  const AlgBitVect* bv2_end = bv + end2 * _cube_size();
+  copy(mTmpBuff, bv + start1 * _cube_size(), hn);
+  AlgBitVect* bv1 = mTmpBuff;
+  AlgBitVect* bv1_end = bv1 + hn * _cube_size();
+  AlgBitVect* bv2 = bv + start2 * _cube_size();
+  AlgBitVect* bv2_end = bv + end2 * _cube_size();
   AlgBitVect* dst_bv = bv + start * _cube_size();
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int comp_res = cube_compare(bv1, bv2);
     if ( comp_res > 0 ) {
-      cube_copy(dst_bv, bv1);
+      copy(dst_bv, bv1, 1);
       bv1 += _cube_size();
       dst_bv += _cube_size();
     }
     else if ( comp_res < 0 ) {
-      cube_copy(dst_bv, bv2);
+      copy(dst_bv, bv2, 1);
       bv2 += _cube_size();
       dst_bv += _cube_size();
     }
@@ -859,7 +716,7 @@ AlgMgr::_sort(AlgBitVect* bv,
     }
   }
   while ( bv1 != bv1_end ) {
-    cube_copy(dst_bv, bv1);
+    copy(dst_bv, bv1, 1);
     bv1 += _cube_size();
     dst_bv += _cube_size();
   }
@@ -876,13 +733,13 @@ AlgMgr::_sort(AlgBitVect* bv,
 //
 // 比較はキューブごとの辞書式順序で行う．
 int
-AlgMgr::compare(const Block& src1,
-		const Block& src2)
+AlgMgr::compare(const AlgBlock& src1,
+		const AlgBlock& src2)
 {
-  const AlgBitVect* bv1 = src1.mBitVect;
-  const AlgBitVect* bv1_end = bv1 + src1.mCubeNum + _cube_size();
-  const AlgBitVect* bv2 = src2.mBitVect;
-  const AlgBitVect* bv2_end = bv2 + src2.mCubeNum + _cube_size();
+  const AlgBitVect* bv1 = src1.bitvect();
+  const AlgBitVect* bv1_end = bv1 + src1.cube_num() + _cube_size();
+  const AlgBitVect* bv2 = src2.bitvect();
+  const AlgBitVect* bv2_end = bv2 + src2.cube_num() + _cube_size();
   for ( ; bv1 != bv1_end && bv2 != bv2_end; bv1 += _cube_size(), bv2 += _cube_size() ) {
     int res = cube_compare(bv1, bv2);
     if ( res != 0 ) {
@@ -904,16 +761,16 @@ AlgMgr::compare(const Block& src1,
 // @brief ビットベクタからハッシュ値を計算する．
 // @param[in] src1 1つめのブロック
 SizeType
-AlgMgr::hash(const Block& src1)
+AlgMgr::hash(const AlgBlock& src1)
 {
   // キューブは常にソートされているので
   // 順番は考慮する必要はない．
   // ただおなじキューブの中のビットに関しては
   // 本当は区別しなければならないがどうしようもないので
   // 16ビットに区切って単純に XOR を取る．
-  int n = src1.mCubeNum * _cube_size();
+  int n = src1.cube_num() * _cube_size();
   SizeType ans = 0;
-  const AlgBitVect* bv = src1.mBitVect;
+  const AlgBitVect* bv = src1.bitvect();
   const AlgBitVect* bv_end = bv + n;
   for ( ; bv != bv_end; ++ bv ) {
     AlgBitVect pat = *bv;
@@ -1069,11 +926,11 @@ AlgMgr::cube_division(AlgBitVect* dst_bv,
   while ( dst_bv != dst_bv_end ) {
     AlgBitVect pat1 = *bv1;
     AlgBitVect pat2 = *bv2;
-    if ( (~(pat1) & *pat2) != 0ULL ) {
+    if ( (~pat1 & pat2) != 0ULL ) {
       // この場合の dst の値は不定
       return false;
     }
-    *dst_bv = pat1 & ~(pat2);
+    *dst_bv = pat1 & ~pat2;
     ++ dst_bv;
     ++ bv1;
     ++ bv2;
@@ -1087,12 +944,12 @@ AlgMgr::cube_division(AlgBitVect* dst_bv,
 // @return lit を含んでいたら true を返す．
 bool
 AlgMgr::is_in(AlgBitVect* bv,
-	      AlgLiteral lit)
+	      Literal lit)
 {
   VarId var_id = lit.varid();
   int blk = _block_pos(var_id);
   int sft = _shift_num(var_id);
-  AlgBitVect pat = lit.is_positive() ? AlgPol::P : AlgPol::N;
+  AlgBitVect pat = lit2bv(lit);
   AlgBitVect mask = pat << sft;
   if ( bv[blk] & mask ) {
     return true;
@@ -1107,27 +964,30 @@ AlgMgr::is_in(AlgBitVect* bv,
 // @param[in] lit 対象のリテラル
 void
 AlgMgr::add_lit(AlgBitVect* bv,
-		AlgLiteral lit)
+		Literal lit)
 {
   VarId var_id = lit.varid();
   int blk = _block_pos(var_id);
   int sft = _shift_num(var_id);
-  AlgBitVect pat = lit.is_positive() ? AlgPol::P : AlgPol::N;
+  AlgBitVect pat = lit2bv(lit);
   AlgBitVect mask = pat << sft;
   bv[blk] |= mask;
 }
 
 // @brief カバー/キューブの内容を出力する．
 // @param[in] s 出力先のストリーム
+// @param[in] bv カバー/キューブを表すビットベクタ
 // @param[in] start キューブの開始位置
 // @param[in] end キューブの終了位置
+// @param[in] varname_list 変数名のリスト
 //
 // end は実際の末尾 + 1 を指す．
 void
 AlgMgr::print(ostream& s,
 	      const AlgBitVect* bv,
 	      int start,
-	      int end)
+	      int end,
+	      const vector<string>& varname_list)
 {
   const char* plus = "";
   for ( int i = start; i < end; ++ i ) {
@@ -1135,13 +995,14 @@ AlgMgr::print(ostream& s,
     plus = " + ";
     const char* spc = "";
     for ( int j = 0; j < variable_num(); ++ j ) {
-      AlgPol pol = literal(bv, i, VarId(j));
+      string varname = varname_list[j];
+      AlgPol pol = get_pol(bv, i, VarId(j));
       if ( pol == AlgPol::P ) {
-	s << spc << varname(j);
+	s << spc << varname;
 	spc = " ";
       }
       else if ( pol == AlgPol::N ) {
-	s << spc << varname(j) << "'";
+	s << spc << varname << "'";
 	spc = " ";
       }
     }
@@ -1173,4 +1034,4 @@ AlgMgr::_resize_buff(int req_size)
   mTmpBuff = new_body(mTmpBuffSize);
 }
 
-END_NAMESPACE_YM_BFO
+END_NAMESPACE_YM_ALG

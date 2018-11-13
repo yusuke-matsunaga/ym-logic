@@ -28,6 +28,12 @@ add_subdirectory(tests)
 #  ソースファイルの設定
 # ===================================================================
 
+set (alg_SOURCES
+  c++-src/alg/AlgCover.cc
+  c++-src/alg/AlgCube.cc
+  c++-src/alg/AlgMgr.cc
+  )
+
 set (expr_SOURCES
   c++-src/expr/Expr.cc
   c++-src/expr/ExprMgr.cc
@@ -55,6 +61,7 @@ set (tvfunc_SOURCES
   )
 
 set (ym_logic_SOURCES
+  ${alg_SOURCES}
   ${expr_SOURCES}
   ${npn_SOURCES}
   ${tvfunc_SOURCES}

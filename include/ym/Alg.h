@@ -27,6 +27,7 @@ BEGIN_NAMESPACE_YM_ALG
 
 class AlgCover;
 class AlgCube;
+class AlgLitSet;
 class AlgMgr;
 
 using AlgBitVect = ymuint64;
@@ -44,6 +45,7 @@ enum class AlgPol {
 
 using nsLogic::nsAlg::AlgCover;
 using nsLogic::nsAlg::AlgCube;
+using nsLogic::nsAlg::AlgLitSet;
 using nsLogic::nsAlg::AlgMgr;
 
 END_NAMESPACE_YM
