@@ -7,6 +7,7 @@
 # インクルードパスの設定
 # ===================================================================
 include_directories (
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-src/alg
   ${PROJECT_SOURCE_DIR}/ym-logic/c++-src/npn
   ${GTEST_INCLUDE_DIR}
   )
@@ -82,6 +83,12 @@ ym_add_gtest ( logic_w01_test
 
 ym_add_gtest ( logic_NpnMgr_test
   npn/NpnMgrTest.cc
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
+  )
+
+ym_add_gtest ( logic_AlgMgr_test
+  alg/AlgMgrTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )

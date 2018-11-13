@@ -12,7 +12,19 @@
 #include "AlgMgr.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_LOGIC
+
+// @brief コンストラクタ
+// @param[in] variable_num 変数の数
+//
+// * 空のキューブを作る．
+AlgCube::AlgCube(int variable_num) :
+  mVariableNum{variable_num}
+{
+  AlgMgr mgr{mVariableNum};
+  mBody = mgr.new_body(1);
+  mgr.cube_clear(mBody);
+}
 
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
@@ -25,21 +37,31 @@ AlgCube::AlgCube(int variable_num,
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
-  mgr.copy_from_lit_list(mBody, vector<Literal>{lit});
+  mgr.cube_set(mBody, vector<Literal>{lit});
 }
 
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
 // @param[in] lit_list キューブを表すリテラルのリスト
-//
-// lit_list が省略された時には空のキューブを作る．
 AlgCube::AlgCube(int variable_num,
 		 const vector<Literal>& lit_list) :
   mVariableNum{variable_num}
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
-  mgr.copy_from_lit_list(mBody, lit_list);
+  mgr.cube_set(mBody, lit_list);
+}
+
+// @brief コンストラクタ
+// @param[in] variable_num 変数の数
+// @param[in] lit_list キューブを表すリテラルのリスト初期化子
+AlgCube::AlgCube(int variable_num,
+		 std::initializer_list<Literal> lit_list) :
+  mVariableNum{variable_num}
+{
+  AlgMgr mgr(mVariableNum);
+  mBody = mgr.new_body(1);
+  mgr.cube_set(mBody, lit_list);
 }
 
 // @brief コピーコンストラクタ
@@ -49,7 +71,7 @@ AlgCube::AlgCube(const AlgCube& src) :
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
-  mgr.copy(mBody, src.mBody, 1);
+  mgr.cube_copy(mBody, src.mBody);
 }
 
 // @brief コピー代入演算子
@@ -58,14 +80,13 @@ AlgCube::AlgCube(const AlgCube& src) :
 AlgCube&
 AlgCube::operator=(const AlgCube& src)
 {
+  AlgMgr mgr(src.mVariableNum);
   if ( mVariableNum != src.mVariableNum ) {
     delete_body();
     mVariableNum = src.mVariableNum;
-    AlgMgr mgr(mVariableNum);
     mBody = mgr.new_body(1);
   }
-  AlgMgr mgr(mVariableNum);
-  mgr.copy(mBody, src.mBody, 1);
+  mgr.cube_copy(mBody, src.mBody);
 
   return *this;
 }
@@ -120,6 +141,7 @@ AlgCube::delete_body()
   }
 }
 
+#if 0
 // @brief 内容を読み出す．
 // @param[in] varid 変数番号 ( 0 <= varid.val() < variable_num() )
 // @retval AlgPol::X この位置にリテラルはない．
@@ -131,6 +153,7 @@ AlgCube::get_pol(VarId varid) const
   AlgMgr mgr(mVariableNum);
   return mgr.get_pol(mBody, 0, varid);
 }
+#endif
 
 // @brief リテラル数を返す．
 int
@@ -266,7 +289,7 @@ AlgCube::operator/(const AlgCube& right) const
 
   AlgMgr mgr(mVariableNum);
   AlgBitVect* body = mgr.new_body(1);
-  bool stat = mgr.cube_division(body, mBody, right.mBody);
+  bool stat = mgr.cube_quotient(body, mBody, right.mBody);
   if ( !stat ) {
     mgr.cube_clear(body);
   }
@@ -286,7 +309,7 @@ AlgCube::operator/=(const AlgCube& right)
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   AlgMgr mgr(mVariableNum);
-  bool stat = mgr.cube_division(mBody, mBody, right.mBody);
+  bool stat = mgr.cube_quotient(mBody, mBody, right.mBody);
   if ( !stat ) {
     mgr.cube_clear(mBody);
   }
@@ -351,4 +374,4 @@ AlgCube::print(ostream& s,
   mgr.print(s, mBody, 0, 1, varname_list);
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_LOGIC

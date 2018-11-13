@@ -13,7 +13,7 @@
 #include "ym/Literal.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_LOGIC
 
 BEGIN_NONAMESPACE
 
@@ -185,15 +185,15 @@ AlgMgr::sum(AlgBitVect* dst_bv,
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int res = cube_compare(bv1, bv2);
     if ( res > 0 ) {
-      copy(dst_bv, bv1, 1);
+      cube_copy(dst_bv, bv1);
       bv1 += _cube_size();
     }
     else if ( res < 0 ) {
-      copy(dst_bv, bv2, 1);
+      cube_copy(dst_bv, bv2);
       bv2 += _cube_size();
     }
     else {
-      copy(dst_bv, bv1, 1);
+      cube_copy(dst_bv, bv1);
       bv1 += _cube_size();
       bv2 += _cube_size();
     }
@@ -201,13 +201,13 @@ AlgMgr::sum(AlgBitVect* dst_bv,
     ++ nc;
   }
   while ( bv1 != bv1_end ) {
-    copy(dst_bv, bv1, 1);
+    cube_copy(dst_bv, bv1);
     bv1 += _cube_size();
     dst_bv += _cube_size();
     ++ nc;
   }
   while ( bv2 != bv2_end ) {
-    copy(dst_bv, bv2, 1);
+    cube_copy(dst_bv, bv2);
     bv2 += _cube_size();
     dst_bv += _cube_size();
     ++ nc;
@@ -240,7 +240,7 @@ AlgMgr::diff(AlgBitVect* dst_bv,
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int res = cube_compare(bv1, bv2);
     if ( res > 0 ) {
-      copy(dst_bv, bv1, 1);
+      cube_copy(dst_bv, bv1);
       bv1 += _cube_size();
       dst_bv += _cube_size();
       ++ nc;
@@ -254,7 +254,7 @@ AlgMgr::diff(AlgBitVect* dst_bv,
     }
   }
   while ( bv1 != bv1_end ) {
-    copy(dst_bv, bv1, 1);
+    cube_copy(dst_bv, bv1);
     bv1 += _cube_size();
     dst_bv += _cube_size();
     ++ nc;
@@ -332,7 +332,7 @@ AlgMgr::product(AlgBitVect* dst_bv,
       // 相反するリテラルがあった．
       continue;
     }
-    copy(dst_bv, bv1, 1);
+    cube_copy(dst_bv, bv1);
     dst_bv[blk] = tmp;
     dst_bv += nb;
     ++ nc;
@@ -375,7 +375,7 @@ AlgMgr::quotient(AlgBitVect* dst_bv,
   const AlgBitVect* bv1_tmp = bv1;
   for ( int i = 0; i < nc1; ++ i ) {
     for ( const AlgBitVect* bv2_tmp = bv2; bv2_tmp != bv2_end; bv2_tmp += _cube_size() ) {
-      if ( cube_division(tmp_dst, bv1_tmp, bv2_tmp) ) {
+      if ( cube_quotient(tmp_dst, bv1_tmp, bv2_tmp) ) {
 	mark[i] = true;
 	break;
       }
@@ -416,7 +416,7 @@ AlgMgr::quotient(AlgBitVect* dst_bv,
 
   for ( int pos: pos_list ) {
     const AlgBitVect* tmp = mTmpBuff + pos * _cube_size();
-    copy(dst_bv, tmp, 1);
+    cube_copy(dst_bv, tmp);
     dst_bv += _cube_size();
   }
 
@@ -449,7 +449,7 @@ AlgMgr::quotient(AlgBitVect* dst_bv,
   const AlgBitVect* bv1_end = bv1 + (nb * src1.cube_num());
   for ( ; bv1 != bv1_end; bv1 += nb ) {
     if ( (bv1[blk] & mask) == pat1 ) {
-      copy(dst_bv, bv1, 1);
+      cube_copy(dst_bv, bv1);
       dst_bv[blk] &= nmask;
       dst_bv += nb;
       ++ nc;
@@ -475,7 +475,7 @@ AlgMgr::common_cube(AlgBitVect* dst_bv,
   const AlgBitVect* bv1_end = bv1 + src1.cube_num() * _cube_size();
 
   // 最初のキューブをコピーする．
-  copy(dst_bv, bv1, 1);
+  cube_copy(dst_bv, bv1);
 
   // 2番目以降のキューブとの共通部分を求める．
   bv1 += _cube_size();
@@ -492,61 +492,33 @@ AlgMgr::common_cube(AlgBitVect* dst_bv,
   }
 }
 
-// @brief カバー(を表すビットベクタ)のコピーを行う．
-// @param[in] dst_bv コピー先のビットベクタ
-// @param[in] src_bv ソースのビットベクタ
-// @param[in] cube_num キューブ数
-void
-AlgMgr::copy(AlgBitVect* dst_bv,
-	     const AlgBitVect* src_bv,
-	     int cube_num)
-{
-  const AlgBitVect* src_end = src_bv + cube_num * _cube_size();
-  for ( ; src_bv != src_end; ++ src_bv, ++ dst_bv ) {
-    *dst_bv = *src_bv;
-  }
-}
-
-// @brief AlgCube のリストからカバー(を表すビットベクタ)のコピーを行う．
-// @param[in] dst_bv コピー先のビットベクタ
-// @param[in] cube_list キューブのリスト
-void
-AlgMgr::copy_from_cube_list(AlgBitVect* dst_bv,
-			    const vector<AlgCube>& cube_list)
-{
-  AlgBitVect* dst_bv_begin = dst_bv;
-  for ( auto& cube: cube_list ) {
-    copy(dst_bv, cube.mBody, 1);
-    dst_bv += _cube_size();
-  }
-  sort(dst_bv_begin, cube_list.size());
-}
-
-// @brief Literal のリストからカバー(を表すビットベクタ)のコピーを行う．
-// @param[in] dst_bv コピー先のビットベクタ
-// @param[in] cube_list カバーを表すリテラルのリストのリスト
-//
-// * dst_bv には十分な容量があると仮定する．
-void
-AlgMgr::copy_from_cube_list(AlgBitVect* dst_bv,
-			    const vector<vector<Literal>>& cube_list)
-{
-  AlgBitVect* dst_bv_begin = dst_bv;
-  for ( auto& lit_list: cube_list ) {
-    copy_from_lit_list(dst_bv, lit_list);
-    dst_bv += _cube_size();
-  }
-  sort(dst_bv_begin, cube_list.size());
-}
-
 // @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
 // @param[in] dst_bv コピー先のビットベクタ
 // @param[in] lit_list キューブを表すリテラルのリスト
 //
 // * dst_bv には十分な容量があると仮定する．
 void
-AlgMgr::copy_from_lit_list(AlgBitVect* dst_bv,
-			   const vector<Literal>& lit_list)
+AlgMgr::cube_set(AlgBitVect* dst_bv,
+		 const vector<Literal>& lit_list)
+{
+  for ( auto lit: lit_list ) {
+    VarId var_id = lit.varid();
+    int blk = _block_pos(var_id);
+    int sft = _shift_num(var_id);
+    AlgBitVect pat = lit2bv(lit);
+    AlgBitVect mask = pat << sft;
+    dst_bv[blk] |= mask;
+  }
+}
+
+// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
+// @param[in] dst_bv コピー先のビットベクタ
+// @param[in] lit_list キューブを表すリテラルのリスト初期化子
+//
+// * dst_bv には十分な容量があると仮定する．
+void
+AlgMgr::cube_set(AlgBitVect* dst_bv,
+		 std::initializer_list<Literal> lit_list)
 {
   for ( auto lit: lit_list ) {
     VarId var_id = lit.varid();
@@ -705,7 +677,7 @@ AlgMgr::_sort(AlgBitVect* bv,
   // マージする．
   // 前半部分を一旦 mTmpBuff にコピーする．
   _resize_buff(hn);
-  copy(mTmpBuff, bv + start1 * _cube_size(), hn);
+  _copy(mTmpBuff, bv + start1 * _cube_size(), hn);
   AlgBitVect* bv1 = mTmpBuff;
   AlgBitVect* bv1_end = bv1 + hn * _cube_size();
   AlgBitVect* bv2 = bv + start2 * _cube_size();
@@ -714,12 +686,12 @@ AlgMgr::_sort(AlgBitVect* bv,
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int comp_res = cube_compare(bv1, bv2);
     if ( comp_res > 0 ) {
-      copy(dst_bv, bv1, 1);
+      cube_copy(dst_bv, bv1);
       bv1 += _cube_size();
       dst_bv += _cube_size();
     }
     else if ( comp_res < 0 ) {
-      copy(dst_bv, bv2, 1);
+      cube_copy(dst_bv, bv2);
       bv2 += _cube_size();
       dst_bv += _cube_size();
     }
@@ -729,7 +701,7 @@ AlgMgr::_sort(AlgBitVect* bv,
     }
   }
   while ( bv1 != bv1_end ) {
-    copy(dst_bv, bv1, 1);
+    cube_copy(dst_bv, bv1);
     bv1 += _cube_size();
     dst_bv += _cube_size();
   }
@@ -825,8 +797,8 @@ AlgMgr::cube_compare(const AlgBitVect* bv1,
 // @param[in] bv1 1つめのキューブを表すビットベクタ
 // @param[in] bv2 2つめのキューブを表すビットベクタ
 bool
-AlgMgr::cube_check_product(const AlgBitVect* bv1,
-			   const AlgBitVect* bv2)
+AlgMgr::cube_check_conflict(const AlgBitVect* bv1,
+			    const AlgBitVect* bv2)
 {
   const AlgBitVect* bv1_end = bv1 + _cube_size();
   while ( bv1 != bv1_end ) {
@@ -837,12 +809,12 @@ AlgMgr::cube_check_product(const AlgBitVect* bv1,
     AlgBitVect tmp2 = tmp & mask2;
     if ( (tmp1 & (tmp2 >> 1)) != 0ULL ) {
       // 同じ変数の異なる極性のリテラルがあった．
-      return false;
+      return true;
     }
     ++ bv1;
     ++ bv2;
   }
-  return true;
+  return false;
 }
 
 // @brief 一方のキューブが他方のキューブに含まれているか調べる．
@@ -931,7 +903,7 @@ AlgMgr::cube_product(AlgBitVect* dst_bv,
 // @param[in] bv2 2つめのキューブを表すビットベクタ
 // @return 正しく割ることができたら true を返す．
 bool
-AlgMgr::cube_division(AlgBitVect* dst_bv,
+AlgMgr::cube_quotient(AlgBitVect* dst_bv,
 		      const AlgBitVect* bv1,
 		      const AlgBitVect* bv2)
 {
@@ -1047,4 +1019,4 @@ AlgMgr::_resize_buff(int req_size)
   mTmpBuff = new_body(mTmpBuffSize);
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_LOGIC

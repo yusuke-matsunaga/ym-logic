@@ -14,9 +14,7 @@
 #include "ym/HashFunc.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
-
-class AlgBlock;
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 /// @ingroup AlgGroup
@@ -24,7 +22,7 @@ class AlgBlock;
 /// @brief キューブ(積項)を表すクラス
 ///
 /// * 離散数学的には Literal の集合だが，相反するリテラル(x と x')は
-/// 同時には含まない．
+///   同時には含まない．
 /// * 常に固定サイズのビット配列として実装する．
 /// * 1つの変数につき2ビットを使用する．
 //////////////////////////////////////////////////////////////////////
@@ -37,20 +35,30 @@ public:
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
+  ///
+  /// * 空のキューブを作る．
+  explicit
+  AlgCube(int variable_num);
+
+  /// @brief コンストラクタ
+  /// @param[in] variable_num 変数の数
   /// @param[in] lit リテラル
   ///
-  /// 単一のリテラルからなるキューブを作る．
+  /// * 単一のリテラルからなるキューブを作る．
   AlgCube(int variable_num,
 	  Literal lit);
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] lit_list キューブを表すリテラルのリスト
-  ///
-  /// lit_list が省略された時には空のキューブを作る．
-  explicit
   AlgCube(int variable_num,
-	  const vector<Literal>& lit_list = vector<Literal>());
+	  const vector<Literal>& lit_list);
+
+  /// @brief コンストラクタ
+  /// @param[in] variable_num 変数の数
+  /// @param[in] lit_list キューブを表すリテラルのリスト初期化子
+  AlgCube(int variable_num,
+	  std::initializer_list<Literal> lit_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
@@ -89,13 +97,10 @@ public:
   int
   literal_num() const;
 
-  /// @brief 内容を読み出す．
-  /// @param[in] varid 変数番号 ( 0 <= varid.val() < variable_num() )
-  /// @retval AlgPol::X この位置にリテラルはない．
-  /// @retval AlgPol::P 肯定のリテラルがある．
-  /// @retval AlgPol::N 否定のリテラルがある．
-  AlgPol
-  get_pol(VarId varid) const;
+  /// @brief 内容をリテラルのリストに変換する．
+  /// @param[in] lit_list 結果を格納するベクタ
+  void
+  to_literal_list(vector<Literal>& lit_list) const;
 
   /// @brief 指定したリテラルを含んでいたら true を返す．
   /// @param[in] lit 対象のリテラル
@@ -236,6 +241,15 @@ private:
 };
 
 /// @relates AlgCube
+/// @brief Literal と AlgCube の論理積
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果のキューブを返す．
+AlgCube
+operator*(Literal left,
+	  const AlgCube& right);
+
+/// @relates AlgCube
 /// @brief AlgCubeの比較演算子
 /// @param[in] left, right オペランド
 /// @retval -1 left < right
@@ -320,6 +334,20 @@ int
 AlgCube::variable_num() const
 {
   return mVariableNum;
+}
+
+// @relates AlgCube
+// @brief Literal と AlgCube の論理積
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果のキューブを返す．
+inline
+AlgCube
+operator*(Literal left,
+	  const AlgCube& right)
+{
+  // 交換則を用いる．
+  return right.operator*(left);
 }
 
 // @relates AlgCube
@@ -410,7 +438,7 @@ operator<<(ostream& s,
   return s;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_LOGIC
 
 BEGIN_NAMESPACE_YM
 

@@ -13,9 +13,7 @@
 #include "ym/HashFunc.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
-
-class AlgBlock;
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 /// @class AlgCover AlgCover.h "ym/AlgCover.h"
@@ -124,12 +122,14 @@ public:
   int
   literal_num(Literal lit) const;
 
+#if 0
   /// @brief 内容を返す．
   /// @param[in] cube_id キューブ番号 ( 0 <= cube_id < cube_num() )
   /// @param[in] var_id 変数の位置番号 ( 0 <= var_id.val() < variable_num() )
   AlgPol
   get_pol(int cube_id,
 	  VarId var_id) const;
+#endif
 
   /// @brief 論理和を計算する．
   /// @param[in] right オペランド
@@ -337,6 +337,24 @@ private:
 };
 
 /// @relates AlgCover
+/// @brief キューブとカバーの加算
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果を返す．
+AlgCover
+operator+(const AlgCube& left,
+	  const AlgCover& right);
+
+/// @relates AlgCover
+/// @brief キューブとカバーの乗算
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果を返す．
+AlgCover
+operator*(const AlgCube& left,
+	  const AlgCover& right);
+
+/// @relates AlgCover
 /// @brief 比較演算子(rich compare)
 /// @param[in] left, right オペランド
 /// @return 比較結果を返す．
@@ -426,6 +444,34 @@ AlgCover::cube_num() const
 }
 
 // @relates AlgCover
+// @brief キューブとカバーの加算
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator+(const AlgCube& left,
+	  const AlgCover& right)
+{
+  // 交換則を用いる．
+  return right.operator+(left);
+}
+
+// @relates AlgCover
+// @brief キューブとカバーの乗算
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator*(const AlgCube& left,
+	  const AlgCover& right)
+{
+  // 交換則を用いる．
+  return right.operator*(left);
+}
+
+// @relates AlgCover
 // @brief 比較演算子 (EQ)
 // @param[in] left, right オペランド
 // @return 等しい時に true を返す．
@@ -511,7 +557,7 @@ operator<<(ostream& s,
   return s;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_LOGIC
 
 BEGIN_NAMESPACE_YM
 

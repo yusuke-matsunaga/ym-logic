@@ -11,7 +11,7 @@
 #include "ym/Alg.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 /// @class AlgBlock AlgBlock.h "AlgBlock.h"
@@ -102,6 +102,6 @@ AlgBlock::bitvect() const
   return mBitVect;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_LOGIC
 
 #endif // ALGBLOCK_H

@@ -12,29 +12,7 @@
 #include "ym/logic.h"
 
 
-/// @brief Algサブパッケージ用の名前空間の開始
-#define BEGIN_NAMESPACE_YM_ALG \
-BEGIN_NAMESPACE_YM_LOGIC \
-BEGIN_NAMESPACE(nsAlg)
-
-/// @brief Algサブパッケージ用の名前空間の終了
-#define END_NAMESPACE_YM_ALG \
-END_NAMESPACE(nsAlg) \
-END_NAMESPACE_YM_LOGIC
-
-
-BEGIN_NAMESPACE_YM_ALG
-
-class AlgCover;
-class AlgCube;
-class AlgLitSet;
-class AlgMgr;
-
-using AlgBitVect = ymuint64;
-
-END_NAMESPACE_YM_ALG
-
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_YM_LOGIC
 
 /// @brief 極性を表す列挙型
 enum class AlgPol {
@@ -43,11 +21,12 @@ enum class AlgPol {
   N = 2  //@< 負極性
 };
 
-using nsLogic::nsAlg::AlgCover;
-using nsLogic::nsAlg::AlgCube;
-using nsLogic::nsAlg::AlgLitSet;
-using nsLogic::nsAlg::AlgMgr;
+using AlgBitVect = ymuint64;
 
-END_NAMESPACE_YM
+class AlgBlock;
+class AlgLitSet;
+class AlgMgr;
+
+END_NAMESPACE_YM_LOGIC
 
 #endif // ALG_H

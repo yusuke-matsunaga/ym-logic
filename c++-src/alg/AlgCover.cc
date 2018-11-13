@@ -13,7 +13,7 @@
 #include "AlgMgr.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
 // クラス AlgCover
@@ -35,7 +35,11 @@ AlgCover::AlgCover(int variable_num,
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr.copy_from_cube_list(mBody, cube_list);
+  int offset = 0;
+  for ( auto& cube: cube_list ) {
+    mgr.cube_copy(mBody, offset, cube.mBody, 0);
+    ++ offset;
+  }
 }
 
 // @brief 特殊なコンストラクタ
@@ -70,7 +74,11 @@ AlgCover::AlgCover(int variable_num,
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr.copy_from_cube_list(mBody, cube_list);
+  int offset = 0;
+  for ( auto& lit_list: cube_list ) {
+    mgr.cube_set(mBody, offset, lit_list);
+    ++ offset;
+  }
 }
 
 // @brief コピーコンストラクタ
@@ -83,7 +91,7 @@ AlgCover::AlgCover(const AlgCover& src) :
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr.copy(mBody, src.mBody, mCubeNum);
+  mgr._copy(mBody, src.mBody, mCubeNum);
 }
 
 // @brief コピー代入演算子
@@ -103,7 +111,7 @@ AlgCover::operator=(const AlgCover& src)
     mCubeCap = mCubeNum;;
     AlgMgr mgr(mVariableNum);
     mBody = mgr.new_body(mCubeCap);
-    mgr.copy(mBody, src.mBody, mCubeNum);
+    mgr._copy(mBody, src.mBody, mCubeNum);
   }
 
   return *this;
@@ -150,7 +158,7 @@ AlgCover::AlgCover(const AlgCube& cube) :
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr.copy(mBody, cube.mBody, 1);
+  mgr.cube_copy(mBody, cube.mBody);
 }
 
 // @brief キューブからのムーブ変換コンストラクタ
@@ -210,6 +218,7 @@ AlgCover::literal_num(Literal lit) const
   return mgr.literal_num(block(), lit);
 }
 
+#if 0
 // @brief 内容を返す．
 // @param[in] cube_id キューブ番号 ( 0 <= cube_id < cube_num() )
 // @param[in] var_id 変数の位置番号 ( 0 <= var_id < variable_num() )
@@ -220,6 +229,7 @@ AlgCover::get_pol(int cube_id,
   AlgMgr mgr(mVariableNum);
   return mgr.get_pol(mBody, cube_id, var_id);
 }
+#endif
 
 // @brief 内容を表す AlgBlock を返す．
 inline
@@ -582,4 +592,4 @@ AlgCover::print(ostream& s,
   mgr.print(s, mBody, 0, mCubeNum, varname_list);
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_LOGIC
