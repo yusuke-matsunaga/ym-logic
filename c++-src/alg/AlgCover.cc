@@ -56,39 +56,21 @@ AlgCover::AlgCover(int variable_num,
   mgr.cube_clear(mBody);
 }
 
-BEGIN_NONAMESPACE
-
-// lit_list をスキャンしてキューブ数を数える．
-inline
-int
-count_cube_num(const vector<Literal>& lit_list)
-{
-  int n = 1;
-  for ( auto lit: lit_list ) {
-    if ( lit == Literal::x() ) {
-      ++ n;
-    }
-  }
-  return n;
-}
-
-END_NONAMESPACE
-
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
-// @param[in] lit_list カバーを表すリテラルのリスト
+// @param[in] cube_list カバーを表すリテラルのリストのリスト
 //
-// lit_list 中に Literal::x() があった場合，キューブの区切りを表す．
+// * キューブの順番は変わる可能性がある．
 AlgCover::AlgCover(int variable_num,
-		   const vector<Literal>& lit_list) :
+		   const vector<vector<Literal>>& cube_list) :
   mVariableNum{variable_num},
-  mCubeNum{count_cube_num(lit_list)},
+  mCubeNum{static_cast<int>(cube_list.size())},
   mCubeCap{mCubeNum},
   mBody{nullptr}
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr.copy_from_lit_list(mBody, lit_list);
+  mgr.copy_from_cube_list(mBody, cube_list);
 }
 
 // @brief コピーコンストラクタ

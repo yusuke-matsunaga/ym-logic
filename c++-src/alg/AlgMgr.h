@@ -219,9 +219,17 @@ public:
 
   /// @brief Literal のリストからカバー(を表すビットベクタ)のコピーを行う．
   /// @param[in] dst_bv コピー先のビットベクタ
-  /// @param[in] lit_list キューブのリスト
+  /// @param[in] cube_list カバーを表すリテラルのリストのリスト
   ///
-  /// * lit_list 中に Literal::x() があるとキューブの区切りになる．
+  /// * dst_bv には十分な容量があると仮定する．
+  void
+  copy_from_cube_list(AlgBitVect* dst_bv,
+		      const vector<vector<Literal>>& cube_list);
+
+  /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
+  /// @param[in] dst_bv コピー先のビットベクタ
+  /// @param[in] lit_list キューブを表すリテラルのリスト
+  ///
   /// * dst_bv には十分な容量があると仮定する．
   void
   copy_from_lit_list(AlgBitVect* dst_bv,
@@ -308,17 +316,6 @@ public:
 	       const AlgBitVect* bv1,
 	       const AlgBitVect* bv2);
 
-  /// @brief キューブとリテラルの積を計算する．
-  /// @param[in] dst_bv コピー先のビットベクタ
-  /// @param[in] bv1 1つめのキューブを表すビットベクタ
-  /// @param[in] lit ２つめのリテラル
-  /// @retval true 積が空でなかった．
-  /// @retval false 積が空だった．
-  bool
-  cube_product(AlgBitVect* dst_bv,
-	       const AlgBitVect* bv1,
-	       Literal lit);
-
   /// @brief キューブによる商を求める．
   /// @param[in] dst_bv コピー先のビットベクタ
   /// @param[in] bv1 1つめのキューブを表すビットベクタ
@@ -328,16 +325,6 @@ public:
   cube_division(AlgBitVect* dst_bv,
 		const AlgBitVect* bv1,
 		const AlgBitVect* bv2);
-
-  /// @brief キューブとリテラルによる商を求める．
-  /// @param[in] dst_bv コピー先のビットベクタ
-  /// @param[in] bv1 1つめのキューブを表すビットベクタ
-  /// @param[in] lit 2つめのリテラル
-  /// @return 正しく割ることができたら true を返す．
-  bool
-  cube_division(AlgBitVect* dst_bv,
-		const AlgBitVect* bv1,
-		Literal lit);
 
   /// @brief 2つのキューブ(を表すビットベクタ)を入れ替える．
   /// @param[in] bv1 1つめのキューブを表すビットベクタ

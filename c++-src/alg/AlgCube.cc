@@ -231,8 +231,8 @@ AlgCube::operator*(Literal right) const
 {
   AlgMgr mgr(mVariableNum);
   AlgBitVect* body = mgr.new_body(1);
-  bool stat = mgr.cube_product(body, mBody, right);
-  if ( !stat ) {
+  int nc = mgr.product(body, block(), right);
+  if ( nc == 0 ) {
     mgr.cube_clear(body);
   }
 
@@ -249,8 +249,8 @@ AlgCube&
 AlgCube::operator*=(Literal right)
 {
   AlgMgr mgr(mVariableNum);
-  bool stat = mgr.cube_product(mBody, mBody, right);
-  if ( !stat ) {
+  int nc = mgr.product(mBody, block(), right);
+  if ( nc == 0 ) {
     mgr.cube_clear(mBody);
   }
 
@@ -299,8 +299,8 @@ AlgCube::operator/(Literal right) const
 {
   AlgMgr mgr(mVariableNum);
   AlgBitVect* body = mgr.new_body(1);
-  bool stat = mgr.cube_division(body, mBody, right);
-  if ( !stat ) {
+  int nc = mgr.quotient(body, block(), right);
+  if ( nc == 0 ) {
     mgr.cube_clear(body);
   }
 
@@ -317,8 +317,8 @@ AlgCube&
 AlgCube::operator/=(Literal right)
 {
   AlgMgr mgr(mVariableNum);
-  bool stat = mgr.cube_division(mBody, mBody, right);
-  if ( !stat ) {
+  int nc = mgr.quotient(mBody, block(), right);
+  if ( nc == 0 ) {
     mgr.cube_clear(mBody);
   }
 

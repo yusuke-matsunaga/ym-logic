@@ -31,6 +31,7 @@ class AlgBlock;
 class AlgCube
 {
   friend class AlgCover;
+  friend class AlgMgr;
 
 public:
 
@@ -39,7 +40,7 @@ public:
   /// @param[in] lit リテラル
   ///
   /// 単一のリテラルからなるキューブを作る．
-  AlgCube(int cube_size,
+  AlgCube(int variable_num,
 	  Literal lit);
 
   /// @brief コンストラクタ
@@ -48,7 +49,7 @@ public:
   ///
   /// lit_list が省略された時には空のキューブを作る．
   explicit
-  AlgCube(int cube_size,
+  AlgCube(int variable_num,
 	  const vector<Literal>& lit_list = vector<Literal>());
 
   /// @brief コピーコンストラクタ

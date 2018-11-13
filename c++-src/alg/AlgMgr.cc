@@ -282,7 +282,7 @@ AlgMgr::product(AlgBitVect* dst_bv,
   const AlgBitVect* bv1 = src1.bitvect();
   ASSERT_COND( dst_bv != bv1 || src2.cube_num() == 1 );
   const AlgBitVect* bv2_start = src2.bitvect();
-  ASSERT_COND( dst_bv == bv2_start );
+  ASSERT_COND( dst_bv != bv2_start );
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
@@ -319,7 +319,6 @@ AlgMgr::product(AlgBitVect* dst_bv,
   AlgBitVect pat = lit2bv(lit);
   AlgBitVect pat1 = pat << sft;
   AlgBitVect mask = 3UL << sft;
-  AlgBitVect nmask = ~mask;
   int nb = _cube_size();
 
   const AlgBitVect* bv1 = src1.bitvect();
@@ -515,33 +514,47 @@ void
 AlgMgr::copy_from_cube_list(AlgBitVect* dst_bv,
 			    const vector<AlgCube>& cube_list)
 {
+  AlgBitVect* dst_bv_begin = dst_bv;
   for ( auto& cube: cube_list ) {
     copy(dst_bv, cube.mBody, 1);
     dst_bv += _cube_size();
   }
+  sort(dst_bv_begin, cube_list.size());
 }
 
 // @brief Literal のリストからカバー(を表すビットベクタ)のコピーを行う．
 // @param[in] dst_bv コピー先のビットベクタ
-// @param[in] lit_list キューブのリスト
+// @param[in] cube_list カバーを表すリテラルのリストのリスト
 //
-// lit_list 中に Literal::x() があるとキューブの区切りになる．
+// * dst_bv には十分な容量があると仮定する．
+void
+AlgMgr::copy_from_cube_list(AlgBitVect* dst_bv,
+			    const vector<vector<Literal>>& cube_list)
+{
+  AlgBitVect* dst_bv_begin = dst_bv;
+  for ( auto& lit_list: cube_list ) {
+    copy_from_lit_list(dst_bv, lit_list);
+    dst_bv += _cube_size();
+  }
+  sort(dst_bv_begin, cube_list.size());
+}
+
+// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
+// @param[in] dst_bv コピー先のビットベクタ
+// @param[in] lit_list キューブを表すリテラルのリスト
+//
+// * dst_bv には十分な容量があると仮定する．
 void
 AlgMgr::copy_from_lit_list(AlgBitVect* dst_bv,
 			   const vector<Literal>& lit_list)
 {
   for ( auto lit: lit_list ) {
-    if ( lit == Literal::x() ) {
-      dst_bv += _cube_size();
-    }
-    else {
-      VarId var_id = lit.varid();
-      int blk = _block_pos(var_id);
-      int sft = _shift_num(var_id);
-      AlgBitVect pat = lit2bv(lit);
-      AlgBitVect mask = pat << sft;
-      dst_bv[blk] |= mask;
-    }
+    VarId var_id = lit.varid();
+    int blk = _block_pos(var_id);
+    int sft = _shift_num(var_id);
+    AlgBitVect pat = lit2bv(lit);
+    AlgBitVect mask = pat << sft;
+    dst_bv[blk] |= mask;
   }
 }
 

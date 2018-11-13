@@ -40,6 +40,7 @@ public:
   /// * cube_list が空の時は空のカバーとなる．
   /// * cube_list が空でない時は各キューブのサイズは variable_num
   ///   と等しくなければならない．
+  /// * キューブの順番は変わる可能性がある．
   explicit
   AlgCover(int variable_num,
 	   const vector<AlgCube>& cube_list = vector<AlgCube>());
@@ -55,11 +56,11 @@ public:
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
-  /// @param[in] lit_list カバーを表すリテラルのリスト
+  /// @param[in] cube_list カバーを表すリテラルのリストのリスト
   ///
-  /// lit_list 中に Literal::X があった場合，キューブの区切りを表す．
+  /// * キューブの順番は変わる可能性がある．
   AlgCover(int variable_num,
-	   const vector<Literal>& lit_list);
+	   const vector<vector<Literal>>& cube_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
