@@ -85,6 +85,26 @@ public:
   literal_num(const AlgBlock& block,
 	      Literal lit);
 
+  /// @brief ビットベクタからハッシュ値を計算する．
+  /// @param[in] src 対象のブロック
+  SizeType
+  hash(const AlgBlock& src);
+
+  /// @brief カバー/キューブの内容を出力する．
+  /// @param[in] s 出力先のストリーム
+  /// @param[in] bv カバー/キューブを表すビットベクタ
+  /// @param[in] start キューブの開始位置
+  /// @param[in] end キューブの終了位置
+  /// @param[in] varname_list 変数名のリスト
+  ///
+  /// end は実際の末尾 + 1 を指す．
+  void
+  print(ostream& s,
+	const AlgBitVect* bv,
+	int start,
+	int end,
+	const vector<string>& varname_list = vector<string>());
+
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -95,6 +115,28 @@ public:
   // オペランドのカバーはビットベクタとキューブ数の組で表す．
   // 結果のキューブ数を関数の戻り値として返す．
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief カバー(を表すビットベクタ)のコピーを行う．
+  /// @param[in] dst_bv コピー先のビットベクタ
+  /// @param[in] src_bv ソースのビットベクタ
+  /// @param[in] cube_num キューブ数
+  ///
+  /// * dst_bv には十分な容量があると仮定する．
+  /// * dst_bv と src_bv の領域が重なっていたら正しく動かない．
+  void
+  cover_copy(AlgBitVect* dst_bv,
+	     const AlgBitVect* src_bv,
+	     int cube_num);
+
+  /// @brief カバー(を表すビットベクタ)に内容をセットする．
+  /// @param[in] dst_bv 対象のビットベクタ
+  /// @param[in] bv_list キューブを表すビットベクタのリスト
+  ///
+  /// * リテラルのリストでキューブを表す．
+  /// * dst_bv には十分な容量が確保されていると仮定する．
+  void
+  cover_set(AlgBitVect* dst_bv,
+	    const vector<AlgBitVect*>& bv_list);
 
   /// @brief カバー(を表すビットベクタ)に内容をセットする．
   /// @param[in] dst_bv 対象のビットベクタ
@@ -126,9 +168,9 @@ public:
   /// * dst_bv != src1.bitvect() を仮定する．
   /// * dst_bv != src2.bitvect() を仮定する．
   int
-  sum(AlgBitVect* dst_bv,
-      const AlgBlock& src1,
-      const AlgBlock& src2);
+  cover_sum(AlgBitVect* dst_bv,
+	    const AlgBlock& src1,
+	    const AlgBlock& src2);
 
   /// @brief 2つのカバーの差分を計算する．
   /// @param[in] dst_bv 結果を格納するビットベクタ
@@ -140,9 +182,9 @@ public:
   /// * dst_bv != src2.bitvect() を仮定する．
   /// * dst_bv == src1.bitvect() でも正しく動く
   int
-  diff(AlgBitVect* dst_bv,
-       const AlgBlock& src1,
-       const AlgBlock& src2);
+  cover_diff(AlgBitVect* dst_bv,
+	     const AlgBlock& src1,
+	     const AlgBlock& src2);
 
   /// @brief 2つのカバーの論理積を計算する．
   /// @param[in] dst_bv 結果を格納するビットベクタ
@@ -157,9 +199,9 @@ public:
   /// * src2.cubenum() == 1 の時は dst_bv == src1.bitvect()
   ///   でも正しく動く．
   int
-  product(AlgBitVect* dst_bv,
-	  const AlgBlock& src1,
-	  const AlgBlock& src2);
+  cover_product(AlgBitVect* dst_bv,
+		const AlgBlock& src1,
+		const AlgBlock& src2);
 
   /// @brief カバーとリテラルとの論理積を計算する．
   /// @param[in] dst_bv 結果を格納するビットベクタ
@@ -170,9 +212,9 @@ public:
   /// * dst_bv には十分な容量があると仮定する．
   /// * dst_bv == src1.bitvect() でも正しく動く．
   int
-  product(AlgBitVect* dst_bv,
-	  const AlgBlock& src1,
-	  Literal lit);
+  cover_product(AlgBitVect* dst_bv,
+		const AlgBlock& src1,
+		Literal lit);
 
   /// @brief カバーの代数的除算を行う．
   /// @param[in] dst_bv 結果を格納するビットベクタ
@@ -184,9 +226,9 @@ public:
   /// * dst_bv == src1.bitvect() でも正しく動く．
   /// * dst_bv == src2.bitvect() でも正しく動く．
   int
-  quotient(AlgBitVect* dst_bv,
-	   const AlgBlock& src1,
-	   const AlgBlock& src2);
+  cover_quotient(AlgBitVect* dst_bv,
+		 const AlgBlock& src1,
+		 const AlgBlock& src2);
 
   /// @brief カバーをリテラルで割る．
   /// @param[in] dst_bv 結果を格納するビットベクタ
@@ -197,9 +239,9 @@ public:
   /// * dst_bv には十分な容量があると仮定する．
   /// * dst_bv == src1.bitvect() でも正しく動く．
   int
-  quotient(AlgBitVect* dst_bv,
-	   const AlgBlock& src1,
-	   Literal lit);
+  cover_quotient(AlgBitVect* dst_bv,
+		 const AlgBlock& src1,
+		 Literal lit);
 
   /// @brief カバー中のすべてのキューブの共通部分を求める．
   /// @param[in] dst_bv 結果を格納するビットベクタ
@@ -211,25 +253,6 @@ public:
   common_cube(AlgBitVect* dst_bv,
 	      const AlgBlock& src1);
 
-  /// @brief カバー(を表すビットベクタ)のコピーを行う．
-  /// @param[in] dst_bv コピー先のビットベクタ
-  /// @param[in] src_bv ソースのビットベクタ
-  /// @param[in] cube_num キューブ数
-  ///
-  /// * dst_bv には十分な容量があると仮定する．
-  /// * dst_bv と src_bv の領域が重なっていたら正しく動かない．
-  void
-  _copy(AlgBitVect* dst_bv,
-	const AlgBitVect* src_bv,
-	int cube_num);
-
-  /// @brief カバー(を表すビットベクタ)を整列する．
-  /// @param[in] bv ビットベクタ
-  /// @param[in] cube_num キューブ数
-  void
-  sort(AlgBitVect* bv,
-       int cube_num);
-
   /// @brief カバー(を表すビットベクタ)の比較を行う．
   /// @param[in] src1 1つめのブロック
   /// @param[in] src2 2つめのブロック
@@ -239,13 +262,8 @@ public:
   ///
   /// 比較はキューブごとの辞書式順序で行う．
   int
-  compare(const AlgBlock& src1,
-	  const AlgBlock& src2);
-
-  /// @brief ビットベクタからハッシュ値を計算する．
-  /// @param[in] src 対象のブロック
-  SizeType
-  hash(const AlgBlock& src);
+  cover_compare(const AlgBlock& src1,
+		const AlgBlock& src2);
 
 
 public:
@@ -312,7 +330,7 @@ public:
   /// * dst_bv には十分な容量があると仮定する．
   void
   cube_set(AlgBitVect* dst_bv,
-	   std::initializer_list<Literal> lit_list);
+	   std::initializer_list<Literal>& lit_list);
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
   /// @param[in] dst_bv 対象のビットベクタ
@@ -323,7 +341,7 @@ public:
   void
   cube_set(AlgBitVect* dst_bv,
 	   int dst_offset,
-	   std::initializer_list<Literal> lit_list);
+	   std::initializer_list<Literal>& lit_list);
 
   /// @brief キューブ(を表すビットベクタ)の比較を行う．
   /// @param[in] bv1 1つめのキューブを表すビットベクタ
@@ -432,6 +450,22 @@ public:
 		const AlgBitVect* bv1,
 		const AlgBitVect* bv2);
 
+  /// @brief キューブによる商を求める．
+  /// @param[in] dst_bv コピー先のビットベクタ
+  /// @param[in] dst_offset オフセット
+  /// @param[in] bv1 1つめのキューブを表すビットベクタ
+  /// @param[in] bv1_offset bv1 のオフセット
+  /// @param[in] bv2 2つめのキューブを表すビットベクタ
+  /// @param[in] bv2_offset bv2 のオフセット
+  /// @return 正しく割ることができたら true を返す．
+  bool
+  cube_quotient(AlgBitVect* dst_bv,
+		int dst_offset,
+		const AlgBitVect* bv1,
+		int bv1_offset,
+		const AlgBitVect* bv2,
+		int bv2_offset);
+
   /// @brief 2つのキューブ(を表すビットベクタ)を入れ替える．
   /// @param[in] bv1 1つめのキューブを表すビットベクタ
   /// @param[in] bv2 2つめのキューブを表すビットベクタ
@@ -462,21 +496,6 @@ public:
 	       AlgBitVect* bv2,
 	       AlgBitVect* bv3,
 	       AlgBitVect* bv4);
-
-  /// @brief カバー/キューブの内容を出力する．
-  /// @param[in] s 出力先のストリーム
-  /// @param[in] bv カバー/キューブを表すビットベクタ
-  /// @param[in] start キューブの開始位置
-  /// @param[in] end キューブの終了位置
-  /// @param[in] varname_list 変数名のリスト
-  ///
-  /// end は実際の末尾 + 1 を指す．
-  void
-  print(ostream& s,
-	const AlgBitVect* bv,
-	int start,
-	int end,
-	const vector<string>& varname_list = vector<string>());
 
 
 public:
@@ -535,6 +554,20 @@ private:
   /// @param[in] dst_bv コピー先のビットベクタ
   void
   cube_restore(AlgBitVect* dst_bv);
+
+  /// @brief ビットベクタの末尾を計算する．
+  /// @param[in] bv ビットベクタの先頭
+  /// @param[in] cube_num キューブ数
+  AlgBitVect*
+  _calc_offset(AlgBitVect* bv,
+	       int cube_num);
+
+  /// @brief ビットベクタの末尾を計算する．
+  /// @param[in] bv ビットベクタの先頭
+  /// @param[in] cube_num キューブ数
+  const AlgBitVect*
+  _calc_offset(const AlgBitVect* bv,
+	       int cube_num);
 
   /// @brief ブロック位置を計算する．
   /// @param[in] var_id 変数番号
@@ -599,6 +632,41 @@ AlgMgr::get_pol(const AlgBitVect* bv,
   return static_cast<AlgPol>((bv[blk] >> sft) & 3ULL);
 }
 
+// @brief カバー(を表すビットベクタ)のコピーを行う．
+// @param[in] dst_bv コピー先のビットベクタ
+// @param[in] src_bv ソースのビットベクタ
+// @param[in] cube_num キューブ数
+//
+// * dst_bv には十分な容量があると仮定する．
+// * dst_bv と src_bv の領域が重なっていたら正しく動かない．
+inline
+void
+AlgMgr::cover_copy(AlgBitVect* dst_bv,
+		   const AlgBitVect* src_bv,
+		   int cube_num)
+{
+  bcopy(src_bv, dst_bv, cube_num * _cube_size() * sizeof(AlgBitVect));
+}
+
+// @brief カバー(を表すビットベクタ)に内容をセットする．
+// @param[in] dst_bv 対象のビットベクタ
+// @param[in] bv_list キューブを表すビットベクタのリスト
+//
+// * リテラルのリストでキューブを表す．
+// * dst_bv には十分な容量が確保されていると仮定する．
+inline
+void
+AlgMgr::cover_set(AlgBitVect* dst_bv,
+		  const vector<AlgBitVect*>& bv_list)
+{
+  AlgBitVect* dst_bv0 = dst_bv;
+  for ( auto bv: bv_list ) {
+    cube_copy(dst_bv, bv);
+    dst_bv += _cube_size();
+  }
+  _sort(dst_bv0, 0, bv_list.size());
+}
+
 // @brief カバー(を表すビットベクタ)に内容をセットする．
 // @param[in] dst_bv 対象のビットベクタ
 // @param[in] cube_list カバーを表すリテラルのリストのリスト
@@ -615,7 +683,7 @@ AlgMgr::cover_set(AlgBitVect* dst_bv,
     cube_set(dst_bv, lit_list);
     dst_bv += _cube_size();
   }
-  sort(dst_bv0, cube_list.size());
+  _sort(dst_bv0, 0, cube_list.size());
 }
 
 // @brief カバー(を表すビットベクタ)に内容をセットする．
@@ -634,19 +702,7 @@ AlgMgr::cover_set(AlgBitVect* dst_bv,
     cube_set(dst_bv, lit_list);
     dst_bv += _cube_size();
   }
-  sort(dst_bv0, cube_list.size());
-}
-
-// @brief カバー(を表すビットベクタ)を整列する．
-// @param[in] cube_num キューブ数
-// @param[in] bv ビットベクタ
-inline
-void
-AlgMgr::sort(AlgBitVect* bv,
-	     int cube_num)
-{
-  // 下請け関数を呼ぶだけ
-  _sort(bv, 0, cube_num);
+  _sort(dst_bv0, 0, cube_list.size());
 }
 
 // @brief キューブ(を表すビットベクタ)をクリアする．
@@ -657,7 +713,7 @@ void
 AlgMgr::cube_clear(AlgBitVect* dst_bv,
 		   int dst_offset)
 {
-  cube_clear(dst_bv + dst_offset * _cube_size());
+  cube_clear(_calc_offset(dst_bv, dst_offset));
 }
 
 // @brief キューブ(を表すビットベクタ)をコピーする．
@@ -668,7 +724,7 @@ void
 AlgMgr::cube_copy(AlgBitVect* dst_bv,
 		  const AlgBitVect* src_bv)
 {
-  _copy(dst_bv, src_bv, 1);
+  cover_copy(dst_bv, src_bv, 1);
 }
 
 // @brief キューブ(を表すビットベクタ)をコピーする．
@@ -683,8 +739,8 @@ AlgMgr::cube_copy(AlgBitVect* dst_bv,
 		  const AlgBitVect* src_bv,
 		  int src_offset)
 {
-  cube_copy(dst_bv + dst_offset * _cube_size(),
-	    src_bv + src_offset * _cube_size());
+  cube_copy(_calc_offset(dst_bv, dst_offset),
+	    _calc_offset(src_bv, src_offset));
 }
 
 // @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
@@ -699,7 +755,7 @@ AlgMgr::cube_set(AlgBitVect* dst_bv,
 		 int dst_offset,
 		 const vector<Literal>& lit_list)
 {
-  cube_set(dst_bv + dst_offset * _cube_size(), lit_list);
+  cube_set(_calc_offset(dst_bv, dst_offset), lit_list);
 }
 
 // @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
@@ -712,9 +768,9 @@ inline
 void
 AlgMgr::cube_set(AlgBitVect* dst_bv,
 		 int dst_offset,
-		 std::initializer_list<Literal> lit_list)
+		 std::initializer_list<Literal>& lit_list)
 {
-  cube_set(dst_bv + dst_offset * _cube_size(), lit_list);
+  cube_set(_calc_offset(dst_bv, dst_offset), lit_list);
 }
 
 // @brief キューブ(を表すビットベクタ)の比較を行う．
@@ -732,8 +788,8 @@ AlgMgr::cube_compare(const AlgBitVect* bv1,
 		     const AlgBitVect* bv2,
 		     int bv2_offset)
 {
-  return cube_compare(bv1 + bv1_offset * _cube_size(),
-		      bv2 + bv2_offset * _cube_size());
+  return cube_compare(_calc_offset(bv1, bv1_offset),
+		      _calc_offset(bv2, bv2_offset));
 }
 
 // @brief 2つのキューブが矛盾していないか調べる．
@@ -750,8 +806,8 @@ AlgMgr::cube_check_conflict(const AlgBitVect* bv1,
 			    const AlgBitVect* bv2,
 			    int bv2_offset)
 {
-  return cube_check_conflict(bv1 + bv1_offset * _cube_size(),
-			     bv2 + bv2_offset * _cube_size());
+  return cube_check_conflict(_calc_offset(bv1, bv1_offset),
+			     _calc_offset(bv2, bv2_offset));
 }
 
 // @brief 一方のキューブが他方のキューブに含まれているか調べる．
@@ -767,8 +823,8 @@ AlgMgr::cube_check_containment(const AlgBitVect* bv1,
 			       const AlgBitVect* bv2,
 			       int bv2_offset)
 {
-  return cube_check_containment(bv1 + bv1_offset * _cube_size(),
-				bv2 + bv2_offset * _cube_size());
+  return cube_check_containment(_calc_offset(bv1, bv1_offset),
+				_calc_offset(bv2, bv2_offset));
 }
 
 // @brief ２つのキューブに共通なリテラルがあれば true を返す．
@@ -784,24 +840,30 @@ AlgMgr::cube_check_intersect(const AlgBitVect* bv1,
 			     const AlgBitVect* bv2,
 			     int bv2_offset)
 {
-  return cube_check_intersect(bv1 + bv1_offset * _cube_size(),
-			      bv2 + bv2_offset * _cube_size());
+  return cube_check_intersect(_calc_offset(bv1, bv1_offset),
+			      _calc_offset(bv2, bv2_offset));
 }
 
-// @brief カバー(を表すビットベクタ)のコピーを行う．
+// @brief キューブによる商を求める．
 // @param[in] dst_bv コピー先のビットベクタ
-// @param[in] src_bv ソースのビットベクタ
-// @param[in] cube_num キューブ数
+// @param[in] dst_offset オフセット
+// @param[in] bv1 1つめのキューブを表すビットベクタ
+// @param[in] bv1_offset bv1 のオフセット
+// @param[in] bv2 2つめのキューブを表すビットベクタ
+// @param[in] bv2_offset bv2 のオフセット
+// @return 正しく割ることができたら true を返す．
 inline
-void
-AlgMgr::_copy(AlgBitVect* dst_bv,
-	      const AlgBitVect* src_bv,
-	      int cube_num)
+bool
+AlgMgr::cube_quotient(AlgBitVect* dst_bv,
+		      int dst_offset,
+		      const AlgBitVect* bv1,
+		      int bv1_offset,
+		      const AlgBitVect* bv2,
+		      int bv2_offset)
 {
-  const AlgBitVect* src_end = src_bv + cube_num * _cube_size();
-  for ( ; src_bv != src_end; ++ src_bv, ++ dst_bv ) {
-    *dst_bv = *src_bv;
-  }
+  return cube_quotient(_calc_offset(dst_bv, dst_offset),
+		       _calc_offset(bv1, bv1_offset),
+		       _calc_offset(bv2, bv2_offset));
 }
 
 // @brief 2つのキューブ(を表すビットベクタ)を入れ替える．
@@ -872,6 +934,28 @@ void
 AlgMgr::cube_restore(AlgBitVect* dst_bv)
 {
   cube_copy(dst_bv, mTmpBuff);
+}
+
+// @brief ビットベクタの末尾を計算する．
+// @param[in] bv ビットベクタの先頭
+// @param[in] cube_num キューブ数
+inline
+AlgBitVect*
+AlgMgr::_calc_offset(AlgBitVect* bv,
+		     int cube_num)
+{
+  return bv + cube_num * _cube_size();
+}
+
+/// @brief ビットベクタの末尾を計算する．
+/// @param[in] bv ビットベクタの先頭
+/// @param[in] cube_num キューブ数
+inline
+const AlgBitVect*
+AlgMgr::_calc_offset(const AlgBitVect* bv,
+		     int cube_num)
+{
+  return bv + cube_num * _cube_size();
 }
 
 // @brief ブロック位置を計算する．

@@ -9,6 +9,7 @@
 
 #include "ym/AlgCover.h"
 #include "ym/AlgCube.h"
+#include "ym/Range.h"
 #include "AlgBlock.h"
 #include "AlgMgr.h"
 
@@ -18,6 +19,18 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 // クラス AlgCover
 //////////////////////////////////////////////////////////////////////
+
+// @brief コンストラクタ
+// @param[in] variable_num 変数の数
+//
+// * 空のカバーとなる．
+AlgCover::AlgCover(int variable_num) :
+  mVariableNum{variable_num},
+  mCubeNum{0},
+  mCubeCap{mCubeNum},
+  mBody{nullptr}
+{
+}
 
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
@@ -33,31 +46,13 @@ AlgCover::AlgCover(int variable_num,
   mCubeCap{mCubeNum},
   mBody{nullptr}
 {
-  AlgMgr mgr(mVariableNum);
-  mBody = mgr.new_body(mCubeCap);
-  int offset = 0;
-  for ( auto& cube: cube_list ) {
-    mgr.cube_copy(mBody, offset, cube.mBody, 0);
-    ++ offset;
+  vector<AlgBitVect*> bv_list(mCubeNum);
+  for ( int i: Range(mCubeNum) ) {
+    bv_list[i] = cube_list[i].mBody;
   }
-}
-
-// @brief 特殊なコンストラクタ
-// @param[in] variable_num 変数の数
-// @param[in] dummy ダミーの引数
-//
-// 空のキューブを1つ持つカバーとなる．
-// dummy の値は無視される．
-AlgCover::AlgCover(int variable_num,
-		   int dummy) :
-  mVariableNum{variable_num},
-  mCubeNum{1},
-  mCubeCap{mCubeNum},
-  mBody{nullptr}
-{
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr.cube_clear(mBody);
+  mgr.cover_set(mBody, bv_list);
 }
 
 // @brief コンストラクタ
@@ -74,11 +69,24 @@ AlgCover::AlgCover(int variable_num,
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  int offset = 0;
-  for ( auto& lit_list: cube_list ) {
-    mgr.cube_set(mBody, offset, lit_list);
-    ++ offset;
-  }
+  mgr.cover_set(mBody, cube_list);
+}
+
+// @brief コンストラクタ
+// @param[in] variable_num 変数の数
+// @param[in] cube_list カバーを表すリテラルのリストのリスト
+//
+// * キューブの順番は変わる可能性がある．
+AlgCover::AlgCover(int variable_num,
+		   std::initializer_list<std::initializer_list<Literal>>& cube_list) :
+  mVariableNum{variable_num},
+  mCubeNum{static_cast<int>(cube_list.size())},
+  mCubeCap{mCubeNum},
+  mBody{nullptr}
+{
+  AlgMgr mgr(mVariableNum);
+  mBody = mgr.new_body(mCubeCap);
+  mgr.cover_set(mBody, cube_list);
 }
 
 // @brief コピーコンストラクタ
@@ -91,7 +99,7 @@ AlgCover::AlgCover(const AlgCover& src) :
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr._copy(mBody, src.mBody, mCubeNum);
+  mgr.cover_copy(mBody, src.mBody, mCubeNum);
 }
 
 // @brief コピー代入演算子
@@ -111,7 +119,7 @@ AlgCover::operator=(const AlgCover& src)
     mCubeCap = mCubeNum;;
     AlgMgr mgr(mVariableNum);
     mBody = mgr.new_body(mCubeCap);
-    mgr._copy(mBody, src.mBody, mCubeNum);
+    mgr.cover_copy(mBody, src.mBody, mCubeNum);
   }
 
   return *this;
@@ -123,8 +131,10 @@ AlgCover::AlgCover(AlgCover&& src) :
   mVariableNum{src.mVariableNum},
   mCubeNum{src.mCubeNum},
   mCubeCap{src.mCubeCap},
-  mBody{std::move(src.mBody)}
+  mBody{src.mBody}
 {
+  src.mCubeNum = 0;
+  src.mCubeCap = 0;
   src.mBody = nullptr;
 }
 
@@ -140,7 +150,10 @@ AlgCover::operator=(AlgCover&& src)
   mVariableNum = src.mVariableNum;
   mCubeNum = src.mCubeNum;
   mCubeCap = src.mCubeCap;
-  mBody = std::move(src.mBody);
+  mBody = src.mBody;
+
+  src.mCubeNum = 0;
+  src.mCubeCap = 0;
   src.mBody = nullptr;
 
   return *this;
@@ -169,7 +182,7 @@ AlgCover::AlgCover(AlgCube&& cube) :
   mVariableNum{cube.variable_num()},
   mCubeNum{1},
   mCubeCap{mCubeNum},
-  mBody{std::move(cube.mBody)}
+  mBody{cube.mBody}
 {
   cube.mBody = nullptr;
 }
@@ -218,6 +231,31 @@ AlgCover::literal_num(Literal lit) const
   return mgr.literal_num(block(), lit);
 }
 
+// @brief 内容をリテラルのリストのリストに変換する．
+// @param[in] cube_list リテラルのリストのリストを格納するベクタ
+void
+AlgCover::to_literal_list(vector<vector<Literal>>& cube_list) const
+{
+  cube_list.clear();
+  cube_list.resize(mCubeNum);
+
+  AlgMgr mgr(mVariableNum);
+  for ( int i: Range(mCubeNum) ) {
+    vector<Literal>& tmp_list = cube_list[i];
+    tmp_list.reserve(mVariableNum);
+    for ( int j: Range(mVariableNum) ) {
+      VarId var(j);
+      AlgPol p = mgr.get_pol(mBody, i, var);
+      if ( p == AlgPol::P ) {
+	tmp_list.push_back(Literal(var, false));
+      }
+      else if ( p == AlgPol::N ) {
+	tmp_list.push_back(Literal(var, true));
+      }
+    }
+  }
+}
+
 #if 0
 // @brief 内容を返す．
 // @param[in] cube_id キューブ番号 ( 0 <= cube_id < cube_num() )
@@ -226,7 +264,6 @@ AlgPol
 AlgCover::get_pol(int cube_id,
 		  VarId var_id) const
 {
-  AlgMgr mgr(mVariableNum);
   return mgr.get_pol(mBody, cube_id, var_id);
 }
 #endif
@@ -250,7 +287,7 @@ AlgCover::operator+(const AlgCover& right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum + right.mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.sum(body, block(), right.block());
+  int nc = mgr.cover_sum(body, block(), right.block());
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -267,7 +304,7 @@ AlgCover::operator+=(const AlgCover& right)
   int cap = mCubeNum + right.mCubeNum;
   // 新しいブロックを作る．
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.sum(body, block(), right.block());
+  int nc = mgr.cover_sum(body, block(), right.block());
 
   mgr.delete_body(mBody, mCubeNum);
 
@@ -289,7 +326,7 @@ AlgCover::operator+(const AlgCube& right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum + 1;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.sum(body, block(), right.block());
+  int nc = mgr.cover_sum(body, block(), right.block());
   return AlgCover(mVariableNum, nc, cap, body);
 }
 
@@ -304,7 +341,7 @@ AlgCover::operator+=(const AlgCube& right)
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum + 1;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.sum(body, block(), right.block());
+  int nc = mgr.cover_sum(body, block(), right.block());
 
   mgr.delete_body(mBody, mCubeNum);
 
@@ -328,7 +365,7 @@ AlgCover::operator-(const AlgCover& right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.diff(body, block(), right.block());
+  int nc = mgr.cover_diff(body, block(), right.block());
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -343,7 +380,7 @@ AlgCover::operator-=(const AlgCover& right)
 
   // キューブ数は増えないのでブロックはそのまま
   AlgMgr mgr(mVariableNum);
-  mCubeNum = mgr.diff(mBody, block(), right.block());
+  mCubeNum = mgr.cover_diff(mBody, block(), right.block());
 
   return *this;
 }
@@ -361,7 +398,7 @@ AlgCover::operator-(const AlgCube& right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.diff(body, block(), right.block());
+  int nc = mgr.cover_diff(body, block(), right.block());
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -375,7 +412,7 @@ AlgCover::operator-=(const AlgCube& right)
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   AlgMgr mgr(mVariableNum);
-  mCubeNum = mgr.diff(mBody, block(), right.block());
+  mCubeNum = mgr.cover_diff(mBody, block(), right.block());
 
   return *this;
 }
@@ -391,7 +428,7 @@ AlgCover::operator*(const AlgCover& right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum * right.mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.product(body, block(), right.block());
+  int nc = mgr.cover_product(body, block(), right.block());
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -407,7 +444,7 @@ AlgCover::operator*=(const AlgCover& right)
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum * right.mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.product(body, block(), right.block());
+  int nc = mgr.cover_product(body, block(), right.block());
 
   mgr.delete_body(mBody, mCubeNum);
 
@@ -429,7 +466,7 @@ AlgCover::operator*(const AlgCube& right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.product(body, block(), right.block());
+  int nc = mgr.cover_product(body, block(), right.block());
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -443,7 +480,7 @@ AlgCover::operator*=(const AlgCube& right)
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   AlgMgr mgr(mVariableNum);
-  mCubeNum = mgr.product(mBody, block(), right.block());
+  mCubeNum = mgr.cover_product(mBody, block(), right.block());
 
   return *this;
 }
@@ -457,7 +494,7 @@ AlgCover::operator*(Literal right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.product(body, block(), right);
+  int nc = mgr.cover_product(body, block(), right);
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -469,7 +506,7 @@ AlgCover&
 AlgCover::operator*=(Literal right)
 {
   AlgMgr mgr(mVariableNum);
-  mCubeNum = mgr.product(mBody, block(), right);
+  mCubeNum = mgr.cover_product(mBody, block(), right);
 
   return *this;
 }
@@ -485,7 +522,7 @@ AlgCover::operator/(const AlgCover& right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.quotient(body, block(), right.block());
+  int nc = mgr.cover_quotient(body, block(), right.block());
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -499,7 +536,7 @@ AlgCover::operator/=(const AlgCover& right)
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   AlgMgr mgr(mVariableNum);
-  mCubeNum = mgr.quotient(mBody, block(), right.block());
+  mCubeNum = mgr.cover_quotient(mBody, block(), right.block());
 
   return *this;
 }
@@ -515,7 +552,7 @@ AlgCover::operator/(const AlgCube& right) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.quotient(body, block(), right.block());
+  int nc = mgr.cover_quotient(body, block(), right.block());
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -529,7 +566,7 @@ AlgCover::operator/=(const AlgCube& right)
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   AlgMgr mgr(mVariableNum);
-  mCubeNum = mgr.quotient(mBody, block(), right.block());
+  mCubeNum = mgr.cover_quotient(mBody, block(), right.block());
 
   return *this;
 }
@@ -543,7 +580,7 @@ AlgCover::operator/(Literal lit) const
   AlgMgr mgr(mVariableNum);
   int cap = mCubeNum;
   AlgBitVect* body = mgr.new_body(cap);
-  int nc = mgr.quotient(body, block(), lit);
+  int nc = mgr.cover_quotient(body, block(), lit);
 
   return AlgCover(mVariableNum, nc, cap, body);
 }
@@ -555,7 +592,7 @@ AlgCover&
 AlgCover::operator/=(Literal lit)
 {
   AlgMgr mgr(mVariableNum);
-  mCubeNum = mgr.quotient(mBody, block(), lit);
+  mCubeNum = mgr.cover_quotient(mBody, block(), lit);
 
   return *this;
 }

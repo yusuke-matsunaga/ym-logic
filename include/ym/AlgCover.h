@@ -10,6 +10,7 @@
 
 
 #include "ym/Alg.h"
+#include "ym/Literal.h"
 #include "ym/HashFunc.h"
 
 
@@ -33,24 +34,21 @@ public:
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
+  ///
+  /// * 空のカバーとなる．
+  explicit
+  AlgCover(int variable_num);
+
+  /// @brief コンストラクタ
+  /// @param[in] variable_num 変数の数
   /// @param[in] cube_list キューブのリスト
   ///
   /// * cube_list が空の時は空のカバーとなる．
   /// * cube_list が空でない時は各キューブのサイズは variable_num
   ///   と等しくなければならない．
   /// * キューブの順番は変わる可能性がある．
-  explicit
   AlgCover(int variable_num,
-	   const vector<AlgCube>& cube_list = vector<AlgCube>());
-
-  /// @brief 特殊なコンストラクタ
-  /// @param[in] variable_num 変数の数
-  /// @param[in] dummy ダミーの引数
-  ///
-  /// 空のキューブを1つ持つカバーとなる．
-  /// dummy の値は無視される．
-  AlgCover(int variable_num,
-	   int dummy);
+	   const vector<AlgCube>& cube_list);
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
@@ -59,6 +57,14 @@ public:
   /// * キューブの順番は変わる可能性がある．
   AlgCover(int variable_num,
 	   const vector<vector<Literal>>& cube_list);
+
+  /// @brief コンストラクタ
+  /// @param[in] variable_num 変数の数
+  /// @param[in] cube_list カバーを表すリテラルのリストのリスト
+  ///
+  /// * キューブの順番は変わる可能性がある．
+  AlgCover(int variable_num,
+	   std::initializer_list<std::initializer_list<Literal>>& cube_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
@@ -121,6 +127,11 @@ public:
   /// @param[in] lit 対象のリテラル
   int
   literal_num(Literal lit) const;
+
+  /// @brief 内容をリテラルのリストのリストに変換する．
+  /// @param[in] cube_list リテラルのリストのリストを格納するベクタ
+  void
+  to_literal_list(vector<vector<Literal>>& cube_list) const;
 
 #if 0
   /// @brief 内容を返す．
@@ -355,6 +366,15 @@ operator*(const AlgCube& left,
 	  const AlgCover& right);
 
 /// @relates AlgCover
+/// @brief リテラルとカバーの乗算
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果を返す．
+AlgCover
+operator*(Literal left,
+	  const AlgCover& right);
+
+/// @relates AlgCover
 /// @brief 比較演算子(rich compare)
 /// @param[in] left, right オペランド
 /// @return 比較結果を返す．
@@ -465,6 +485,20 @@ operator+(const AlgCube& left,
 inline
 AlgCover
 operator*(const AlgCube& left,
+	  const AlgCover& right)
+{
+  // 交換則を用いる．
+  return right.operator*(left);
+}
+
+// @relates AlgCover
+// @brief リテラルとカバーの乗算
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator*(Literal left,
 	  const AlgCover& right)
 {
   // 交換則を用いる．

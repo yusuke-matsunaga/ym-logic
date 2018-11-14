@@ -56,7 +56,7 @@ AlgCube::AlgCube(int variable_num,
 // @param[in] variable_num 変数の数
 // @param[in] lit_list キューブを表すリテラルのリスト初期化子
 AlgCube::AlgCube(int variable_num,
-		 std::initializer_list<Literal> lit_list) :
+		 std::initializer_list<Literal>& lit_list) :
   mVariableNum{variable_num}
 {
   AlgMgr mgr(mVariableNum);
@@ -95,8 +95,9 @@ AlgCube::operator=(const AlgCube& src)
 // @param[in] src ムーブ元のオブジェクト
 AlgCube::AlgCube(AlgCube&& src) :
   mVariableNum{src.mVariableNum},
-  mBody{std::move(src.mBody)}
+  mBody{src.mBody}
 {
+  src.mBody = nullptr;
 }
 
 // @brief ムーブ代入演算子
@@ -108,7 +109,9 @@ AlgCube::operator=(AlgCube&& src)
   delete_body();
 
   mVariableNum = src.mVariableNum;
-  mBody = std::move(src.mBody);
+  mBody = src.mBody;
+
+  src.mBody = nullptr;
 
   return *this;
 }
@@ -161,6 +164,27 @@ AlgCube::literal_num() const
 {
   AlgMgr mgr(mVariableNum);
   return mgr.literal_num(block());
+}
+
+// @brief 内容をリテラルのリストに変換する．
+// @param[in] lit_list 結果を格納するベクタ
+void
+AlgCube::to_literal_list(vector<Literal>& lit_list) const
+{
+  AlgMgr mgr(mVariableNum);
+  int nl = mgr.literal_num(block());
+  lit_list.clear();
+  lit_list.reserve(nl);
+  for ( int i = 0; i < mVariableNum; ++ i ) {
+    VarId var(i);
+    AlgPol p = mgr.get_pol(mBody, 0, var);
+    if ( p == AlgPol::P ) {
+      lit_list.push_back(Literal(var, false));
+    }
+    else if ( p == AlgPol::N ) {
+      lit_list.push_back(Literal(var, true));
+    }
+  }
 }
 
 // @brief 指定したリテラルを含んでいたら true を返す．
@@ -254,7 +278,7 @@ AlgCube::operator*(Literal right) const
 {
   AlgMgr mgr(mVariableNum);
   AlgBitVect* body = mgr.new_body(1);
-  int nc = mgr.product(body, block(), right);
+  int nc = mgr.cover_product(body, block(), right);
   if ( nc == 0 ) {
     mgr.cube_clear(body);
   }
@@ -272,7 +296,7 @@ AlgCube&
 AlgCube::operator*=(Literal right)
 {
   AlgMgr mgr(mVariableNum);
-  int nc = mgr.product(mBody, block(), right);
+  int nc = mgr.cover_product(mBody, block(), right);
   if ( nc == 0 ) {
     mgr.cube_clear(mBody);
   }
@@ -313,6 +337,8 @@ AlgCube::operator/=(const AlgCube& right)
   if ( !stat ) {
     mgr.cube_clear(mBody);
   }
+
+  return *this;
 }
 
 // @brief リテラルによる商を計算する
@@ -322,7 +348,7 @@ AlgCube::operator/(Literal right) const
 {
   AlgMgr mgr(mVariableNum);
   AlgBitVect* body = mgr.new_body(1);
-  int nc = mgr.quotient(body, block(), right);
+  int nc = mgr.cover_quotient(body, block(), right);
   if ( nc == 0 ) {
     mgr.cube_clear(body);
   }
@@ -340,12 +366,28 @@ AlgCube&
 AlgCube::operator/=(Literal right)
 {
   AlgMgr mgr(mVariableNum);
-  int nc = mgr.quotient(mBody, block(), right);
+  int nc = mgr.cover_quotient(mBody, block(), right);
   if ( nc == 0 ) {
     mgr.cube_clear(mBody);
   }
 
   return *this;
+}
+
+// @relates AlgCube
+// @brief AlgCubeの比較演算子
+// @param[in] left, right オペランド
+// @retval -1 left < right
+// @retval  0 left = right
+// @retval  1 left > right
+int
+compare(const AlgCube& left,
+	const AlgCube& right)
+{
+  ASSERT_COND( left.variable_num() == right.variable_num() );
+
+  AlgMgr mgr(left.variable_num());
+  return mgr.cube_compare(left.mBody, right.mBody);
 }
 
 // @breif AlgBlock を返す．

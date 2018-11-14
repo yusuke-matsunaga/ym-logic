@@ -58,7 +58,7 @@ public:
   /// @param[in] variable_num 変数の数
   /// @param[in] lit_list キューブを表すリテラルのリスト初期化子
   AlgCube(int variable_num,
-	  std::initializer_list<Literal> lit_list);
+	  std::initializer_list<Literal>& lit_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
@@ -97,15 +97,15 @@ public:
   int
   literal_num() const;
 
-  /// @brief 内容をリテラルのリストに変換する．
-  /// @param[in] lit_list 結果を格納するベクタ
-  void
-  to_literal_list(vector<Literal>& lit_list) const;
-
   /// @brief 指定したリテラルを含んでいたら true を返す．
   /// @param[in] lit 対象のリテラル
   bool
   has_literal(Literal lit) const;
+
+  /// @brief 内容をリテラルのリストに変換する．
+  /// @param[in] lit_list 結果を格納するベクタ
+  void
+  to_literal_list(vector<Literal>& lit_list) const;
 
   /// @brief オペランドのキューブに含まれていたら true を返す．
   /// @param[in] right オペランドのキューブ
