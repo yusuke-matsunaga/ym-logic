@@ -918,8 +918,8 @@ AlgMgr::cube_quotient(AlgBitVect* dst_bv,
 // @param[in] lit 対象のリテラル
 // @return lit を含んでいたら true を返す．
 bool
-AlgMgr::is_in(AlgBitVect* bv,
-	      Literal lit)
+AlgMgr::litset_check(AlgBitVect* bv,
+		     Literal lit)
 {
   VarId var_id = lit.varid();
   int blk = _block_pos(var_id);
@@ -934,19 +934,17 @@ AlgMgr::is_in(AlgBitVect* bv,
   }
 }
 
-// @brief 要素の追加
-// @param[in] bv ビットベクタ
-// @param[in] lit 対象のリテラル
+// @brief ユニオン演算
+// @param[in] dst_bv 対象のビットベクタ
+// @param[in] src_bv 加えるビットベクタ
 void
-AlgMgr::add_lit(AlgBitVect* bv,
-		Literal lit)
+AlgMgr::litset_union(AlgBitVect* dst_bv,
+		     const AlgBitVect* src_bv)
 {
-  VarId var_id = lit.varid();
-  int blk = _block_pos(var_id);
-  int sft = _shift_num(var_id);
-  AlgBitVect pat = lit2bv(lit);
-  AlgBitVect mask = pat << sft;
-  bv[blk] |= mask;
+  AlgBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
+  for ( ; dst_bv != dst_bv_end; ++ dst_bv, ++ src_bv ) {
+    *dst_bv |= *src_bv;
+  }
 }
 
 // @brief カバー/キューブの内容を出力する．

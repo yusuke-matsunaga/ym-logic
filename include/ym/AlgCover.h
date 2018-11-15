@@ -148,11 +148,23 @@ public:
   AlgCover
   operator+(const AlgCover& right) const;
 
+  /// @brief 論理和を計算して代入する．
+  /// @param[in] right オペランド
+  /// @return 演算後の自身への参照を返す．
+  AlgCover&
+  operator+=(const AlgCover& right);
+
   /// @brief 論理和を計算する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
   AlgCover
   operator+(const AlgCube& right) const;
+
+  /// @brief 論理和を計算して代入する(キューブ版)．
+  /// @param[in] right オペランド
+  /// @return 演算後の自身への参照を返す．
+  AlgCover&
+  operator+=(const AlgCube& right);
 
   /// @brief 差分を計算する．
   /// @param[in] right オペランド
@@ -162,6 +174,12 @@ public:
   AlgCover
   operator-(const AlgCover& right) const;
 
+  /// @brief 差分を計算して代入する．
+  /// @param[in] right オペランド
+  /// @return 演算後の自身への参照を返す．
+  AlgCover&
+  operator-=(const AlgCover& right);
+
   /// @brief 差分を計算する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
@@ -170,65 +188,17 @@ public:
   AlgCover
   operator-(const AlgCube& right) const;
 
-  /// @brief 論理積を計算する．
-  /// @param[in] right オペランド
-  /// @return 計算結果を返す．
-  AlgCover
-  operator*(const AlgCover& right) const;
-
-  /// @brief 論理積を計算する(キューブ版)．
-  /// @param[in] right オペランド
-  /// @return 計算結果を返す．
-  AlgCover
-  operator*(const AlgCube& right) const;
-
-  /// @brief 論理積を計算する(リテラル版)．
-  /// @param[in] right オペランド
-  /// @return 計算結果を返す．
-  AlgCover
-  operator*(Literal right) const;
-
-  /// @brief algebraic division を計算する．
-  /// @param[in] right オペランド
-  /// @return 計算結果を返す．
-  AlgCover
-  operator/(const AlgCover& right) const;
-
-  /// @brief キューブによる商を計算する．
-  /// @param[in] cube 対象のキューブ
-  /// @return 計算結果を返す．
-  AlgCover
-  operator/(const AlgCube& cube) const;
-
-  /// @brief リテラルによる商を計算する．
-  /// @param[in] lit 対象のリテラル
-  /// @return 計算結果を返す．
-  AlgCover
-  operator/(Literal lit) const;
-
-  /// @brief 論理和を計算して代入する．
-  /// @param[in] right オペランド
-  /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator+=(const AlgCover& right);
-
-  /// @brief 論理和を計算して代入する(キューブ版)．
-  /// @param[in] right オペランド
-  /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator+=(const AlgCube& right);
-
-  /// @brief 差分を計算して代入する．
-  /// @param[in] right オペランド
-  /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator-=(const AlgCover& right);
-
   /// @brief 差分を計算して代入する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
   AlgCover&
   operator-=(const AlgCube& right);
+
+  /// @brief 論理積を計算する．
+  /// @param[in] right オペランド
+  /// @return 計算結果を返す．
+  AlgCover
+  operator*(const AlgCover& right) const;
 
   /// @brief 論理積を計算して代入する．
   /// @param[in] right オペランド
@@ -236,11 +206,23 @@ public:
   AlgCover&
   operator*=(const AlgCover& right);
 
+  /// @brief 論理積を計算する(キューブ版)．
+  /// @param[in] right オペランド
+  /// @return 計算結果を返す．
+  AlgCover
+  operator*(const AlgCube& right) const;
+
   /// @brief 論理積を計算して代入する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
   AlgCover&
   operator*=(const AlgCube& right);
+
+  /// @brief 論理積を計算する(リテラル版)．
+  /// @param[in] right オペランド
+  /// @return 計算結果を返す．
+  AlgCover
+  operator*(Literal right) const;
 
   /// @brief 論理積を計算して代入する(リテラル版)．
   /// @param[in] right オペランド
@@ -248,17 +230,35 @@ public:
   AlgCover&
   operator*=(Literal right);
 
+  /// @brief algebraic division を計算する．
+  /// @param[in] right オペランド
+  /// @return 計算結果を返す．
+  AlgCover
+  operator/(const AlgCover& right) const;
+
   /// @brief algebraic division を行って代入する．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
   AlgCover&
   operator/=(const AlgCover& right);
 
+  /// @brief キューブによる商を計算する．
+  /// @param[in] cube 対象のキューブ
+  /// @return 計算結果を返す．
+  AlgCover
+  operator/(const AlgCube& cube) const;
+
   /// @brief キューブによる商を計算して代入する．
   /// @param[in] cube 対象のキューブ
   /// @return 演算後の自身への参照を返す．
   AlgCover&
   operator/=(const AlgCube& cube);
+
+  /// @brief リテラルによる商を計算する．
+  /// @param[in] lit 対象のリテラル
+  /// @return 計算結果を返す．
+  AlgCover
+  operator/(Literal lit) const;
 
   /// @brief リテラルによる商を計算して代入する．
   /// @param[in] lit 対象のリテラル
@@ -348,6 +348,39 @@ private:
 };
 
 /// @relates AlgCover
+/// @brief カバーの加算
+/// @param[in] left, right
+/// @return 結果を返す．
+AlgCover
+operator+(AlgCover&& left,
+	  const AlgCover& right);
+
+/// @relates AlgCover
+/// @brief カバーの加算
+/// @param[in] left, right
+/// @return 結果を返す．
+AlgCover
+operator+(const AlgCover& left,
+	  AlgCover&& right);
+
+/// @relates AlgCover
+/// @brief カバーの加算
+/// @param[in] left, right
+/// @return 結果を返す．
+AlgCover
+operator+(AlgCover&& left,
+	  AlgCover&& right);
+
+/// @relates AlgCover
+/// @brief キューブとカバーの加算
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果を返す．
+AlgCover
+operator+(AlgCover&& left,
+	  const AlgCube& right);
+
+/// @relates AlgCover
 /// @brief キューブとカバーの加算
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
@@ -357,6 +390,39 @@ operator+(const AlgCube& left,
 	  const AlgCover& right);
 
 /// @relates AlgCover
+/// @brief キューブとカバーの加算
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果を返す．
+AlgCover
+operator+(const AlgCube& left,
+	  AlgCover&& right);
+
+/// @relates AlgCover
+/// @brief カバーの減算
+/// @param[in] left, right オペランド
+/// @return 結果を返す．
+AlgCover
+operator-(AlgCover&& left,
+	  const AlgCover& right);
+
+/// @relates AlgCover
+/// @brief カバーとキューブの減算
+/// @param[in] left, right オペランド
+/// @return 結果を返す．
+AlgCover
+operator-(AlgCover&& left,
+	  const AlgCube& right);
+
+/// @relates AlgCover, AlgCube
+/// @brief カバーとキューブの乗算
+/// @param[in] left, right オペランド
+/// @return 結果を返す．
+AlgCover
+operator*(AlgCover&& left,
+	  const AlgCube& right);
+
+/// @relates AlgCover, AlgCube
 /// @brief キューブとカバーの乗算
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
@@ -365,7 +431,24 @@ AlgCover
 operator*(const AlgCube& left,
 	  const AlgCover& right);
 
-/// @relates AlgCover
+/// @relates AlgCover, AlgCube
+/// @brief キューブとカバーの乗算
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果を返す．
+AlgCover
+operator*(const AlgCube& left,
+	  AlgCover&& right);
+
+/// @relates AlgCover, Literal
+/// @brief カバーとリテラルの乗算
+/// @param[in] left, right オペランド
+/// @return 結果を返す．
+AlgCover
+operator*(AlgCover&& left,
+	  Literal right);
+
+/// @relates AlgCover, Literal
 /// @brief リテラルとカバーの乗算
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
@@ -373,6 +456,39 @@ operator*(const AlgCube& left,
 AlgCover
 operator*(Literal left,
 	  const AlgCover& right);
+
+/// @relates AlgCover, Literal
+/// @brief リテラルとカバーの乗算
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果を返す．
+AlgCover
+operator*(Literal left,
+	  AlgCover&& right);
+
+/// @relates AlgCover
+/// @brief カバーの除算
+/// @param[in] left, right オペランド
+/// @return 結果を返す．
+AlgCover
+operator/(AlgCover&& left,
+	  const AlgCover& right);
+
+/// @relates AlgCover, AlgCube
+/// @brief カバーとキューブの除算
+/// @param[in] left, right オペランド
+/// @return 結果を返す．
+AlgCover
+operator/(AlgCover&& left,
+	  const AlgCube& right);
+
+/// @relates AlgCover, Literal
+/// @brief カバーとリテラルの除算
+/// @param[in] left, right オペランド
+/// @return 結果を返す．
+AlgCover
+operator/(AlgCover&& left,
+	  Literal right);
 
 /// @relates AlgCover
 /// @brief 比較演算子(rich compare)
@@ -464,6 +580,56 @@ AlgCover::cube_num() const
 }
 
 // @relates AlgCover
+// @brief カバーの加算
+// @param[in] left, right
+// @return 結果を返す．
+inline
+AlgCover
+operator+(AlgCover&& left,
+	  const AlgCover& right)
+{
+  return AlgCover(std::move(left)).operator+=(right);
+}
+
+// @relates AlgCover
+// @brief カバーの加算
+// @param[in] left, right
+// @return 結果を返す．
+inline
+AlgCover
+operator+(const AlgCover& left,
+	  AlgCover&& right)
+{
+  // 交換則を用いる．
+  return AlgCover(std::move(right)).operator+=(left);
+}
+
+// @relates AlgCover
+// @brief カバーの加算
+// @param[in] left, right
+// @return 結果を返す．
+inline
+AlgCover
+operator+(AlgCover&& left,
+	  AlgCover&& right)
+{
+  return AlgCover(std::move(left)).operator+=(right);
+}
+
+// @relates AlgCover
+// @brief キューブとカバーの加算
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator+(AlgCover&& left,
+	  const AlgCube& right)
+{
+  return AlgCover(std::move(left)).operator+=(right);
+}
+
+// @relates AlgCover
 // @brief キューブとカバーの加算
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
@@ -475,6 +641,56 @@ operator+(const AlgCube& left,
 {
   // 交換則を用いる．
   return right.operator+(left);
+}
+
+// @relates AlgCover
+// @brief キューブとカバーの加算
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator+(const AlgCube& left,
+	  AlgCover&& right)
+{
+  // 交換則を用いる．
+  return AlgCover(std::move(right)).operator+=(left);
+}
+
+/// @relates AlgCover
+/// @brief カバーの減算
+/// @param[in] left, right オペランド
+/// @return 結果を返す．
+inline
+AlgCover
+operator-(AlgCover&& left,
+	  const AlgCover& right)
+{
+  return AlgCover(std::move(left)).operator-=(right);
+}
+
+// @relates AlgCover
+// @brief カバーとキューブの減算
+// @param[in] left, right オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator-(AlgCover&& left,
+	  const AlgCube& right)
+{
+  return AlgCover(std::move(left)).operator-=(right);
+}
+
+// @relates AlgCover, AlgCube
+// @brief カバーとキューブの乗算
+// @param[in] left, right オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator*(AlgCover&& left,
+	  const AlgCube& right)
+{
+  return AlgCover(std::move(left)).operator*=(right);
 }
 
 // @relates AlgCover
@@ -491,6 +707,32 @@ operator*(const AlgCube& left,
   return right.operator*(left);
 }
 
+// @relates AlgCover, AlgCube
+// @brief キューブとカバーの乗算
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator*(const AlgCube& left,
+	  AlgCover&& right)
+{
+  // 交換則を用いる．
+  return AlgCover(std::move(right)).operator*=(left);
+}
+
+// @relates AlgCover, Literal
+// @brief カバーとリテラルの乗算
+// @param[in] left, right オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator*(AlgCover&& left,
+	  Literal right)
+{
+  return AlgCover(std::move(left)).operator*=(right);
+}
+
 // @relates AlgCover
 // @brief リテラルとカバーの乗算
 // @param[in] left 第1オペランド
@@ -503,6 +745,56 @@ operator*(Literal left,
 {
   // 交換則を用いる．
   return right.operator*(left);
+}
+
+// @relates AlgCover, Literal
+// @brief リテラルとカバーの乗算
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator*(Literal left,
+	  AlgCover&& right)
+{
+  // 交換則を用いる．
+  return AlgCover(std::move(right)).operator*=(left);
+}
+
+// @relates AlgCover
+// @brief カバーの除算
+// @param[in] left, right オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator/(AlgCover&& left,
+	  const AlgCover& right)
+{
+  return AlgCover(std::move(left)).operator/=(right);
+}
+
+// @relates AlgCover, AlgCube
+// @brief カバーとキューブの除算
+// @param[in] left, right オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator/(AlgCover&& left,
+	  const AlgCube& right)
+{
+  return AlgCover(std::move(left)).operator/=(right);
+}
+
+// @relates AlgCover, Literal
+// @brief カバーとリテラルの除算
+// @param[in] left, right オペランド
+// @return 結果を返す．
+inline
+AlgCover
+operator/(AlgCover&& left,
+	  Literal right)
+{
+  return AlgCover(std::move(left)).operator/=(right);
 }
 
 // @relates AlgCover

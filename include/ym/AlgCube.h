@@ -123,7 +123,7 @@ public:
   /// @brief 引数のリテラルをひとつでも含んでいたら true を返す．
   /// @param[in] right 対象のリテラル集合
   bool
-  contains(const AlgLitSet& right) const;
+  check_intersect(const AlgLitSet& right) const;
 
   /// @brief キューブの論理積を計算する
   /// @param[in] right オペランド
@@ -220,7 +220,13 @@ private:
   void
   delete_body();
 
+
+private:
+  //////////////////////////////////////////////////////////////////////
   // friend 関数の宣言
+  // private: 指定は実は関係ない．
+  //////////////////////////////////////////////////////////////////////
+
   friend
   int
   compare(const AlgCube& left,
@@ -241,6 +247,46 @@ private:
 };
 
 /// @relates AlgCube
+/// @brief キューブの論理積を計算する
+/// @param[in] left, right オペランド
+///
+/// リテラル集合としてみると和集合となる<br>
+/// ただし，相反するリテラルが含まれていたら空キューブとなる．
+AlgCube
+operator*(AlgCube&& left,
+	  const AlgCube& right);
+
+/// @relates AlgCube
+/// @brief キューブの論理積を計算する
+/// @param[in] left, right オペランド
+///
+/// リテラル集合としてみると和集合となる<br>
+/// ただし，相反するリテラルが含まれていたら空キューブとなる．
+AlgCube
+operator*(const AlgCube& left,
+	  AlgCube&& right);
+
+/// @relates AlgCube
+/// @brief キューブの論理積を計算する
+/// @param[in] left, right オペランド
+///
+/// リテラル集合としてみると和集合となる<br>
+/// ただし，相反するリテラルが含まれていたら空キューブとなる．
+AlgCube
+operator*(AlgCube&& left,
+	  AlgCube&& right);
+
+/// @relates AlgCube
+/// @brief キューブとリテラルの論理積を計算する
+/// @param[in] right オペランドのリテラル
+///
+/// リテラル集合としてみると和集合となる<br>
+/// ただし，相反するリテラルが含まれていたら空キューブとなる．
+AlgCube
+operator*(AlgCube&& left,
+	  Literal right);
+
+/// @relates AlgCube
 /// @brief Literal と AlgCube の論理積
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
@@ -248,6 +294,33 @@ private:
 AlgCube
 operator*(Literal left,
 	  const AlgCube& right);
+
+/// @relates AlgCube
+/// @brief Literal と AlgCube の論理積
+/// @param[in] left 第1オペランド
+/// @param[in] right 第2オペランド
+/// @return 結果のキューブを返す．
+AlgCube
+operator*(Literal left,
+	  AlgCube&& right);
+
+/// @relates AlgCube
+/// @brief キューブの除算を計算する
+/// @param[in] left, right オペランド
+///
+/// リテラル集合としてみると集合差となる<br>
+AlgCube
+operator/(AlgCube&& left,
+	  const AlgCube& right);
+
+/// @relates AlgCube
+/// @brief キューブとリテラルの除算を計算する
+/// @param[in] left, right オペランド
+///
+/// リテラル集合としてみると集合差となる<br>
+AlgCube
+operator/(AlgCube&& left,
+	  Literal right);
 
 /// @relates AlgCube
 /// @brief AlgCubeの比較演算子
@@ -337,6 +410,62 @@ AlgCube::variable_num() const
 }
 
 // @relates AlgCube
+// @brief キューブの論理積を計算する
+// @param[in] left, right オペランド
+//
+// リテラル集合としてみると和集合となる<br>
+// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
+AlgCube
+operator*(AlgCube&& left,
+	  const AlgCube& right)
+{
+  return AlgCube(std::move(left)).operator*=(right);
+}
+
+// @relates AlgCube
+// @brief キューブの論理積を計算する
+// @param[in] left, right オペランド
+//
+// リテラル集合としてみると和集合となる<br>
+// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
+AlgCube
+operator*(const AlgCube& left,
+	  AlgCube&& right)
+{
+  return AlgCube(std::move(right)).operator*=(left);
+}
+
+// @relates AlgCube
+// @brief キューブの論理積を計算する
+// @param[in] left, right オペランド
+//
+// リテラル集合としてみると和集合となる<br>
+// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
+AlgCube
+operator*(AlgCube&& left,
+	  AlgCube&& right)
+{
+  return AlgCube(std::move(left)).operator*=(right);
+}
+
+// @relates AlgCube
+// @brief キューブとリテラルの論理積を計算する
+// @param[in] right オペランドのリテラル
+//
+// リテラル集合としてみると和集合となる<br>
+// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
+AlgCube
+operator*(AlgCube&& left,
+	  Literal right)
+{
+  return AlgCube(std::move(left)).operator*=(right);
+}
+
+// @relates AlgCube
 // @brief Literal と AlgCube の論理積
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
@@ -348,6 +477,46 @@ operator*(Literal left,
 {
   // 交換則を用いる．
   return right.operator*(left);
+}
+
+// @relates AlgCube
+// @brief Literal と AlgCube の論理積
+// @param[in] left 第1オペランド
+// @param[in] right 第2オペランド
+// @return 結果のキューブを返す．
+inline
+AlgCube
+operator*(Literal left,
+	  AlgCube&& right)
+{
+  // 交換則を用いる．
+  return AlgCube(std::move(right)).operator*=(left);
+}
+
+// @relates AlgCube
+// @brief キューブの除算を計算する
+// @param[in] left, right オペランド
+//
+// リテラル集合としてみると集合差となる<br>
+inline
+AlgCube
+operator/(AlgCube&& left,
+	  const AlgCube& right)
+{
+  return AlgCube(std::move(left)).operator/=(right);
+}
+
+// @relates AlgCube
+// @brief キューブとリテラルの除算を計算する
+// @param[in] left, right オペランド
+//
+// リテラル集合としてみると集合差となる<br>
+inline
+AlgCube
+operator/(AlgCube&& left,
+	  Literal right)
+{
+  return AlgCube(std::move(left)).operator/=(right);
 }
 
 // @relates AlgCube

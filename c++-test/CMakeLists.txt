@@ -105,6 +105,12 @@ ym_add_gtest ( logic_AlgCover_test
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
+ym_add_gtest ( logic_AlgKernel_test
+  alg/AlgKernelTest.cc
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
+  )
+
 
 # ===================================================================
 #  インストールターゲットの設定

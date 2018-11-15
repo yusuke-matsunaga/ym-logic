@@ -31,6 +31,8 @@ add_subdirectory(tests)
 set (alg_SOURCES
   c++-src/alg/AlgCover.cc
   c++-src/alg/AlgCube.cc
+  c++-src/alg/AlgKernelGen.cc
+  c++-src/alg/AlgLitSet.cc
   c++-src/alg/AlgMgr.cc
   )
 

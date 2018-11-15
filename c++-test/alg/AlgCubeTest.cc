@@ -317,8 +317,11 @@ TEST(AlgCubeTest, move_constructor)
   AlgCube cube1(nv, lit_list);
 
   AlgCube cube2(std::move(cube1));
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
   EXPECT_EQ( nv, cube2.variable_num() );
-  EXPECT_EQ( nl,  cube2.literal_num() );
+  EXPECT_EQ( nl, cube2.literal_num() );
 
   vector<Literal> lit_list1;
   cube2.to_literal_list(lit_list1);
@@ -374,6 +377,9 @@ TEST(AlgCubeTest, move_assignment)
   EXPECT_EQ( 0, cube2.literal_num() );
 
   cube2 = std::move(cube1);
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl,  cube2.literal_num() );
 
@@ -469,7 +475,7 @@ TEST(AlgCubeTest, check_intersect)
   EXPECT_FALSE( cube3.check_containment(cube2) );
 };
 
-TEST(AlgCubeTest, product1)
+TEST(AlgCubeTest, cube_cube_product1)
 {
   const int nv = 10;
 
@@ -514,7 +520,7 @@ TEST(AlgCubeTest, product1)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, product2)
+TEST(AlgCubeTest, cube_cube_product2)
 {
   const int nv = 10;
 
@@ -560,7 +566,148 @@ TEST(AlgCubeTest, product2)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, lproduct1)
+TEST(AlgCubeTest, Rcube_cube_product1)
+{
+  const int nv = 10;
+
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  VarId var4(4);
+  VarId var5(5);
+  VarId var6(6);
+  VarId var7(7);
+  VarId var8(8);
+  VarId var9(9);
+
+  Literal lit0(var0, false);
+  Literal lit1(var5, true);
+  Literal lit2(var7, true);
+  AlgCube cube1(nv, {lit1, lit2});
+  AlgCube cube2(nv, {lit0, lit1});
+
+  AlgCube cube3 = std::move(cube1) * cube2;
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
+  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+};
+
+TEST(AlgCubeTest, cube_Rcube_product1)
+{
+  const int nv = 10;
+
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  VarId var4(4);
+  VarId var5(5);
+  VarId var6(6);
+  VarId var7(7);
+  VarId var8(8);
+  VarId var9(9);
+
+  Literal lit0(var0, false);
+  Literal lit1(var5, true);
+  Literal lit2(var7, true);
+  AlgCube cube1(nv, {lit1, lit2});
+  AlgCube cube2(nv, {lit0, lit1});
+
+  AlgCube cube3 = cube1 * std::move(cube2);
+
+  EXPECT_EQ( 0, cube2.literal_num() );
+
+  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+};
+
+TEST(AlgCubeTest, Rcube_Rcube_product1)
+{
+  const int nv = 10;
+
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  VarId var4(4);
+  VarId var5(5);
+  VarId var6(6);
+  VarId var7(7);
+  VarId var8(8);
+  VarId var9(9);
+
+  Literal lit0(var0, false);
+  Literal lit1(var5, true);
+  Literal lit2(var7, true);
+  AlgCube cube1(nv, {lit1, lit2});
+  AlgCube cube2(nv, {lit0, lit1});
+
+  AlgCube cube3 = std::move(cube1) * std::move(cube2);
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
+  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+};
+
+TEST(AlgCubeTest, lit_cube_product1)
 {
   const int nv = 10;
 
@@ -604,7 +751,53 @@ TEST(AlgCubeTest, lproduct1)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, lproduct2)
+TEST(AlgCubeTest, lit_Rcube_product1)
+{
+  const int nv = 10;
+
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  VarId var4(4);
+  VarId var5(5);
+  VarId var6(6);
+  VarId var7(7);
+  VarId var8(8);
+  VarId var9(9);
+
+  Literal lit0(var0, false);
+  Literal lit1(var5, true);
+  Literal lit2(var7, true);
+  AlgCube cube1(nv, {lit1, lit2});
+
+  AlgCube cube3 = lit0 * std::move(cube1);
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
+  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+};
+
+TEST(AlgCubeTest, lit_cube_product2)
 {
   const int nv = 10;
 
@@ -648,7 +841,7 @@ TEST(AlgCubeTest, lproduct2)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, rproduct1)
+TEST(AlgCubeTest, cube_lit_product1)
 {
   const int nv = 10;
 
@@ -692,7 +885,53 @@ TEST(AlgCubeTest, rproduct1)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, rproduct2)
+TEST(AlgCubeTest, Rcube_lit_product1)
+{
+  const int nv = 10;
+
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  VarId var4(4);
+  VarId var5(5);
+  VarId var6(6);
+  VarId var7(7);
+  VarId var8(8);
+  VarId var9(9);
+
+  Literal lit0(var0, false);
+  Literal lit1(var5, true);
+  Literal lit2(var7, true);
+  AlgCube cube1(nv, {lit1, lit2});
+
+  AlgCube cube3 = std::move(cube1) * lit0;
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
+  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+};
+
+TEST(AlgCubeTest, cube_lit_product2)
 {
   const int nv = 10;
 
@@ -736,7 +975,7 @@ TEST(AlgCubeTest, rproduct2)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, sproduct1)
+TEST(AlgCubeTest, Scube_cube_product1)
 {
   const int nv = 10;
 
@@ -781,7 +1020,7 @@ TEST(AlgCubeTest, sproduct1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, sproduct2)
+TEST(AlgCubeTest, Scube_cube_product2)
 {
   const int nv = 10;
 
@@ -827,7 +1066,7 @@ TEST(AlgCubeTest, sproduct2)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, srproduct1)
+TEST(AlgCubeTest, Scube_literal_product1)
 {
   const int nv = 10;
 
@@ -871,7 +1110,7 @@ TEST(AlgCubeTest, srproduct1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, srproduct2)
+TEST(AlgCubeTest, Scube_literal_product2)
 {
   const int nv = 10;
 
@@ -915,7 +1154,7 @@ TEST(AlgCubeTest, srproduct2)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, slproduct1)
+TEST(AlgCubeTest, literal_Scube_product1)
 {
   const int nv = 10;
 
@@ -959,7 +1198,7 @@ TEST(AlgCubeTest, slproduct1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, slproduct2)
+TEST(AlgCubeTest, literal_Scube_product2)
 {
   const int nv = 10;
 
@@ -1003,7 +1242,7 @@ TEST(AlgCubeTest, slproduct2)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, iproduct1)
+TEST(AlgCubeTest, Icube_cube_product1)
 {
   const int nv = 10;
 
@@ -1048,7 +1287,7 @@ TEST(AlgCubeTest, iproduct1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, iproduct2)
+TEST(AlgCubeTest, Icube_cube_product2)
 {
   const int nv = 10;
 
@@ -1094,7 +1333,7 @@ TEST(AlgCubeTest, iproduct2)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, ilproduct1)
+TEST(AlgCubeTest, Icube_literal_product1)
 {
   const int nv = 10;
 
@@ -1138,7 +1377,7 @@ TEST(AlgCubeTest, ilproduct1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, ilproduct2)
+TEST(AlgCubeTest, Icube_literal_product2)
 {
   const int nv = 10;
 
@@ -1182,7 +1421,7 @@ TEST(AlgCubeTest, ilproduct2)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, quotient1)
+TEST(AlgCubeTest, cube_cube_quotient1)
 {
   const int nv = 10;
 
@@ -1227,7 +1466,54 @@ TEST(AlgCubeTest, quotient1)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, quotient2)
+TEST(AlgCubeTest, Rcube_cube_quotient1)
+{
+  const int nv = 10;
+
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  VarId var4(4);
+  VarId var5(5);
+  VarId var6(6);
+  VarId var7(7);
+  VarId var8(8);
+  VarId var9(9);
+
+  Literal lit0(var0, false);
+  Literal lit1(var5, true);
+  Literal lit2(var7, true);
+  AlgCube cube1(nv, {lit0, lit1, lit2});
+  AlgCube cube2(nv, {lit0, lit2});
+
+  AlgCube cube3 = std::move(cube1) / cube2;
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+};
+
+TEST(AlgCubeTest, cube_cube_quotient2)
 {
   const int nv = 10;
 
@@ -1272,7 +1558,7 @@ TEST(AlgCubeTest, quotient2)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, lquotient1)
+TEST(AlgCubeTest, cube_lit_quotient1)
 {
   const int nv = 10;
 
@@ -1316,7 +1602,53 @@ TEST(AlgCubeTest, lquotient1)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, lquotient2)
+TEST(AlgCubeTest, Rcube_lit_quotient1)
+{
+  const int nv = 10;
+
+  VarId var0(0);
+  VarId var1(1);
+  VarId var2(2);
+  VarId var3(3);
+  VarId var4(4);
+  VarId var5(5);
+  VarId var6(6);
+  VarId var7(7);
+  VarId var8(8);
+  VarId var9(9);
+
+  Literal lit0(var0, false);
+  Literal lit1(var5, true);
+  Literal lit2(var7, true);
+  AlgCube cube1(nv, {lit0, lit1, lit2});
+
+  AlgCube cube3 = std::move(cube1) / lit0;
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+};
+
+TEST(AlgCubeTest, cube_lit_quotient2)
 {
   const int nv = 10;
 
@@ -1360,7 +1692,7 @@ TEST(AlgCubeTest, lquotient2)
   EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, squotient1)
+TEST(AlgCubeTest, Scube_cube_quotient1)
 {
   const int nv = 10;
 
@@ -1405,7 +1737,7 @@ TEST(AlgCubeTest, squotient1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, squotient2)
+TEST(AlgCubeTest, Scube_cube_quotient2)
 {
   const int nv = 10;
 
@@ -1450,7 +1782,7 @@ TEST(AlgCubeTest, squotient2)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, slquotient1)
+TEST(AlgCubeTest, Scube_literal_quotient1)
 {
   const int nv = 10;
 
@@ -1494,7 +1826,7 @@ TEST(AlgCubeTest, slquotient1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, slquotient2)
+TEST(AlgCubeTest, Scube_literal_quotient2)
 {
   const int nv = 10;
 
@@ -1538,7 +1870,7 @@ TEST(AlgCubeTest, slquotient2)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, iquotient1)
+TEST(AlgCubeTest, Icube_cube_quotient1)
 {
   const int nv = 10;
 
@@ -1583,7 +1915,7 @@ TEST(AlgCubeTest, iquotient1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, iquotient2)
+TEST(AlgCubeTest, Icube_cube_quotient2)
 {
   const int nv = 10;
 
@@ -1628,7 +1960,7 @@ TEST(AlgCubeTest, iquotient2)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, ilquotient1)
+TEST(AlgCubeTest, Icube_literal_quotient1)
 {
   const int nv = 10;
 
@@ -1672,7 +2004,7 @@ TEST(AlgCubeTest, ilquotient1)
   EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
 };
 
-TEST(AlgCubeTest, ilquotient2)
+TEST(AlgCubeTest, Icube_literal_quotient2)
 {
   const int nv = 10;
 

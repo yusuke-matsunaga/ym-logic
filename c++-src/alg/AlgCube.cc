@@ -9,6 +9,7 @@
 
 #include "ym/AlgCube.h"
 #include "AlgBlock.h"
+#include "AlgLitSet.h"
 #include "AlgMgr.h"
 
 
@@ -37,6 +38,7 @@ AlgCube::AlgCube(int variable_num,
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
+  mgr.cube_clear(mBody);
   mgr.cube_set(mBody, vector<Literal>{lit});
 }
 
@@ -49,6 +51,7 @@ AlgCube::AlgCube(int variable_num,
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
+  mgr.cube_clear(mBody);
   mgr.cube_set(mBody, lit_list);
 }
 
@@ -61,6 +64,7 @@ AlgCube::AlgCube(int variable_num,
 {
   AlgMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
+  mgr.cube_clear(mBody);
   mgr.cube_set(mBody, lit_list);
 }
 
@@ -162,6 +166,9 @@ AlgCube::get_pol(VarId varid) const
 int
 AlgCube::literal_num() const
 {
+  if ( mBody == nullptr ) {
+    return 0;
+  }
   AlgMgr mgr(mVariableNum);
   return mgr.literal_num(block());
 }
@@ -224,8 +231,12 @@ AlgCube::check_intersect(const AlgCube& right) const
 // @brief 引数のリテラルをひとつでも含んでいたら true を返す．
 // @param[in] right 対象のリテラル集合
 bool
-AlgCube::contains(const AlgLitSet& right) const
+AlgCube::check_intersect(const AlgLitSet& right) const
 {
+  ASSERT_COND( mVariableNum == right.mVariableNum );
+
+  AlgMgr mgr(mVariableNum);
+  return mgr.cube_check_intersect(mBody, right.mBody);
 }
 
 // @brief キューブの論理積を計算する
