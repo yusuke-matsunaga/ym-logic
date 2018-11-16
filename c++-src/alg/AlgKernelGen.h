@@ -23,26 +23,18 @@ struct AlgKernelInfo
 {
 
   /// @brief 内容を指定したコンストラクタ
-  AlgKernelInfo(const AlgCover& kernel,
-		const AlgCube& cokernel) :
-    mKernel{kernel},
-    mCoKernel{cokernel}
-  {
-  }
-
-  /// @brief 内容を指定したコンストラクタ
   AlgKernelInfo(AlgCover&& kernel,
-		AlgCube&& cokernel) :
+		AlgCover&& cokernels) :
     mKernel{kernel},
-    mCoKernel{cokernel}
+    mCoKernels{cokernels}
   {
   }
 
   /// @brief カーネル
   AlgCover mKernel;
 
-  /// @brief コカーネル
-  AlgCube mCoKernel;
+  /// @brief コカーネルのリストを表すカバー
+  AlgCover mCoKernels;
 
 };
 
@@ -90,8 +82,54 @@ private:
   kern_sub(const AlgCover& cover,
 	   vector<Literal>::const_iterator p,
 	   const AlgCube& ccube,
-	   const AlgLitSet& plits,
-	   vector<AlgKernelInfo>& kernel_list);
+	   const AlgLitSet& plits);
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられるデータ構造
+  //////////////////////////////////////////////////////////////////////
+
+  // カーネルをキーにしてコカーネルを持つハッシュ表のセル
+  struct Cell
+  {
+    // コンストラクタ
+    Cell(AlgCover&& kernel,
+	 const AlgCube& cokernel) :
+      mKernel{kernel},
+      mCoKernels{cokernel}
+    {
+    }
+
+    // カーネル
+    AlgCover mKernel;
+
+    // コカーネルのリストを表すカバー
+    AlgCover mCoKernels;
+
+    // 次のセルを指すリンクポインタ
+    Cell* mLink;
+
+  };
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // ハッシュ表に関する操作
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ハッシュ表をクリアする．
+  void
+  hash_clear();
+
+  /// @brief ハッシュ表に登録する．
+  void
+  hash_add(AlgCover&& kernel,
+	   const AlgCube& cokernel);
+
+  /// @brief ハッシュ表をリサイズする．
+  void
+  hash_resize(int size);
 
 
 private:
@@ -101,6 +139,18 @@ private:
 
   // リテラルリストの末尾
   vector<Literal>::const_iterator mEnd;
+
+  // ハッシュ表
+  vector<Cell*> mHashTable;
+
+  // ハッシュ表のサイズ
+  int mHashSize;
+
+  // ハッシュ表を拡大する目安
+  int mNextLimit;
+
+  // ハッシュ表のセルのリスト
+  vector<Cell*> mCellList;
 
 };
 

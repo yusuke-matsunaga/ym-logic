@@ -629,4 +629,21 @@ AlgCover::print(ostream& s,
   mgr.print(s, mBody, 0, mCubeNum, varname_list);
 }
 
+// @relates AlgCover
+// @brief 比較演算子(rich compare)
+// @param[in] left, right オペランド
+// @return 比較結果を返す．
+//
+// 比較方法はキューブごとの辞書式順序
+int
+compare(const AlgCover& left,
+	const AlgCover& right)
+{
+  ASSERT_COND( left.mVariableNum == right.mVariableNum );
+
+  AlgMgr mgr(left.mVariableNum);
+
+  return mgr.cover_compare(left.block(), right.block());
+}
+
 END_NAMESPACE_YM_LOGIC

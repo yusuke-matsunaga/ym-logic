@@ -26,6 +26,7 @@ AlgKernelGen::AlgKernelGen()
 // @brief デストラクタ
 AlgKernelGen::~AlgKernelGen()
 {
+  hash_clear();
 }
 
 // @brief カーネルとコカーネルを列挙する．
@@ -35,7 +36,7 @@ void
 AlgKernelGen::generate(const AlgCover& cover,
 		       vector<AlgKernelInfo>& kernel_list)
 {
-  // cover に2回以上現れるリテラルとそのの出現頻度のリストを作る．
+  // cover に2回以上現れるリテラルとその出現頻度のリストを作る．
   int nv = cover.variable_num();
   vector<pair<int, Literal>> tmp_list;
   tmp_list.reserve(nv * 2);
@@ -64,16 +65,26 @@ AlgKernelGen::generate(const AlgCover& cover,
   }
 
   mEnd = literal_list.end();
+  hash_clear();
+  hash_resize(32);
 
   AlgCube ccube0(nv); // 空のキューブ
   AlgLitSet plits(nv); // 空集合
-  kern_sub(cover, literal_list.begin(), ccube0, plits, kernel_list);
+  kern_sub(cover, literal_list.begin(), ccube0, plits);
 
   // 特例：自分自身がカーネルとなっているか調べる．
   AlgCube ccube = cover.common_cube();
   if ( ccube.literal_num() == 0 ) {
-    kernel_list.push_back(AlgKernelInfo{cover, ccube});
+    AlgCover cover1(cover);
+    hash_add(std::move(cover1), ccube);
   }
+
+  // kernel_list に設定する．
+  // この処理は破壊的なので以降は mHashTable は使えない．
+  for ( auto cell: mCellList ) {
+    kernel_list.push_back(AlgKernelInfo{std::move(cell->mKernel), std::move(cell->mCoKernels)});
+  }
+  hash_clear();
 }
 
 // @brief カーネルを求める下請け関数
@@ -85,8 +96,7 @@ void
 AlgKernelGen::kern_sub(const AlgCover& cover,
 		       vector<Literal>::const_iterator p,
 		       const AlgCube& ccube,
-		       const AlgLitSet& plits,
-		       vector<AlgKernelInfo>& kernel_list)
+		       const AlgLitSet& plits)
 {
   AlgLitSet plits1(plits);
   while ( p != mEnd ) {
@@ -120,11 +130,71 @@ AlgKernelGen::kern_sub(const AlgCover& cover,
     plits1 += lit;
 
     // 再帰する．
-    kern_sub(cover1, p, ccube1, plits1, kernel_list);
+    kern_sub(cover1, p, ccube1, plits1);
 
-    // cover1/ccube1/level を記録．
-    kernel_list.push_back(AlgKernelInfo{std::move(cover1), std::move(ccube1)});
+    // cover1/ccube1 を記録．
+    hash_add(std::move(cover1), ccube1);
   }
+}
+
+// @brief ハッシュ表をクリアする．
+void
+AlgKernelGen::hash_clear()
+{
+  for ( auto cell: mCellList ) {
+    delete cell;
+  }
+  mHashTable.clear();
+  mCellList.clear();
+}
+
+// @brief ハッシュ表に登録する．
+void
+AlgKernelGen::hash_add(AlgCover&& kernel,
+		       const AlgCube& cokernel)
+{
+  SizeType hash = kernel.hash();
+  int index = hash % mHashSize;
+  bool found = false;
+  for ( auto cell = mHashTable[index];
+	cell != nullptr;
+	cell = cell->mLink ) {
+    if ( cell->mKernel == kernel ) {
+      // 同じカーネルがあった．
+      cell->mCoKernels += cokernel;
+      found = true;
+      break;
+    }
+  }
+  if ( !found ) {
+    if ( mCellList.size() >= mNextLimit ) {
+      hash_resize(mHashSize * 2);
+      index = hash % mHashSize;
+    }
+    auto cell = new Cell{std::move(kernel), cokernel};
+    cell->mLink = mHashTable[index];
+    mHashTable[index] = cell;
+    mCellList.push_back(cell);
+  }
+}
+
+// @brief ハッシュ表をリサイズする．
+void
+AlgKernelGen::hash_resize(int size)
+{
+  vector<Cell*> new_table(size, nullptr);
+  for ( auto cell: mHashTable ) {
+    while ( cell != nullptr ) {
+      auto next = cell->mLink;
+      SizeType hash = cell->mKernel.hash();
+      int index = hash % size;
+      cell->mLink = new_table[index];
+      new_table[index] = cell;
+    }
+  }
+  mHashTable.swap(new_table);
+  mHashSize = size;
+  mNextLimit = static_cast<int>(mHashSize * 1.8);
 }
 
 END_NAMESPACE_YM_LOGIC

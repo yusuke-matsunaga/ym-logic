@@ -57,11 +57,9 @@ TEST(AlgKernelTest, test1)
 
   vector<string> exp_list
     {
-     "v3 + v4, v0 v5",
-     "v3 + v4, v2 v5",
+     "v3 + v4, v0 v5 + v2 v5",
      "v3 + v4 + v6, v1 v5",
-     "v0 + v1 + v2, v3 v5",
-     "v0 + v1 + v2, v4 v5",
+     "v0 + v1 + v2, v3 v5 + v4 v5",
      "v0 v3 + v0 v4 + v1 v3 + v1 v4 + v1 v6 + v2 v3 + v2 v4, v5",
      "v0 v3 v5 + v0 v4 v5 + v1 v3 v5 + v1 v4 v5 + v1 v5 v6 + v2 v3 v5 + v2 v4 v5 + v7, "
     };
@@ -71,9 +69,9 @@ TEST(AlgKernelTest, test1)
   for ( int i: Range(n) ) {
     auto& ki = kernel_list[i];
     auto& kernel = ki.mKernel;
-    auto& cokernel = ki.mCoKernel;
+    auto& cokernels = ki.mCoKernels;
     ostringstream tmp;
-    tmp << kernel << ", " << cokernel;
+    tmp << kernel << ", " << cokernels;
     string tmp_str = tmp.str();
     EXPECT_EQ( exp_list[i], tmp_str );
   }
