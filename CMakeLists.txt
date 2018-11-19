@@ -34,6 +34,10 @@ set (alg_SOURCES
   c++-src/alg/AlgKernelGen.cc
   c++-src/alg/AlgLitSet.cc
   c++-src/alg/AlgMgr.cc
+  c++-src/alg/GenFactor.cc
+  c++-src/alg/BestKernel.cc
+  c++-src/alg/OneLevel0Kernel.cc
+  c++-src/alg/WeakDivision.cc
   )
 
 set (expr_SOURCES

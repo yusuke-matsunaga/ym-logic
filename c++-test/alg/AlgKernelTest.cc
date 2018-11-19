@@ -52,8 +52,8 @@ TEST(AlgKernelTest, test1)
 
   AlgKernelGen kg;
 
-  vector<AlgKernelInfo> kernel_list;
-  kg.generate(cover1, kernel_list);
+  vector<pair<AlgCover, AlgCover>> kernel_list;
+  kg.all_kernel(cover1, kernel_list);
 
   vector<string> exp_list
     {
@@ -68,8 +68,8 @@ TEST(AlgKernelTest, test1)
   EXPECT_EQ( exp_list.size(), n );
   for ( int i: Range(n) ) {
     auto& ki = kernel_list[i];
-    auto& kernel = ki.mKernel;
-    auto& cokernels = ki.mCoKernels;
+    auto& kernel = ki.first;
+    auto& cokernels = ki.second;
     ostringstream tmp;
     tmp << kernel << ", " << cokernels;
     string tmp_str = tmp.str();

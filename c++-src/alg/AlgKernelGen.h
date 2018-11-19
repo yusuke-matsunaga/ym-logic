@@ -17,29 +17,6 @@
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-/// @class カーネル(とコカーネル)の情報を表す構造体
-//////////////////////////////////////////////////////////////////////
-struct AlgKernelInfo
-{
-
-  /// @brief 内容を指定したコンストラクタ
-  AlgKernelInfo(AlgCover&& kernel,
-		AlgCover&& cokernels) :
-    mKernel{kernel},
-    mCoKernels{cokernels}
-  {
-  }
-
-  /// @brief カーネル
-  AlgCover mKernel;
-
-  /// @brief コカーネルのリストを表すカバー
-  AlgCover mCoKernels;
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class AlgKernelGen AlgKernelGen.h "AlgKernelGen.h"
 /// @brief カーネルを求めるクラス
 //////////////////////////////////////////////////////////////////////
@@ -61,16 +38,26 @@ public:
 
   /// @brief カーネルとコカーネルを列挙する．
   /// @param[in] cover 対象のカバー
-  /// @param[out] kernel_list 結果を格納するリスト
+  /// @param[out] kernel_list カーネルとコカーネルのペアのリスト
   void
-  generate(const AlgCover& cover,
-	   vector<AlgKernelInfo>& kernel_list);
+  all_kernel(const AlgCover& cover,
+	     vector<pair<AlgCover, AlgCover>>& kernel_list);
+
+  /// @brief 価値の最も高いカーネルを求める．
+  /// @param[in] cover 対象のカバー
+  AlgCover
+  best_kernel(const AlgCover& cover);
 
 
 private:
   //////////////////////////////////////////////////////////////////////
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief カーネルとコカーネルを列挙する．
+  /// @param[in] cover 対象のカバー
+  void
+  generate(const AlgCover& cover);
 
   /// @brief カーネルを求める下請け関数
   /// @param[in] cover 対象のカバー

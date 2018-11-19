@@ -31,10 +31,54 @@ AlgKernelGen::~AlgKernelGen()
 
 // @brief カーネルとコカーネルを列挙する．
 // @param[in] cover 対象のカバー
-// @param[out] kernel_list 結果を格納するリスト
+// @param[out] kernel_list カーネルとコカーネルのペアのリスト
 void
-AlgKernelGen::generate(const AlgCover& cover,
-		       vector<AlgKernelInfo>& kernel_list)
+AlgKernelGen::all_kernel(const AlgCover& cover,
+			 vector<pair<AlgCover, AlgCover>>& kernel_list)
+{
+  generate(cover);
+
+  // kernel_list に設定する．
+  // この処理は破壊的なので以降は mHashTable は使えない．
+  for ( auto cell: mCellList ) {
+    kernel_list.push_back(make_pair(std::move(cell->mKernel), std::move(cell->mCoKernels)));
+  }
+  hash_clear();
+}
+
+// @brief 最も価値の高いカーネルを返す．
+// @param[in] cover 対象のカバー
+AlgCover
+AlgKernelGen::best_kernel(const AlgCover& cover)
+{
+  generate(cover);
+
+  // 価値の最も大きいカーネルを求める．
+  int max_value = -1;
+  Cell* max_cell = nullptr;
+  for ( auto cell: mCellList ) {
+    const AlgCover& kernel = cell->mKernel;
+    int k_nc = kernel.cube_num();
+    int k_nl = kernel.literal_num();
+    const AlgCover& cokernels = cell->mCoKernels;
+    int c_nc = cokernels.cube_num();
+    int c_nl = cokernels.literal_num();
+    int value = (k_nc - 1) * c_nl + (c_nc - 1) * k_nl;
+    if ( max_value < value ) {
+      max_value = value;
+      max_cell = cell;
+    }
+  }
+  AlgCover ans{std::move(max_cell->mKernel)};
+  hash_clear();
+
+  return ans;
+}
+
+// @brief カーネルとコカーネルを列挙する．
+// @param[in] cover 対象のカバー
+void
+AlgKernelGen::generate(const AlgCover& cover)
 {
   // cover に2回以上現れるリテラルとその出現頻度のリストを作る．
   int nv = cover.variable_num();
@@ -78,13 +122,6 @@ AlgKernelGen::generate(const AlgCover& cover,
     AlgCover cover1(cover);
     hash_add(std::move(cover1), ccube);
   }
-
-  // kernel_list に設定する．
-  // この処理は破壊的なので以降は mHashTable は使えない．
-  for ( auto cell: mCellList ) {
-    kernel_list.push_back(AlgKernelInfo{std::move(cell->mKernel), std::move(cell->mCoKernels)});
-  }
-  hash_clear();
 }
 
 // @brief カーネルを求める下請け関数
