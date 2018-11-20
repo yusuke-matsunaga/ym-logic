@@ -111,6 +111,12 @@ ym_add_gtest ( logic_AlgKernel_test
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
+ym_add_gtest ( logic_GenFactor_test
+  alg/GenFactorTest.cc
+  $<TARGET_OBJECTS:ym_base_ad>
+  $<TARGET_OBJECTS:ym_logic_ad>
+  )
+
 
 # ===================================================================
 #  インストールターゲットの設定

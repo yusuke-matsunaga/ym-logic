@@ -285,6 +285,7 @@ AlgMgr::cover_product(AlgBitVect* dst_bv,
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
   int nc = 0;
+  AlgBitVect* dst_bv0 = dst_bv;
   const AlgBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
   const AlgBitVect* bv2_end = _calc_offset(bv2_start, src2.cube_num());
   for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
@@ -295,6 +296,7 @@ AlgMgr::cover_product(AlgBitVect* dst_bv,
       }
     }
   }
+  _sort(dst_bv0, 0, nc);
   return nc;
 }
 

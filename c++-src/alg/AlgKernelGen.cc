@@ -53,6 +53,12 @@ AlgKernelGen::best_kernel(const AlgCover& cover)
 {
   generate(cover);
 
+  // 特例: 自身がレベル０カーネルの場合は空のカバーを返す．
+  if ( mCellList.size() == 1 && mCellList[0]->mCoKernels.literal_num() == 0 ) {
+    hash_clear();
+    return AlgCover(cover.variable_num());
+  }
+
   // 価値の最も大きいカーネルを求める．
   int max_value = -1;
   Cell* max_cell = nullptr;

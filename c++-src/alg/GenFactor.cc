@@ -47,7 +47,6 @@ GenFactor::operator()(const AlgCover& f)
   auto p = mDivide(f, d);
   const AlgCover& q = p.first;
   const AlgCover& r = p.second;
-
   if ( q.cube_num() == 1 ) {
     vector<vector<Literal>> cube_list;
     q.to_literal_list(cube_list);
@@ -105,6 +104,9 @@ GenFactor::cover_to_expr(const AlgCover& f)
   f.to_literal_list(cube_list);
 
   int nc = cube_list.size();
+  if ( nc == 0 ) {
+    return Expr::zero();
+  }
   vector<Expr> and_list(nc);
   for ( int i = 0; i < nc; ++ i ) {
     const vector<Literal>& cube = cube_list[i];
