@@ -904,10 +904,10 @@ TEST(AlgMgrTest, product2)
   int nc = mgr.cover_product(bv3, AlgBlock{2, bv1}, AlgBlock{2, bv2});
   EXPECT_EQ( 3, nc );
 
-  EXPECT_EQ( AlgPol::P, mgr.get_pol(bv3, 0, var0) );
-  EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 0, var1) );
+  EXPECT_EQ( AlgPol::N, mgr.get_pol(bv3, 0, var0) );
+  EXPECT_EQ( AlgPol::N, mgr.get_pol(bv3, 0, var1) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 0, var2) );
-  EXPECT_EQ( AlgPol::N, mgr.get_pol(bv3, 0, var3) );
+  EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 0, var3) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 0, var4) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 0, var5) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 0, var6) );
@@ -915,10 +915,10 @@ TEST(AlgMgrTest, product2)
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 0, var8) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 0, var9) );
 
-  EXPECT_EQ( AlgPol::N, mgr.get_pol(bv3, 1, var0) );
-  EXPECT_EQ( AlgPol::N, mgr.get_pol(bv3, 1, var1) );
+  EXPECT_EQ( AlgPol::P, mgr.get_pol(bv3, 1, var0) );
+  EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 1, var1) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 1, var2) );
-  EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 1, var3) );
+  EXPECT_EQ( AlgPol::N, mgr.get_pol(bv3, 1, var3) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 1, var4) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 1, var5) );
   EXPECT_EQ( AlgPol::X, mgr.get_pol(bv3, 1, var6) );
