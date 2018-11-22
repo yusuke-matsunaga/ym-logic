@@ -66,9 +66,9 @@ TEST_P(NpnMgrTestWithParam, func_test)
   int ni_exp = 1U << ni;
   int ni_exp_exp = 1U << ni_exp;
   HashSet<TvFunc> func_hash;
-  for ( int sig: Range(ni_exp_exp) ) {
+  for ( int sig: Range<>(ni_exp_exp) ) {
     vector<int> values(ni_exp);
-    for ( int p: Range(ni_exp) ) {
+    for ( int p: Range<>(ni_exp) ) {
       if ( sig & (1U << p) ) {
 	values[p] = 1;
       }
@@ -113,9 +113,9 @@ TEST_P(NpnMgrTestWithParam, func_test2)
   int ni_exp = 1U << ni;
   int ni_exp_exp = 1U << ni_exp;
   HashSet<TvFunc> func_hash;
-  for ( int sig: Range(ni_exp_exp) ) {
+  for ( int sig: Range<>(ni_exp_exp) ) {
     vector<int> values(ni_exp);
-    for ( int p: Range(ni_exp) ) {
+    for ( int p: Range<>(ni_exp) ) {
       if ( sig & (1U << p) ) {
 	values[p] = 1;
       }
@@ -147,11 +147,11 @@ TEST_P(NpnMgrTestWithParam, func_test2)
     if ( ni > 0 ) {
       for ( PermGen pg(ni, ni); !pg.is_end(); ++ pg ) {
 	for ( int op: { 0, 1 } ) {
-	  for ( int ip: Range(ni_exp) ) {
+	  for ( int ip: Range<>(ni_exp) ) {
 	    NpnMap map(ni);
 	    bool oinv = op ? true : false;
 	    map.set_oinv(oinv);
-	    for ( int i: Range(ni) ) {
+	    for ( int i: Range<>(ni) ) {
 	      bool iinv = (ip & (1U << i)) ? true : false;
 	      map.set(VarId(i), VarId(pg(i)), iinv);
 	    }
@@ -232,9 +232,9 @@ TEST_P(NpnMgrRandomTest, func_test)
   }
 
   std::uniform_int_distribution<int> rd2(0, 1);
-  for ( int i: Range(nfunc) ) {
+  for ( int i: Range<>(nfunc) ) {
     vector<int> values(ni_exp);
-    for ( int p: Range(ni_exp) ) {
+    for ( int p: Range<>(ni_exp) ) {
       if ( rd2(mRandGen) ) {
 	values[p] = 1;
       }
@@ -264,18 +264,18 @@ TEST_P(NpnMgrRandomTest, func_test)
     }
 
     RandPermGen rpg(ni);
-    for ( int j: Range(nperm) ) {
+    for ( int j: Range<>(nperm) ) {
       vector<int> dst_map(ni);
       rpg.generate(mRandGen);
-      for ( int k: Range(ni) ) {
+      for ( int k: Range<>(ni) ) {
 	dst_map[k] = rpg.elem(k);
       }
       for ( int op: { 0, 1} ) {
 	bool oinv = op ? true : false;
-	for ( int k: Range(nphase) ) {
+	for ( int k: Range<>(nphase) ) {
 	  NpnMap map(ni);
 	  map.set_oinv(oinv);
-	  for ( int i: Range(ni) ) {
+	  for ( int i: Range<>(ni) ) {
 	    bool iinv = rd2(mRandGen) ? true : false;
 	    map.set(VarId(i), VarId(dst_map[i]), iinv);
 	  }
@@ -310,7 +310,7 @@ str_to_func(int ni,
 {
   int ni_exp = 1 << ni;
   vector<int> values(ni_exp);
-  for ( int i: Range(ni_exp) ) {
+  for ( int i: Range<>(ni_exp) ) {
     values[i] = func_str[i] == '1' ? 1 : 0;
   }
   return TvFunc(ni, values);

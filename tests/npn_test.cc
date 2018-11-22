@@ -44,9 +44,9 @@ npn_test(int argc,
     // 全探索
     int ni_exp_exp = 1U << ni_exp;
     nf = ni_exp_exp;
-    for ( int p: Range(ni_exp_exp) ) {
+    for ( int p: Range<>(ni_exp_exp) ) {
       vector<int> values(ni_exp);
-      for ( int b: Range(ni_exp) ) {
+      for ( int b: Range<>(ni_exp) ) {
 	if ( p & (1U << b) ) {
 	  values[b] = 1;
 	}
@@ -73,9 +73,9 @@ npn_test(int argc,
   else {
     // ランダムサンプリング
     std::uniform_int_distribution<int> rd2(0, 1);
-    for ( int i: Range(nf) ) {
+    for ( int i: Range<>(nf) ) {
       vector<int> values(ni_exp);
-      for ( int b: Range(ni_exp) ) {
+      for ( int b: Range<>(ni_exp) ) {
 	if ( rd2(rg) ) {
 	  values[b] = 1;
 	}

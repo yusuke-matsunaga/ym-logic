@@ -90,7 +90,7 @@ AlgKernelGen::generate(const AlgCover& cover)
   int nv = cover.variable_num();
   vector<pair<int, Literal>> tmp_list;
   tmp_list.reserve(nv * 2);
-  for ( int i: Range(nv) ) {
+  for ( int i: Range<>(nv) ) {
     VarId var(i);
     for ( auto lit: {Literal(var, false), Literal(var, true)} ) {
       int n = cover.literal_num(lit);
@@ -110,7 +110,7 @@ AlgKernelGen::generate(const AlgCover& cover)
   // リテラルだけを literal_list に移す．
   int n = tmp_list.size();
   vector<Literal> literal_list(n);
-  for ( int i: Range(n) ) {
+  for ( int i: Range<>(n) ) {
     literal_list[i] = tmp_list[i].second;
   }
 

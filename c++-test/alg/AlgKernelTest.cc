@@ -66,7 +66,7 @@ TEST(AlgKernelTest, test1)
 
   int n = kernel_list.size();
   EXPECT_EQ( exp_list.size(), n );
-  for ( int i: Range(n) ) {
+  for ( int i: Range<>(n) ) {
     auto& ki = kernel_list[i];
     auto& kernel = ki.first;
     auto& cokernels = ki.second;
