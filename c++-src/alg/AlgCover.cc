@@ -47,7 +47,7 @@ AlgCover::AlgCover(int variable_num,
   mBody{nullptr}
 {
   vector<AlgBitVect*> bv_list(mCubeNum);
-  for ( int i: Range<>(mCubeNum) ) {
+  for ( int i: Range(mCubeNum) ) {
     bv_list[i] = cube_list[i].mBody;
   }
   AlgMgr mgr(mVariableNum);
@@ -240,10 +240,10 @@ AlgCover::to_literal_list(vector<vector<Literal>>& cube_list) const
   cube_list.resize(mCubeNum);
 
   AlgMgr mgr(mVariableNum);
-  for ( int i: Range<>(mCubeNum) ) {
+  for ( int i: Range(mCubeNum) ) {
     vector<Literal>& tmp_list = cube_list[i];
     tmp_list.reserve(mVariableNum);
-    for ( int j: Range<>(mVariableNum) ) {
+    for ( int j: Range(mVariableNum) ) {
       VarId var(j);
       AlgPol p = mgr.get_pol(mBody, i, var);
       if ( p == AlgPol::P ) {

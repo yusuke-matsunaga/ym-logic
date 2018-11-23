@@ -77,7 +77,7 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
   int ni_exp = 1U << ni;
   int n0 = 0;
   int n1 = 0;
-  for ( int p: Range<>(ni_exp) ) {
+  for ( int p: Range(ni_exp) ) {
     EXPECT_EQ( exp_values[p], func.value(p) ) << str;
     if ( exp_values[p] ) {
       ++ n1;
@@ -93,7 +93,7 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
   // invert_int() のテスト
   TvFunc fn(func);
   fn.invert_int();
-  for ( int p: Range<>(ni_exp) ) {
+  for ( int p: Range(ni_exp) ) {
     int exp_value = 1 - exp_values[p];
     EXPECT_EQ( exp_value, fn.value(p) ) << str;
   }
@@ -116,7 +116,7 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
 
   // walsh_0() のテスト
   int exp_w0 = 0;
-  for ( int p: Range<>(ni_exp) ) {
+  for ( int p: Range(ni_exp) ) {
     int v = exp_values[p];
     if ( v == 0 ) {
       exp_w0 += 1;
@@ -132,11 +132,11 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
   }
 
   // walsh_1() のテスト
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     VarId vid(i);
     int i_bit = 1U << i;
     int exp_w1 = 0;
-    for ( int p: Range<>(ni_exp) ) {
+    for ( int p: Range(ni_exp) ) {
       int v = exp_values[p];
       if ( p & i_bit ) {
 	v = 1 - v;
@@ -157,14 +157,14 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
 
   if ( ni < 14 ) {
     // walsh_2() のテスト
-    for ( int i1: Range<>(ni) ) {
+    for ( int i1: Range(ni) ) {
       VarId vid1(i1);
       int i1_bit = 1U << i1;
-      for ( int i2: Range<>(i1 + 1, ni) ) {
+      for ( int i2: Range(i1 + 1, ni) ) {
 	VarId vid2(i2);
 	int i2_bit = 1U << i2;
 	int exp_w2 = 0;
-	for ( int p: Range<>(ni_exp) ) {
+	for ( int p: Range(ni_exp) ) {
 	  int v = exp_values[p];
 	  bool i1_on = (p & i1_bit) == i1_bit;
 	  bool i2_on = (p & i2_bit) == i2_bit;
@@ -192,10 +192,10 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
   // walsh_w0(), walsh_w1() のテスト
   // ランダムな極性割り当てを試す．
   int n = ni < 14 ? 10 : 1;
-  for ( int c: Range<>(n) ) {
+  for ( int c: Range(n) ) {
     for ( int oinv: {0, 1} ) {
       int ibits = 0U;
-      for ( int j: Range<>(ni) ) {
+      for ( int j: Range(ni) ) {
 	if ( mRandDist(mRandGen) ) {
 	  ibits |= (1U << j);
 	}
@@ -217,21 +217,21 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
 	cout << endl;
       }
       int ww0[21];
-      for ( int j: Range<>(ni + 1) ) {
+      for ( int j: Range(ni + 1) ) {
 	ww0[j] = 0;
       }
       int ww1[20][21];
       if ( ni < 14 ) {
-	for ( int j: Range<>(ni) ) {
-	  for (int k: Range<>(ni + 1) ) {
+	for ( int j: Range(ni) ) {
+	  for (int k: Range(ni + 1) ) {
 	    ww1[j][k] = 0;
 	  }
 	}
       }
-      for ( int p: Range<>(ni_exp) ) {
+      for ( int p: Range(ni_exp) ) {
 	int q = p ^ ibits;
 	int cur_w = 0;
-	for ( int j: Range<>(ni) ) {
+	for ( int j: Range(ni) ) {
 	  if ( q & (1U << j) ) {
 	    ++ cur_w;
 	  }
@@ -247,7 +247,7 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
 	  ww0[cur_w] += 1;
 	}
 	if ( ni < 14 ) {
-	  for ( int j: Range<>(ni) ) {
+	  for ( int j: Range(ni) ) {
 	    int i_bit = 1U << j;
 	    int v1 = v;
 	    if ( q & i_bit ) {
@@ -262,13 +262,13 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
 	  }
 	}
       }
-      for ( int w: Range<>(ni + 1) ) {
+      for ( int w: Range(ni + 1) ) {
 	if ( debug ) {
 	  cout << "  w = " << w << endl;
 	}
 	EXPECT_EQ( ww0[w], func.walsh_w0(w, oinv, ibits) );
 	if ( ni < 14 ) {
-	  for ( int j: Range<>(ni) ) {
+	  for ( int j: Range(ni) ) {
 	    VarId var(j);
 	    EXPECT_EQ( ww1[j][w], func.walsh_w1(var, w, oinv, ibits) );
 	  }
@@ -290,7 +290,7 @@ check_op(const TvFunc& func1,
   vector<int> exp_and(ni_exp);
   vector<int> exp_or(ni_exp);
   vector<int> exp_xor(ni_exp);
-  for ( int p: Range<>(ni_exp) ) {
+  for ( int p: Range(ni_exp) ) {
     int v1 = func1.value(p);
     int v2 = func2.value(p);
     exp_and[p] = v1 & v2;
@@ -355,7 +355,7 @@ TEST_P(TvFuncTestWithParam, const_one)
   init_values();
   int ni = GetParam();
   int ni_exp = 1U << ni;
-  for ( int p: Range<>(ni_exp) ) {
+  for ( int p: Range(ni_exp) ) {
     mValues[p] = 1;
   }
   TvFunc f0 = TvFunc::one(ni);
@@ -369,9 +369,9 @@ TEST_P(TvFuncTestWithParam, literal1)
   init_values();
   int ni = GetParam();
   int ni_exp = 1U << ni;
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     TvFunc f1 = TvFunc::literal(ni, VarId(i), false);
-    for ( int p: Range<>(ni_exp) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
       }
@@ -384,7 +384,7 @@ TEST_P(TvFuncTestWithParam, literal1)
     check_func(f1, mValues, false, buf1.str());
 
     TvFunc f2 = TvFunc::literal(ni, VarId(i), true);
-    for ( int p: Range<>(ni_exp) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
       }
@@ -403,10 +403,10 @@ TEST_P(TvFuncTestWithParam, literal2)
   init_values();
   int ni = GetParam();
   int ni_exp = 1U << ni;
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     Literal lit(VarId(i), false);
     TvFunc f1 = TvFunc::literal(ni, lit);
-    for ( int p: Range<>(ni_exp) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
       }
@@ -420,7 +420,7 @@ TEST_P(TvFuncTestWithParam, literal2)
 
     lit = Literal(VarId(i), true);
     TvFunc f2 = TvFunc::literal(ni, lit);
-    for ( int p: Range<>(ni_exp) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
       }
@@ -439,9 +439,9 @@ TEST_P(TvFuncTestWithParam, posi_literal)
   init_values();
   int ni = GetParam();
   int ni_exp = 1U << ni;
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     TvFunc f1 = TvFunc::posi_literal(ni, VarId(i));
-    for ( int p: Range<>(ni_exp) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
       }
@@ -460,9 +460,9 @@ TEST_P(TvFuncTestWithParam, nega_literal)
   init_values();
   int ni = GetParam();
   int ni_exp = 1U << ni;
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     TvFunc f1 = TvFunc::nega_literal(ni, VarId(i));
-    for ( int p: Range<>(ni_exp) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
       }
@@ -482,8 +482,8 @@ TEST_P(TvFuncTestWithParam, random_func)
   int ni = GetParam();
   int ni_exp = 1 << ni;
   int n = ni < 13 ? 100 : ni < 14 ? 20 : 5;
-  for ( int c: Range<>(n) ) {
-    for ( int p: Range<>(ni_exp) ) {
+  for ( int c: Range(n) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( mRandDist(mRandGen) ) {
 	mValues[p] = 1;
       }
@@ -498,7 +498,7 @@ TEST(TvFuncTest, check_op1)
 {
   vector<int> values1(4);
   vector<int> values2(4);
-  for ( int v1: Range<>(14) ) {
+  for ( int v1: Range(14) ) {
     for ( int p: {0, 1, 2, 3} ) {
       if ( v1 & (1 << p) ) {
 	values1[p] = 1;
@@ -508,7 +508,7 @@ TEST(TvFuncTest, check_op1)
       }
     }
     TvFunc func1(2, values1);
-    for ( int v2: Range<>(14) ) {
+    for ( int v2: Range(14) ) {
       for ( int p: {0, 1, 2, 3} ) {
 	if ( v2 & (1 << p) ) {
 	  values2[p] = 1;
@@ -530,8 +530,8 @@ TEST_P(TvFuncTestWithParam, check_op2)
   vector<int> values1(ni_exp, 0);
   vector<int> values2(ni_exp, 0);
   int n = ni < 19 ? 100 : 1;
-  for ( int c: Range<>(n) ) {
-    for ( int p: Range<>(ni_exp) ) {
+  for ( int c: Range(n) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( mRandDist(mRandGen) ) {
 	values1[p] = 1;
       }
@@ -551,11 +551,11 @@ TEST_P(TvFuncTestWithParam, check_sup1)
   int ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
   int n = ni < 17 ? 100 : ni < 19 ? 10 : 1;
-  for ( int c: Range<>(n) ) {
-    for ( int i: Range<>(ni) ) {
+  for ( int c: Range(n) ) {
+    for ( int i: Range(ni) ) {
       int i_bit = 1U << i;
       // i 番目の変数を独立にする．
-      for ( int p: Range<>(ni_exp) ) {
+      for ( int p: Range(ni_exp) ) {
 	if ( p & i_bit ) {
 	  values[p] = values[p ^ i_bit];
 	}
@@ -567,10 +567,10 @@ TEST_P(TvFuncTestWithParam, check_sup1)
 	}
       }
       TvFunc func(ni, values);
-      for ( int j: Range<>(ni) ) {
+      for ( int j: Range(ni) ) {
 	bool exp_ans = false;
 	int j_bit = 1U << j;
-	for ( int p: Range<>(ni_exp) ) {
+	for ( int p: Range(ni_exp) ) {
 	  if ( (p & j_bit) == j_bit ) {
 	    if ( values[p] != values[p ^ j_bit] ) {
 	      exp_ans = true;
@@ -590,15 +590,15 @@ TEST_P(TvFuncTestWithParam, check_sup2)
   int ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
   int n = ni < 19 ? 200 : 2;
-  for ( int c: Range<>(n) ) {
+  for ( int c: Range(n) ) {
     int i_bits = 0;
-    for ( int i: Range<>(ni) ) {
+    for ( int i: Range(ni) ) {
       if ( mRandDist(mRandGen) ) {
 	i_bits |= (1U << i);
       }
     }
     // i_bits に含まれる変数を独立にする．
-    for ( int p: Range<>(ni_exp) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( p & i_bits ) {
 	values[p] = values[p & ~i_bits];
       }
@@ -610,10 +610,10 @@ TEST_P(TvFuncTestWithParam, check_sup2)
       }
     }
     TvFunc func(ni, values);
-    for ( int j: Range<>(ni) ) {
+    for ( int j: Range(ni) ) {
       bool exp_ans = false;
       int j_bit = 1U << j;
-      for ( int p: Range<>(ni_exp) ) {
+      for ( int p: Range(ni_exp) ) {
 	if ( (p & j_bit) == j_bit ) {
 	  if ( values[p] != values[p ^ j_bit] ) {
 	    exp_ans = true;
@@ -636,7 +636,7 @@ check_sym(const vector<int>& values,
   int i1_bit = 1U << i1;
   int i2_bit = 1U << i2;
   int ni_exp = values.size();
-  for ( int p: Range<>(ni_exp) ) {
+  for ( int p: Range(ni_exp) ) {
     if ( (p & i1_bit) == 0U && (p & i2_bit) == i2_bit ) {
       if ( values[p] != values[p ^ i1_bit ^ i2_bit] ) {
 	sym0 = 0U;
@@ -665,13 +665,13 @@ TEST_P(TvFuncTestWithParam, check_sym)
   vector<int> values(ni_exp, 0);
   int n1 = ni < 11 ? 50 : 10;
   int n2 = ni < 11 ? 50 : 10;
-  for ( int c1: Range<>(n1) ) {
-    for ( int i1: Range<>(ni) ) {
+  for ( int c1: Range(n1) ) {
+    for ( int i1: Range(ni) ) {
       int i1_bit = 1U << i1;
-      for ( int i2: Range<>(i1 + 1, ni) ) {
+      for ( int i2: Range(i1 + 1, ni) ) {
 	int i2_bit = 1U << i2;
 	for ( int inv: {0, 1, 2, 3} ) {
-	  for ( int p: Range<>(ni_exp) ) {
+	  for ( int p: Range(ni_exp) ) {
 	    if ( (inv & 1) == 1 && (p & i1_bit) == 0U && (p & i2_bit) == i2_bit ) {
 	      values[p] = values[p ^ i1_bit ^ i2_bit];
 	    }
@@ -693,7 +693,7 @@ TEST_P(TvFuncTestWithParam, check_sym)
 	  EXPECT_EQ( exp_sym0, func.check_sym(VarId(i2), VarId(i1), false) );
 	  EXPECT_EQ( exp_sym1, func.check_sym(VarId(i1), VarId(i2), true) );
 	  EXPECT_EQ( exp_sym1, func.check_sym(VarId(i2), VarId(i1), true) );
-	  for ( int c2: Range<>(n2) ) {
+	  for ( int c2: Range(n2) ) {
 	    int j1 = rd(mRandGen);
 	    int j2 = rd(mRandGen);
 	    if ( j1 == j2 ) {
@@ -717,8 +717,8 @@ TEST_P(TvFuncTestWithParam, cofactor)
   int ni_exp = 1 << ni;
   vector<int> values(ni_exp, 0);
   int n = ni < 17 ? 100 : ni < 19 ? 10 : 1;
-  for ( int c: Range<>(n) ) {
-    for ( int p: Range<>(ni_exp) ) {
+  for ( int c: Range(n) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( mRandDist(mRandGen) ) {
 	values[p] = 1;
       }
@@ -727,14 +727,14 @@ TEST_P(TvFuncTestWithParam, cofactor)
       }
     }
     TvFunc func(ni, values);
-    for ( int i: Range<>(ni) ) {
+    for ( int i: Range(ni) ) {
       VarId var(i);
       TvFunc func0 = func.cofactor(var, true);
       TvFunc func1 = func.cofactor(var, false);
       vector<int> values0(ni_exp, 0);
       vector<int> values1(ni_exp, 0);
       int i_bit = 1U << i;
-      for ( int p: Range<>(ni_exp) ) {
+      for ( int p: Range(ni_exp) ) {
 	if ( p & i_bit ) {
 	  values0[p] = values[p ^ i_bit];
 	  values1[p] = values[p];
@@ -767,8 +767,8 @@ TEST_P(TvFuncTestWithParam, xform)
   vector<int> values(ni_exp, 0);
   int n1 = ni < 12 ? 30 : ni < 19 ? 5 : 1;
   int n2 = ni < 15 ? 30 : 5;
-  for ( int c1: Range<>(n1) ) {
-    for ( int p: Range<>(ni_exp) ) {
+  for ( int c1: Range(n1) ) {
+    for ( int p: Range(ni_exp) ) {
       if ( mRandDist(mRandGen) ) {
 	values[p] = 1;
       }
@@ -778,21 +778,21 @@ TEST_P(TvFuncTestWithParam, xform)
     }
     TvFunc func(ni, values);
     RandPermGen rpg(ni);
-    for ( int c2: Range<>(n2) ) {
+    for ( int c2: Range(n2) ) {
       bool oinv = mRandDist(mRandGen) ? true : false;
       NpnMap map(ni);
       map.set_oinv(oinv);
       rpg.generate(mRandGen);
-      for ( int i: Range<>(ni) ) {
+      for ( int i: Range(ni) ) {
 	bool iinv = mRandDist(mRandGen) ? true : false;
 	map.set(VarId(i), VarId(rpg.elem(i)), iinv);
       }
       TvFunc xfunc = func.xform(map);
 
       vector<int> exp_values(ni_exp);
-      for ( int p: Range<>(ni_exp) ) {
+      for ( int p: Range(ni_exp) ) {
 	int q = 0;
-	for ( int i: Range<>(ni) ) {
+	for ( int i: Range(ni) ) {
 	  NpnVmap vmap = map.imap(VarId(i));
 	  int j = vmap.var().val();
 	  bool iinv = vmap.inv();
@@ -831,7 +831,7 @@ TEST(TvFuncTest, shrink_0)
   EXPECT_EQ( TvFunc::zero(0), func1 );
 
   EXPECT_EQ( ni, map.input_num() );
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     NpnVmap imap = map.imap(VarId(i));
     EXPECT_TRUE( imap.is_invalid() );
   }
@@ -848,7 +848,7 @@ TEST(TvFuncTest, shrink_1)
   EXPECT_EQ( TvFunc::one(0), func1 );
 
   EXPECT_EQ( ni, map.input_num() );
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     NpnVmap imap = map.imap(VarId(i));
     EXPECT_TRUE( imap.is_invalid() );
   }
@@ -873,7 +873,7 @@ TEST(TvFuncTest, shrink_lit1)
     EXPECT_FALSE( imap.inv() );
   }
 
-  for ( int i: Range<>(1, ni) ) {
+  for ( int i: Range(1, ni) ) {
     NpnVmap imap = map.imap(VarId(i));
     EXPECT_TRUE( imap.is_invalid() );
   }
@@ -898,7 +898,7 @@ TEST(TvFuncTest, shrink_lit2)
     EXPECT_FALSE( imap.inv() );
   }
 
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     if ( i == 2 ) {
       continue;
     }
@@ -942,7 +942,7 @@ TEST(TvFuncTest, shrink_lit3)
     EXPECT_FALSE( imap.inv() );
   }
 
-  for ( int i: Range<>(ni) ) {
+  for ( int i: Range(ni) ) {
     if ( i == 2 || i == 5 ) {
       continue;
     }

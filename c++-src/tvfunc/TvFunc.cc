@@ -104,7 +104,7 @@ TvFunc::TvFunc(int ni) :
   mBlockNum(nblock(ni)),
   mVector(new TvFunc::WordType[mBlockNum])
 {
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] = 0UL;
   }
 }
@@ -118,7 +118,7 @@ TvFunc::TvFunc(int ni,
   mVector(new TvFunc::WordType[mBlockNum])
 {
   TvFunc::WordType mask = vec_mask(ni);
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] = mask;
   }
 }
@@ -134,7 +134,7 @@ TvFunc::TvFunc(int ni,
   int idx = varid.val();
   ASSERT_COND( idx < ni );
 
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     TvFunc::WordType pat = lit_pat(idx, b);
     if ( inv ) {
       pat = ~pat;
@@ -156,7 +156,7 @@ TvFunc::TvFunc(int ni,
   int base = 0;
   TvFunc::WordType bitpat = 0ULL;
   TvFunc::WordType bitmask = 1ULL;
-  for ( int p: Range<>(ni_pow) ) {
+  for ( int p: Range(ni_pow) ) {
     if ( values[p] ) {
       bitpat |= bitmask;
     }
@@ -180,7 +180,7 @@ TvFunc::TvFunc(const TvFunc& src) :
   mBlockNum(src.mBlockNum),
   mVector(new TvFunc::WordType[mBlockNum])
 {
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] = src.mVector[b];
   }
 }
@@ -208,7 +208,7 @@ TvFunc::operator=(const TvFunc& src)
   }
   mInputNum = src.mInputNum;
 
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] = src.mVector[b];
   }
 
@@ -247,7 +247,7 @@ TvFunc&
 TvFunc::invert_int()
 {
   TvFunc::WordType neg_mask = vec_mask(mInputNum);
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] ^= neg_mask;
   }
   return *this;
@@ -257,7 +257,7 @@ TvFunc::invert_int()
 TvFunc&
 TvFunc::and_int(const TvFunc& src1)
 {
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] &= src1.mVector[b];
   }
   return *this;
@@ -267,7 +267,7 @@ TvFunc::and_int(const TvFunc& src1)
 TvFunc&
 TvFunc::or_int(const TvFunc& src1)
 {
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] |= src1.mVector[b];
   }
   return *this;
@@ -277,7 +277,7 @@ TvFunc::or_int(const TvFunc& src1)
 TvFunc&
 TvFunc::xor_int(const TvFunc& src1)
 {
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     mVector[b] ^= src1.mVector[b];
   }
   return *this;
@@ -298,7 +298,7 @@ TvFunc::cofactor_int(VarId varid,
       mask = ~mask;
     }
     int shift = 1 << pos;
-    for ( int b: Range<>(mBlockNum) ) {
+    for ( int b: Range(mBlockNum) ) {
       TvFunc::WordType pat = mVector[b] & mask;
       if ( inv ) {
 	pat |= (pat << shift);
@@ -312,7 +312,7 @@ TvFunc::cofactor_int(VarId varid,
   else {
     pos -= NIPW;
     int bit = 1U << pos;
-    for ( int b: Range<>(mBlockNum) ) {
+    for ( int b: Range(mBlockNum) ) {
       if ( inv ) {
 	if ( (b & bit) == bit ) {
 	  mVector[b] = mVector[b ^ bit];
@@ -337,7 +337,7 @@ TvFunc::check_sup(VarId var) const
     // ブロックごとにチェック
     int dist = 1 << i;
     TvFunc::WordType mask = c_masks[i];
-    for ( int b: Range<>(mBlockNum) ) {
+    for ( int b: Range(mBlockNum) ) {
       TvFunc::WordType word = mVector[b];
       if ( (word ^ (word << dist)) & mask ) {
 	return true;
@@ -348,7 +348,7 @@ TvFunc::check_sup(VarId var) const
     // ブロック単位でチェック
     int i5 = i - NIPW;
     int check = 1 << i5;
-    for ( int b: Range<>(mBlockNum) ) {
+    for ( int b: Range(mBlockNum) ) {
       if ( (b & check) && (mVector[b] != mVector[b ^ check]) ) {
 	return true;
       }
@@ -389,7 +389,7 @@ TvFunc::check_sym(VarId var1,
     else {
       cond = mask_j;
     }
-    for ( int b: Range<>(mBlockNum) ) {
+    for ( int b: Range(mBlockNum) ) {
       if ( (b & mask_all) == cond &&
 	   mVector[b] != mVector[b ^ mask_all] ) {
 	ans = false;
@@ -410,7 +410,7 @@ TvFunc::check_sym(VarId var1,
     }
     TvFunc::WordType mask2 = ~c_masks[j];
     int s = 1 << j;
-    for ( int b: Range<>(mBlockNum) ) {
+    for ( int b: Range(mBlockNum) ) {
       if ( (b & mask_i) == cond &&
 	   (mVector[b] ^ (mVector[b ^ mask_i] >> s)) & mask2 ) {
 	ans = false;
@@ -424,7 +424,7 @@ TvFunc::check_sym(VarId var1,
     if ( inv ) {
       TvFunc::WordType mask = sym_masks3[(i * (i - 1)) / 2 + j];
       int s = (1 << i) + (1 << j);
-      for ( int b: Range<>(mBlockNum) ) {
+      for ( int b: Range(mBlockNum) ) {
 	TvFunc::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
@@ -435,7 +435,7 @@ TvFunc::check_sym(VarId var1,
     else {
       TvFunc::WordType mask = sym_masks2[(i * (i - 1)) / 2 + j];
       int s = (1 << i) - (1 << j);
-      for ( int b: Range<>(mBlockNum) ) {
+      for ( int b: Range(mBlockNum) ) {
 	TvFunc::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
@@ -460,10 +460,10 @@ TvFunc::xform(const NpnMap& npnmap) const
   int new_ni = npnmap.input_num2();
   int imask = 0;
   int ipat[kMaxNi];
-  for ( int i: Range<>(new_ni) ) {
+  for ( int i: Range(new_ni) ) {
     ipat[i] = 0;
   }
-  for ( int i: Range<>(mInputNum) ) {
+  for ( int i: Range(mInputNum) ) {
     VarId src_var(i);
     NpnVmap imap = npnmap.imap(src_var);
     if ( imap.is_invalid() ) {
@@ -480,10 +480,10 @@ TvFunc::xform(const NpnMap& npnmap) const
 
   TvFunc ans(new_ni);
   int ni_pow = 1 << new_ni;
-  for ( int b: Range<>(ni_pow) ) {
+  for ( int b: Range(ni_pow) ) {
     int orig_b = 0;
     int tmp = b;
-    for ( int i: Range<>(new_ni) ) {
+    for ( int i: Range(new_ni) ) {
       if ( tmp & 1 ) {
 	orig_b |= ipat[i];
       }
@@ -507,7 +507,7 @@ TvFunc::shrink_map() const
   // まず独立な変数を求める．
   ymuint varmap = 0U;
   int dst_ni = 0;
-  for ( int i: Range<>(mInputNum) ) {
+  for ( int i: Range(mInputNum) ) {
     if ( !check_sup(VarId(i)) ) {
       varmap |= (1U << i);
     }
@@ -526,7 +526,7 @@ TvFunc::shrink_map() const
   NpnMap ans(mInputNum, dst_ni);
   int j = 0;
   int rmap[kMaxNi];
-  for ( int i: Range<>(mInputNum) ) {
+  for ( int i: Range(mInputNum) ) {
     if ( (varmap & (1U << i)) == 0U ) {
       ans.set(VarId(i), VarId(j), false);
       rmap[j] = i;
@@ -563,7 +563,7 @@ SizeType
 TvFunc::hash() const
 {
   SizeType ans = 0;
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     TvFunc::WordType tmp = mVector[b];
     TvFunc::WordType tmp_l = (tmp >>  0) & 0xFFFFFFFFULL;
     TvFunc::WordType tmp_h = (tmp >> 32) & 0xFFFFFFFFULL;
@@ -587,7 +587,7 @@ compare(const TvFunc& func1,
 
   // 以降は入力数が等しい場合
   int n = func1.mBlockNum;
-  for ( int b: Range<>(n) ) {
+  for ( int b: Range(n) ) {
     TvFunc::WordType w1 = func1.mVector[n - b - 1];
     TvFunc::WordType w2 = func2.mVector[n - b - 1];
     if ( w1 < w2 ) {
@@ -611,7 +611,7 @@ operator&&(const TvFunc& func1,
   }
 
   int n = func1.mBlockNum;
-  for ( int b: Range<>(n) ) {
+  for ( int b: Range(n) ) {
     TvFunc::WordType w1 = func1.mVector[n - b - 1];
     TvFunc::WordType w2 = func2.mVector[n - b - 1];
     if ( (w1 & w2) != 0U ) {
@@ -633,7 +633,7 @@ TvFunc::print(ostream& s,
     TvFunc::WordType* bp = mVector;
     int offset = 0;
     TvFunc::WordType tmp = *bp;
-    for ( int p: Range<>(ni_pow) ) {
+    for ( int p: Range(ni_pow) ) {
       s << (tmp & 1LL);
       tmp >>= 1;
       ++ offset;
@@ -649,7 +649,7 @@ TvFunc::print(ostream& s,
     TvFunc::WordType* bp = mVector;
     int offset = 0;
     TvFunc::WordType tmp = *bp;
-    for ( int p: Range<>(ni_pow4) ) {
+    for ( int p: Range(ni_pow4) ) {
       TvFunc::WordType tmp1 = (tmp & 0xF);
       if ( tmp1 < 10 ) {
 	s << static_cast<char>('0' + tmp1);
@@ -677,7 +677,7 @@ void
 TvFunc::dump(ODO& s) const
 {
   s << mInputNum;
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     s << mVector[b];
   }
 }
@@ -694,7 +694,7 @@ TvFunc::restore(IDO& s)
     mBlockNum = nblk;
     mVector = new TvFunc::WordType[mBlockNum];
   }
-  for ( int b: Range<>(mBlockNum) ) {
+  for ( int b: Range(mBlockNum) ) {
     s >> mVector[b];
   }
 }
