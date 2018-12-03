@@ -181,7 +181,7 @@ SopCover::SopCover(SopCube&& cube) :
   mBody{nullptr}
 {
   SopMgr mgr(mVariableNum);
-  mgr.cube_move(mBody, cube);
+  mBody = mgr.cube_move(cube);
 }
 
 // @brief 内容を指定したコンストラクタ

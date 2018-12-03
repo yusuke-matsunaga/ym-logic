@@ -318,11 +318,11 @@ public:
 	     int src_offset);
 
   /// @brief キューブをムーブする．
-  /// @param[in] dst_bv 対象のビットベクタ
   /// @param[in] src_cube ムーブ元のキューブ
-  void
-  cube_move(SopBitVect* dst_bv,
-	    SopCube& src_cube);
+  ///
+  /// 実際には SopCube のメンバにアクセスするだけ．
+  SopBitVect*
+  cube_move(SopCube& src_cube);
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
   /// @param[in] dst_bv 対象のビットベクタ
@@ -801,15 +801,14 @@ SopMgr::cube_copy(SopBitVect* dst_bv,
 }
 
 // @brief キューブをムーブする．
-// @param[in] dst_bv 対象のビットベクタ
 // @param[in] src_cube ムーブ元のキューブ
 inline
-void
-SopMgr::cube_move(SopBitVect* dst_bv,
-		  SopCube& src_cube)
+SopBitVect*
+SopMgr::cube_move(SopCube& src_cube)
 {
-  dst_bv = src_cube.mBody;
+  SopBitVect* dst_bv = src_cube.mBody;
   src_cube.mBody = nullptr;
+  return dst_bv;
 }
 
 // @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．

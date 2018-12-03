@@ -463,7 +463,7 @@ SopMgr::common_cube(const SopBlock& src1)
   const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
 
   SopBitVect* dst_bv0 = new_body(1);
-  SopBitVect* dst_bv = dst_bv;
+  SopBitVect* dst_bv = dst_bv0;
 
   // 最初のキューブをコピーする．
   cube_copy(dst_bv, bv1);
