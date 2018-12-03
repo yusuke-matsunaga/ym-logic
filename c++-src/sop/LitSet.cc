@@ -9,6 +9,7 @@
 
 #include "LitSet.h"
 #include "SopMgr.h"
+#include "ym/SopCube.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -171,6 +172,17 @@ LitSet::operator+=(Literal lit)
   mgr.cube_set(mBody, vector<Literal>{lit});
 
   return *this;
+}
+
+// @brief 引数のキューブ中のリテラルをひとつでも含んでいたら true を返す．
+// @param[in] right 対象のキューブ
+bool
+LitSet::check_intersect(const SopCube& right) const
+{
+  ASSERT_COND( mVariableNum == right.variable_num() );
+
+  SopMgr mgr(mVariableNum);
+  return mgr.cube_check_intersect(mBody, right);
 }
 
 END_NAMESPACE_YM_LOGIC

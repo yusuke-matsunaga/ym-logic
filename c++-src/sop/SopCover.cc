@@ -46,13 +46,9 @@ SopCover::SopCover(int variable_num,
   mCubeCap{mCubeNum},
   mBody{nullptr}
 {
-  vector<SopBitVect*> bv_list(mCubeNum);
-  for ( int i: Range(mCubeNum) ) {
-    bv_list[i] = cube_list[i].mBody;
-  }
   SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr.cover_set(mBody, bv_list);
+  mgr.cover_set(mBody, cube_list);
 }
 
 // @brief コンストラクタ
@@ -167,11 +163,11 @@ SopCover::SopCover(const SopCube& cube) :
   mVariableNum{cube.variable_num()},
   mCubeNum{1},
   mCubeCap{mCubeNum},
-  mBody{0}
+  mBody{nullptr}
 {
   SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
-  mgr.cube_copy(mBody, cube.mBody);
+  mgr.cube_copy(mBody, cube);
 }
 
 // @brief キューブからのムーブ変換コンストラクタ
@@ -182,9 +178,10 @@ SopCover::SopCover(SopCube&& cube) :
   mVariableNum{cube.variable_num()},
   mCubeNum{1},
   mCubeCap{mCubeNum},
-  mBody{cube.mBody}
+  mBody{nullptr}
 {
-  cube.mBody = nullptr;
+  SopMgr mgr(mVariableNum);
+  mgr.cube_move(mBody, cube);
 }
 
 // @brief 内容を指定したコンストラクタ
@@ -323,7 +320,7 @@ SopCover::operator+=(const SopCover& right)
 SopCover
 SopCover::operator+(const SopCube& right) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  ASSERT_COND( mVariableNum == right.variable_num() );
 
   SopMgr mgr(mVariableNum);
   int cap = mCubeNum + 1;
@@ -338,7 +335,7 @@ SopCover::operator+(const SopCube& right) const
 SopCover&
 SopCover::operator+=(const SopCube& right)
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  ASSERT_COND( mVariableNum == right.variable_num() );
 
   SopMgr mgr(mVariableNum);
   int cap = mCubeNum + 1;
@@ -395,7 +392,7 @@ SopCover::operator-=(const SopCover& right)
 SopCover
 SopCover::operator-(const SopCube& right) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  ASSERT_COND( mVariableNum == right.variable_num() );
 
   SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
@@ -411,7 +408,7 @@ SopCover::operator-(const SopCube& right) const
 SopCover&
 SopCover::operator-=(const SopCube& right)
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  ASSERT_COND( mVariableNum == right.variable_num() );
 
   SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_diff(mBody, block(), right.block());
@@ -463,7 +460,7 @@ SopCover::operator*=(const SopCover& right)
 SopCover
 SopCover::operator*(const SopCube& right) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  ASSERT_COND( mVariableNum == right.variable_num() );
 
   SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
@@ -479,7 +476,7 @@ SopCover::operator*(const SopCube& right) const
 SopCover&
 SopCover::operator*=(const SopCube& right)
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  ASSERT_COND( mVariableNum == right.variable_num() );
 
   SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_product(mBody, block(), right.block());
@@ -549,7 +546,7 @@ SopCover::operator/=(const SopCover& right)
 SopCover
 SopCover::operator/(const SopCube& right) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  ASSERT_COND( mVariableNum == right.variable_num() );
 
   SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
@@ -565,7 +562,7 @@ SopCover::operator/(const SopCube& right) const
 SopCover&
 SopCover::operator/=(const SopCube& right)
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  ASSERT_COND( mVariableNum == right.variable_num() );
 
   SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_quotient(mBody, block(), right.block());
@@ -606,10 +603,7 @@ SopCube
 SopCover::common_cube() const
 {
   SopMgr mgr(mVariableNum);
-  SopBitVect* body = mgr.new_body(1);
-  mgr.common_cube(body, block());
-
-  return SopCube(mVariableNum, body);
+  return mgr.common_cube(block());
 }
 
 // @brief ハッシュ値を返す．

@@ -155,7 +155,7 @@ KernelGen::kern_sub(const SopCover& cover,
     SopCover cover1 = cover / lit;
     // 共通なキューブを求める．
     SopCube ccube1 = cover1.common_cube();
-    if ( ccube1.check_intersect(plits1) ) {
+    if ( plits1.check_intersect(ccube1) ) {
       // plits にはすでに処理したリテラルが入っている．
       // それと ccube1 が共通部分をもっていたということは
       // cover1 はすでに処理されている．

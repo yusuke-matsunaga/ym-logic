@@ -8,7 +8,7 @@
 /// Copyright (C) 2018 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Alg.h"
+#include "ym/Sop.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC

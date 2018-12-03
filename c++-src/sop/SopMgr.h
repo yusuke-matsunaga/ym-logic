@@ -10,6 +10,7 @@
 
 
 #include "ym/Sop.h"
+#include "ym/SopCube.h"
 #include "ym/VarId.h"
 
 
@@ -128,6 +129,15 @@ public:
 	     const SopBitVect* src_bv,
 	     int cube_num);
 
+  /// @brief カバー(を表すキューブのリスト)に内容をセットする．
+  /// @param[in] dst_bv 対象のビットベクタ
+  /// @param[in] cube_list キューブのリスト
+  ///
+  /// * dst_bv には十分な容量が確保されていると仮定する．
+  void
+  cover_set(SopBitVect* dst_bv,
+	    const vector<SopCube>& cube_list);
+
   /// @brief カバー(を表すビットベクタ)に内容をセットする．
   /// @param[in] dst_bv 対象のビットベクタ
   /// @param[in] bv_list キューブを表すビットベクタのリスト
@@ -244,14 +254,11 @@ public:
 		 Literal lit);
 
   /// @brief カバー中のすべてのキューブの共通部分を求める．
-  /// @param[in] dst_bv 結果を格納するビットベクタ
   /// @param[in] src1 1つめのブロック
   ///
   /// * 共通部分がないときは空のキューブとなる．
-  /// * dst_bv には十分な容量があると仮定する．
-  void
-  common_cube(SopBitVect* dst_bv,
-	      const SopBlock& src1);
+  SopCube
+  common_cube(const SopBlock& src1);
 
   /// @brief カバー(を表すビットベクタ)の比較を行う．
   /// @param[in] src1 1つめのブロック
@@ -285,6 +292,13 @@ public:
   cube_clear(SopBitVect* dst_bv,
 	     int dst_offset);
 
+  /// @brief キューブをコピーする．
+  /// @param[in] dst_bv 対象のビットベクタ
+  /// @param[in] src_cube コピー元のキューブ
+  void
+  cube_copy(SopBitVect* dst_bv,
+	    const SopCube& src_cube);
+
   /// @brief キューブ(を表すビットベクタ)をコピーする．
   /// @param[in] dst_bv 対象のビットベクタ
   /// @param[in] src_bv コピー元のビットベクタ
@@ -302,6 +316,13 @@ public:
 	     int dst_offset,
 	     const SopBitVect* src_bv,
 	     int src_offset);
+
+  /// @brief キューブをムーブする．
+  /// @param[in] dst_bv 対象のビットベクタ
+  /// @param[in] src_cube ムーブ元のキューブ
+  void
+  cube_move(SopBitVect* dst_bv,
+	    SopCube& src_cube);
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
   /// @param[in] dst_bv 対象のビットベクタ
@@ -408,6 +429,14 @@ public:
 			 int bv1_offset,
 			 const SopBitVect* bv2,
 			 int bv2_offset);
+
+  /// @brief ２つのキューブに共通なリテラルがあれば true を返す．
+  /// @param[in] bv1 1つめのキューブを表すビットベクタ
+  /// @param[in] cube2 2つめのキューブ
+  /// @return ２つのキューブに共通なリテラルがあれば true を返す．
+  bool
+  cube_check_intersect(const SopBitVect* bv1,
+		       const SopCube& cube2);
 
   /// @brief ２つのキューブに共通なリテラルがあれば true を返す．
   /// @param[in] bv1 1つめのキューブを表すビットベクタ
@@ -648,6 +677,23 @@ SopMgr::cover_copy(SopBitVect* dst_bv,
   bcopy(src_bv, dst_bv, cube_num * _cube_size() * sizeof(SopBitVect));
 }
 
+// @brief カバー(を表すキューブのリスト)に内容をセットする．
+// @param[in] dst_bv 対象のビットベクタ
+// @param[in] cube_list キューブのリスト
+//
+// * dst_bv には十分な容量が確保されていると仮定する．
+inline
+void
+SopMgr::cover_set(SopBitVect* dst_bv,
+		  const vector<SopCube>& cube_list)
+{
+  SopBitVect* dst_bv0 = dst_bv;
+  for ( const auto& cube: cube_list ) {
+    cube_copy(dst_bv, cube.mBody);
+    dst_bv += _cube_size();
+  }
+}
+
 // @brief カバー(を表すビットベクタ)に内容をセットする．
 // @param[in] dst_bv 対象のビットベクタ
 // @param[in] bv_list キューブを表すビットベクタのリスト
@@ -716,6 +762,17 @@ SopMgr::cube_clear(SopBitVect* dst_bv,
   cube_clear(_calc_offset(dst_bv, dst_offset));
 }
 
+// @brief キューブをコピーする．
+// @param[in] dst_bv 対象のビットベクタ
+// @param[in] src_cube コピー元のキューブ
+inline
+void
+SopMgr::cube_copy(SopBitVect* dst_bv,
+		  const SopCube& src_cube)
+{
+  cover_copy(dst_bv, src_cube.mBody, 1);
+}
+
 // @brief キューブ(を表すビットベクタ)をコピーする．
 // @param[in] dst_bv 対象のビットベクタ
 // @param[in] src_bv コピー元のビットベクタ
@@ -741,6 +798,18 @@ SopMgr::cube_copy(SopBitVect* dst_bv,
 {
   cube_copy(_calc_offset(dst_bv, dst_offset),
 	    _calc_offset(src_bv, src_offset));
+}
+
+// @brief キューブをムーブする．
+// @param[in] dst_bv 対象のビットベクタ
+// @param[in] src_cube ムーブ元のキューブ
+inline
+void
+SopMgr::cube_move(SopBitVect* dst_bv,
+		  SopCube& src_cube)
+{
+  dst_bv = src_cube.mBody;
+  src_cube.mBody = nullptr;
 }
 
 // @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
@@ -790,6 +859,18 @@ SopMgr::cube_compare(const SopBitVect* bv1,
 {
   return cube_compare(_calc_offset(bv1, bv1_offset),
 		      _calc_offset(bv2, bv2_offset));
+}
+
+// @brief ２つのキューブに共通なリテラルがあれば true を返す．
+// @param[in] bv1 1つめのキューブを表すビットベクタ
+// @param[in] cube2 2つめのキューブ
+// @return ２つのキューブに共通なリテラルがあれば true を返す．
+inline
+bool
+SopMgr::cube_check_intersect(const SopBitVect* bv1,
+			     const SopCube& cube2)
+{
+  return cube_check_intersect(bv1, cube2.mBody);
 }
 
 // @brief 2つのキューブが矛盾していないか調べる．

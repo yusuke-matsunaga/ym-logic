@@ -226,17 +226,6 @@ SopCube::check_intersect(const SopCube& right) const
   return mgr.cube_check_intersect(mBody, right.mBody);
 }
 
-// @brief 引数のリテラルをひとつでも含んでいたら true を返す．
-// @param[in] right 対象のリテラル集合
-bool
-SopCube::check_intersect(const LitSet& right) const
-{
-  ASSERT_COND( mVariableNum == right.mVariableNum );
-
-  SopMgr mgr(mVariableNum);
-  return mgr.cube_check_intersect(mBody, right.mBody);
-}
-
 // @brief キューブの論理積を計算する
 // @param[in] right オペランド
 //

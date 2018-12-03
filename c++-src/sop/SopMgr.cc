@@ -453,17 +453,17 @@ SopMgr::cover_quotient(SopBitVect* dst_bv,
 }
 
 // @brief カバー中のすべてのキューブの共通部分を求める．
-// @param[in] dst_bv 結果を格納するビットベクタ
 // @param[in] src1 1つめのブロック
 //
 // * 共通部分がないときは空のキューブとなる．
-// * dst_bv には十分な容量があると仮定する．
-void
-SopMgr::common_cube(SopBitVect* dst_bv,
-		    const SopBlock& src1)
+SopCube
+SopMgr::common_cube(const SopBlock& src1)
 {
   const SopBitVect* bv1 = src1.bitvect();
   const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
+
+  SopBitVect* dst_bv0 = new_body(1);
+  SopBitVect* dst_bv = dst_bv;
 
   // 最初のキューブをコピーする．
   cube_copy(dst_bv, bv1);
@@ -483,6 +483,8 @@ SopMgr::common_cube(SopBitVect* dst_bv,
       break;
     }
   }
+
+  return SopCube(mVarNum, dst_bv0);
 }
 
 // @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．

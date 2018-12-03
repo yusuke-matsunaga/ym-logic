@@ -16,8 +16,6 @@
 
 BEGIN_NAMESPACE_YM_LOGIC
 
-class LitSet;
-
 //////////////////////////////////////////////////////////////////////
 /// @ingroup SopGroup
 /// @class SopCube SopCube.h "ym/SopCube.h"
@@ -30,7 +28,6 @@ class LitSet;
 //////////////////////////////////////////////////////////////////////
 class SopCube
 {
-  friend class SopCover;
   friend class SopMgr;
 
 public:
@@ -129,11 +126,6 @@ public:
   /// @param[in] right オペランドのキューブ
   bool
   check_intersect(const SopCube& right) const;
-
-  /// @brief 引数のリテラルをひとつでも含んでいたら true を返す．
-  /// @param[in] right 対象のリテラル集合
-  bool
-  check_intersect(const LitSet& right) const;
 
   /// @brief キューブの論理積を計算する
   /// @param[in] right オペランド

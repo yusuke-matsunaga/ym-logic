@@ -1,5 +1,5 @@
-#ifndef ALGLITSET_H
-#define ALGLITSET_H
+#ifndef LITSET_H
+#define LITSET_H
 
 /// @file LitSet.h
 /// @brief LitSet のヘッダファイル
@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 
-#include "ym/Alg.h"
+#include "ym/Sop.h"
 #include "ym/Literal.h"
 
 
@@ -23,8 +23,7 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 class LitSet
 {
-  friend class SopCube; // SopCube::check_intersect() のため
-  friend class AlgMgr;
+  //friend class AlgMgr;
 
 public:
 
@@ -105,6 +104,11 @@ public:
   LitSet&
   operator+=(Literal lit);
 
+  /// @brief 引数のキューブ中のリテラルをひとつでも含んでいたら true を返す．
+  /// @param[in] right 対象のキューブ
+  bool
+  check_intersect(const SopCube& right) const;
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -121,7 +125,7 @@ private:
   int mVariableNum;
 
   // 内容を表すビットベクタ
-  AlgBitVect* mBody;
+  SopBitVect* mBody;
 
 };
 
@@ -252,4 +256,4 @@ operator+(const LitSet&& lit_set,
 
 END_NAMESPACE_YM_LOGIC
 
-#endif // ALGLITSET_H
+#endif // LITSET_H

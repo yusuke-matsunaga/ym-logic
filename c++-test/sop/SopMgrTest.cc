@@ -1123,19 +1123,18 @@ TEST(SopMgrTest, common_cube)
   mgr.cover_set(bv1, cube_list1);
   SopBlock block1{nc1, bv1};
 
-  SopBitVect* bv3 = mgr.new_body(2);
-  mgr.common_cube(bv3, block1);
+  SopCube ccube = mgr.common_cube(block1);
 
-  EXPECT_EQ( SopPat::_1, mgr.get_pat(bv3, 0, var0) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var1) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var2) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var3) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var4) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var5) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var6) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var7) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var8) );
-  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var9) );
+  EXPECT_EQ( SopPat::_1, ccube.get_pat(var0) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var1) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var2) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var3) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var4) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var5) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var6) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var7) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var8) );
+  EXPECT_EQ( SopPat::_X, ccube.get_pat(var9) );
 }
 
 TEST(SopMgrTest, cover_compare1)
