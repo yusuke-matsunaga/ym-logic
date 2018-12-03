@@ -8,8 +8,8 @@
 
 
 #include "OneLevel0Kernel.h"
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -34,7 +34,7 @@ BEGIN_NONAMESPACE
 // なければ Literal::x() を返す．
 inline
 Literal
-find_literal(const AlgCover& f)
+find_literal(const SopCover& f)
 {
   int nv = f.variable_num();
   for ( int i = 0; i < nv; ++ i ) {
@@ -54,13 +54,13 @@ END_NONAMESPACE
 // @brief 除数を求める．
 // @param[in] f 対象の論理式
 // @return 除数を表す論理式を返す．
-AlgCover
-OneLevel0Kernel::operator()(const AlgCover& f) const
+SopCover
+OneLevel0Kernel::operator()(const SopCover& f) const
 {
   if ( f.cube_num() < 2 ) {
     // f をこれ以上割ることはできない．
     // 空の論理式を返す．
-    return AlgCover{f.variable_num()};
+    return SopCover{f.variable_num()};
   }
 
   // f に2回以上現れるリテラルを求める．
@@ -68,13 +68,13 @@ OneLevel0Kernel::operator()(const AlgCover& f) const
   if ( lit == Literal::x() ) {
     // f をこれ以上割ることはできない．
     // 空の論理式を返す．
-    return AlgCover{f.variable_num()};
+    return SopCover{f.variable_num()};
   }
 
-  AlgCover f1{f};
+  SopCover f1{f};
   do {
     f1 /= lit;
-    AlgCube cc = f1.common_cube();
+    SopCube cc = f1.common_cube();
     f1 /= cc;
     lit = find_literal(f1);
   } while ( lit != Literal::x() );

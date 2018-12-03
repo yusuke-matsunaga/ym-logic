@@ -8,7 +8,7 @@
 /// Copyright (C) 2018 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Alg.h"
+#include "ym/Sop.h"
 #include "ym/Expr.h"
 
 
@@ -42,7 +42,7 @@ public:
 
   /// @brief ファクタリングを行う．
   Expr
-  operator()(const AlgCover& f);
+  operator()(const SopCover& f);
 
 
 private:
@@ -52,12 +52,12 @@ private:
 
   /// @brief 'LF' を行う．
   Expr
-  literal_factor(const AlgCover& f,
+  literal_factor(const SopCover& f,
 		 const vector<Literal>& lit_list);
 
-  /// @brief AlgCover をそのまま Expr に変換する．
+  /// @brief SopCover をそのまま Expr に変換する．
   Expr
-  cover_to_expr(const AlgCover& f);
+  cover_to_expr(const SopCover& f);
 
 
 private:

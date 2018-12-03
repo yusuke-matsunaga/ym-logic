@@ -1,8 +1,8 @@
-#ifndef ONELEVEL0KERNEL_H
-#define ONELEVEL0KERNEL_H
+#ifndef BESTKERNEL_H
+#define BESTKERNEL_H
 
-/// @file OneLevel0Kernel.h
-/// @brief OneLevel0Kernel のヘッダファイル
+/// @file BestKernel.h
+/// @brief BestKernel のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2018 Yusuke Matsunaga
@@ -14,19 +14,19 @@
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-/// @class OneLevel0Kernel OneLevel0Kernel.h "OneLevel0Kernel.h"
-/// @brief 'one_level0_kernel' を求める Divisor の派生クラス
+/// @class BestKernel BestKernel.h "BestKernel.h"
+/// @brief 'best_kernel' を求める Divisor の派生クラス
 //////////////////////////////////////////////////////////////////////
-class OneLevel0Kernel :
+class BestKernel :
   public Divisor
 {
 public:
 
   /// @brief コンストラクタ
-  OneLevel0Kernel();
+  BestKernel();
 
   /// @brief デストラクタ
-  ~OneLevel0Kernel();
+  ~BestKernel();
 
 
 public:
@@ -37,11 +37,11 @@ public:
   /// @brief 除数を求める．
   /// @param[in] f 対象の論理式
   /// @return 除数を表す論理式を返す．
-  AlgCover
-  operator()(const AlgCover& f) const override;
+  SopCover
+  operator()(const SopCover& f) const override;
 
 };
 
 END_NAMESPACE_YM_LOGIC
 
-#endif // ONELEVEL0KERNEL_H
+#endif // BESTKERNEL_H

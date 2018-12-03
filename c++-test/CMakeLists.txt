@@ -7,7 +7,7 @@
 # インクルードパスの設定
 # ===================================================================
 include_directories (
-  ${PROJECT_SOURCE_DIR}/ym-logic/c++-src/alg
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-src/sop
   ${PROJECT_SOURCE_DIR}/ym-logic/c++-src/npn
   ${GTEST_INCLUDE_DIR}
   )
@@ -87,32 +87,32 @@ ym_add_gtest ( logic_NpnMgr_test
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest ( logic_AlgMgr_test
-  alg/AlgMgrTest.cc
+ym_add_gtest ( logic_SopMgr_test
+  sop/SopMgrTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest ( logic_AlgCube_test
-  alg/AlgCubeTest.cc
+ym_add_gtest ( logic_SopCube_test
+  sop/SopCubeTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest ( logic_AlgCover_test
-  alg/AlgCoverTest.cc
+ym_add_gtest ( logic_SopCover_test
+  sop/SopCoverTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
-ym_add_gtest ( logic_AlgKernel_test
-  alg/AlgKernelTest.cc
+ym_add_gtest ( logic_Kernel_test
+  sop/KernelTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )
 
 ym_add_gtest ( logic_GenFactor_test
-  alg/GenFactorTest.cc
+  sop/GenFactorTest.cc
   $<TARGET_OBJECTS:ym_base_ad>
   $<TARGET_OBJECTS:ym_logic_ad>
   )

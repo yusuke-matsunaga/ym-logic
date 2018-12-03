@@ -1,24 +1,26 @@
-#ifndef YM_ALGCUBE_H
-#define YM_ALGCUBE_H
+#ifndef YM_SOPCUBE_H
+#define YM_SOPCUBE_H
 
-/// @file ym/AlgCube.h
-/// @brief AlgCube のヘッダファイル
+/// @file ym/SopCube.h
+/// @brief SopCube のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2017, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
-#include "ym/Alg.h"
+#include "ym/Sop.h"
 #include "ym/Literal.h"
 #include "ym/HashFunc.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
+class LitSet;
+
 //////////////////////////////////////////////////////////////////////
-/// @ingroup AlgGroup
-/// @class AlgCube AlgCube.h "ym/AlgCube.h"
+/// @ingroup SopGroup
+/// @class SopCube SopCube.h "ym/SopCube.h"
 /// @brief キューブ(積項)を表すクラス
 ///
 /// * 離散数学的には Literal の集合だが，相反するリテラル(x と x')は
@@ -26,10 +28,10 @@ BEGIN_NAMESPACE_YM_LOGIC
 /// * 常に固定サイズのビット配列として実装する．
 /// * 1つの変数につき2ビットを使用する．
 //////////////////////////////////////////////////////////////////////
-class AlgCube
+class SopCube
 {
-  friend class AlgCover;
-  friend class AlgMgr;
+  friend class SopCover;
+  friend class SopMgr;
 
 public:
 
@@ -38,50 +40,50 @@ public:
   ///
   /// * 空のキューブを作る．
   explicit
-  AlgCube(int variable_num);
+  SopCube(int variable_num);
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] lit リテラル
   ///
   /// * 単一のリテラルからなるキューブを作る．
-  AlgCube(int variable_num,
+  SopCube(int variable_num,
 	  Literal lit);
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] lit_list キューブを表すリテラルのリスト
-  AlgCube(int variable_num,
+  SopCube(int variable_num,
 	  const vector<Literal>& lit_list);
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] lit_list キューブを表すリテラルのリスト初期化子
-  AlgCube(int variable_num,
+  SopCube(int variable_num,
 	  std::initializer_list<Literal>& lit_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
-  AlgCube(const AlgCube& src);
+  SopCube(const SopCube& src);
 
   /// @brief コピー代入演算子
   /// @param[in] src コピー元のオブジェクト
   /// @return 代入後の自身への参照を返す．
-  AlgCube&
-  operator=(const AlgCube& src);
+  SopCube&
+  operator=(const SopCube& src);
 
   /// @brief ムーブコンストラクタ
   /// @param[in] src ムーブ元のオブジェクト
-  AlgCube(AlgCube&& src);
+  SopCube(SopCube&& src);
 
   /// @brief ムーブ代入演算子
   /// @param[in] src ムーブ元のオブジェクト
   /// @return 代入後の自身への参照を返す．
-  AlgCube&
-  operator=(AlgCube&& src);
+  SopCube&
+  operator=(SopCube&& src);
 
   /// @brief デストラクタ
-  ~AlgCube();
+  ~SopCube();
 
 
 public:
@@ -97,6 +99,14 @@ public:
   int
   literal_num() const;
 
+  /// @brief 指定した変数のパタンを読み出す．
+  /// @param[in] var 変数( 0 <= var_id.val() < variable_num() )
+  /// @retval SopPat::_X その変数は現れない．
+  /// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
+  /// @retval SopPat::_0 その変数が否定のリテラルとして現れる．
+  SopPat
+  get_pat(VarId var) const;
+
   /// @brief 指定したリテラルを含んでいたら true を返す．
   /// @param[in] lit 対象のリテラル
   bool
@@ -110,28 +120,28 @@ public:
   /// @brief オペランドのキューブに含まれていたら true を返す．
   /// @param[in] right オペランドのキューブ
   ///
-  /// ここではキューブの表す論理関数の含意を考える<br>
-  /// だからリテラル集合としてはオペランドのキューブを含むことになる．
+  /// * ここではキューブの表す論理関数の含意を考える．
+  /// * だからリテラル集合としてはオペランドのキューブを含むことになる．
   bool
-  check_containment(const AlgCube& right) const;
+  check_containment(const SopCube& right) const;
 
   /// @brief 2つのキューブに共通なリテラルがあれば true を返す．
   /// @param[in] right オペランドのキューブ
   bool
-  check_intersect(const AlgCube& right) const;
+  check_intersect(const SopCube& right) const;
 
   /// @brief 引数のリテラルをひとつでも含んでいたら true を返す．
   /// @param[in] right 対象のリテラル集合
   bool
-  check_intersect(const AlgLitSet& right) const;
+  check_intersect(const LitSet& right) const;
 
   /// @brief キューブの論理積を計算する
   /// @param[in] right オペランド
   ///
   /// リテラル集合としてみると和集合となる<br>
   /// ただし，相反するリテラルが含まれていたら空キューブとなる．
-  AlgCube
-  operator*(const AlgCube& right) const;
+  SopCube
+  operator*(const SopCube& right) const;
 
   /// @brief 論理積を計算し自身に代入する．
   /// @param[in] right オペランドのキューブ
@@ -139,15 +149,15 @@ public:
   ///
   /// リテラル集合とみなすとユニオンを計算することになる<br>
   /// ただし，相反するリテラルとの積があったら答は空のキューブとなる．
-  AlgCube&
-  operator*=(const AlgCube& right);
+  SopCube&
+  operator*=(const SopCube& right);
 
   /// @brief キューブとリテラルの論理積を計算する
   /// @param[in] right オペランドのリテラル
   ///
   /// リテラル集合としてみると和集合となる<br>
   /// ただし，相反するリテラルが含まれていたら空キューブとなる．
-  AlgCube
+  SopCube
   operator*(Literal right) const;
 
   /// @brief リテラルとの論理積を計算し自身に代入する．
@@ -156,13 +166,13 @@ public:
   ///
   /// リテラル集合とみなすとユニオンを計算することになる<br>
   /// ただし，相反するリテラルとの積があったら答は空のキューブとなる．
-  AlgCube&
+  SopCube&
   operator*=(Literal right);
 
   /// @brief キューブによる商を計算する
   /// @param[in] right オペランド
-  AlgCube
-  operator/(const AlgCube& right) const;
+  SopCube
+  operator/(const SopCube& right) const;
 
   /// @brief キューブによる商を計算し自身に代入する．
   /// @param[in] right オペランドのキューブ
@@ -170,12 +180,12 @@ public:
   ///
   /// リテラル集合として考えると集合差を計算することになる<br>
   /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
-  AlgCube&
-  operator/=(const AlgCube& right);
+  SopCube&
+  operator/=(const SopCube& right);
 
   /// @brief リテラルによる商を計算する
   /// @param[in] right オペランドのリテラル
-  AlgCube
+  SopCube
   operator/(Literal right) const;
 
   /// @brief リテラルによる商を計算し自身に代入する．
@@ -184,11 +194,11 @@ public:
   ///
   /// リテラル集合として考えると集合差を計算することになる<br>
   /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
-  AlgCube&
+  SopCube&
   operator/=(Literal right);
 
-  /// @breif AlgBlock を返す．
-  AlgBlock
+  /// @breif SopBlock を返す．
+  SopBlock
   block() const;
 
   /// @brief ハッシュ値を返す．
@@ -213,8 +223,8 @@ private:
   /// @param[in] body キューブのパタンを表す本体
   ///
   /// 危険なので普通は使わないように
-  AlgCube(int variable_num,
-	  AlgBitVect* body);
+  SopCube(int variable_num,
+	  SopBitVect* body);
 
   /// @brief mBody を削除する．
   void
@@ -229,8 +239,8 @@ private:
 
   friend
   int
-  compare(const AlgCube& left,
-	  const AlgCube& right);
+  compare(const SopCube& left,
+	  const SopCube& right);
 
 
 private:
@@ -242,159 +252,159 @@ private:
   int mVariableNum;
 
   // 内容を表すビットベクタ
-  AlgBitVect* mBody;
+  SopBitVect* mBody;
 
 };
 
-/// @relates AlgCube
+/// @relates SopCube
 /// @brief キューブの論理積を計算する
 /// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
-AlgCube
-operator*(AlgCube&& left,
-	  const AlgCube& right);
+SopCube
+operator*(SopCube&& left,
+	  const SopCube& right);
 
-/// @relates AlgCube
+/// @relates SopCube
 /// @brief キューブの論理積を計算する
 /// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
-AlgCube
-operator*(const AlgCube& left,
-	  AlgCube&& right);
+SopCube
+operator*(const SopCube& left,
+	  SopCube&& right);
 
-/// @relates AlgCube
+/// @relates SopCube
 /// @brief キューブの論理積を計算する
 /// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
-AlgCube
-operator*(AlgCube&& left,
-	  AlgCube&& right);
+SopCube
+operator*(SopCube&& left,
+	  SopCube&& right);
 
-/// @relates AlgCube
+/// @relates SopCube
 /// @brief キューブとリテラルの論理積を計算する
 /// @param[in] right オペランドのリテラル
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
-AlgCube
-operator*(AlgCube&& left,
+SopCube
+operator*(SopCube&& left,
 	  Literal right);
 
-/// @relates AlgCube
-/// @brief Literal と AlgCube の論理積
+/// @relates SopCube
+/// @brief Literal と SopCube の論理積
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
 /// @return 結果のキューブを返す．
-AlgCube
+SopCube
 operator*(Literal left,
-	  const AlgCube& right);
+	  const SopCube& right);
 
-/// @relates AlgCube
-/// @brief Literal と AlgCube の論理積
+/// @relates SopCube
+/// @brief Literal と SopCube の論理積
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
 /// @return 結果のキューブを返す．
-AlgCube
+SopCube
 operator*(Literal left,
-	  AlgCube&& right);
+	  SopCube&& right);
 
-/// @relates AlgCube
+/// @relates SopCube
 /// @brief キューブの除算を計算する
 /// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると集合差となる<br>
-AlgCube
-operator/(AlgCube&& left,
-	  const AlgCube& right);
+SopCube
+operator/(SopCube&& left,
+	  const SopCube& right);
 
-/// @relates AlgCube
+/// @relates SopCube
 /// @brief キューブとリテラルの除算を計算する
 /// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると集合差となる<br>
-AlgCube
-operator/(AlgCube&& left,
+SopCube
+operator/(SopCube&& left,
 	  Literal right);
 
-/// @relates AlgCube
-/// @brief AlgCubeの比較演算子
+/// @relates SopCube
+/// @brief SopCubeの比較演算子
 /// @param[in] left, right オペランド
 /// @retval -1 left < right
 /// @retval  0 left = right
 /// @retval  1 left > right
 int
-compare(const AlgCube& left,
-	const AlgCube& right);
+compare(const SopCube& left,
+	const SopCube& right);
 
-/// @relates AlgCube
-/// @brief AlgCubeの比較演算子(EQ)
+/// @relates SopCube
+/// @brief SopCubeの比較演算子(EQ)
 /// @param[in] left, right オペランド
 /// @retval true  left == right
 /// @retval false left != right
 bool
-operator==(const AlgCube& left,
-	   const AlgCube& right);
+operator==(const SopCube& left,
+	   const SopCube& right);
 
-/// @relates AlgCube
-/// @brief AlgCubeの比較演算子(NE)
+/// @relates SopCube
+/// @brief SopCubeの比較演算子(NE)
 /// @param[in] left, right オペランド
 /// @retval true  left != right
 /// @retval false left == right
 bool
-operator!=(const AlgCube& left,
-	   const AlgCube& right);
+operator!=(const SopCube& left,
+	   const SopCube& right);
 
-/// @relates AlgCube
-/// @brief AlgCubeの比較演算子(LT)
+/// @relates SopCube
+/// @brief SopCubeの比較演算子(LT)
 /// @param[in] left, right オペランド
 /// @retval true  left < right
 /// @retval false left >= right
 bool
-operator<(const AlgCube& left,
-	  const AlgCube& right);
+operator<(const SopCube& left,
+	  const SopCube& right);
 
-/// @relates AlgCube
-/// @brief AlgCubeの比較演算子(GT)
+/// @relates SopCube
+/// @brief SopCubeの比較演算子(GT)
 /// @param[in] left, right オペランド
 /// @retval true  left > right
 /// @retval false left <= right
 bool
-operator>(const AlgCube& left,
-	  const AlgCube& right);
+operator>(const SopCube& left,
+	  const SopCube& right);
 
-/// @relates AlgCube
-/// @brief AlgCubeの比較演算子(LE)
+/// @relates SopCube
+/// @brief SopCubeの比較演算子(LE)
 /// @param[in] left, right オペランド
 /// @retval true  left < right
 /// @retval false left >= right
 bool
-operator<=(const AlgCube& left,
-	   const AlgCube& right);
+operator<=(const SopCube& left,
+	   const SopCube& right);
 
-/// @relates AlgCube
-/// @brief AlgCubeの比較演算子(GE)
+/// @relates SopCube
+/// @brief SopCubeの比較演算子(GE)
 /// @param[in] left, right オペランド
 /// @retval true  left < right
 /// @retval false left >= right
 bool
-operator>=(const AlgCube& left,
-	   const AlgCube& right);
+operator>=(const SopCube& left,
+	   const SopCube& right);
 
-/// @relates AlgCube
-/// @brief AlgCube の内容を出力する．
+/// @relates SopCube
+/// @brief SopCube の内容を出力する．
 /// @param[in] s 出力先のストリーム
 /// @param[in] cube 対象のキューブ(のポインタ)
 ///
 /// cube->print(s) と等価
 ostream&
 operator<<(ostream& s,
-	   const AlgCube& cube);
+	   const SopCube& cube);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -404,196 +414,196 @@ operator<<(ostream& s,
 // @brief 変数の数を返す．
 inline
 int
-AlgCube::variable_num() const
+SopCube::variable_num() const
 {
   return mVariableNum;
 }
 
-// @relates AlgCube
+// @relates SopCube
 // @brief キューブの論理積を計算する
 // @param[in] left, right オペランド
 //
 // リテラル集合としてみると和集合となる<br>
 // ただし，相反するリテラルが含まれていたら空キューブとなる．
 inline
-AlgCube
-operator*(AlgCube&& left,
-	  const AlgCube& right)
+SopCube
+operator*(SopCube&& left,
+	  const SopCube& right)
 {
-  return AlgCube(std::move(left)).operator*=(right);
+  return SopCube(std::move(left)).operator*=(right);
 }
 
-// @relates AlgCube
+// @relates SopCube
 // @brief キューブの論理積を計算する
 // @param[in] left, right オペランド
 //
 // リテラル集合としてみると和集合となる<br>
 // ただし，相反するリテラルが含まれていたら空キューブとなる．
 inline
-AlgCube
-operator*(const AlgCube& left,
-	  AlgCube&& right)
+SopCube
+operator*(const SopCube& left,
+	  SopCube&& right)
 {
-  return AlgCube(std::move(right)).operator*=(left);
+  return SopCube(std::move(right)).operator*=(left);
 }
 
-// @relates AlgCube
+// @relates SopCube
 // @brief キューブの論理積を計算する
 // @param[in] left, right オペランド
 //
 // リテラル集合としてみると和集合となる<br>
 // ただし，相反するリテラルが含まれていたら空キューブとなる．
 inline
-AlgCube
-operator*(AlgCube&& left,
-	  AlgCube&& right)
+SopCube
+operator*(SopCube&& left,
+	  SopCube&& right)
 {
-  return AlgCube(std::move(left)).operator*=(right);
+  return SopCube(std::move(left)).operator*=(right);
 }
 
-// @relates AlgCube
+// @relates SopCube
 // @brief キューブとリテラルの論理積を計算する
 // @param[in] right オペランドのリテラル
 //
 // リテラル集合としてみると和集合となる<br>
 // ただし，相反するリテラルが含まれていたら空キューブとなる．
 inline
-AlgCube
-operator*(AlgCube&& left,
+SopCube
+operator*(SopCube&& left,
 	  Literal right)
 {
-  return AlgCube(std::move(left)).operator*=(right);
+  return SopCube(std::move(left)).operator*=(right);
 }
 
-// @relates AlgCube
-// @brief Literal と AlgCube の論理積
+// @relates SopCube
+// @brief Literal と SopCube の論理積
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
 // @return 結果のキューブを返す．
 inline
-AlgCube
+SopCube
 operator*(Literal left,
-	  const AlgCube& right)
+	  const SopCube& right)
 {
   // 交換則を用いる．
   return right.operator*(left);
 }
 
-// @relates AlgCube
-// @brief Literal と AlgCube の論理積
+// @relates SopCube
+// @brief Literal と SopCube の論理積
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
 // @return 結果のキューブを返す．
 inline
-AlgCube
+SopCube
 operator*(Literal left,
-	  AlgCube&& right)
+	  SopCube&& right)
 {
   // 交換則を用いる．
-  return AlgCube(std::move(right)).operator*=(left);
+  return SopCube(std::move(right)).operator*=(left);
 }
 
-// @relates AlgCube
+// @relates SopCube
 // @brief キューブの除算を計算する
 // @param[in] left, right オペランド
 //
 // リテラル集合としてみると集合差となる<br>
 inline
-AlgCube
-operator/(AlgCube&& left,
-	  const AlgCube& right)
+SopCube
+operator/(SopCube&& left,
+	  const SopCube& right)
 {
-  return AlgCube(std::move(left)).operator/=(right);
+  return SopCube(std::move(left)).operator/=(right);
 }
 
-// @relates AlgCube
+// @relates SopCube
 // @brief キューブとリテラルの除算を計算する
 // @param[in] left, right オペランド
 //
 // リテラル集合としてみると集合差となる<br>
 inline
-AlgCube
-operator/(AlgCube&& left,
+SopCube
+operator/(SopCube&& left,
 	  Literal right)
 {
-  return AlgCube(std::move(left)).operator/=(right);
+  return SopCube(std::move(left)).operator/=(right);
 }
 
-// @relates AlgCube
-// @brief AlgCubeの比較演算子(EQ)
+// @relates SopCube
+// @brief SopCubeの比較演算子(EQ)
 // @param[in] left, right オペランド
 // @retval true  left == right
 // @retval false left != right
 inline
 bool
-operator==(const AlgCube& left,
-	   const AlgCube& right)
+operator==(const SopCube& left,
+	   const SopCube& right)
 {
   return compare(left, right) == 0;
 }
 
-// @relates AlgCube
-// @brief AlgCubeの比較演算子(NE)
+// @relates SopCube
+// @brief SopCubeの比較演算子(NE)
 // @param[in] left, right オペランド
 // @retval true  left != right
 // @retval false left == right
 inline
 bool
-operator!=(const AlgCube& left,
-	   const AlgCube& right)
+operator!=(const SopCube& left,
+	   const SopCube& right)
 {
   return compare(left, right) != 0;
 }
 
-// @brief AlgCubeの比較演算子(LT)
+// @brief SopCubeの比較演算子(LT)
 // @param[in] left, right オペランド
 // @retval true  left < right
 // @retval false left >= right
 inline
 bool
-operator<(const AlgCube& left,
-	  const AlgCube& right)
+operator<(const SopCube& left,
+	  const SopCube& right)
 {
   return compare(left, right) < 0;
 }
 
-// @brief AlgCubeの比較演算子(GT)
+// @brief SopCubeの比較演算子(GT)
 // @param[in] left, right オペランド
 // @retval true  left > right
 // @retval false left <= right
 inline
 bool
-operator>(const AlgCube& left,
-	  const AlgCube& right)
+operator>(const SopCube& left,
+	  const SopCube& right)
 {
   return compare(left, right) > 0;
 }
 
-// @brief AlgCubeの比較演算子(LE)
+// @brief SopCubeの比較演算子(LE)
 // @param[in] left, right オペランド
 // @retval true  left < right
 // @retval false left >= right
 inline
 bool
-operator<=(const AlgCube& left,
-	   const AlgCube& right)
+operator<=(const SopCube& left,
+	   const SopCube& right)
 {
   return compare(left, right) <= 0;
 }
 
-// @brief AlgCubeの比較演算子(GE)
+// @brief SopCubeの比較演算子(GE)
 // @param[in] left, right オペランド
 // @retval true  left < right
 // @retval false left >= right
 inline
 bool
-operator>=(const AlgCube& left,
-	   const AlgCube& right)
+operator>=(const SopCube& left,
+	   const SopCube& right)
 {
   return compare(left, right) >= 0;
 }
 
-// @brief AlgCube の内容を出力する．
+// @brief SopCube の内容を出力する．
 // @param[in] s 出力先のストリーム
 // @param[in] cube 対象のキューブ
 //
@@ -601,7 +611,7 @@ operator>=(const AlgCube& left,
 inline
 ostream&
 operator<<(ostream& s,
-	   const AlgCube& cube)
+	   const SopCube& cube)
 {
   cube.print(s);
   return s;
@@ -611,12 +621,12 @@ END_NAMESPACE_YM_LOGIC
 
 BEGIN_NAMESPACE_YM
 
-/// @breif AlgCube をキーにしたハッシュ関数クラスの定義
+/// @breif SopCube をキーにしたハッシュ関数クラスの定義
 template <>
-struct HashFunc<AlgCube>
+struct HashFunc<SopCube>
 {
   SizeType
-  operator()(const AlgCube& cube) const
+  operator()(const SopCube& cube) const
   {
     return cube.hash();
   }
@@ -624,4 +634,4 @@ struct HashFunc<AlgCube>
 
 END_NAMESPACE_YM
 
-#endif // YM_ALGCUBE_H
+#endif // YM_SOPCUBE_H

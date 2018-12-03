@@ -8,9 +8,9 @@
 
 
 #include "BestKernel.h"
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
-#include "AlgKernelGen.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
+#include "KernelGen.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -32,10 +32,10 @@ BestKernel::~BestKernel()
 // @brief 除数を求める．
 // @param[in] f 対象の論理式
 // @return 除数を表す論理式を返す．
-AlgCover
-BestKernel::operator()(const AlgCover& f) const
+SopCover
+BestKernel::operator()(const SopCover& f) const
 {
-  AlgKernelGen kernel_gen;
+  KernelGen kernel_gen;
 
   return kernel_gen.best_kernel(f);
 }

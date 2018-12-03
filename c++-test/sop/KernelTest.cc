@@ -1,6 +1,6 @@
 
-/// @file AlgKernelTest.cc
-/// @brief AlgKernelTest の実装ファイル
+/// @file KernelTest.cc
+/// @brief KernelTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2018 Yusuke Matsunaga
@@ -8,13 +8,13 @@
 
 
 #include <gtest/gtest.h>
-#include "AlgKernelGen.h"
+#include "KernelGen.h"
 #include "ym/Range.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
-TEST(AlgKernelTest, test1)
+TEST(KernelTest, test1)
 {
   const int nv = 10;
 
@@ -41,7 +41,7 @@ TEST(AlgKernelTest, test1)
   Literal lit_j(var9, false);
 
   // adf + aef + bdf + bef + cdf + cef + bfg + h
-  AlgCover cover1{nv, { { lit_a, lit_d, lit_f },
+  SopCover cover1{nv, { { lit_a, lit_d, lit_f },
 			{ lit_a, lit_e, lit_f },
 			{ lit_b, lit_d, lit_f },
 			{ lit_b, lit_e, lit_f },
@@ -50,9 +50,9 @@ TEST(AlgKernelTest, test1)
 			{ lit_b, lit_f, lit_g },
 			{ lit_h } } };
 
-  AlgKernelGen kg;
+  KernelGen kg;
 
-  vector<pair<AlgCover, AlgCover>> kernel_list;
+  vector<pair<SopCover, SopCover>> kernel_list;
   kg.all_kernel(cover1, kernel_list);
 
   vector<string> exp_list

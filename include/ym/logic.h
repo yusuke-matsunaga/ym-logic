@@ -34,8 +34,8 @@ BEGIN_NAMESPACE_YM_LOGIC
 // クラスの先行宣言
 //////////////////////////////////////////////////////////////////////
 
-class AlgCover;
-class AlgCube;
+class SopCover;
+class SopCube;
 class Expr;
 class ExprWriter;
 class NpnMap;
@@ -52,8 +52,8 @@ class Literal;
 class TvFunc;
 class TvFuncM;
 
-using nsLogic::AlgCover;
-using nsLogic::AlgCube;
+using nsLogic::SopCover;
+using nsLogic::SopCube;
 using nsLogic::Expr;
 using nsLogic::ExprWriter;
 using nsLogic::NpnMap;

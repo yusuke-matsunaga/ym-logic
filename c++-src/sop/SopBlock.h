@@ -1,34 +1,34 @@
-#ifndef ALGBLOCK_H
-#define ALGBLOCK_H
+#ifndef SOPBLOCK_H
+#define SOPBLOCK_H
 
-/// @file AlgBlock.h
-/// @brief AlgBlock のヘッダファイル
+/// @file SopBlock.h
+/// @brief SopBlock のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2018 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Alg.h"
+#include "ym/Sop.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-/// @class AlgBlock AlgBlock.h "AlgBlock.h"
-/// @brief AlgCover/AlgCube に共通なデータ構造
+/// @class SopBlock SopBlock.h "SopBlock.h"
+/// @brief SopCover/SopCube に共通なデータ構造
 //////////////////////////////////////////////////////////////////////
-class AlgBlock
+class SopBlock
 {
 public:
 
   /// @brief コンストラクタ
   /// @param[in] cube_num キューブ数
   /// @param[in] bitvect ビットベクタの先頭アドレス
-  AlgBlock(int cube_num,
-	   const AlgBitVect* bitvect);
+  SopBlock(int cube_num,
+	   const SopBitVect* bitvect);
 
   /// @brief デストラクタ
-  ~AlgBlock();
+  ~SopBlock();
 
 
 public:
@@ -41,7 +41,7 @@ public:
   cube_num() const;
 
   /// @brief ビットベクタの先頭アドレスを返す．
-  const AlgBitVect*
+  const SopBitVect*
   bitvect() const;
 
 
@@ -60,7 +60,7 @@ private:
   int mCubeNum;
 
   // ブロックの先頭
-  const AlgBitVect* mBitVect;
+  const SopBitVect* mBitVect;
 
 };
 
@@ -73,8 +73,8 @@ private:
 // @param[in] cube_num キューブ数
 // @param[in] bitvect ビットベクタの先頭アドレス
 inline
-AlgBlock::AlgBlock(int cube_num,
-		   const AlgBitVect* bitvect) :
+SopBlock::SopBlock(int cube_num,
+		   const SopBitVect* bitvect) :
   mCubeNum{cube_num},
   mBitVect{bitvect}
 {
@@ -82,26 +82,26 @@ AlgBlock::AlgBlock(int cube_num,
 
 // @brief デストラクタ
 inline
-AlgBlock::~AlgBlock()
+SopBlock::~SopBlock()
 {
 }
 
 // @brief キューブ数を返す．
 inline
 int
-AlgBlock::cube_num() const
+SopBlock::cube_num() const
 {
   return mCubeNum;
 }
 
 // @brief ビットベクタの先頭アドレスを返す．
 inline
-const AlgBitVect*
-AlgBlock::bitvect() const
+const SopBitVect*
+SopBlock::bitvect() const
 {
   return mBitVect;
 }
 
 END_NAMESPACE_YM_LOGIC
 
-#endif // ALGBLOCK_H
+#endif // SOPBLOCK_H

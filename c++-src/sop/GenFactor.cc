@@ -8,8 +8,8 @@
 
 
 #include "GenFactor.h"
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 #include "Divisor.h"
 #include "Divide.h"
 
@@ -37,16 +37,16 @@ GenFactor::~GenFactor()
 
 // @brief ファクタリングを行う．
 Expr
-GenFactor::operator()(const AlgCover& f)
+GenFactor::operator()(const SopCover& f)
 {
-  AlgCover d = mDivisor(f);
+  SopCover d = mDivisor(f);
   if ( d.cube_num() == 0 ) {
     return cover_to_expr(f);
   }
 
   auto p = mDivide(f, d);
-  const AlgCover& q = p.first;
-  const AlgCover& r = p.second;
+  const SopCover& q = p.first;
+  const SopCover& r = p.second;
   if ( q.cube_num() == 1 ) {
     vector<vector<Literal>> cube_list;
     q.to_literal_list(cube_list);
@@ -54,12 +54,12 @@ GenFactor::operator()(const AlgCover& f)
     return literal_factor(f, cube_list[0]);
   }
   else {
-    AlgCube cc = q.common_cube();
-    AlgCover q1 = q / cc;
+    SopCube cc = q.common_cube();
+    SopCover q1 = q / cc;
     auto p = mDivide(f, q1);
-    const AlgCover& d1 = p.first;
-    const AlgCover& r1 = p.second;
-    AlgCube cc1 = d1.common_cube();
+    const SopCover& d1 = p.first;
+    const SopCover& r1 = p.second;
+    SopCube cc1 = d1.common_cube();
     if ( cc1.literal_num() == 0 ) {
       Expr q_expr = operator()(q1);
       Expr d_expr = operator()(d1);
@@ -75,7 +75,7 @@ GenFactor::operator()(const AlgCover& f)
 }
 
 Expr
-GenFactor::literal_factor(const AlgCover& f,
+GenFactor::literal_factor(const SopCover& f,
 			  const vector<Literal>& lit_list)
 {
   // l <- lit_list に含まれるリテラルで最も出現回数の多いもの
@@ -88,17 +88,17 @@ GenFactor::literal_factor(const AlgCover& f,
       l = lit;
     }
   }
-  AlgCover q = f / l;
-  AlgCover r = f - q * l;
+  SopCover q = f / l;
+  SopCover r = f - q * l;
   Expr q_expr = operator()(q);
   Expr d_expr = Expr::literal(l);
   Expr r_expr = operator()(r);
   return (q_expr & d_expr) | r_expr;
 }
 
-// @brief AlgCover をそのまま Expr に変換する．
+// @brief SopCover をそのまま Expr に変換する．
 Expr
-GenFactor::cover_to_expr(const AlgCover& f)
+GenFactor::cover_to_expr(const SopCover& f)
 {
   vector<vector<Literal>> cube_list;
   f.to_literal_list(cube_list);

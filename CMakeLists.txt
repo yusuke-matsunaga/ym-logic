@@ -28,16 +28,16 @@ add_subdirectory(tests)
 #  ソースファイルの設定
 # ===================================================================
 
-set (alg_SOURCES
-  c++-src/alg/AlgCover.cc
-  c++-src/alg/AlgCube.cc
-  c++-src/alg/AlgKernelGen.cc
-  c++-src/alg/AlgLitSet.cc
-  c++-src/alg/AlgMgr.cc
-  c++-src/alg/GenFactor.cc
-  c++-src/alg/BestKernel.cc
-  c++-src/alg/OneLevel0Kernel.cc
-  c++-src/alg/WeakDivision.cc
+set (sop_SOURCES
+  c++-src/sop/SopCover.cc
+  c++-src/sop/SopCube.cc
+  c++-src/sop/SopMgr.cc
+  c++-src/sop/KernelGen.cc
+  c++-src/sop/LitSet.cc
+  c++-src/sop/GenFactor.cc
+  c++-src/sop/BestKernel.cc
+  c++-src/sop/OneLevel0Kernel.cc
+  c++-src/sop/WeakDivision.cc
   )
 
 set (expr_SOURCES
@@ -67,7 +67,7 @@ set (tvfunc_SOURCES
   )
 
 set (ym_logic_SOURCES
-  ${alg_SOURCES}
+  ${sop_SOURCES}
   ${expr_SOURCES}
   ${npn_SOURCES}
   ${tvfunc_SOURCES}

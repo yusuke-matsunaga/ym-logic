@@ -1,8 +1,8 @@
 #ifndef ALGLITSET_H
 #define ALGLITSET_H
 
-/// @file AlgLitSet.h
-/// @brief AlgLitSet のヘッダファイル
+/// @file LitSet.h
+/// @brief LitSet のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2017, 2018 Yusuke Matsunaga
@@ -16,14 +16,14 @@
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-/// @class AlgLitSet AlgLitSet.h "AlgLitSet.h"
+/// @class LitSet LitSet.h "LitSet.h"
 /// @brief Literal の集合を表すクラス
 ///
-/// AlgCube と異なり，相反するリテラル(x と x')を同時に含んでも良い．
+/// SopCube と異なり，相反するリテラル(x と x')を同時に含んでも良い．
 //////////////////////////////////////////////////////////////////////
-class AlgLitSet
+class LitSet
 {
-  friend class AlgCube; // AlgCube::check_intersect() のため
+  friend class SopCube; // SopCube::check_intersect() のため
   friend class AlgMgr;
 
 public:
@@ -33,48 +33,48 @@ public:
   ///
   /// * 空集合となる．
   explicit
-  AlgLitSet(int variable_num);
+  LitSet(int variable_num);
 
   /// @brief シングルトンのコンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] lit リテラル
-  AlgLitSet(int variable_num,
+  LitSet(int variable_num,
 	    Literal lit);
 
   /// @brief 一般的なコンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] lit_list リテラルのリスト
-  AlgLitSet(int variable_num,
+  LitSet(int variable_num,
 	    const vector<Literal>& lit_list);
 
   /// @brief 一般的なコンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] lit_list リテラルのリスト
-  AlgLitSet(int variable_num,
+  LitSet(int variable_num,
 	    std::initializer_list<Literal>& lit_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
-  AlgLitSet(const AlgLitSet& src);
+  LitSet(const LitSet& src);
 
   /// @brief コピー代入演算子
   /// @param[in] src コピー元のオブジェクト
   /// @return 代入後の自身への参照を返す．
-  AlgLitSet&
-  operator=(const AlgLitSet& src);
+  LitSet&
+  operator=(const LitSet& src);
 
   /// @brief ムーブコンストラクタ
   /// @param[in] src ムーブ元のオブジェクト
-  AlgLitSet(AlgLitSet&& src);
+  LitSet(LitSet&& src);
 
   /// @brief ムーブ代入演算子
   /// @param[in] src ムーブ元のオブジェクト
   /// @return 代入後の自身への参照を返す．
-  AlgLitSet&
-  operator=(AlgLitSet&& src);
+  LitSet&
+  operator=(LitSet&& src);
 
   /// @brief デストラクタ
-  ~AlgLitSet();
+  ~LitSet();
 
 
 public:
@@ -96,13 +96,13 @@ public:
   /// @brief ユニオン演算付き代入
   /// @param[in] right オペランド
   /// @return 自身への参照を返す．
-  AlgLitSet&
-  operator+=(const AlgLitSet& right);
+  LitSet&
+  operator+=(const LitSet& right);
 
   /// @brief 要素を足す．
   /// @param[in] lit 追加するリテラル
   /// @return 自身への参照を返す．
-  AlgLitSet&
+  LitSet&
   operator+=(Literal lit);
 
 
@@ -125,48 +125,48 @@ private:
 
 };
 
-/// @brief AlgLitSet 同士の加算(ユニオン演算)
+/// @brief LitSet 同士の加算(ユニオン演算)
 /// @param[in] left, right
 /// @return 演算結果を返す．
-AlgLitSet
-operator+(const AlgLitSet& left,
-	  const AlgLitSet& right);
+LitSet
+operator+(const LitSet& left,
+	  const LitSet& right);
 
-/// @brief AlgLitSet 同士の加算(ユニオン演算)
+/// @brief LitSet 同士の加算(ユニオン演算)
 /// @param[in] left, right
 /// @return 演算結果を返す．
-AlgLitSet
-operator+(AlgLitSet&& left,
-	  const AlgLitSet& right);
+LitSet
+operator+(LitSet&& left,
+	  const LitSet& right);
 
-/// @brief AlgLitSet 同士の加算(ユニオン演算)
+/// @brief LitSet 同士の加算(ユニオン演算)
 /// @param[in] left, right
 /// @return 演算結果を返す．
-AlgLitSet
-operator+(const AlgLitSet& left,
-	  AlgLitSet&& right);
+LitSet
+operator+(const LitSet& left,
+	  LitSet&& right);
 
-/// @brief AlgLitSet 同士の加算(ユニオン演算)
+/// @brief LitSet 同士の加算(ユニオン演算)
 /// @param[in] left, right
 /// @return 演算結果を返す．
-AlgLitSet
-operator+(AlgLitSet&& left,
-	  AlgLitSet&& right);
+LitSet
+operator+(LitSet&& left,
+	  LitSet&& right);
 
 /// @brief 要素を足す．
 /// @param[in] lit_set リテラル集合の本体
 /// @param[in] lit 追加するリテラル
 /// @return 演算結果を返す．
-AlgLitSet
-operator+(const AlgLitSet& lit_set,
+LitSet
+operator+(const LitSet& lit_set,
 	  Literal lit);
 
 /// @brief 要素を足す．
 /// @param[in] lit_set リテラル集合の本体
 /// @param[in] lit 追加するリテラル
 /// @return 演算結果を返す．
-AlgLitSet
-operator+(const AlgLitSet&& lit_set,
+LitSet
+operator+(const LitSet&& lit_set,
 	  Literal lit);
 
 
@@ -177,53 +177,53 @@ operator+(const AlgLitSet&& lit_set,
 // @brief 変数の数を返す．
 inline
 int
-AlgLitSet::variable_num() const
+LitSet::variable_num() const
 {
   return mVariableNum;
 }
 
-// @brief AlgLitSet 同士の加算(ユニオン演算)
+// @brief LitSet 同士の加算(ユニオン演算)
 // @param[in] left, right
 // @return 演算結果を返す．
 inline
-AlgLitSet
-operator+(const AlgLitSet& left,
-	  const AlgLitSet& right)
+LitSet
+operator+(const LitSet& left,
+	  const LitSet& right)
 {
-  return AlgLitSet(left).operator+=(right);
+  return LitSet(left).operator+=(right);
 }
 
-// @brief AlgLitSet 同士の加算(ユニオン演算)
+// @brief LitSet 同士の加算(ユニオン演算)
 // @param[in] left, right
 // @return 演算結果を返す．
 inline
-AlgLitSet
-operator+(AlgLitSet&& left,
-	  const AlgLitSet& right)
+LitSet
+operator+(LitSet&& left,
+	  const LitSet& right)
 {
-  return AlgLitSet(left).operator+=(right);
+  return LitSet(left).operator+=(right);
 }
 
-// @brief AlgLitSet 同士の加算(ユニオン演算)
+// @brief LitSet 同士の加算(ユニオン演算)
 // @param[in] left, right
 // @return 演算結果を返す．
 inline
-AlgLitSet
-operator+(const AlgLitSet& left,
-	  AlgLitSet&& right)
+LitSet
+operator+(const LitSet& left,
+	  LitSet&& right)
 {
-  return AlgLitSet(right).operator+=(left);
+  return LitSet(right).operator+=(left);
 }
 
-// @brief AlgLitSet 同士の加算(ユニオン演算)
+// @brief LitSet 同士の加算(ユニオン演算)
 // @param[in] left, right
 // @return 演算結果を返す．
 inline
-AlgLitSet
-operator+(AlgLitSet&& left,
-	  AlgLitSet&& right)
+LitSet
+operator+(LitSet&& left,
+	  LitSet&& right)
 {
-  return AlgLitSet(left).operator+=(right);
+  return LitSet(left).operator+=(right);
 }
 
 // @brief 要素を足す．
@@ -231,11 +231,11 @@ operator+(AlgLitSet&& left,
 // @param[in] lit 追加するリテラル
 // @return 演算結果を返す．
 inline
-AlgLitSet
-operator+(const AlgLitSet& lit_set,
+LitSet
+operator+(const LitSet& lit_set,
 	  Literal lit)
 {
-  return AlgLitSet(lit_set).operator+=(lit);
+  return LitSet(lit_set).operator+=(lit);
 }
 
 // @brief 要素を足す．
@@ -243,11 +243,11 @@ operator+(const AlgLitSet& lit_set,
 // @param[in] lit 追加するリテラル
 // @return 演算結果を返す．
 inline
-AlgLitSet
-operator+(const AlgLitSet&& lit_set,
+LitSet
+operator+(const LitSet&& lit_set,
 	  Literal lit)
 {
-  return AlgLitSet(lit_set).operator+=(lit);
+  return LitSet(lit_set).operator+=(lit);
 }
 
 END_NAMESPACE_YM_LOGIC

@@ -8,7 +8,7 @@
 
 
 #include "WeakDivision.h"
-#include "ym/AlgCover.h"
+#include "ym/SopCover.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -31,12 +31,12 @@ WeakDivision::~WeakDivision()
 // @param[in] f 被除数
 // @param[in] d 除数
 // @return 商q と余りr の pair を返す．
-pair<AlgCover, AlgCover>
-WeakDivision::operator()(const AlgCover& f,
-			 const AlgCover& d) const
+pair<SopCover, SopCover>
+WeakDivision::operator()(const SopCover& f,
+			 const SopCover& d) const
 {
-  AlgCover q = f / d;
-  AlgCover r = f - (q * d);
+  SopCover q = f / d;
+  SopCover r = f - (q * d);
   return make_pair(std::move(q), std::move(r));
 }
 

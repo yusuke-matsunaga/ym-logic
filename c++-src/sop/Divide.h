@@ -1,8 +1,8 @@
-#ifndef DIVISOR_H
-#define DIVISOR_H
+#ifndef DIVIDE_H
+#define DIVIDE_H
 
-/// @file Divisor.h
-/// @brief Divisor のヘッダファイル
+/// @file Divide.h
+/// @brief Divide のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2018 Yusuke Matsunaga
@@ -14,16 +14,16 @@
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-/// @class Divisor Divisor.h "Divisor.h"
-/// @brief 除数を求める純粋仮想基底クラス
+/// @class Divide Divide.h "Divide.h"
+/// @brief 除算を行う純粋仮想基底クラス
 //////////////////////////////////////////////////////////////////////
-class Divisor
+class Divide
 {
 public:
 
   /// @brief デストラクタ
   virtual
-  ~Divisor() { }
+  ~Divide() { }
 
 
 public:
@@ -31,15 +31,17 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 除数を求める．
-  /// @param[in] f 対象の論理式
-  /// @return 除数を表す論理式を返す．
+  /// @brief 除算を行う．
+  /// @param[in] f 被除数
+  /// @param[in] d 除数
+  /// @return 商q と余りr の pair を返す．
   virtual
-  AlgCover
-  operator()(const AlgCover& f) const = 0;
+  pair<SopCover, SopCover>
+  operator()(const SopCover& f,
+	     const SopCover& d) const = 0;
 
 };
 
 END_NAMESPACE_YM_LOGIC
 
-#endif // DIVISOR_H
+#endif // DIVIDE_H

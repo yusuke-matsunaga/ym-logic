@@ -38,9 +38,9 @@ public:
   /// @param[in] f 被除数
   /// @param[in] d 除数
   /// @return 商q と余りr の pair を返す．
-  pair<AlgCover, AlgCover>
-  operator()(const AlgCover& f,
-	     const AlgCover& d) const override;
+  pair<SopCover, SopCover>
+  operator()(const SopCover& f,
+	     const SopCover& d) const override;
 
 
 private:

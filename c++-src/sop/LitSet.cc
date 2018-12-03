@@ -1,31 +1,31 @@
 
-/// @file AlgLitSet.cc
-/// @brief AlgLitSet の実装ファイル
+/// @file LitSet.cc
+/// @brief LitSet の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2017, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
-#include "AlgLitSet.h"
-#include "AlgMgr.h"
+#include "LitSet.h"
+#include "SopMgr.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgLitSet
+// クラス LitSet
 //////////////////////////////////////////////////////////////////////
 
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
 //
 // * 空集合となる．
-AlgLitSet::AlgLitSet(int variable_num) :
+LitSet::LitSet(int variable_num) :
   mVariableNum(variable_num),
   mBody(nullptr)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_clear(mBody);
 }
@@ -35,12 +35,12 @@ AlgLitSet::AlgLitSet(int variable_num) :
 // @param[in] lit リテラル
 //
 // 単一のリテラルからなるキューブを作る．
-AlgLitSet::AlgLitSet(int variable_num,
+LitSet::LitSet(int variable_num,
 		     Literal lit) :
   mVariableNum(variable_num),
   mBody(nullptr)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_clear(mBody);
   mgr.cube_set(mBody, vector<Literal>({lit}));
@@ -49,12 +49,12 @@ AlgLitSet::AlgLitSet(int variable_num,
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
 // @param[in] lit_list キューブを表すリテラルのリスト
-AlgLitSet::AlgLitSet(int variable_num,
+LitSet::LitSet(int variable_num,
 		     const vector<Literal>& lit_list) :
   mVariableNum(variable_num),
   mBody(nullptr)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_clear(mBody);
   mgr.cube_set(mBody, lit_list);
@@ -63,12 +63,12 @@ AlgLitSet::AlgLitSet(int variable_num,
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
 // @param[in] lit_list キューブを表すリテラルのリスト
-AlgLitSet::AlgLitSet(int variable_num,
+LitSet::LitSet(int variable_num,
 		     std::initializer_list<Literal>& lit_list) :
   mVariableNum(variable_num),
   mBody(nullptr)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_clear(mBody);
   mgr.cube_set(mBody, lit_list);
@@ -76,11 +76,11 @@ AlgLitSet::AlgLitSet(int variable_num,
 
 // @brief コピーコンストラクタ
 // @param[in] src コピー元のオブジェクト
-AlgLitSet::AlgLitSet(const AlgLitSet& src) :
+LitSet::LitSet(const LitSet& src) :
   mVariableNum(src.mVariableNum),
   mBody(nullptr)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_copy(mBody, src.mBody);
 }
@@ -88,13 +88,13 @@ AlgLitSet::AlgLitSet(const AlgLitSet& src) :
 // @brief 代入演算子
 // @param[in] src コピー元のオブジェクト
 // @return 代入後の自身への参照を返す．
-AlgLitSet&
-AlgLitSet::operator=(const AlgLitSet& src)
+LitSet&
+LitSet::operator=(const LitSet& src)
 {
   if ( &src != this ) {
-    AlgMgr mgr(src.mVariableNum);
+    SopMgr mgr(src.mVariableNum);
     if ( mVariableNum != src.mVariableNum ) {
-      AlgMgr old_mgr(mVariableNum);
+      SopMgr old_mgr(mVariableNum);
       old_mgr.delete_body(mBody, 1);
       mVariableNum = src.mVariableNum;
       mBody = mgr.new_body(1);
@@ -107,7 +107,7 @@ AlgLitSet::operator=(const AlgLitSet& src)
 
 // @brief ムーブコンストラクタ
 // @param[in] src ムーブ元のオブジェクト
-AlgLitSet::AlgLitSet(AlgLitSet&& src) :
+LitSet::LitSet(LitSet&& src) :
   mVariableNum{src.mVariableNum},
   mBody{src.mBody}
 {
@@ -117,10 +117,10 @@ AlgLitSet::AlgLitSet(AlgLitSet&& src) :
 // @brief ムーブ代入演算子
 // @param[in] src ムーブ元のオブジェクト
 // @return 代入後の自身への参照を返す．
-AlgLitSet&
-AlgLitSet::operator=(AlgLitSet&& src)
+LitSet&
+LitSet::operator=(LitSet&& src)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mgr.delete_body(mBody, 1);
 
   mVariableNum = src.mVariableNum;
@@ -132,9 +132,9 @@ AlgLitSet::operator=(AlgLitSet&& src)
 }
 
 // @brief デストラクタ
-AlgLitSet::~AlgLitSet()
+LitSet::~LitSet()
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mgr.delete_body(mBody, 1);
 }
 
@@ -143,19 +143,19 @@ AlgLitSet::~AlgLitSet()
 // @retval true 含まれている．
 // @retval false 含まれていない．
 bool
-AlgLitSet::is_in(Literal lit) const
+LitSet::is_in(Literal lit) const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.litset_check(mBody, lit);
 }
 
 // @brief ユニオン演算付き代入
 // @param[in] right オペランド
 // @return 自身への参照を返す．
-AlgLitSet&
-AlgLitSet::operator+=(const AlgLitSet& right)
+LitSet&
+LitSet::operator+=(const LitSet& right)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mgr.litset_union(mBody, right.mBody);
 
   return *this;
@@ -164,10 +164,10 @@ AlgLitSet::operator+=(const AlgLitSet& right)
 // @brief 要素を足す．
 // @param[in] lit 追加するリテラル
 // @return 自身への参照を返す．
-AlgLitSet&
-AlgLitSet::operator+=(Literal lit)
+LitSet&
+LitSet::operator+=(Literal lit)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mgr.cube_set(mBody, vector<Literal>{lit});
 
   return *this;

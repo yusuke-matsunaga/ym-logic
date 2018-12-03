@@ -1,15 +1,15 @@
-#ifndef YM_ALGCOVER_H
-#define YM_ALGCOVER_H
+#ifndef YM_SOPCOVER_H
+#define YM_SOPCOVER_H
 
-/// @file ym/AlgCover.h
-/// @brief AlgCover のヘッダファイル
+/// @file ym/SopCover.h
+/// @brief SopCover のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2017, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
-#include "ym/Alg.h"
+#include "ym/Sop.h"
 #include "ym/Literal.h"
 #include "ym/HashFunc.h"
 
@@ -17,7 +17,7 @@
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-/// @class AlgCover AlgCover.h "ym/AlgCover.h"
+/// @class SopCover SopCover.h "ym/SopCover.h"
 /// @brief カバー(積和形論理式)を表すクラス
 ///
 /// 中身は positional cube matrix 表現を用いたビットベクタ<br>
@@ -26,9 +26,9 @@ BEGIN_NAMESPACE_YM_LOGIC
 /// この式は代数的(algebraic)なので他のキューブに包含されるキューブは
 /// 許されない．もちろん重複したキューブも許されない．<br>
 /// 通常の操作を行っているかぎり代数的な式しか生成されない．<br>
-/// 実際の操作は AlgMgr が行う．
+/// 実際の操作は SopMgr が行う．
 //////////////////////////////////////////////////////////////////////
-class AlgCover
+class SopCover
 {
 public:
 
@@ -37,25 +37,24 @@ public:
   ///
   /// * 空のカバーとなる．
   explicit
-  AlgCover(int variable_num);
+  SopCover(int variable_num);
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] cube_list キューブのリスト
   ///
-  /// * cube_list が空の時は空のカバーとなる．
-  /// * cube_list が空でない時は各キューブのサイズは variable_num
+  /// * cube_list 中の各キューブのサイズは variable_num
   ///   と等しくなければならない．
   /// * キューブの順番は変わる可能性がある．
-  AlgCover(int variable_num,
-	   const vector<AlgCube>& cube_list);
+  SopCover(int variable_num,
+	   const vector<SopCube>& cube_list);
 
   /// @brief コンストラクタ
   /// @param[in] variable_num 変数の数
   /// @param[in] cube_list カバーを表すリテラルのリストのリスト
   ///
   /// * キューブの順番は変わる可能性がある．
-  AlgCover(int variable_num,
+  SopCover(int variable_num,
 	   const vector<vector<Literal>>& cube_list);
 
   /// @brief コンストラクタ
@@ -63,47 +62,47 @@ public:
   /// @param[in] cube_list カバーを表すリテラルのリストのリスト
   ///
   /// * キューブの順番は変わる可能性がある．
-  AlgCover(int variable_num,
+  SopCover(int variable_num,
 	   std::initializer_list<std::initializer_list<Literal>>& cube_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
-  AlgCover(const AlgCover& src);
+  SopCover(const SopCover& src);
 
   /// @brief コピー代入演算子
   /// @param[in] src コピー元のオブジェクト
   /// @return 代入後の自身の参照を返す．
-  AlgCover&
-  operator=(const AlgCover& src);
+  SopCover&
+  operator=(const SopCover& src);
 
   /// @brief ムーブコンストラクタ
   /// @param[in] src ムーブ元のオブジェクト
-  AlgCover(AlgCover&& src);
+  SopCover(SopCover&& src);
 
   /// @brief ムーブ代入演算子
   /// @param[in] src ムーブ元のオブジェクト
   /// @return 代入後の自身の参照を返す．
-  AlgCover&
-  operator=(AlgCover&& src);
+  SopCover&
+  operator=(SopCover&& src);
 
   /// @brief キューブからのコピー変換コンストラクタ
   /// @param[in] cube 対象のキューブ
   ///
   /// 指定されたキューブのみのカバーとなる．
   explicit
-  AlgCover(const AlgCube& cube);
+  SopCover(const SopCube& cube);
 
   /// @brief キューブからのムーブ変換コンストラクタ
   /// @param[in] cube 対象のキューブ
   ///
   /// 指定されたキューブのみのカバーとなる．
   explicit
-  AlgCover(AlgCube&& cube);
+  SopCover(SopCube&& cube);
 
   /// @brief デストラクタ
   ///
   /// ここに属しているすべてのキューブは削除される．
-  ~AlgCover();
+  ~SopCover();
 
 
 public:
@@ -133,143 +132,144 @@ public:
   void
   to_literal_list(vector<vector<Literal>>& cube_list) const;
 
-#if 0
-  /// @brief 内容を返す．
+  /// @brief パタンを返す．
   /// @param[in] cube_id キューブ番号 ( 0 <= cube_id < cube_num() )
-  /// @param[in] var_id 変数の位置番号 ( 0 <= var_id.val() < variable_num() )
-  AlgPol
-  get_pol(int cube_id,
+  /// @param[in] var 変数( 0 <= var_id.val() < variable_num() )
+  /// @retval SopPat::_X その変数は現れない．
+  /// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
+  /// @retval SopPat::_0 その変数が否定のリテラルとして現れる．
+  SopPat
+  get_pat(int cube_id,
 	  VarId var_id) const;
-#endif
 
   /// @brief 論理和を計算する．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
-  AlgCover
-  operator+(const AlgCover& right) const;
+  SopCover
+  operator+(const SopCover& right) const;
 
   /// @brief 論理和を計算して代入する．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator+=(const AlgCover& right);
+  SopCover&
+  operator+=(const SopCover& right);
 
   /// @brief 論理和を計算する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
-  AlgCover
-  operator+(const AlgCube& right) const;
+  SopCover
+  operator+(const SopCube& right) const;
 
   /// @brief 論理和を計算して代入する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator+=(const AlgCube& right);
+  SopCover&
+  operator+=(const SopCube& right);
 
   /// @brief 差分を計算する．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
   ///
   /// right のみに含まれる要素があっても無視される．
-  AlgCover
-  operator-(const AlgCover& right) const;
+  SopCover
+  operator-(const SopCover& right) const;
 
   /// @brief 差分を計算して代入する．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator-=(const AlgCover& right);
+  SopCover&
+  operator-=(const SopCover& right);
 
   /// @brief 差分を計算する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
   ///
   /// right のみに含まれる要素があっても無視される．
-  AlgCover
-  operator-(const AlgCube& right) const;
+  SopCover
+  operator-(const SopCube& right) const;
 
   /// @brief 差分を計算して代入する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator-=(const AlgCube& right);
+  SopCover&
+  operator-=(const SopCube& right);
 
   /// @brief 論理積を計算する．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
-  AlgCover
-  operator*(const AlgCover& right) const;
+  SopCover
+  operator*(const SopCover& right) const;
 
   /// @brief 論理積を計算して代入する．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator*=(const AlgCover& right);
+  SopCover&
+  operator*=(const SopCover& right);
 
   /// @brief 論理積を計算する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
-  AlgCover
-  operator*(const AlgCube& right) const;
+  SopCover
+  operator*(const SopCube& right) const;
 
   /// @brief 論理積を計算して代入する(キューブ版)．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator*=(const AlgCube& right);
+  SopCover&
+  operator*=(const SopCube& right);
 
   /// @brief 論理積を計算する(リテラル版)．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
-  AlgCover
+  SopCover
   operator*(Literal right) const;
 
   /// @brief 論理積を計算して代入する(リテラル版)．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
+  SopCover&
   operator*=(Literal right);
 
   /// @brief algebraic division を計算する．
   /// @param[in] right オペランド
   /// @return 計算結果を返す．
-  AlgCover
-  operator/(const AlgCover& right) const;
+  SopCover
+  operator/(const SopCover& right) const;
 
   /// @brief algebraic division を行って代入する．
   /// @param[in] right オペランド
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator/=(const AlgCover& right);
+  SopCover&
+  operator/=(const SopCover& right);
 
   /// @brief キューブによる商を計算する．
   /// @param[in] cube 対象のキューブ
   /// @return 計算結果を返す．
-  AlgCover
-  operator/(const AlgCube& cube) const;
+  SopCover
+  operator/(const SopCube& cube) const;
 
   /// @brief キューブによる商を計算して代入する．
   /// @param[in] cube 対象のキューブ
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
-  operator/=(const AlgCube& cube);
+  SopCover&
+  operator/=(const SopCube& cube);
 
   /// @brief リテラルによる商を計算する．
   /// @param[in] lit 対象のリテラル
   /// @return 計算結果を返す．
-  AlgCover
+  SopCover
   operator/(Literal lit) const;
 
   /// @brief リテラルによる商を計算して代入する．
   /// @param[in] lit 対象のリテラル
   /// @return 演算後の自身への参照を返す．
-  AlgCover&
+  SopCover&
   operator/=(Literal lit);
 
   /// @brief 共通なキューブを返す．
   ///
   /// 共通なキューブがない場合には空のキューブを返す．
-  AlgCube
+  SopCube
   common_cube() const;
 
   /// @brief ハッシュ値を返す．
@@ -296,10 +296,10 @@ private:
   /// @param[in] body 内容のパタンを表す本体
   ///
   /// この関数は危険なので普通は使わないこと
-  AlgCover(int variable_num,
+  SopCover(int variable_num,
 	   int cube_num,
 	   int cube_cap,
-	   AlgBitVect* body);
+	   SopBitVect* body);
 
   /// @brief キューブ容量を変更する．
   /// @param[in] req_cap 要求するキューブ容量
@@ -308,8 +308,8 @@ private:
   void
   resize(int req_cap);
 
-  /// @brief 内容を表す AlgBlock を返す．
-  AlgBlock
+  /// @brief 内容を表す SopBlock を返す．
+  SopBlock
   block() const;
 
   /// @brief キューブ容量を計算する．
@@ -324,8 +324,8 @@ private:
   /// 比較方法はキューブごとの辞書式順序
   friend
   int
-  compare(const AlgCover& left,
-	  const AlgCover& right);
+  compare(const SopCover& left,
+	  const SopCover& right);
 
 
 private:
@@ -343,178 +343,178 @@ private:
   int mCubeCap;
 
   // 内容を表すビットベクタ
-  AlgBitVect* mBody;
+  SopBitVect* mBody;
 
 };
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief キューブとカバーの加算
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
 /// @return 結果を返す．
-AlgCover
-operator+(const AlgCube& left,
-	  const AlgCover& right);
+SopCover
+operator+(const SopCube& left,
+	  const SopCover& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief カバーの減算
 /// @param[in] left, right オペランド
 /// @return 結果を返す．
-AlgCover
-operator-(AlgCover&& left,
-	  const AlgCover& right);
+SopCover
+operator-(SopCover&& left,
+	  const SopCover& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief カバーとキューブの減算
 /// @param[in] left, right オペランド
 /// @return 結果を返す．
-AlgCover
-operator-(AlgCover&& left,
-	  const AlgCube& right);
+SopCover
+operator-(SopCover&& left,
+	  const SopCube& right);
 
-/// @relates AlgCover, AlgCube
+/// @relates SopCover, SopCube
 /// @brief カバーとキューブの乗算
 /// @param[in] left, right オペランド
 /// @return 結果を返す．
-AlgCover
-operator*(AlgCover&& left,
-	  const AlgCube& right);
+SopCover
+operator*(SopCover&& left,
+	  const SopCube& right);
 
-/// @relates AlgCover, AlgCube
+/// @relates SopCover, SopCube
 /// @brief キューブとカバーの乗算
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
 /// @return 結果を返す．
-AlgCover
-operator*(const AlgCube& left,
-	  const AlgCover& right);
+SopCover
+operator*(const SopCube& left,
+	  const SopCover& right);
 
-/// @relates AlgCover, AlgCube
+/// @relates SopCover, SopCube
 /// @brief キューブとカバーの乗算
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
 /// @return 結果を返す．
-AlgCover
-operator*(const AlgCube& left,
-	  AlgCover&& right);
+SopCover
+operator*(const SopCube& left,
+	  SopCover&& right);
 
-/// @relates AlgCover, Literal
+/// @relates SopCover, Literal
 /// @brief カバーとリテラルの乗算
 /// @param[in] left, right オペランド
 /// @return 結果を返す．
-AlgCover
-operator*(AlgCover&& left,
+SopCover
+operator*(SopCover&& left,
 	  Literal right);
 
-/// @relates AlgCover, Literal
+/// @relates SopCover, Literal
 /// @brief リテラルとカバーの乗算
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
 /// @return 結果を返す．
-AlgCover
+SopCover
 operator*(Literal left,
-	  const AlgCover& right);
+	  const SopCover& right);
 
-/// @relates AlgCover, Literal
+/// @relates SopCover, Literal
 /// @brief リテラルとカバーの乗算
 /// @param[in] left 第1オペランド
 /// @param[in] right 第2オペランド
 /// @return 結果を返す．
-AlgCover
+SopCover
 operator*(Literal left,
-	  AlgCover&& right);
+	  SopCover&& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief カバーの除算
 /// @param[in] left, right オペランド
 /// @return 結果を返す．
-AlgCover
-operator/(AlgCover&& left,
-	  const AlgCover& right);
+SopCover
+operator/(SopCover&& left,
+	  const SopCover& right);
 
-/// @relates AlgCover, AlgCube
+/// @relates SopCover, SopCube
 /// @brief カバーとキューブの除算
 /// @param[in] left, right オペランド
 /// @return 結果を返す．
-AlgCover
-operator/(AlgCover&& left,
-	  const AlgCube& right);
+SopCover
+operator/(SopCover&& left,
+	  const SopCube& right);
 
-/// @relates AlgCover, Literal
+/// @relates SopCover, Literal
 /// @brief カバーとリテラルの除算
 /// @param[in] left, right オペランド
 /// @return 結果を返す．
-AlgCover
-operator/(AlgCover&& left,
+SopCover
+operator/(SopCover&& left,
 	  Literal right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief 比較演算子(rich compare)
 /// @param[in] left, right オペランド
 /// @return 比較結果を返す．
 ///
 /// 比較方法はキューブごとの辞書式順序
 int
-compare(const AlgCover& left,
-	const AlgCover& right);
+compare(const SopCover& left,
+	const SopCover& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief 比較演算子 (EQ)
 /// @param[in] left, right オペランド
 /// @return 等しい時に true を返す．
 bool
-operator==(const AlgCover& left,
-	   const AlgCover& right);
+operator==(const SopCover& left,
+	   const SopCover& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief 比較演算子 (NE)
 /// @param[in] left, right オペランド
 /// @return 等しくない時に true を返す．
 bool
-operator!=(const AlgCover& left,
-	   const AlgCover& right);
+operator!=(const SopCover& left,
+	   const SopCover& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief 比較演算子 (LT)
 /// @param[in] left, right オペランド
 /// @return left が right より小さい時に true を返す．
 bool
-operator<(const AlgCover& left,
-	  const AlgCover& right);
+operator<(const SopCover& left,
+	  const SopCover& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief 比較演算子 (GT)
 /// @param[in] left, right オペランド
 /// @return left が right より大きい時に true を返す．
 bool
-operator>(const AlgCover& left,
-	  const AlgCover& right);
+operator>(const SopCover& left,
+	  const SopCover& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief 比較演算子 (LE)
 /// @param[in] left, right オペランド
 /// @return left が right と等しいか小さい時に true を返す．
 bool
-operator<=(const AlgCover& left,
-	   const AlgCover& right);
+operator<=(const SopCover& left,
+	   const SopCover& right);
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief 比較演算子 (GE)
 /// @param[in] left, right オペランド
 /// @return left が right と等しいか大きい時に true を返す．
 bool
-operator>=(const AlgCover& left,
-	   const AlgCover& right);
+operator>=(const SopCover& left,
+	   const SopCover& right);
 
-/// @relates AlgCover
-/// @brief AlgCover の内容を出力する．
+/// @relates SopCover
+/// @brief SopCover の内容を出力する．
 /// @param[in] s 出力先のストリーム
 /// @param[in] cover 対象のカバー
 ///
 /// cover.print(s) と等価
 ostream&
 operator<<(ostream& s,
-	   const AlgCover& cover);
+	   const SopCover& cover);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -524,7 +524,7 @@ operator<<(ostream& s,
 // @brief 変数の数を返す．
 inline
 int
-AlgCover::variable_num() const
+SopCover::variable_num() const
 {
   return mVariableNum;
 }
@@ -532,238 +532,238 @@ AlgCover::variable_num() const
 // @brief キューブの数を返す．
 inline
 int
-AlgCover::cube_num() const
+SopCover::cube_num() const
 {
   return mCubeNum;
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief キューブとカバーの加算
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator+(const AlgCube& left,
-	  const AlgCover& right)
+SopCover
+operator+(const SopCube& left,
+	  const SopCover& right)
 {
   // 交換則を用いる．
   return right.operator+(left);
 }
 
-/// @relates AlgCover
+/// @relates SopCover
 /// @brief カバーの減算
 /// @param[in] left, right オペランド
 /// @return 結果を返す．
 inline
-AlgCover
-operator-(AlgCover&& left,
-	  const AlgCover& right)
+SopCover
+operator-(SopCover&& left,
+	  const SopCover& right)
 {
-  return AlgCover(std::move(left)).operator-=(right);
+  return SopCover(std::move(left)).operator-=(right);
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief カバーとキューブの減算
 // @param[in] left, right オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator-(AlgCover&& left,
-	  const AlgCube& right)
+SopCover
+operator-(SopCover&& left,
+	  const SopCube& right)
 {
-  return AlgCover(std::move(left)).operator-=(right);
+  return SopCover(std::move(left)).operator-=(right);
 }
 
-// @relates AlgCover, AlgCube
+// @relates SopCover, SopCube
 // @brief カバーとキューブの乗算
 // @param[in] left, right オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator*(AlgCover&& left,
-	  const AlgCube& right)
+SopCover
+operator*(SopCover&& left,
+	  const SopCube& right)
 {
-  return AlgCover(std::move(left)).operator*=(right);
+  return SopCover(std::move(left)).operator*=(right);
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief キューブとカバーの乗算
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator*(const AlgCube& left,
-	  const AlgCover& right)
+SopCover
+operator*(const SopCube& left,
+	  const SopCover& right)
 {
   // 交換則を用いる．
   return right.operator*(left);
 }
 
-// @relates AlgCover, AlgCube
+// @relates SopCover, SopCube
 // @brief キューブとカバーの乗算
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator*(const AlgCube& left,
-	  AlgCover&& right)
+SopCover
+operator*(const SopCube& left,
+	  SopCover&& right)
 {
   // 交換則を用いる．
-  return AlgCover(std::move(right)).operator*=(left);
+  return SopCover(std::move(right)).operator*=(left);
 }
 
-// @relates AlgCover, Literal
+// @relates SopCover, Literal
 // @brief カバーとリテラルの乗算
 // @param[in] left, right オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator*(AlgCover&& left,
+SopCover
+operator*(SopCover&& left,
 	  Literal right)
 {
-  return AlgCover(std::move(left)).operator*=(right);
+  return SopCover(std::move(left)).operator*=(right);
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief リテラルとカバーの乗算
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
 // @return 結果を返す．
 inline
-AlgCover
+SopCover
 operator*(Literal left,
-	  const AlgCover& right)
+	  const SopCover& right)
 {
   // 交換則を用いる．
   return right.operator*(left);
 }
 
-// @relates AlgCover, Literal
+// @relates SopCover, Literal
 // @brief リテラルとカバーの乗算
 // @param[in] left 第1オペランド
 // @param[in] right 第2オペランド
 // @return 結果を返す．
 inline
-AlgCover
+SopCover
 operator*(Literal left,
-	  AlgCover&& right)
+	  SopCover&& right)
 {
   // 交換則を用いる．
-  return AlgCover(std::move(right)).operator*=(left);
+  return SopCover(std::move(right)).operator*=(left);
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief カバーの除算
 // @param[in] left, right オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator/(AlgCover&& left,
-	  const AlgCover& right)
+SopCover
+operator/(SopCover&& left,
+	  const SopCover& right)
 {
-  return AlgCover(std::move(left)).operator/=(right);
+  return SopCover(std::move(left)).operator/=(right);
 }
 
-// @relates AlgCover, AlgCube
+// @relates SopCover, SopCube
 // @brief カバーとキューブの除算
 // @param[in] left, right オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator/(AlgCover&& left,
-	  const AlgCube& right)
+SopCover
+operator/(SopCover&& left,
+	  const SopCube& right)
 {
-  return AlgCover(std::move(left)).operator/=(right);
+  return SopCover(std::move(left)).operator/=(right);
 }
 
-// @relates AlgCover, Literal
+// @relates SopCover, Literal
 // @brief カバーとリテラルの除算
 // @param[in] left, right オペランド
 // @return 結果を返す．
 inline
-AlgCover
-operator/(AlgCover&& left,
+SopCover
+operator/(SopCover&& left,
 	  Literal right)
 {
-  return AlgCover(std::move(left)).operator/=(right);
+  return SopCover(std::move(left)).operator/=(right);
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief 比較演算子 (EQ)
 // @param[in] left, right オペランド
 // @return 等しい時に true を返す．
 inline
 bool
-operator==(const AlgCover& left,
-	   const AlgCover& right)
+operator==(const SopCover& left,
+	   const SopCover& right)
 {
   return compare(left, right) == 0;
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief 比較演算子 (NE)
 // @param[in] left, right オペランド
 // @return 等しくない時に true を返す．
 inline
 bool
-operator!=(const AlgCover& left,
-	   const AlgCover& right)
+operator!=(const SopCover& left,
+	   const SopCover& right)
 {
   return compare(left, right) != 0;
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief 比較演算子 (LT)
 // @param[in] left, right オペランド
 // @return left が right より小さい時に true を返す．
 inline
 bool
-operator<(const AlgCover& left,
-	  const AlgCover& right)
+operator<(const SopCover& left,
+	  const SopCover& right)
 {
   return compare(left, right) < 0;
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief 比較演算子 (GT)
 // @param[in] left, right オペランド
 // @return left が right より大きい時に true を返す．
 inline
 bool
-operator>(const AlgCover& left,
-	  const AlgCover& right)
+operator>(const SopCover& left,
+	  const SopCover& right)
 {
   return compare(left, right) > 0;
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief 比較演算子 (LE)
 // @param[in] left, right オペランド
 // @return left が right と等しいか小さい時に true を返す．
 inline
 bool
-operator<=(const AlgCover& left,
-	   const AlgCover& right)
+operator<=(const SopCover& left,
+	   const SopCover& right)
 {
   return compare(left, right) <= 0;
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief 比較演算子 (GE)
 // @param[in] left, right オペランド
 // @return left が right と等しいか大きい時に true を返す．
 inline
 bool
-operator>=(const AlgCover& left,
-	   const AlgCover& right)
+operator>=(const SopCover& left,
+	   const SopCover& right)
 {
   return compare(left, right) >= 0;
 }
 
-// @brief AlgCover の内容を出力する．
+// @brief SopCover の内容を出力する．
 // @param[in] s 出力先のストリーム
 // @param[in] cover 対象のカバー
 //
@@ -771,7 +771,7 @@ operator>=(const AlgCover& left,
 inline
 ostream&
 operator<<(ostream& s,
-	   const AlgCover& cover)
+	   const SopCover& cover)
 {
   cover.print(s);
   return s;
@@ -781,12 +781,12 @@ END_NAMESPACE_YM_LOGIC
 
 BEGIN_NAMESPACE_YM
 
-/// @breif AlgCover をキーにしたハッシュ関数クラスの定義
+/// @breif SopCover をキーにしたハッシュ関数クラスの定義
 template <>
-struct HashFunc<AlgCover>
+struct HashFunc<SopCover>
 {
   SizeType
-  operator()(const AlgCover& cover) const
+  operator()(const SopCover& cover) const
   {
     return cover.hash();
   }
@@ -794,4 +794,4 @@ struct HashFunc<AlgCover>
 
 END_NAMESPACE_YM
 
-#endif // YM_ALGCOVER_H
+#endif // YM_SOPCOVER_H

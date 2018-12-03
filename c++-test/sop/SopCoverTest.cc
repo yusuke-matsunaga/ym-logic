@@ -1,6 +1,6 @@
 
-/// @file AlgCoverTest.cc
-/// @brief AlgCoverTest の実装ファイル
+/// @file SopCoverTest.cc
+/// @brief SopCoverTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2018 Yusuke Matsunaga
@@ -8,13 +8,13 @@
 
 
 #include <gtest/gtest.h>
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 
 
 BEGIN_NAMESPACE_YM
 
-TEST(AlgCoverTest, constructor1)
+TEST(SopCoverTest, constructor1)
 {
   const int nv = 10;
 
@@ -40,7 +40,7 @@ TEST(AlgCoverTest, constructor1)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1(nv);
+  SopCover cover1(nv);
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  0, cover1.cube_num() );
@@ -67,7 +67,7 @@ TEST(AlgCoverTest, constructor1)
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 };
 
-TEST(AlgCoverTest, constructor2)
+TEST(SopCoverTest, constructor2)
 {
   const int nv = 10;
 
@@ -93,12 +93,12 @@ TEST(AlgCoverTest, constructor2)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCube cube1{nv, {lit0, lit1}};
-  AlgCube cube2{nv, {lit2, lit3}};
+  SopCube cube1{nv, {lit0, lit1}};
+  SopCube cube2{nv, {lit2, lit3}};
 
-  vector<AlgCube> cube_list{cube1, cube2};
+  vector<SopCube> cube_list{cube1, cube2};
 
-  AlgCover cover1{nv, cube_list};
+  SopCover cover1{nv, cube_list};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -136,7 +136,7 @@ TEST(AlgCoverTest, constructor2)
 
 };
 
-TEST(AlgCoverTest, constructor3)
+TEST(SopCoverTest, constructor3)
 {
   const int nv = 10;
 
@@ -163,7 +163,7 @@ TEST(AlgCoverTest, constructor3)
   Literal lit9(var9, false);
 
   vector<vector<Literal>> cube_list{ {lit0, lit1}, {lit2, lit3} };
-  AlgCover cover1{nv, cube_list};
+  SopCover cover1{nv, cube_list};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -201,7 +201,7 @@ TEST(AlgCoverTest, constructor3)
 
 };
 
-TEST(AlgCoverTest, constructor4)
+TEST(SopCoverTest, constructor4)
 {
   const int nv = 10;
 
@@ -228,7 +228,7 @@ TEST(AlgCoverTest, constructor4)
   Literal lit9(var9, false);
 
   std::initializer_list<std::initializer_list<Literal>> cube_list{ {lit0, lit1}, {lit2, lit3} };
-  AlgCover cover1{nv, cube_list};
+  SopCover cover1{nv, cube_list};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -266,7 +266,7 @@ TEST(AlgCoverTest, constructor4)
 
 };
 
-TEST(AlgCoverTest, copy_constructor)
+TEST(SopCoverTest, copy_constructor)
 {
   const int nv = 10;
 
@@ -293,9 +293,9 @@ TEST(AlgCoverTest, copy_constructor)
   Literal lit9(var9, false);
 
   std::initializer_list<std::initializer_list<Literal>> cube_list{ {lit0, lit1}, {lit2, lit3} };
-  AlgCover src_cover{nv, cube_list};
+  SopCover src_cover{nv, cube_list};
 
-  AlgCover cover1{src_cover};
+  SopCover cover1{src_cover};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -333,7 +333,7 @@ TEST(AlgCoverTest, copy_constructor)
 
 };
 
-TEST(AlgCoverTest, copy_assignment)
+TEST(SopCoverTest, copy_assignment)
 {
   const int nv = 10;
 
@@ -360,9 +360,9 @@ TEST(AlgCoverTest, copy_assignment)
   Literal lit9(var9, false);
 
   std::initializer_list<std::initializer_list<Literal>> cube_list{ {lit0, lit1}, {lit2, lit3} };
-  AlgCover src_cover{nv, cube_list};
+  SopCover src_cover{nv, cube_list};
 
-  AlgCover cover1 = src_cover;
+  SopCover cover1 = src_cover;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -400,7 +400,7 @@ TEST(AlgCoverTest, copy_assignment)
 
 };
 
-TEST(AlgCoverTest, move_constructor)
+TEST(SopCoverTest, move_constructor)
 {
   const int nv = 10;
 
@@ -427,9 +427,9 @@ TEST(AlgCoverTest, move_constructor)
   Literal lit9(var9, false);
 
   std::initializer_list<std::initializer_list<Literal>> cube_list{ {lit0, lit1}, {lit2, lit3} };
-  AlgCover src_cover{nv, cube_list};
+  SopCover src_cover{nv, cube_list};
 
-  AlgCover cover1{std::move(src_cover)};
+  SopCover cover1{std::move(src_cover)};
 
   EXPECT_EQ(  0, src_cover.cube_num() );
 
@@ -469,7 +469,7 @@ TEST(AlgCoverTest, move_constructor)
 
 };
 
-TEST(AlgCoverTest, move_assignment)
+TEST(SopCoverTest, move_assignment)
 {
   const int nv = 10;
 
@@ -496,9 +496,9 @@ TEST(AlgCoverTest, move_assignment)
   Literal lit9(var9, false);
 
   std::initializer_list<std::initializer_list<Literal>> cube_list{ {lit0, lit1}, {lit2, lit3} };
-  AlgCover src_cover{nv, cube_list};
+  SopCover src_cover{nv, cube_list};
 
-  AlgCover cover1 = std::move(src_cover);
+  SopCover cover1 = std::move(src_cover);
 
   EXPECT_EQ(  0, src_cover.cube_num() );
 
@@ -538,7 +538,7 @@ TEST(AlgCoverTest, move_assignment)
 
 };
 
-TEST(AlgCoverTest, cube_constructor)
+TEST(SopCoverTest, cube_constructor)
 {
   const int nv = 10;
 
@@ -564,9 +564,9 @@ TEST(AlgCoverTest, cube_constructor)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCube src_cube{nv, {lit0, lit1}};
+  SopCube src_cube{nv, {lit0, lit1}};
 
-  AlgCover cover1{src_cube};
+  SopCover cover1{src_cube};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  1, cover1.cube_num() );
@@ -601,7 +601,7 @@ TEST(AlgCoverTest, cube_constructor)
 
 };
 
-TEST(AlgCoverTest, cube_move_constructor)
+TEST(SopCoverTest, cube_move_constructor)
 {
   const int nv = 10;
 
@@ -627,9 +627,9 @@ TEST(AlgCoverTest, cube_move_constructor)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCube src_cube{nv, {lit0, lit1}};
+  SopCube src_cube{nv, {lit0, lit1}};
 
-  AlgCover cover1{std::move(src_cube)};
+  SopCover cover1{std::move(src_cube)};
 
   EXPECT_EQ( 0, src_cube.literal_num() );
 
@@ -666,7 +666,7 @@ TEST(AlgCoverTest, cube_move_constructor)
 
 };
 
-TEST(AlgCoverTest, cover_cover_sum)
+TEST(SopCoverTest, cover_cover_sum)
 {
   const int nv = 10;
 
@@ -692,10 +692,10 @@ TEST(AlgCoverTest, cover_cover_sum)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit1} } };
-  AlgCover src2{nv, { {lit2, lit3} } };
+  SopCover src1{nv, { {lit0, lit1} } };
+  SopCover src2{nv, { {lit2, lit3} } };
 
-  AlgCover cover1 = src1 + src2;
+  SopCover cover1 = src1 + src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -733,7 +733,7 @@ TEST(AlgCoverTest, cover_cover_sum)
 
 };
 
-TEST(AlgCoverTest, cover_cube_sum)
+TEST(SopCoverTest, cover_cube_sum)
 {
   const int nv = 10;
 
@@ -759,10 +759,10 @@ TEST(AlgCoverTest, cover_cube_sum)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit1} } };
-  AlgCube src2{nv, {lit2, lit3} };
+  SopCover src1{nv, { {lit0, lit1} } };
+  SopCube src2{nv, {lit2, lit3} };
 
-  AlgCover cover1 = src1 + src2;
+  SopCover cover1 = src1 + src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -800,7 +800,7 @@ TEST(AlgCoverTest, cover_cube_sum)
 
 };
 
-TEST(AlgCoverTest, cube_cover_sum)
+TEST(SopCoverTest, cube_cover_sum)
 {
   const int nv = 10;
 
@@ -826,10 +826,10 @@ TEST(AlgCoverTest, cube_cover_sum)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCube src1{nv, {lit0, lit1} };
-  AlgCover src2{nv, { {lit2, lit3} } };
+  SopCube src1{nv, {lit0, lit1} };
+  SopCover src2{nv, { {lit2, lit3} } };
 
-  AlgCover cover1 = src1 + src2;
+  SopCover cover1 = src1 + src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -867,7 +867,7 @@ TEST(AlgCoverTest, cube_cover_sum)
 
 };
 
-TEST(AlgCoverTest, Scover_cover_sum)
+TEST(SopCoverTest, Scover_cover_sum)
 {
   const int nv = 10;
 
@@ -893,8 +893,8 @@ TEST(AlgCoverTest, Scover_cover_sum)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit1} } };
-  AlgCover src2{nv, { {lit2, lit3} } };
+  SopCover cover1{nv, { {lit0, lit1} } };
+  SopCover src2{nv, { {lit2, lit3} } };
 
   cover1 = cover1 + src2;
 
@@ -934,7 +934,7 @@ TEST(AlgCoverTest, Scover_cover_sum)
 
 };
 
-TEST(AlgCoverTest, Scover_cube_sum1)
+TEST(SopCoverTest, Scover_cube_sum1)
 {
   const int nv = 10;
 
@@ -960,8 +960,8 @@ TEST(AlgCoverTest, Scover_cube_sum1)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit1} }};
-  AlgCube src2{nv, {lit2, lit3}};
+  SopCover cover1{nv, { {lit0, lit1} }};
+  SopCube src2{nv, {lit2, lit3}};
 
   cover1 = cover1 + src2;
 
@@ -1001,7 +1001,7 @@ TEST(AlgCoverTest, Scover_cube_sum1)
 
 };
 
-TEST(AlgCoverTest, cube_Scover_sum)
+TEST(SopCoverTest, cube_Scover_sum)
 {
   const int nv = 10;
 
@@ -1027,8 +1027,8 @@ TEST(AlgCoverTest, cube_Scover_sum)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCube src1{nv, {lit0, lit1} };
-  AlgCover cover1{nv, { {lit2, lit3} } };
+  SopCube src1{nv, {lit0, lit1} };
+  SopCover cover1{nv, { {lit2, lit3} } };
 
   cover1 = src1 + cover1;
 
@@ -1068,7 +1068,7 @@ TEST(AlgCoverTest, cube_Scover_sum)
 
 };
 
-TEST(AlgCoverTest, Icover_cover_sum)
+TEST(SopCoverTest, Icover_cover_sum)
 {
   const int nv = 10;
 
@@ -1094,8 +1094,8 @@ TEST(AlgCoverTest, Icover_cover_sum)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit1} } };
-  AlgCover src2{nv, { {lit2, lit3} } };
+  SopCover cover1{nv, { {lit0, lit1} } };
+  SopCover src2{nv, { {lit2, lit3} } };
 
   cover1 += src2;
 
@@ -1135,7 +1135,7 @@ TEST(AlgCoverTest, Icover_cover_sum)
 
 };
 
-TEST(AlgCoverTest, Icover_cube_sum)
+TEST(SopCoverTest, Icover_cube_sum)
 {
   const int nv = 10;
 
@@ -1161,8 +1161,8 @@ TEST(AlgCoverTest, Icover_cube_sum)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit1} }};
-  AlgCube src2{nv, {lit2, lit3}};
+  SopCover cover1{nv, { {lit0, lit1} }};
+  SopCube src2{nv, {lit2, lit3}};
 
   cover1 += src2;
 
@@ -1202,7 +1202,7 @@ TEST(AlgCoverTest, Icover_cube_sum)
 
 };
 
-TEST(AlgCoverTest, cover_cover_diff)
+TEST(SopCoverTest, cover_cover_diff)
 {
   const int nv = 10;
 
@@ -1228,10 +1228,10 @@ TEST(AlgCoverTest, cover_cover_diff)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit1}, {lit2, lit3} } };
-  AlgCover src2{nv, { {lit3, lit2}, {lit0, ~lit1} } };
+  SopCover src1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCover src2{nv, { {lit3, lit2}, {lit0, ~lit1} } };
 
-  AlgCover cover1 = src1 - src2;
+  SopCover cover1 = src1 - src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  1, cover1.cube_num() );
@@ -1266,7 +1266,7 @@ TEST(AlgCoverTest, cover_cover_diff)
 
 };
 
-TEST(AlgCoverTest, Rcover_cover_diff)
+TEST(SopCoverTest, Rcover_cover_diff)
 {
   const int nv = 10;
 
@@ -1292,10 +1292,10 @@ TEST(AlgCoverTest, Rcover_cover_diff)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit1}, {lit2, lit3} } };
-  AlgCover src2{nv, { {lit3, lit2}, {lit0, ~lit1} } };
+  SopCover src1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCover src2{nv, { {lit3, lit2}, {lit0, ~lit1} } };
 
-  AlgCover cover1 = std::move(src1) - src2;
+  SopCover cover1 = std::move(src1) - src2;
 
   EXPECT_EQ( 0, src1.cube_num() );
 
@@ -1332,7 +1332,7 @@ TEST(AlgCoverTest, Rcover_cover_diff)
 
 };
 
-TEST(AlgCoverTest, cover_cube_diff)
+TEST(SopCoverTest, cover_cube_diff)
 {
   const int nv = 10;
 
@@ -1358,10 +1358,10 @@ TEST(AlgCoverTest, cover_cube_diff)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit1}, {lit2, lit3} } };
-  AlgCube src2{nv, {lit3, lit2} };
+  SopCover src1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCube src2{nv, {lit3, lit2} };
 
-  AlgCover cover1 = src1 - src2;
+  SopCover cover1 = src1 - src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  1, cover1.cube_num() );
@@ -1396,7 +1396,7 @@ TEST(AlgCoverTest, cover_cube_diff)
 
 };
 
-TEST(AlgCoverTest, Scover_cover_diff)
+TEST(SopCoverTest, Scover_cover_diff)
 {
   const int nv = 10;
 
@@ -1422,8 +1422,8 @@ TEST(AlgCoverTest, Scover_cover_diff)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
-  AlgCover src2{nv, { {lit3, lit2}, {lit0, ~lit1} } };
+  SopCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCover src2{nv, { {lit3, lit2}, {lit0, ~lit1} } };
 
   cover1 = cover1 - src2;
 
@@ -1460,7 +1460,7 @@ TEST(AlgCoverTest, Scover_cover_diff)
 
 };
 
-TEST(AlgCoverTest, Scover_cube_diff)
+TEST(SopCoverTest, Scover_cube_diff)
 {
   const int nv = 10;
 
@@ -1486,8 +1486,8 @@ TEST(AlgCoverTest, Scover_cube_diff)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
-  AlgCube src2{nv, {lit3, lit2} };
+  SopCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCube src2{nv, {lit3, lit2} };
 
   cover1 = cover1 - src2;
 
@@ -1524,7 +1524,7 @@ TEST(AlgCoverTest, Scover_cube_diff)
 
 };
 
-TEST(AlgCoverTest, Icover_cover_diff)
+TEST(SopCoverTest, Icover_cover_diff)
 {
   const int nv = 10;
 
@@ -1550,8 +1550,8 @@ TEST(AlgCoverTest, Icover_cover_diff)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
-  AlgCover src2{nv, { {lit3, lit2}, {lit0, ~lit1} } };
+  SopCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCover src2{nv, { {lit3, lit2}, {lit0, ~lit1} } };
 
   cover1 -= src2;
 
@@ -1588,7 +1588,7 @@ TEST(AlgCoverTest, Icover_cover_diff)
 
 };
 
-TEST(AlgCoverTest, Icover_cube_diff)
+TEST(SopCoverTest, Icover_cube_diff)
 {
   const int nv = 10;
 
@@ -1614,8 +1614,8 @@ TEST(AlgCoverTest, Icover_cube_diff)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
-  AlgCube src2{nv, {lit3, lit2} };
+  SopCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCube src2{nv, {lit3, lit2} };
 
   cover1 -= src2;
 
@@ -1652,7 +1652,7 @@ TEST(AlgCoverTest, Icover_cube_diff)
 
 };
 
-TEST(AlgCoverTest, cover_cover_product)
+TEST(SopCoverTest, cover_cover_product)
 {
   const int nv = 10;
 
@@ -1678,10 +1678,10 @@ TEST(AlgCoverTest, cover_cover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0}, {lit1} } };
-  AlgCover src2{nv, { {lit2}, {lit3} } };
+  SopCover src1{nv, { {lit0}, {lit1} } };
+  SopCover src2{nv, { {lit2}, {lit3} } };
 
-  AlgCover cover1 = src1 * src2;
+  SopCover cover1 = src1 * src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  4, cover1.cube_num() );
@@ -1725,7 +1725,7 @@ TEST(AlgCoverTest, cover_cover_product)
 
 };
 
-TEST(AlgCoverTest, cover_cube_product)
+TEST(SopCoverTest, cover_cube_product)
 {
   const int nv = 10;
 
@@ -1751,10 +1751,10 @@ TEST(AlgCoverTest, cover_cube_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0}, {lit1} } };
-  AlgCube src2{nv,  {lit2} };
+  SopCover src1{nv, { {lit0}, {lit1} } };
+  SopCube src2{nv,  {lit2} };
 
-  AlgCover cover1 = src1 * src2;
+  SopCover cover1 = src1 * src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -1792,7 +1792,7 @@ TEST(AlgCoverTest, cover_cube_product)
 
 };
 
-TEST(AlgCoverTest, Rcover_cube_product)
+TEST(SopCoverTest, Rcover_cube_product)
 {
   const int nv = 10;
 
@@ -1818,10 +1818,10 @@ TEST(AlgCoverTest, Rcover_cube_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0}, {lit1} } };
-  AlgCube src2{nv,  {lit2} };
+  SopCover src1{nv, { {lit0}, {lit1} } };
+  SopCube src2{nv,  {lit2} };
 
-  AlgCover cover1 = std::move(src1) * src2;
+  SopCover cover1 = std::move(src1) * src2;
 
   EXPECT_EQ( 0, src1.cube_num() );
 
@@ -1861,7 +1861,7 @@ TEST(AlgCoverTest, Rcover_cube_product)
 
 };
 
-TEST(AlgCoverTest, cube_cover_product)
+TEST(SopCoverTest, cube_cover_product)
 {
   const int nv = 10;
 
@@ -1887,10 +1887,10 @@ TEST(AlgCoverTest, cube_cover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCube src1{nv,  {lit2} };
-  AlgCover src2{nv, { {lit0}, {lit1} } };
+  SopCube src1{nv,  {lit2} };
+  SopCover src2{nv, { {lit0}, {lit1} } };
 
-  AlgCover cover1 = src1 * src2;
+  SopCover cover1 = src1 * src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -1928,7 +1928,7 @@ TEST(AlgCoverTest, cube_cover_product)
 
 };
 
-TEST(AlgCoverTest, cube_Rcover_product)
+TEST(SopCoverTest, cube_Rcover_product)
 {
   const int nv = 10;
 
@@ -1954,10 +1954,10 @@ TEST(AlgCoverTest, cube_Rcover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCube src1{nv,  {lit2} };
-  AlgCover src2{nv, { {lit0}, {lit1} } };
+  SopCube src1{nv,  {lit2} };
+  SopCover src2{nv, { {lit0}, {lit1} } };
 
-  AlgCover cover1 = src1 * std::move(src2);
+  SopCover cover1 = src1 * std::move(src2);
 
   EXPECT_EQ( 0, src2.cube_num() );
 
@@ -1997,7 +1997,7 @@ TEST(AlgCoverTest, cube_Rcover_product)
 
 };
 
-TEST(AlgCoverTest, cover_literal_product)
+TEST(SopCoverTest, cover_literal_product)
 {
   const int nv = 10;
 
@@ -2023,9 +2023,9 @@ TEST(AlgCoverTest, cover_literal_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0}, {lit1} } };
+  SopCover src1{nv, { {lit0}, {lit1} } };
 
-  AlgCover cover1 = src1 * lit2;
+  SopCover cover1 = src1 * lit2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -2063,7 +2063,7 @@ TEST(AlgCoverTest, cover_literal_product)
 
 };
 
-TEST(AlgCoverTest, Rcover_literal_product)
+TEST(SopCoverTest, Rcover_literal_product)
 {
   const int nv = 10;
 
@@ -2089,9 +2089,9 @@ TEST(AlgCoverTest, Rcover_literal_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0}, {lit1} } };
+  SopCover src1{nv, { {lit0}, {lit1} } };
 
-  AlgCover cover1 = std::move(src1) * lit2;
+  SopCover cover1 = std::move(src1) * lit2;
 
   EXPECT_EQ( 0, src1.cube_num() );
 
@@ -2131,7 +2131,7 @@ TEST(AlgCoverTest, Rcover_literal_product)
 
 };
 
-TEST(AlgCoverTest, literal_cover_product)
+TEST(SopCoverTest, literal_cover_product)
 {
   const int nv = 10;
 
@@ -2157,9 +2157,9 @@ TEST(AlgCoverTest, literal_cover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0}, {lit1} } };
+  SopCover src1{nv, { {lit0}, {lit1} } };
 
-  AlgCover cover1 = lit2 * src1;
+  SopCover cover1 = lit2 * src1;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -2197,7 +2197,7 @@ TEST(AlgCoverTest, literal_cover_product)
 
 };
 
-TEST(AlgCoverTest, literal_Rcover_product)
+TEST(SopCoverTest, literal_Rcover_product)
 {
   const int nv = 10;
 
@@ -2223,9 +2223,9 @@ TEST(AlgCoverTest, literal_Rcover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0}, {lit1} } };
+  SopCover src1{nv, { {lit0}, {lit1} } };
 
-  AlgCover cover1 = lit2 * std::move(src1);
+  SopCover cover1 = lit2 * std::move(src1);
 
   EXPECT_EQ( 0, src1.cube_num() );
 
@@ -2265,7 +2265,7 @@ TEST(AlgCoverTest, literal_Rcover_product)
 
 };
 
-TEST(AlgCoverTest, Scover_cover_product)
+TEST(SopCoverTest, Scover_cover_product)
 {
   const int nv = 10;
 
@@ -2291,8 +2291,8 @@ TEST(AlgCoverTest, Scover_cover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0}, {lit1} } };
-  AlgCover src2{nv, { {lit2}, {lit3} } };
+  SopCover cover1{nv, { {lit0}, {lit1} } };
+  SopCover src2{nv, { {lit2}, {lit3} } };
 
   cover1 = cover1 * src2;
 
@@ -2338,7 +2338,7 @@ TEST(AlgCoverTest, Scover_cover_product)
 
 };
 
-TEST(AlgCoverTest, cover_Scover_product)
+TEST(SopCoverTest, cover_Scover_product)
 {
   const int nv = 10;
 
@@ -2364,8 +2364,8 @@ TEST(AlgCoverTest, cover_Scover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0}, {lit1} } };
-  AlgCover cover1{nv, { {lit2}, {lit3} } };
+  SopCover src1{nv, { {lit0}, {lit1} } };
+  SopCover cover1{nv, { {lit2}, {lit3} } };
 
   cover1 = src1 * cover1;
 
@@ -2411,7 +2411,7 @@ TEST(AlgCoverTest, cover_Scover_product)
 
 };
 
-TEST(AlgCoverTest, Scover_cube_product)
+TEST(SopCoverTest, Scover_cube_product)
 {
   const int nv = 10;
 
@@ -2437,8 +2437,8 @@ TEST(AlgCoverTest, Scover_cube_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0}, {lit1} } };
-  AlgCube src2{nv,  {lit2} };
+  SopCover cover1{nv, { {lit0}, {lit1} } };
+  SopCube src2{nv,  {lit2} };
 
   cover1 = cover1 * src2;
 
@@ -2478,7 +2478,7 @@ TEST(AlgCoverTest, Scover_cube_product)
 
 };
 
-TEST(AlgCoverTest, cube_Scover_product)
+TEST(SopCoverTest, cube_Scover_product)
 {
   const int nv = 10;
 
@@ -2504,8 +2504,8 @@ TEST(AlgCoverTest, cube_Scover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCube src1{nv,  {lit2} };
-  AlgCover cover1{nv, { {lit0}, {lit1} } };
+  SopCube src1{nv,  {lit2} };
+  SopCover cover1{nv, { {lit0}, {lit1} } };
 
   cover1 = src1 * cover1;
 
@@ -2545,7 +2545,7 @@ TEST(AlgCoverTest, cube_Scover_product)
 
 };
 
-TEST(AlgCoverTest, Scover_literal_product)
+TEST(SopCoverTest, Scover_literal_product)
 {
   const int nv = 10;
 
@@ -2571,7 +2571,7 @@ TEST(AlgCoverTest, Scover_literal_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0}, {lit1} } };
+  SopCover cover1{nv, { {lit0}, {lit1} } };
 
   cover1 = cover1 * lit2;
 
@@ -2611,7 +2611,7 @@ TEST(AlgCoverTest, Scover_literal_product)
 
 };
 
-TEST(AlgCoverTest, literal_Scover_product)
+TEST(SopCoverTest, literal_Scover_product)
 {
   const int nv = 10;
 
@@ -2637,7 +2637,7 @@ TEST(AlgCoverTest, literal_Scover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0}, {lit1} } };
+  SopCover cover1{nv, { {lit0}, {lit1} } };
 
   cover1 = lit2 * cover1;
 
@@ -2677,7 +2677,7 @@ TEST(AlgCoverTest, literal_Scover_product)
 
 };
 
-TEST(AlgCoverTest, Icover_cover_product)
+TEST(SopCoverTest, Icover_cover_product)
 {
   const int nv = 10;
 
@@ -2703,8 +2703,8 @@ TEST(AlgCoverTest, Icover_cover_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0}, {lit1} } };
-  AlgCover src2{nv, { {lit2}, {lit3} } };
+  SopCover cover1{nv, { {lit0}, {lit1} } };
+  SopCover src2{nv, { {lit2}, {lit3} } };
 
   cover1 *= src2;
 
@@ -2750,7 +2750,7 @@ TEST(AlgCoverTest, Icover_cover_product)
 
 };
 
-TEST(AlgCoverTest, Icover_cube_product)
+TEST(SopCoverTest, Icover_cube_product)
 {
   const int nv = 10;
 
@@ -2776,8 +2776,8 @@ TEST(AlgCoverTest, Icover_cube_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0}, {lit1} } };
-  AlgCube src2{nv,  {lit2} };
+  SopCover cover1{nv, { {lit0}, {lit1} } };
+  SopCube src2{nv,  {lit2} };
 
   cover1 *= src2;
 
@@ -2817,7 +2817,7 @@ TEST(AlgCoverTest, Icover_cube_product)
 
 };
 
-TEST(AlgCoverTest, Icover_literal_product)
+TEST(SopCoverTest, Icover_literal_product)
 {
   const int nv = 10;
 
@@ -2843,7 +2843,7 @@ TEST(AlgCoverTest, Icover_literal_product)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0}, {lit1} } };
+  SopCover cover1{nv, { {lit0}, {lit1} } };
 
   cover1 *= lit2;
 
@@ -2883,7 +2883,7 @@ TEST(AlgCoverTest, Icover_literal_product)
 
 };
 
-TEST(AlgCoverTest, cover_cover_quotient)
+TEST(SopCoverTest, cover_cover_quotient)
 {
   const int nv = 10;
 
@@ -2909,10 +2909,10 @@ TEST(AlgCoverTest, cover_cover_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
-  AlgCover src2{nv, { {lit0}, {lit1} } };
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover src2{nv, { {lit0}, {lit1} } };
 
-  AlgCover cover1 = src1 / src2;
+  SopCover cover1 = src1 / src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -2948,7 +2948,7 @@ TEST(AlgCoverTest, cover_cover_quotient)
 
 };
 
-TEST(AlgCoverTest, cover_cube_quotient)
+TEST(SopCoverTest, cover_cube_quotient)
 {
   const int nv = 10;
 
@@ -2974,10 +2974,10 @@ TEST(AlgCoverTest, cover_cube_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
-  AlgCube src2{nv, {lit0} };
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCube src2{nv, {lit0} };
 
-  AlgCover cover1 = src1 / src2;
+  SopCover cover1 = src1 / src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -3013,7 +3013,7 @@ TEST(AlgCoverTest, cover_cube_quotient)
 
 };
 
-TEST(AlgCoverTest, cover_literal_quotient)
+TEST(SopCoverTest, cover_literal_quotient)
 {
   const int nv = 10;
 
@@ -3039,9 +3039,9 @@ TEST(AlgCoverTest, cover_literal_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
 
-  AlgCover cover1 = src1 / lit0;
+  SopCover cover1 = src1 / lit0;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -3077,7 +3077,7 @@ TEST(AlgCoverTest, cover_literal_quotient)
 
 };
 
-TEST(AlgCoverTest, Rcover_cover_quotient)
+TEST(SopCoverTest, Rcover_cover_quotient)
 {
   const int nv = 10;
 
@@ -3103,10 +3103,10 @@ TEST(AlgCoverTest, Rcover_cover_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
-  AlgCover src2{nv, { {lit0}, {lit1} } };
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover src2{nv, { {lit0}, {lit1} } };
 
-  AlgCover cover1 = std::move(src1) / src2;
+  SopCover cover1 = std::move(src1) / src2;
 
   EXPECT_EQ( 0, src1.cube_num() );
 
@@ -3144,7 +3144,7 @@ TEST(AlgCoverTest, Rcover_cover_quotient)
 
 };
 
-TEST(AlgCoverTest, Rcover_cube_quotient)
+TEST(SopCoverTest, Rcover_cube_quotient)
 {
   const int nv = 10;
 
@@ -3170,10 +3170,10 @@ TEST(AlgCoverTest, Rcover_cube_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
-  AlgCube src2{nv, {lit0} };
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCube src2{nv, {lit0} };
 
-  AlgCover cover1 = std::move(src1) / src2;
+  SopCover cover1 = std::move(src1) / src2;
 
   EXPECT_EQ( 0, src1.cube_num() );
 
@@ -3211,7 +3211,7 @@ TEST(AlgCoverTest, Rcover_cube_quotient)
 
 };
 
-TEST(AlgCoverTest, Rcover_literal_quotient)
+TEST(SopCoverTest, Rcover_literal_quotient)
 {
   const int nv = 10;
 
@@ -3237,9 +3237,9 @@ TEST(AlgCoverTest, Rcover_literal_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
 
-  AlgCover cover1 = std::move(src1) / lit0;
+  SopCover cover1 = std::move(src1) / lit0;
 
   EXPECT_EQ( 0, src1.cube_num() );
 
@@ -3277,7 +3277,7 @@ TEST(AlgCoverTest, Rcover_literal_quotient)
 
 };
 
-TEST(AlgCoverTest, Scover_cover_quotient)
+TEST(SopCoverTest, Scover_cover_quotient)
 {
   const int nv = 10;
 
@@ -3303,8 +3303,8 @@ TEST(AlgCoverTest, Scover_cover_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
-  AlgCover src2{nv, { {lit0}, {lit1} } };
+  SopCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover src2{nv, { {lit0}, {lit1} } };
 
   cover1 = cover1 / src2;
 
@@ -3342,7 +3342,7 @@ TEST(AlgCoverTest, Scover_cover_quotient)
 
 };
 
-TEST(AlgCoverTest, Scover_cube_quotient)
+TEST(SopCoverTest, Scover_cube_quotient)
 {
   const int nv = 10;
 
@@ -3368,8 +3368,8 @@ TEST(AlgCoverTest, Scover_cube_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
-  AlgCube src2{nv, {lit0} };
+  SopCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCube src2{nv, {lit0} };
 
   cover1 = cover1 / src2;
 
@@ -3407,7 +3407,7 @@ TEST(AlgCoverTest, Scover_cube_quotient)
 
 };
 
-TEST(AlgCoverTest, Scover_literal_quotient)
+TEST(SopCoverTest, Scover_literal_quotient)
 {
   const int nv = 10;
 
@@ -3433,7 +3433,7 @@ TEST(AlgCoverTest, Scover_literal_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
 
   cover1 = cover1 / lit0;
 
@@ -3471,7 +3471,7 @@ TEST(AlgCoverTest, Scover_literal_quotient)
 
 };
 
-TEST(AlgCoverTest, Icover_cover_quotient)
+TEST(SopCoverTest, Icover_cover_quotient)
 {
   const int nv = 10;
 
@@ -3497,8 +3497,8 @@ TEST(AlgCoverTest, Icover_cover_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
-  AlgCover src2{nv, { {lit0}, {lit1} } };
+  SopCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover src2{nv, { {lit0}, {lit1} } };
 
   cover1 /= src2;
 
@@ -3536,7 +3536,7 @@ TEST(AlgCoverTest, Icover_cover_quotient)
 
 };
 
-TEST(AlgCoverTest, Icover_cube_quotient)
+TEST(SopCoverTest, Icover_cube_quotient)
 {
   const int nv = 10;
 
@@ -3562,8 +3562,8 @@ TEST(AlgCoverTest, Icover_cube_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
-  AlgCube src2{nv, {lit0} };
+  SopCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCube src2{nv, {lit0} };
 
   cover1 /= src2;
 
@@ -3601,7 +3601,7 @@ TEST(AlgCoverTest, Icover_cube_quotient)
 
 };
 
-TEST(AlgCoverTest, Icover_literal_quotient)
+TEST(SopCoverTest, Icover_literal_quotient)
 {
   const int nv = 10;
 
@@ -3627,7 +3627,7 @@ TEST(AlgCoverTest, Icover_literal_quotient)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
 
   cover1 /= lit0;
 
@@ -3665,7 +3665,7 @@ TEST(AlgCoverTest, Icover_literal_quotient)
 
 };
 
-TEST(AlgCoverTest, common_cube)
+TEST(SopCoverTest, common_cube)
 {
   const int nv = 10;
 
@@ -3691,9 +3691,9 @@ TEST(AlgCoverTest, common_cube)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  AlgCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit0, ~lit4} } };
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit0, ~lit4} } };
 
-  AlgCube cube1 = src1.common_cube();
+  SopCube cube1 = src1.common_cube();
 
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ(  1, cube1.literal_num() );

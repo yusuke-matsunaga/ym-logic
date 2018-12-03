@@ -1,30 +1,30 @@
 
-/// @file AlgKernelGen.cc
-/// @brief AlgKernelGen の実装ファイル
+/// @file KernelGen.cc
+/// @brief KernelGen の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2017, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
-#include "AlgKernelGen.h"
-#include "AlgLitSet.h"
+#include "KernelGen.h"
+#include "LitSet.h"
 #include "ym/Range.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgKernelGen
+// クラス KernelGen
 //////////////////////////////////////////////////////////////////////
 
 // @brief コンストラクタ
-AlgKernelGen::AlgKernelGen()
+KernelGen::KernelGen()
 {
 }
 
 // @brief デストラクタ
-AlgKernelGen::~AlgKernelGen()
+KernelGen::~KernelGen()
 {
   hash_clear();
 }
@@ -33,8 +33,8 @@ AlgKernelGen::~AlgKernelGen()
 // @param[in] cover 対象のカバー
 // @param[out] kernel_list カーネルとコカーネルのペアのリスト
 void
-AlgKernelGen::all_kernel(const AlgCover& cover,
-			 vector<pair<AlgCover, AlgCover>>& kernel_list)
+KernelGen::all_kernel(const SopCover& cover,
+			 vector<pair<SopCover, SopCover>>& kernel_list)
 {
   generate(cover);
 
@@ -48,25 +48,25 @@ AlgKernelGen::all_kernel(const AlgCover& cover,
 
 // @brief 最も価値の高いカーネルを返す．
 // @param[in] cover 対象のカバー
-AlgCover
-AlgKernelGen::best_kernel(const AlgCover& cover)
+SopCover
+KernelGen::best_kernel(const SopCover& cover)
 {
   generate(cover);
 
   // 特例: 自身がレベル０カーネルの場合は空のカバーを返す．
   if ( mCellList.size() == 1 && mCellList[0]->mCoKernels.literal_num() == 0 ) {
     hash_clear();
-    return AlgCover(cover.variable_num());
+    return SopCover(cover.variable_num());
   }
 
   // 価値の最も大きいカーネルを求める．
   int max_value = -1;
   Cell* max_cell = nullptr;
   for ( auto cell: mCellList ) {
-    const AlgCover& kernel = cell->mKernel;
+    const SopCover& kernel = cell->mKernel;
     int k_nc = kernel.cube_num();
     int k_nl = kernel.literal_num();
-    const AlgCover& cokernels = cell->mCoKernels;
+    const SopCover& cokernels = cell->mCoKernels;
     int c_nc = cokernels.cube_num();
     int c_nl = cokernels.literal_num();
     int value = (k_nc - 1) * c_nl + (c_nc - 1) * k_nl;
@@ -75,7 +75,7 @@ AlgKernelGen::best_kernel(const AlgCover& cover)
       max_cell = cell;
     }
   }
-  AlgCover ans{std::move(max_cell->mKernel)};
+  SopCover ans{std::move(max_cell->mKernel)};
   hash_clear();
 
   return ans;
@@ -84,7 +84,7 @@ AlgKernelGen::best_kernel(const AlgCover& cover)
 // @brief カーネルとコカーネルを列挙する．
 // @param[in] cover 対象のカバー
 void
-AlgKernelGen::generate(const AlgCover& cover)
+KernelGen::generate(const SopCover& cover)
 {
   // cover に2回以上現れるリテラルとその出現頻度のリストを作る．
   int nv = cover.variable_num();
@@ -118,14 +118,14 @@ AlgKernelGen::generate(const AlgCover& cover)
   hash_clear();
   hash_resize(32);
 
-  AlgCube ccube0(nv); // 空のキューブ
-  AlgLitSet plits(nv); // 空集合
+  SopCube ccube0(nv); // 空のキューブ
+  LitSet plits(nv); // 空集合
   kern_sub(cover, literal_list.begin(), ccube0, plits);
 
   // 特例：自分自身がカーネルとなっているか調べる．
-  AlgCube ccube = cover.common_cube();
+  SopCube ccube = cover.common_cube();
   if ( ccube.literal_num() == 0 ) {
-    AlgCover cover1(cover);
+    SopCover cover1(cover);
     hash_add(std::move(cover1), ccube);
   }
 }
@@ -136,12 +136,12 @@ AlgKernelGen::generate(const AlgCover& cover)
 // @param[in] ccube 今までに括りだされた共通のキューブ
 // @param[in] plits mLitList[0]〜mLitList[pos - 1] までをまとめたリテラル集合
 void
-AlgKernelGen::kern_sub(const AlgCover& cover,
+KernelGen::kern_sub(const SopCover& cover,
 		       vector<Literal>::const_iterator p,
-		       const AlgCube& ccube,
-		       const AlgLitSet& plits)
+		       const SopCube& ccube,
+		       const LitSet& plits)
 {
-  AlgLitSet plits1(plits);
+  LitSet plits1(plits);
   while ( p != mEnd ) {
     Literal lit = *p;
     ++ p;
@@ -152,9 +152,9 @@ AlgKernelGen::kern_sub(const AlgCover& cover,
     }
 
     // まず lit で割る．
-    AlgCover cover1 = cover / lit;
+    SopCover cover1 = cover / lit;
     // 共通なキューブを求める．
-    AlgCube ccube1 = cover1.common_cube();
+    SopCube ccube1 = cover1.common_cube();
     if ( ccube1.check_intersect(plits1) ) {
       // plits にはすでに処理したリテラルが入っている．
       // それと ccube1 が共通部分をもっていたということは
@@ -182,7 +182,7 @@ AlgKernelGen::kern_sub(const AlgCover& cover,
 
 // @brief ハッシュ表をクリアする．
 void
-AlgKernelGen::hash_clear()
+KernelGen::hash_clear()
 {
   for ( auto cell: mCellList ) {
     delete cell;
@@ -193,8 +193,8 @@ AlgKernelGen::hash_clear()
 
 // @brief ハッシュ表に登録する．
 void
-AlgKernelGen::hash_add(AlgCover&& kernel,
-		       const AlgCube& cokernel)
+KernelGen::hash_add(SopCover&& kernel,
+		    const SopCube& cokernel)
 {
   SizeType hash = kernel.hash();
   int index = hash % mHashSize;
@@ -223,7 +223,7 @@ AlgKernelGen::hash_add(AlgCover&& kernel,
 
 // @brief ハッシュ表をリサイズする．
 void
-AlgKernelGen::hash_resize(int size)
+KernelGen::hash_resize(int size)
 {
   vector<Cell*> new_table(size, nullptr);
   for ( auto cell: mHashTable ) {

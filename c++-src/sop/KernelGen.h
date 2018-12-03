@@ -1,34 +1,36 @@
-#ifndef ALGKERNELGEN_H
-#define ALGKERNELGEN_H
+#ifndef KERNELGEN_H
+#define KERNELGEN_H
 
-/// @file AlgKernelGen.h
-/// @brief AlgKernelGen のヘッダファイル
+/// @file KernelGen.h
+/// @brief KernelGen のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2017, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
-#include "ym/Alg.h"
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/Sop.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
+class LitSet;
+
 //////////////////////////////////////////////////////////////////////
-/// @class AlgKernelGen AlgKernelGen.h "AlgKernelGen.h"
+/// @class KernelGen KernelGen.h "KernelGen.h"
 /// @brief カーネルを求めるクラス
 //////////////////////////////////////////////////////////////////////
-class AlgKernelGen
+class KernelGen
 {
 public:
 
   /// @brief コンストラクタ
-  AlgKernelGen();
+  KernelGen();
 
   /// @brief デストラクタ
-  ~AlgKernelGen();
+  ~KernelGen();
 
 
 public:
@@ -40,13 +42,13 @@ public:
   /// @param[in] cover 対象のカバー
   /// @param[out] kernel_list カーネルとコカーネルのペアのリスト
   void
-  all_kernel(const AlgCover& cover,
-	     vector<pair<AlgCover, AlgCover>>& kernel_list);
+  all_kernel(const SopCover& cover,
+	     vector<pair<SopCover, SopCover>>& kernel_list);
 
   /// @brief 価値の最も高いカーネルを求める．
   /// @param[in] cover 対象のカバー
-  AlgCover
-  best_kernel(const AlgCover& cover);
+  SopCover
+  best_kernel(const SopCover& cover);
 
 
 private:
@@ -57,7 +59,7 @@ private:
   /// @brief カーネルとコカーネルを列挙する．
   /// @param[in] cover 対象のカバー
   void
-  generate(const AlgCover& cover);
+  generate(const SopCover& cover);
 
   /// @brief カーネルを求める下請け関数
   /// @param[in] cover 対象のカバー
@@ -66,10 +68,10 @@ private:
   /// @param[in] ccube 今までに括りだされた共通のキューブ
   /// @param[in] plits mLitList[0]〜mLitList[pos - 1] までをまとめたリテラル集合
   void
-  kern_sub(const AlgCover& cover,
+  kern_sub(const SopCover& cover,
 	   vector<Literal>::const_iterator p,
-	   const AlgCube& ccube,
-	   const AlgLitSet& plits);
+	   const SopCube& ccube,
+	   const LitSet& plits);
 
 
 private:
@@ -81,18 +83,18 @@ private:
   struct Cell
   {
     // コンストラクタ
-    Cell(AlgCover&& kernel,
-	 const AlgCube& cokernel) :
+    Cell(SopCover&& kernel,
+	 const SopCube& cokernel) :
       mKernel{kernel},
       mCoKernels{cokernel}
     {
     }
 
     // カーネル
-    AlgCover mKernel;
+    SopCover mKernel;
 
     // コカーネルのリストを表すカバー
-    AlgCover mCoKernels;
+    SopCover mCoKernels;
 
     // 次のセルを指すリンクポインタ
     Cell* mLink;
@@ -111,8 +113,8 @@ private:
 
   /// @brief ハッシュ表に登録する．
   void
-  hash_add(AlgCover&& kernel,
-	   const AlgCube& cokernel);
+  hash_add(SopCover&& kernel,
+	   const SopCube& cokernel);
 
   /// @brief ハッシュ表をリサイズする．
   void
@@ -143,4 +145,4 @@ private:
 
 END_NAMESPACE_YM_LOGIC
 
-#endif // ALGKERNELGEN_H
+#endif // KERNELGEN_H

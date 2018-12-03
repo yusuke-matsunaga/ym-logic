@@ -1,30 +1,30 @@
 
-/// @file AlgCover.cc
-/// @brief AlgCover の実装ファイル
+/// @file SopCover.cc
+/// @brief SopCover の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 #include "ym/Range.h"
-#include "AlgBlock.h"
-#include "AlgMgr.h"
+#include "SopBlock.h"
+#include "SopMgr.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgCover
+// クラス SopCover
 //////////////////////////////////////////////////////////////////////
 
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
 //
 // * 空のカバーとなる．
-AlgCover::AlgCover(int variable_num) :
+SopCover::SopCover(int variable_num) :
   mVariableNum{variable_num},
   mCubeNum{0},
   mCubeCap{mCubeNum},
@@ -39,18 +39,18 @@ AlgCover::AlgCover(int variable_num) :
 // * cube_list が空の時は空のカバーとなる．
 // * cube_list が空でない時は各キューブのサイズは variable_num
 //   と等しくなければならない．
-AlgCover::AlgCover(int variable_num,
-		   const vector<AlgCube>& cube_list) :
+SopCover::SopCover(int variable_num,
+		   const vector<SopCube>& cube_list) :
   mVariableNum{variable_num},
   mCubeNum{static_cast<int>(cube_list.size())},
   mCubeCap{mCubeNum},
   mBody{nullptr}
 {
-  vector<AlgBitVect*> bv_list(mCubeNum);
+  vector<SopBitVect*> bv_list(mCubeNum);
   for ( int i: Range(mCubeNum) ) {
     bv_list[i] = cube_list[i].mBody;
   }
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
   mgr.cover_set(mBody, bv_list);
 }
@@ -60,14 +60,14 @@ AlgCover::AlgCover(int variable_num,
 // @param[in] cube_list カバーを表すリテラルのリストのリスト
 //
 // * キューブの順番は変わる可能性がある．
-AlgCover::AlgCover(int variable_num,
+SopCover::SopCover(int variable_num,
 		   const vector<vector<Literal>>& cube_list) :
   mVariableNum{variable_num},
   mCubeNum{static_cast<int>(cube_list.size())},
   mCubeCap{mCubeNum},
   mBody{nullptr}
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
   mgr.cover_set(mBody, cube_list);
 }
@@ -77,27 +77,27 @@ AlgCover::AlgCover(int variable_num,
 // @param[in] cube_list カバーを表すリテラルのリストのリスト
 //
 // * キューブの順番は変わる可能性がある．
-AlgCover::AlgCover(int variable_num,
+SopCover::SopCover(int variable_num,
 		   std::initializer_list<std::initializer_list<Literal>>& cube_list) :
   mVariableNum{variable_num},
   mCubeNum{static_cast<int>(cube_list.size())},
   mCubeCap{mCubeNum},
   mBody{nullptr}
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
   mgr.cover_set(mBody, cube_list);
 }
 
 // @brief コピーコンストラクタ
 // @param[in] src コピー元のオブジェクト
-AlgCover::AlgCover(const AlgCover& src) :
+SopCover::SopCover(const SopCover& src) :
   mVariableNum{src.mVariableNum},
   mCubeNum{src.mCubeNum},
   mCubeCap{mCubeNum},
   mBody{nullptr}
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
   mgr.cover_copy(mBody, src.mBody, mCubeNum);
 }
@@ -105,19 +105,19 @@ AlgCover::AlgCover(const AlgCover& src) :
 // @brief コピー代入演算子
 // @param[in] src コピー元のオブジェクト
 // @return 代入後の自身の参照を返す．
-AlgCover&
-AlgCover::operator=(const AlgCover& src)
+SopCover&
+SopCover::operator=(const SopCover& src)
 {
   if ( this != &src ) {
     int n = src.cube_num();
     if ( mCubeCap < n ) {
-      AlgMgr mgr(mVariableNum);
+      SopMgr mgr(mVariableNum);
       mgr.delete_body(mBody, mCubeCap);
     }
     mVariableNum = src.mVariableNum;
     mCubeNum = src.mCubeNum;
     mCubeCap = mCubeNum;;
-    AlgMgr mgr(mVariableNum);
+    SopMgr mgr(mVariableNum);
     mBody = mgr.new_body(mCubeCap);
     mgr.cover_copy(mBody, src.mBody, mCubeNum);
   }
@@ -127,7 +127,7 @@ AlgCover::operator=(const AlgCover& src)
 
 // @brief ムーブコンストラクタ
 // @param[in] src ムーブ元のオブジェクト
-AlgCover::AlgCover(AlgCover&& src) :
+SopCover::SopCover(SopCover&& src) :
   mVariableNum{src.mVariableNum},
   mCubeNum{src.mCubeNum},
   mCubeCap{src.mCubeCap},
@@ -141,10 +141,10 @@ AlgCover::AlgCover(AlgCover&& src) :
 // @brief ムーブ代入演算子
 // @param[in] src ムーブ元のオブジェクト
 // @return 代入後の自身の参照を返す．
-AlgCover&
-AlgCover::operator=(AlgCover&& src)
+SopCover&
+SopCover::operator=(SopCover&& src)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mgr.delete_body(mBody, 1);
 
   mVariableNum = src.mVariableNum;
@@ -163,13 +163,13 @@ AlgCover::operator=(AlgCover&& src)
 // @param[in] cube 対象のキューブ
 //
 // 指定されたキューブのみのカバーとなる．
-AlgCover::AlgCover(const AlgCube& cube) :
+SopCover::SopCover(const SopCube& cube) :
   mVariableNum{cube.variable_num()},
   mCubeNum{1},
   mCubeCap{mCubeNum},
   mBody{0}
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(mCubeCap);
   mgr.cube_copy(mBody, cube.mBody);
 }
@@ -178,7 +178,7 @@ AlgCover::AlgCover(const AlgCube& cube) :
 // @param[in] cube 対象のキューブ
 //
 // 指定されたキューブのみのカバーとなる．
-AlgCover::AlgCover(AlgCube&& cube) :
+SopCover::SopCover(SopCube&& cube) :
   mVariableNum{cube.variable_num()},
   mCubeNum{1},
   mCubeCap{mCubeNum},
@@ -194,10 +194,10 @@ AlgCover::AlgCover(AlgCube&& cube) :
 // @param[in] body 内容のパタンを表す本体
 //
 // この関数は危険なので普通は使わないこと
-AlgCover::AlgCover(int variable_num,
+SopCover::SopCover(int variable_num,
 		   int cube_num,
 		   int cube_cap,
-		   AlgBitVect* body) :
+		   SopBitVect* body) :
   mVariableNum{variable_num},
   mCubeNum{cube_num},
   mCubeCap{cube_cap},
@@ -208,102 +208,104 @@ AlgCover::AlgCover(int variable_num,
 // @brief デストラクタ
 //
 // ここに属しているすべてのキューブは削除される．
-AlgCover::~AlgCover()
+SopCover::~SopCover()
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mgr.delete_body(mBody, 1);
 }
 
 // @brief リテラル数を返す．
 int
-AlgCover::literal_num() const
+SopCover::literal_num() const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.literal_num(block());
 }
 
 // @brief 指定されたリテラルの出現回数を返す．
 // @param[in] lit 対象のリテラル
 int
-AlgCover::literal_num(Literal lit) const
+SopCover::literal_num(Literal lit) const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.literal_num(block(), lit);
 }
 
 // @brief 内容をリテラルのリストのリストに変換する．
 // @param[in] cube_list リテラルのリストのリストを格納するベクタ
 void
-AlgCover::to_literal_list(vector<vector<Literal>>& cube_list) const
+SopCover::to_literal_list(vector<vector<Literal>>& cube_list) const
 {
   cube_list.clear();
   cube_list.resize(mCubeNum);
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   for ( int i: Range(mCubeNum) ) {
     vector<Literal>& tmp_list = cube_list[i];
     tmp_list.reserve(mVariableNum);
     for ( int j: Range(mVariableNum) ) {
       VarId var(j);
-      AlgPol p = mgr.get_pol(mBody, i, var);
-      if ( p == AlgPol::P ) {
+      SopPat pat = mgr.get_pat(mBody, i, var);
+      if ( pat == SopPat::_1 ) {
 	tmp_list.push_back(Literal(var, false));
       }
-      else if ( p == AlgPol::N ) {
+      else if ( pat == SopPat::_0 ) {
 	tmp_list.push_back(Literal(var, true));
       }
     }
   }
 }
 
-#if 0
-// @brief 内容を返す．
+// @brief パタンを返す．
 // @param[in] cube_id キューブ番号 ( 0 <= cube_id < cube_num() )
-// @param[in] var_id 変数の位置番号 ( 0 <= var_id < variable_num() )
-AlgPol
-AlgCover::get_pol(int cube_id,
-		  VarId var_id) const
+// @param[in] var 変数( 0 <= var_id.val() < variable_num() )
+// @retval SopPat::_X その変数は現れない．
+// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
+// @retval SopPat::_0 その変数が否定のリテラルとして現れる．
+SopPat
+SopCover::get_pat(int cube_id,
+		  VarId var) const
 {
-  return mgr.get_pol(mBody, cube_id, var_id);
+  SopMgr mgr(mVariableNum);
+  return mgr.get_pat(mBody, cube_id, var);
 }
-#endif
 
-// @brief 内容を表す AlgBlock を返す．
+// @brief 内容を表す SopBlock を返す．
 inline
-AlgBlock
-AlgCover::block() const
+SopBlock
+SopCover::block() const
 {
-  return AlgBlock{mCubeNum, mBody};
+  return SopBlock{mCubeNum, mBody};
 }
 
 // @brief 論理和を計算する．
 // @param[in] right オペランド
 // @return 計算結果を返す．
-AlgCover
-AlgCover::operator+(const AlgCover& right) const
+SopCover
+SopCover::operator+(const SopCover& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum + right.mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_sum(body, block(), right.block());
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief 論理和を計算して代入する．
 // @param[in] right オペランド
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator+=(const AlgCover& right)
+SopCover&
+SopCover::operator+=(const SopCover& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum + right.mCubeNum;
   // 新しいブロックを作る．
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_sum(body, block(), right.block());
 
   mgr.delete_body(mBody, mCubeNum);
@@ -318,29 +320,29 @@ AlgCover::operator+=(const AlgCover& right)
 // @brief 論理和を計算する(キューブ版)．
 // @param[in] right オペランド
 // @return 計算結果を返す．
-AlgCover
-AlgCover::operator+(const AlgCube& right) const
+SopCover
+SopCover::operator+(const SopCube& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum + 1;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_sum(body, block(), right.block());
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief 論理和を計算して代入する(キューブ版)．
 // @param[in] right オペランド
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator+=(const AlgCube& right)
+SopCover&
+SopCover::operator+=(const SopCube& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum + 1;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_sum(body, block(), right.block());
 
   mgr.delete_body(mBody, mCubeNum);
@@ -357,29 +359,29 @@ AlgCover::operator+=(const AlgCube& right)
 // @return 計算結果を返す．
 //
 // right のみに含まれる要素があっても無視される．
-AlgCover
-AlgCover::operator-(const AlgCover& right) const
+SopCover
+SopCover::operator-(const SopCover& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_diff(body, block(), right.block());
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief 差分を計算して代入する．
 // @param[in] right オペランド
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator-=(const AlgCover& right)
+SopCover&
+SopCover::operator-=(const SopCover& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   // キューブ数は増えないのでブロックはそのまま
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_diff(mBody, block(), right.block());
 
   return *this;
@@ -390,28 +392,28 @@ AlgCover::operator-=(const AlgCover& right)
 // @return 計算結果を返す．
 //
 // right のみに含まれる要素があっても無視される．
-AlgCover
-AlgCover::operator-(const AlgCube& right) const
+SopCover
+SopCover::operator-(const SopCube& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_diff(body, block(), right.block());
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief 差分を計算して代入する(キューブ版)．
 // @param[in] right オペランド
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator-=(const AlgCube& right)
+SopCover&
+SopCover::operator-=(const SopCube& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_diff(mBody, block(), right.block());
 
   return *this;
@@ -420,30 +422,30 @@ AlgCover::operator-=(const AlgCube& right)
 // @brief 論理積を計算する．
 // @param[in] right オペランド
 // @return 計算結果を返す．
-AlgCover
-AlgCover::operator*(const AlgCover& right) const
+SopCover
+SopCover::operator*(const SopCover& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum * right.mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_product(body, block(), right.block());
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief 論理積を計算して代入する．
 // @param[in] right オペランド
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator*=(const AlgCover& right)
+SopCover&
+SopCover::operator*=(const SopCover& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum * right.mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_product(body, block(), right.block());
 
   mgr.delete_body(mBody, mCubeNum);
@@ -458,28 +460,28 @@ AlgCover::operator*=(const AlgCover& right)
 // @brief 論理積を計算する(キューブ版)．
 // @param[in] right オペランド
 // @return 計算結果を返す．
-AlgCover
-AlgCover::operator*(const AlgCube& right) const
+SopCover
+SopCover::operator*(const SopCube& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_product(body, block(), right.block());
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief 論理積を計算して代入する(キューブ版)．
 // @param[in] right オペランド
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator*=(const AlgCube& right)
+SopCover&
+SopCover::operator*=(const SopCube& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_product(mBody, block(), right.block());
 
   return *this;
@@ -488,24 +490,24 @@ AlgCover::operator*=(const AlgCube& right)
 // @brief 論理積を計算する(リテラル版)．
 // @param[in] right オペランド
 // @return 計算結果を返す．
-AlgCover
-AlgCover::operator*(Literal right) const
+SopCover
+SopCover::operator*(Literal right) const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_product(body, block(), right);
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief 論理積を計算して代入する(リテラル版)．
 // @param[in] right オペランド
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator*=(Literal right)
+SopCover&
+SopCover::operator*=(Literal right)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_product(mBody, block(), right);
 
   return *this;
@@ -514,28 +516,28 @@ AlgCover::operator*=(Literal right)
 // @brief algebraic division を計算する．
 // @param[in] right オペランド
 // @return 計算結果を返す．
-AlgCover
-AlgCover::operator/(const AlgCover& right) const
+SopCover
+SopCover::operator/(const SopCover& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_quotient(body, block(), right.block());
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief algebraic division を行って代入する．
 // @param[in] right オペランド
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator/=(const AlgCover& right)
+SopCover&
+SopCover::operator/=(const SopCover& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_quotient(mBody, block(), right.block());
 
   return *this;
@@ -544,28 +546,28 @@ AlgCover::operator/=(const AlgCover& right)
 // @brief キューブによる商を計算する．
 // @param[in] right 対象のキューブ
 // @return 計算結果を返す．
-AlgCover
-AlgCover::operator/(const AlgCube& right) const
+SopCover
+SopCover::operator/(const SopCube& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_quotient(body, block(), right.block());
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief キューブによる商を計算して代入する．
 // @param[in] right 対象のキューブ
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator/=(const AlgCube& right)
+SopCover&
+SopCover::operator/=(const SopCube& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_quotient(mBody, block(), right.block());
 
   return *this;
@@ -574,24 +576,24 @@ AlgCover::operator/=(const AlgCube& right)
 // @brief リテラルによる商を計算する．
 // @param[in] lit 対象のリテラル
 // @return 計算結果を返す．
-AlgCover
-AlgCover::operator/(Literal lit) const
+SopCover
+SopCover::operator/(Literal lit) const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int cap = mCubeNum;
-  AlgBitVect* body = mgr.new_body(cap);
+  SopBitVect* body = mgr.new_body(cap);
   int nc = mgr.cover_quotient(body, block(), lit);
 
-  return AlgCover(mVariableNum, nc, cap, body);
+  return SopCover(mVariableNum, nc, cap, body);
 }
 
 // @brief リテラルによる商を計算して代入する．
 // @param[in] lit 対象のリテラル
 // @return 演算後の自身への参照を返す．
-AlgCover&
-AlgCover::operator/=(Literal lit)
+SopCover&
+SopCover::operator/=(Literal lit)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mCubeNum = mgr.cover_quotient(mBody, block(), lit);
 
   return *this;
@@ -600,21 +602,21 @@ AlgCover::operator/=(Literal lit)
 // @brief 共通なキューブを返す．
 //
 // 共通なキューブがない場合には空のキューブを返す．
-AlgCube
-AlgCover::common_cube() const
+SopCube
+SopCover::common_cube() const
 {
-  AlgMgr mgr(mVariableNum);
-  AlgBitVect* body = mgr.new_body(1);
+  SopMgr mgr(mVariableNum);
+  SopBitVect* body = mgr.new_body(1);
   mgr.common_cube(body, block());
 
-  return AlgCube(mVariableNum, body);
+  return SopCube(mVariableNum, body);
 }
 
 // @brief ハッシュ値を返す．
 SizeType
-AlgCover::hash() const
+SopCover::hash() const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.hash(block());
 }
 
@@ -622,26 +624,26 @@ AlgCover::hash() const
 // @param[in] s 出力先のストリーム
 // @param[in] varname_list 変数名のリスト
 void
-AlgCover::print(ostream& s,
+SopCover::print(ostream& s,
 		const vector<string>& varname_list) const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mgr.print(s, mBody, 0, mCubeNum, varname_list);
 }
 
-// @relates AlgCover
+// @relates SopCover
 // @brief 比較演算子(rich compare)
 // @param[in] left, right オペランド
 // @return 比較結果を返す．
 //
 // 比較方法はキューブごとの辞書式順序
 int
-compare(const AlgCover& left,
-	const AlgCover& right)
+compare(const SopCover& left,
+	const SopCover& right)
 {
   ASSERT_COND( left.mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(left.mVariableNum);
+  SopMgr mgr(left.mVariableNum);
 
   return mgr.cover_compare(left.block(), right.block());
 }

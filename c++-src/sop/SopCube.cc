@@ -1,16 +1,16 @@
 
-/// @file AlgCube.cc
-/// @brief AlgCube の実装ファイル
+/// @file SopCube.cc
+/// @brief SopCube の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2018 Yusuke Matsunaga
 /// All rights reserved.
 
 
-#include "ym/AlgCube.h"
-#include "AlgBlock.h"
-#include "AlgLitSet.h"
-#include "AlgMgr.h"
+#include "ym/SopCube.h"
+#include "SopBlock.h"
+#include "SopMgr.h"
+#include "LitSet.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -19,10 +19,10 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @param[in] variable_num 変数の数
 //
 // * 空のキューブを作る．
-AlgCube::AlgCube(int variable_num) :
+SopCube::SopCube(int variable_num) :
   mVariableNum{variable_num}
 {
-  AlgMgr mgr{mVariableNum};
+  SopMgr mgr{mVariableNum};
   mBody = mgr.new_body(1);
   mgr.cube_clear(mBody);
 }
@@ -32,11 +32,11 @@ AlgCube::AlgCube(int variable_num) :
 // @param[in] lit リテラル
 //
 // 単一のリテラルからなるキューブを作る．
-AlgCube::AlgCube(int variable_num,
+SopCube::SopCube(int variable_num,
 		 Literal lit) :
   mVariableNum{variable_num}
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_clear(mBody);
   mgr.cube_set(mBody, vector<Literal>{lit});
@@ -45,11 +45,11 @@ AlgCube::AlgCube(int variable_num,
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
 // @param[in] lit_list キューブを表すリテラルのリスト
-AlgCube::AlgCube(int variable_num,
+SopCube::SopCube(int variable_num,
 		 const vector<Literal>& lit_list) :
   mVariableNum{variable_num}
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_clear(mBody);
   mgr.cube_set(mBody, lit_list);
@@ -58,11 +58,11 @@ AlgCube::AlgCube(int variable_num,
 // @brief コンストラクタ
 // @param[in] variable_num 変数の数
 // @param[in] lit_list キューブを表すリテラルのリスト初期化子
-AlgCube::AlgCube(int variable_num,
+SopCube::SopCube(int variable_num,
 		 std::initializer_list<Literal>& lit_list) :
   mVariableNum{variable_num}
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_clear(mBody);
   mgr.cube_set(mBody, lit_list);
@@ -70,10 +70,10 @@ AlgCube::AlgCube(int variable_num,
 
 // @brief コピーコンストラクタ
 // @param[in] src コピー元のオブジェクト
-AlgCube::AlgCube(const AlgCube& src) :
+SopCube::SopCube(const SopCube& src) :
   mVariableNum{src.mVariableNum}
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
   mgr.cube_copy(mBody, src.mBody);
 }
@@ -81,10 +81,10 @@ AlgCube::AlgCube(const AlgCube& src) :
 // @brief コピー代入演算子
 // @param[in] src コピー元のオブジェクト
 // @return 代入後の自身への参照を返す．
-AlgCube&
-AlgCube::operator=(const AlgCube& src)
+SopCube&
+SopCube::operator=(const SopCube& src)
 {
-  AlgMgr mgr(src.mVariableNum);
+  SopMgr mgr(src.mVariableNum);
   if ( mVariableNum != src.mVariableNum ) {
     delete_body();
     mVariableNum = src.mVariableNum;
@@ -97,7 +97,7 @@ AlgCube::operator=(const AlgCube& src)
 
 // @brief ムーブコンストラクタ
 // @param[in] src ムーブ元のオブジェクト
-AlgCube::AlgCube(AlgCube&& src) :
+SopCube::SopCube(SopCube&& src) :
   mVariableNum{src.mVariableNum},
   mBody{src.mBody}
 {
@@ -107,8 +107,8 @@ AlgCube::AlgCube(AlgCube&& src) :
 // @brief ムーブ代入演算子
 // @param[in] src ムーブ元のオブジェクト
 // @return 代入後の自身への参照を返す．
-AlgCube&
-AlgCube::operator=(AlgCube&& src)
+SopCube&
+SopCube::operator=(SopCube&& src)
 {
   delete_body();
 
@@ -125,70 +125,68 @@ AlgCube::operator=(AlgCube&& src)
 // @param[in] body キューブのパタンを表す本体
 //
 // 危険なので普通は使わないように
-AlgCube::AlgCube(int variable_num,
-		 AlgBitVect* body) :
+SopCube::SopCube(int variable_num,
+		 SopBitVect* body) :
   mVariableNum{variable_num},
   mBody{body}
 {
 }
 
 // @brief デストラクタ
-AlgCube::~AlgCube()
+SopCube::~SopCube()
 {
   delete_body();
 }
 
 // @brief mBody を削除する．
 void
-AlgCube::delete_body()
+SopCube::delete_body()
 {
   if ( mBody != nullptr ) {
-    AlgMgr mgr(mVariableNum);
+    SopMgr mgr(mVariableNum);
     mgr.delete_body(mBody, 1);
   }
 }
 
-#if 0
-// @brief 内容を読み出す．
-// @param[in] varid 変数番号 ( 0 <= varid.val() < variable_num() )
-// @retval AlgPol::X この位置にリテラルはない．
-// @retval AlgPol::P 肯定のリテラルがある．
-// @retval AlgPol::N 否定のリテラルがある．
-AlgPol
-AlgCube::get_pol(VarId varid) const
+// @brief 指定した変数のパタンを読み出す．
+// @param[in] var 変数( 0 <= var_id.val() < variable_num() )
+// @retval SopPat::_X その変数は現れない．
+// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
+// @retval SopPat::_0 その変数が否定のリテラルとして現れる．
+SopPat
+SopCube::get_pat(VarId var) const
 {
-  AlgMgr mgr(mVariableNum);
-  return mgr.get_pol(mBody, 0, varid);
+  SopMgr mgr(mVariableNum);
+  return mgr.get_pat(mBody, 0, var);
 }
-#endif
 
 // @brief リテラル数を返す．
 int
-AlgCube::literal_num() const
+SopCube::literal_num() const
 {
   if ( mBody == nullptr ) {
     return 0;
   }
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.literal_num(block());
 }
 
 // @brief 内容をリテラルのリストに変換する．
 // @param[in] lit_list 結果を格納するベクタ
 void
-AlgCube::to_literal_list(vector<Literal>& lit_list) const
+SopCube::to_literal_list(vector<Literal>& lit_list) const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int nl = mgr.literal_num(block());
   lit_list.clear();
   lit_list.reserve(nl);
   for ( int i = 0; i < mVariableNum; ++ i ) {
     VarId var(i);
-    AlgPol p = mgr.get_pol(mBody, 0, var);
-    if ( p == AlgPol::P ) {
+    SopPat pat = mgr.get_pat(mBody, 0, var);
+    if ( pat == SopPat::_1 ) {
       lit_list.push_back(Literal(var, false));
     }
-    else if ( p == AlgPol::N ) {
+    else if ( pat == SopPat::_0 ) {
       lit_list.push_back(Literal(var, true));
     }
   }
@@ -197,9 +195,9 @@ AlgCube::to_literal_list(vector<Literal>& lit_list) const
 // @brief 指定したリテラルを含んでいたら true を返す．
 // @param[in] lit 対象のリテラル
 bool
-AlgCube::has_literal(Literal lit) const
+SopCube::has_literal(Literal lit) const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.literal_num(block(), lit) > 0;
 }
 
@@ -209,33 +207,33 @@ AlgCube::has_literal(Literal lit) const
 // ここではキューブの表す論理関数の含意を考える<br>
 // だからリテラル集合としてはオペランドのキューブを含むことになる．
 bool
-AlgCube::check_containment(const AlgCube& right) const
+SopCube::check_containment(const SopCube& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.cube_check_containment(mBody, right.mBody);
 }
 
 // @brief 2つのキューブに共通なリテラルがあれば true を返す．
 // @param[in] right オペランドのキューブ
 bool
-AlgCube::check_intersect(const AlgCube& right) const
+SopCube::check_intersect(const SopCube& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.cube_check_intersect(mBody, right.mBody);
 }
 
 // @brief 引数のリテラルをひとつでも含んでいたら true を返す．
 // @param[in] right 対象のリテラル集合
 bool
-AlgCube::check_intersect(const AlgLitSet& right) const
+SopCube::check_intersect(const LitSet& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.cube_check_intersect(mBody, right.mBody);
 }
 
@@ -244,19 +242,19 @@ AlgCube::check_intersect(const AlgLitSet& right) const
 //
 // リテラル集合としてみると和集合となる<br>
 // ただし，相反するリテラルが含まれていたら空キューブとなる．
-AlgCube
-AlgCube::operator*(const AlgCube& right) const
+SopCube
+SopCube::operator*(const SopCube& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
-  AlgBitVect* body = mgr.new_body(1);
+  SopMgr mgr(mVariableNum);
+  SopBitVect* body = mgr.new_body(1);
   bool stat = mgr.cube_product(body, mBody, right.mBody);
   if ( !stat ) {
     mgr.cube_clear(body);
   }
 
-  return AlgCube(mVariableNum, body);
+  return SopCube(mVariableNum, body);
 }
 
 // @brief 論理積を計算し自身に代入する．
@@ -265,12 +263,12 @@ AlgCube::operator*(const AlgCube& right) const
 //
 // リテラル集合とみなすとユニオンを計算することになる<br>
 // ただし，相反するリテラルとの積があったら答は空のキューブとなる．
-AlgCube&
-AlgCube::operator*=(const AlgCube& right)
+SopCube&
+SopCube::operator*=(const SopCube& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   bool stat = mgr.cube_product(mBody, mBody, right.mBody);
   if ( !stat ) {
     mgr.cube_clear(mBody);
@@ -284,17 +282,17 @@ AlgCube::operator*=(const AlgCube& right)
 //
 // リテラル集合としてみると和集合となる<br>
 // ただし，相反するリテラルが含まれていたら空キューブとなる．
-AlgCube
-AlgCube::operator*(Literal right) const
+SopCube
+SopCube::operator*(Literal right) const
 {
-  AlgMgr mgr(mVariableNum);
-  AlgBitVect* body = mgr.new_body(1);
+  SopMgr mgr(mVariableNum);
+  SopBitVect* body = mgr.new_body(1);
   int nc = mgr.cover_product(body, block(), right);
   if ( nc == 0 ) {
     mgr.cube_clear(body);
   }
 
-  return AlgCube(mVariableNum, body);
+  return SopCube(mVariableNum, body);
 }
 
 // @brief リテラルとの論理積を計算し自身に代入する．
@@ -303,10 +301,10 @@ AlgCube::operator*(Literal right) const
 //
 // リテラル集合とみなすとユニオンを計算することになる<br>
 // ただし，相反するリテラルとの積があったら答は空のキューブとなる．
-AlgCube&
-AlgCube::operator*=(Literal right)
+SopCube&
+SopCube::operator*=(Literal right)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int nc = mgr.cover_product(mBody, block(), right);
   if ( nc == 0 ) {
     mgr.cube_clear(mBody);
@@ -317,19 +315,19 @@ AlgCube::operator*=(Literal right)
 
 // @brief キューブによる商を計算する
 // @param[in] right オペランド
-AlgCube
-AlgCube::operator/(const AlgCube& right) const
+SopCube
+SopCube::operator/(const SopCube& right) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
-  AlgBitVect* body = mgr.new_body(1);
+  SopMgr mgr(mVariableNum);
+  SopBitVect* body = mgr.new_body(1);
   bool stat = mgr.cube_quotient(body, mBody, right.mBody);
   if ( !stat ) {
     mgr.cube_clear(body);
   }
 
-  return AlgCube(mVariableNum, body);
+  return SopCube(mVariableNum, body);
 }
 
 // @brief キューブによる商を計算し自身に代入する．
@@ -338,12 +336,12 @@ AlgCube::operator/(const AlgCube& right) const
 //
 // リテラル集合として考えると集合差を計算することになる<br>
 // ただし，right のみに含まれるリテラルがあったら結果は空となる．
-AlgCube&
-AlgCube::operator/=(const AlgCube& right)
+SopCube&
+SopCube::operator/=(const SopCube& right)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   bool stat = mgr.cube_quotient(mBody, mBody, right.mBody);
   if ( !stat ) {
     mgr.cube_clear(mBody);
@@ -354,17 +352,17 @@ AlgCube::operator/=(const AlgCube& right)
 
 // @brief リテラルによる商を計算する
 // @param[in] right オペランドのリテラル
-AlgCube
-AlgCube::operator/(Literal right) const
+SopCube
+SopCube::operator/(Literal right) const
 {
-  AlgMgr mgr(mVariableNum);
-  AlgBitVect* body = mgr.new_body(1);
+  SopMgr mgr(mVariableNum);
+  SopBitVect* body = mgr.new_body(1);
   int nc = mgr.cover_quotient(body, block(), right);
   if ( nc == 0 ) {
     mgr.cube_clear(body);
   }
 
-  return AlgCube(mVariableNum, body);
+  return SopCube(mVariableNum, body);
 }
 
 // @brief リテラルによる商を計算し自身に代入する．
@@ -373,10 +371,10 @@ AlgCube::operator/(Literal right) const
 //
 // リテラル集合として考えると集合差を計算することになる<br>
 // ただし，right のみに含まれるリテラルがあったら結果は空となる．
-AlgCube&
-AlgCube::operator/=(Literal right)
+SopCube&
+SopCube::operator/=(Literal right)
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   int nc = mgr.cover_quotient(mBody, block(), right);
   if ( nc == 0 ) {
     mgr.cube_clear(mBody);
@@ -385,34 +383,34 @@ AlgCube::operator/=(Literal right)
   return *this;
 }
 
-// @relates AlgCube
-// @brief AlgCubeの比較演算子
+// @relates SopCube
+// @brief SopCubeの比較演算子
 // @param[in] left, right オペランド
 // @retval -1 left < right
 // @retval  0 left = right
 // @retval  1 left > right
 int
-compare(const AlgCube& left,
-	const AlgCube& right)
+compare(const SopCube& left,
+	const SopCube& right)
 {
   ASSERT_COND( left.variable_num() == right.variable_num() );
 
-  AlgMgr mgr(left.variable_num());
+  SopMgr mgr(left.variable_num());
   return mgr.cube_compare(left.mBody, right.mBody);
 }
 
-// @breif AlgBlock を返す．
-AlgBlock
-AlgCube::block() const
+// @breif SopBlock を返す．
+SopBlock
+SopCube::block() const
 {
-  return AlgBlock(1, mBody);
+  return SopBlock(1, mBody);
 }
 
 // @brief ハッシュ値を返す．
 SizeType
-AlgCube::hash() const
+SopCube::hash() const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   return mgr.hash(block());
 }
 
@@ -420,10 +418,10 @@ AlgCube::hash() const
 // @param[in] s 出力先のストリーム
 // @param[in] varname_list 変数名のリスト
 void
-AlgCube::print(ostream& s,
+SopCube::print(ostream& s,
 	       const vector<string>& varname_list) const
 {
-  AlgMgr mgr(mVariableNum);
+  SopMgr mgr(mVariableNum);
   mgr.print(s, mBody, 0, 1, varname_list);
 }
 

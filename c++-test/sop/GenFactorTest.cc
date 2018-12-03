@@ -9,7 +9,7 @@
 
 #include <gtest/gtest.h>
 #include "GenFactor.h"
-#include "ym/AlgCover.h"
+#include "ym/SopCover.h"
 #include "ym/Expr.h"
 #include "ym/Range.h"
 
@@ -43,7 +43,7 @@ TEST(GenFactorTest, quick_factor)
   Literal lit_j(var9, false);
 
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  AlgCover cover1{nv, { { lit_a, lit_b, lit_g },
+  SopCover cover1{nv, { { lit_a, lit_b, lit_g },
 			{ lit_a, lit_c, lit_g },
 			{ lit_a, lit_d, lit_f },
 			{ lit_a, lit_f, lit_g },
@@ -112,7 +112,7 @@ TEST(GenFactorTest, good_factor)
   Literal lit_j(var9, false);
 
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  AlgCover cover1{nv, { { lit_a, lit_b, lit_g },
+  SopCover cover1{nv, { { lit_a, lit_b, lit_g },
 			{ lit_a, lit_c, lit_g },
 			{ lit_a, lit_d, lit_f },
 			{ lit_a, lit_f, lit_g },
