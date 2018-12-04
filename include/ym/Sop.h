@@ -26,7 +26,6 @@ using SopBitVect = ymuint64;
 
 // クラス名の前方参照用宣言
 class SopBlock;
-class SopLitSet;
 class SopMgr;
 
 END_NAMESPACE_YM_LOGIC
