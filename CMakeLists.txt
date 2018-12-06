@@ -34,7 +34,6 @@ set (sop_SOURCES
   c++-src/sop/SopMgr.cc
   c++-src/sop/KernelGen.cc
   c++-src/sop/LitSet.cc
-  c++-src/sop/GenFactor.cc
   c++-src/sop/BestKernel.cc
   c++-src/sop/OneLevel0Kernel.cc
   c++-src/sop/WeakDivision.cc
