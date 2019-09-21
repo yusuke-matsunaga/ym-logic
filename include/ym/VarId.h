@@ -10,7 +10,6 @@
 
 
 #include "ym_config.h"
-#include "ym/HashFunc.h"
 #include "ym/IDO.h"
 #include "ym/ODO.h"
 
@@ -164,20 +163,6 @@ operator<<(ODO& s,
 IDO&
 operator>>(IDO& s,
 	   VarId& varid);
-
-
-//////////////////////////////////////////////////////////////////////
-// HashBase<VarId> 用のハッシュ関数
-//////////////////////////////////////////////////////////////////////
-template<>
-struct
-HashFunc<VarId>
-{
-  SizeType
-  operator()(VarId key) const {
-    return static_cast<SizeType>(key.val());
-  }
-};
 
 
 //////////////////////////////////////////////////////////////////////
@@ -370,5 +355,34 @@ operator>>(IDO& s,
 }
 
 END_NAMESPACE_YM
+
+BEGIN_NAMESPACE_STD
+
+// VarId の等価比較オブジェクト
+template <>
+struct equal_to<YM_NAMESPACE::VarId>
+{
+  bool
+  operator()(YM_NAMESPACE::VarId n1,
+	     YM_NAMESPACE::VarId n2) const
+  {
+    return n1 == n2;
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+// hash<VarId> の特殊化
+//////////////////////////////////////////////////////////////////////
+template<>
+struct
+hash<YM_NAMESPACE::VarId>
+{
+  SizeType
+  operator()(YM_NAMESPACE::VarId key) const {
+    return static_cast<SizeType>(key.val());
+  }
+};
+
+END_NAMESPACE_STD
 
 #endif // YM_VARID_H

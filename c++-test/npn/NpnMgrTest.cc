@@ -10,7 +10,6 @@
 #include "gtest/gtest.h"
 #include "NpnMgr.h"
 #include "ym/TvFunc.h"
-#include "ym/HashSet.h"
 #include "ym/PermGen.h"
 #include "ym/RandPermGen.h"
 #include "ym/Range.h"
@@ -65,7 +64,7 @@ TEST_P(NpnMgrTestWithParam, func_test)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   int ni_exp_exp = 1U << ni_exp;
-  HashSet<TvFunc> func_hash;
+  unordered_set<TvFunc> func_hash;
   for ( int sig: Range(ni_exp_exp) ) {
     vector<int> values(ni_exp);
     for ( int p: Range(ni_exp) ) {
@@ -91,8 +90,8 @@ TEST_P(NpnMgrTestWithParam, func_test)
     NpnMap map = map_list[0];
     TvFunc cfunc = f.xform(map);
 
-    if ( !func_hash.find(cfunc) ) {
-      func_hash.add(cfunc);
+    if ( func_hash.count(cfunc) == 0 ) {
+      func_hash.insert(cfunc);
     }
   }
 
@@ -104,7 +103,7 @@ TEST_P(NpnMgrTestWithParam, func_test)
     222,
   };
 
-  EXPECT_EQ( exp_num[ni], func_hash.num() );
+  EXPECT_EQ( exp_num[ni], func_hash.size() );
 }
 
 TEST_P(NpnMgrTestWithParam, func_test2)
@@ -112,7 +111,7 @@ TEST_P(NpnMgrTestWithParam, func_test2)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   int ni_exp_exp = 1U << ni_exp;
-  HashSet<TvFunc> func_hash;
+  unordered_set<TvFunc> func_hash;
   for ( int sig: Range(ni_exp_exp) ) {
     vector<int> values(ni_exp);
     for ( int p: Range(ni_exp) ) {
@@ -124,7 +123,7 @@ TEST_P(NpnMgrTestWithParam, func_test2)
       }
     }
     TvFunc f(ni, values);
-    if ( func_hash.check(f) ) {
+    if ( func_hash.count(f) > 0 ) {
       continue;
     }
 
@@ -156,7 +155,7 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	      map.set(VarId(i), VarId(pg(i)), iinv);
 	    }
 	    TvFunc f1 = f.xform(map);
-	    func_hash.add(f1);
+	    func_hash.insert(f1);
 
 	    NpnMgr npnmgr;
 	    TvFunc cfunc1 = npnmgr.cannonical(f1);

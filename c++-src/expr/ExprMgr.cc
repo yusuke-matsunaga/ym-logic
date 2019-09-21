@@ -447,7 +447,7 @@ ExprMgr::compose(const ExprNode* node,
 // comp_map にしたがってリテラルを式に置き換える．
 ExprNodePtr
 ExprMgr::compose(const ExprNode* node,
-		 const HashMap<VarId, Expr>& comp_map)
+		 const unordered_map<VarId, Expr>& comp_map)
 {
   switch ( node->type() ) {
   case ExprType::Const0:
@@ -455,20 +455,16 @@ ExprMgr::compose(const ExprNode* node,
     return node;
 
   case ExprType::PosiLiteral:
-    {
-      Expr ans;
-      if ( comp_map.find(node->varid(), ans) ) {
-	return ans.root();
-      }
+    if ( comp_map.count(node->varid()) > 0 ) {
+      auto ans = comp_map.at(node->varid());
+      return ans.root();
     }
     return node;
 
   case ExprType::NegaLiteral:
-    {
-      Expr ans;
-      if ( comp_map.find(node->varid(), ans) ) {
-	return complement(ans.root());
-      }
+    if ( comp_map.count(node->varid()) > 0 ) {
+      auto ans = comp_map.at(node->varid());
+      return complement(ans.root());
     }
     return node;
 
@@ -505,7 +501,7 @@ ExprMgr::compose(const ExprNode* node,
 // 変数番号をマッピングし直す
 ExprNodePtr
 ExprMgr::remap_var(const ExprNode* node,
-		   const HashMap<VarId, VarId>& varmap)
+		   const unordered_map<VarId, VarId>& varmap)
 {
   switch ( node->type() ) {
   case ExprType::Const0:
@@ -513,20 +509,16 @@ ExprMgr::remap_var(const ExprNode* node,
     return node;
 
   case ExprType::PosiLiteral:
-    {
-      VarId ans;
-      if ( varmap.find(node->varid(), ans) ) {
-	return make_posiliteral(ans);
-      }
+    if ( varmap.count(node->varid()) > 0 ) {
+      auto ans = varmap.at(node->varid());
+      return make_posiliteral(ans);
     }
     return node;
 
   case ExprType::NegaLiteral:
-    {
-      VarId ans;
-      if ( varmap.find(node->varid(), ans) ) {
-	return make_negaliteral(ans);
-      }
+    if ( varmap.count(node->varid()) > 0 ) {
+      auto ans = varmap.at(node->varid());
+      return make_negaliteral(ans);
     }
     return node;
 

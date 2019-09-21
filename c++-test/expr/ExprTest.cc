@@ -1008,9 +1008,9 @@ TEST(ExprTest, compose2)
   Expr expr0 = lit0p | lit4n;
   Expr expr1 = lit1p & lit3p;
   Expr expr2 = ~(lit1n & lit2p);
-  HashMap<VarId, Expr> comp_map;
-  comp_map.add(var0, expr1);
-  comp_map.add(var4, expr2);
+  unordered_map<VarId, Expr> comp_map;
+  comp_map[var0] = expr1;
+  comp_map[var4] = expr2;
   Expr expr = expr0.compose(comp_map);
 
   ostringstream oss;
@@ -1058,8 +1058,8 @@ TEST(ExprTest, remap_var1)
   Expr lit3p = Expr::posi_literal(var3);
 
   Expr expr0 = (lit0p & lit3p) | (lit1n & lit2p);
-  HashMap<VarId, VarId> varmap;
-  varmap.add(var0, var1);
+  unordered_map<VarId, VarId> varmap;
+  varmap[var0] = var1;
   Expr expr = expr0.remap_var(varmap);
 
   ostringstream oss;

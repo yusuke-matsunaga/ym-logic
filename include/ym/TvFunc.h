@@ -12,7 +12,6 @@
 #include "ym/logic.h"
 #include "ym/VarId.h"
 #include "ym/Literal.h"
-#include "ym/HashBase.h"
 #include "ym/IDO.h"
 #include "ym/ODO.h"
 
@@ -30,7 +29,7 @@ BEGIN_NAMESPACE_YM
 /// さらに，オペランドのどちらかが右辺値の場合には自動的にそのオブジェクト
 /// からムーブ演算子で中身を移してそのオブジェクト乗で代入付き論理演算を
 /// 行うようになっている．
-/// 捨てて良いオブジェクトを用いる場合には std::move() で右辺値にしておいた
+/// 捨てて良いオブジェクトを用いる場合には move() で右辺値にしておいた
 /// ほうが効率がよい．
 //////////////////////////////////////////////////////////////////////
 class TvFunc
@@ -689,18 +688,6 @@ operator>>(IDO& s,
 	   TvFunc& func);
 
 
-// TvFunc をキーにしたハッシュ関数クラスの定義
-template <>
-struct HashFunc<TvFunc>
-{
-  SizeType
-  operator()(const TvFunc& f) const
-  {
-    return f.hash();
-  }
-};
-
-
 //////////////////////////////////////////////////////////////////////
 // インライン関数の定義
 //////////////////////////////////////////////////////////////////////
@@ -1115,5 +1102,20 @@ operator>>(IDO& s,
 }
 
 END_NAMESPACE_YM
+
+BEGIN_NAMESPACE_STD
+
+// TvFunc をキーにしたハッシュ関数クラスの定義
+template <>
+struct hash<YM_NAMESPACE::TvFunc>
+{
+  SizeType
+  operator()(const YM_NAMESPACE::TvFunc& f) const
+  {
+    return f.hash();
+  }
+};
+
+END_NAMESPACE_STD
 
 #endif // YM_TVFUNC_H

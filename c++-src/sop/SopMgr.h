@@ -166,7 +166,7 @@ public:
   /// * dst_bv には十分な容量が確保されていると仮定する．
   void
   cover_set(SopBitVect* dst_bv,
-	    std::initializer_list<std::initializer_list<Literal>>& cube_list);
+	    initializer_list<initializer_list<Literal>>& cube_list);
 
   /// @brief 2つのカバーの論理和を計算する．
   /// @param[in] dst_bv 結果を格納するビットベクタ
@@ -351,7 +351,7 @@ public:
   /// * dst_bv には十分な容量があると仮定する．
   void
   cube_set(SopBitVect* dst_bv,
-	   std::initializer_list<Literal>& lit_list);
+	   initializer_list<Literal>& lit_list);
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
   /// @param[in] dst_bv 対象のビットベクタ
@@ -362,7 +362,7 @@ public:
   void
   cube_set(SopBitVect* dst_bv,
 	   int dst_offset,
-	   std::initializer_list<Literal>& lit_list);
+	   initializer_list<Literal>& lit_list);
 
   /// @brief キューブ(を表すビットベクタ)の比較を行う．
   /// @param[in] bv1 1つめのキューブを表すビットベクタ
@@ -741,7 +741,7 @@ SopMgr::cover_set(SopBitVect* dst_bv,
 inline
 void
 SopMgr::cover_set(SopBitVect* dst_bv,
-		  std::initializer_list<std::initializer_list<Literal>>& cube_list)
+		  initializer_list<initializer_list<Literal>>& cube_list)
 {
   SopBitVect* dst_bv0 = dst_bv;
   for ( auto lit_list: cube_list ) {
@@ -836,7 +836,7 @@ inline
 void
 SopMgr::cube_set(SopBitVect* dst_bv,
 		 int dst_offset,
-		 std::initializer_list<Literal>& lit_list)
+		 initializer_list<Literal>& lit_list)
 {
   cube_set(_calc_offset(dst_bv, dst_offset), lit_list);
 }

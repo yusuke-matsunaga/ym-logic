@@ -10,7 +10,6 @@
 
 
 #include "ym/TvFunc.h"
-#include "ym/HashBase.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -586,17 +585,6 @@ operator>>(IDO& s,
 	   TvFuncM& func);
 
 
-// TvFuncM をキーにしたハッシュ関数クラスの定義
-template <>
-struct HashFunc<TvFuncM>
-{
-  SizeType
-  operator()(const TvFuncM& f) const
-  {
-    return f.hash();
-  }
-};
-
 
 //////////////////////////////////////////////////////////////////////
 // インライン関数の定義
@@ -968,5 +956,32 @@ operator>>(IDO& s,
 }
 
 END_NAMESPACE_YM
+
+BEGIN_NAMESPACE_STD
+
+// TvFuncM の等価比較関数クラスの定義
+template <>
+struct equal_to<YM_NAMESPACE::TvFuncM>
+{
+  SizeType
+  operator()(const YM_NAMESPACE::TvFuncM& f1,
+	     const YM_NAMESPACE::TvFuncM& f2) const
+  {
+    return f1 == f2;
+  }
+};
+
+// TvFuncM をキーにしたハッシュ関数クラスの定義
+template <>
+struct hash<YM_NAMESPACE::TvFuncM>
+{
+  SizeType
+  operator()(const YM_NAMESPACE::TvFuncM& f) const
+  {
+    return f.hash();
+  }
+};
+
+END_NAMESPACE_STD
 
 #endif // YM_TVFUNCM_H

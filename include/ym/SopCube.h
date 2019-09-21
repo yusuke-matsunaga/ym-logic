@@ -11,7 +11,6 @@
 
 #include "ym/Sop.h"
 #include "ym/Literal.h"
-#include "ym/HashFunc.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -57,7 +56,7 @@ public:
   /// @param[in] variable_num 変数の数
   /// @param[in] lit_list キューブを表すリテラルのリスト初期化子
   SopCube(int variable_num,
-	  std::initializer_list<Literal>& lit_list);
+	  initializer_list<Literal>& lit_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
@@ -422,7 +421,7 @@ SopCube
 operator*(SopCube&& left,
 	  const SopCube& right)
 {
-  return SopCube(std::move(left)).operator*=(right);
+  return SopCube(move(left)).operator*=(right);
 }
 
 // @relates SopCube
@@ -436,7 +435,7 @@ SopCube
 operator*(const SopCube& left,
 	  SopCube&& right)
 {
-  return SopCube(std::move(right)).operator*=(left);
+  return SopCube(move(right)).operator*=(left);
 }
 
 // @relates SopCube
@@ -450,7 +449,7 @@ SopCube
 operator*(SopCube&& left,
 	  SopCube&& right)
 {
-  return SopCube(std::move(left)).operator*=(right);
+  return SopCube(move(left)).operator*=(right);
 }
 
 // @relates SopCube
@@ -464,7 +463,7 @@ SopCube
 operator*(SopCube&& left,
 	  Literal right)
 {
-  return SopCube(std::move(left)).operator*=(right);
+  return SopCube(move(left)).operator*=(right);
 }
 
 // @relates SopCube
@@ -492,7 +491,7 @@ operator*(Literal left,
 	  SopCube&& right)
 {
   // 交換則を用いる．
-  return SopCube(std::move(right)).operator*=(left);
+  return SopCube(move(right)).operator*=(left);
 }
 
 // @relates SopCube
@@ -505,7 +504,7 @@ SopCube
 operator/(SopCube&& left,
 	  const SopCube& right)
 {
-  return SopCube(std::move(left)).operator/=(right);
+  return SopCube(move(left)).operator/=(right);
 }
 
 // @relates SopCube
@@ -518,7 +517,7 @@ SopCube
 operator/(SopCube&& left,
 	  Literal right)
 {
-  return SopCube(std::move(left)).operator/=(right);
+  return SopCube(move(left)).operator/=(right);
 }
 
 // @relates SopCube
@@ -611,19 +610,19 @@ operator<<(ostream& s,
 
 END_NAMESPACE_YM_LOGIC
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_STD
 
 /// @breif SopCube をキーにしたハッシュ関数クラスの定義
 template <>
-struct HashFunc<SopCube>
+struct hash<YM_NAMESPACE::SopCube>
 {
   SizeType
-  operator()(const SopCube& cube) const
+  operator()(const YM_NAMESPACE::SopCube& cube) const
   {
     return cube.hash();
   }
 };
 
-END_NAMESPACE_YM
+END_NAMESPACE_STD
 
 #endif // YM_SOPCUBE_H

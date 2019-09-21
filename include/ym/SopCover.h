@@ -11,7 +11,6 @@
 
 #include "ym/Sop.h"
 #include "ym/Literal.h"
-#include "ym/HashFunc.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -63,7 +62,7 @@ public:
   ///
   /// * キューブの順番は変わる可能性がある．
   SopCover(int variable_num,
-	   std::initializer_list<std::initializer_list<Literal>>& cube_list);
+	   initializer_list<initializer_list<Literal>>& cube_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト
@@ -560,7 +559,7 @@ SopCover
 operator-(SopCover&& left,
 	  const SopCover& right)
 {
-  return SopCover(std::move(left)).operator-=(right);
+  return SopCover(move(left)).operator-=(right);
 }
 
 // @relates SopCover
@@ -572,7 +571,7 @@ SopCover
 operator-(SopCover&& left,
 	  const SopCube& right)
 {
-  return SopCover(std::move(left)).operator-=(right);
+  return SopCover(move(left)).operator-=(right);
 }
 
 // @relates SopCover, SopCube
@@ -584,7 +583,7 @@ SopCover
 operator*(SopCover&& left,
 	  const SopCube& right)
 {
-  return SopCover(std::move(left)).operator*=(right);
+  return SopCover(move(left)).operator*=(right);
 }
 
 // @relates SopCover
@@ -612,7 +611,7 @@ operator*(const SopCube& left,
 	  SopCover&& right)
 {
   // 交換則を用いる．
-  return SopCover(std::move(right)).operator*=(left);
+  return SopCover(move(right)).operator*=(left);
 }
 
 // @relates SopCover, Literal
@@ -624,7 +623,7 @@ SopCover
 operator*(SopCover&& left,
 	  Literal right)
 {
-  return SopCover(std::move(left)).operator*=(right);
+  return SopCover(move(left)).operator*=(right);
 }
 
 // @relates SopCover
@@ -652,7 +651,7 @@ operator*(Literal left,
 	  SopCover&& right)
 {
   // 交換則を用いる．
-  return SopCover(std::move(right)).operator*=(left);
+  return SopCover(move(right)).operator*=(left);
 }
 
 // @relates SopCover
@@ -664,7 +663,7 @@ SopCover
 operator/(SopCover&& left,
 	  const SopCover& right)
 {
-  return SopCover(std::move(left)).operator/=(right);
+  return SopCover(move(left)).operator/=(right);
 }
 
 // @relates SopCover, SopCube
@@ -676,7 +675,7 @@ SopCover
 operator/(SopCover&& left,
 	  const SopCube& right)
 {
-  return SopCover(std::move(left)).operator/=(right);
+  return SopCover(move(left)).operator/=(right);
 }
 
 // @relates SopCover, Literal
@@ -688,7 +687,7 @@ SopCover
 operator/(SopCover&& left,
 	  Literal right)
 {
-  return SopCover(std::move(left)).operator/=(right);
+  return SopCover(move(left)).operator/=(right);
 }
 
 // @relates SopCover
@@ -779,19 +778,19 @@ operator<<(ostream& s,
 
 END_NAMESPACE_YM_LOGIC
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_STD
 
 /// @breif SopCover をキーにしたハッシュ関数クラスの定義
 template <>
-struct HashFunc<SopCover>
+struct hash<YM_NAMESPACE::SopCover>
 {
   SizeType
-  operator()(const SopCover& cover) const
+  operator()(const YM_NAMESPACE::SopCover& cover) const
   {
     return cover.hash();
   }
 };
 
-END_NAMESPACE_YM
+END_NAMESPACE_STD
 
 #endif // YM_SOPCOVER_H

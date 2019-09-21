@@ -14,12 +14,9 @@
 BEGIN_NAMESPACE_YM_LOGIC
 
 // @brief コンストラクタ
-ExprWriter::ExprWriter()
+ExprWriter::ExprWriter() :
+  mOpStrArray{"~", "&", "|", "^"}
 {
-  mOpStrArray[0] = "~";
-  mOpStrArray[1] = "&";
-  mOpStrArray[2] = "|";
-  mOpStrArray[3] = "^";
 }
 
 // @brief デストラクタ
@@ -31,7 +28,7 @@ ExprWriter::~ExprWriter()
 ostream&
 ExprWriter::dump(ostream& s,
 		 const Expr& expr,
-		 const HashMap<VarId, string>& var_names) const
+		 const unordered_map<VarId, string>& var_names) const
 {
   dump_sub(s, expr, var_names);
   return s;
@@ -42,7 +39,7 @@ ostream&
 ExprWriter::dump(ostream& s,
 		 const Expr& expr) const
 {
-  dump_sub(s, expr, HashMap<VarId, string>());
+  dump_sub(s, expr, unordered_map<VarId, string>());
   return s;
 }
 
@@ -63,7 +60,7 @@ ExprWriter::dump_to_string(const Expr& expr) const
 // 登録されていなければデフォルトの表記を用いる．
 string
 ExprWriter::dump_to_string(const Expr& expr,
-			   const HashMap<VarId, string>& var_names) const
+			   const unordered_map<VarId, string>& var_names) const
 {
   ostringstream buf;
   dump(buf, expr, var_names);
@@ -124,7 +121,7 @@ operator<<(ostream& s,
 {
   ExprWriter writer;
   // 空の map を渡す
-  return writer.dump(s, expr, HashMap<VarId, string>());
+  return writer.dump(s, expr, unordered_map<VarId, string>());
 }
 
 
@@ -132,7 +129,7 @@ operator<<(ostream& s,
 void
 ExprWriter::dump_sub(ostream& s,
 		     const Expr& expr,
-		     const HashMap<VarId, string>& var_names) const
+		     const unordered_map<VarId, string>& var_names) const
 {
   if ( expr.is_zero() ) {
     s << "0";
@@ -145,8 +142,8 @@ ExprWriter::dump_sub(ostream& s,
       s << not_str();
     }
     VarId id = expr.varid();
-    string ans;
-    if ( var_names.find(id, ans) ) {
+    if ( var_names.count(id) > 0 ) {
+      auto ans = var_names.at(id);
       s << ans;
     }
     else {

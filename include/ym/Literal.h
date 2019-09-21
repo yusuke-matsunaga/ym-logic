@@ -11,7 +11,6 @@
 
 #include "ym_config.h"
 #include "ym/VarId.h"
-#include "ym/HashFunc.h"
 #include "ym/IDO.h"
 #include "ym/ODO.h"
 
@@ -240,18 +239,6 @@ operator<<(ODO& s,
 IDO&
 operator>>(IDO& s,
 	   Literal& lit);
-
-
-// Literal をキーにしたハッシュ関数クラス
-template <>
-struct HashFunc<Literal>
-{
-  SizeType
-  operator()(Literal lit) const
-  {
-    return lit.hash();
-  }
-};
 
 
 //////////////////////////////////////////////////////////////////////
@@ -524,16 +511,29 @@ END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_STD
 
+// Literal の等価比較オブジェクト
 template <>
-struct equal_to<nsYm::Literal>
+struct equal_to<YM_NAMESPACE::Literal>
 {
   bool
-  operator()(nsYm::Literal n1,
-	     nsYm::Literal n2) const
+  operator()(YM_NAMESPACE::Literal n1,
+	     YM_NAMESPACE::Literal n2) const
   {
     return n1 == n2;
   }
 };
+
+// Literal をキーにしたハッシュ関数クラス
+template <>
+struct hash<YM_NAMESPACE::Literal>
+{
+  SizeType
+  operator()(YM_NAMESPACE::Literal lit) const
+  {
+    return lit.hash();
+  }
+};
+
 
 END_NAMESPACE_STD
 

@@ -50,7 +50,7 @@ public:
   /// @param[in] variable_num 変数の数
   /// @param[in] lit_list リテラルのリスト
   LitSet(int variable_num,
-	    std::initializer_list<Literal>& lit_list);
+	 initializer_list<Literal>& lit_list);
 
   /// @brief コピーコンストラクタ
   /// @param[in] src コピー元のオブジェクト

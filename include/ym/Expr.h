@@ -11,7 +11,6 @@
 
 #include "ym/logic.h"
 #include "ym/Literal.h"
-#include "ym/HashMap.h"
 #include "ym/IDO.h"
 #include "ym/ODO.h"
 
@@ -272,7 +271,7 @@ public:
   ///
   /// 一度に複数の置き換えを行う
   Expr
-  compose(const HashMap<VarId, Expr>& comp_map) const;
+  compose(const unordered_map<VarId, Expr>& comp_map) const;
 
   /// @brief 複数変数の compose 演算
   /// @param[in] comp_list 置き換える変数と置き換える先の
@@ -291,7 +290,7 @@ public:
   ///
   /// varmap に登録されていない場合には不変とする．
   Expr
-  remap_var(const HashMap<VarId, VarId>& varmap) const;
+  remap_var(const unordered_map<VarId, VarId>& varmap) const;
 
   /// @brief 変数番号を再マップする．
   /// @param[in] varlist 置き換え元の変数番号と置き換え先の変数番号をペアとしたリスト

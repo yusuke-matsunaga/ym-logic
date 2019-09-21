@@ -11,7 +11,6 @@
 
 #include "ym/logic.h"
 #include "ym/VarId.h"
-#include "ym/HashMap.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -53,7 +52,7 @@ public:
   ostream&
   dump(ostream& s,
        const Expr& expr,
-       const HashMap<VarId, string>& var_names) const;
+       const unordered_map<VarId, string>& var_names) const;
 
   /// @brief 内容を文字列にする．
   /// @param[in] expr 文字列
@@ -67,7 +66,7 @@ public:
   /// 登録されていなければデフォルトの表記を用いる．
   string
   dump_to_string(const Expr& expr,
-		 const HashMap<VarId, string>& var_names) const;
+		 const unordered_map<VarId, string>& var_names) const;
 
 
 public:
@@ -114,7 +113,7 @@ private:
   void
   dump_sub(ostream& s,
 	   const Expr& expr,
-	   const HashMap<VarId, string>& var_names) const;
+	   const unordered_map<VarId, string>& var_names) const;
 
 
 private:

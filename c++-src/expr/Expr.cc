@@ -306,7 +306,7 @@ Expr::compose(VarId varid,
 
 // comp_map にしたがって複数のリテラルの置き換えを行う．
 Expr
-Expr::compose(const HashMap<VarId, Expr>& comp_map) const
+Expr::compose(const unordered_map<VarId, Expr>& comp_map) const
 {
   return Expr(ExprMgr::the_obj().compose(root(), comp_map));
 }
@@ -321,16 +321,16 @@ Expr::compose(const HashMap<VarId, Expr>& comp_map) const
 Expr
 Expr::compose(const vector<pair<VarId, Expr>>& comp_list) const
 {
-  HashMap<VarId, Expr> comp_map;
+  unordered_map<VarId, Expr> comp_map;
   for ( auto p: comp_list ) {
-    comp_map.add(p.first, p.second);
+    comp_map[p.first] = p.second;
   }
   return Expr(ExprMgr::the_obj().compose(root(), comp_map));
 }
 
 // 与えられた論理式のリテラル番号を再マップする．
 Expr
-Expr::remap_var(const HashMap<VarId, VarId>& varmap) const
+Expr::remap_var(const unordered_map<VarId, VarId>& varmap) const
 {
   return Expr(ExprMgr::the_obj().remap_var(root(), varmap));
 }
@@ -339,9 +339,9 @@ Expr::remap_var(const HashMap<VarId, VarId>& varmap) const
 Expr
 Expr::remap_var(const vector<pair<VarId, VarId>>& varlist) const
 {
-  HashMap<VarId, VarId> varmap;
+  unordered_map<VarId, VarId> varmap;
   for ( auto p: varlist ) {
-    varmap.add(p.first, p.second);
+    varmap[p.first] = p.second;
   }
   return Expr(ExprMgr::the_obj().remap_var(root(), varmap));
 }
