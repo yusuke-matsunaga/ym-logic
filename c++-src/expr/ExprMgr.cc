@@ -32,7 +32,6 @@ ExprMgr::the_obj()
 
 // @brief コンストラクタ
 ExprMgr::ExprMgr() :
-  mNodeAlloc(4096),
   mNodeNum(0),
   mMaxNodeNum(0),
   mStuckNodeNum(0)
@@ -594,60 +593,11 @@ ExprMgr::simplify(const ExprNode* node)
   return nullptr;
 }
 
-// @brief 使用されているメモリ量を返す．
-int
-ExprMgr::used_size()
-{
-  return mNodeAlloc.used_size();
-}
-
 // @brief 使用されているノード数を返す．
 int
 ExprMgr::node_num()
 {
   return mNodeNum;
-}
-
-// @brief used_size() の最大値を返す．
-int
-ExprMgr::max_used_size()
-{
-  return mNodeAlloc.max_used_size();
-}
-
-// @brief nodenum() の最大値を返す．
-int
-ExprMgr::max_node_num()
-{
-  return mMaxNodeNum;
-}
-
-// @brief 実際に確保したメモリ量を返す．
-int
-ExprMgr::allocated_size()
-{
-  return mNodeAlloc.allocated_size();
-}
-
-// @brief 実際に確保した回数を返す．
-int
-ExprMgr::allocated_count()
-{
-  return mNodeAlloc.allocated_count();
-}
-
-// @brief 内部状態を出力する．
-void
-ExprMgr::print_stats(ostream& s)
-{
-  s << "maximum used size: " << max_used_size() << endl
-    << "maximum node num:  " << max_node_num() << endl
-    << "current used size: " << used_size() << endl
-    << "current node num:  " << node_num()
-    << " ( " << mStuckNodeNum << " )" << endl
-    << "allocated size:    " << allocated_size() << endl
-    << "allocated count:   " << allocated_count() << endl
-    << endl;
 }
 
 // id 番めまでのリテラルノードを作る．
@@ -684,7 +634,7 @@ ExprMgr::alloc_node(ExprType type)
   }
 
   int req_size = calc_size(nc);
-  void* p = mNodeAlloc.get_memory(req_size);
+  void* p = new char[req_size];
   ExprNode* node = new (p) ExprNode;
   node->mRefType = static_cast<int>(type);
   node->mNc = nc;
@@ -700,14 +650,14 @@ void
 ExprMgr::free_node(ExprNode* node)
 {
   int n = node->child_num();
-  for (int i = 0; i < n; ++ i) {
+  for ( int i = 0; i < n; ++ i ) {
     node->child(i)->dec_ref();
   }
 
   -- mNodeNum;
 
-  int req_size = calc_size(n);
-  mNodeAlloc.put_memory(req_size, node);
+  char* p = reinterpret_cast<char*>(node);
+  delete [] p;
 }
 
 // ExprNode の入力数から必要なサイズを計算する．

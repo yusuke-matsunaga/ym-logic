@@ -14,8 +14,6 @@
 #include "ExprNode.h"
 #include "ExprNodePtr.h"
 
-#include "ym/FragAlloc.h"
-
 
 BEGIN_NAMESPACE_YM_LOGIC
 
@@ -250,9 +248,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
-
-  // ノード用のアロケーター
-  FragAlloc mNodeAlloc;
 
   // 唯一の定数0ノード
   ExprNodePtr mConst0;
