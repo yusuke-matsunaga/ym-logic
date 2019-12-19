@@ -3,7 +3,7 @@
 /// @brief NpnMap の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2010, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2010, 2014, 2019 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -22,16 +22,9 @@ const int debug_npn_map = 1;
 const int debug_npn_map = 0;
 #endif
 
-// 空のコンストラクタ
-NpnMap::NpnMap() :
-  mNiPol(0UL)
-{
-}
-
 // 入力数を指定したコンストラクタ
 // 恒等変換になる．
-NpnMap::NpnMap(int ni) :
-  mNiPol(0)
+NpnMap::NpnMap(int ni)
 {
   set_ni(ni, ni);
   for (int i = 0; i < ni; ++ i) {
@@ -45,17 +38,16 @@ NpnMap::NpnMap(int ni) :
 //
 // 内容は不定
 NpnMap::NpnMap(int ni,
-	       int ni2) :
-  mNiPol(0)
+	       int ni2)
 {
   set_ni(ni, ni2);
 }
 
 // コピーコンストラクタ
 NpnMap::NpnMap(const NpnMap& src) :
-  mNiPol(src.mNiPol)
+  mNiPol{src.mNiPol}
 {
-  for (int i = 0; i < input_num(); ++ i) {
+  for ( int i = 0; i < input_num(); ++ i ) {
     mImap[i] = src.mImap[i];
   }
 }
@@ -65,15 +57,10 @@ const NpnMap&
 NpnMap::operator=(const NpnMap& src)
 {
   mNiPol = src.mNiPol;
-  for (int i = 0; i < input_num(); ++ i) {
+  for ( int i = 0; i < input_num(); ++ i ) {
     mImap[i] = src.mImap[i];
   }
   return *this;
-}
-
-// デストラクタ
-NpnMap::~NpnMap()
-{
 }
 
 // 内容をクリアする．
@@ -93,7 +80,7 @@ void
 NpnMap::resize(int new_ni)
 {
   set_ni(new_ni, new_ni);
-  for (int i = 0; i < new_ni; ++ i) {
+  for ( int i = 0; i < new_ni; ++ i ) {
     mImap[i] = NpnVmap::invalid();
   }
 }
@@ -108,7 +95,7 @@ NpnMap::resize(int ni,
 	       int ni2)
 {
   set_ni(ni, ni2);
-  for (int i = 0; i < ni; ++ i) {
+  for ( int i = 0; i < ni; ++ i ) {
     mImap[i] = NpnVmap::invalid();
   }
 }
@@ -119,7 +106,7 @@ NpnMap::set_identity(int new_ni,
 		     bool oinv)
 {
   set_ni(new_ni, new_ni);
-  for (int i = 0; i < new_ni; ++ i) {
+  for ( int i = 0; i < new_ni; ++ i ) {
     mImap[i] = NpnVmap(VarId(i), false);
   }
   set_oinv(oinv);
@@ -158,7 +145,7 @@ NpnMap::operator==(const NpnMap& src) const
   if ( mNiPol != src.mNiPol ) {
     return false;
   }
-  for (int i = 0; i < input_num(); ++ i) {
+  for ( int i = 0; i < input_num(); ++ i ) {
     if ( mImap[i] != src.mImap[i] ) {
       return false;
     }
@@ -179,7 +166,7 @@ inverse(const NpnMap& src)
   int src_ni = src.input_num();
   int dst_ni = src.input_num2();
   NpnMap dst_map(dst_ni, src_ni);
-  for (int i = 0; i < src_ni; ++ i) {
+  for ( int i = 0; i < src_ni; ++ i ) {
     VarId src_var(i);
     NpnVmap imap = src.imap(src_var);
     if ( !imap.is_invalid() ) {
@@ -234,7 +221,7 @@ operator*(const NpnMap& src1,
 
   NpnMap dst_map(ni1, ni2_2);
   dst_map.set_oinv(src1.oinv() ^ src2.oinv());
-  for (int i1 = 0; i1 < ni1; ++ i1) {
+  for ( int i1 = 0; i1 < ni1; ++ i1 ) {
     VarId var1(i1);
     NpnVmap imap1 = src1.imap(var1);
     if ( imap1.is_invalid() ) {
@@ -304,41 +291,34 @@ operator<<(ostream& s,
 }
 
 // バイナリ出力
-ODO&
-operator<<(ODO& bos,
-	   const NpnMap& map)
+void NpnMap::dump(ostream& bos) const
 {
-  int ni = map.input_num();
-  int ni2 = map.input_num2();
+  int ni = input_num();
+  int ni2 = input_num2();
   bos << ni << ni2;
-  for (int i = 0; i < ni; ++ i) {
-    NpnVmap vmap = map.imap(VarId(i));
-    bos << vmap;
+  for ( int i = 0; i < ni; ++ i ) {
+    NpnVmap vmap = imap(VarId(i));
+    vmap.dump(bos);
   }
-  bos << map.oinv();
-
-  return bos;
+  bos << oinv();
 }
 
 // バイナリ入力
-IDO&
-operator>>(IDO& bis,
-	   NpnMap& map)
+void
+NpnMap::restore(istream& bis)
 {
   int ni;
   int ni2;
   bis >> ni >> ni2;
-  map.resize(ni, ni2);
-  for (int i = 0; i < ni; ++ i) {
+  resize(ni, ni2);
+  for ( int i = 0; i < ni; ++ i ) {
     NpnVmap vmap;
-    bis >> vmap;
-    map.set(VarId(i), vmap);
+    vmap.restore(bis);
+    set(VarId(i), vmap);
   }
   bool inv;
   bis >> inv;
-  map.set_oinv(inv);
-
-  return bis;
+  set_oinv(inv);
 }
 
 END_NAMESPACE_YM_LOGIC

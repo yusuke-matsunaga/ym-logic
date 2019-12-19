@@ -5,15 +5,13 @@
 /// @brief NpnMapM のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2016, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2016, 2017, 2018, 2019 Yusuke Matsunaga
 /// All rights reserved.
 
 
 #include "ym/logic.h"
 #include "ym/VarId.h"
 #include "ym/NpnVmap.h"
-#include "ym/IDO.h"
-#include "ym/ODO.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -21,9 +19,9 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 /// @class NpnMapM NpnMapM.h "ym/NpnMapM.h"
 /// @ingroup LogicGroup
-/// @brief NPN変換の情報を入れるクラス
+/// @brief 他出力のNPN変換の情報を入れるクラス
 ///
-/// @sa tNpnImap
+/// @sa NpnVmap
 //////////////////////////////////////////////////////////////////////
 class NpnMapM
 {
@@ -31,7 +29,7 @@ public:
 
   /// @brief 空のコンストラクタ．
   /// @note 内容は不定
-  NpnMapM();
+  NpnMapM() = default;
 
   /// @brief 入力数と出力数を指定したコンストラクタ
   /// @param[in] ni 入力数
@@ -160,6 +158,20 @@ public:
   operator==(const NpnMapM& src) const;
 
 
+public:
+  //////////////////////////////////////////////////////////////////////
+  // バイナリダンプ/リストア関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief バイナリストリームに出力する．
+  void
+  dump(ostream& s) const;
+
+  /// @brief バイナリストリームから読み込む．
+  void
+  restore(istream& s);
+
+
 private:
   //////////////////////////////////////////////////////////////////////
   // 内部で用いられる関数
@@ -176,13 +188,13 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  int mInputNum;
+  int mInputNum{0};
 
   // 出力数
-  int mOutputNum;
+  int mOutputNum{0};
 
   // 入力と出力のマッピング情報
-  NpnVmap* mMapArray;
+  NpnVmap* mMapArray{nullptr};
 
 };
 
@@ -217,24 +229,6 @@ operator*(const NpnMapM& src1,
 ostream&
 operator<<(ostream& s,
 	   const NpnMapM& map);
-
-/// @relates NpnMapM
-/// @brief バイナリ出力
-/// @param[in] s 出力ストリーム
-/// @param[in] map 変換マップ
-/// @return s
-ODO&
-operator<<(ODO& s,
-	   const NpnMapM& map);
-
-/// @relates NpnMapM
-/// @brief バイナリ入力
-/// @param[in] s 入力ストリーム
-/// @param[out] map 結果を格納する変数
-/// @return s
-IDO&
-operator>>(IDO& s,
-	   NpnMapM& map);
 
 
 //////////////////////////////////////////////////////////////////////

@@ -5,14 +5,12 @@
 /// @brief NpnVmap のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2016, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2016, 2017, 2019 Yusuke Matsunaga
 /// All rights reserved.
 
 
 #include "ym/logic.h"
 #include "ym/VarId.h"
-#include "ym/IDO.h"
-#include "ym/ODO.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -75,26 +73,18 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // フレンド関数 (public に意味はない)
+  // バイナリダンプ/リストア関数
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 内容をバイナリダンプする．
   /// @param[in] s 出力ストリーム
-  /// @param[in] vmap 対象のオブジェクト
-  /// @return s
-  friend
-  ODO&
-  operator<<(ODO& s,
-	     const NpnVmap& vmap);
+  void
+  dump(ostream& s) const;
 
   /// @brief バイナリ入力
   /// @param[in] s 入力ストリーム
-  /// @param[out] vmap 結果を格納する変数
-  /// @return s
-  friend
-  IDO&
-  operator>>(IDO& s,
-	     NpnVmap& vmap);
+  void
+  restore(istream& s);
 
 
 private:
@@ -116,7 +106,7 @@ private:
 // @note 内容は不定
 inline
 NpnVmap::NpnVmap() :
-  mPosPol(0xFF)
+  mPosPol{0xFF}
 {
 }
 
@@ -189,26 +179,20 @@ NpnVmap::operator!=(const NpnVmap& right) const
 
 // @brief 内容をバイナリダンプする．
 // @param[in] s 出力ストリーム
-// @param[in] vmap 対象のオブジェクト
-// @return s
 inline
-ODO&
-operator<<(ODO& s,
-	   const NpnVmap& vmap)
+void
+NpnVmap::dump(ostream& s) const
 {
-  return s << vmap.mPosPol;
+  s << mPosPol;
 }
 
 // @brief バイナリ入力
 // @param[in] s 入力ストリーム
-// @param[out] vmap 結果を格納する変数
-// @return s
 inline
-IDO&
-operator>>(IDO& s,
-	   NpnVmap& vmap)
+void
+NpnVmap::restore(istream& s)
 {
-  return s >> vmap.mPosPol;
+  s >> mPosPol;
 }
 
 END_NAMESPACE_YM_LOGIC

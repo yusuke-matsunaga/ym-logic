@@ -5,13 +5,11 @@
 /// @brief VarId の定義ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2016, 2017, 2018 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2016, 2017, 2018, 2019 Yusuke Matsunaga
 /// All rights reserved.
 
 
 #include "ym_config.h"
-#include "ym/IDO.h"
-#include "ym/ODO.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -41,7 +39,7 @@ public:
   /// @brief 空のコンストラクタ
   ///
   /// 不正な値( = VarId::illegal())になる．
-  VarId();
+  VarId() = default;
 
   /// @brief 値を指定したコンストラクタ
   /// @param[in] val 変数番号
@@ -52,7 +50,7 @@ public:
   VarId(int val);
 
   /// @brief デストラクタ
-  ~VarId();
+  ~VarId() = default;
 
 
 public:
@@ -87,11 +85,11 @@ public:
   /// @brief バイナリファイルに出力する．
   /// @param[in] s 出力先のストリーム
   void
-  store(ODO& s) const;
+  dump(ostream& s) const;
 
   /// @brief バイナリファイルを読み込む．
   void
-  restore(IDO& s);
+  restore(istream& s);
 
 
 private:
@@ -100,7 +98,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 実際の値
-  int mVal;
+  int mVal{-1};
 
 };
 
@@ -148,22 +146,6 @@ ostream&
 operator<<(ostream& s,
 	   const VarId& varid);
 
-/// @relates VarId
-/// @brief バイナリファイルの出力
-/// @param[in] s 出力先のストリーム
-/// @param[in] varid 対象の変数
-ODO&
-operator<<(ODO& s,
-	   const VarId& varid);
-
-/// @relates VarId
-/// @brief バイナリファイルの読み込み
-/// @param[in] s 入力元のストリーム
-/// @param[out] varid 対象の変数
-IDO&
-operator>>(IDO& s,
-	   VarId& varid);
-
 
 //////////////////////////////////////////////////////////////////////
 // インライン関数の定義
@@ -174,27 +156,13 @@ inline
 VarId
 VarId::illegal()
 {
-  return VarId(-1);
-}
-
-// @brief 空のコンストラクタ
-inline
-VarId::VarId() :
-  mVal(-1)
-{
-  // この値は kVarIdIllegal となる．
+  return VarId();
 }
 
 // @brief 値を指定したコンストラクタ
 inline
 VarId::VarId(int val) :
-  mVal(val)
-{
-}
-
-// @brief デストラクタ
-inline
-VarId::~VarId()
+  mVal{val}
 {
 }
 
@@ -297,7 +265,7 @@ operator>=(const VarId& left,
 // @param[in] s 出力先のストリーム
 inline
 void
-VarId::store(ODO& s) const
+VarId::dump(ostream& s) const
 {
   s << mVal;
 }
@@ -305,7 +273,7 @@ VarId::store(ODO& s) const
 // @brief バイナリファイルを読み込む．
 inline
 void
-VarId::restore(IDO& s)
+VarId::restore(istream& s)
 {
   s >> mVal;
 }
@@ -328,32 +296,6 @@ operator<<(ostream& s,
   return s;
 }
 
-// @relates VarId
-// @brief バイナリファイルの出力
-// @param[in] s 出力先のストリーム
-// @param[in] varid 対象の変数
-inline
-ODO&
-operator<<(ODO& s,
-	   const VarId& varid)
-{
-  varid.store(s);
-  return s;
-}
-
-// @relates Varid
-// @brief バイナリファイルの読み込み
-// @param[in] s 入力元のストリーム
-// @param[out] varid 対象の変数
-inline
-IDO&
-operator>>(IDO& s,
-	   VarId& varid)
-{
-  varid.restore(s);
-  return s;
-}
-
 END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_STD
@@ -369,6 +311,7 @@ struct equal_to<YM_NAMESPACE::VarId>
     return n1 == n2;
   }
 };
+
 
 //////////////////////////////////////////////////////////////////////
 // hash<VarId> の特殊化

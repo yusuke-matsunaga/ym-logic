@@ -5,7 +5,7 @@
 /// @brief NpnMap のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2016, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2016, 2017, 2019 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -13,8 +13,6 @@
 #include "ym/VarId.h"
 #include "ym/NpnVmap.h"
 #include "ym/TvFunc.h"
-#include "ym/IDO.h"
-#include "ym/ODO.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -48,13 +46,13 @@ public:
   /// @brief 空のコンストラクタ．
   ///
   /// 内容は不定
-  NpnMap();
+  NpnMap() = default;
 
   /// @brief 入力数を指定したコンストラクタ
   /// @param[in] ni 入力数
   ///
   /// 定義域と値域のサイズは同じになる．
-  /// 内容は不定
+  /// 恒等変換になる．
   explicit
   NpnMap(int ni);
 
@@ -77,7 +75,7 @@ public:
   operator=(const NpnMap& src);
 
   /// @brief デストラクタ
-  ~NpnMap();
+  ~NpnMap() = default;
 
 
 public:
@@ -179,6 +177,20 @@ public:
   operator==(const NpnMap& src) const;
 
 
+public:
+  //////////////////////////////////////////////////////////////////////
+  // バイナリダンプ/リストア関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief バイナリストリームに出力する．
+  void
+  dump(ostream& s) const;
+
+  /// @brief バイナリストリームから読み込む．
+  void
+  restore(istream& s);
+
+
 private:
   //////////////////////////////////////////////////////////////////////
   // 内部で用いられる下請け関数
@@ -200,7 +212,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数(8bit x 2) + 出力の極性
-  ymuint mNiPol;
+  ymuint mNiPol{0};
 
   // 入力のマッピング情報
   NpnVmap mImap[TvFunc::kMaxNi];
@@ -248,24 +260,6 @@ operator!=(const NpnMap& src1,
 ostream&
 operator<<(ostream& s,
 	   const NpnMap& map);
-
-/// @relates NpnMap
-/// @brief バイナリ出力
-/// @param[in] s 出力ストリーム
-/// @param[in] map 変換マップ
-/// @return s
-ODO&
-operator<<(ODO& s,
-	   const NpnMap& map);
-
-/// @relates NpnMap
-/// @brief バイナリ入力
-/// @param[in] s 入力ストリーム
-/// @param[out] map 結果を格納する変数
-/// @return s
-IDO&
-operator>>(IDO& s,
-	   NpnMap& map);
 
 
 //////////////////////////////////////////////////////////////////////

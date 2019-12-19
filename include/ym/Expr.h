@@ -11,8 +11,6 @@
 
 #include "ym/logic.h"
 #include "ym/Literal.h"
-#include "ym/IDO.h"
-#include "ym/ODO.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -516,45 +514,18 @@ public:
 
 
 public:
-
   //////////////////////////////////////////////////////////////////////
-  /// @name 内部状態を得るクラスメソッド
+  /// @name バイナリダンプ/リストア関数
   /// @{
+  //////////////////////////////////////////////////////////////////////
 
-  /// @brief 使用されているメモリ量を返す．
-  static
-  int
-  used_size();
-
-  /// @brief 現在使用中のノード数を返す．
-  static
-  int
-  node_num();
-
-  /// @brief used_size() の最大値を返す．
-  static
-  int
-  max_used_size();
-
-  /// @brief nodenum() の最大値を返す．
-  static
-  int
-  max_node_num();
-
-  /// @brief 実際に確保したメモリ量を返す．
-  static
-  int
-  allocated_size();
-
-  /// @brief 実際に確保した回数を返す．
-  static
-  int
-  allocated_count();
-
-  /// @brief 内部状態を出力する．
-  static
+  /// @brief バイナリストリームに出力する．
   void
-  print_stats(ostream& s);
+  dump(ostream& s) const;
+
+  /// @brief バイナリストリームから読み込む．
+  void
+  restore(istream& s);
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -676,24 +647,6 @@ to_string(const Expr& expr);
 ostream&
 operator<<(ostream& s,
 	   const Expr& expr);
-
-/// @relates Expr
-/// @brief 論理式の内容のバイナリ出力
-/// @param[in] s 出力ストリーム
-/// @param[in] expr 論理式
-/// @return s
-ODO&
-operator<<(ODO& s,
-	   const Expr& expr);
-
-/// @relates Expr
-/// @brief 論理式の内容のバイナリ入力
-/// @param[in] s 入力ストリーム
-/// @param[out] expr 論理式
-/// @return s
-IDO&
-operator>>(IDO& s,
-	   Expr& expr);
 
 
 //////////////////////////////////////////////////////////////////////

@@ -17,34 +17,19 @@ BEGIN_NAMESPACE_YM_LOGIC
 // クラス NpnMapM
 //////////////////////////////////////////////////////////////////////
 
-// @brief 空のコンストラクタ．
-// @note 内容は不定
-NpnMapM::NpnMapM() :
-  mInputNum(0),
-  mOutputNum(0),
-  mMapArray(nullptr)
-{
-}
-
 // @brief 入力数と出力数を指定したコンストラクタ
 // @param[in] ni 入力数
 // @param[in] no 出力数
 // @note 各変数の変換内容は不正な値になっている．
 NpnMapM::NpnMapM(int ni,
-		 int no) :
-  mInputNum(0),
-  mOutputNum(0),
-  mMapArray(nullptr)
+		 int no)
 {
   resize(ni, no);
 }
 
 // @brief コピーコンストラクタ
 // @param[in] src コピー元のオブジェクト
-NpnMapM::NpnMapM(const NpnMapM& src) :
-  mInputNum(0),
-  mOutputNum(0),
-  mMapArray(nullptr)
+NpnMapM::NpnMapM(const NpnMapM& src)
 {
   copy(src);
 }
@@ -76,10 +61,7 @@ NpnMapM::copy(const NpnMapM& src)
 
 // @brief NpnMap からの変換コンストラクタ
 // @note 出力数が1となる．
-NpnMapM::NpnMapM(const NpnMap& src) :
-  mInputNum(0),
-  mOutputNum(0),
-  mMapArray(nullptr)
+NpnMapM::NpnMapM(const NpnMap& src)
 {
   resize(src.input_num(), 1);
   for (int i = 0; i < mInputNum; ++ i) {
@@ -333,51 +315,46 @@ operator<<(ostream& s,
 }
 
 // バイナリ出力
-ODO&
-operator<<(ODO& bos,
-	   const NpnMapM& map)
+void
+NpnMapM::dump(ostream& bos) const
 {
-  int ni = map.input_num();
+  int ni = input_num();
   bos << ni;
 
-  int no = map.output_num();
+  int no = output_num();
   bos << no;
 
-  for (int i = 0; i < ni; ++ i) {
-    NpnVmap vmap = map.imap(VarId(i));
-    bos << vmap;
+  for ( int i = 0; i < ni; ++ i ) {
+    NpnVmap vmap = imap(VarId(i));
+    vmap.dump(bos);
   }
 
-  for (int i = 0; i < no; ++ i) {
-    NpnVmap vmap = map.omap(VarId(i));
-    bos << vmap;
+  for ( int i = 0; i < no; ++ i ) {
+    NpnVmap vmap = omap(VarId(i));
+    vmap.dump(bos);
   }
-
-  return bos;
 }
 
 // バイナリ入力
-IDO&
-operator>>(IDO& bis,
-	   NpnMapM& map)
+void
+NpnMapM::restore(istream& bis)
 {
   int ni;
   int no;
   bis >> ni >> no;
-  map.resize(ni, no);
+  resize(ni, no);
 
-  for (int i = 0; i < ni; ++ i) {
+  for ( int i = 0; i < ni; ++ i ) {
     NpnVmap vmap;
-    bis >> vmap;
-    map.set_imap(VarId(i), vmap);
+    vmap.restore(bis);
+    set_imap(VarId(i), vmap);
   }
 
   for (int i = 0; i < no; ++ i) {
     NpnVmap vmap;
-    bis >> vmap;
-    map.set_omap(VarId(i), vmap);
+    vmap.restore(bis);
+    set_omap(VarId(i), vmap);
   }
-
-  return bis;
 }
+
 END_NAMESPACE_YM_LOGIC

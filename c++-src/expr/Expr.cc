@@ -587,62 +587,13 @@ Expr::sop_litnum(VarId varid,
   return l.nl();
 }
 
-// @brief 使用されているメモリ量を返す．
-int
-Expr::used_size()
-{
-  return ExprMgr::the_obj().used_size();
-}
-
-// 現在使用中のノード数を返す．
-int
-Expr::node_num()
-{
-  return ExprMgr::the_obj().node_num();
-}
-
-// @brief used_size() の最大値を返す．
-int
-Expr::max_used_size()
-{
-  return ExprMgr::the_obj().max_used_size();
-}
-
-// @brief nodenum() の最大値を返す．
-int
-Expr::max_node_num()
-{
-  return ExprMgr::the_obj().max_node_num();
-}
-
-// @brief 実際に確保したメモリ量を返す．
-int
-Expr::allocated_size()
-{
-  return ExprMgr::the_obj().allocated_size();
-}
-
-// @brief 実際に確保した回数を返す．
-int
-Expr::allocated_count()
-{
-  return ExprMgr::the_obj().allocated_count();
-}
-
-// @brief 内部状態を出力する．
-void
-Expr::print_stats(ostream& s)
-{
-  ExprMgr::the_obj().print_stats(s);
-}
-
 
 BEGIN_NONAMESPACE
 
 // 論理式をバイナリダンプする．
 void
-write_expr(ODO& s,
-	   const Expr& expr)
+dump_expr(ostream& s,
+	  const Expr& expr)
 {
   if ( expr.is_zero() ) {
     s << static_cast<ymuint8>(0);
@@ -653,13 +604,13 @@ write_expr(ODO& s,
     return;
   }
   if ( expr.is_posi_literal() ) {
-    s << static_cast<ymuint8>(2)
-      << expr.varid();
+    s << static_cast<ymuint8>(2);
+    expr.varid().dump(s);
     return;
   }
   if ( expr.is_nega_literal() ) {
-    s << static_cast<ymuint8>(3)
-      << expr.varid();
+    s << static_cast<ymuint8>(3);
+    expr.varid().dump(s);
     return;
   }
 
@@ -682,13 +633,13 @@ write_expr(ODO& s,
   s << type
     << nc;
   for ( int i = 0; i < nc; ++ i ) {
-    write_expr(s, expr.child(i));
+    dump_expr(s, expr.child(i));
   }
 }
 
-// バイナリストリームから論理式を作る．
+// ストリームから論理式を作る．
 Expr
-read_expr(IDO& s)
+read_expr(istream& s)
 {
   ymuint8 type;
   s >> type;
@@ -702,14 +653,14 @@ read_expr(IDO& s)
   case 2:
     {
       VarId var;
-      s >> var;
+      var.restore(s);
       return Expr::posi_literal(var);
     }
 
   case 3:
     {
       VarId var;
-      s >> var;
+      var.restore(s);
       return Expr::nega_literal(var);
     }
   }
@@ -753,30 +704,18 @@ to_string(const Expr& expr)
   return os.str();
 }
 
-// @relates Expr
-// @brief 論理式の内容のバイナリ出力
-// @param[in] s 出力ストリーム
-// @param[in] expr 論理式
-// @return s
-ODO&
-operator<<(ODO& s,
-	   const Expr& expr)
+// @brief バイナリストリームに出力する．
+void
+Expr::dump(ostream& s) const
 {
-  write_expr(s, expr);
-  return s;
+  dump_expr(s, *this);
 }
 
-// @relates Expr
-// @brief 論理式の内容のバイナリ入力
-// @param[in] s 入力ストリーム
-// @param[out] expr 論理式
-// @return s
-IDO&
-operator>>(IDO& s,
-	   Expr& expr)
+// @brief バイナリストリームから読み込む．
+void
+Expr::restore(istream& s)
 {
-  expr = read_expr(s);
-  return s;
+  *this = read_expr(s);
 }
 
 END_NAMESPACE_YM_LOGIC
