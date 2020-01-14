@@ -12,8 +12,6 @@
 #include "ym/logic.h"
 #include "ym/VarId.h"
 #include "ym/Literal.h"
-#include "ym/IDO.h"
-#include "ym/ODO.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -327,18 +325,18 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // IDO/ODO 用の関数
+  // バイナリ入出力用の関数
   //////////////////////////////////////////////////////////////////////
 
   /// @brief バイナリファイルの書き出し
   /// @param[in] s 出力先のストリーム
   void
-  dump(ODO& s) const;
+  dump(ostream& s) const;
 
   /// @brief バイナリファイルの読み込み
   /// @param[in] s 入力元のストリーム
   void
-  restore(IDO& s);
+  restore(istream& s);
 
 
 public:
@@ -670,22 +668,6 @@ operator&&(const TvFunc& left,
 ostream&
 operator<<(ostream& s,
 	   const TvFunc& func);
-
-/// @brief バイナリ出力
-/// @param[in] s 出力ストリーム
-/// @param[in] func 関数
-/// @return s
-ODO&
-operator<<(ODO& s,
-	   const TvFunc& func);
-
-/// @brief バイナリ入力
-/// @param[in] s 入力ストリーム
-/// @param[out] func 関数
-/// @return s
-IDO&
-operator>>(IDO& s,
-	   TvFunc& func);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -1072,32 +1054,6 @@ operator<<(ostream& s,
 	   const TvFunc& func)
 {
   func.print(s, 2);
-  return s;
-}
-
-// @brief バイナリ出力
-// @param[in] s 出力ストリーム
-// @param[in] func 関数
-// @return s
-inline
-ODO&
-operator<<(ODO& s,
-	   const TvFunc& func)
-{
-  func.dump(s);
-  return s;
-}
-
-// @brief バイナリ入力
-// @param[in] s 入力ストリーム
-// @param[out] func 関数
-// @return s
-inline
-IDO&
-operator>>(IDO& s,
-	   TvFunc& func)
-{
-  func.restore(s);
   return s;
 }
 

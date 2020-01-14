@@ -11,8 +11,6 @@
 
 #include "ym_config.h"
 #include "ym/VarId.h"
-#include "ym/IDO.h"
-#include "ym/ODO.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -127,12 +125,12 @@ public:
   /// @brief バイナリファイルに出力する．
   /// @param[in] s 出力先のストリーム
   void
-  store(ODO& s) const;
+  store(ostream& s) const;
 
   /// @brief バイナリファイルから読み込む．
   /// @param[in] s 入力元のストリーム
   void
-  restore(IDO& s);
+  restore(istream& s);
 
 
 private:
@@ -221,24 +219,6 @@ operator>=(Literal lit1,
 ostream&
 operator<<(ostream& s,
 	   const Literal& lit);
-
-/// @relates Literal
-/// @brief Literal の内容をバイナリファイルに出力する関数
-/// @param[in] s 出力先のストリーム
-/// @param[in] lit 対象のリテラル
-/// @return s
-ODO&
-operator<<(ODO& s,
-	   const Literal& lit);
-
-/// @relates Literal
-/// @brief Literal の内容をバイナリファイルから読み込む関数
-/// @param[in] s 入力元のストリーム
-/// @param[out] lit 対象のリテラル
-/// @return s
-IDO&
-operator>>(IDO& s,
-	   Literal& lit);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -361,18 +341,18 @@ Literal::make_negative() const
 // @param[in] s 出力先のストリーム
 inline
 void
-Literal::store(ODO& s) const
+Literal::store(ostream& s) const
 {
-  s << mBody;
+  s.write(reinterpret_cast<const char*>(&mBody), sizeof(mBody));
 }
 
 // @brief バイナリファイルから読み込む．
 // @param[in] s 入力元のストリーム
 inline
 void
-Literal::restore(IDO& s)
+Literal::restore(istream& s)
 {
-  s >> mBody;
+  s.read(reinterpret_cast<char*>(&mBody), sizeof(mBody));
 }
 
 // @brief 比較関数
@@ -444,32 +424,6 @@ operator>=(Literal lit1,
 	   Literal lit2)
 {
   return !operator<(lit1, lit2);
-}
-
-// @brief Literal の内容をバイナリファイルに出力する関数
-// @param[in] s 出力先のストリーム
-// @param[in] lit 対象のリテラル
-// @return s
-inline
-ODO&
-operator<<(ODO& s,
-	   const Literal& lit)
-{
-  lit.store(s);
-  return s;
-}
-
-// @brief Literal の内容をバイナリファイルから読み込む関数
-// @param[in] s 入力元のストリーム
-// @param[out] lit 対象のリテラル
-// @return s
-inline
-IDO&
-operator>>(IDO& s,
-	   Literal& lit)
-{
-  lit.restore(s);
-  return s;
 }
 
 // ハッシュ用の関数

@@ -674,29 +674,25 @@ TvFunc::print(ostream& s,
 // @brief バイナリファイルの書き出し
 // @param[in] s 出力先のストリーム
 void
-TvFunc::dump(ODO& s) const
+TvFunc::dump(ostream& s) const
 {
-  s << mInputNum;
-  for ( int b: Range(mBlockNum) ) {
-    s << mVector[b];
-  }
+  s.write(reinterpret_cast<const char*>(&mInputNum), sizeof(mInputNum));
+  s.write(reinterpret_cast<const char*>(mVector), sizeof(WordType) * mBlockNum);
 }
 
 // @brief バイナリファイルの読み込み
 // @param[in] s 入力元のストリーム
 void
-TvFunc::restore(IDO& s)
+TvFunc::restore(istream& s)
 {
-  s >> mInputNum;
+  s.read(reinterpret_cast<char*>(&mInputNum), sizeof(mInputNum));
   int nblk = nblock(mInputNum);
   if ( mBlockNum != nblk ) {
     delete [] mVector;
     mBlockNum = nblk;
     mVector = new TvFunc::WordType[mBlockNum];
   }
-  for ( int b: Range(mBlockNum) ) {
-    s >> mVector[b];
-  }
+  s.read(reinterpret_cast<char*>(mVector), sizeof(WordType) * mBlockNum);
 }
 
 // @brief コファクターマスクを得る．

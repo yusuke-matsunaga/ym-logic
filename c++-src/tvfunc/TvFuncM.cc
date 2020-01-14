@@ -695,37 +695,28 @@ TvFuncM::print(ostream& s,
 // @brief バイナリファイルの書き出し
 // @param[in] s 出力先のストリーム
 void
-TvFuncM::dump(ODO& s) const
+TvFuncM::dump(ostream& s) const
 {
-  s << mInputNum
-    << mOutputNum
-    << mBlockNum1
-    << mBlockNum;
-
-  for ( int b: Range(mBlockNum) ) {
-    s << mVector[b];
-  }
+  s.write(reinterpret_cast<const char*>(&mInputNum), sizeof(mInputNum));
+  s.write(reinterpret_cast<const char*>(&mOutputNum), sizeof(mOutputNum));
+  s.write(reinterpret_cast<const char*>(mVector), sizeof(WordType) * mBlockNum);
 }
 
 // @brief バイナリファイルの読み込み
 // @param[in] s 入力元のストリーム
 void
-TvFuncM::restore(IDO& s)
+TvFuncM::restore(istream& s)
 {
-  int nblk;
-  s >> mInputNum
-    >> mOutputNum
-    >> mBlockNum1
-    >> nblk;
-
+  s.read(reinterpret_cast<char*>(&mInputNum), sizeof(mInputNum));
+  s.read(reinterpret_cast<char*>(&mOutputNum), sizeof(mOutputNum));
+  mBlockNum1 = nblock(mInputNum);
+  int nblk = mBlockNum1 * mOutputNum;
   if ( mBlockNum != nblk ) {
     delete [] mVector;
     mBlockNum = nblk;
     mVector = new TvFuncM::WordType[mBlockNum];
   }
-  for ( int b: Range(mBlockNum) ) {
-    s >> mVector[b];
-  }
+  s.read(reinterpret_cast<char*>(mVector), sizeof(WordType) * mBlockNum);
 }
 
 END_NAMESPACE_YM
