@@ -66,14 +66,14 @@ cdef extern from "ym/Expr.h" namespace "nsYm::nsLogic" :
         bool is_simple_xor()
         bool is_sop()
 
-        int litnum()
-        int litnum(VarId)
-        int litnum(VarId, bool)
+        int literal_num()
+        int literal_num(VarId)
+        int literal_num(VarId, bool)
 
         int input_size()
-        int sop_cubenum()
-        int sop_litnum()
-        int sop_litnum(VarId)
-        int sop_litnum(VarId, bool)
+        int sop_cube_num()
+        int sop_literal_num()
+        int sop_literal_num(VarId)
+        int sop_literal_num(VarId, bool)
 
     string to_string(const Expr&)

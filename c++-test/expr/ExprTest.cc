@@ -37,9 +37,9 @@ TEST(ExprTest, empty_constr)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 0, expr.litnum() );
+  EXPECT_EQ( 0, expr.literal_num() );
   EXPECT_EQ( 0, expr.input_size() );
-  EXPECT_EQ( 0, expr.sop_litnum() );
+  EXPECT_EQ( 0, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, zero)
@@ -65,9 +65,9 @@ TEST(ExprTest, zero)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 0, expr.litnum() );
+  EXPECT_EQ( 0, expr.literal_num() );
   EXPECT_EQ( 0, expr.input_size() );
-  EXPECT_EQ( 0, expr.sop_litnum() );
+  EXPECT_EQ( 0, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, one)
@@ -93,9 +93,9 @@ TEST(ExprTest, one)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 0, expr.litnum() );
+  EXPECT_EQ( 0, expr.literal_num() );
   EXPECT_EQ( 0, expr.input_size() );
-  EXPECT_EQ( 0, expr.sop_litnum() );
+  EXPECT_EQ( 0, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, literal1)
@@ -122,12 +122,12 @@ TEST(ExprTest, literal1)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 1, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
   EXPECT_EQ( 1, expr.input_size() );
-  EXPECT_EQ( 1, expr.sop_litnum() );
+  EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, literal2)
@@ -155,12 +155,12 @@ TEST(ExprTest, literal2)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 1, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), true) );
   EXPECT_EQ( 1, expr.input_size() );
-  EXPECT_EQ( 1, expr.sop_litnum() );
+  EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, posi_literal)
@@ -187,12 +187,12 @@ TEST(ExprTest, posi_literal)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 1, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
   EXPECT_EQ( 1, expr.input_size() );
-  EXPECT_EQ( 1, expr.sop_litnum() );
+  EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, nega_literal)
@@ -219,12 +219,12 @@ TEST(ExprTest, nega_literal)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 1, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), true) );
   EXPECT_EQ( 1, expr.input_size() );
-  EXPECT_EQ( 1, expr.sop_litnum() );
+  EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, and1)
@@ -263,15 +263,15 @@ TEST(ExprTest, and1)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, and2)
@@ -310,15 +310,15 @@ TEST(ExprTest, and2)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, and3)
@@ -358,15 +358,15 @@ TEST(ExprTest, and3)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, and4)
@@ -406,15 +406,15 @@ TEST(ExprTest, and4)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, and5)
@@ -454,15 +454,15 @@ TEST(ExprTest, and5)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, or1)
@@ -501,15 +501,15 @@ TEST(ExprTest, or1)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, or2)
@@ -548,15 +548,15 @@ TEST(ExprTest, or2)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, or3)
@@ -596,15 +596,15 @@ TEST(ExprTest, or3)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, or4)
@@ -644,15 +644,15 @@ TEST(ExprTest, or4)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, or5)
@@ -692,15 +692,15 @@ TEST(ExprTest, or5)
   EXPECT_FALSE( expr.is_simple_xor() );
   EXPECT_TRUE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 2, expr.sop_litnum() );
+  EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, xor1)
@@ -739,15 +739,15 @@ TEST(ExprTest, xor1)
   EXPECT_TRUE( expr.is_simple_xor() );
   EXPECT_FALSE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 4, expr.sop_litnum() );
+  EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, xor2)
@@ -786,15 +786,15 @@ TEST(ExprTest, xor2)
   EXPECT_TRUE( expr.is_simple_xor() );
   EXPECT_FALSE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 4, expr.sop_litnum() );
+  EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, xor3)
@@ -834,15 +834,15 @@ TEST(ExprTest, xor3)
   EXPECT_TRUE( expr.is_simple_xor() );
   EXPECT_FALSE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 4, expr.sop_litnum() );
+  EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, xor4)
@@ -882,15 +882,15 @@ TEST(ExprTest, xor4)
   EXPECT_TRUE( expr.is_simple_xor() );
   EXPECT_FALSE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 4, expr.sop_litnum() );
+  EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, xor5)
@@ -930,15 +930,15 @@ TEST(ExprTest, xor5)
   EXPECT_TRUE( expr.is_simple_xor() );
   EXPECT_FALSE( expr.is_sop() );
 
-  EXPECT_EQ( 2, expr.litnum() );
-  EXPECT_EQ( 1, expr.litnum(VarId(0)) );
-  EXPECT_EQ( 1, expr.litnum(VarId(0), false) );
-  EXPECT_EQ( 0, expr.litnum(VarId(0), true) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1)) );
-  EXPECT_EQ( 0, expr.litnum(VarId(1), false) );
-  EXPECT_EQ( 1, expr.litnum(VarId(1), true) );
+  EXPECT_EQ( 2, expr.literal_num() );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0)) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(0), false) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1)) );
+  EXPECT_EQ( 0, expr.literal_num(VarId(1), false) );
+  EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
-  EXPECT_EQ( 4, expr.sop_litnum() );
+  EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
 TEST(ExprTest, inv1)

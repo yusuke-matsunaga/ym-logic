@@ -526,22 +526,22 @@ Expr::is_sop() const
 
 // リテラル数を得る．
 int
-Expr::litnum() const
+Expr::literal_num() const
 {
   return root()->litnum();
 }
 
 // 特定の変数のリテラル数を得る．
 int
-Expr::litnum(VarId varid) const
+Expr::literal_num(VarId varid) const
 {
   return root()->litnum(varid);
 }
 
 // 特定の変数の特定の極性のリテラル数を得る．
 int
-Expr::litnum(VarId varid,
-	     bool inv) const
+Expr::literal_num(VarId varid,
+		  bool inv) const
 {
   return root()->litnum(varid, inv);
 }
@@ -555,7 +555,7 @@ Expr::input_size() const
 
 // SOP形式に展開したときのキューブ数を得る．
 int
-Expr::sop_cubenum() const
+Expr::sop_cube_num() const
 {
   SopLit l = root()->soplit(false);
   return l.np();
@@ -563,7 +563,7 @@ Expr::sop_cubenum() const
 
 // SOP形式に展開した時のリテラル数を見積もる．
 int
-Expr::sop_litnum() const
+Expr::sop_literal_num() const
 {
   SopLit l = root()->soplit(false);
   return l.nl();
@@ -571,7 +571,7 @@ Expr::sop_litnum() const
 
 // SOP形式に展開した時の varid 番めの変数のリテラルの出現回数を得る．
 int
-Expr::sop_litnum(VarId varid) const
+Expr::sop_literal_num(VarId varid) const
 {
   SopLit l = root()->soplit(false, varid);
   return l.nl();
@@ -580,8 +580,8 @@ Expr::sop_litnum(VarId varid) const
 // SOP形式に展開した時の varid 番めの変数の極性が pol のリテラル
 // の出現回数を得る．
 int
-Expr::sop_litnum(VarId varid,
-		 bool inv) const
+Expr::sop_literal_num(VarId varid,
+		      bool inv) const
 {
   SopLit l = root()->soplit(false, varid, inv);
   return l.nl();

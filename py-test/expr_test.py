@@ -50,9 +50,9 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_or() )
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
-        self.assertEqual( 0, expr.litnum )
+        self.assertEqual( 0, expr.literal_num )
         self.assertEqual( 0, expr.input_size )
-        self.assertEqual( 0, expr.sop_litnum )
+        self.assertEqual( 0, expr.sop_literal_num )
 
     def test_zero(self) :
         expr = Expr.zero()
@@ -73,9 +73,9 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_or() )
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
-        self.assertEqual( 0, expr.litnum )
+        self.assertEqual( 0, expr.literal_num )
         self.assertEqual( 0, expr.input_size )
-        self.assertEqual( 0, expr.sop_litnum )
+        self.assertEqual( 0, expr.sop_literal_num )
 
     def test_one(self) :
         expr = Expr.one()
@@ -96,9 +96,9 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_or() )
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
-        self.assertEqual( 0, expr.litnum )
+        self.assertEqual( 0, expr.literal_num )
         self.assertEqual( 0, expr.input_size )
-        self.assertEqual( 0, expr.sop_litnum )
+        self.assertEqual( 0, expr.sop_literal_num )
 
     def test_literal1(self) :
         var = VarId(0)
@@ -121,9 +121,9 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_or() )
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
-        self.assertEqual( 1, expr.litnum )
+        self.assertEqual( 1, expr.literal_num )
         self.assertEqual( 1, expr.input_size )
-        self.assertEqual( 1, expr.sop_litnum )
+        self.assertEqual( 1, expr.sop_literal_num )
 
     def test_literal2(self) :
         var = VarId(0)
@@ -146,9 +146,9 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_or() )
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
-        self.assertEqual( 1, expr.litnum )
+        self.assertEqual( 1, expr.literal_num )
         self.assertEqual( 1, expr.input_size )
-        self.assertEqual( 1, expr.sop_litnum )
+        self.assertEqual( 1, expr.sop_literal_num )
 
     def test_posi_literal(self) :
         var = VarId(0)
@@ -171,9 +171,9 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_or() )
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
-        self.assertEqual( 1, expr.litnum )
+        self.assertEqual( 1, expr.literal_num )
         self.assertEqual( 1, expr.input_size )
-        self.assertEqual( 1, expr.sop_litnum )
+        self.assertEqual( 1, expr.sop_literal_num )
 
     def test_nega_literal(self) :
         var = VarId(0)
@@ -196,9 +196,9 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_or() )
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
-        self.assertEqual( 1, expr.litnum )
+        self.assertEqual( 1, expr.literal_num )
         self.assertEqual( 1, expr.input_size )
-        self.assertEqual( 1, expr.sop_litnum )
+        self.assertEqual( 1, expr.sop_literal_num )
 
     def test_and1(self) :
         var0 = VarId(0)
@@ -233,15 +233,15 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
 
-        self.assertEqual( 2, expr.litnum )
-        self.assertEqual( 1, expr.litnum_var(var0) )
-        self.assertEqual( 1, expr.litnum_literal(var0, False) )
-        self.assertEqual( 0, expr.litnum_literal(var0, True) )
-        self.assertEqual( 1, expr.litnum_var(var1) )
-        self.assertEqual( 0, expr.litnum_literal(var1, False) )
-        self.assertEqual( 1, expr.litnum_literal(var1, True) )
+        self.assertEqual( 2, expr.literal_num )
+        self.assertEqual( 1, expr.literal_num_var(var0) )
+        self.assertEqual( 1, expr.literal_num_literal(var0, False) )
+        self.assertEqual( 0, expr.literal_num_literal(var0, True) )
+        self.assertEqual( 1, expr.literal_num_var(var1) )
+        self.assertEqual( 0, expr.literal_num_literal(var1, False) )
+        self.assertEqual( 1, expr.literal_num_literal(var1, True) )
         self.assertEqual( 2, expr.input_size )
-        self.assertEqual( 2, expr.sop_litnum )
+        self.assertEqual( 2, expr.sop_literal_num )
 
     def test_and2(self) :
         var0 = VarId(0)
@@ -276,15 +276,15 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
 
-        self.assertEqual( 2, expr.litnum )
-        self.assertEqual( 1, expr.litnum_var(var0) )
-        self.assertEqual( 1, expr.litnum_literal(var0, False) )
-        self.assertEqual( 0, expr.litnum_literal(var0, True) )
-        self.assertEqual( 1, expr.litnum_var(var1) )
-        self.assertEqual( 0, expr.litnum_literal(var1, False) )
-        self.assertEqual( 1, expr.litnum_literal(var1, True) )
+        self.assertEqual( 2, expr.literal_num )
+        self.assertEqual( 1, expr.literal_num_var(var0) )
+        self.assertEqual( 1, expr.literal_num_literal(var0, False) )
+        self.assertEqual( 0, expr.literal_num_literal(var0, True) )
+        self.assertEqual( 1, expr.literal_num_var(var1) )
+        self.assertEqual( 0, expr.literal_num_literal(var1, False) )
+        self.assertEqual( 1, expr.literal_num_literal(var1, True) )
         self.assertEqual( 2, expr.input_size )
-        self.assertEqual( 2, expr.sop_litnum )
+        self.assertEqual( 2, expr.sop_literal_num )
 
     def test_or1(self) :
         var0 = VarId(0)
@@ -319,15 +319,15 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
 
-        self.assertEqual( 2, expr.litnum )
-        self.assertEqual( 1, expr.litnum_var(var0) )
-        self.assertEqual( 1, expr.litnum_literal(var0, False) )
-        self.assertEqual( 0, expr.litnum_literal(var0, True) )
-        self.assertEqual( 1, expr.litnum_var(var1) )
-        self.assertEqual( 0, expr.litnum_literal(var1, False) )
-        self.assertEqual( 1, expr.litnum_literal(var1, True) )
+        self.assertEqual( 2, expr.literal_num )
+        self.assertEqual( 1, expr.literal_num_var(var0) )
+        self.assertEqual( 1, expr.literal_num_literal(var0, False) )
+        self.assertEqual( 0, expr.literal_num_literal(var0, True) )
+        self.assertEqual( 1, expr.literal_num_var(var1) )
+        self.assertEqual( 0, expr.literal_num_literal(var1, False) )
+        self.assertEqual( 1, expr.literal_num_literal(var1, True) )
         self.assertEqual( 2, expr.input_size )
-        self.assertEqual( 2, expr.sop_litnum )
+        self.assertEqual( 2, expr.sop_literal_num )
 
     def test_or1(self) :
         var0 = VarId(0)
@@ -362,15 +362,15 @@ class ExprTest(unittest.TestCase) :
         self.assertFalse( expr.is_simple_xor() )
         self.assertTrue( expr.is_sop() )
 
-        self.assertEqual( 2, expr.litnum )
-        self.assertEqual( 1, expr.litnum_var(var0) )
-        self.assertEqual( 1, expr.litnum_literal(var0, False) )
-        self.assertEqual( 0, expr.litnum_literal(var0, True) )
-        self.assertEqual( 1, expr.litnum_var(var1) )
-        self.assertEqual( 0, expr.litnum_literal(var1, False) )
-        self.assertEqual( 1, expr.litnum_literal(var1, True) )
+        self.assertEqual( 2, expr.literal_num )
+        self.assertEqual( 1, expr.literal_num_var(var0) )
+        self.assertEqual( 1, expr.literal_num_literal(var0, False) )
+        self.assertEqual( 0, expr.literal_num_literal(var0, True) )
+        self.assertEqual( 1, expr.literal_num_var(var1) )
+        self.assertEqual( 0, expr.literal_num_literal(var1, False) )
+        self.assertEqual( 1, expr.literal_num_literal(var1, True) )
         self.assertEqual( 2, expr.input_size )
-        self.assertEqual( 2, expr.sop_litnum )
+        self.assertEqual( 2, expr.sop_literal_num )
 
     def test_xor1(self) :
         var0 = VarId(0)
@@ -405,15 +405,15 @@ class ExprTest(unittest.TestCase) :
         self.assertTrue( expr.is_simple_xor() )
         self.assertFalse( expr.is_sop() )
 
-        self.assertEqual( 2, expr.litnum )
-        self.assertEqual( 1, expr.litnum_var(var0) )
-        self.assertEqual( 1, expr.litnum_literal(var0, False) )
-        self.assertEqual( 0, expr.litnum_literal(var0, True) )
-        self.assertEqual( 1, expr.litnum_var(var1) )
-        self.assertEqual( 0, expr.litnum_literal(var1, False) )
-        self.assertEqual( 1, expr.litnum_literal(var1, True) )
+        self.assertEqual( 2, expr.literal_num )
+        self.assertEqual( 1, expr.literal_num_var(var0) )
+        self.assertEqual( 1, expr.literal_num_literal(var0, False) )
+        self.assertEqual( 0, expr.literal_num_literal(var0, True) )
+        self.assertEqual( 1, expr.literal_num_var(var1) )
+        self.assertEqual( 0, expr.literal_num_literal(var1, False) )
+        self.assertEqual( 1, expr.literal_num_literal(var1, True) )
         self.assertEqual( 2, expr.input_size )
-        self.assertEqual( 4, expr.sop_litnum )
+        self.assertEqual( 4, expr.sop_literal_num )
 
     def test_xor2(self) :
         var0 = VarId(0)
@@ -448,15 +448,15 @@ class ExprTest(unittest.TestCase) :
         self.assertTrue( expr.is_simple_xor() )
         self.assertFalse( expr.is_sop() )
 
-        self.assertEqual( 2, expr.litnum )
-        self.assertEqual( 1, expr.litnum_var(var0) )
-        self.assertEqual( 1, expr.litnum_literal(var0, False) )
-        self.assertEqual( 0, expr.litnum_literal(var0, True) )
-        self.assertEqual( 1, expr.litnum_var(var1) )
-        self.assertEqual( 0, expr.litnum_literal(var1, False) )
-        self.assertEqual( 1, expr.litnum_literal(var1, True) )
+        self.assertEqual( 2, expr.literal_num )
+        self.assertEqual( 1, expr.literal_num_var(var0) )
+        self.assertEqual( 1, expr.literal_num_literal(var0, False) )
+        self.assertEqual( 0, expr.literal_num_literal(var0, True) )
+        self.assertEqual( 1, expr.literal_num_var(var1) )
+        self.assertEqual( 0, expr.literal_num_literal(var1, False) )
+        self.assertEqual( 1, expr.literal_num_literal(var1, True) )
         self.assertEqual( 2, expr.input_size )
-        self.assertEqual( 4, expr.sop_litnum )
+        self.assertEqual( 4, expr.sop_literal_num )
 
     def test_inv(self) :
         var0 = VarId(0)

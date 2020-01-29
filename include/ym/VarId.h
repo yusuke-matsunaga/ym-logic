@@ -164,6 +164,10 @@ inline
 VarId::VarId(int val) :
   mVal{val}
 {
+  // 負数は不正値に直しておく．
+  if ( mVal < 0 ) {
+    mVal = -1;
+  }
 }
 
 // @brief 正しい値の時に true を返す．
@@ -267,7 +271,7 @@ inline
 void
 VarId::dump(ostream& s) const
 {
-  s << mVal;
+  s.write(reinterpret_cast<const char*>(&mVal), sizeof(mVal));
 }
 
 // @brief バイナリファイルを読み込む．
@@ -275,7 +279,7 @@ inline
 void
 VarId::restore(istream& s)
 {
-  s >> mVal;
+  s.read(reinterpret_cast<char*>(&mVal), sizeof(mVal));
 }
 
 // @relates VarId

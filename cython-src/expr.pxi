@@ -264,24 +264,24 @@ cdef class Expr :
 
     ### @brief リテラル数を返す．
     @property
-    def litnum(self) :
-        return self._this.litnum()
+    def literal_num(self) :
+        return self._this.literal_num()
 
     ### @brief 特定の変数に関するリテラル数を返す．
-    def litnum_var(self, VarId var) :
+    def literal_num_var(self, VarId var) :
         cdef CXX_VarId c_var = CXX_VarId(var.val)
-        return self._this.litnum(c_var)
+        return self._this.literal_num(c_var)
 
     ### @brief 特定のリテラルに関するリテラル数を返す．
-    def litnum_literal(self, VarId var, bool inv) :
+    def literal_num_literal(self, VarId var, bool inv) :
         cdef CXX_VarId c_var = CXX_VarId(var.val)
-        return self._this.litnum(c_var, inv)
+        return self._this.literal_num(c_var, inv)
 
     ### @brief 特定のリテラルに関するリテラル数を返す．
-    def litnum_literal(self, Literal lit) :
+    def literal_num_literal(self, Literal lit) :
         cdef CXX_VarId c_var = CXX_VarId(lit.varid.val)
         cdef bool inv = lit.is_negative()
-        return self._this.litnum(c_var, inv)
+        return self._this.literal_num(c_var, inv)
 
     ### @brief 入力数を返す．
     @property
@@ -290,29 +290,29 @@ cdef class Expr :
 
     ### @brief SOP形式に直した場合のキューブ数を返す．
     @property
-    def sop_cubenum(self) :
-        return self._this.sop_cubenum()
+    def sop_cube_num(self) :
+        return self._this.sop_cube_num()
 
     ### @brief SOP形式に直した場合のリテラル数を返す．
     @property
-    def sop_litnum(self) :
-        return self._this.sop_litnum()
+    def sop_literal_num(self) :
+        return self._this.sop_literal_num()
 
     ### @brief SOP形式に直した場合の特定の変数に関するリテラル数を返す．
-    def sop_litnum_var(self, VarId var) :
+    def sop_literal_num_var(self, VarId var) :
         cdef CXX_VarId c_var = CXX_VarId(var.val)
-        return self._this.sop_litnum(c_var)
+        return self._this.sop_literal_num(c_var)
 
     ### @brief SOP形式に直した場合の特定のリテラルに関するリテラル数を返す．
-    def sop_litnum_literal(self, VarId var, bool inv) :
+    def sop_literal_num_literal(self, VarId var, bool inv) :
         cdef CXX_VarId c_var = CXX_VarId(var.val)
-        return self._this.sop_litnum(c_var, inv)
+        return self._this.sop_literal_num(c_var, inv)
 
     ### @brief SOP形式に直した場合の特定のリテラルに関するリテラル数を返す．
-    def sop_litnum_literal(self, Literal lit) :
+    def sop_literal_num_literal(self, Literal lit) :
         cdef CXX_VarId c_var = CXX_VarId(lit.varid.val)
         cdef bool inv = lit.is_negative()
-        return self._this.sop_litnum(c_var, inv)
+        return self._this.sop_literal_num(c_var, inv)
 
     ### @brief 内容を表す文字列を返す．
     def __repr__(self) :

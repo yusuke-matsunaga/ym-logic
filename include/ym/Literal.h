@@ -239,15 +239,19 @@ void
 Literal::set(VarId varid,
 	     bool inv)
 {
-  mBody = (varid.val() << 1) + static_cast<int>(inv);
+  if ( varid.is_valid() ) {
+    mBody = (varid.val() << 1) + static_cast<int>(inv);
+  }
+  else {
+    mBody = -1;
+  }
 }
 
 // デフォルトコンストラクタ
 inline
-Literal::Literal()
+Literal::Literal() :
+  mBody{-1}
 {
-  mBody = -1;
-  mBody <<= 1;
 }
 
 // 変数番号と極性を指定したコンストラクタ
@@ -261,7 +265,7 @@ Literal::Literal(VarId varid,
 // 内部でのみ用いるコンストラクタ
 inline
 Literal::Literal(int body) :
-  mBody(body)
+  mBody{body}
 {
 }
 
@@ -278,7 +282,7 @@ inline
 bool
 Literal::is_valid() const
 {
-  return mBody != x().mBody;
+  return mBody != -1;
 }
 
 // 変数番号を得る．
@@ -286,7 +290,12 @@ inline
 VarId
 Literal::varid() const
 {
-  return VarId(mBody >> 1);
+  if ( is_valid() ) {
+    return VarId(mBody >> 1);
+  }
+  else {
+    return VarId::illegal();
+  }
 }
 
 // @brief 正極性のリテラルの時 true を返す．
@@ -318,7 +327,12 @@ inline
 Literal
 Literal::invert() const
 {
-  return Literal(mBody ^ 1U);
+  if ( is_valid() ) {
+    return Literal(mBody ^ 1U);
+  }
+  else {
+    return *this;
+  }
 }
 
 // @brief 同じ変数の正極性リテラルを返す．
@@ -326,7 +340,12 @@ inline
 Literal
 Literal::make_positive() const
 {
-  return Literal(mBody & ~1U);
+  if ( is_valid() ) {
+    return Literal(mBody & ~1U);
+  }
+  else {
+    return *this;
+  }
 }
 
 // @brief 同じ変数の負極性リテラルを返す．
@@ -334,7 +353,12 @@ inline
 Literal
 Literal::make_negative() const
 {
-  return Literal(mBody | 1U);
+  if ( is_valid() ) {
+    return Literal(mBody | 1U);
+  }
+  else {
+    return *this;
+  }
 }
 
 // @brief バイナリファイルに出力する．
@@ -487,7 +511,6 @@ struct hash<YM_NAMESPACE::Literal>
     return lit.hash();
   }
 };
-
 
 END_NAMESPACE_STD
 
