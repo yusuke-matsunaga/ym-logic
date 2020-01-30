@@ -23,8 +23,8 @@ walsh_01_normalize(const TvFunc& func,
 
 TEST(w01test, walsh_01_normalize_and2)
 {
-  TvFunc lit0 = TvFunc::literal(2, Literal(VarId(0)));
-  TvFunc lit1 = TvFunc::literal(2, Literal(VarId(1)));
+  TvFunc lit0 = TvFunc::make_literal(2, Literal(VarId(0)));
+  TvFunc lit1 = TvFunc::make_literal(2, Literal(VarId(1)));
 
   TvFunc and2 = lit0 & lit1;
 
@@ -56,8 +56,8 @@ TEST(w01test, walsh_01_normalize_and2)
 
 TEST(w01test, walsh_01_normalize_xor2)
 {
-  TvFunc lit0 = TvFunc::literal(2, Literal(VarId(0)));
-  TvFunc lit1 = TvFunc::literal(2, Literal(VarId(1)));
+  TvFunc lit0 = TvFunc::make_literal(2, Literal(VarId(0)));
+  TvFunc lit1 = TvFunc::make_literal(2, Literal(VarId(1)));
 
   TvFunc xor2 = (lit0 & ~lit1) | (~lit0 & lit1);
 
@@ -89,11 +89,11 @@ TEST(w01test, walsh_01_normalize_xor2)
 
 TEST(w01test, walsh_01_normalize_ao221)
 {
-  TvFunc lit0 = TvFunc::literal(5, Literal(VarId(0)));
-  TvFunc lit1 = TvFunc::literal(5, Literal(VarId(1)));
-  TvFunc lit2 = TvFunc::literal(5, Literal(VarId(2)));
-  TvFunc lit3 = TvFunc::literal(5, Literal(VarId(3)));
-  TvFunc lit4 = TvFunc::literal(5, Literal(VarId(4)));
+  TvFunc lit0 = TvFunc::make_literal(5, Literal(VarId(0)));
+  TvFunc lit1 = TvFunc::make_literal(5, Literal(VarId(1)));
+  TvFunc lit2 = TvFunc::make_literal(5, Literal(VarId(2)));
+  TvFunc lit3 = TvFunc::make_literal(5, Literal(VarId(3)));
+  TvFunc lit4 = TvFunc::make_literal(5, Literal(VarId(4)));
 
   TvFunc ao221 = (lit0 & lit1) | (~lit2 & ~lit3) | lit4;
 

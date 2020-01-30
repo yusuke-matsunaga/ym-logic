@@ -16,8 +16,8 @@ BEGIN_NAMESPACE_YM
 
 TEST(TvFuncMove, copy)
 {
-  auto f = TvFunc::zero(20);
-  auto g = TvFunc::one(20);
+  auto f = TvFunc::make_zero(20);
+  auto g = TvFunc::make_one(20);
 
   for ( auto i = 0; i < 10000; ++ i ) {
     auto tmp = f;
@@ -25,14 +25,14 @@ TEST(TvFuncMove, copy)
     g = tmp;
   }
 
-  EXPECT_EQ( TvFunc::zero(20), f );
-  EXPECT_EQ( TvFunc::one(20), g );
+  EXPECT_EQ( TvFunc::make_zero(20), f );
+  EXPECT_EQ( TvFunc::make_one(20), g );
 }
 
 TEST(TvFuncMove, move)
 {
-  auto f = TvFunc::zero(20);
-  auto g = TvFunc::one(20);
+  auto f = TvFunc::make_zero(20);
+  auto g = TvFunc::make_one(20);
 
   for ( auto i = 0; i < 10000; ++ i ) {
     auto tmp = std::move(f);
@@ -40,20 +40,20 @@ TEST(TvFuncMove, move)
     g = std::move(tmp);
   }
 
-  EXPECT_EQ( TvFunc::zero(20), f );
-  EXPECT_EQ( TvFunc::one(20), g );
+  EXPECT_EQ( TvFunc::make_zero(20), f );
+  EXPECT_EQ( TvFunc::make_one(20), g );
 }
 
 TEST(TvFuncMove, copy_m)
 {
   vector<TvFunc> f_list(2);
-  f_list[0] = TvFunc::zero(20);
-  f_list[1] = TvFunc::one(20);
+  f_list[0] = TvFunc::make_zero(20);
+  f_list[1] = TvFunc::make_one(20);
   TvFuncM f(f_list);
 
   vector<TvFunc> g_list(2);
-  g_list[0] = TvFunc::posi_literal(20, VarId(0));
-  g_list[1] = TvFunc::nega_literal(20, VarId(1));
+  g_list[0] = TvFunc::make_posi_literal(20, VarId(0));
+  g_list[1] = TvFunc::make_nega_literal(20, VarId(1));
   TvFuncM g(g_list);
 
   for ( auto i = 0; i < 10000; ++ i ) {
@@ -62,22 +62,22 @@ TEST(TvFuncMove, copy_m)
     g = tmp;
   }
 
-  EXPECT_EQ( TvFunc::zero(20), f.slice(VarId(0)) );
-  EXPECT_EQ( TvFunc::one(20), f.slice(VarId(1)) );
-  EXPECT_EQ( TvFunc::posi_literal(20, VarId(0)), g.slice(VarId(0)) );
-  EXPECT_EQ( TvFunc::nega_literal(20, VarId(1)), g.slice(VarId(1)) );
+  EXPECT_EQ( TvFunc::make_zero(20), f.slice(VarId(0)) );
+  EXPECT_EQ( TvFunc::make_one(20), f.slice(VarId(1)) );
+  EXPECT_EQ( TvFunc::make_posi_literal(20, VarId(0)), g.slice(VarId(0)) );
+  EXPECT_EQ( TvFunc::make_nega_literal(20, VarId(1)), g.slice(VarId(1)) );
 }
 
 TEST(TvFuncMove, move_m)
 {
   vector<TvFunc> f_list(2);
-  f_list[0] = TvFunc::zero(20);
-  f_list[1] = TvFunc::one(20);
+  f_list[0] = TvFunc::make_zero(20);
+  f_list[1] = TvFunc::make_one(20);
   TvFuncM f(f_list);
 
   vector<TvFunc> g_list(2);
-  g_list[0] = TvFunc::posi_literal(20, VarId(0));
-  g_list[1] = TvFunc::nega_literal(20, VarId(1));
+  g_list[0] = TvFunc::make_posi_literal(20, VarId(0));
+  g_list[1] = TvFunc::make_nega_literal(20, VarId(1));
   TvFuncM g(g_list);
 
   for ( auto i = 0; i < 10000; ++ i ) {
@@ -86,10 +86,10 @@ TEST(TvFuncMove, move_m)
     g = std::move(tmp);
   }
 
-  EXPECT_EQ( TvFunc::zero(20), f.slice(VarId(0)) );
-  EXPECT_EQ( TvFunc::one(20), f.slice(VarId(1)) );
-  EXPECT_EQ( TvFunc::posi_literal(20, VarId(0)), g.slice(VarId(0)) );
-  EXPECT_EQ( TvFunc::nega_literal(20, VarId(1)), g.slice(VarId(1)) );
+  EXPECT_EQ( TvFunc::make_zero(20), f.slice(VarId(0)) );
+  EXPECT_EQ( TvFunc::make_one(20), f.slice(VarId(1)) );
+  EXPECT_EQ( TvFunc::make_posi_literal(20, VarId(0)), g.slice(VarId(0)) );
+  EXPECT_EQ( TvFunc::make_nega_literal(20, VarId(1)), g.slice(VarId(1)) );
 }
 
 END_NAMESPACE_YM

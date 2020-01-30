@@ -227,7 +227,7 @@ NpnMgr::cannonical(const TvFunc& func)
   }
 
   // 残りはすべて展開して真理値ベクタが最大となるものを探す．
-  mMaxFunc = TvFunc::zero(ni0);
+  mMaxFunc = TvFunc::make_zero(ni0);
   mMaxList.clear();
 
   NpnMap xmap0_orig = mXmap0;

@@ -29,35 +29,35 @@ cdef class TvFunc :
 
     ### @brief 恒偽関数を返す．
     @staticmethod
-    def zero(int ni) :
+    def make_zero(int ni) :
         ans = TvFunc()
-        ans._this = CXX_TvFunc.zero(ni)
+        ans._this = CXX_TvFunc.make_zero(ni)
         return ans
 
     ### @brief 恒真関数を返す．
     @staticmethod
-    def one(int ni) :
+    def make_one(int ni) :
         ans = TvFunc()
-        ans._this = CXX_TvFunc.one(ni)
+        ans._this = CXX_TvFunc.make_one(ni)
         return ans
 
     ### @brief リテラル関数を返す．
     @staticmethod
-    def literal(int ni, VarId var, bool inv) :
+    def make_literal(int ni, VarId var, bool inv) :
         cdef CXX_VarId c_var = CXX_VarId(var.val)
         ans = TvFunc()
-        ans._this = CXX_TvFunc.literal(ni, c_var, inv)
+        ans._this = CXX_TvFunc.make_literal(ni, c_var, inv)
         return ans
 
     ### @brief 肯定のリテラル関数を返す．
     @staticmethod
-    def posi_literal(int ni, VarId var) :
-        return TvFunc.literal(ni, var, False)
+    def make_posi_literal(int ni, VarId var) :
+        return TvFunc.make_literal(ni, var, False)
 
     ### @brief 否定のリテラル関数を返す．
     @staticmethod
-    def nega_literal(int ni, VarId var) :
-        return TvFunc.literal(ni, var, True)
+    def make_nega_literal(int ni, VarId var) :
+        return TvFunc.make_literal(ni, var, True)
 
     ### @brief 反転
     def __invert__(self) :

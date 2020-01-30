@@ -87,14 +87,14 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  zero(int ni);
+  make_zero(int ni);
 
   /// @brief 恒真関数を作る．
   /// @param[in] ni 入力数
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  one(int ni);
+  make_one(int ni);
 
   /// @brief リテラル関数を作る．
   /// @param[in] ni 入力数
@@ -105,9 +105,9 @@ public:
   /// @return 生成したオブジェクト
   static
   TvFunc
-  literal(int ni,
-	  VarId varid,
-	  bool inv);
+  make_literal(int ni,
+	       VarId varid,
+	       bool inv);
 
   /// @brief リテラル関数を作る．
   /// @param[in] ni 入力数
@@ -115,8 +115,8 @@ public:
   /// @return 生成したオブジェクト
   static
   TvFunc
-  literal(int ni,
-	  Literal lit);
+  make_literal(int ni,
+	       Literal lit);
 
   /// @brief 肯定のリテラル関数を作る．
   /// @param[in] ni 入力数
@@ -124,8 +124,8 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  posi_literal(int ni,
-	       VarId varid);
+  make_posi_literal(int ni,
+		    VarId varid);
 
   /// @brief 否定のリテラル関数を作る．
   /// @param[in] ni 入力数
@@ -133,8 +133,8 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  nega_literal(int ni,
-	       VarId varid);
+  make_nega_literal(int ni,
+		    VarId varid);
 
 
 public:
@@ -677,7 +677,7 @@ operator<<(ostream& s,
 // 恒偽関数を作る．
 inline
 TvFunc
-TvFunc::zero(int ni)
+TvFunc::make_zero(int ni)
 {
   return TvFunc(ni);
 }
@@ -685,7 +685,7 @@ TvFunc::zero(int ni)
 // 恒真関数を作る．
 inline
 TvFunc
-TvFunc::one(int ni)
+TvFunc::make_one(int ni)
 {
   return TvFunc(ni, 0);
 }
@@ -699,9 +699,9 @@ TvFunc::one(int ni)
 // @return 生成したオブジェクト
 inline
 TvFunc
-TvFunc::literal(int ni,
-		VarId varid,
-		bool inv)
+TvFunc::make_literal(int ni,
+		     VarId varid,
+		     bool inv)
 {
   return TvFunc(ni, varid, inv);
 }
@@ -712,8 +712,8 @@ TvFunc::literal(int ni,
 // @return 生成したオブジェクト
 inline
 TvFunc
-TvFunc::literal(int ni,
-		Literal lit)
+TvFunc::make_literal(int ni,
+		     Literal lit)
 {
   return TvFunc(ni, lit.varid(), lit.is_negative());
 }
@@ -721,8 +721,8 @@ TvFunc::literal(int ni,
 // 肯定のリテラル関数を作る．
 inline
 TvFunc
-TvFunc::posi_literal(int ni,
-		     VarId varid)
+TvFunc::make_posi_literal(int ni,
+			  VarId varid)
 {
   return TvFunc(ni, varid, false);
 }
@@ -730,8 +730,8 @@ TvFunc::posi_literal(int ni,
 // 否定のリテラル関数を作る．
 inline
 TvFunc
-TvFunc::nega_literal(int ni,
-		     VarId varid)
+TvFunc::make_nega_literal(int ni,
+			  VarId varid)
 {
   return TvFunc(ni, varid, true);
 }

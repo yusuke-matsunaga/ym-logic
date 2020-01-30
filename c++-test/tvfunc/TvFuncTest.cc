@@ -344,9 +344,9 @@ TEST_P(TvFuncTestWithParam, const_zero)
 {
   init_values();
   int ni = GetParam();
-  TvFunc f0 = TvFunc::zero(ni);
+  TvFunc f0 = TvFunc::make_zero(ni);
   ostringstream buf;
-  buf << "TvFunc::zero(" << ni << ")";
+  buf << "TvFunc::make_zero(" << ni << ")";
   check_func(f0, mValues, false, buf.str());
 }
 
@@ -358,9 +358,9 @@ TEST_P(TvFuncTestWithParam, const_one)
   for ( int p: Range(ni_exp) ) {
     mValues[p] = 1;
   }
-  TvFunc f0 = TvFunc::one(ni);
+  TvFunc f0 = TvFunc::make_one(ni);
   ostringstream buf;
-  buf << "TvFunc::one(" << ni << ")";
+  buf << "TvFunc::make_one(" << ni << ")";
   check_func(f0, mValues, false, buf.str());
 }
 
@@ -370,7 +370,7 @@ TEST_P(TvFuncTestWithParam, literal1)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   for ( int i: Range(ni) ) {
-    TvFunc f1 = TvFunc::literal(ni, VarId(i), false);
+    TvFunc f1 = TvFunc::make_literal(ni, VarId(i), false);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
@@ -380,10 +380,10 @@ TEST_P(TvFuncTestWithParam, literal1)
       }
     }
     ostringstream buf1;
-    buf1 << "TvFunc::literal(" << ni << ", " << i << ", false)";
+    buf1 << "TvFunc::make_literal(" << ni << ", " << i << ", false)";
     check_func(f1, mValues, false, buf1.str());
 
-    TvFunc f2 = TvFunc::literal(ni, VarId(i), true);
+    TvFunc f2 = TvFunc::make_literal(ni, VarId(i), true);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
@@ -393,7 +393,7 @@ TEST_P(TvFuncTestWithParam, literal1)
       }
     }
     ostringstream buf2;
-    buf2 << "TvFunc::literal(" << ni << ", " << i << ", true)";
+    buf2 << "TvFunc::make_literal(" << ni << ", " << i << ", true)";
     check_func(f2, mValues, false, buf2.str());
   }
 }
@@ -405,7 +405,7 @@ TEST_P(TvFuncTestWithParam, literal2)
   int ni_exp = 1U << ni;
   for ( int i: Range(ni) ) {
     Literal lit(VarId(i), false);
-    TvFunc f1 = TvFunc::literal(ni, lit);
+    TvFunc f1 = TvFunc::make_literal(ni, lit);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
@@ -415,11 +415,11 @@ TEST_P(TvFuncTestWithParam, literal2)
       }
     }
     ostringstream buf1;
-    buf1 << "TvFunc::literal(" << ni << ", Literal(" << i << ", false))";
+    buf1 << "TvFunc::make_literal(" << ni << ", Literal(" << i << ", false))";
     check_func(f1, mValues, true, buf1.str());
 
     lit = Literal(VarId(i), true);
-    TvFunc f2 = TvFunc::literal(ni, lit);
+    TvFunc f2 = TvFunc::make_literal(ni, lit);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
@@ -429,7 +429,7 @@ TEST_P(TvFuncTestWithParam, literal2)
       }
     }
     ostringstream buf2;
-    buf2 << "TvFunc::literal(" << ni << ", Literal(" << i << ", true))";
+    buf2 << "TvFunc::make_literal(" << ni << ", Literal(" << i << ", true))";
     check_func(f2, mValues, true, buf2.str());
   }
 }
@@ -440,7 +440,7 @@ TEST_P(TvFuncTestWithParam, posi_literal)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   for ( int i: Range(ni) ) {
-    TvFunc f1 = TvFunc::posi_literal(ni, VarId(i));
+    TvFunc f1 = TvFunc::make_posi_literal(ni, VarId(i));
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
@@ -461,7 +461,7 @@ TEST_P(TvFuncTestWithParam, nega_literal)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   for ( int i: Range(ni) ) {
-    TvFunc f1 = TvFunc::nega_literal(ni, VarId(i));
+    TvFunc f1 = TvFunc::make_nega_literal(ni, VarId(i));
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
@@ -823,12 +823,12 @@ TEST_P(TvFuncTestWithParam, xform)
 TEST(TvFuncTest, shrink_0)
 {
   int ni = 10;
-  TvFunc func0 = TvFunc::zero(ni);
+  TvFunc func0 = TvFunc::make_zero(ni);
 
   NpnMap map = func0.shrink_map();
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::zero(0), func1 );
+  EXPECT_EQ( TvFunc::make_zero(0), func1 );
 
   EXPECT_EQ( ni, map.input_num() );
   for ( int i: Range(ni) ) {
@@ -840,12 +840,12 @@ TEST(TvFuncTest, shrink_0)
 TEST(TvFuncTest, shrink_1)
 {
   int ni = 10;
-  TvFunc func0 = TvFunc::one(ni);
+  TvFunc func0 = TvFunc::make_one(ni);
 
   NpnMap map = func0.shrink_map();
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::one(0), func1 );
+  EXPECT_EQ( TvFunc::make_one(0), func1 );
 
   EXPECT_EQ( ni, map.input_num() );
   for ( int i: Range(ni) ) {
@@ -857,12 +857,12 @@ TEST(TvFuncTest, shrink_1)
 TEST(TvFuncTest, shrink_lit1)
 {
   int ni = 10;
-  TvFunc func0 = TvFunc::literal(ni, VarId(0), false);
+  TvFunc func0 = TvFunc::make_literal(ni, VarId(0), false);
 
   NpnMap map = func0.shrink_map();;
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::literal(1, VarId(0), false), func1);
+  EXPECT_EQ( TvFunc::make_literal(1, VarId(0), false), func1);
 
   EXPECT_EQ( ni, map.input_num() );
 
@@ -882,12 +882,12 @@ TEST(TvFuncTest, shrink_lit1)
 TEST(TvFuncTest, shrink_lit2)
 {
   int ni = 10;
-  TvFunc func0 = TvFunc::literal(ni, VarId(2), false);
+  TvFunc func0 = TvFunc::make_literal(ni, VarId(2), false);
 
   NpnMap map = func0.shrink_map();
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::literal(1, VarId(0), false), func1);
+  EXPECT_EQ( TvFunc::make_literal(1, VarId(0), false), func1);
 
   EXPECT_EQ( ni, map.input_num() );
 
@@ -910,8 +910,8 @@ TEST(TvFuncTest, shrink_lit2)
 TEST(TvFuncTest, shrink_lit3)
 {
   int ni = 10;
-  TvFunc lit1 = TvFunc::literal(ni, VarId(2), false);
-  TvFunc lit2 = TvFunc::literal(ni, VarId(5), false);
+  TvFunc lit1 = TvFunc::make_literal(ni, VarId(2), false);
+  TvFunc lit2 = TvFunc::make_literal(ni, VarId(5), false);
   TvFunc func0 = lit1 & ~lit2;
 
   NpnMap map = func0.shrink_map();
@@ -919,8 +919,8 @@ TEST(TvFuncTest, shrink_lit3)
 
   TvFunc func2;
   {
-    TvFunc lit1 = TvFunc::literal(2, VarId(0), false);
-    TvFunc lit2 = TvFunc::literal(2, VarId(1), false);
+    TvFunc lit1 = TvFunc::make_literal(2, VarId(0), false);
+    TvFunc lit2 = TvFunc::make_literal(2, VarId(1), false);
     func2 = lit1 & ~lit2;
   }
 
@@ -953,44 +953,44 @@ TEST(TvFuncTest, shrink_lit3)
 
 TEST(TvFuncTest, expand_0)
 {
-  TvFunc func0 = TvFunc::zero(0);
+  TvFunc func0 = TvFunc::make_zero(0);
 
   NpnMap map(0, 10);
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::zero(10), func1 );
+  EXPECT_EQ( TvFunc::make_zero(10), func1 );
 }
 
 TEST(TvFuncTest, expand_1)
 {
-  TvFunc func0 = TvFunc::one(0);
+  TvFunc func0 = TvFunc::make_one(0);
 
   NpnMap map(0, 10);
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::one(10), func1 );
+  EXPECT_EQ( TvFunc::make_one(10), func1 );
 }
 
 TEST(TvFuncTest, expand_lit1)
 {
-  TvFunc func0 = TvFunc::literal(1, VarId(0), false);
+  TvFunc func0 = TvFunc::make_literal(1, VarId(0), false);
 
   NpnMap map(1, 10);
   map.set(VarId(0), VarId(0), false);
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::literal(10, VarId(0), false), func1 );
+  EXPECT_EQ( TvFunc::make_literal(10, VarId(0), false), func1 );
 }
 
 TEST(TvFuncTest, expand_lit2)
 {
-  TvFunc func0 = TvFunc::literal(2, VarId(1), false);
+  TvFunc func0 = TvFunc::make_literal(2, VarId(1), false);
 
   NpnMap map(2, 10);
   map.set(VarId(1), VarId(2), false);
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::literal(10, VarId(2), false), func1 );
+  EXPECT_EQ( TvFunc::make_literal(10, VarId(2), false), func1 );
 }
 
 INSTANTIATE_TEST_CASE_P(Test0to20,

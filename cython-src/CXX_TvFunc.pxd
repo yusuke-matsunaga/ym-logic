@@ -20,11 +20,11 @@ cdef extern from "ym/TvFunc.h" namespace "nsYm" :
         TvFunc(int, const vector[int]& values)
         TvFunc(const TvFunc& src)
         @staticmethod
-        TvFunc zero(int)
+        TvFunc make_zero(int)
         @staticmethod
-        TvFunc one(int)
+        TvFunc make_one(int)
         @staticmethod
-        TvFunc literal(int, VarId, bool)
+        TvFunc make_literal(int, VarId, bool)
         TvFunc invert()
         TvFunc and_op(const TvFunc&)
         TvFunc or_op(const TvFunc&)

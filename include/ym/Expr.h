@@ -371,6 +371,8 @@ public:
   VarId
   varid() const;
 
+  /// @brief リテラルの取得
+
   /// @brief AND 式のチェック
   /// @return トップが AND の時に true を返す．
   bool
