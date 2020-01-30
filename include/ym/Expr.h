@@ -76,19 +76,19 @@ public:
   /// 返されたオブジェクトは is_valid() == false となる．
   static
   Expr
-  invalid();
+  make_invalid();
 
   /// @brief 恒偽関数の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  zero();
+  make_zero();
 
   /// @brief 恒真関数の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  one();
+  make_one();
 
   /// @brief リテラル式の生成
   /// @param[in] varid 変数番号
@@ -98,29 +98,29 @@ public:
   /// @return 生成したオブジェクト
   static
   Expr
-  literal(VarId varid,
-	  bool inv);
+  make_literal(VarId varid,
+	       bool inv);
 
   /// @brief リテラル式の生成
   /// @param[in] lit リテラル
   /// @return 生成したオブジェクト
   static
   Expr
-  literal(Literal lit);
+  make_literal(Literal lit);
 
   /// @brief 正(肯定)リテラル式の生成
   /// @param[in] varid 変数番号
   /// @return 生成したオブジェクト
   static
   Expr
-  posi_literal(VarId varid);
+  make_posi_literal(VarId varid);
 
   /// @brief 負(否定)リテラル式の生成
   /// @param[in] varid 変数番号
   /// @return 生成したオブジェクト
   static
   Expr
-  nega_literal(VarId varid);
+  make_nega_literal(VarId varid);
 
   /// @brief AND 式の生成
   /// @param[in] chd1, chd2 オペランド
@@ -653,27 +653,27 @@ operator<<(ostream& s,
 // inline 関数の定義
 //////////////////////////////////////////////////////////////////////
 
+inline
+Expr
+Expr::make_literal(VarId varid,
+		   bool inv)
+{
+  return inv ? make_nega_literal(varid) : make_posi_literal(varid);
+}
+
+inline
+Expr
+Expr::make_literal(Literal lit)
+{
+  return make_literal(lit.varid(), lit.is_negative());
+}
+
 // @brief 適正な値を持っているかチェックする．
 inline
 bool
 Expr::is_valid() const
 {
   return mRootPtr != nullptr;
-}
-
-inline
-Expr
-Expr::literal(VarId varid,
-	      bool inv)
-{
-  return inv ? nega_literal(varid) : posi_literal(varid);
-}
-
-inline
-Expr
-Expr::literal(Literal lit)
-{
-  return literal(lit.varid(), lit.is_negative());
 }
 
 inline

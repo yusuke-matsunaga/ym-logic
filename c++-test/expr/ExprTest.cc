@@ -42,9 +42,9 @@ TEST(ExprTest, empty_constr)
   EXPECT_EQ( 0, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, zero)
+TEST(ExprTest, make_zero)
 {
-  Expr expr = Expr::zero();
+  Expr expr = Expr::make_zero();
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_TRUE( expr.is_zero() );
@@ -70,9 +70,9 @@ TEST(ExprTest, zero)
   EXPECT_EQ( 0, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, one)
+TEST(ExprTest, make_one)
 {
-  Expr expr = Expr::one();
+  Expr expr = Expr::make_one();
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -98,10 +98,10 @@ TEST(ExprTest, one)
   EXPECT_EQ( 0, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, literal1)
+TEST(ExprTest, make_literal1)
 {
   VarId var(0);
-  Expr expr = Expr::literal(var, false);
+  Expr expr = Expr::make_literal(var, false);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -130,11 +130,11 @@ TEST(ExprTest, literal1)
   EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, literal2)
+TEST(ExprTest, make_literal2)
 {
   VarId var(0);
   Literal lit(var, true);
-  Expr expr = Expr::literal(lit);
+  Expr expr = Expr::make_literal(lit);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -163,10 +163,10 @@ TEST(ExprTest, literal2)
   EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, posi_literal)
+TEST(ExprTest, make_posi_literal)
 {
   VarId var(0);
-  Expr expr = Expr::posi_literal(var);
+  Expr expr = Expr::make_posi_literal(var);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -195,10 +195,10 @@ TEST(ExprTest, posi_literal)
   EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, nega_literal)
+TEST(ExprTest, make_nega_literal)
 {
   VarId var(0);
-  Expr expr = Expr::nega_literal(var);
+  Expr expr = Expr::make_nega_literal(var);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -227,12 +227,12 @@ TEST(ExprTest, nega_literal)
   EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, and1)
+TEST(ExprTest, and_op1)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = Expr::and_op(lit0p, lit1n);
 
   EXPECT_TRUE( expr.is_valid() );
@@ -274,12 +274,12 @@ TEST(ExprTest, and1)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, and2)
+TEST(ExprTest, and_op2)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = lit0p & lit1n;
 
   EXPECT_TRUE( expr.is_valid() );
@@ -321,12 +321,12 @@ TEST(ExprTest, and2)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, and3)
+TEST(ExprTest, make_and1)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_and(lit_list);
 
@@ -369,12 +369,12 @@ TEST(ExprTest, and3)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, and4)
+TEST(ExprTest, make_and2)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   list<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_and(lit_list);
 
@@ -417,12 +417,12 @@ TEST(ExprTest, and4)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, and5)
+TEST(ExprTest, and_int)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = lit0p;
   expr &= lit1n;
 
@@ -465,12 +465,12 @@ TEST(ExprTest, and5)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, or1)
+TEST(ExprTest, or_op1)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = Expr::or_op(lit0p, lit1n);
 
   EXPECT_TRUE( expr.is_valid() );
@@ -512,12 +512,12 @@ TEST(ExprTest, or1)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, or2)
+TEST(ExprTest, or_op2)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = lit0p | lit1n;
 
   EXPECT_TRUE( expr.is_valid() );
@@ -559,12 +559,12 @@ TEST(ExprTest, or2)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, or3)
+TEST(ExprTest, make_or1)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_or(lit_list);
 
@@ -607,12 +607,12 @@ TEST(ExprTest, or3)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, or4)
+TEST(ExprTest, make_or2)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   list<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_or(lit_list);
 
@@ -655,12 +655,12 @@ TEST(ExprTest, or4)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, or5)
+TEST(ExprTest, or_int)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = lit0p;
   expr |= lit1n;
 
@@ -703,12 +703,12 @@ TEST(ExprTest, or5)
   EXPECT_EQ( 2, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, xor1)
+TEST(ExprTest, xor_op1)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = Expr::xor_op(lit0p, lit1n);
 
   EXPECT_TRUE( expr.is_valid() );
@@ -750,12 +750,12 @@ TEST(ExprTest, xor1)
   EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, xor2)
+TEST(ExprTest, xor_op2)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = lit0p ^ lit1n;
 
   EXPECT_TRUE( expr.is_valid() );
@@ -797,12 +797,12 @@ TEST(ExprTest, xor2)
   EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, xor3)
+TEST(ExprTest, make_xor1)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_xor(lit_list);
 
@@ -845,12 +845,12 @@ TEST(ExprTest, xor3)
   EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, xor4)
+TEST(ExprTest, make_xor2)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   list<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_xor(lit_list);
 
@@ -893,12 +893,12 @@ TEST(ExprTest, xor4)
   EXPECT_EQ( 4, expr.sop_literal_num() );
 }
 
-TEST(ExprTest, xor5)
+TEST(ExprTest, xor_int)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
   Expr expr = lit0p;
   expr ^= lit1n;
 
@@ -945,8 +945,8 @@ TEST(ExprTest, inv1)
 {
   VarId var0(0);
   VarId var1(1);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1n = Expr::nega_literal(var1);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1n = Expr::make_nega_literal(var1);
 
   Expr lit0n = ~lit0p;
   {
@@ -976,11 +976,11 @@ TEST(ExprTest, compose1)
   VarId var1(1);
   VarId var2(2);
   VarId var3(3);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1p = Expr::posi_literal(var1);
-  Expr lit1n = Expr::nega_literal(var1);
-  Expr lit2p = Expr::posi_literal(var2);
-  Expr lit3p = Expr::posi_literal(var3);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1p = Expr::make_posi_literal(var1);
+  Expr lit1n = Expr::make_nega_literal(var1);
+  Expr lit2p = Expr::make_posi_literal(var2);
+  Expr lit3p = Expr::make_posi_literal(var3);
 
   Expr expr0 = lit0p | (lit1n & lit2p);
   Expr expr1 = lit1p & lit3p;
@@ -998,12 +998,12 @@ TEST(ExprTest, compose2)
   VarId var2(2);
   VarId var3(3);
   VarId var4(4);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1p = Expr::posi_literal(var1);
-  Expr lit1n = Expr::nega_literal(var1);
-  Expr lit2p = Expr::posi_literal(var2);
-  Expr lit3p = Expr::posi_literal(var3);
-  Expr lit4n = Expr::nega_literal(var4);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1p = Expr::make_posi_literal(var1);
+  Expr lit1n = Expr::make_nega_literal(var1);
+  Expr lit2p = Expr::make_posi_literal(var2);
+  Expr lit3p = Expr::make_posi_literal(var3);
+  Expr lit4n = Expr::make_nega_literal(var4);
 
   Expr expr0 = lit0p | lit4n;
   Expr expr1 = lit1p & lit3p;
@@ -1025,12 +1025,12 @@ TEST(ExprTest, compose3)
   VarId var2(2);
   VarId var3(3);
   VarId var4(4);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1p = Expr::posi_literal(var1);
-  Expr lit1n = Expr::nega_literal(var1);
-  Expr lit2p = Expr::posi_literal(var2);
-  Expr lit3p = Expr::posi_literal(var3);
-  Expr lit4n = Expr::nega_literal(var4);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1p = Expr::make_posi_literal(var1);
+  Expr lit1n = Expr::make_nega_literal(var1);
+  Expr lit2p = Expr::make_posi_literal(var2);
+  Expr lit3p = Expr::make_posi_literal(var3);
+  Expr lit4n = Expr::make_nega_literal(var4);
 
   Expr expr0 = lit0p | lit4n;
   Expr expr1 = lit1p & lit3p;
@@ -1051,11 +1051,11 @@ TEST(ExprTest, remap_var1)
   VarId var1(1);
   VarId var2(2);
   VarId var3(3);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1p = Expr::posi_literal(var1);
-  Expr lit1n = Expr::nega_literal(var1);
-  Expr lit2p = Expr::posi_literal(var2);
-  Expr lit3p = Expr::posi_literal(var3);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1p = Expr::make_posi_literal(var1);
+  Expr lit1n = Expr::make_nega_literal(var1);
+  Expr lit2p = Expr::make_posi_literal(var2);
+  Expr lit3p = Expr::make_posi_literal(var3);
 
   Expr expr0 = (lit0p & lit3p) | (lit1n & lit2p);
   unordered_map<VarId, VarId> varmap;
@@ -1073,11 +1073,11 @@ TEST(ExprTest, remap_var2)
   VarId var1(1);
   VarId var2(2);
   VarId var3(3);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1p = Expr::posi_literal(var1);
-  Expr lit1n = Expr::nega_literal(var1);
-  Expr lit2p = Expr::posi_literal(var2);
-  Expr lit3p = Expr::posi_literal(var3);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1p = Expr::make_posi_literal(var1);
+  Expr lit1n = Expr::make_nega_literal(var1);
+  Expr lit2p = Expr::make_posi_literal(var2);
+  Expr lit3p = Expr::make_posi_literal(var3);
 
   Expr expr0 = (lit0p & lit3p) | (lit1n & lit2p);
   vector<pair<VarId, VarId>> varlist;
@@ -1095,11 +1095,11 @@ TEST(ExprTest, eval1)
   VarId var1(1);
   VarId var2(2);
   VarId var3(3);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1p = Expr::posi_literal(var1);
-  Expr lit1n = Expr::nega_literal(var1);
-  Expr lit2p = Expr::posi_literal(var2);
-  Expr lit3p = Expr::posi_literal(var3);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1p = Expr::make_posi_literal(var1);
+  Expr lit1n = Expr::make_nega_literal(var1);
+  Expr lit2p = Expr::make_posi_literal(var2);
+  Expr lit3p = Expr::make_posi_literal(var3);
 
   Expr expr = (lit0p & lit3p) | (lit1n & lit2p);
   vector<Expr::BitVectType> vals(4, 0);
@@ -1132,11 +1132,11 @@ TEST(ExprTest, make_tv1)
   VarId var1(1);
   VarId var2(2);
   VarId var3(3);
-  Expr lit0p = Expr::posi_literal(var0);
-  Expr lit1p = Expr::posi_literal(var1);
-  Expr lit1n = Expr::nega_literal(var1);
-  Expr lit2p = Expr::posi_literal(var2);
-  Expr lit3p = Expr::posi_literal(var3);
+  Expr lit0p = Expr::make_posi_literal(var0);
+  Expr lit1p = Expr::make_posi_literal(var1);
+  Expr lit1n = Expr::make_nega_literal(var1);
+  Expr lit2p = Expr::make_posi_literal(var2);
+  Expr lit3p = Expr::make_posi_literal(var3);
 
   Expr expr = (lit0p & lit3p) | (lit1n & lit2p);
   TvFunc f = expr.make_tv();

@@ -19,15 +19,15 @@ cdef extern from "ym/Expr.h" namespace "nsYm::nsLogic" :
     cdef cppclass Expr :
         Expr()
         @staticmethod
-        Expr zero()
+        Expr make_zero()
         @staticmethod
-        Expr one()
+        Expr make_one()
         @staticmethod
-        Expr literal(VarId, bool)
+        Expr make_literal(VarId, bool)
         @staticmethod
-        Expr posi_literal(VarId)
+        Expr make_posi_literal(VarId)
         @staticmethod
-        Expr nega_literal(VarId)
+        Expr make_nega_literal(VarId)
         @staticmethod
         Expr and_op(const Expr& opr1, const Expr& opr2)
         @staticmethod

@@ -78,35 +78,35 @@ Expr::~Expr()
 //
 // 返されたオブジェクトは is_valid() == false となる．
 Expr
-Expr::invalid()
+Expr::make_invalid()
 {
   return Expr(nullptr);
 }
 
 // 定数 0 の論理式を作る
 Expr
-Expr::zero()
+Expr::make_zero()
 {
   return Expr(ExprMgr::the_obj().make_zero());
 }
 
 // 定数 1 の論理式を作る
 Expr
-Expr::one()
+Expr::make_one()
 {
   return Expr(ExprMgr::the_obj().make_one());
 }
 
 // 肯定のリテラルを作る．
 Expr
-Expr::posi_literal(VarId varid)
+Expr::make_posi_literal(VarId varid)
 {
   return Expr(ExprMgr::the_obj().make_posiliteral(varid));
 }
 
 // 否定のリテラルを作る．
 Expr
-Expr::nega_literal(VarId varid)
+Expr::make_nega_literal(VarId varid)
 {
   return Expr(ExprMgr::the_obj().make_negaliteral(varid));
 }
@@ -241,7 +241,7 @@ Expr::from_string(const string& expr_str,
   }
   catch ( SyntaxError e ) {
     err_msg = e.mMsg;
-    return Expr::invalid();
+    return Expr::make_invalid();
   }
 }
 
@@ -639,38 +639,38 @@ dump_expr(ostream& s,
 
 // ストリームから論理式を作る．
 Expr
-read_expr(istream& s)
+restore_expr(istream& s)
 {
   ymuint8 type;
-  s >> type;
+  s.read(reinterpret_cast<char*>(&type), sizeof(type));
   switch ( type ) {
   case 0:
-    return Expr::zero();
+    return Expr::make_zero();
 
   case 1:
-    return Expr::one();
+    return Expr::make_one();
 
   case 2:
     {
       VarId var;
       var.restore(s);
-      return Expr::posi_literal(var);
+      return Expr::make_posi_literal(var);
     }
 
   case 3:
     {
       VarId var;
       var.restore(s);
-      return Expr::nega_literal(var);
+      return Expr::make_nega_literal(var);
     }
   }
 
   // 残りは論理演算
   int nc;
-  s >> nc;
+  s.read(reinterpret_cast<char*>(&nc), sizeof(nc));
   vector<Expr> child_list(nc);
   for (int i = 0; i < nc; ++ i) {
-    child_list[i] = read_expr(s);
+    child_list[i] = restore_expr(s);
   }
 
   switch ( type ) {
@@ -688,7 +688,7 @@ read_expr(istream& s)
   }
 
   // ダミー
-  return Expr::zero();
+  return Expr::make_zero();
 }
 
 END_NONAMESPACE
@@ -715,7 +715,7 @@ Expr::dump(ostream& s) const
 void
 Expr::restore(istream& s)
 {
-  *this = read_expr(s);
+  *this = restore_expr(s);
 }
 
 END_NAMESPACE_YM_LOGIC

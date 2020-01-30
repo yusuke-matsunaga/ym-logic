@@ -170,16 +170,16 @@ ExprParser::get_literal()
   ExprToken token = get_token(id);
 
   if ( token == ExprToken::ZERO ) {
-    return Expr::zero();
+    return Expr::make_zero();
   }
 
   if ( token == ExprToken::ONE ) {
-    return Expr::one();
+    return Expr::make_one();
   }
 
   if ( token == ExprToken::NUM ) {
     // id 番目の肯定のリテラルを作る．
-    return Expr::posi_literal(id);
+    return Expr::make_posi_literal(id);
   }
 
   if ( token == ExprToken::NOT ) {
@@ -190,7 +190,7 @@ ExprParser::get_literal()
       throw SyntaxError("NUMBER is expected after NOT");
     }
     // id 番目の否定のリテラルを作る．
-    return Expr::nega_literal(id);
+    return Expr::make_nega_literal(id);
   }
 
   if ( token == ExprToken::LP ) {
@@ -202,7 +202,7 @@ ExprParser::get_literal()
   throw SyntaxError("syntax error");
 
   // ダミー
-  return Expr::zero();
+  return Expr::make_zero();
 }
 
 // AND でつながった積項をとって来る．
