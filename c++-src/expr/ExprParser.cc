@@ -21,8 +21,8 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @brief コンストラクタ
 // @param[in] expr_str 論理式を表す文字列
 ExprParser::ExprParser(const string& expr_str) :
-  mExprStr(expr_str),
-  mInput(mExprStr)
+  mExprStr{expr_str},
+  mInput{mExprStr}
 {
 }
 
@@ -35,7 +35,7 @@ ExprParser::~ExprParser()
 VarId
 ExprParser::str_to_literal(const string& str)
 {
-  int id = 0;
+  SizeType id = 0;
   for ( char c: str ) {
     id *= 10;
     id += static_cast<ymuint>(c - '0');
@@ -82,7 +82,7 @@ ExprParser::get_token(VarId& lit_id)
   case 'o':  // 次のケースと同じ
   case 'O':  goto stateO;
   default:
-    throw SyntaxError("syntax error");
+    throw SyntaxError{"syntax error"};
   }
 
  state1:
@@ -118,7 +118,7 @@ ExprParser::get_token(VarId& lit_id)
   case '8':  // 次のケースとおなじ
   case '9':  str.append(1, c); goto state1;
   default:
-    throw SyntaxError("syntax error");
+    throw SyntaxError{"syntax error"};
   }
 
  stateZ:
@@ -135,10 +135,10 @@ ExprParser::get_token(VarId& lit_id)
 
  stateO:
   if ( !mInput.get(c) || (c != 'n' && c != 'N') ) {
-    throw SyntaxError("syntax error");
+    throw SyntaxError{"syntax error"};
   }
   if ( !mInput.get(c) || (c != 'e' && c != 'E') ) {
-    throw SyntaxError("syntax error");
+    throw SyntaxError{"syntax error"};
   }
   return ExprToken::ONE;
 }
@@ -167,7 +167,7 @@ ExprParser::get_literal()
   // ここに来る可能性のあるのは NUM, NOT, LP のみ
   // それ以外はエラー
   VarId id;
-  ExprToken token = get_token(id);
+  auto token{get_token(id)};
 
   if ( token == ExprToken::ZERO ) {
     return Expr::make_zero();
@@ -210,16 +210,16 @@ Expr
 ExprParser::get_product()
 {
   // まず第一項めを取り出す．
-  Expr expr = get_literal();
+  auto expr{get_literal()};
 
   for ( ; ; ) {
     // 次のトークンが AND かどうかを調べる．
-    if ( ! get_and_token() ) {
+    if ( !get_and_token() ) {
       // AND 以外なら終り．
       return expr;
     }
     // 次のリテラルを取り出す．
-    Expr expr1 = get_literal();
+    auto expr1{get_literal()};
 
     // 積項を作る．
     expr &= expr1;
@@ -233,22 +233,21 @@ Expr
 ExprParser::get_expr(ExprToken end_token)
 {
   // まず第一項めを取り出す．
-  Expr expr = get_product();
+  auto expr{get_product()};
 
   for ( ; ; ) {
     // 次のトークンを調べる．
     VarId dummy;
-    ExprToken token = get_token(dummy);
+    auto token{get_token(dummy)};
     if ( token == end_token ) {
       return expr;
     }
     if ( token != ExprToken::OR && token != ExprToken::XOR ) {
       // OR か XOR で無ければならない．
-      cerr << "token = " << token << endl;
-      throw SyntaxError("syntax error");
+      throw SyntaxError{"syntax error"};
     }
     // 次の積項を取り出す．
-    Expr expr1 = get_product();
+    auto expr1{get_product()};
 
     if ( token == ExprToken::OR ) {
       // 和項を作る．

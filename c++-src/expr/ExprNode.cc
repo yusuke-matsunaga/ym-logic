@@ -29,10 +29,10 @@ posi_equiv(const ExprNode* node0,
     return false;
   }
 
-  int n = node0->child_num();
-  for ( int i = 0; i < n; i ++ ) {
-    const ExprNode* chd0 = node0->child(i);
-    const ExprNode* chd1 = node1->child(i);
+  SizeType n{node0->child_num()};
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto chd0{node0->child(i)};
+    auto chd1{node1->child(i)};
     if ( !posi_equiv(chd0, chd1) ) {
       return false;
     }
@@ -64,7 +64,7 @@ nega_equiv(const ExprNode* node0,
     return node1->is_posiliteral() && node0->varid() == node1->varid();
   }
 
-  int n = node0->child_num();
+  SizeType n{node0->child_num()};
   if ( node1->child_num() != n ) {
     return false;
   }
@@ -73,9 +73,9 @@ nega_equiv(const ExprNode* node0,
     if ( !node1->is_or() ) {
       return false;
     }
-    for ( int i = 0; i < n; i ++ ) {
-      const ExprNode* chd0 = node0->child(i);
-      const ExprNode* chd1 = node1->child(i);
+    for ( SizeType i = 0; i < n; ++ i ) {
+      auto chd0{node0->child(i)};
+      auto chd1{node1->child(i)};
       if ( !nega_equiv(chd0, chd1) ) {
 	return false;
       }
@@ -86,9 +86,9 @@ nega_equiv(const ExprNode* node0,
     if ( !node1->is_and() ) {
       return false;
     }
-    for ( int i = 0; i < n; i ++ ) {
-      const ExprNode* chd0 = node0->child(i);
-      const ExprNode* chd1 = node1->child(i);
+    for ( SizeType i = 0; i < n; ++ i ) {
+      auto chd0{node0->child(i)};
+      auto chd1{node1->child(i)};
       if ( !nega_equiv(chd0, chd1) ) {
 	return false;
       }
@@ -99,11 +99,10 @@ nega_equiv(const ExprNode* node0,
     if ( !node1->is_xor() ) {
       return false;
     }
-    int n = node0->child_num();
     bool inv = false;
-    for ( int i = 0; i < n; i ++ ) {
-      const ExprNode* chd0 = node0->child(i);
-      const ExprNode* chd1 = node1->child(i);
+    for ( SizeType i = 0; i < n; ++ i ) {
+      auto chd0{node0->child(i)};
+      auto chd1{node1->child(i)};
       if ( !nega_equiv(chd0, chd1) ) {
 	inv = !inv;
       }
@@ -137,22 +136,22 @@ ExprNode::eval(const vector<BitVectType>& vals,
     return ~vals[varid().val()] & mask;
   }
 
-  int nc = child_num();
+  SizeType nc{child_num()};
   ASSERT_COND( nc > 0 );
 
-  BitVectType ans = child(0)->eval(vals, mask);
+  BitVectType ans{child(0)->eval(vals, mask)};
   if ( is_and() ) {
-    for ( int i = 1; i < nc; ++ i ) {
+    for ( SizeType i = 1; i < nc; ++ i ) {
       ans &= child(i)->eval(vals, mask);
     }
   }
   else if ( is_or() ) {
-    for ( int i = 1; i < nc; ++ i ) {
+    for ( SizeType i = 1; i < nc; ++ i ) {
       ans |= child(i)->eval(vals, mask);
     }
   }
   else if ( is_xor() ) {
-    for ( int i = 1; i < nc; ++ i ) {
+    for ( SizeType i = 1; i < nc; ++ i ) {
       ans ^= child(i)->eval(vals, mask);
     }
   }
@@ -165,7 +164,7 @@ ExprNode::eval(const vector<BitVectType>& vals,
 // @brief 真理値表を作成する．
 // @param[in] ni 入力数
 TvFunc
-ExprNode::make_tv(int ni) const
+ExprNode::make_tv(SizeType ni) const
 {
   if ( is_zero() ) {
     return TvFunc::make_zero(ni);
@@ -181,22 +180,22 @@ ExprNode::make_tv(int ni) const
   }
 
   // あとは AND/OR/XOR のみ
-  int nc = child_num();
+  SizeType nc{child_num()};
   ASSERT_COND( nc > 0 );
 
-  TvFunc ans = child(0)->make_tv(ni);
+  TvFunc ans{child(0)->make_tv(ni)};
   if ( is_and() ) {
-    for ( int i = 1; i < nc; ++ i ) {
+    for ( SizeType i = 1; i < nc; ++ i ) {
       ans &= child(i)->make_tv(ni);
     }
   }
   else if ( is_or() ) {
-    for ( int i = 1; i < nc; ++ i ) {
+    for ( SizeType i = 1; i < nc; ++ i ) {
       ans |= child(i)->make_tv(ni);
     }
   }
   else if ( is_xor() ) {
-    for ( int i = 1; i < nc; ++ i ) {
+    for ( SizeType i = 1; i < nc; ++ i ) {
       ans ^= child(i)->make_tv(ni);
     }
   }
@@ -241,7 +240,7 @@ ExprNode::is_sop() const
 }
 
 // リテラル数を返す．
-int
+SizeType
 ExprNode::litnum() const
 {
   if ( is_literal() ) {
@@ -249,7 +248,7 @@ ExprNode::litnum() const
     return 1;
   }
 
-  int num = 0;
+  SizeType num = 0;
 
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
@@ -262,7 +261,7 @@ ExprNode::litnum() const
 }
 
 // 特定の変数のリテラル数を返す．
-int
+SizeType
 ExprNode::litnum(VarId id) const
 {
   if ( is_literal() && varid() == id ) {
@@ -270,7 +269,7 @@ ExprNode::litnum(VarId id) const
     return 1;
   }
 
-  int num = 0;
+  SizeType num = 0;
 
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
@@ -284,7 +283,7 @@ ExprNode::litnum(VarId id) const
 }
 
 // 特定の変数の特定の極性のリテラル数を返す．
-int
+SizeType
 ExprNode::litnum(VarId id,
 		 bool inv) const
 {
@@ -293,7 +292,7 @@ ExprNode::litnum(VarId id,
     return 1;
   }
 
-  int num = 0;
+  SizeType num = 0;
 
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
@@ -306,18 +305,18 @@ ExprNode::litnum(VarId id,
 }
 
 // @brief 使われている変数の最大の番号 + 1を得る．
-int
+SizeType
 ExprNode::input_size() const
 {
   if ( is_literal() ) {
     return varid().val() + 1;
   }
 
-  int ans = 0;
+  SizeType ans = 0;
 
   if ( is_op() ) {
     for ( auto child: child_list() ) {
-      int ans1 = child->input_size();
+      SizeType ans1{child->input_size()};
       if ( ans < ans1 ) {
 	ans = ans1;
       }
@@ -335,18 +334,18 @@ ExprNode::soplit(bool inverted) const
     return SopLit(1, 1);
   }
 
-  if ( (type() == ExprType::And && !inverted) ||
-       (type() == ExprType::Or && inverted) ) {
+  if ( (type() == ExprNode::And && !inverted) ||
+       (type() == ExprNode::Or && inverted) ) {
     SopLit l(1, 0);
     for ( auto child: child_list() ) {
-      SopLit l1 = child->soplit(inverted);
+      auto l1{child->soplit(inverted)};
       l *= l1;
     }
     return l;
   }
 
-  if ( (type() == ExprType::Or && !inverted) ||
-       (type() == ExprType::And && inverted) ) {
+  if ( (type() == ExprNode::Or && !inverted) ||
+       (type() == ExprNode::And && inverted) ) {
     SopLit l(0, 0);
     for ( auto child: child_list() ) {
       SopLit l1 = child->soplit(inverted);
@@ -355,17 +354,17 @@ ExprNode::soplit(bool inverted) const
     return l;
   }
 
-  if ( type() == ExprType::Xor ) {
-    const ExprNode* chd = child(0);
-    SopLit lp = chd->soplit(inverted);
-    SopLit ln = chd->soplit(inverted);
-    int nc = child_num();
-    for ( int i = 1; i < nc; ++ i ) {
-      const ExprNode* chd = child(i);
-      SopLit l1p = lp;
-      SopLit l1n = ln;
-      SopLit l2p = chd->soplit(false);
-      SopLit l2n = chd->soplit(true);
+  if ( type() == ExprNode::Xor ) {
+    auto chd{child(0)};
+    auto lp{chd->soplit(inverted)};
+    auto ln{chd->soplit(inverted)};
+    SizeType nc{child_num()};
+    for ( SizeType i = 1; i < nc; ++ i ) {
+      auto chd{child(i)};
+      auto l1p{lp};
+      auto l1n{ln};
+      auto l2p{chd->soplit(false)};
+      auto l2n{chd->soplit(true)};
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
@@ -389,37 +388,37 @@ ExprNode::soplit(bool inverted,
     }
   }
 
-  if ( (type() == ExprType::And && !inverted) ||
-       (type() == ExprType::Or  && inverted) ) {
+  if ( (type() == ExprNode::And && !inverted) ||
+       (type() == ExprNode::Or  && inverted) ) {
     SopLit l(1, 0);
     for ( auto child: child_list() ) {
-      SopLit l1 = child->soplit(inverted, id);
+      auto l1{child->soplit(inverted, id)};
       l *= l1;
     }
     return l;
   }
 
-  if ( (type() == ExprType::Or && !inverted) ||
-       (type() == ExprType::And && inverted) ) {
+  if ( (type() == ExprNode::Or && !inverted) ||
+       (type() == ExprNode::And && inverted) ) {
     SopLit l(0, 0);
     for ( auto child: child_list() ) {
-      SopLit l1 = child->soplit(inverted, id);
+      auto l1{child->soplit(inverted, id)};
       l += l1;
     }
     return l;
   }
 
-  if ( type() == ExprType::Xor ) {
-    const ExprNode* chd = child(0);
-    SopLit lp = chd->soplit(inverted);
-    SopLit ln = chd->soplit(inverted);
-    int nc = child_num();
-    for ( int i = 1; i < nc; ++ i ) {
-      const ExprNode* chd = child(i);
-      SopLit l1p = lp;
-      SopLit l1n = ln;
-      SopLit l2p = chd->soplit(false, id);
-      SopLit l2n = chd->soplit(true, id);
+  if ( type() == ExprNode::Xor ) {
+    auto chd{child(0)};
+    auto lp{chd->soplit(inverted)};
+    auto ln{chd->soplit(inverted)};
+    SizeType nc{child_num()};
+    for ( SizeType i = 1; i < nc; ++ i ) {
+      auto chd{child(i)};
+      auto l1p{lp};
+      auto l1n{ln};
+      auto l2p{chd->soplit(false, id)};
+      auto l2n{chd->soplit(true, id)};
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
@@ -444,37 +443,37 @@ ExprNode::soplit(bool inverted,
     }
   }
 
-  if ( (type() == ExprType::And && !inverted) ||
-       (type() == ExprType::Or && inverted) ) {
+  if ( (type() == ExprNode::And && !inverted) ||
+       (type() == ExprNode::Or && inverted) ) {
     SopLit l(1, 0);
     for ( auto child: child_list() ) {
-      SopLit l1 = child->soplit(inverted, id, inv);
+      auto l1{child->soplit(inverted, id, inv)};
       l *= l1;
     }
     return l;
   }
 
-  if ( (type() == ExprType::Or && !inverted) ||
-       (type() == ExprType::And && inverted) ) {
+  if ( (type() == ExprNode::Or && !inverted) ||
+       (type() == ExprNode::And && inverted) ) {
     SopLit l(0, 0);
     for ( auto child: child_list() ) {
-      SopLit l1 = child->soplit(inverted, id, inv);
+      auto l1{child->soplit(inverted, id, inv)};
       l += l1;
     }
     return l;
   }
 
-  if ( type() == ExprType::Xor ) {
-    int n = child_num();
-    const ExprNode* chd = child(0);
-    SopLit lp = chd->soplit(inverted);
-    SopLit ln = chd->soplit(inverted);
-    for ( int i = 1; i < n; ++ i ) {
-      const ExprNode* chd = child(i);
-      SopLit l1p = lp;
-      SopLit l1n = ln;
-      SopLit l2p = chd->soplit(false, id);
-      SopLit l2n = chd->soplit(true, id);
+  if ( type() == ExprNode::Xor ) {
+    SizeType n{child_num()};
+    auto chd{child(0)};
+    auto lp{chd->soplit(inverted)};
+    auto ln{chd->soplit(inverted)};
+    for ( SizeType i = 1; i < n; ++ i ) {
+      auto chd{child(i)};
+      auto l1p{lp};
+      auto l1n{ln};
+      auto l2p{chd->soplit(false, id)};
+      auto l2n{chd->soplit(true, id)};
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
@@ -490,19 +489,19 @@ void
 ExprNode::print(ostream& s) const
 {
   switch ( type() ) {
-  case ExprType::Const0:      s << "0"; return;
-  case ExprType::Const1:      s << "1"; return;
-  case ExprType::PosiLiteral: s << "P" << varid(); return;
-  case ExprType::NegaLiteral: s << "N" << varid(); return;
+  case ExprNode::Const0:      s << "0"; return;
+  case ExprNode::Const1:      s << "1"; return;
+  case ExprNode::PosiLiteral: s << "P" << varid(); return;
+  case ExprNode::NegaLiteral: s << "N" << varid(); return;
   default: break;
   }
   const char* op = "";
   const char* op1 = "";
   s << "(";
   switch ( type() ) {
-  case ExprType::And: op1 = " & "; break;
-  case ExprType::Or:  op1 = " | "; break;
-  case ExprType::Xor: op1 = " ^ "; break;
+  case ExprNode::And: op1 = " & "; break;
+  case ExprNode::Or:  op1 = " | "; break;
+  case ExprNode::Xor: op1 = " ^ "; break;
   default: break;
   }
   for ( auto child: child_list() ) {

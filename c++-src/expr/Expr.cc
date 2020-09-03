@@ -19,22 +19,19 @@
 BEGIN_NAMESPACE_YM_LOGIC
 
 // 根のノードを指定したコンストラクタ
-Expr::Expr(const ExprNode* node) :
-  mRootPtr(nullptr)
+Expr::Expr(const ExprNode* node)
 {
   set_root(node);
 }
 
 // デフォルトコンストラクタ
-Expr::Expr() :
-  mRootPtr(nullptr)
+Expr::Expr()
 {
   set_root(ExprMgr::the_obj().make_zero());
 }
 
 // コピーコンストラクタ
-Expr::Expr(const Expr& src) :
-  mRootPtr(nullptr)
+Expr::Expr(const Expr& src)
 {
   set_root(src.root());
 }
@@ -116,8 +113,8 @@ Expr
 Expr::and_op(const Expr& chd1,
 	     const Expr& chd2)
 {
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
   return Expr(mgr.make_and(begin));
@@ -129,8 +126,8 @@ Expr::make_and(const vector<Expr>& chd_list)
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -142,8 +139,8 @@ Expr::make_and(const list<Expr>& chd_list)
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -155,8 +152,8 @@ Expr
 Expr::or_op(const Expr& chd1,
 	    const Expr& chd2)
 {
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
   return Expr(mgr.make_or(begin));
@@ -168,8 +165,8 @@ Expr::make_or(const vector<Expr>& chd_list)
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -181,8 +178,8 @@ Expr::make_or(const list<Expr>& chd_list)
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -194,8 +191,8 @@ Expr
 Expr::xor_op(const Expr& chd1,
 	     const Expr& chd2)
 {
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
   return Expr(mgr.make_xor(begin));
@@ -207,8 +204,8 @@ Expr::make_xor(const vector<Expr>& chd_list)
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -220,8 +217,8 @@ Expr::make_xor(const list<Expr>& chd_list)
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -257,15 +254,16 @@ Expr::__clear_memory()
 Expr
 Expr::invert() const
 {
-  return Expr(ExprMgr::the_obj().complement(root()));
+  auto& mgr{ExprMgr::the_obj()};
+  return Expr(mgr.complement(root()));
 }
 
 // 自分の論理式と src の論理式の論理積を計算し自分に代入する．
 Expr&
 Expr::operator&=(const Expr& src)
 {
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.make_and(begin));
@@ -276,8 +274,8 @@ Expr::operator&=(const Expr& src)
 Expr&
 Expr::operator|=(const Expr& src)
 {
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.make_or(begin));
@@ -288,8 +286,8 @@ Expr::operator|=(const Expr& src)
 Expr&
 Expr::operator^=(const Expr& src)
 {
-  ExprMgr& mgr = ExprMgr::the_obj();
-  int begin = mgr.nodestack_top();
+  auto& mgr{ExprMgr::the_obj()};
+  SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.make_xor(begin));
@@ -301,14 +299,16 @@ Expr
 Expr::compose(VarId varid,
 	      const Expr& src) const
 {
-  return Expr(ExprMgr::the_obj().compose(root(), varid, src.root()));
+  auto& mgr{ExprMgr::the_obj()};
+  return Expr(mgr.compose(root(), varid, src.root()));
 }
 
 // comp_map にしたがって複数のリテラルの置き換えを行う．
 Expr
 Expr::compose(const unordered_map<VarId, Expr>& comp_map) const
 {
-  return Expr(ExprMgr::the_obj().compose(root(), comp_map));
+  auto& mgr{ExprMgr::the_obj()};
+  return Expr(mgr.compose(root(), comp_map));
 }
 
 // @brief 複数変数の compose 演算
@@ -325,14 +325,16 @@ Expr::compose(const vector<pair<VarId, Expr>>& comp_list) const
   for ( auto p: comp_list ) {
     comp_map[p.first] = p.second;
   }
-  return Expr(ExprMgr::the_obj().compose(root(), comp_map));
+  auto& mgr{ExprMgr::the_obj()};
+  return Expr(mgr.compose(root(), comp_map));
 }
 
 // 与えられた論理式のリテラル番号を再マップする．
 Expr
 Expr::remap_var(const unordered_map<VarId, VarId>& varmap) const
 {
-  return Expr(ExprMgr::the_obj().remap_var(root(), varmap));
+  auto& mgr{ExprMgr::the_obj()};
+  return Expr(mgr.remap_var(root(), varmap));
 }
 
 // 与えられた論理式のリテラル番号を再マップする．
@@ -343,7 +345,8 @@ Expr::remap_var(const vector<pair<VarId, VarId>>& varlist) const
   for ( auto p: varlist ) {
     varmap[p.first] = p.second;
   }
-  return Expr(ExprMgr::the_obj().remap_var(root(), varmap));
+  auto& mgr{ExprMgr::the_obj()};
+  return Expr(mgr.remap_var(root(), varmap));
 }
 
 // 重複した式を取り除く
@@ -351,10 +354,11 @@ Expr::remap_var(const vector<pair<VarId, VarId>>& varlist) const
 // expr + ~expr = 1 のようなもの
 // 自分自身が簡単化された式に置き換わる．
 // 新しい式を返す．
-const Expr&
+Expr&
 Expr::simplify()
 {
-  set_root(ExprMgr::the_obj().simplify(root()));
+  auto& mgr{ExprMgr::the_obj()};
+  set_root(mgr.simplify(root()));
   return *this;
 }
 
@@ -370,9 +374,9 @@ Expr::eval(const vector<BitVectType>& vals,
 
 // @brief 真理値表の作成
 TvFunc
-Expr::make_tv(int ni) const
+Expr::make_tv(SizeType ni) const
 {
-  int ni2 = input_size();
+  SizeType ni2{input_size()};
   if ( ni < ni2 ) {
     ni = ni2;
   }
@@ -429,6 +433,16 @@ Expr::varid() const
   return root()->varid();
 }
 
+// @brief リテラルの取得
+// @return 対象がリテラルの場合リテラルを返す．
+//
+// そうでなければリテラルとして不正な値を返す．
+Literal
+Expr::literal() const
+{
+  return root()->literal();
+}
+
 // トップがANDの時に真となる．
 bool
 Expr::is_and() const
@@ -474,7 +488,7 @@ compare_type(const Expr& src1,
 
 // AND/OR/XOR の時に子供の項の数を返す．
 // それ以外のノードの時には 0 を返す．
-int
+SizeType
 Expr::child_num() const
 {
   return root()->child_num();
@@ -484,6 +498,7 @@ Expr::child_num() const
 Expr
 Expr::child(int pos) const
 {
+  ASSERT_COND( 0 <= pos && pos < child_num() );
   return Expr(root()->child(pos));
 }
 

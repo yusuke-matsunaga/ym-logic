@@ -10,7 +10,6 @@
 
 
 #include "ym/Expr.h"
-#include "ExprType.h"
 #include "ym/Array.h"
 
 
@@ -34,6 +33,20 @@ public:
 
   using BitVectType = Expr::BitVectType;
 
+  /// @brief 演算子の種類を表す列挙型
+  ///
+  /// 定数やリテラルも含む．
+  /// 型判定の dirty trick のために値の指定が必要．
+  enum Type {
+    Const0      = 0,
+    Const1      = 1,
+    PosiLiteral = 2,
+    NegaLiteral = 3,
+    And         = 4,
+    Or          = 5,
+    Xor         = 6
+  };
+
 public:
 
   //////////////////////////////////////////////////////////////////////
@@ -41,7 +54,7 @@ public:
   /// @{
 
   /// @brief 型を返す
-  ExprType
+  Type
   type() const;
 
   /// @brief 恒偽関数を表している時に真となる．
@@ -77,6 +90,13 @@ public:
   VarId
   varid() const;
 
+  /// @brief リテラルの取得
+  /// @return 対象がリテラルの場合リテラルを返す．
+  ///
+  /// そうでなければリテラルとして不正な値を返す．
+  Literal
+  literal() const;
+
   /// @brief AND ノードの時に真となる．
   bool
   is_and() const;
@@ -96,7 +116,7 @@ public:
   is_op() const;
 
   /// @brief 演算子ノードの場合に項の数を返す．
-  int
+  SizeType
   child_num() const;
 
   /// @brief 演算子ノードの場合に子供のノードを返す．
@@ -118,7 +138,7 @@ public:
   /// @brief 真理値表を作成する．
   /// @param[in] ni 入力数
   TvFunc
-  make_tv(int ni) const;
+  make_tv(SizeType ni) const;
 
   /// @brief 定数,リテラルもしくは子供がリテラルのノードの時に true を返す．
   bool
@@ -141,12 +161,12 @@ public:
   is_sop() const;
 
   /// @brief リテラル数を返す．
-  int
+  SizeType
   litnum() const;
 
   /// @brief 特定の変数のリテラルの出現回数を返す．
   /// @param[in] varid 計測対象の変数番号
-  int
+  SizeType
   litnum(VarId varid) const;
 
   /// @brief 特定の変数の特定の極性のリテラルの出現回数を返す．
@@ -154,12 +174,12 @@ public:
   /// @param[in] inv 計測対象の極性
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
-  int
+  SizeType
   litnum(VarId varid,
 	 bool inv) const;
 
   /// @brief 使われている変数の最大の番号 + 1を得る．
-  int
+  SizeType
   input_size() const;
 
   /// @brief SOP 形式に展開したときの積項数とリテラル数を見積もる．
@@ -229,12 +249,12 @@ public:
 private:
 
   // 参照回数を得る．
-  int
+  SizeType
   ref() const;
 
   // 参照回数をセットする．
   void
-  ref(int ref) const;
+  ref(SizeType ref) const;
 
   // 自殺する．
   void
@@ -251,13 +271,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 参照回数＋ノードタイプ(3ビット)
-  int mRefType;
+  SizeType mRefType;
 
   // 子供の数 もしくは 変数番号
-  int mNc;
+  SizeType mNc;
 
   // 子を指すポインタの配列
   const ExprNode* mChildArray[1];
+
+  // 参照回数の最大値
+  static const SizeType kRefMax{1UL << (sizeof(SizeType) * 8 - 4)};
 
 };
 
@@ -293,24 +316,24 @@ ExprNode::~ExprNode()
 }
 
 inline
-ExprType
+ExprNode::Type
 ExprNode::type() const
 {
-  return static_cast<ExprType>(mRefType & 7U);
+  return static_cast<Type>(mRefType & 7U);
 }
 
 inline
 bool
 ExprNode::is_zero() const
 {
-  return type() == ExprType::Const0;
+  return type() == ExprNode::Const0;
 }
 
 inline
 bool
 ExprNode::is_one() const
 {
-  return type() == ExprType::Const1;
+  return type() == ExprNode::Const1;
 }
 
 inline
@@ -318,21 +341,21 @@ bool
 ExprNode::is_constant() const
 {
   // ちょっときたないコード
-  return static_cast<ExprType>(mRefType & 6U) == ExprType::Const0;
+  return static_cast<Type>(mRefType & 6U) == ExprNode::Const0;
 }
 
 inline
 bool
 ExprNode::is_posiliteral() const
 {
-  return type() == ExprType::PosiLiteral;
+  return type() == ExprNode::PosiLiteral;
 }
 
 inline
 bool
 ExprNode::is_negaliteral() const
 {
-  return type() == ExprType::NegaLiteral;
+  return type() == ExprNode::NegaLiteral;
 }
 
 inline
@@ -340,7 +363,7 @@ bool
 ExprNode::is_literal() const
 {
   // ちょっとキタナイコード．
-  return static_cast<ExprType>(mRefType & 6U) == ExprType::PosiLiteral;
+  return static_cast<Type>(mRefType & 6U) == ExprNode::PosiLiteral;
 }
 
 inline
@@ -357,25 +380,41 @@ ExprNode::varid() const
   return is_literal() ? VarId(mNc) : VarId();
 }
 
+// @brief リテラルの取得
+// @return 対象がリテラルの場合リテラルを返す．
+//
+// そうでなければリテラルとして不正な値を返す．
+inline
+Literal
+ExprNode::literal() const
+{
+  for ( bool inv: {false, true} ) {
+    if ( is_literal(inv) ) {
+      return Literal(VarId(mNc), inv);
+    }
+  }
+  return Literal();
+}
+
 inline
 bool
 ExprNode::is_and() const
 {
-  return type() == ExprType::And;
+  return type() == ExprNode::And;
 }
 
 inline
 bool
 ExprNode::is_or() const
 {
-  return type() == ExprType::Or;
+  return type() == ExprNode::Or;
 }
 
 inline
 bool
 ExprNode::is_xor() const
 {
-  return type() == ExprType::Xor;
+  return type() == ExprNode::Xor;
 }
 
 inline
@@ -419,7 +458,7 @@ ExprNode::is_simple_xor() const
 }
 
 inline
-int
+SizeType
 ExprNode::child_num() const
 {
   return is_op() ? mNc : 0;
@@ -440,7 +479,7 @@ Array<const ExprNode*>
 ExprNode::child_list() const
 {
   if ( is_op() ) {
-    auto arrayptr = const_cast<const ExprNode**>(mChildArray);
+    auto arrayptr{const_cast<const ExprNode**>(mChildArray)};
     return Array<const ExprNode*>(arrayptr, 0, mNc);
   }
   else {
@@ -449,7 +488,7 @@ ExprNode::child_list() const
 }
 
 inline
-int
+SizeType
 ExprNode::ref() const
 {
   return static_cast<int>(mRefType >> 3);
@@ -457,9 +496,9 @@ ExprNode::ref() const
 
 inline
 void
-ExprNode::ref(int ref) const
+ExprNode::ref(SizeType ref) const
 {
-  ExprNode* node = const_cast<ExprNode*>(this);
+  auto node{const_cast<ExprNode*>(this)};
   // 昔の参照回数を落とす．
   node->mRefType &= 7;
   // ref をセットする．
@@ -472,7 +511,7 @@ ExprNode::inc_ref() const
 {
   // MAX の時は増やさない．
   if ( ref() < kRefMax ) {
-    ExprNode* node = const_cast<ExprNode*>(this);
+    auto node{const_cast<ExprNode*>(this)};
     node->mRefType += 8;
   }
 }
@@ -481,15 +520,16 @@ inline
 void
 ExprNode::dec_ref() const
 {
-  int r = ref();
-  // MAX の時は減らさない．
-  if ( r < kRefMax ) {
-    ExprNode* node = const_cast<ExprNode*>(this);
-    node->mRefType -= 8;
-    if ( r == 1 ) {
-      node->suicide();
-    }
+  SizeType r = ref();
+  auto node{const_cast<ExprNode*>(this)};
+  if ( r == 1 ) {
+    // これが最後の参照だった．
+    node->suicide();
   }
+  else if ( r < kRefMax ) {
+    node->mRefType -= 8;
+  }
+  // MAX の時は減らさない．
 }
 
 END_NAMESPACE_YM_LOGIC

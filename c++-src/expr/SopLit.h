@@ -22,23 +22,23 @@ class SopLit
 {
 public:
   /// コンストラクタ
-  SopLit(int np = 0,
-	 int nl = 0);
+  SopLit(SizeType np = 0,
+	 SizeType nl = 0);
 
   /// 積項数を得る．
-  int
+  SizeType
   np() const;
 
   /// リテラル数を得る．
-  int
+  SizeType
   nl() const;
 
   /// 和を取って代入する．
-  const SopLit&
+  SopLit&
   operator+=(const SopLit& src);
 
   /// 積を取って代入する．
-  const SopLit&
+  SopLit&
   operator*=(const SopLit& src);
 
   /// 2つの積項の和
@@ -59,10 +59,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 積項数
-  int mNp;
+  SizeType mNp;
 
   // リテラル数
-  int mNl;
+  SizeType mNl;
 };
 
 
@@ -72,29 +72,29 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 inline
-SopLit::SopLit(int np,
-	       int nl) :
-  mNp(np),
-  mNl(nl)
+SopLit::SopLit(SizeType np,
+	       SizeType nl) :
+  mNp{np},
+  mNl{nl}
 {
 }
 
 inline
-int
+SizeType
 SopLit::np() const
 {
   return mNp;
 }
 
 inline
-int
+SizeType
 SopLit::nl() const
 {
   return mNl;
 }
 
 inline
-const SopLit&
+SopLit&
 SopLit::operator+=(const SopLit& src)
 {
   mNp += src.mNp;
@@ -103,10 +103,10 @@ SopLit::operator+=(const SopLit& src)
 }
 
 inline
-const SopLit&
+SopLit&
 SopLit::operator*=(const SopLit& src)
 {
-  int old_np = mNp;
+  SizeType old_np = mNp;
   mNp *= src.mNp;
   mNl = mNl * src.mNp + src.mNl * old_np;
   return *this;

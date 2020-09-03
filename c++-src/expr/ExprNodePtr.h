@@ -34,7 +34,7 @@ public:
 
   /// @brief 代入演算子
   /// @param[in] src 代入元のオブジェクト
-  const ExprNodePtr&
+  ExprNodePtr&
   operator=(const ExprNodePtr& src);
 
   /// @brief デストラクタ
@@ -72,7 +72,7 @@ typedef vector<ExprNodePtr> ExprNodeList;
 // @param[in] ptr Cポインタ
 inline
 ExprNodePtr::ExprNodePtr(const ExprNode* ptr) :
-  mPtr(ptr)
+  mPtr{ptr}
 {
   if ( mPtr ) {
     mPtr->inc_ref();
@@ -83,7 +83,7 @@ ExprNodePtr::ExprNodePtr(const ExprNode* ptr) :
 // @param[in] src コピー元のオブジェクト
 inline
 ExprNodePtr::ExprNodePtr(const ExprNodePtr& src) :
-  mPtr(src.mPtr)
+  mPtr{src.mPtr}
 {
   if ( mPtr ) {
     mPtr->inc_ref();
@@ -93,7 +93,7 @@ ExprNodePtr::ExprNodePtr(const ExprNodePtr& src) :
 // @brief 代入演算子
 // @param[in] src 代入元のオブジェクト
 inline
-const ExprNodePtr&
+ExprNodePtr&
 ExprNodePtr::operator=(const ExprNodePtr& src)
 {
   if ( src.mPtr ) {

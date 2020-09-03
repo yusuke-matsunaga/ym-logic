@@ -55,12 +55,11 @@ class SyntaxError :
   public exception
 {
 public:
+
+  SyntaxError(const char* msg) : mMsg{msg} { }
+
   /// @brief エラーメッセージ
   const char* mMsg;
-
-  /// @brief コンストラクタ
-  SyntaxError(const char* msg) { mMsg = msg; }
-
 };
 
 

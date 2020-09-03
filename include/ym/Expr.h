@@ -5,7 +5,7 @@
 /// @brief Expr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017, 2018 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2018, 2020 Yusuke Matsunaga
 /// All rights reserved.
 
 
@@ -305,7 +305,7 @@ public:
   /// のような簡単なルールで簡単かを行う
   /// 自分自身が簡単化された式に置き換わる．
   /// @return 自分自身
-  const Expr&
+  Expr&
   simplify();
 
   /// @brief 値の評価
@@ -321,7 +321,7 @@ public:
   /// @param[in] ni 入力数
   /// @note ni が省略された場合には input_size() が用いられる．
   TvFunc
-  make_tv(int ni = 0) const;
+  make_tv(SizeType ni = 0) const;
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -372,6 +372,11 @@ public:
   varid() const;
 
   /// @brief リテラルの取得
+  /// @return 対象がリテラルの場合リテラルを返す．
+  ///
+  /// そうでなければリテラルとして不正な値を返す．
+  Literal
+  literal() const;
 
   /// @brief AND 式のチェック
   /// @return トップが AND の時に true を返す．
@@ -396,12 +401,13 @@ public:
   /// @brief オペランドの個数の取得
   /// @retval オペランドの個数 AND/OR/XOR の場合
   /// @retval 0 上記以外の場合
-  int
+  SizeType
   child_num() const;
 
   /// @brief オペランドの取得
-  /// @param[in] pos 取り出すオペランドの位置 (最初の位置は 0)
+  /// @param[in] pos 取り出すオペランドの位置 (0 <= pos < child_num())
   /// @return pos 番目のオペランドを返す．
+  ///
   /// ただし pos が範囲外の場合と演算子ノードでなかった場合には
   /// 0を表す式を返す．
   Expr
@@ -589,7 +595,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 根のノード
-  const ExprNode* mRootPtr;
+  const ExprNode* mRootPtr{nullptr};
 
 };
 

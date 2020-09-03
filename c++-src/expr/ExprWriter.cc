@@ -141,9 +141,9 @@ ExprWriter::dump_sub(ostream& s,
     if ( expr.is_nega_literal() ) {
       s << not_str();
     }
-    VarId id = expr.varid();
+    VarId id{expr.varid()};
     if ( var_names.count(id) > 0 ) {
-      auto ans = var_names.at(id);
+      auto ans{var_names.at(id)};
       s << ans;
     }
     else {
@@ -166,8 +166,8 @@ ExprWriter::dump_sub(ostream& s,
     }
     s << "( ";
     string delim1 = "";
-    int n = expr.child_num();
-    for ( int i = 0; i < n; ++ i ) {
+    SizeType n{expr.child_num()};
+    for ( SizeType i = 0; i < n; ++ i ) {
       s << delim1;
       dump_sub(s, expr.child(i), var_names);
       delim1 = " " + delim + " ";

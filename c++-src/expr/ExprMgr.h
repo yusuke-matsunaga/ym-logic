@@ -5,12 +5,11 @@
 /// @brief ExprMgr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2020 Yusuke Matsunaga
 /// All rights reserved.
 
 
 #include "ym/Expr.h"
-#include "ExprType.h"
 #include "ExprNode.h"
 #include "ExprNodePtr.h"
 
@@ -81,7 +80,7 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には重複を取り除く
   ExprNodePtr
-  make_and(int begin);
+  make_and(SizeType begin);
 
   /// @brief OR ノードの生成
   /// @param[in] begin ノードスタック中の開始位置
@@ -90,7 +89,7 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には重複を取り除く
   ExprNodePtr
-  make_or(int begin);
+  make_or(SizeType begin);
 
   /// @brief XOR ノードの生成
   /// @param[in] begin ノードスタック中の開始位置
@@ -99,21 +98,21 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には個数の偶奇に応じた処理を行う．
   ExprNodePtr
-  make_xor(int begin);
+  make_xor(SizeType begin);
 
   /// @brief ノードスタックにノードを入れる．
   void
   nodestack_push(const ExprNode* node);
 
   /// @brief ノードスタックの先頭位置を返す．
-  int
+  SizeType
   nodestack_top();
 
   /// @brief ノードスタックの先頭位置を戻す．
   /// @note この関数を明示的に使う必要があるののはノードを
   /// プッシュしておきながら make_XXX を呼ばないとき
   void
-  nodestack_pop(int oldtop);
+  nodestack_pop(SizeType oldtop);
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -167,27 +166,27 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 使用されているメモリ量を返す．
-  int
+  SizeType
   used_size();
 
   /// @brief 使用されているノード数を返す．
-  int
+  SizeType
   node_num();
 
   /// @brief used_size() の最大値を返す．
-  int
+  SizeType
   max_used_size();
 
   /// @brief nodenum() の最大値を返す．
-  int
+  SizeType
   max_node_num();
 
   /// @brief 実際に確保したメモリ量を返す．
-  int
+  SizeType
   allocated_size();
 
   /// @brief 実際に確保した回数を返す．
-  int
+  SizeType
   allocated_count();
 
   /// @brief 内部状態を出力する．
@@ -232,7 +231,7 @@ private:
 
   // ExprNode を確保して内容を設定する．
   ExprNode*
-  alloc_node(ExprType type);
+  alloc_node(ExprNode::Type type);
 
   // ExprNode を削除する．
   void
@@ -240,8 +239,8 @@ private:
 
   // ExprNode の入力数から必要なサイズを計算する．
   static
-  int
-  calc_size(int nc);
+  SizeType
+  calc_size(SizeType nc);
 
 
 private:
@@ -265,13 +264,13 @@ private:
   ExprNodeList mNodeStack;
 
   // 使用中のノード数
-  int mNodeNum;
+  SizeType mNodeNum;
 
   // 使用した最大のノード数
-  int mMaxNodeNum;
+  SizeType mMaxNodeNum;
 
   // 絶対に開放されないノード数
-  int mStuckNodeNum;
+  SizeType mStuckNodeNum;
 
 };
 
