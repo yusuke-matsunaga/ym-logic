@@ -449,13 +449,13 @@ public:
 
   /// @brief リテラル数の取得
   /// @return リテラル数
-  int
+  SizeType
   literal_num() const;
 
   /// @brief 変数の出現回数の取得
   /// @param[in] varid 変数番号
   /// @return varid 番めの変数のリテラルの出現回数を得る．
-  int
+  SizeType
   literal_num(VarId varid) const;
 
   /// @brief リテラルの出現回数の取得
@@ -464,34 +464,34 @@ public:
   ///                - false: 反転なし (正極性)
   ///                - true:  反転あり (負極性)
   /// @return varid 番めの変数の極性が inv のリテラルの出現回数を得る．
-  int
+  SizeType
   literal_num(VarId varid,
 	      bool inv) const;
 
   /// @brief リテラルの出現回数の取得
   /// @param[in] lit リテラル
   /// @return lit のリテラルの出現回数を得る．
-  int
+  SizeType
   literal_num(Literal lit) const;
 
   /// @brief 使われている変数の最大の番号 + 1を得る．
-  int
+  SizeType
   input_size() const;
 
   /// @brief SOP形式に展開したときのキューブ数の見積もり
   /// @return SOP形式のキューブ (積項) 数
-  int
+  SizeType
   sop_cube_num() const;
 
   /// @brief SOP形式に展開した時のリテラル数の見積もり
   /// @return SOP形式のリテラル数
-  int
+  SizeType
   sop_literal_num() const;
 
   /// @brief SOP形式に展開した時の変数の出現回数の見積もり
   /// @param[in] varid 変数番号
   /// @return SOP形式の varid 番めの変数のリテラルの出現回数
-  int
+  SizeType
   sop_literal_num(VarId varid) const;
 
   /// @brief SOP形式に展開した時のテラルの出現回数の見積もり
@@ -501,14 +501,14 @@ public:
   ///                - true:  反転あり (負極性)
   /// @return SOP形式に展開した時の varid 番めの変数の極性が
   /// inv のリテラルの出現回数
-  int
+  SizeType
   sop_literal_num(VarId varid,
 	     bool inv) const;
 
   /// @brief SOP形式に展開したときのリテラルの出現回数の見積もり
   /// @param[in] lit リテラル
   /// @return SOP形式に展開したときの lit のリテラルの出現回数
-  int
+  SizeType
   sop_literal_num(Literal lit) const;
 
   /// @}
@@ -679,7 +679,7 @@ Expr::is_valid() const
 }
 
 inline
-int
+SizeType
 Expr::literal_num(Literal lit) const
 {
   return literal_num(lit.varid(), lit.is_negative());
@@ -721,7 +721,7 @@ operator^(const Expr& src1,
 }
 
 inline
-int
+SizeType
 Expr::sop_literal_num(Literal lit) const
 {
   return sop_literal_num(lit.varid(), lit.is_negative());
