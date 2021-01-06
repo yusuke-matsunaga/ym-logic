@@ -62,7 +62,7 @@ target_link_libraries ( pym_logic
 
 set ( RUN_PYM_LOGIC
   env PYTHONPATH=${PROJECT_BINARY_DIR}/ym-logic/py-test
-  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pym_logic_test.py)
+  ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pym_logic_test.py)
 
 add_test ( logic_py_VarId_test
   ${RUN_PYM_LOGIC} VarIdTest
