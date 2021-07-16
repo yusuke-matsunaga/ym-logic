@@ -993,8 +993,8 @@ TEST(TvFuncTest, expand_lit2)
   EXPECT_EQ( TvFunc::make_literal(10, VarId(2), false), func1 );
 }
 
-INSTANTIATE_TEST_CASE_P(Test0to20,
-			TvFuncTestWithParam,
-			::testing::Range(0, 21));
+INSTANTIATE_TEST_SUITE_P(Test0to20,
+			 TvFuncTestWithParam,
+			 ::testing::Range(0, 21));
 
 END_NAMESPACE_YM
