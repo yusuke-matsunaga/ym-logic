@@ -3,9 +3,8 @@
 /// @brief NpnMapM の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2021 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/NpnMapM.h"
 #include "ym/NpnMap.h"
@@ -21,15 +20,19 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @param[in] ni 入力数
 // @param[in] no 出力数
 // @note 各変数の変換内容は不正な値になっている．
-NpnMapM::NpnMapM(int ni,
-		 int no)
+NpnMapM::NpnMapM(
+  SizeType ni,
+  SizeType no
+)
 {
   resize(ni, no);
 }
 
 // @brief コピーコンストラクタ
 // @param[in] src コピー元のオブジェクト
-NpnMapM::NpnMapM(const NpnMapM& src)
+NpnMapM::NpnMapM(
+  const NpnMapM& src
+)
 {
   copy(src);
 }
@@ -37,8 +40,10 @@ NpnMapM::NpnMapM(const NpnMapM& src)
 // @brief 代入演算子
 // @param[in] src コピー元のオブジェクト
 // @return 自分自身への定数参照を返す．
-const NpnMapM&
-NpnMapM::operator=(const NpnMapM& src)
+NpnMapM&
+NpnMapM::operator=(
+  const NpnMapM& src
+)
 {
   if ( this != &src ) {
     copy(src);
@@ -48,23 +53,27 @@ NpnMapM::operator=(const NpnMapM& src)
 
 // @brief コピーする．
 void
-NpnMapM::copy(const NpnMapM& src)
+NpnMapM::copy(
+  const NpnMapM& src
+)
 {
-  int ni = src.mInputNum;
-  int no = src.mOutputNum;
+  SizeType ni = src.mInputNum;
+  SizeType no = src.mOutputNum;
   resize(ni, no);
-  int n = ni + no;
-  for (int i = 0; i < n; ++ i) {
+  SizeType n = ni + no;
+  for ( SizeType i = 0; i < n; ++ i ) {
     mMapArray[i] = src.mMapArray[i];
   }
 }
 
 // @brief NpnMap からの変換コンストラクタ
 // @note 出力数が1となる．
-NpnMapM::NpnMapM(const NpnMap& src)
+NpnMapM::NpnMapM(
+  const NpnMap& src
+)
 {
   resize(src.input_num(), 1);
-  for (int i = 0; i < mInputNum; ++ i) {
+  for ( SizeType i = 0; i < mInputNum; ++ i ) {
     mMapArray[i] = src.imap(VarId(i));
   }
   set_omap(VarId(0), VarId(0), src.oinv());
@@ -81,21 +90,20 @@ NpnMapM::~NpnMapM()
 void
 NpnMapM::clear()
 {
-  int n = mInputNum + mOutputNum;
-  for (int i = 0; i < n; ++ i) {
+  SizeType n = mInputNum + mOutputNum;
+  for ( SizeType i = 0; i < n; ++ i ) {
     mMapArray[i] = NpnVmap::invalid();
   }
 }
 
 // @brief 入力数と出力数を再設定する．
-// @param[in] ni 入力数
-// @param[in] no 出力数
-// @note 以前の内容はクリアされる．
 void
-NpnMapM::resize(int ni,
-		int no)
+NpnMapM::resize(
+  SizeType ni,
+  SizeType no
+)
 {
-  int n = ni + no;
+  SizeType n = ni + no;
   if ( mInputNum + mOutputNum != n ) {
     delete [] mMapArray;
     mMapArray = new NpnVmap[n];
@@ -106,60 +114,58 @@ NpnMapM::resize(int ni,
 }
 
 // @brief 恒等変換を表すように設定する．
-// @param[in] ni 入力数
-// @param[in] no 出力数
 void
-NpnMapM::set_identity(int ni,
-		      int no)
+NpnMapM::set_identity(
+  SizeType ni,
+  SizeType no
+)
 {
   resize(ni, no);
-  for (int i = 0; i < ni; ++ i) {
+  for ( SizeType i = 0; i < ni; ++ i ) {
     set_imap(VarId(i), VarId(i), false);
   }
-  for (int i = 0; i < no; ++ i) {
+  for ( SizeType i = 0; i < no; ++ i ) {
     set_omap(VarId(i), VarId(i), false);
   }
 }
 
 // @brief 入力の変換内容の設定
-// @param[in] var 入力番号
-// @param[in] imap 変換情報(変換先の入力番号と極性)
-// @sa NpnVmap
 void
-NpnMapM::set_imap(VarId var,
-		  NpnVmap imap)
+NpnMapM::set_imap(
+  VarId var,
+  NpnVmap imap
+)
 {
-  int pos = var.val();
+  SizeType pos = var.val();
   if ( pos < input_num() ) {
     mMapArray[pos] = imap;
   }
 }
 
 // @brief 出力の変換内容の設定
-// @param[in] var 出力番号
-// @param[in] omap 変換情報(変換先の出力番号と極性)
-// @sa NpnVmap
 void
-NpnMapM::set_omap(VarId var,
-		  NpnVmap omap)
+NpnMapM::set_omap(
+  VarId var,
+  NpnVmap omap
+)
 {
-  int pos = var.val();
+  SizeType pos = var.val();
   if ( pos < output_num() ) {
     mMapArray[pos + mInputNum] = omap;
   }
 }
 
 // @brief 内容が等しいか調べる．
-// @param[in] src 比較対象のマップ
-// @return 自分自身と src が等しいときに true を返す．
 bool
-NpnMapM::operator==(const NpnMapM& src) const
+NpnMapM::operator==(
+  const NpnMapM& src
+) const
 {
   if ( src.mInputNum != mInputNum || src.mOutputNum != mOutputNum ) {
     return false;
   }
-  int n = mInputNum + mOutputNum;
-  for (int i = 0; i < n; ++ i) {
+  SizeType n = mInputNum + mOutputNum;
+  for ( SizeType i = 0; i < n; ++ i ) {
     if ( mMapArray[i] != src.mMapArray[i] ) {
       return false;
     }
@@ -168,18 +174,17 @@ NpnMapM::operator==(const NpnMapM& src) const
 }
 
 // @brief 逆写像を求める．
-// @param[in] src 入力となるマップ
-// @return src の逆写像
-// @note 1対1写像でなければ答えは不定．
 NpnMapM
-inverse(const NpnMapM& src)
+inverse(
+  const NpnMapM& src
+)
 {
-  int ni = src.input_num();
-  int no = src.output_num();
+  SizeType ni = src.input_num();
+  SizeType no = src.output_num();
 
   NpnMapM ans(ni, no);
 
-  for (int i = 0; i < ni; ++ i) {
+  for ( SizeType i = 0; i < ni; ++ i ) {
     VarId src_var(i);
     NpnVmap imap = src.imap(src_var);
     if ( imap.is_invalid() ) {
@@ -190,7 +195,7 @@ inverse(const NpnMapM& src)
     bool inv = imap.inv();
     ans.set_imap(dst_var, src_var, inv);
   }
-  for (int i = 0; i < no; ++ i) {
+  for (SizeType i = 0; i < no; ++ i) {
     VarId src_var(i);
     NpnVmap omap = src.omap(src_var);
     if ( omap.is_invalid() ) {
@@ -206,16 +211,14 @@ inverse(const NpnMapM& src)
 }
 
 // @brief 合成を求める．
-// @param[in] src1,src2 入力となるマップ
-// @return src1 と src2 を合成したもの
-// @note src1の値域とsrc2の定義域は一致していな
-// ければならない．そうでなければ答えは不定．
 NpnMapM
-operator*(const NpnMapM& src1,
-	  const NpnMapM& src2)
+operator*(
+  const NpnMapM& src1,
+  const NpnMapM& src2
+)
 {
-  int ni = src1.input_num();
-  int no = src1.output_num();
+  SizeType ni = src1.input_num();
+  SizeType no = src1.output_num();
   if ( ni != src2.input_num() || no != src2.output_num() ) {
     // 不正な値を返す．
     return NpnMapM(ni, no);
@@ -223,7 +226,7 @@ operator*(const NpnMapM& src1,
 
   NpnMapM ans(ni, no);
 
-  for (int i = 0; i < ni; ++ i) {
+  for (SizeType i = 0; i < ni; ++ i) {
     VarId var1(i);
     NpnVmap imap1 = src1.imap(var1);
     if ( imap1.is_invalid() ) {
@@ -240,7 +243,7 @@ operator*(const NpnMapM& src1,
     ans.set_imap(var1, var3, inv2 ^ inv3);
   }
 
-  for (int i = 0; i < no; ++ i) {
+  for (SizeType i = 0; i < no; ++ i) {
     VarId var1(i);
     NpnVmap omap1 = src1.omap(var1);
     if ( omap1.is_invalid() ) {
@@ -261,17 +264,16 @@ operator*(const NpnMapM& src1,
 }
 
 // @brief 内容を表示する(主にデバッグ用)．
-// @param[in] s 出力ストリーム
-// @param[in] map 出力対象のマップ
-// @note 改行はしない．
 ostream&
-operator<<(ostream& s,
-	   const NpnMapM& map)
+operator<<(
+  ostream& s,
+  const NpnMapM& map
+)
 {
   const char* comma = "";
 
   s << "INPUT(";
-  for (int i = 0; i < map.input_num(); ++ i) {
+  for (SizeType i = 0; i < map.input_num(); ++ i) {
     s << comma;
     comma = ", ";
     s << i << " ==> ";
@@ -292,7 +294,7 @@ operator<<(ostream& s,
 
   comma = "";
   s << " OUTPUT(";
-  for (int i = 0; i < map.output_num(); ++ i) {
+  for (SizeType i = 0; i < map.output_num(); ++ i) {
     s << comma;
     comma = ", ";
     s << i << " ==> ";
@@ -316,20 +318,22 @@ operator<<(ostream& s,
 
 // バイナリ出力
 void
-NpnMapM::dump(ostream& bos) const
+NpnMapM::dump(
+  ostream& bos
+) const
 {
-  int ni = input_num();
+  SizeType ni = input_num();
   bos << ni;
 
-  int no = output_num();
+  SizeType no = output_num();
   bos << no;
 
-  for ( int i = 0; i < ni; ++ i ) {
+  for ( SizeType i = 0; i < ni; ++ i ) {
     NpnVmap vmap = imap(VarId(i));
     vmap.dump(bos);
   }
 
-  for ( int i = 0; i < no; ++ i ) {
+  for ( SizeType i = 0; i < no; ++ i ) {
     NpnVmap vmap = omap(VarId(i));
     vmap.dump(bos);
   }
@@ -337,20 +341,22 @@ NpnMapM::dump(ostream& bos) const
 
 // バイナリ入力
 void
-NpnMapM::restore(istream& bis)
+NpnMapM::restore(
+  istream& bis
+)
 {
-  int ni;
-  int no;
+  SizeType ni;
+  SizeType no;
   bis >> ni >> no;
   resize(ni, no);
 
-  for ( int i = 0; i < ni; ++ i ) {
+  for ( SizeType i = 0; i < ni; ++ i ) {
     NpnVmap vmap;
     vmap.restore(bis);
     set_imap(VarId(i), vmap);
   }
 
-  for (int i = 0; i < no; ++ i) {
+  for ( SizeType i = 0; i < no; ++ i ) {
     NpnVmap vmap;
     vmap.restore(bis);
     set_omap(VarId(i), vmap);
