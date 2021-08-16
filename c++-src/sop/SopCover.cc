@@ -229,12 +229,10 @@ SopCover::literal_num(Literal lit) const
 }
 
 // @brief 内容をリテラルのリストのリストに変換する．
-// @param[in] cube_list リテラルのリストのリストを格納するベクタ
-void
-SopCover::to_literal_list(vector<vector<Literal>>& cube_list) const
+vector<vector<Literal>>
+SopCover::to_literal_list() const
 {
-  cube_list.clear();
-  cube_list.resize(mCubeNum);
+  vector<vector<Literal>> cube_list(mCubeNum);
 
   SopMgr mgr(mVariableNum);
   for ( int i: Range(mCubeNum) ) {
@@ -251,6 +249,8 @@ SopCover::to_literal_list(vector<vector<Literal>>& cube_list) const
       }
     }
   }
+
+  return cube_list;
 }
 
 // @brief パタンを返す．

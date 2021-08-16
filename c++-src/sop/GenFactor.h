@@ -121,8 +121,7 @@ GenFactor<Divisor, Divide>::operator()(const SopCover& f)
   const SopCover& q = p.first;
   const SopCover& r = p.second;
   if ( q.cube_num() == 1 ) {
-    vector<vector<Literal>> cube_list;
-    q.to_literal_list(cube_list);
+    auto cube_list = q.to_literal_list();
     ASSERT_COND( cube_list.size() == 1 );
     return literal_factor(f, cube_list[0]);
   }
@@ -140,8 +139,7 @@ GenFactor<Divisor, Divide>::operator()(const SopCover& f)
       return (q_expr & d_expr) | r_expr;
     }
     else {
-      vector<Literal> lit_list;
-      cc1.to_literal_list(lit_list);
+      auto lit_list = cc1.to_literal_list();
       return literal_factor(f, lit_list);
     }
   }
@@ -177,8 +175,7 @@ inline
 Expr
 GenFactor<Divisor, Divide>::cover_to_expr(const SopCover& f)
 {
-  vector<vector<Literal>> cube_list;
-  f.to_literal_list(cube_list);
+  auto cube_list = f.to_literal_list();
 
   int nc = cube_list.size();
   if ( nc == 0 ) {
