@@ -5,9 +5,8 @@
 /// @brief Expr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017, 2018, 2020 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2018, 2020, 2021 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/logic.h"
 #include "ym/Literal.h"
@@ -58,14 +57,16 @@ public:
   Expr();
 
   /// @brief コピーコンストラクタ
-  /// @param[in] src コピー元のオブジェクト
-  Expr(const Expr& src);
+  Expr(
+    const Expr& src ///< [in] コピー元のオブジェクト
+  );
 
   /// @brief 代入演算子
-  /// @param[in] src コピー元のオブジェクト
   /// @return 自分自身
   Expr&
-  operator=(const Expr& src);
+  operator=(
+    const Expr& src ///< [in] コピー元のオブジェクト
+  );
 
   /// @brief デストラクタ
   ~Expr();
@@ -91,119 +92,112 @@ public:
   make_one();
 
   /// @brief リテラル式の生成
-  /// @param[in] varid 変数番号
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   /// @return 生成したオブジェクト
   static
   Expr
-  make_literal(VarId varid,
-	       bool inv);
+  make_literal(
+    VarId varid, ///< [in] 変数番号
+    bool inv     ///< [in] 極性
+                 ///<      - false: 反転なし (正極性)
+                 ///<      - true:  反転あり (負極性)
+  )
+  {
+    return inv ? make_nega_literal(varid) : make_posi_literal(varid);
+  }
 
   /// @brief リテラル式の生成
-  /// @param[in] lit リテラル
   /// @return 生成したオブジェクト
   static
   Expr
-  make_literal(Literal lit);
+  make_literal(
+    Literal lit ///< [in] リテラル
+  )
+  {
+    return make_literal(lit.varid(), lit.is_negative());
+  }
 
   /// @brief 正(肯定)リテラル式の生成
-  /// @param[in] varid 変数番号
   /// @return 生成したオブジェクト
   static
   Expr
-  make_posi_literal(VarId varid);
+  make_posi_literal(
+    VarId varid ///< [in] 変数番号
+  );
 
   /// @brief 負(否定)リテラル式の生成
-  /// @param[in] varid 変数番号
   /// @return 生成したオブジェクト
   static
   Expr
-  make_nega_literal(VarId varid);
+  make_nega_literal(
+    VarId varid ///< [in] 変数番号
+  );
 
   /// @brief AND 式の生成
-  /// @param[in] chd1, chd2 オペランド
   /// @return chd1, chd2 を部分論理式に持つ AND 式を生成し，返す．
   static
   Expr
-  and_op(const Expr& chd1,
-	 const Expr& chd2);
+  and_op(
+    const Expr& chd1, ///< [in] 第1オペランド
+    const Expr& chd2  ///< [in] 第2オペランド
+  );
 
   /// @brief AND 式の生成
-  /// @param[in] chd_list オペランドのベクタ
   /// @return chd_list を部分論理式に持つ AND 式を生成し，返す．
   static
   Expr
-  make_and(const vector<Expr>& chd_list);
-
-  /// @brief AND 式の生成
-  /// @param[in] chd_list オペランドのリスト
-  /// @return chd_list を部分論理式に持つ AND 式を生成し，返す．
-  static
-  Expr
-  make_and(const list<Expr>& chd_list);
+  make_and(
+    const vector<Expr>& chd_list ///< [in] オペランドのベクタ
+  );
 
   /// @brief OR 式の生成
-  /// @param[in] chd1, chd2 オペランド
   /// @return chd1, chd2 を部分論理式に持つ OR 式を生成し，返す．
   static
   Expr
-  or_op(const Expr& chd1,
-	const Expr& chd2);
+  or_op(
+    const Expr& chd1, ///< [in] 第1オペランド
+    const Expr& chd2  ///< [in] 第2オペランド
+  );
 
   /// @brief OR 式の生成
-  /// @param[in] chd_list オペランドのベクタ
   /// @return chd_list を部分論理式に持つ OR 式を生成し，返す．
   static
   Expr
-  make_or(const vector<Expr>& chd_list);
-
-  /// @brief OR 式の生成
-  ///
-  /// chd_list を部分論理式に持つ OR を返す．
-  /// @param[in] chd_list オペランドのリスト
-  /// @return chd_list を部分論理式に持つ OR 式を生成し，返す．
-  static
-  Expr
-  make_or(const list<Expr>& chd_list);
+  make_or(
+    const vector<Expr>& chd_list ///< [in] オペランドのベクタ
+  );
 
   /// @brief XOR 式の生成
-  /// @param[in] chd1, chd2 オペランド
   /// @return chd1, chd2 を部分論理式に持つ XOR 式を生成し，返す．
   static
   Expr
-  xor_op(const Expr& chd1,
-	 const Expr& chd2);
+  xor_op(
+    const Expr& chd1, ///< [in] 第1オペランド
+    const Expr& chd2  ///< [in] 第2オペランド
+  );
 
   /// @brief XOR 式の生成
-  /// @param[in] chd_list オペランドのベクタ
   /// @return chd_list を部分論理式に持つ XOR 式を生成し，返す．
   static
   Expr
-  make_xor(const vector<Expr>& chd_list);
-
-  /// @brief XOR 式の生成
-  /// @param[in] chd_list オペランドのリスト
-  /// @return chd_list を部分論理式に持つ XOR 式を生成し，返す．
-  static
-  Expr
-  make_xor(const list<Expr>& chd_list);
+  make_xor(
+    const vector<Expr>& chd_list ///< [in] オペランドのベクタ
+  );
 
   /// @brief 論理式をパーズして Expr オブジェクトを作る．
-  /// @param[in] expr_str 論理式を表す文字列
-  /// @param[out] err_msg エラーメッセージを格納する文字列
   /// @return 変換された Expr オブジェクト
   ///
   /// - エラーが起きたら msg にエラーメッセージをセットする．
   /// - エラーの場合，返される Expr オブジェクトは valid でない( is_valid() == false )．
   static
   Expr
-  from_string(const string& expr_str,
-	      string& err_msg);
+  from_string(
+    const string& expr_str, ///< [in] 論理式を表す文字列
+    string& err_msg         ///< [in] エラーメッセージを格納する文字列
+  );
 
   /// @brief 確保していたメモリを開放する．
-  /// @note メモリリークチェックのための関数なので通常は使用しない．
+  ///
+  /// メモリリークチェックのための関数なので通常は使用しない．
   static
   void
   __clear_memory();
@@ -219,39 +213,43 @@ public:
   /// @brief 論理否定
   /// @return 自分自身を否定した形の論理式を返す．
   Expr
-  operator~() const;
+  operator~() const
+  {
+    return invert();
+  }
 
   /// @brief operator~() の別名
   Expr
   invert() const;
 
   /// @brief AND つき代入
-  /// @param[in] src オペランド
   /// @return 自分自身
   ///
   /// 自分の論理式と src の論理式の AND を計算し自分に代入する．
   Expr&
-  operator&=(const Expr& src);
+  operator&=(
+    const Expr& src ///< [in] オペランド
+  );
 
   /// @brief OR つき代入
-  /// @param[in] src オペランド
   /// @return 自分自身
   ///
   /// 自分の論理式と src の論理式の OR を計算し自分に代入する．
   Expr&
-  operator|=(const Expr& src);
+  operator|=(
+    const Expr& src ///< [in] オペランド
+  );
 
   /// @brief XOR つき代入
-  /// @param[in] src オペランド
   /// @return 自分自身
   ///
   /// 自分の論理式と src の論理式の XOR を計算し自分に代入する．
   Expr&
-  operator^=(const Expr& src);
+  operator^=(
+    const Expr& src ///< [in] オペランド
+  );
 
   /// @brief compose 演算
-  /// @param[in] varid 置き換え対象の変数番号
-  /// @param[in] sub varid を置き換える先の論理式
   /// @return varid 番目の終端ノードを sub に置き換えたものを返す．
   ///
   /// - sub の論理式の中に varid 番目のリテラルがあっても
@@ -259,45 +257,51 @@ public:
   /// -もしも自分自身の論理式の中に varid 番目のリテラル
   /// が含まれない場合にはなにも変わらない．
   Expr
-  compose(VarId varid,
-	  const Expr& sub) const;
+  compose(
+    VarId varid,    ///< [in] 置き換え対象の変数番号
+    const Expr& sub ///< [in] varid を置き換える先の論理式
+  ) const;
 
   /// @brief 複数変数の compose 演算
-  /// @param[in] comp_map 置き換える変数をキーにして置き換える先の
-  /// 論理式を値とした連想配列
   /// @return comp_map にしたがって置き換えを行った論理式
   ///
   /// 一度に複数の置き換えを行う
   Expr
-  compose(const unordered_map<VarId, Expr>& comp_map) const;
+  compose(
+    const unordered_map<VarId, Expr>& comp_map ///< [in] 置き換える変数をキーにして置き換える先の
+                                               ///< 論理式を値とした連想配列
+  ) const;
 
   /// @brief 複数変数の compose 演算
-  /// @param[in] comp_list 置き換える変数と置き換える先の
-  /// 論理式をペアとしてリスト
   /// @return comp_list にしたがって置き換えを行った論理式
   ///
   /// - 一度に複数の置き換えを行う
   /// - comp_list 中に変数の重複が有った場合の動作は不定となる．
   Expr
-  compose(const vector<pair<VarId, Expr>>& comp_list) const;
+  compose(
+    const vector<pair<VarId, Expr>>& comp_list ///< [in] 置き換える変数と置き換える先の
+                                               ///<  論理式をペアとしてリスト
+  ) const;
 
   /// @brief 変数番号を再マップする．
-  /// @param[in] varmap 置き換え元の変数番号をキーとして
-  /// 置き換え先の変数番号を値とした連想配列
   /// @return 置き換えた論理式
   ///
   /// varmap に登録されていない場合には不変とする．
   Expr
-  remap_var(const unordered_map<VarId, VarId>& varmap) const;
+  remap_var(
+    const unordered_map<VarId, VarId>& varmap ///< [in] 置き換え元の変数番号をキーとして
+                                              ///< 置き換え先の変数番号を値とした連想配列
+  ) const;
 
   /// @brief 変数番号を再マップする．
-  /// @param[in] varlist 置き換え元の変数番号と置き換え先の変数番号をペアとしたリスト
   /// @return 置き換えた論理式
   ///
   /// - varlist に現れない場合には不変とする．
   /// - varlist 中に変数の重複が有った場合の動作は不定となる．
   Expr
-  remap_var(const vector<pair<VarId, VarId>>& varlist) const;
+  remap_var(
+    const vector<pair<VarId, VarId>>& varlist ///< [in] 置き換え元の変数番号と置き換え先の変数番号をペアとしたリスト
+  ) const;
 
   /// @brief 簡単化
   /// - expr + expr = expr
@@ -309,19 +313,22 @@ public:
   simplify();
 
   /// @brief 値の評価
-  /// @param[in] vals 変数の値割り当て
-  /// @param[in] mask 使用するビットのためのマスク
   /// @return 評価値
-  /// @note 演算はビット毎に独立に行われる．
+  ///
+  /// 演算はビット毎に独立に行われる．
   BitVectType
-  eval(const vector<BitVectType>& vals,
-       BitVectType mask = ~0UL) const;
+  eval(
+    const vector<BitVectType>& vals, ///< [in] 変数の値割り当て
+    BitVectType mask = ~0UL          ///< [in] 使用するビットのためのマスク
+  ) const;
 
   /// @brief 真理値表の作成
-  /// @param[in] ni 入力数
-  /// @note ni が省略された場合には input_size() が用いられる．
+  ///
+  /// ni が省略された場合には input_size() が用いられる．
   TvFunc
-  make_tv(SizeType ni = 0) const;
+  make_tv(
+    SizeType ni = 0 ///< [in] 入力数
+  ) const;
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -333,7 +340,10 @@ public:
 
   /// @brief 適正な値を持っているかチェックする．
   bool
-  is_valid() const;
+  is_valid() const
+  {
+    return mRootPtr != nullptr;
+  }
 
   /// @brief 恒偽関数のチェック
   /// @return 恒偽関数を表している時に true を返す．
@@ -405,13 +415,14 @@ public:
   child_num() const;
 
   /// @brief オペランドの取得
-  /// @param[in] pos 取り出すオペランドの位置 (0 <= pos < child_num())
   /// @return pos 番目のオペランドを返す．
   ///
   /// ただし pos が範囲外の場合と演算子ノードでなかった場合には
   /// 0を表す式を返す．
   Expr
-  child(int pos) const;
+  child(
+    int pos ///< [in] 取り出すオペランドの位置 (0 <= pos < child_num())
+  ) const;
 
   /// @brief "シンプル"な論理式のチェック
   /// @return シンプルな論理式のときに true を返す．
@@ -459,26 +470,31 @@ public:
   literal_num() const;
 
   /// @brief 変数の出現回数の取得
-  /// @param[in] varid 変数番号
   /// @return varid 番めの変数のリテラルの出現回数を得る．
   SizeType
-  literal_num(VarId varid) const;
+  literal_num(
+    VarId varid ///< [in] 変数番号
+  ) const;
 
   /// @brief リテラルの出現回数の取得
-  /// @param[in] varid 変数番号
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   /// @return varid 番めの変数の極性が inv のリテラルの出現回数を得る．
   SizeType
-  literal_num(VarId varid,
-	      bool inv) const;
+  literal_num(
+    VarId varid, ///< [in] 変数番号
+    bool inv     ///< [in] 極性
+                 ///<      - false: 反転なし (正極性)
+                 ///<      - true:  反転あり (負極性)
+  ) const;
 
   /// @brief リテラルの出現回数の取得
-  /// @param[in] lit リテラル
   /// @return lit のリテラルの出現回数を得る．
   SizeType
-  literal_num(Literal lit) const;
+  literal_num(
+    Literal lit ///< [in] リテラル
+  ) const
+  {
+    return literal_num(lit.varid(), lit.is_negative());
+  }
 
   /// @brief 使われている変数の最大の番号 + 1を得る．
   SizeType
@@ -495,27 +511,32 @@ public:
   sop_literal_num() const;
 
   /// @brief SOP形式に展開した時の変数の出現回数の見積もり
-  /// @param[in] varid 変数番号
   /// @return SOP形式の varid 番めの変数のリテラルの出現回数
   SizeType
-  sop_literal_num(VarId varid) const;
+  sop_literal_num(
+    VarId varid ///< [in] 変数番号
+  ) const;
 
   /// @brief SOP形式に展開した時のテラルの出現回数の見積もり
-  /// @param[in] varid 変数番号
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   /// @return SOP形式に展開した時の varid 番めの変数の極性が
   /// inv のリテラルの出現回数
   SizeType
-  sop_literal_num(VarId varid,
-	     bool inv) const;
+  sop_literal_num(
+    VarId varid, ///< [in] 変数番号
+    bool inv     ///< [in] 極性
+                 ///<      - false: 反転なし (正極性)
+                 ///<      - true:  反転あり (負極性)
+  ) const;
 
   /// @brief SOP形式に展開したときのリテラルの出現回数の見積もり
-  /// @param[in] lit リテラル
   /// @return SOP形式に展開したときの lit のリテラルの出現回数
   SizeType
-  sop_literal_num(Literal lit) const;
+  sop_literal_num(
+    Literal lit ///< [in] リテラル
+  ) const
+  {
+    return sop_literal_num(lit.varid(), lit.is_negative());
+  }
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -529,11 +550,15 @@ public:
 
   /// @brief バイナリストリームに出力する．
   void
-  dump(ostream& s) const;
+  dump(
+    ostream& s ///< [in] 出力ストリーム
+  ) const;
 
   /// @brief バイナリストリームから読み込む．
   void
-  restore(istream& s);
+  restore(
+    istream& s ///< [in] 入力ストリーム
+  );
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -545,30 +570,57 @@ public:
   // friend 関数の宣言
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief AND 演算
+  /// @return src1 の論理式と src2 の論理式の AND を返す．
   friend
   Expr
-  operator&(const Expr& src1,
-	    const Expr& src2);
+  operator&(
+    const Expr& src1, ///< [in] 第1オペランド
+    const Expr& src2  ///< [in] 第2オペランド
+  )
+  {
+    return Expr::and_op(src1, src2);
+  }
 
+  /// @brief OR 演算
+  /// @return src1 の論理式と src2 の論理式の OR を返す．
   friend
   Expr
-  operator|(const Expr& src1,
-	    const Expr& src2);
+  operator|(
+    const Expr& src1, ///< [in] 第1オペランド
+    const Expr& src2  ///< [in] 第2オペランド
+  )
+  {
+    return Expr::or_op(src1, src2);
+  }
 
+  /// @brief XOR 演算
+  /// @return src1 の論理式と src2 の論理式の XOR を返す．
   friend
   Expr
-  operator^(const Expr& src1,
-	    const Expr& src2);
+  operator^(
+    const Expr& src1, ///< [in] 第1オペランド
+    const Expr& src2  ///< [in] 第2オペランド
+  )
+  {
+    return Expr::xor_op(src1, src2);
+  }
 
   friend
   bool
-  check_equiv(const Expr& left,
-	      const Expr& right);
+  check_equiv(
+    const Expr& left, ///< [in] 第1オペランド
+    const Expr& right ///< [in] 第2オペランド
+  );
 
+  /// @brief 根の演算タイプの比較
+  /// @return src1 と src2 の根のタイプが同じとき true を返す．
   friend
   bool
-  compare_type(const Expr& src1,
-	       const Expr& src2);
+  compare_type(
+    const Expr& src1, ///< [in] 第1オペランド
+    const Expr& src2  ///< [in] 第2オペランド
+  );
 
 
 private:
@@ -577,12 +629,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // @brief 内部で用いるコンストラクタ
-  // @param[in] node 根のノード
-  Expr(const ExprNode* node);
+  explicit
+  Expr(
+    const ExprNode* node ///< [in] 根のノード
+  );
 
   // 根のノードをセットする．
   void
-  set_root(const ExprNode* node);
+  set_root(
+    const ExprNode* node ///< [in] 根のノード
+  );
 
   /// @brief 根のノートを得る．
   const ExprNode*
@@ -608,55 +664,31 @@ private:
 /// @{
 
 /// @relates Expr
-/// @brief AND 演算
-/// @param[in] src1, src2 オペランド
-/// @return src1 の論理式と src2 の論理式の AND を返す．
-Expr
-operator&(const Expr& src1,
-	  const Expr& src2);
-
-/// @relates Expr
-/// @brief OR 演算
-/// @param[in] src1, src2 オペランド
-/// @return src1 の論理式と src2 の論理式の OR を返す．
-Expr
-operator|(const Expr& src1,
-	  const Expr& src2);
-
-/// @relates Expr
-/// @brief XOR 演算
-/// @param[in] src1, src2 オペランド
-/// @return src1 の論理式と src2 の論理式の XOR を返す．
-Expr
-operator^(const Expr& src1,
-	  const Expr& src2);
-
-/// @relates Expr
-/// @brief 根の演算タイプの比較
-/// @param[in] src1, src2 オペランド
-/// @return src1 と src2 の根のタイプが同じとき true を返す．
 bool
-compare_type(const Expr& src1,
-	     const Expr& src2);
+compare_type(
+  const Expr& src1, ///< [in] 第1オペランド
+  const Expr& src2  ///< [in] 第2オペランド
+);
 
 /// @}
 
 /// @relates Expr
 /// @brief 論理式の内容を文字列にする．
-/// @param[in] expr 論理式
 string
-to_string(const Expr& expr);
+to_string(
+  const Expr& expr ///< [in] 論理式
+);
 
 /// @relates Expr
 /// @brief 論理式の内容のストリーム出力
-/// @param[in] s 出力ストリーム
-/// @param[in] expr 論理式
 /// @return s
 ostream&
-operator<<(ostream& s,
-	   const Expr& expr);
+operator<<(
+  ostream& s,      ///< [in] 出力ストリーム
+  const Expr& expr ///< [in] 論理式
+);
 
-
+#if 0
 //////////////////////////////////////////////////////////////////////
 // inline 関数の定義
 //////////////////////////////////////////////////////////////////////
@@ -732,6 +764,7 @@ Expr::sop_literal_num(Literal lit) const
 {
   return sop_literal_num(lit.varid(), lit.is_negative());
 }
+#endif
 
 END_NAMESPACE_YM_LOGIC
 
