@@ -375,7 +375,7 @@ TEST(ExprTest, make_and2)
   VarId var1(1);
   Expr lit0p = Expr::make_posi_literal(var0);
   Expr lit1n = Expr::make_nega_literal(var1);
-  list<Expr> lit_list{lit0p, lit1n};
+  vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_and(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
@@ -613,7 +613,7 @@ TEST(ExprTest, make_or2)
   VarId var1(1);
   Expr lit0p = Expr::make_posi_literal(var0);
   Expr lit1n = Expr::make_nega_literal(var1);
-  list<Expr> lit_list{lit0p, lit1n};
+  vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_or(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
@@ -851,7 +851,7 @@ TEST(ExprTest, make_xor2)
   VarId var1(1);
   Expr lit0p = Expr::make_posi_literal(var0);
   Expr lit1n = Expr::make_nega_literal(var1);
-  list<Expr> lit_list{lit0p, lit1n};
+  vector<Expr> lit_list{lit0p, lit1n};
   Expr expr = Expr::make_xor(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );

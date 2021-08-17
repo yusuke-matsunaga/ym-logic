@@ -5,9 +5,8 @@
 /// @brief Sop のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2018, 2021 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/logic.h"
 
@@ -34,12 +33,13 @@ enum class SopPat {
 
 /// @relates SopPat
 /// @brief SopPat のストリーム出力
-/// @param[in] s ストリーム
-/// @param[in] pat パタン
+/// @return s を返す．
 inline
 ostream&
-operator<<(ostream& s,
-	   SopPat pat)
+operator<<(
+  ostream& s, ///< [in] ストリーム
+  SopPat pat  ///< [in] パタン
+)
 {
   switch ( pat ) {
   case SopPat::_0: s << '0'; break;

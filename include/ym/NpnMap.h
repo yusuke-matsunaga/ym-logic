@@ -5,9 +5,8 @@
 /// @brief NpnMap のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2016, 2017, 2019 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2016, 2017, 2019, 2021 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/logic.h"
 #include "ym/VarId.h"
@@ -34,14 +33,19 @@ class NpnMap
 public:
 
   /// @brief 恒等変換を返すクラスメソッド
-  /// @param[in] ni 入力数
-  /// @param[in] oinv 出力を反転する時 true にするフラグ
   ///
   /// 当たり前だが定義域と値域のサイズ(入力数)は同じ
   static
   NpnMap
-  identity(int ni,
-	   bool oinv = false);
+  identity(
+    SizeType ni,      ///< [in] 入力数
+    bool oinv = false ///< [in] 出力を反転する時 true にするフラグ
+  )
+  {
+    NpnMap ans;
+    ans.set_identity(ni, oinv);
+    return ans;
+  }
 
   /// @brief 空のコンストラクタ．
   ///
@@ -49,30 +53,33 @@ public:
   NpnMap() = default;
 
   /// @brief 入力数を指定したコンストラクタ
-  /// @param[in] ni 入力数
   ///
   /// 定義域と値域のサイズは同じになる．
   /// 恒等変換になる．
   explicit
-  NpnMap(int ni);
+  NpnMap(
+    SizeType ni ///< [in] 入力数
+  );
 
   /// @brief 写像前と後の入力数を指定したコンストラクタ
-  /// @param[in] ni 写像前の入力数
-  /// @param[in] ni2 写像後の入力数
   ///
   /// 内容は不定
-  NpnMap(int ni,
-	 int ni2);
+  NpnMap(
+    SizeType ni,  ///< [in] 写像前の入力数
+    SizeType ni2  ///< [in] 写像後の入力数
+  );
 
   /// @brief コピーコンストラクタ
-  /// @param[in] src コピー元のオブジェクト
-  NpnMap(const NpnMap& src);
+  NpnMap(
+    const NpnMap& src ///< [in] コピー元のオブジェクト
+  );
 
   /// @brief 代入演算子
-  /// @param[in] src コピー元のオブジェクト
   /// @return 自分自身への定数参照を返す．
-  const NpnMap&
-  operator=(const NpnMap& src);
+  NpnMap&
+  operator=(
+    const NpnMap& src ///< [in] コピー元のオブジェクト
+  );
 
   /// @brief デストラクタ
   ~NpnMap() = default;
@@ -91,54 +98,58 @@ public:
   clear();
 
   /// @brief 入力数を再設定する．
-  /// @param[in] ni 入力数
   ///
   /// 写像前と写像後の入力数が等しい場合．
   /// 以前の内容はクリアされる．
   void
-  resize(int ni);
+  resize(
+    SizeType ni ///< [in] 入力数
+  );
 
   /// @brief 入力数を再設定する．
-  /// @param[in] ni 写像前の入力数
-  /// @param[in] ni2 写像後の入力数
   ///
   /// 以前の内容はクリアされる．
   void
-  resize(int ni,
-	 int ni2);
+  resize(
+    SizeType ni, ///< [in] 写像前の入力数
+    SizeType ni2 ///< [in] 写像後の入力数
+  );
 
   /// @brief 恒等変換を表すように設定する．
-  /// @param[in] ni 入力数
-  /// @param[in] oinv 出力を反転する時 true にするフラグ
   void
-  set_identity(int ni,
-	       bool oinv = false);
+  set_identity(
+    SizeType ni,      ///< [in] 入力数
+    bool oinv = false ///< [in] 出力を反転する時 true にするフラグ
+  );
 
   /// @brief 入力の変換内容の設定
-  /// @param[in] src_var 入力変数
-  /// @param[in] dst_var 変換先の入力変数
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   void
-  set(VarId src_var,
-      VarId dst_var,
-      bool inv);
+  set(
+    VarId src_var, ///< [in] 入力変数
+    VarId dst_var, ///< [in] 変換先の入力変数
+    bool inv       ///< [in] 極性
+                   ///<  - false: 反転なし (正極性)
+                   ///<  - true:  反転あり (負極性)
+  )
+  {
+    set(src_var, NpnVmap(dst_var, inv));
+  }
 
   /// @brief 入力の変換内容の設定
-  /// @param[in] src_var 入力変数
-  /// @param[in] imap 変換情報(変換先の入力番号と極性)
   /// @sa NpnVmap
   void
-  set(VarId src_var,
-      NpnVmap imap);
+  set(
+    VarId src_var, ///< [in] 入力変数
+    NpnVmap imap   ///< [in] 変換情報(変換先の入力番号と極性)
+  );
 
   /// @brief 出力極性を設定する．
-  /// @param[in] inv 出力極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   void
-  set_oinv(bool inv);
+  set_oinv(
+    bool inv ///< [in] 出力極性
+             ///< - false: 反転なし (正極性)
+             ///< - true:  反転あり (負極性)
+  );
 
 
 public:
@@ -148,33 +159,54 @@ public:
 
   /// @brief 写像前の入力数を得る．
   /// @return 入力数
-  int
-  input_num() const;
+  SizeType
+  input_num() const
+  {
+    return (mNiPol >> 1) & 0xffU;
+  }
 
   /// @brief 写像後の入力数を得る．
   /// @return 入力数
-  int
-  input_num2() const;
+  SizeType
+  input_num2() const
+  {
+    return (mNiPol >> 9) & 0xffU;
+  }
 
   /// @brief 入力の変換情報の取得
-  /// @param[in] var 入力変数
   /// @return pos 番目の入力の変換情報
-  /// @note var に対応するマッピング情報がないときには不正な値を返す．
+  ///
+  /// var に対応するマッピング情報がないときには不正な値を返す．
   /// @sa NpnVmap
   NpnVmap
-  imap(VarId var) const;
+  imap(
+    VarId var ///< [in] 入力変数
+  ) const
+  {
+    int idx = var.val();
+    if ( idx < input_num() ) {
+      return mImap[idx];
+    }
+    else {
+      return NpnVmap::invalid();
+    }
+  }
 
   /// @brief 出力極性を返す．
   /// @retval false 反転なし
   /// @retval true 反転あり
   bool
-  oinv() const;
+  oinv() const
+  {
+    return static_cast<bool>(mNiPol & 1U);
+  }
 
   /// @brief 内容が等しいか調べる．
-  /// @param[in] src 比較対象のマップ
   /// @return 自分自身と src が等しいときに true を返す．
   bool
-  operator==(const NpnMap& src) const;
+  operator==(
+    const NpnMap& src ///< [in] 比較対象のマップ
+  ) const;
 
 
 public:
@@ -184,11 +216,15 @@ public:
 
   /// @brief バイナリストリームに出力する．
   void
-  dump(ostream& s) const;
+  dump(
+    ostream& s ///< [in] 出力先のストリーム
+  ) const;
 
   /// @brief バイナリストリームから読み込む．
   void
-  restore(istream& s);
+  restore(
+    istream& s ///< [in] 入力元のストリーム
+  );
 
 
 private:
@@ -197,13 +233,17 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 入力数をセットする．
-  /// @param[in] ni 写像前の入力数
-  /// @param[in] ni2 写像後の入力数
   ///
   /// 出力の極性は変化しない．
   void
-  set_ni(int ni,
-	 int ni2);
+  set_ni(
+    SizeType ni, ///< [in] 写像前の入力数
+    SizeType ni2 ///< [in] 写像後の入力数
+  )
+  {
+    mNiPol &= 1U;
+    mNiPol |= (ni << 1) | (ni2 << 9);
+  }
 
 
 private:
@@ -226,137 +266,47 @@ private:
 
 /// @relates NpnMap
 /// @brief 逆写像を求める．
-/// @param[in] src 入力となるマップ
 /// @return src の逆写像
 ///
 /// 1対1写像でなければ答えは不定．
 NpnMap
-inverse(const NpnMap& src);
+inverse(
+  const NpnMap& src ///< [in] 入力となるマップ
+);
 
 /// @relates NpnMap
 /// @brief 合成を求める．
-/// @param[in] src1,src2 入力となるマップ
 /// @return src1 と src2 を合成したもの
 ///
 /// src1の値域とsrc2の定義域は一致していな
 /// ければならない．そうでなければ答えは不定．
 NpnMap
-operator*(const NpnMap& src1,
-	  const NpnMap& src2);
+operator*(
+  const NpnMap& src1, ///< [in] 左側のオペランド
+  const NpnMap& src2  ///< [in] 右側のオペランド
+);
 
 /// @brief 非等価演算子
-/// @param[in] src1, src2 オペランド
 /// @return src1 と src2 が等しくないときに true を返す．
-bool
-operator!=(const NpnMap& src1,
-	   const NpnMap& src2);
-
-/// @relates NpnMap
-/// @brief 内容を表示する(主にデバッグ用)．
-/// @param[in] s 出力ストリーム
-/// @param[in] map 出力対象のマップ
-///
-/// 改行はしない．
-ostream&
-operator<<(ostream& s,
-	   const NpnMap& map);
-
-
-//////////////////////////////////////////////////////////////////////
-// インライン関数の定義
-//////////////////////////////////////////////////////////////////////
-
-// @brief 恒等変換を返すクラスメソッド
-// @param[in] ni 入力数
-// @param[in] oinv 出力を反転する時 true にするフラグ
-//
-// 当たり前だが定義域と値域のサイズ(入力数)は同じ
-inline
-NpnMap
-NpnMap::identity(int ni,
-		 bool oinv)
-{
-  NpnMap ans;
-  ans.set_identity(ni, oinv);
-  return ans;
-}
-
-// 入力数を得る．
-inline
-int
-NpnMap::input_num() const
-{
-  return (mNiPol >> 1) & 0xffU;
-}
-
-// @brief 写像後の入力数を得る．
-// @return 入力数
-inline
-int
-NpnMap::input_num2() const
-{
-  return (mNiPol >> 9) & 0xffU;
-}
-
-// var に対応するマッピング情報を得る．
-inline
-NpnVmap
-NpnMap::imap(VarId var) const
-{
-  int idx = var.val();
-  if ( idx < input_num() ) {
-    return mImap[idx];
-  }
-  else {
-    return NpnVmap::invalid();
-  }
-}
-
-// 出力極性を返す．
 inline
 bool
-NpnMap::oinv() const
-{
-  return static_cast<bool>(mNiPol & 1U);
-}
-
-// @brief 入力の変換内容の設定
-// @param[in] src_var 入力変数
-// @param[in] dst_var 変換先の入力変数
-// @param[in] inv 極性
-inline
-void
-NpnMap::set(VarId src_var,
-	    VarId dst_var,
-	    bool inv)
-{
-  set(src_var, NpnVmap(dst_var, inv));
-}
-
-// @brief 入力数をセットする．
-// @param[in] ni 写像前の入力数
-// @param[in] ni2 写像後の入力数
-//
-// 出力の極性は変化しない．
-inline
-void
-NpnMap::set_ni(int ni,
-	       int ni2)
-{
-  mNiPol &= 1U;
-  mNiPol |= (ni << 1) | (ni2 << 9);
-}
-
-// @brief 非等価演算子
-// @param[in] src1, src2 オペランド
-// @return src1 と src2 が等しくないときに true を返す．
-inline
-bool
-operator!=(const NpnMap& src1,
-	   const NpnMap& src2)
+operator!=(
+  const NpnMap& src1, ///< [in] 左側のオペランド
+  const NpnMap& src2  ///< [in] 右側のオペランド
+)
 {
   return !src1.operator==(src2);
 }
+
+/// @relates NpnMap
+/// @brief 内容を表示する(主にデバッグ用)．
+///
+/// 改行はしない．
+ostream&
+operator<<(
+  ostream& s,       ///< [in] 出力ストリーム
+  const NpnMap& map ///< [in] 出力対象のマップ
+);
 
 END_NAMESPACE_YM_LOGIC
 

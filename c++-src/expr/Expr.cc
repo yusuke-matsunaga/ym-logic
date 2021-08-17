@@ -134,19 +134,6 @@ Expr::make_and(const vector<Expr>& chd_list)
   return Expr(mgr.make_and(begin));
 }
 
-Expr
-Expr::make_and(const list<Expr>& chd_list)
-{
-  ASSERT_COND( chd_list.size() > 0 );
-
-  auto& mgr{ExprMgr::the_obj()};
-  SizeType begin{mgr.nodestack_top()};
-  for ( auto expr: chd_list ) {
-    mgr.nodestack_push(expr.root());
-  }
-  return Expr(mgr.make_and(begin));
-}
-
 // 与えられた論理式を部分論理式に持つ 2 入力ORの論理式を作るクラス・メソッド
 Expr
 Expr::or_op(const Expr& chd1,
@@ -173,19 +160,6 @@ Expr::make_or(const vector<Expr>& chd_list)
   return Expr(mgr.make_or(begin));
 }
 
-Expr
-Expr::make_or(const list<Expr>& chd_list)
-{
-  ASSERT_COND( chd_list.size() > 0 );
-
-  auto& mgr{ExprMgr::the_obj()};
-  SizeType begin{mgr.nodestack_top()};
-  for ( auto expr: chd_list ) {
-    mgr.nodestack_push(expr.root());
-  }
-  return Expr(mgr.make_or(begin));
-}
-
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
 Expr
 Expr::xor_op(const Expr& chd1,
@@ -201,19 +175,6 @@ Expr::xor_op(const Expr& chd1,
 // 与えられた論理式を部分論理式に持つ n 入力XORの論理式を作るクラス・メソッド
 Expr
 Expr::make_xor(const vector<Expr>& chd_list)
-{
-  ASSERT_COND( chd_list.size() > 0 );
-
-  auto& mgr{ExprMgr::the_obj()};
-  SizeType begin{mgr.nodestack_top()};
-  for ( auto expr: chd_list ) {
-    mgr.nodestack_push(expr.root());
-  }
-  return Expr(mgr.make_xor(begin));
-}
-
-Expr
-Expr::make_xor(const list<Expr>& chd_list)
 {
   ASSERT_COND( chd_list.size() > 0 );
 

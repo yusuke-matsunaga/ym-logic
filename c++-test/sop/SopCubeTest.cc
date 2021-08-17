@@ -6,7 +6,6 @@
 /// Copyright (C) 2018 Yusuke Matsunaga
 /// All rights reserved.
 
-
 #include <gtest/gtest.h>
 #include "ym/SopCube.h"
 #include "ym/VarId.h"
@@ -24,8 +23,7 @@ TEST(SopCubeTest, constructor1)
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( 0,  cube1.literal_num() );
 
-  vector<Literal> lit_list;
-  cube1.to_literal_list(lit_list);
+  auto lit_list = cube1.to_literal_list();
   EXPECT_TRUE( lit_list.empty() );
 };
 
@@ -50,8 +48,7 @@ TEST(SopCubeTest, constructor2)
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( 1,  cube1.literal_num() );
 
-  vector<Literal> lit_list;
-  cube1.to_literal_list(lit_list);
+  auto lit_list = cube1.to_literal_list();
   EXPECT_EQ( 1, lit_list.size() );
   EXPECT_EQ( lit, lit_list[0] );
 
@@ -102,8 +99,7 @@ TEST(SopCubeTest, constructor3)
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( nl,  cube1.literal_num() );
 
-  vector<Literal> lit_list1;
-  cube1.to_literal_list(lit_list1);
+  auto lit_list1 = cube1.to_literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
@@ -155,8 +151,7 @@ TEST(SopCubeTest, constructor4)
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( nl,  cube1.literal_num() );
 
-  vector<Literal> lit_list1;
-  cube1.to_literal_list(lit_list1);
+  auto lit_list1 = cube1.to_literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
@@ -209,8 +204,7 @@ TEST(SopCubeTest, copy_constructor)
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl,  cube2.literal_num() );
 
-  vector<Literal> lit_list1;
-  cube2.to_literal_list(lit_list1);
+  auto lit_list1 = cube2.to_literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
@@ -266,8 +260,7 @@ TEST(SopCubeTest, copy_assignment)
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl,  cube2.literal_num() );
 
-  vector<Literal> lit_list1;
-  cube2.to_literal_list(lit_list1);
+  auto lit_list1 = cube2.to_literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
@@ -323,8 +316,7 @@ TEST(SopCubeTest, move_constructor)
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl, cube2.literal_num() );
 
-  vector<Literal> lit_list1;
-  cube2.to_literal_list(lit_list1);
+  auto lit_list1 = cube2.to_literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
@@ -383,8 +375,7 @@ TEST(SopCubeTest, move_assignment)
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl,  cube2.literal_num() );
 
-  vector<Literal> lit_list1;
-  cube2.to_literal_list(lit_list1);
+  auto lit_list1 = cube2.to_literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );

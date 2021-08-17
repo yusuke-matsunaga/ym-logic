@@ -173,12 +173,13 @@ SopCube::literal_num() const
 
 // @brief 内容をリテラルのリストに変換する．
 // @param[in] lit_list 結果を格納するベクタ
-void
-SopCube::to_literal_list(vector<Literal>& lit_list) const
+vector<Literal>
+SopCube::to_literal_list() const
 {
   SopMgr mgr(mVariableNum);
   int nl = mgr.literal_num(block());
-  lit_list.clear();
+
+  vector<Literal> lit_list;
   lit_list.reserve(nl);
   for ( int i = 0; i < mVariableNum; ++ i ) {
     VarId var(i);
@@ -190,6 +191,8 @@ SopCube::to_literal_list(vector<Literal>& lit_list) const
       lit_list.push_back(Literal(var, true));
     }
   }
+
+  return lit_list;
 }
 
 // @brief 指定したリテラルを含んでいたら true を返す．

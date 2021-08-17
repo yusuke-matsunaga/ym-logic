@@ -5,9 +5,8 @@
 /// @brief SopCube のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018 Yusuke Matsunaga
+/// Copyright (C) 2017, 2018, 2021 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/Sop.h"
 #include "ym/Literal.h"
@@ -32,51 +31,56 @@ class SopCube
 public:
 
   /// @brief コンストラクタ
-  /// @param[in] variable_num 変数の数
   ///
   /// * 空のキューブを作る．
   explicit
-  SopCube(int variable_num);
+  SopCube(
+    int variable_num ///< [in] 変数の数
+  );
 
   /// @brief コンストラクタ
-  /// @param[in] variable_num 変数の数
-  /// @param[in] lit リテラル
   ///
   /// * 単一のリテラルからなるキューブを作る．
-  SopCube(int variable_num,
-	  Literal lit);
+  SopCube(
+    int variable_num, ///< [in] 変数の数
+    Literal lit       ///< [in] リテラル
+  );
 
   /// @brief コンストラクタ
-  /// @param[in] variable_num 変数の数
-  /// @param[in] lit_list キューブを表すリテラルのリスト
-  SopCube(int variable_num,
-	  const vector<Literal>& lit_list);
+  SopCube(
+    int variable_num,               ///< [in] 変数の数
+    const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
+  );
 
   /// @brief コンストラクタ
-  /// @param[in] variable_num 変数の数
-  /// @param[in] lit_list キューブを表すリテラルのリスト初期化子
-  SopCube(int variable_num,
-	  initializer_list<Literal>& lit_list);
+  SopCube(
+    int variable_num,                   ///< [in] 変数の数
+    initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト初期化子
+  );
 
   /// @brief コピーコンストラクタ
-  /// @param[in] src コピー元のオブジェクト
-  SopCube(const SopCube& src);
+  SopCube(
+    const SopCube& src ///< [in] コピー元のオブジェクト
+  );
 
   /// @brief コピー代入演算子
-  /// @param[in] src コピー元のオブジェクト
   /// @return 代入後の自身への参照を返す．
   SopCube&
-  operator=(const SopCube& src);
+  operator=(
+    const SopCube& src ///< [in] コピー元のオブジェクト
+  );
 
   /// @brief ムーブコンストラクタ
-  /// @param[in] src ムーブ元のオブジェクト
-  SopCube(SopCube&& src);
+  SopCube(
+    SopCube&& src ///< [in] ムーブ元のオブジェクト
+  );
 
   /// @brief ムーブ代入演算子
-  /// @param[in] src ムーブ元のオブジェクト
   /// @return 代入後の自身への参照を返す．
   SopCube&
-  operator=(SopCube&& src);
+  operator=(
+    SopCube&& src ///< [in] ムーブ元のオブジェクト
+  );
 
   /// @brief デストラクタ
   ~SopCube();
@@ -89,104 +93,118 @@ public:
 
   /// @brief 変数の数を返す．
   int
-  variable_num() const;
+  variable_num() const
+  {
+    return mVariableNum;
+  }
 
   /// @brief リテラル数を返す．
   int
   literal_num() const;
 
   /// @brief 指定した変数のパタンを読み出す．
-  /// @param[in] var 変数( 0 <= var_id.val() < variable_num() )
   /// @retval SopPat::_X その変数は現れない．
   /// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
   /// @retval SopPat::_0 その変数が否定のリテラルとして現れる．
   SopPat
-  get_pat(VarId var) const;
+  get_pat(
+    VarId var ///< [in] 変数( 0 <= var_id.val() < variable_num() )
+  ) const;
 
   /// @brief 指定したリテラルを含んでいたら true を返す．
-  /// @param[in] lit 対象のリテラル
   bool
-  has_literal(Literal lit) const;
+  has_literal(
+    Literal lit ///< [in] 対象のリテラル
+  ) const;
 
   /// @brief 内容をリテラルのリストに変換する．
-  /// @param[in] lit_list 結果を格納するベクタ
-  void
-  to_literal_list(vector<Literal>& lit_list) const;
+  vector<Literal>
+  to_literal_list() const;
 
   /// @brief オペランドのキューブに含まれていたら true を返す．
-  /// @param[in] right オペランドのキューブ
   ///
   /// * ここではキューブの表す論理関数の含意を考える．
   /// * だからリテラル集合としてはオペランドのキューブを含むことになる．
   bool
-  check_containment(const SopCube& right) const;
+  check_containment(
+    const SopCube& right ///< [in] オペランドのキューブ
+  ) const;
 
   /// @brief 2つのキューブに共通なリテラルがあれば true を返す．
-  /// @param[in] right オペランドのキューブ
   bool
-  check_intersect(const SopCube& right) const;
+  check_intersect(
+    const SopCube& right ///< [in] オペランドのキューブ
+  ) const;
 
   /// @brief キューブの論理積を計算する
-  /// @param[in] right オペランド
   ///
   /// リテラル集合としてみると和集合となる<br>
   /// ただし，相反するリテラルが含まれていたら空キューブとなる．
   SopCube
-  operator*(const SopCube& right) const;
+  operator*(
+    const SopCube& right ///< [in] オペランド
+  ) const;
 
   /// @brief 論理積を計算し自身に代入する．
-  /// @param[in] right オペランドのキューブ
   /// @return 演算後の自身の参照を返す．
   ///
   /// リテラル集合とみなすとユニオンを計算することになる<br>
   /// ただし，相反するリテラルとの積があったら答は空のキューブとなる．
   SopCube&
-  operator*=(const SopCube& right);
+  operator*=(
+    const SopCube& right ///< [in] オペランドのキューブ
+  );
 
   /// @brief キューブとリテラルの論理積を計算する
-  /// @param[in] right オペランドのリテラル
   ///
   /// リテラル集合としてみると和集合となる<br>
   /// ただし，相反するリテラルが含まれていたら空キューブとなる．
   SopCube
-  operator*(Literal right) const;
+  operator*(
+    Literal right ///< [in] オペランドのリテラル
+  ) const;
 
   /// @brief リテラルとの論理積を計算し自身に代入する．
-  /// @param[in] right オペランドのリテラル
   /// @return 演算後の自身の参照を返す．
   ///
   /// リテラル集合とみなすとユニオンを計算することになる<br>
   /// ただし，相反するリテラルとの積があったら答は空のキューブとなる．
   SopCube&
-  operator*=(Literal right);
+  operator*=(
+    Literal right ///< [in] オペランドのリテラル
+  );
 
   /// @brief キューブによる商を計算する
-  /// @param[in] right オペランド
   SopCube
-  operator/(const SopCube& right) const;
+  operator/(
+    const SopCube& right ///< [in] オペランド
+  ) const;
 
   /// @brief キューブによる商を計算し自身に代入する．
-  /// @param[in] right オペランドのキューブ
   /// @return 演算後の自身の参照を返す．
   ///
   /// リテラル集合として考えると集合差を計算することになる<br>
   /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
   SopCube&
-  operator/=(const SopCube& right);
+  operator/=(
+    const SopCube& right ///< [in] オペランドのキューブ
+  );
 
   /// @brief リテラルによる商を計算する
-  /// @param[in] right オペランドのリテラル
   SopCube
-  operator/(Literal right) const;
+  operator/(
+    Literal right ///< [in] オペランドのリテラル
+  ) const;
 
   /// @brief リテラルによる商を計算し自身に代入する．
-  /// @param[in] right オペランドのリテラル
   /// @return 演算後の自身の参照を返す．
   ///
   /// リテラル集合として考えると集合差を計算することになる<br>
   /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
   SopCube&
-  operator/=(Literal right);
+  operator/=(
+    Literal right ///< [in] オペランドのリテラル
+  );
 
   /// @breif SopBlock を返す．
   SopBlock
@@ -197,11 +215,12 @@ public:
   hash() const;
 
   /// @brief 内容をわかりやすい形で出力する．
-  /// @param[in] s 出力先のストリーム
-  /// @param[in] varname_list 変数名のリスト
   void
-  print(ostream& s,
-	const vector<string>& varname_list = vector<string>()) const;
+  print(
+    ostream& s, ///< [in] 出力先のストリーム
+    const vector<string>& varname_list ///< [in] 変数名のリスト
+    = vector<string>()
+  ) const;
 
 
 private:
@@ -210,12 +229,12 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 内容を指定するコンストラクタ
-  /// @param[in] variable_num 変数の数
-  /// @param[in] body キューブのパタンを表す本体
   ///
   /// 危険なので普通は使わないように
-  SopCube(int variable_num,
-	  SopBitVect* body);
+  SopCube(
+    int variable_num, ///< [in] 変数の数
+    SopBitVect* body  ///< [in] キューブのパタンを表す本体
+  );
 
   /// @brief mBody を削除する．
   void
@@ -230,8 +249,10 @@ private:
 
   friend
   int
-  compare(const SopCube& left,
-	  const SopCube& right);
+  compare(
+    const SopCube& left,
+    const SopCube& right
+  );
 
 
 private:
@@ -249,155 +270,231 @@ private:
 
 /// @relates SopCube
 /// @brief キューブの論理積を計算する
-/// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
 SopCube
-operator*(SopCube&& left,
-	  const SopCube& right);
+operator*(
+  SopCube&& left,      ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return SopCube(move(left)).operator*=(right);
+}
 
 /// @relates SopCube
 /// @brief キューブの論理積を計算する
-/// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
 SopCube
-operator*(const SopCube& left,
-	  SopCube&& right);
+operator*(
+  const SopCube& left, ///< [in] 第1オペランド
+  SopCube&& right      ///< [in] 第2オペランド
+)
+{
+  return SopCube(move(right)).operator*=(left);
+}
 
 /// @relates SopCube
 /// @brief キューブの論理積を計算する
-/// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
 SopCube
-operator*(SopCube&& left,
-	  SopCube&& right);
+operator*(
+  SopCube&& left, ///< [in] 第1オペランド
+  SopCube&& right ///< [in] 第2オペランド
+)
+{
+  return SopCube(move(left)).operator*=(right);
+}
 
 /// @relates SopCube
 /// @brief キューブとリテラルの論理積を計算する
-/// @param[in] right オペランドのリテラル
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
 SopCube
-operator*(SopCube&& left,
-	  Literal right);
+operator*(
+  SopCube&& left, ///< [in] 第1オペランド
+  Literal right	  ///< [in] 第2オペランド
+)
+{
+  return SopCube(move(left)).operator*=(right);
+}
 
 /// @relates SopCube
 /// @brief Literal と SopCube の論理積
-/// @param[in] left 第1オペランド
-/// @param[in] right 第2オペランド
 /// @return 結果のキューブを返す．
+inline
 SopCube
-operator*(Literal left,
-	  const SopCube& right);
+operator*(
+  Literal left,        ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  // 交換則を用いる．
+  return right.operator*(left);
+}
 
 /// @relates SopCube
 /// @brief Literal と SopCube の論理積
-/// @param[in] left 第1オペランド
-/// @param[in] right 第2オペランド
 /// @return 結果のキューブを返す．
+inline
 SopCube
-operator*(Literal left,
-	  SopCube&& right);
+operator*(
+  Literal left,    ///< [in] 第1オペランド
+  SopCube&& right  ///< [in] 第2オペランド
+)
+{
+  // 交換則を用いる．
+  return SopCube(move(right)).operator*=(left);
+}
 
 /// @relates SopCube
 /// @brief キューブの除算を計算する
-/// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると集合差となる<br>
+inline
 SopCube
-operator/(SopCube&& left,
-	  const SopCube& right);
+operator/(
+  SopCube&& left,      ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return SopCube(move(left)).operator/=(right);
+}
 
 /// @relates SopCube
 /// @brief キューブとリテラルの除算を計算する
-/// @param[in] left, right オペランド
 ///
 /// リテラル集合としてみると集合差となる<br>
+inline
 SopCube
-operator/(SopCube&& left,
-	  Literal right);
+operator/(
+  SopCube&& left, ///< [in] 第1オペランド
+  Literal right	  ///< [in] 第2オペランド
+)
+{
+  return SopCube(move(left)).operator/=(right);
+}
 
 /// @relates SopCube
 /// @brief SopCubeの比較演算子
-/// @param[in] left, right オペランド
 /// @retval -1 left < right
 /// @retval  0 left = right
 /// @retval  1 left > right
 int
-compare(const SopCube& left,
-	const SopCube& right);
+compare(
+  const SopCube& left, ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+);
 
 /// @relates SopCube
 /// @brief SopCubeの比較演算子(EQ)
-/// @param[in] left, right オペランド
 /// @retval true  left == right
 /// @retval false left != right
+inline
 bool
-operator==(const SopCube& left,
-	   const SopCube& right);
+operator==(
+  const SopCube& left, ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return compare(left, right) == 0;
+}
 
 /// @relates SopCube
 /// @brief SopCubeの比較演算子(NE)
-/// @param[in] left, right オペランド
 /// @retval true  left != right
 /// @retval false left == right
+inline
 bool
-operator!=(const SopCube& left,
-	   const SopCube& right);
+operator!=(
+  const SopCube& left, ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return compare(left, right) != 0;
+}
 
 /// @relates SopCube
 /// @brief SopCubeの比較演算子(LT)
-/// @param[in] left, right オペランド
 /// @retval true  left < right
 /// @retval false left >= right
+inline
 bool
-operator<(const SopCube& left,
-	  const SopCube& right);
+operator<(
+  const SopCube& left, ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return compare(left, right) < 0;
+}
 
 /// @relates SopCube
 /// @brief SopCubeの比較演算子(GT)
-/// @param[in] left, right オペランド
 /// @retval true  left > right
 /// @retval false left <= right
+inline
 bool
-operator>(const SopCube& left,
-	  const SopCube& right);
+operator>(
+  const SopCube& left, ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return compare(left, right) > 0;
+}
 
 /// @relates SopCube
 /// @brief SopCubeの比較演算子(LE)
-/// @param[in] left, right オペランド
 /// @retval true  left < right
 /// @retval false left >= right
+inline
 bool
-operator<=(const SopCube& left,
-	   const SopCube& right);
+operator<=(
+  const SopCube& left, ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return compare(left, right) <= 0;
+}
 
 /// @relates SopCube
 /// @brief SopCubeの比較演算子(GE)
-/// @param[in] left, right オペランド
 /// @retval true  left < right
 /// @retval false left >= right
+inline
 bool
-operator>=(const SopCube& left,
-	   const SopCube& right);
+operator>=(
+  const SopCube& left, ///< [in] 第1オペランド
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return compare(left, right) >= 0;
+}
 
 /// @relates SopCube
 /// @brief SopCube の内容を出力する．
-/// @param[in] s 出力先のストリーム
-/// @param[in] cube 対象のキューブ(のポインタ)
 ///
 /// cube->print(s) と等価
+inline
 ostream&
-operator<<(ostream& s,
-	   const SopCube& cube);
+operator<<(
+  ostream& s,         ///< [in] 出力先のストリーム
+  const SopCube& cube ///< [in] 対象のキューブ(のポインタ)
+)
+{
+  cube.print(s);
+  return s;
+}
 
-
+#if 0
 //////////////////////////////////////////////////////////////////////
 // インライン関数の定義
 //////////////////////////////////////////////////////////////////////
@@ -406,9 +503,6 @@ operator<<(ostream& s,
 inline
 int
 SopCube::variable_num() const
-{
-  return mVariableNum;
-}
 
 // @relates SopCube
 // @brief キューブの論理積を計算する
@@ -607,6 +701,7 @@ operator<<(ostream& s,
   cube.print(s);
   return s;
 }
+#endif
 
 END_NAMESPACE_YM_LOGIC
 
