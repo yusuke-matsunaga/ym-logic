@@ -295,11 +295,11 @@ TEST_P(NpnMgrRandomTest, func_test)
   }
 }
 
-INSTANTIATE_TEST_CASE_P(Test0to5,
+INSTANTIATE_TEST_SUITE_P(Test0to5,
 			NpnMgrTestWithParam,
 			::testing::Range(0, 5));
 
-INSTANTIATE_TEST_CASE_P(Test5to20,
+INSTANTIATE_TEST_SUITE_P(Test5to20,
 			NpnMgrRandomTest,
 			::testing::Range(5, 20));
 
