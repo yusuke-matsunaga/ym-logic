@@ -3,9 +3,8 @@
 /// @brief SopCube の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2018, 2022 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/SopCube.h"
 #include "SopBlock.h"
@@ -19,8 +18,9 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @param[in] variable_num 変数の数
 //
 // * 空のキューブを作る．
-SopCube::SopCube(int variable_num) :
-  mVariableNum{variable_num}
+SopCube::SopCube(
+  SizeType variable_num
+) : mVariableNum{variable_num}
 {
   SopMgr mgr{mVariableNum};
   mBody = mgr.new_body(1);
@@ -28,13 +28,10 @@ SopCube::SopCube(int variable_num) :
 }
 
 // @brief コンストラクタ
-// @param[in] variable_num 変数の数
-// @param[in] lit リテラル
-//
-// 単一のリテラルからなるキューブを作る．
-SopCube::SopCube(int variable_num,
-		 Literal lit) :
-  mVariableNum{variable_num}
+SopCube::SopCube(
+  SizeType variable_num,
+  Literal lit
+) : mVariableNum{variable_num}
 {
   SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
@@ -43,11 +40,10 @@ SopCube::SopCube(int variable_num,
 }
 
 // @brief コンストラクタ
-// @param[in] variable_num 変数の数
-// @param[in] lit_list キューブを表すリテラルのリスト
-SopCube::SopCube(int variable_num,
-		 const vector<Literal>& lit_list) :
-  mVariableNum{variable_num}
+SopCube::SopCube(
+  SizeType variable_num,
+  const vector<Literal>& lit_list
+) : mVariableNum{variable_num}
 {
   SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
@@ -56,11 +52,10 @@ SopCube::SopCube(int variable_num,
 }
 
 // @brief コンストラクタ
-// @param[in] variable_num 変数の数
-// @param[in] lit_list キューブを表すリテラルのリスト初期化子
-SopCube::SopCube(int variable_num,
-		 std::initializer_list<Literal>& lit_list) :
-  mVariableNum{variable_num}
+SopCube::SopCube(
+  SizeType variable_num,
+  std::initializer_list<Literal>& lit_list
+) : mVariableNum{variable_num}
 {
   SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
@@ -69,9 +64,9 @@ SopCube::SopCube(int variable_num,
 }
 
 // @brief コピーコンストラクタ
-// @param[in] src コピー元のオブジェクト
-SopCube::SopCube(const SopCube& src) :
-  mVariableNum{src.mVariableNum}
+SopCube::SopCube(
+  const SopCube& src
+) : mVariableNum{src.mVariableNum}
 {
   SopMgr mgr(mVariableNum);
   mBody = mgr.new_body(1);
@@ -79,10 +74,10 @@ SopCube::SopCube(const SopCube& src) :
 }
 
 // @brief コピー代入演算子
-// @param[in] src コピー元のオブジェクト
-// @return 代入後の自身への参照を返す．
 SopCube&
-SopCube::operator=(const SopCube& src)
+SopCube::operator=(
+  const SopCube& src
+)
 {
   SopMgr mgr(src.mVariableNum);
   if ( mVariableNum != src.mVariableNum ) {
@@ -96,19 +91,19 @@ SopCube::operator=(const SopCube& src)
 }
 
 // @brief ムーブコンストラクタ
-// @param[in] src ムーブ元のオブジェクト
-SopCube::SopCube(SopCube&& src) :
-  mVariableNum{src.mVariableNum},
-  mBody{src.mBody}
+SopCube::SopCube(
+  SopCube&& src
+) : mVariableNum{src.mVariableNum},
+    mBody{src.mBody}
 {
   src.mBody = nullptr;
 }
 
 // @brief ムーブ代入演算子
-// @param[in] src ムーブ元のオブジェクト
-// @return 代入後の自身への参照を返す．
 SopCube&
-SopCube::operator=(SopCube&& src)
+SopCube::operator=(
+  SopCube&& src
+)
 {
   delete_body();
 
@@ -121,14 +116,11 @@ SopCube::operator=(SopCube&& src)
 }
 
 // @brief 内容を指定するコンストラクタ
-// @param[in] variable_num 変数の数
-// @param[in] body キューブのパタンを表す本体
-//
-// 危険なので普通は使わないように
-SopCube::SopCube(int variable_num,
-		 SopBitVect* body) :
-  mVariableNum{variable_num},
-  mBody{body}
+SopCube::SopCube(
+  SizeType variable_num,
+  SopBitVect* body
+) : mVariableNum{variable_num},
+    mBody{body}
 {
 }
 
@@ -149,19 +141,17 @@ SopCube::delete_body()
 }
 
 // @brief 指定した変数のパタンを読み出す．
-// @param[in] var 変数( 0 <= var_id.val() < variable_num() )
-// @retval SopPat::_X その変数は現れない．
-// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
-// @retval SopPat::_0 その変数が否定のリテラルとして現れる．
 SopPat
-SopCube::get_pat(VarId var) const
+SopCube::get_pat(
+  VarId var
+) const
 {
   SopMgr mgr(mVariableNum);
   return mgr.get_pat(mBody, 0, var);
 }
 
 // @brief リテラル数を返す．
-int
+SizeType
 SopCube::literal_num() const
 {
   if ( mBody == nullptr ) {
@@ -172,16 +162,15 @@ SopCube::literal_num() const
 }
 
 // @brief 内容をリテラルのリストに変換する．
-// @param[in] lit_list 結果を格納するベクタ
 vector<Literal>
 SopCube::to_literal_list() const
 {
   SopMgr mgr(mVariableNum);
-  int nl = mgr.literal_num(block());
+  SizeType nl = mgr.literal_num(block());
 
   vector<Literal> lit_list;
   lit_list.reserve(nl);
-  for ( int i = 0; i < mVariableNum; ++ i ) {
+  for ( SizeType i = 0; i < mVariableNum; ++ i ) {
     VarId var(i);
     SopPat pat = mgr.get_pat(mBody, 0, var);
     if ( pat == SopPat::_1 ) {
@@ -196,21 +185,20 @@ SopCube::to_literal_list() const
 }
 
 // @brief 指定したリテラルを含んでいたら true を返す．
-// @param[in] lit 対象のリテラル
 bool
-SopCube::has_literal(Literal lit) const
+SopCube::has_literal(
+  Literal lit
+) const
 {
   SopMgr mgr(mVariableNum);
   return mgr.literal_num(block(), lit) > 0;
 }
 
 // @brief オペランドのキューブに含まれていたら true を返す．
-// @param[in] right オペランドのキューブ
-//
-// ここではキューブの表す論理関数の含意を考える<br>
-// だからリテラル集合としてはオペランドのキューブを含むことになる．
 bool
-SopCube::check_containment(const SopCube& right) const
+SopCube::check_containment(
+  const SopCube& right
+) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
@@ -219,9 +207,10 @@ SopCube::check_containment(const SopCube& right) const
 }
 
 // @brief 2つのキューブに共通なリテラルがあれば true を返す．
-// @param[in] right オペランドのキューブ
 bool
-SopCube::check_intersect(const SopCube& right) const
+SopCube::check_intersect(
+  const SopCube& right
+) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
@@ -230,12 +219,10 @@ SopCube::check_intersect(const SopCube& right) const
 }
 
 // @brief キューブの論理積を計算する
-// @param[in] right オペランド
-//
-// リテラル集合としてみると和集合となる<br>
-// ただし，相反するリテラルが含まれていたら空キューブとなる．
 SopCube
-SopCube::operator*(const SopCube& right) const
+SopCube::operator*(
+  const SopCube& right
+) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
@@ -250,13 +237,10 @@ SopCube::operator*(const SopCube& right) const
 }
 
 // @brief 論理積を計算し自身に代入する．
-// @param[in] right オペランドのキューブ
-// @return 演算後の自身の参照を返す．
-//
-// リテラル集合とみなすとユニオンを計算することになる<br>
-// ただし，相反するリテラルとの積があったら答は空のキューブとなる．
 SopCube&
-SopCube::operator*=(const SopCube& right)
+SopCube::operator*=(
+  const SopCube& right
+)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
@@ -270,12 +254,10 @@ SopCube::operator*=(const SopCube& right)
 }
 
 // @brief キューブとリテラルの論理積を計算する
-// @param[in] right オペランドのリテラル
-//
-// リテラル集合としてみると和集合となる<br>
-// ただし，相反するリテラルが含まれていたら空キューブとなる．
 SopCube
-SopCube::operator*(Literal right) const
+SopCube::operator*(
+  Literal right
+) const
 {
   SopMgr mgr(mVariableNum);
   SopBitVect* body = mgr.new_body(1);
@@ -288,13 +270,10 @@ SopCube::operator*(Literal right) const
 }
 
 // @brief リテラルとの論理積を計算し自身に代入する．
-// @param[in] right オペランドのリテラル
-// @return 演算後の自身の参照を返す．
-//
-// リテラル集合とみなすとユニオンを計算することになる<br>
-// ただし，相反するリテラルとの積があったら答は空のキューブとなる．
 SopCube&
-SopCube::operator*=(Literal right)
+SopCube::operator*=(
+  Literal right
+)
 {
   SopMgr mgr(mVariableNum);
   int nc = mgr.cover_product(mBody, block(), right);
@@ -306,9 +285,10 @@ SopCube::operator*=(Literal right)
 }
 
 // @brief キューブによる商を計算する
-// @param[in] right オペランド
 SopCube
-SopCube::operator/(const SopCube& right) const
+SopCube::operator/(
+  const SopCube& right
+) const
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
@@ -323,13 +303,10 @@ SopCube::operator/(const SopCube& right) const
 }
 
 // @brief キューブによる商を計算し自身に代入する．
-// @param[in] right オペランドのキューブ
-// @return 演算後の自身の参照を返す．
-//
-// リテラル集合として考えると集合差を計算することになる<br>
-// ただし，right のみに含まれるリテラルがあったら結果は空となる．
 SopCube&
-SopCube::operator/=(const SopCube& right)
+SopCube::operator/=(
+  const SopCube& right
+)
 {
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
@@ -343,9 +320,10 @@ SopCube::operator/=(const SopCube& right)
 }
 
 // @brief リテラルによる商を計算する
-// @param[in] right オペランドのリテラル
 SopCube
-SopCube::operator/(Literal right) const
+SopCube::operator/(
+  Literal right
+) const
 {
   SopMgr mgr(mVariableNum);
   SopBitVect* body = mgr.new_body(1);
@@ -358,13 +336,10 @@ SopCube::operator/(Literal right) const
 }
 
 // @brief リテラルによる商を計算し自身に代入する．
-// @param[in] right オペランドのリテラル
-// @return 演算後の自身の参照を返す．
-//
-// リテラル集合として考えると集合差を計算することになる<br>
-// ただし，right のみに含まれるリテラルがあったら結果は空となる．
 SopCube&
-SopCube::operator/=(Literal right)
+SopCube::operator/=(
+  Literal right
+)
 {
   SopMgr mgr(mVariableNum);
   int nc = mgr.cover_quotient(mBody, block(), right);
@@ -376,14 +351,11 @@ SopCube::operator/=(Literal right)
 }
 
 // @relates SopCube
-// @brief SopCubeの比較演算子
-// @param[in] left, right オペランド
-// @retval -1 left < right
-// @retval  0 left = right
-// @retval  1 left > right
 int
-compare(const SopCube& left,
-	const SopCube& right)
+compare(
+  const SopCube& left,
+  const SopCube& right
+)
 {
   ASSERT_COND( left.variable_num() == right.variable_num() );
 
@@ -407,11 +379,11 @@ SopCube::hash() const
 }
 
 // @brief 内容をわかりやすい形で出力する．
-// @param[in] s 出力先のストリーム
-// @param[in] varname_list 変数名のリスト
 void
-SopCube::print(ostream& s,
-	       const vector<string>& varname_list) const
+SopCube::print(
+  ostream& s,
+  const vector<string>& varname_list
+) const
 {
   SopMgr mgr(mVariableNum);
   mgr.print(s, mBody, 0, 1, varname_list);

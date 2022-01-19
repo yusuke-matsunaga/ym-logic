@@ -35,7 +35,7 @@ public:
   /// * 空のカバーとなる．
   explicit
   SopCover(
-    int variable_num ///< [in] 変数の数
+    SizeType variable_num ///< [in] 変数の数
   );
 
   /// @brief コンストラクタ
@@ -44,7 +44,7 @@ public:
   ///   と等しくなければならない．
   /// * キューブの順番は変わる可能性がある．
   SopCover(
-    int variable_num,                ///< [in] 変数の数
+    SizeType variable_num,           ///< [in] 変数の数
     const vector<SopCube>& cube_list ///< [in] キューブのリスト
   );
 
@@ -52,7 +52,7 @@ public:
   ///
   /// * キューブの順番は変わる可能性がある．
   SopCover(
-    int variable_num,                        ///< [in] 変数の数
+    SizeType variable_num,                   ///< [in] 変数の数
     const vector<vector<Literal>>& cube_list ///< [in] カバーを表すリテラルのリストのリスト
   );
 
@@ -60,7 +60,7 @@ public:
   ///
   /// * キューブの順番は変わる可能性がある．
   SopCover(
-    int variable_num,                                      ///< [in] 変数の数
+    SizeType variable_num,                                 ///< [in] 変数の数
     initializer_list<initializer_list<Literal>>& cube_list ///< [in] カバーを表すリテラルのリストのリスト
   );
 
@@ -116,25 +116,25 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 変数の数を返す．
-  int
+  SizeType
   variable_num() const
   {
     return mVariableNum;
   }
 
   /// @brief キューブの数を返す．
-  int
+  SizeType
   cube_num() const
   {
     return mCubeNum;
   }
 
   /// @brief リテラル数を返す．
-  int
+  SizeType
   literal_num() const;
 
   /// @brief 指定されたリテラルの出現回数を返す．
-  int
+  SizeType
   literal_num(
     Literal lit ///< [in] 対象のリテラル
   ) const;
@@ -149,8 +149,8 @@ public:
   /// @retval SopPat::_0 その変数が否定のリテラルとして現れる．
   SopPat
   get_pat(
-    int cube_id, ///< [in] キューブ番号 ( 0 <= cube_id < cube_num() )
-    VarId var_id ///< [in] 変数( 0 <= var_id.val() < variable_num() )
+    SizeType cube_id, ///< [in] キューブ番号 ( 0 <= cube_id < cube_num() )
+    VarId var_id      ///< [in] 変数( 0 <= var_id.val() < variable_num() )
   ) const;
 
   /// @brief 論理和を計算する．
@@ -311,7 +311,7 @@ public:
   void
   print(
     ostream& s, ///< [in] 出力先のストリーム
-    const vector<string>& varname_list = vector<string>() ///< [in] 変数名のリスト
+    const vector<string>& varname_list = vector<string>{} ///< [in] 変数名のリスト
   ) const;
 
 
@@ -324,10 +324,10 @@ private:
   ///
   /// この関数は危険なので普通は使わないこと
   SopCover(
-    int variable_num, ///< [in] 変数の数
-    int cube_num,     ///< [in] キューブ数
-    int cube_cap,     ///< [in] キューブ容量
-    SopBitVect* body  ///< [in] 内容のパタンを表す本体
+    SizeType variable_num, ///< [in] 変数の数
+    SizeType cube_num,     ///< [in] キューブ数
+    SizeType cube_cap,     ///< [in] キューブ容量
+    SopBitVect* body       ///< [in] 内容のパタンを表す本体
   );
 
   /// @brief キューブ容量を変更する．
@@ -335,7 +335,7 @@ private:
   /// 現在のキューブ容量が大きければ変更しない．
   void
   resize(
-    int req_cap ///< [in] 要求するキューブ容量
+    SizeType req_cap ///< [in] 要求するキューブ容量
   );
 
   /// @brief 内容を表す SopBlock を返す．
@@ -344,9 +344,9 @@ private:
 
   /// @brief キューブ容量を計算する．
   static
-  int
+  SizeType
   get_capacity(
-    int cube_num ///< [in] キューブ数
+    SizeType cube_num ///< [in] キューブ数
   );
 
   /// @brief 比較演算子(rich compare)
@@ -367,13 +367,13 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数の数
-  int mVariableNum;
+  SizeType mVariableNum;
 
   // キューブ数
-  int mCubeNum;
+  SizeType mCubeNum;
 
   // mBody の実際に確保されているキューブ容量
-  int mCubeCap;
+  SizeType mCubeCap;
 
   // 内容を表すビットベクタ
   SopBitVect* mBody;

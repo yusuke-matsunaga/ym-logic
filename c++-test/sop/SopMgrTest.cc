@@ -3,7 +3,7 @@
 /// @brief SopMgrTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2018, 2022 Yusuke Matsunaga
 /// All rights reserved.
 
 #include <gtest/gtest.h>
@@ -17,18 +17,18 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 TEST(SopMgrTest, constructor)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   EXPECT_EQ( nv, mgr.variable_num() );
 }
 
 TEST(SopMgrTest, new_delete)
 {
-  const int nv = 100;
+  const SizeType nv = 100;
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv = mgr.new_body(10);
 
@@ -37,22 +37,22 @@ TEST(SopMgrTest, new_delete)
 
 TEST(SopMgrTest, cube_set1)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv = mgr.new_body(1);
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
   vector<Literal> lit_list{Literal(var0, false), Literal(var1, true), Literal(var2, false)};
 
@@ -72,22 +72,22 @@ TEST(SopMgrTest, cube_set1)
 
 TEST(SopMgrTest, cube_set2)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv = mgr.new_body(1);
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
   mgr.cube_set(bv, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
 
@@ -105,22 +105,22 @@ TEST(SopMgrTest, cube_set2)
 
 TEST(SopMgrTest, cube_clear)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv = mgr.new_body(1);
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
   mgr.cube_set(bv, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
   mgr.cube_clear(bv);
@@ -139,20 +139,20 @@ TEST(SopMgrTest, cube_clear)
 
 TEST(SopMgrTest, cube_compare)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
@@ -177,20 +177,20 @@ TEST(SopMgrTest, cube_compare)
 
 TEST(SopMgrTest, cube_check_conflict)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
@@ -209,20 +209,20 @@ TEST(SopMgrTest, cube_check_conflict)
 
 TEST(SopMgrTest, cube_check_containment)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
@@ -244,20 +244,20 @@ TEST(SopMgrTest, cube_check_containment)
 
 TEST(SopMgrTest, cube_check_intersect)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
@@ -277,20 +277,20 @@ TEST(SopMgrTest, cube_check_intersect)
 
 TEST(SopMgrTest, cube_product)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false), Literal(var2, true)});
@@ -334,20 +334,20 @@ TEST(SopMgrTest, cube_product)
 
 TEST(SopMgrTest, cube_quotient)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, true)});
@@ -391,20 +391,20 @@ TEST(SopMgrTest, cube_quotient)
 
 TEST(SopMgrTest, cube_swap)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, false), Literal(var2, true)});
@@ -440,20 +440,20 @@ TEST(SopMgrTest, cube_swap)
 
 TEST(SopMgrTest, cube_rotate3)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false)});
@@ -503,20 +503,20 @@ TEST(SopMgrTest, cube_rotate3)
 
 TEST(SopMgrTest, cube_rotate4)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false)});
@@ -580,20 +580,20 @@ TEST(SopMgrTest, cube_rotate4)
 
 TEST(SopMgrTest, cover_set1)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(2);
   mgr.cover_set(bv1, {{Literal(var0, false)}, {Literal(var1, true)}});
@@ -623,20 +623,20 @@ TEST(SopMgrTest, cover_set1)
 
 TEST(SopMgrTest, cover_set2)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(2);
   mgr.cover_set(bv1, {{Literal(var1, false)}, {Literal(var0, true)}});
@@ -666,20 +666,20 @@ TEST(SopMgrTest, cover_set2)
 
 TEST(SopMgrTest, sum1)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(1);
   mgr.cube_set(bv1, {Literal(var0, false)});
@@ -717,20 +717,20 @@ TEST(SopMgrTest, sum1)
 
 TEST(SopMgrTest, sum2)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(2);
   mgr.cover_set(bv1, {{Literal(var0, false)}, {Literal(var1, true)}});
@@ -768,20 +768,20 @@ TEST(SopMgrTest, sum2)
 
 TEST(SopMgrTest, diff)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(2);
   mgr.cover_set(bv1, {{Literal(var0, false)}, {Literal(var1, true)}});
@@ -807,20 +807,20 @@ TEST(SopMgrTest, diff)
 
 TEST(SopMgrTest, product1)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(2);
   mgr.cover_set(bv1, {{Literal(var0, false)}, {Literal(var1, true)}});
@@ -879,20 +879,20 @@ TEST(SopMgrTest, product1)
 
 TEST(SopMgrTest, product2)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(2);
   mgr.cover_set(bv1, {{Literal(var0, false)}, {Literal(var1, true)}});
@@ -940,20 +940,20 @@ TEST(SopMgrTest, product2)
 
 TEST(SopMgrTest, product3)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   SopBitVect* bv1 = mgr.new_body(2);
   mgr.cover_set(bv1, {{Literal(var0, false)}, {Literal(var1, true)}});
@@ -976,20 +976,20 @@ TEST(SopMgrTest, product3)
 
 TEST(SopMgrTest, quotient1)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   std::initializer_list<std::initializer_list<Literal>> cube_list1
     {
@@ -998,7 +998,7 @@ TEST(SopMgrTest, quotient1)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var1, true},  Literal{var3, true}  }
     };
-  int nc1 = cube_list1.size();
+  SizeType nc1 = cube_list1.size();
   SopBitVect* bv1 = mgr.new_body(nc1);
   mgr.cover_set(bv1, cube_list1);
   SopBlock block1{nc1, bv1};
@@ -1008,13 +1008,13 @@ TEST(SopMgrTest, quotient1)
      { Literal{var2, false} },
      { Literal{var3, true} }
     };
-  int nc2 = cube_list2.size();
+  SizeType nc2 = cube_list2.size();
   SopBitVect* bv2 = mgr.new_body(cube_list2.size());
   mgr.cover_set(bv2, cube_list2);
   SopBlock block2{nc2, bv2};
 
   SopBitVect* bv3 = mgr.new_body(2);
-  int nc = mgr.cover_quotient(bv3, block1, block2);
+  SizeType nc = mgr.cover_quotient(bv3, block1, block2);
   EXPECT_EQ( 2, nc );
 
   EXPECT_EQ( SopPat::_1, mgr.get_pat(bv3, 0, var0) );
@@ -1042,20 +1042,20 @@ TEST(SopMgrTest, quotient1)
 
 TEST(SopMgrTest, quotient2)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   std::initializer_list<std::initializer_list<Literal>> cube_list1
     {
@@ -1064,13 +1064,13 @@ TEST(SopMgrTest, quotient2)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var1, true},  Literal{var3, true}  }
     };
-  int nc1 = cube_list1.size();
+  SizeType nc1 = cube_list1.size();
   SopBitVect* bv1 = mgr.new_body(nc1);
   mgr.cover_set(bv1, cube_list1);
   SopBlock block1{nc1, bv1};
 
   SopBitVect* bv3 = mgr.new_body(2);
-  int nc = mgr.cover_quotient(bv3, block1, Literal{var1, true});
+  SizeType nc = mgr.cover_quotient(bv3, block1, Literal{var1, true});
   EXPECT_EQ( 2, nc );
 
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var0) );
@@ -1098,27 +1098,27 @@ TEST(SopMgrTest, quotient2)
 
 TEST(SopMgrTest, common_cube)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   std::initializer_list<std::initializer_list<Literal>> cube_list1
     {
      { Literal{var0, false}, Literal{var2, false}, Literal{var4, false} },
      { Literal{var0, false}, Literal{var3, true}  },
     };
-  int nc1 = cube_list1.size();
+  SizeType nc1 = cube_list1.size();
   SopBitVect* bv1 = mgr.new_body(nc1);
   mgr.cover_set(bv1, cube_list1);
   SopBlock block1{nc1, bv1};
@@ -1139,20 +1139,20 @@ TEST(SopMgrTest, common_cube)
 
 TEST(SopMgrTest, cover_compare1)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   std::initializer_list<std::initializer_list<Literal>> cube_list1
     {
@@ -1161,7 +1161,7 @@ TEST(SopMgrTest, cover_compare1)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var1, true},  Literal{var3, true}  }
     };
-  int nc1 = cube_list1.size();
+  SizeType nc1 = cube_list1.size();
   SopBitVect* bv1 = mgr.new_body(nc1);
   mgr.cover_set(bv1, cube_list1);
   SopBlock block1{nc1, bv1};
@@ -1173,7 +1173,7 @@ TEST(SopMgrTest, cover_compare1)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var0, false}, Literal{var3, true}  }
     };
-  int nc2 = cube_list2.size();
+  SizeType nc2 = cube_list2.size();
   SopBitVect* bv2 = mgr.new_body(nc2);
   mgr.cover_set(bv2, cube_list2);
   SopBlock block2{nc2, bv2};
@@ -1184,20 +1184,20 @@ TEST(SopMgrTest, cover_compare1)
 
 TEST(SopMgrTest, cover_compare2)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   std::initializer_list<std::initializer_list<Literal>> cube_list1
     {
@@ -1206,7 +1206,7 @@ TEST(SopMgrTest, cover_compare2)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var1, true},  Literal{var3, true}  }
     };
-  int nc1 = cube_list1.size();
+  SizeType nc1 = cube_list1.size();
   SopBitVect* bv1 = mgr.new_body(nc1);
   mgr.cover_set(bv1, cube_list1);
   SopBlock block1{nc1, bv1};
@@ -1217,7 +1217,7 @@ TEST(SopMgrTest, cover_compare2)
      { Literal{var1, true},  Literal{var3, true}  },
      { Literal{var1, true},  Literal{var2, false} }
     };
-  int nc2 = cube_list2.size();
+  SizeType nc2 = cube_list2.size();
   SopBitVect* bv2 = mgr.new_body(nc2);
   mgr.cover_set(bv2, cube_list2);
   SopBlock block2{nc2, bv2};
@@ -1231,20 +1231,20 @@ TEST(SopMgrTest, cover_compare2)
 
 TEST(SopMgrTest, cover_compare3)
 {
-  const int nv = 10;
+  const SizeType nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+  VarId var3{3};
+  VarId var4{4};
+  VarId var5{5};
+  VarId var6{6};
+  VarId var7{7};
+  VarId var8{8};
+  VarId var9{9};
 
-  SopMgr mgr(nv);
+  SopMgr mgr{nv};
 
   std::initializer_list<std::initializer_list<Literal>> cube_list1
     {
@@ -1253,7 +1253,7 @@ TEST(SopMgrTest, cover_compare3)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var1, true},  Literal{var3, true}  }
     };
-  int nc1 = cube_list1.size();
+  SizeType nc1 = cube_list1.size();
   SopBitVect* bv1 = mgr.new_body(nc1);
   mgr.cover_set(bv1, cube_list1);
   SopBlock block1{nc1, bv1};
@@ -1265,7 +1265,7 @@ TEST(SopMgrTest, cover_compare3)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var0, false}, Literal{var4, true}  }
     };
-  int nc2 = cube_list2.size();
+  SizeType nc2 = cube_list2.size();
   SopBitVect* bv2 = mgr.new_body(nc2);
   mgr.cover_set(bv2, cube_list2);
   SopBlock block2{nc2, bv2};

@@ -3,9 +3,8 @@
 /// @brief TvFunc の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2022 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/TvFunc.h"
 #include "ym/Range.h"
@@ -51,7 +50,9 @@ BEGIN_NONAMESPACE
 // 0入力用
 inline
 int
-count_onebits_0(TvFunc::WordType word)
+count_onebits_0(
+  TvFunc::WordType word
+)
 {
   return static_cast<int>(word & 0x1ULL);
 }
@@ -60,7 +61,9 @@ count_onebits_0(TvFunc::WordType word)
 // 1入力用
 inline
 int
-count_onebits_1(TvFunc::WordType word)
+count_onebits_1(
+  TvFunc::WordType word
+)
 {
   const TvFunc::WordType mask1 = 0x1ULL;
 
@@ -72,7 +75,9 @@ count_onebits_1(TvFunc::WordType word)
 // 2入力用
 inline
 int
-count_onebits_2(TvFunc::WordType word)
+count_onebits_2(
+  TvFunc::WordType word
+)
 {
   const TvFunc::WordType mask1  = 0x5ULL;
   const TvFunc::WordType mask2  = 0x3ULL;
@@ -86,7 +91,9 @@ count_onebits_2(TvFunc::WordType word)
 // 3入力用
 inline
 int
-count_onebits_3(TvFunc::WordType word)
+count_onebits_3(
+  TvFunc::WordType word
+)
 {
   const TvFunc::WordType mask1  = 0x55ULL;
   const TvFunc::WordType mask2  = 0x33ULL;
@@ -102,7 +109,9 @@ count_onebits_3(TvFunc::WordType word)
 // 4入力用
 inline
 int
-count_onebits_4(TvFunc::WordType word)
+count_onebits_4(
+  TvFunc::WordType word
+)
 {
   const TvFunc::WordType mask1  = 0x5555ULL;
   const TvFunc::WordType mask2  = 0x3333ULL;
@@ -120,7 +129,9 @@ count_onebits_4(TvFunc::WordType word)
 // 5入力用
 inline
 int
-count_onebits_5(TvFunc::WordType word)
+count_onebits_5(
+  TvFunc::WordType word
+)
 {
   const TvFunc::WordType mask1   = 0x55555555ULL;
   const TvFunc::WordType mask2   = 0x33333333ULL;
@@ -140,7 +151,9 @@ count_onebits_5(TvFunc::WordType word)
 // 6入力用
 inline
 int
-count_onebits_6(TvFunc::WordType word)
+count_onebits_6(
+  TvFunc::WordType word
+)
 {
   const TvFunc::WordType mask1  = 0x5555555555555555ULL;
   const TvFunc::WordType mask2  = 0x3333333333333333ULL;
@@ -161,7 +174,9 @@ count_onebits_6(TvFunc::WordType word)
 // word の中の 1 のビットを数える．
 inline
 int
-count_onebits(TvFunc::WordType word)
+count_onebits(
+  TvFunc::WordType word
+)
 {
   return count_onebits_6(word);
 }
@@ -169,7 +184,7 @@ count_onebits(TvFunc::WordType word)
 END_NONAMESPACE
 
 // 0 の数を数える．
-int
+SizeType
 TvFunc::count_zero() const
 {
   switch ( input_num() ) {
@@ -185,15 +200,15 @@ TvFunc::count_zero() const
     ;
   }
 
-  int ans = 0;
-  for ( int b: Range(mBlockNum) ) {
+  SizeType ans = 0;
+  for ( SizeType b: Range(mBlockNum) ) {
     ans += count_onebits(mVector[b]);
   }
   return (1 << input_num()) - ans;
 }
 
 // 1 の数を数える．
-int
+SizeType
 TvFunc::count_one() const
 {
   switch ( input_num() ) {
@@ -209,8 +224,8 @@ TvFunc::count_one() const
     ;
   }
 
-  int ans = 0;
-  for ( int b: Range(mBlockNum) ) {
+  SizeType ans = 0;
+  for ( SizeType b: Range(mBlockNum) ) {
     ans += count_onebits(mVector[b]);
   }
   return ans;
@@ -234,7 +249,7 @@ TvFunc::walsh_0() const
   }
 
   int ans = 0;
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     ans += count_onebits(mVector[b]);
   }
   return (1 << input_num()) - ans * 2;
@@ -242,9 +257,11 @@ TvFunc::walsh_0() const
 
 // 1次の Walsh 係数を求める．
 int
-TvFunc::walsh_1(VarId varid) const
+TvFunc::walsh_1(
+  VarId varid
+) const
 {
-  int pos = varid.val();
+  SizeType pos = varid.val();
   switch ( input_num() ) {
   case 0: ASSERT_NOT_REACHED;
   case 1: return (1 << 1) - count_onebits_1(mVector[0] ^ c_mask(pos)) * 2;
@@ -259,9 +276,9 @@ TvFunc::walsh_1(VarId varid) const
   }
 
   // n > 6
-  int c = 0;
+  SizeType c = 0;
   int n = 1 << input_num();
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     TvFunc::WordType mask = lit_pat(pos, b);
     c += count_onebits(mVector[b] ^ mask);
   }
@@ -270,11 +287,13 @@ TvFunc::walsh_1(VarId varid) const
 
 // 2次の Walsh 係数を求める．
 int
-TvFunc::walsh_2(VarId var1,
-		VarId var2) const
+TvFunc::walsh_2(
+  VarId var1,
+  VarId var2
+) const
 {
-  int i = var1.val();
-  int j = var2.val();
+  SizeType i = var1.val();
+  SizeType j = var2.val();
 
   if ( i == j ) {
     return 0;
@@ -292,15 +311,13 @@ TvFunc::walsh_2(VarId var1,
 
   // i と j を正規化する．
   if ( i < j ) {
-    int tmp = i;
-    i = j;
-    j = tmp;
+    std::swap(i, j);
   }
 
-  int c = 0;
+  SizeType c = 0;
   if ( i < NIPW ) {
     TvFunc::WordType mask = c_mask(i) ^ c_mask(j);
-    for ( int b: Range(mBlockNum) ) {
+    for ( SizeType b: Range(mBlockNum) ) {
       c += count_onebits(mVector[b] ^ mask);
     }
   }
@@ -315,7 +332,7 @@ TvFunc::walsh_2(VarId var1,
     //     c += count_onebits(mVector[b] ^ mask1);
     //   }
     // }
-    int i5 = i - NIPW;
+    SizeType i5 = i - NIPW;
     TvFunc::WordType mask = c_mask(j);
     for ( int b: Range(mBlockNum) ) {
       TvFunc::WordType mask1 = 0UL - ((b >> i5) & 1UL);
@@ -334,9 +351,9 @@ TvFunc::walsh_2(VarId var1,
     //     c += count_onebits(mVector[b]);
     //   }
     // }
-    int i5 = i - NIPW;
-    int j5 = j - NIPW;
-    for ( int b: Range(mBlockNum) ) {
+    SizeType i5 = i - NIPW;
+    SizeType j5 = j - NIPW;
+    for ( SizeType b: Range(mBlockNum) ) {
       TvFunc::WordType mask = 0UL - (((b >> i5) ^ (b >> j5)) & 1UL);
       c += count_onebits(mVector[b] ^ mask);
     }
@@ -349,8 +366,10 @@ BEGIN_NONAMESPACE
 // 5入力の walsh_01 用サブルーティン
 inline
 int
-walsh_01_5b(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_5b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   const TvFunc::WordType mask1   = 0x55555555ULL;
   const TvFunc::WordType mask2   = 0x33333333ULL;
@@ -416,8 +435,10 @@ walsh_01_5b(TvFunc::WordType* src_vec,
 // 6 入力の walsh_01 用サブルーティン
 inline
 int
-walsh_01_6b(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_6b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   const TvFunc::WordType mask1   = 0x5555555555555555ULL;
   const TvFunc::WordType mask2   = 0x3333333333333333ULL;
@@ -497,8 +518,10 @@ walsh_01_6b(TvFunc::WordType* src_vec,
 // 7入力の walsh_01 用サブルーティン
 inline
 int
-walsh_01_7b(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_7b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_6b(src_vec,                     vec);
   int ans1 = walsh_01_6b(src_vec + (1 << (6 - NIPW)), vec);
@@ -509,8 +532,10 @@ walsh_01_7b(TvFunc::WordType* src_vec,
 // 8入力の walsh_01 用サブルーティン
 inline
 int
-walsh_01_8b(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_8b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_7b(src_vec,                     vec);
   int ans1 = walsh_01_7b(src_vec + (1 << (7 - NIPW)), vec);
@@ -521,8 +546,10 @@ walsh_01_8b(TvFunc::WordType* src_vec,
 // 9入力の walsh_01 用サブルーティン
 inline
 int
-walsh_01_9b(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_9b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_8b(src_vec,                     vec);
   int ans1 = walsh_01_8b(src_vec + (1 << (8 - NIPW)), vec);
@@ -533,8 +560,10 @@ walsh_01_9b(TvFunc::WordType* src_vec,
 // 10入力の walsh_01 用サブルーティン
 inline
 int
-walsh_01_10b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_10b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_9b(src_vec,                     vec);
   int ans1 = walsh_01_9b(src_vec + (1 << (9 - NIPW)), vec);
@@ -544,8 +573,10 @@ walsh_01_10b(TvFunc::WordType* src_vec,
 
 // 11入力の walsh_01 用サブルーティン
 int
-walsh_01_11b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_11b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_10b(src_vec,                      vec);
   int ans1 = walsh_01_10b(src_vec + (1 << (10 - NIPW)), vec);
@@ -555,8 +586,10 @@ walsh_01_11b(TvFunc::WordType* src_vec,
 
 // 12入力の walsh_01 用サブルーティン
 int
-walsh_01_12b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_12b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_11b(src_vec,                      vec);
   int ans1 = walsh_01_11b(src_vec + (1 << (11 - NIPW)), vec);
@@ -566,8 +599,10 @@ walsh_01_12b(TvFunc::WordType* src_vec,
 
 // 13入力の walsh_01 用サブルーティン
 int
-walsh_01_13b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_13b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_12b(src_vec,                      vec);
   int ans1 = walsh_01_12b(src_vec + (1 << (12 - NIPW)), vec);
@@ -577,8 +612,10 @@ walsh_01_13b(TvFunc::WordType* src_vec,
 
 // 14入力の walsh_01 用サブルーティン
 int
-walsh_01_14b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_14b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_13b(src_vec,                      vec);
   int ans1 = walsh_01_13b(src_vec + (1 << (13 - NIPW)), vec);
@@ -588,8 +625,10 @@ walsh_01_14b(TvFunc::WordType* src_vec,
 
 // 15入力の walsh_01 用サブルーティン
 int
-walsh_01_15b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_15b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_14b(src_vec,                      vec);
   int ans1 = walsh_01_14b(src_vec + (1 << (14 - NIPW)), vec);
@@ -599,8 +638,10 @@ walsh_01_15b(TvFunc::WordType* src_vec,
 
 // 16入力の walsh_01 用サブルーティン
 int
-walsh_01_16b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_16b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_15b(src_vec,                      vec);
   int ans1 = walsh_01_15b(src_vec + (1 << (15 - NIPW)), vec);
@@ -610,8 +651,10 @@ walsh_01_16b(TvFunc::WordType* src_vec,
 
 // 17入力の walsh_01 用サブルーティン
 int
-walsh_01_17b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_17b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_16b(src_vec,                      vec);
   int ans1 = walsh_01_16b(src_vec + (1 << (16 - NIPW)), vec);
@@ -621,8 +664,10 @@ walsh_01_17b(TvFunc::WordType* src_vec,
 
 // 18入力の walsh_01 用サブルーティン
 int
-walsh_01_18b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_18b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_17b(src_vec,                      vec);
   int ans1 = walsh_01_17b(src_vec + (1 << (17 - NIPW)), vec);
@@ -632,8 +677,10 @@ walsh_01_18b(TvFunc::WordType* src_vec,
 
 // 19入力の walsh_01 用サブルーティン
 int
-walsh_01_19b(TvFunc::WordType* src_vec,
-	     int vec[])
+walsh_01_19b(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   int ans0 = walsh_01_18b(src_vec,                      vec);
   int ans1 = walsh_01_18b(src_vec + (1 << (18 - NIPW)), vec);
@@ -644,8 +691,10 @@ walsh_01_19b(TvFunc::WordType* src_vec,
 // 0入力の walsh_01 本体
 inline
 int
-walsh_01_0(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_0(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   return 1 - src_vec[0] * 2;
 }
@@ -653,8 +702,10 @@ walsh_01_0(TvFunc::WordType* src_vec,
 // 1入力の walsh_01 本体
 inline
 int
-walsh_01_1(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_1(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   const TvFunc::WordType mask1   = 0x1ULL;
 
@@ -676,8 +727,10 @@ walsh_01_1(TvFunc::WordType* src_vec,
 // 2入力の walsh_01 本体
 inline
 int
-walsh_01_2(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_2(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   const TvFunc::WordType mask1   = 0x5ULL;
   const TvFunc::WordType mask2   = 0x3ULL;
@@ -709,8 +762,10 @@ walsh_01_2(TvFunc::WordType* src_vec,
 // 3入力の walsh_01 本体
 inline
 int
-walsh_01_3(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_3(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   const TvFunc::WordType mask1   = 0x55ULL;
   const TvFunc::WordType mask2   = 0x33ULL;
@@ -753,8 +808,10 @@ walsh_01_3(TvFunc::WordType* src_vec,
 // 4入力の walsh_01 本体
 inline
 int
-walsh_01_4(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_4(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   const TvFunc::WordType mask1   = 0x5555ULL;
   const TvFunc::WordType mask2   = 0x3333ULL;
@@ -809,8 +866,10 @@ walsh_01_4(TvFunc::WordType* src_vec,
 // 5入力の walsh_01 本体
 inline
 int
-walsh_01_5(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_5(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4} ) {
     vec[i] = 0;
@@ -828,8 +887,10 @@ walsh_01_5(TvFunc::WordType* src_vec,
 // 6入力の walsh_01 本体
 inline
 int
-walsh_01_6(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_6(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5} ) {
     vec[i] = 0;
@@ -847,8 +908,10 @@ walsh_01_6(TvFunc::WordType* src_vec,
 // 7入力の walsh_01 本体
 inline
 int
-walsh_01_7(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_7(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5} ) {
     vec[i] = 0;
@@ -868,8 +931,10 @@ walsh_01_7(TvFunc::WordType* src_vec,
 // 8入力の walsh_01 本体
 inline
 int
-walsh_01_8(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_8(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6} ) {
     vec[i] = 0;
@@ -889,8 +954,10 @@ walsh_01_8(TvFunc::WordType* src_vec,
 // 9入力の walsh_01 本体
 inline
 int
-walsh_01_9(TvFunc::WordType* src_vec,
-	   int vec[])
+walsh_01_9(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7} ) {
     vec[i] = 0;
@@ -910,8 +977,10 @@ walsh_01_9(TvFunc::WordType* src_vec,
 // 10入力の walsh_01 本体
 inline
 int
-walsh_01_10(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_10(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8} ) {
     vec[i] = 0;
@@ -930,8 +999,10 @@ walsh_01_10(TvFunc::WordType* src_vec,
 
 // 11入力の walsh_01 本体
 int
-walsh_01_11(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_11(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
     vec[i] = 0;
@@ -950,8 +1021,10 @@ walsh_01_11(TvFunc::WordType* src_vec,
 
 // 12入力の walsh_01 本体
 int
-walsh_01_12(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_12(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} ) {
     vec[i] = 0;
@@ -970,8 +1043,10 @@ walsh_01_12(TvFunc::WordType* src_vec,
 
 // 13入力の walsh_01 本体
 int
-walsh_01_13(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_13(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11} ) {
     vec[i] = 0;
@@ -990,8 +1065,10 @@ walsh_01_13(TvFunc::WordType* src_vec,
 
 // 14入力の walsh_01 本体
 int
-walsh_01_14(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_14(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} ) {
     vec[i] = 0;
@@ -1010,8 +1087,10 @@ walsh_01_14(TvFunc::WordType* src_vec,
 
 // 15入力の walsh_01 本体
 int
-walsh_01_15(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_15(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13} ) {
     vec[i] = 0;
@@ -1030,8 +1109,10 @@ walsh_01_15(TvFunc::WordType* src_vec,
 
 // 16入力の walsh_01 本体
 int
-walsh_01_16(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_16(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14} ) {
     vec[i] = 0;
@@ -1050,8 +1131,10 @@ walsh_01_16(TvFunc::WordType* src_vec,
 
 // 17入力の walsh_01 本体
 int
-walsh_01_17(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_17(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15} ) {
     vec[i] = 0;
@@ -1070,8 +1153,10 @@ walsh_01_17(TvFunc::WordType* src_vec,
 
 // 18入力の walsh_01 本体
 int
-walsh_01_18(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_18(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16} ) {
     vec[i] = 0;
@@ -1090,8 +1175,10 @@ walsh_01_18(TvFunc::WordType* src_vec,
 
 // 19入力の walsh_01 本体
 int
-walsh_01_19(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_19(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17} ) {
     vec[i] = 0;
@@ -1110,8 +1197,10 @@ walsh_01_19(TvFunc::WordType* src_vec,
 
 // 20入力の walsh_01 本体
 int
-walsh_01_20(TvFunc::WordType* src_vec,
-	    int vec[])
+walsh_01_20(
+  TvFunc::WordType* src_vec,
+  int vec[]
+)
 {
   for ( int i: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18} ) {
     vec[i] = 0;
@@ -1132,7 +1221,9 @@ END_NONAMESPACE
 
 // 0次と 1次の Walsh 係数を求める．
 int
-TvFunc::walsh_01(int vec[]) const
+TvFunc::walsh_01(
+  int vec[]
+) const
 {
   switch ( input_num() ) {
   case  0: return walsh_01_0(mVector, vec);
@@ -1167,8 +1258,10 @@ BEGIN_NONAMESPACE
 
 inline
 TvFunc::WordType
-pm2_1(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm2_1(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask1   = 0x5ULL;
   const TvFunc::WordType offset1 = 0x5ULL;
@@ -1180,8 +1273,10 @@ pm2_1(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm2_2(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm2_2(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask2   = 0x3ULL;
   const TvFunc::WordType offset2 = 0x2ULL;
@@ -1193,8 +1288,10 @@ pm2_2(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm3_1(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm3_1(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask1   = 0x55ULL;
   const TvFunc::WordType offset1 = 0x55ULL;
@@ -1206,8 +1303,10 @@ pm3_1(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm3_2(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm3_2(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask2   = 0x33ULL;
   const TvFunc::WordType offset2 = 0x22ULL;
@@ -1219,8 +1318,10 @@ pm3_2(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm3_4(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm3_4(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask4   = 0x0fULL;
   const TvFunc::WordType offset4 = 0x04ULL;
@@ -1232,7 +1333,9 @@ pm3_4(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_3_4(TvFunc::WordType w)
+p_3_4(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask4   = 0x0fULL;
   TvFunc::WordType tmp0 = (w >> 0) & mask4;
@@ -1242,8 +1345,10 @@ p_3_4(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm4_1(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm4_1(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask1   = 0x5555ULL;
   const TvFunc::WordType offset1 = 0x5555ULL;
@@ -1255,8 +1360,10 @@ pm4_1(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm4_2(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm4_2(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask2   = 0x3333ULL;
   const TvFunc::WordType offset2 = 0x2222ULL;
@@ -1268,8 +1375,10 @@ pm4_2(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm4_4(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm4_4(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask4   = 0x0f0fULL;
   const TvFunc::WordType offset4 = 0x0404ULL;
@@ -1281,7 +1390,9 @@ pm4_4(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_4_4(TvFunc::WordType w)
+p_4_4(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask4   = 0x0f0fULL;
   TvFunc::WordType tmp0 = (w >> 0) & mask4;
@@ -1291,8 +1402,10 @@ p_4_4(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm4_8(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm4_8(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask8   = 0x00ffULL;
   const TvFunc::WordType offset8 = 0x0008ULL;
@@ -1304,7 +1417,9 @@ pm4_8(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_4_8(TvFunc::WordType w)
+p_4_8(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask8   = 0x00ffULL;
   TvFunc::WordType tmp0 = (w >> 0) & mask8;
@@ -1314,8 +1429,10 @@ p_4_8(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm5_1(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm5_1(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask1   = 0x55555555ULL;
   const TvFunc::WordType offset1 = 0x55555555ULL;
@@ -1327,8 +1444,10 @@ pm5_1(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm5_2(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm5_2(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask2   = 0x33333333ULL;
   const TvFunc::WordType offset2 = 0x22222222ULL;
@@ -1340,8 +1459,10 @@ pm5_2(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm5_4(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm5_4(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask4   = 0x0f0f0f0fULL;
   const TvFunc::WordType offset4 = 0x04040404ULL;
@@ -1353,7 +1474,9 @@ pm5_4(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_5_4(TvFunc::WordType w)
+p_5_4(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask4   = 0x0f0f0f0fULL;
   TvFunc::WordType tmp0 = (w >> 0) & mask4;
@@ -1363,8 +1486,10 @@ p_5_4(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm5_8(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm5_8(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask8   = 0x00ff00ffULL;
   const TvFunc::WordType offset8 = 0x00080008ULL;
@@ -1376,7 +1501,9 @@ pm5_8(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_5_8(TvFunc::WordType w)
+p_5_8(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask8   = 0x00ff00ffULL;
   TvFunc::WordType tmp0 = (w >> 0) & mask8;
@@ -1386,8 +1513,10 @@ p_5_8(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm5_16(TvFunc::WordType w,
-       TvFunc::WordType& m)
+pm5_16(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask16   = 0x0000ffffULL;
   const TvFunc::WordType offset16 = 0x00000010ULL;
@@ -1399,7 +1528,9 @@ pm5_16(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_5_16(TvFunc::WordType w)
+p_5_16(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask16   = 0x0000ffffULL;
   TvFunc::WordType tmp0 = (w >>  0) & mask16;
@@ -1409,8 +1540,10 @@ p_5_16(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm6_1(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm6_1(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask1   = 0x5555555555555555ULL;
   const TvFunc::WordType offset1 = 0x5555555555555555ULL;
@@ -1422,8 +1555,10 @@ pm6_1(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm6_2(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm6_2(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask2   = 0x3333333333333333ULL;
   const TvFunc::WordType offset2 = 0x2222222222222222ULL;
@@ -1435,8 +1570,10 @@ pm6_2(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-pm6_4(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm6_4(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask4   = 0x0f0f0f0f0f0f0f0fULL;
   const TvFunc::WordType offset4 = 0x0404040404040404ULL;
@@ -1448,7 +1585,9 @@ pm6_4(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_6_4(TvFunc::WordType w)
+p_6_4(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask4   = 0x0f0f0f0f0f0f0f0fULL;
   TvFunc::WordType tmp0 = (w >> 0) & mask4;
@@ -1458,8 +1597,10 @@ p_6_4(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm6_8(TvFunc::WordType w,
-      TvFunc::WordType& m)
+pm6_8(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask8   = 0x00ff00ff00ff00ffULL;
   const TvFunc::WordType offset8 = 0x0008000800080008ULL;
@@ -1471,7 +1612,9 @@ pm6_8(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_6_8(TvFunc::WordType w)
+p_6_8(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask8   = 0x00ff00ff00ff00ffULL;
   TvFunc::WordType tmp0 = (w >> 0) & mask8;
@@ -1481,8 +1624,10 @@ p_6_8(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm6_16(TvFunc::WordType w,
-       TvFunc::WordType& m)
+pm6_16(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask16   = 0x0000ffff0000ffffULL;
   const TvFunc::WordType offset16 = 0x0000001000000010ULL;
@@ -1494,7 +1639,9 @@ pm6_16(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_6_16(TvFunc::WordType w)
+p_6_16(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask16   = 0x0000ffff0000ffffULL;
   TvFunc::WordType tmp0 = (w >>  0) & mask16;
@@ -1504,8 +1651,10 @@ p_6_16(TvFunc::WordType w)
 
 inline
 TvFunc::WordType
-pm6_32(TvFunc::WordType w,
-       TvFunc::WordType& m)
+pm6_32(
+  TvFunc::WordType w,
+  TvFunc::WordType& m
+)
 {
   const TvFunc::WordType mask32   = 0x00000000ffffffffULL;
   const TvFunc::WordType offset32 = 0x0000000000000020ULL;
@@ -1517,7 +1666,9 @@ pm6_32(TvFunc::WordType w,
 
 inline
 TvFunc::WordType
-p_6_32(TvFunc::WordType w)
+p_6_32(
+  TvFunc::WordType w
+)
 {
   const TvFunc::WordType mask32   = 0x00000000ffffffffULL;
   TvFunc::WordType tmp0 = (w >>  0) & mask32;
@@ -1526,10 +1677,12 @@ p_6_32(TvFunc::WordType w)
 }
 
 inline
-int
-w2pos(int ni,
-      int i,
-      int j)
+SizeType
+w2pos(
+  SizeType ni,
+  SizeType i,
+  SizeType j
+)
 {
   return i * ni + j;
 }
@@ -1537,10 +1690,12 @@ w2pos(int ni,
 // 5入力の walsh_012 用サブルーティン
 inline
 int
-walsh_012_5b(TvFunc::WordType* src_vec,
-	     int ni,
-	     int vec1[],
-	     int vec2[])
+walsh_012_5b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   const int n = 1 << 5;
 
@@ -1676,10 +1831,12 @@ walsh_012_5b(TvFunc::WordType* src_vec,
 // 6 入力の walsh_012 用サブルーティン
 inline
 int
-walsh_012_6b(TvFunc::WordType* src_vec,
-	     int ni,
-	     int vec1[],
-	     int vec2[])
+walsh_012_6b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   const int n = 1 << 6;
 
@@ -1877,10 +2034,12 @@ walsh_012_6b(TvFunc::WordType* src_vec,
 // 7入力の walsh_012 用サブルーティン
 inline
 int
-walsh_012_7b(TvFunc::WordType* src_vec,
-	     int ni,
-	     int vec1[],
-	     int vec2[])
+walsh_012_7b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_6b(src_vec,                     ni, vec1  , vec2);
@@ -1898,10 +2057,12 @@ walsh_012_7b(TvFunc::WordType* src_vec,
 // 8入力の walsh_012 用サブルーティン
 inline
 int
-walsh_012_8b(TvFunc::WordType* src_vec,
-	     int ni,
-	     int vec1[],
-	     int vec2[])
+walsh_012_8b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_7b(src_vec,                     ni, vec1  , vec2);
@@ -1919,10 +2080,12 @@ walsh_012_8b(TvFunc::WordType* src_vec,
 // 9入力の walsh_012 用サブルーティン
 inline
 int
-walsh_012_9b(TvFunc::WordType* src_vec,
-	     int ni,
-	     int vec1[],
-	     int vec2[])
+walsh_012_9b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_8b(src_vec,                     ni, vec1,   vec2);
@@ -1940,10 +2103,12 @@ walsh_012_9b(TvFunc::WordType* src_vec,
 // 10入力の walsh_012 用サブルーティン
 inline
 int
-walsh_012_10b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_10b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_9b(src_vec,                     ni, vec1  , vec2);
@@ -1961,10 +2126,12 @@ walsh_012_10b(TvFunc::WordType* src_vec,
 // 11入力の walsh_012 用サブルーティン
 inline
 int
-walsh_012_11b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_11b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_10b(src_vec,                      ni, vec1  , vec2);
@@ -1982,10 +2149,12 @@ walsh_012_11b(TvFunc::WordType* src_vec,
 // 12入力の walsh_012 用サブルーティン
 inline
 int
-walsh_012_12b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_12b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_11b(src_vec,                      ni, vec1  , vec2);
@@ -2002,10 +2171,12 @@ walsh_012_12b(TvFunc::WordType* src_vec,
 
 // 13入力の walsh_012 用サブルーティン
 int
-walsh_012_13b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_13b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_12b(src_vec,                      ni, vec1  , vec2);
@@ -2022,10 +2193,12 @@ walsh_012_13b(TvFunc::WordType* src_vec,
 
 // 14入力の walsh_012 用サブルーティン
 int
-walsh_012_14b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_14b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_13b(src_vec,                      ni, vec1  , vec2);
@@ -2042,10 +2215,12 @@ walsh_012_14b(TvFunc::WordType* src_vec,
 
 // 15入力の walsh_012 用サブルーティン
 int
-walsh_012_15b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_15b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_14b(src_vec,                      ni, vec1  , vec2);
@@ -2062,10 +2237,12 @@ walsh_012_15b(TvFunc::WordType* src_vec,
 
 // 16入力の walsh_012 用サブルーティン
 int
-walsh_012_16b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_16b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_15b(src_vec,                      ni, vec1  , vec2);
@@ -2082,10 +2259,12 @@ walsh_012_16b(TvFunc::WordType* src_vec,
 
 // 17入力の walsh_012 用サブルーティン
 int
-walsh_012_17b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_17b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_16b(src_vec,                      ni, vec1  , vec2);
@@ -2102,10 +2281,12 @@ walsh_012_17b(TvFunc::WordType* src_vec,
 
 // 18入力の walsh_012 用サブルーティン
 int
-walsh_012_18b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_18b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_17b(src_vec,                      ni, vec1  , vec2);
@@ -2122,10 +2303,12 @@ walsh_012_18b(TvFunc::WordType* src_vec,
 
 // 19入力の walsh_012 用サブルーティン
 int
-walsh_012_19b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_19b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_18b(src_vec,                      ni, vec1  , vec2);
@@ -2142,10 +2325,12 @@ walsh_012_19b(TvFunc::WordType* src_vec,
 
 // 20入力の walsh_012 用サブルーティン
 int
-walsh_012_20b(TvFunc::WordType* src_vec,
-	      int ni,
-	      int vec1[],
-	      int vec2[])
+walsh_012_20b(
+  TvFunc::WordType* src_vec,
+  SizeType ni,
+  int vec1[],
+  int vec2[]
+)
 {
   int vec1_1[TvFunc::kMaxNi];
   int ans0 = walsh_012_19b(src_vec,                      ni, vec1  , vec2);
@@ -2162,27 +2347,33 @@ walsh_012_20b(TvFunc::WordType* src_vec,
 
 // 0入力の walsh_012 本体
 int
-walsh_012_0(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_0(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   return walsh_01_0(src_vec, vec1);
 }
 
 // 1入力の walsh_012 本体
 int
-walsh_012_1(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_1(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   return walsh_01_1(src_vec, vec1);
 }
 
 // 2入力の walsh_012 本体
 int
-walsh_012_2(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_2(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int n = 1 << 2;
 
@@ -2208,9 +2399,11 @@ walsh_012_2(TvFunc::WordType* src_vec,
 
 // 3入力の walsh_012 本体
 int
-walsh_012_3(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_3(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int n = 1 << 3;
 
@@ -2254,9 +2447,11 @@ walsh_012_3(TvFunc::WordType* src_vec,
 
 // 4入力の walsh_012 本体
 int
-walsh_012_4(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_4(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int n = 1 << 4;
 
@@ -2321,9 +2516,11 @@ walsh_012_4(TvFunc::WordType* src_vec,
 
 // 5入力の walsh_012 本体
 int
-walsh_012_5(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_5(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 5 * 5;
   for ( int i: Range(nn) ) {
@@ -2343,9 +2540,11 @@ walsh_012_5(TvFunc::WordType* src_vec,
 
 // 6入力の walsh_012 本体
 int
-walsh_012_6(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_6(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 6 * 6;
   for ( int i: Range(nn) ) {
@@ -2365,9 +2564,11 @@ walsh_012_6(TvFunc::WordType* src_vec,
 
 // 7入力の walsh_012 本体
 int
-walsh_012_7(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_7(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 7 * 7;
   for ( int i: Range(nn) ) {
@@ -2387,9 +2588,11 @@ walsh_012_7(TvFunc::WordType* src_vec,
 
 // 8入力の walsh_012 本体
 int
-walsh_012_8(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_8(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 8 * 8;
   for ( int i: Range(nn) ) {
@@ -2409,9 +2612,11 @@ walsh_012_8(TvFunc::WordType* src_vec,
 
 // 9入力の walsh_012 本体
 int
-walsh_012_9(TvFunc::WordType* src_vec,
-	    int vec1[],
-	    int vec2[])
+walsh_012_9(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 9 * 9;
   for ( int i: Range(nn) ) {
@@ -2431,9 +2636,11 @@ walsh_012_9(TvFunc::WordType* src_vec,
 
 // 10入力の walsh_012 本体
 int
-walsh_012_10(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_10(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 10 * 10;
   for ( int i: Range(nn) ) {
@@ -2453,9 +2660,11 @@ walsh_012_10(TvFunc::WordType* src_vec,
 
 // 11入力の walsh_012 本体
 int
-walsh_012_11(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_11(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 11 * 11;
   for ( int i: Range(nn) ) {
@@ -2475,9 +2684,11 @@ walsh_012_11(TvFunc::WordType* src_vec,
 
 // 12入力の walsh_012 本体
 int
-walsh_012_12(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_12(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 12 * 12;
   for ( int i: Range(nn) ) {
@@ -2497,9 +2708,11 @@ walsh_012_12(TvFunc::WordType* src_vec,
 
 // 13入力の walsh_012 本体
 int
-walsh_012_13(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_13(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 13 * 13;
   for ( int i: Range(nn) ) {
@@ -2519,9 +2732,11 @@ walsh_012_13(TvFunc::WordType* src_vec,
 
 // 14入力の walsh_012 本体
 int
-walsh_012_14(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_14(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 14 * 14;
   for ( int i: Range(nn) ) {
@@ -2541,9 +2756,11 @@ walsh_012_14(TvFunc::WordType* src_vec,
 
 // 15入力の walsh_012 本体
 int
-walsh_012_15(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_15(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 15 * 15;
   for ( int i: Range(nn) ) {
@@ -2563,9 +2780,11 @@ walsh_012_15(TvFunc::WordType* src_vec,
 
 // 16入力の walsh_012 本体
 int
-walsh_012_16(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_16(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 16 * 16;
   for ( int i: Range(nn) ) {
@@ -2585,9 +2804,11 @@ walsh_012_16(TvFunc::WordType* src_vec,
 
 // 17入力の walsh_012 本体
 int
-walsh_012_17(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_17(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 17 * 17;
   for ( int i: Range(nn) ) {
@@ -2607,9 +2828,11 @@ walsh_012_17(TvFunc::WordType* src_vec,
 
 // 18入力の walsh_012 本体
 int
-walsh_012_18(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_18(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 18 * 18;
   for ( int i: Range(nn) ) {
@@ -2629,9 +2852,11 @@ walsh_012_18(TvFunc::WordType* src_vec,
 
 // 19入力の walsh_012 本体
 int
-walsh_012_19(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_19(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 19 * 19;
   for ( int i: Range(nn) ) {
@@ -2651,9 +2876,11 @@ walsh_012_19(TvFunc::WordType* src_vec,
 
 // 20入力の walsh_01 本体
 int
-walsh_012_20(TvFunc::WordType* src_vec,
-	     int vec1[],
-	     int vec2[])
+walsh_012_20(
+  TvFunc::WordType* src_vec,
+  int vec1[],
+  int vec2[]
+)
 {
   const int nn = 20 * 20;
   for ( int i: Range(nn) ) {
@@ -2675,8 +2902,10 @@ END_NONAMESPACE
 
 // 0次と 1次と 2次の Walsh 係数を求める．
 int
-TvFunc::walsh_012(int vec1[],
-		  int vec2[]) const
+TvFunc::walsh_012(
+  int vec1[],
+  int vec2[]
+) const
 {
   switch ( input_num() ) {
   case  0: return walsh_012_0(mVector, vec1, vec2);
@@ -2711,9 +2940,11 @@ BEGIN_NONAMESPACE
 
 inline
 int
-walsh_w0_0(TvFunc::WordType bitvec,
-	   int ibits,
-	   int w)
+walsh_w0_0(
+  TvFunc::WordType bitvec,
+  int ibits,
+  int w
+)
 {
   ASSERT_COND( w == 0 );
 
@@ -2724,9 +2955,11 @@ walsh_w0_0(TvFunc::WordType bitvec,
 
 inline
 int
-walsh_w0_1(TvFunc::WordType bitvec,
-	   int ibits,
-	   int w)
+walsh_w0_1(
+  TvFunc::WordType bitvec,
+  int ibits,
+  int w
+)
 {
   int nall = 0;
   int c = 0;
@@ -2747,9 +2980,11 @@ walsh_w0_1(TvFunc::WordType bitvec,
 
 inline
 int
-walsh_w0_2(TvFunc::WordType bitvec,
-	   int ibits,
-	   int w)
+walsh_w0_2(
+  TvFunc::WordType bitvec,
+  int ibits,
+  int w
+)
 {
   int nall = 0;
   int c = 0;
@@ -2775,9 +3010,11 @@ walsh_w0_2(TvFunc::WordType bitvec,
 
 inline
 int
-walsh_w0_3(TvFunc::WordType bitvec,
-	   int ibits,
-	   int w)
+walsh_w0_3(
+  TvFunc::WordType bitvec,
+  int ibits,
+  int w
+)
 {
   int nall = 0;
   int c = 0;
@@ -2810,9 +3047,11 @@ walsh_w0_3(TvFunc::WordType bitvec,
 
 inline
 int
-walsh_w0_4(TvFunc::WordType bitvec,
-	   int ibits,
-	   int w)
+walsh_w0_4(
+  TvFunc::WordType bitvec,
+  int ibits,
+  int w
+)
 {
   int nall = 0;
   int c = 0;
@@ -2856,9 +3095,11 @@ walsh_w0_4(TvFunc::WordType bitvec,
 
 inline
 int
-walsh_w0_5(TvFunc::WordType bitvec,
-	   int ibits,
-	   int w)
+walsh_w0_5(
+  TvFunc::WordType bitvec,
+  int ibits,
+  int w
+)
 {
   int nall = 0;
   int c = 0;
@@ -2921,9 +3162,11 @@ walsh_w0_5(TvFunc::WordType bitvec,
 
 inline
 int
-walsh_w0_6(TvFunc::WordType bitvec,
-	   int ibits,
-	   int w)
+walsh_w0_6(
+  TvFunc::WordType bitvec,
+  int ibits,
+  int w
+)
 {
   int nall = 0;
   int c = 0;
@@ -3023,9 +3266,11 @@ END_NONAMESPACE
 
 // 重み別の 0 次の Walsh 係数を求める．
 int
-TvFunc::walsh_w0(int w,
-		 bool oinv,
-		 int ibits) const
+TvFunc::walsh_w0(
+  int w,
+  bool oinv,
+  int ibits
+) const
 {
   int ans;
   switch ( input_num() ) {
@@ -3090,10 +3335,12 @@ TvFunc::walsh_w0(int w,
 
 // 重み別の 1 次の Walsh 係数を求める．
 int
-TvFunc::walsh_w1(VarId var,
-		 int w,
-		 bool oinv,
-		 int ibits) const
+TvFunc::walsh_w1(
+  VarId var,
+  int w,
+  bool oinv,
+  int ibits
+) const
 {
   int idx = var.val();
   int ans;

@@ -3,9 +3,8 @@
 /// @brief ExprWriter の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2022 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/ExprWriter.h"
 #include "ym/Expr.h"
@@ -13,22 +12,13 @@
 
 BEGIN_NAMESPACE_YM_LOGIC
 
-// @brief コンストラクタ
-ExprWriter::ExprWriter() :
-  mOpStrArray{"~", "&", "|", "^"}
-{
-}
-
-// @brief デストラクタ
-ExprWriter::~ExprWriter()
-{
-}
-
 // ostream に対する書出し
 ostream&
-ExprWriter::dump(ostream& s,
-		 const Expr& expr,
-		 const unordered_map<VarId, string>& var_names) const
+ExprWriter::dump(
+  ostream& s,
+  const Expr& expr,
+  const unordered_map<VarId, string>& var_names
+) const
 {
   dump_sub(s, expr, var_names);
   return s;
@@ -36,17 +26,20 @@ ExprWriter::dump(ostream& s,
 
 // ostream に対する書出し
 ostream&
-ExprWriter::dump(ostream& s,
-		 const Expr& expr) const
+ExprWriter::dump(
+  ostream& s,
+  const Expr& expr
+) const
 {
   dump_sub(s, expr, unordered_map<VarId, string>());
   return s;
 }
 
 // @brief 内容を文字列にする．
-// @param[in] expr 文字列
 string
-ExprWriter::dump_to_string(const Expr& expr) const
+ExprWriter::dump_to_string(
+  const Expr& expr
+) const
 {
   ostringstream buf;
   dump(buf, expr);
@@ -54,13 +47,11 @@ ExprWriter::dump_to_string(const Expr& expr) const
 }
 
 // @brief 内容を文字列にする．
-// @param[in] expr 文字列
-// @param[in] var_names 各変数番号から変数名への写像
-// @note varid 番目の変数名として var_names[varid] を用いる．
-// 登録されていなければデフォルトの表記を用いる．
 string
-ExprWriter::dump_to_string(const Expr& expr,
-			   const unordered_map<VarId, string>& var_names) const
+ExprWriter::dump_to_string(
+  const Expr& expr,
+  const unordered_map<VarId, string>& var_names
+) const
 {
   ostringstream buf;
   dump(buf, expr, var_names);
@@ -69,7 +60,9 @@ ExprWriter::dump_to_string(const Expr& expr,
 
 // 演算子文字列を設定する．
 void
-ExprWriter::set_opstr(const vector<string>& op)
+ExprWriter::set_opstr(
+  const vector<string>& op
+)
 {
   for ( auto i: { 0, 1, 2, 3 } ) {
     mOpStrArray[i] = op[i];
@@ -77,10 +70,10 @@ ExprWriter::set_opstr(const vector<string>& op)
 }
 
 // 演算子文字列を取得する．
-void
-ExprWriter::opstr(vector<string>& op) const
+vector<string>
+ExprWriter::opstr() const
 {
-  op.resize(4);
+  vector<string> op(4);
   for ( auto i: { 0, 1, 2, 3 } ) {
     op[i] = mOpStrArray[i];
   }
@@ -116,8 +109,10 @@ ExprWriter::xor_str() const
 
 // 論理式の内容を ostream に書出す．
 ostream&
-operator<<(ostream& s,
-	   const Expr& expr)
+operator<<(
+  ostream& s,
+  const Expr& expr
+)
 {
   ExprWriter writer;
   // 空の map を渡す
@@ -127,9 +122,11 @@ operator<<(ostream& s,
 
 // dump() のサブルーティン
 void
-ExprWriter::dump_sub(ostream& s,
-		     const Expr& expr,
-		     const unordered_map<VarId, string>& var_names) const
+ExprWriter::dump_sub(
+  ostream& s,
+  const Expr& expr,
+  const unordered_map<VarId, string>& var_names
+) const
 {
   if ( expr.is_zero() ) {
     s << "0";

@@ -5,9 +5,8 @@
 /// @brief ExprWriter のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2022 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/logic.h"
 #include "ym/VarId.h"
@@ -26,66 +25,69 @@ class ExprWriter
 public:
 
   /// @brief コンストラクタ
-  ExprWriter();
+  ExprWriter() = default;
 
   /// @brief デストラクタ
-  ~ExprWriter();
+  ~ExprWriter() = default;
 
 
 public:
 
   /// @brief 内容の出力
-  /// @param[in] s 出力ストリーム
-  /// @param[in] expr 文字列
   /// @return s
   ostream&
-  dump(ostream& s,
-       const Expr& expr) const;
+  dump(
+    ostream& s,      ///< [in] 出力ストリーム
+    const Expr& expr ///< [in] 式
+  ) const;
 
   /// @brief 内容の出力
-  /// @param[in] s 出力ストリーム
-  /// @param[in] expr 文字列
-  /// @param[in] var_names 各変数番号から変数名への写像
-  /// @note varid 番目の変数名として var_names[varid] を用いる．
-  /// 登録されていなければデフォルトの表記を用いる．
   /// @return s
   ostream&
-  dump(ostream& s,
-       const Expr& expr,
-       const unordered_map<VarId, string>& var_names) const;
+  dump(
+    ostream& s,                                   ///< [in] 出力ストリーム
+    const Expr& expr,                             ///< [in] 式
+    const unordered_map<VarId, string>& var_names ///< [in] 各変数から変数名への写像
+                                                  ///<  var の変数名として var_names[var] を用いる．
+                                                  ///<  登録されていなければデフォルトの表記を用いる．
+  ) const;
 
   /// @brief 内容を文字列にする．
-  /// @param[in] expr 文字列
+  /// @return 式の内容を表す文字列
   string
-  dump_to_string(const Expr& expr) const;
+  dump_to_string(
+    const Expr& expr ///< [in] 式
+  ) const;
 
   /// @brief 内容を文字列にする．
-  /// @param[in] expr 文字列
-  /// @param[in] var_names 各変数番号から変数名への写像
-  /// @note varid 番目の変数名として var_names[varid] を用いる．
-  /// 登録されていなければデフォルトの表記を用いる．
+  /// @return 式の内容を表す文字列
   string
-  dump_to_string(const Expr& expr,
-		 const unordered_map<VarId, string>& var_names) const;
+  dump_to_string(
+    const Expr& expr,                              ///< [in] 出力ストリーム
+    const unordered_map<VarId, string>& var_names  ///< [in] 式
+						   ///< [in] 各変数から変数名への写像
+						   ///<  var の変数名として var_names[var] を用いる．
+  ) const;					   ///<  登録されていなければデフォルトの表記を用いる．
 
 
 public:
 
   /// @brief 演算子を表す文字列の設定
-  /// @param[in] op 演算子を表す文字列を入れる．
-  /// - op[0]: 否定 (~)
-  /// - op[1]: AND  (&)
-  /// - op[2]: OR   (|)
-  /// - op[3]: XOR  (^)
   /// @sa opstr
   void
-  set_opstr(const vector<string>& op);
+  set_opstr(
+    const vector<string>& op ///< [in] 演算子を表す文字列を入れる．
+                             ///< - op[0]: 否定 (~)
+                             ///< - op[1]: AND  (&)
+                             ///< - op[2]: OR   (|)
+                             ///< - op[3]: XOR  (^)
+  );
 
   /// @brief 演算子を表す文字列の取得
-  /// @param[out] op 演算子を表す文字列を格納するベクタ
+  /// @return 演算子を表す文字列を格納するベクタ(サイズは4)
   /// @sa set_opstr
-  void
-  opstr(vector<string>& op) const;
+  vector<string>
+  opstr() const;
 
   /// @brief 否定演算子を表す文字列の取得
   const string&
@@ -111,9 +113,11 @@ private:
 
   // dump() のサブルーティン
   void
-  dump_sub(ostream& s,
-	   const Expr& expr,
-	   const unordered_map<VarId, string>& var_names) const;
+  dump_sub(
+    ostream& s,
+    const Expr& expr,
+    const unordered_map<VarId, string>& var_names
+  ) const;
 
 
 private:
@@ -122,7 +126,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // dump() 時の演算子を表す文字列の配列．
-  string mOpStrArray[4];
+  string mOpStrArray[4]{"~", "&", "|", "^"};
 
 };
 

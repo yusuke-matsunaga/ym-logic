@@ -3,9 +3,8 @@
 /// @brief TvFunc の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2022 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/TvFunc.h"
 #include "ym/NpnMap.h"
@@ -81,11 +80,13 @@ TvFunc::WordType sym_masks3[] = {
 // @param[in] ni 入力数
 inline
 TvFunc::WordType
-vec_mask(int ni)
+vec_mask(
+  SizeType ni
+)
 {
   TvFunc::WordType mask = ~0ULL;
   if ( ni < NIPW ) {
-    int ni_exp = 1 << ni;
+    SizeType ni_exp = 1 << ni;
     mask >>= (64 - ni_exp);
   }
   return mask;
@@ -99,42 +100,45 @@ END_NONAMESPACE
 
 // 入力数のみ指定したコンストラクタ
 // 中身は恒偽関数
-TvFunc::TvFunc(int ni) :
-  mInputNum(ni),
-  mBlockNum(nblock(ni)),
-  mVector(new TvFunc::WordType[mBlockNum])
+TvFunc::TvFunc(
+  SizeType ni
+) : mInputNum{ni},
+    mBlockNum{nblock(ni)},
+    mVector{new TvFunc::WordType[mBlockNum]}
 {
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] = 0UL;
   }
 }
 
 // 恒真関数を作るコンストラクタ
 // 2番目の引数はダミー
-TvFunc::TvFunc(int ni,
-	       int dummy) :
-  mInputNum(ni),
-  mBlockNum(nblock(ni)),
-  mVector(new TvFunc::WordType[mBlockNum])
+TvFunc::TvFunc(
+  SizeType ni,
+  int dummy
+) : mInputNum{ni},
+    mBlockNum{nblock(ni)},
+    mVector{new TvFunc::WordType[mBlockNum]}
 {
   TvFunc::WordType mask = vec_mask(ni);
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] = mask;
   }
 }
 
 // リテラル関数を作るコンストラクタ
-TvFunc::TvFunc(int ni,
-	       VarId varid,
-	       bool inv) :
-  mInputNum(ni),
-  mBlockNum(nblock(ni)),
-  mVector(new TvFunc::WordType[mBlockNum])
+TvFunc::TvFunc(
+  SizeType ni,
+  VarId varid,
+  bool inv
+) : mInputNum{ni},
+    mBlockNum{nblock(ni)},
+    mVector{new TvFunc::WordType[mBlockNum]}
 {
-  int idx = varid.val();
+  SizeType idx = varid.val();
   ASSERT_COND( idx < ni );
 
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     TvFunc::WordType pat = lit_pat(idx, b);
     if ( inv ) {
       pat = ~pat;
@@ -145,18 +149,19 @@ TvFunc::TvFunc(int ni,
 }
 
 // 入力数と真理値を指定したコンストラクタ
-TvFunc::TvFunc(int ni,
-	       const vector<int>& values) :
-  mInputNum(ni),
-  mBlockNum(nblock(ni)),
-  mVector(new TvFunc::WordType[mBlockNum])
+TvFunc::TvFunc(
+  SizeType ni,
+  const vector<int>& values
+) : mInputNum{ni},
+    mBlockNum{nblock(ni)},
+    mVector{new TvFunc::WordType[mBlockNum]}
 {
-  int ni_pow = 1 << ni;
+  SizeType ni_pow = 1 << ni;
   ASSERT_COND( values.size() == ni_pow );
-  int base = 0;
+  SizeType base = 0;
   TvFunc::WordType bitpat = 0ULL;
   TvFunc::WordType bitmask = 1ULL;
-  for ( int p: Range(ni_pow) ) {
+  for ( SizeType p: Range(ni_pow) ) {
     if ( values[p] ) {
       bitpat |= bitmask;
     }
@@ -175,22 +180,24 @@ TvFunc::TvFunc(int ni,
 }
 
 // コピーコンストラクタ
-TvFunc::TvFunc(const TvFunc& src) :
-  mInputNum(src.mInputNum),
-  mBlockNum(src.mBlockNum),
-  mVector(new TvFunc::WordType[mBlockNum])
+TvFunc::TvFunc(
+  const TvFunc& src
+) : mInputNum{src.mInputNum},
+    mBlockNum{src.mBlockNum},
+    mVector{new TvFunc::WordType[mBlockNum]}
 {
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] = src.mVector[b];
   }
 }
 
 // @brief ムーブコンストラクタ
 // @param[in] src ムーブ元のソースオブジェクト
-TvFunc::TvFunc(TvFunc&& src) :
-  mInputNum(src.mInputNum),
-  mBlockNum(src.mBlockNum),
-  mVector(src.mVector)
+TvFunc::TvFunc(
+  TvFunc&& src
+) : mInputNum{src.mInputNum},
+    mBlockNum{src.mBlockNum},
+    mVector{src.mVector}
 {
   src.mInputNum = 0;
   src.mBlockNum = 0;
@@ -199,7 +206,9 @@ TvFunc::TvFunc(TvFunc&& src) :
 
 // コピー代入演算子
 TvFunc&
-TvFunc::operator=(const TvFunc& src)
+TvFunc::operator=(
+  const TvFunc& src
+)
 {
   if ( mBlockNum != src.mBlockNum ) {
     delete [] mVector;
@@ -208,7 +217,7 @@ TvFunc::operator=(const TvFunc& src)
   }
   mInputNum = src.mInputNum;
 
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] = src.mVector[b];
   }
 
@@ -216,10 +225,11 @@ TvFunc::operator=(const TvFunc& src)
 }
 
 // @brief ムーブ代入演算子
-// @param[in] src コピー元のソースオブジェクト
 // @return 自分自身への参照を返す．
 TvFunc&
-TvFunc::operator=(TvFunc&& src)
+TvFunc::operator=(
+  TvFunc&& src
+)
 {
   if ( mVector != nullptr ) {
     delete [] mVector;
@@ -247,7 +257,7 @@ TvFunc&
 TvFunc::invert_int()
 {
   TvFunc::WordType neg_mask = vec_mask(mInputNum);
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] ^= neg_mask;
   }
   return *this;
@@ -255,9 +265,11 @@ TvFunc::invert_int()
 
 // src1 との論理積を計算し自分に代入する．
 TvFunc&
-TvFunc::and_int(const TvFunc& src1)
+TvFunc::and_int(
+  const TvFunc& src1
+)
 {
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] &= src1.mVector[b];
   }
   return *this;
@@ -265,9 +277,11 @@ TvFunc::and_int(const TvFunc& src1)
 
 // src1 との論理和を計算し自分に代入する．
 TvFunc&
-TvFunc::or_int(const TvFunc& src1)
+TvFunc::or_int(
+  const TvFunc& src1
+)
 {
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] |= src1.mVector[b];
   }
   return *this;
@@ -275,9 +289,11 @@ TvFunc::or_int(const TvFunc& src1)
 
 // src1 との排他的論理和を計算し自分に代入する．
 TvFunc&
-TvFunc::xor_int(const TvFunc& src1)
+TvFunc::xor_int(
+  const TvFunc& src1
+)
 {
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] ^= src1.mVector[b];
   }
   return *this;
@@ -288,17 +304,19 @@ TvFunc::xor_int(const TvFunc& src1)
 // @param[in] pol 極性
 // @return 自身への参照を返す．
 TvFunc&
-TvFunc::cofactor_int(VarId varid,
-		     bool inv)
+TvFunc::cofactor_int(
+  VarId varid,
+  bool inv
+)
 {
-  int pos = varid.val();
+  SizeType pos = varid.val();
   if ( pos < NIPW ) {
     TvFunc::WordType mask = c_masks[pos];
     if ( inv ) {
       mask = ~mask;
     }
-    int shift = 1 << pos;
-    for ( int b: Range(mBlockNum) ) {
+    SizeType shift = 1 << pos;
+    for ( SizeType b: Range(mBlockNum) ) {
       TvFunc::WordType pat = mVector[b] & mask;
       if ( inv ) {
 	pat |= (pat << shift);
@@ -311,8 +329,8 @@ TvFunc::cofactor_int(VarId varid,
   }
   else {
     pos -= NIPW;
-    int bit = 1U << pos;
-    for ( int b: Range(mBlockNum) ) {
+    SizeType bit = 1U << pos;
+    for ( SizeType b: Range(mBlockNum) ) {
       if ( inv ) {
 	if ( (b & bit) == bit ) {
 	  mVector[b] = mVector[b ^ bit];
@@ -330,14 +348,16 @@ TvFunc::cofactor_int(VarId varid,
 
 // 変数がサポートの時 true を返す．
 bool
-TvFunc::check_sup(VarId var) const
+TvFunc::check_sup(
+  VarId var
+) const
 {
-  int i = var.val();
+  SizeType i = var.val();
   if ( i < NIPW ) {
     // ブロックごとにチェック
-    int dist = 1 << i;
+    SizeType dist = 1 << i;
     TvFunc::WordType mask = c_masks[i];
-    for ( int b: Range(mBlockNum) ) {
+    for ( SizeType b: Range(mBlockNum) ) {
       TvFunc::WordType word = mVector[b];
       if ( (word ^ (word << dist)) & mask ) {
 	return true;
@@ -346,9 +366,9 @@ TvFunc::check_sup(VarId var) const
   }
   else {
     // ブロック単位でチェック
-    int i5 = i - NIPW;
-    int check = 1 << i5;
-    for ( int b: Range(mBlockNum) ) {
+    SizeType i5 = i - NIPW;
+    SizeType check = 1 << i5;
+    for ( SizeType b: Range(mBlockNum) ) {
       if ( (b & check) && (mVector[b] != mVector[b ^ check]) ) {
 	return true;
       }
@@ -359,18 +379,18 @@ TvFunc::check_sup(VarId var) const
 
 // i 番目と j 番目の変数が対称のとき true を返す．
 bool
-TvFunc::check_sym(VarId var1,
-		  VarId var2,
-		  bool inv) const
+TvFunc::check_sym(
+  VarId var1,
+  VarId var2,
+  bool inv
+) const
 {
-  int i = var1.val();
-  int j = var2.val();
+  SizeType i = var1.val();
+  SizeType j = var2.val();
 
   // i と j を正規化する．
   if ( i < j ) {
-    int tmp = i;
-    i = j;
-    j = tmp;
+    std::swap(i, j);
   }
   // ここ以降では必ず i > j が成り立つ．
 
@@ -379,17 +399,17 @@ TvFunc::check_sym(VarId var1,
     // i >= NIPW (実際には i > NIPW)
     // j >= NIPW
     // ブロック単位で比較する．
-    int mask_i = (1 << (i - NIPW));
-    int mask_j = (1 << (j - NIPW));
-    int mask_all = mask_i | mask_j;
-    int cond;
+    SizeType mask_i = (1 << (i - NIPW));
+    SizeType mask_j = (1 << (j - NIPW));
+    SizeType mask_all = mask_i | mask_j;
+    SizeType cond;
     if ( inv ) {
       cond = 0UL;
     }
     else {
       cond = mask_j;
     }
-    for ( int b: Range(mBlockNum) ) {
+    for ( SizeType b: Range(mBlockNum) ) {
       if ( (b & mask_all) == cond &&
 	   mVector[b] != mVector[b ^ mask_all] ) {
 	ans = false;
@@ -400,8 +420,8 @@ TvFunc::check_sym(VarId var1,
   else if ( i >= NIPW ) {
     // i >= NIPW
     // j < NIPW
-    int mask_i = (1 << (i - NIPW));
-    int cond;
+    SizeType mask_i = (1 << (i - NIPW));
+    SizeType cond;
     if ( inv ) {
       cond = 0UL;
     }
@@ -409,8 +429,8 @@ TvFunc::check_sym(VarId var1,
       cond = mask_i;
     }
     TvFunc::WordType mask2 = ~c_masks[j];
-    int s = 1 << j;
-    for ( int b: Range(mBlockNum) ) {
+    SizeType s = 1 << j;
+    for ( SizeType b: Range(mBlockNum) ) {
       if ( (b & mask_i) == cond &&
 	   (mVector[b] ^ (mVector[b ^ mask_i] >> s)) & mask2 ) {
 	ans = false;
@@ -423,8 +443,8 @@ TvFunc::check_sym(VarId var1,
     // j < NIPW
     if ( inv ) {
       TvFunc::WordType mask = sym_masks3[(i * (i - 1)) / 2 + j];
-      int s = (1 << i) + (1 << j);
-      for ( int b: Range(mBlockNum) ) {
+      SizeType s = (1 << i) + (1 << j);
+      for ( SizeType b: Range(mBlockNum) ) {
 	TvFunc::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
@@ -434,8 +454,8 @@ TvFunc::check_sym(VarId var1,
     }
     else {
       TvFunc::WordType mask = sym_masks2[(i * (i - 1)) / 2 + j];
-      int s = (1 << i) - (1 << j);
-      for ( int b: Range(mBlockNum) ) {
+      SizeType s = (1 << i) - (1 << j);
+      for ( SizeType b: Range(mBlockNum) ) {
 	TvFunc::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
 	  ans = false;
@@ -449,7 +469,9 @@ TvFunc::check_sym(VarId var1,
 
 // npnmap に従った変換を行う．
 TvFunc
-TvFunc::xform(const NpnMap& npnmap) const
+TvFunc::xform(
+  const NpnMap& npnmap
+) const
 {
 #if defined(DEBUG)
   cout << "xform" << endl
@@ -457,14 +479,14 @@ TvFunc::xform(const NpnMap& npnmap) const
        << npnmap << endl;
 #endif
 
-  int new_ni = npnmap.input_num2();
-  int imask = 0;
-  int ipat[kMaxNi];
-  for ( int i: Range(new_ni) ) {
+  SizeType new_ni = npnmap.input_num2();
+  SizeType imask = 0;
+  SizeType ipat[kMaxNi];
+  for ( SizeType i: Range(new_ni) ) {
     ipat[i] = 0;
   }
-  for ( int i: Range(mInputNum) ) {
-    VarId src_var(i);
+  for ( SizeType i: Range(mInputNum) ) {
+    VarId src_var{i};
     NpnVmap imap = npnmap.imap(src_var);
     if ( imap.is_invalid() ) {
       continue;
@@ -473,17 +495,17 @@ TvFunc::xform(const NpnMap& npnmap) const
       imask |= (1 << i);
     }
     VarId dst_var = imap.var();
-    int j = dst_var.val();
+    SizeType j = dst_var.val();
     ipat[j] = 1 << i;
   }
   TvFunc::WordType omask = npnmap.oinv() ? 1ULL : 0ULL;
 
   TvFunc ans(new_ni);
-  int ni_pow = 1 << new_ni;
-  for ( int b: Range(ni_pow) ) {
-    int orig_b = 0;
-    int tmp = b;
-    for ( int i: Range(new_ni) ) {
+  SizeType ni_pow = 1 << new_ni;
+  for ( SizeType b: Range(ni_pow) ) {
+    SizeType orig_b = 0;
+    SizeType tmp = b;
+    for ( SizeType i: Range(new_ni) ) {
       if ( tmp & 1 ) {
 	orig_b |= ipat[i];
       }
@@ -505,9 +527,9 @@ NpnMap
 TvFunc::shrink_map() const
 {
   // まず独立な変数を求める．
-  ymuint varmap = 0U;
-  int dst_ni = 0;
-  for ( int i: Range(mInputNum) ) {
+  SizeType varmap = 0U;
+  SizeType dst_ni = 0;
+  for ( SizeType i: Range(mInputNum) ) {
     if ( !check_sup(VarId(i)) ) {
       varmap |= (1U << i);
     }
@@ -524,9 +546,9 @@ TvFunc::shrink_map() const
 
   // npnmap を設定する．
   NpnMap ans(mInputNum, dst_ni);
-  int j = 0;
-  int rmap[kMaxNi];
-  for ( int i: Range(mInputNum) ) {
+  SizeType j = 0;
+  SizeType rmap[kMaxNi];
+  for ( SizeType i: Range(mInputNum) ) {
     if ( (varmap & (1U << i)) == 0U ) {
       ans.set(VarId(i), VarId(j), false);
       rmap[j] = i;
@@ -549,13 +571,14 @@ TvFunc::npn_cannonical_map() const
 }
 
 // @brief npn 変換の正規変換をすべて求める．
-// @param[out] map_list 変換を格納するリスト
-void
-TvFunc::npn_cannonical_all_map(vector<NpnMap>& map_list) const
+vector<NpnMap>
+TvFunc::npn_cannonical_all_map() const
 {
   nsLogic::NpnMgr npn_mgr;
   npn_mgr.cannonical(*this);
+  vector<NpnMap> map_list;
   npn_mgr.all_cmap(map_list);
+  return map_list;
 }
 
 // ハッシュ値を返す．
@@ -563,7 +586,7 @@ SizeType
 TvFunc::hash() const
 {
   SizeType ans = 0;
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     TvFunc::WordType tmp = mVector[b];
     TvFunc::WordType tmp_l = (tmp >>  0) & 0xFFFFFFFFULL;
     TvFunc::WordType tmp_h = (tmp >> 32) & 0xFFFFFFFFULL;
@@ -574,8 +597,10 @@ TvFunc::hash() const
 
 // 比較関数
 int
-compare(const TvFunc& func1,
-	const TvFunc& func2)
+compare(
+  const TvFunc& func1,
+  const TvFunc& func2
+)
 {
   // まず入力数を比較する．
   if ( func1.mInputNum < func2.mInputNum ) {
@@ -586,8 +611,8 @@ compare(const TvFunc& func1,
   }
 
   // 以降は入力数が等しい場合
-  int n = func1.mBlockNum;
-  for ( int b: Range(n) ) {
+  SizeType n = func1.mBlockNum;
+  for ( SizeType b: Range(n) ) {
     TvFunc::WordType w1 = func1.mVector[n - b - 1];
     TvFunc::WordType w2 = func2.mVector[n - b - 1];
     if ( w1 < w2 ) {
@@ -603,15 +628,17 @@ compare(const TvFunc& func1,
 // @relates TvFunc
 // @brief 交差チェック
 bool
-operator&&(const TvFunc& func1,
-	   const TvFunc& func2)
+operator&&(
+  const TvFunc& func1,
+  const TvFunc& func2
+)
 {
   if ( func1.mInputNum != func2.mInputNum ) {
     return false;
   }
 
-  int n = func1.mBlockNum;
-  for ( int b: Range(n) ) {
+  SizeType n = func1.mBlockNum;
+  for ( SizeType b: Range(n) ) {
     TvFunc::WordType w1 = func1.mVector[n - b - 1];
     TvFunc::WordType w2 = func2.mVector[n - b - 1];
     if ( (w1 & w2) != 0U ) {
@@ -624,16 +651,18 @@ operator&&(const TvFunc& func1,
 // 内容の出力
 // mode は 2 か 16
 void
-TvFunc::print(ostream& s,
-	      int mode) const
+TvFunc::print(
+  ostream& s,
+  int mode
+) const
 {
-  int ni_pow = 1 << mInputNum;
-  const int wordsize = sizeof(TvFunc::WordType) * 8;
+  SizeType ni_pow = 1 << mInputNum;
+  const SizeType wordsize = sizeof(TvFunc::WordType) * 8;
   if ( mode == 2 ) {
     TvFunc::WordType* bp = mVector;
-    int offset = 0;
+    SizeType offset = 0;
     TvFunc::WordType tmp = *bp;
-    for ( int p: Range(ni_pow) ) {
+    for ( SizeType p: Range(ni_pow) ) {
       s << (tmp & 1LL);
       tmp >>= 1;
       ++ offset;
@@ -645,11 +674,11 @@ TvFunc::print(ostream& s,
     }
   }
   else if ( mode == 16 ) {
-    int ni_pow4 = ni_pow / 4;
+    SizeType ni_pow4 = ni_pow / 4;
     TvFunc::WordType* bp = mVector;
-    int offset = 0;
+    SizeType offset = 0;
     TvFunc::WordType tmp = *bp;
-    for ( int p: Range(ni_pow4) ) {
+    for ( SizeType p: Range(ni_pow4) ) {
       TvFunc::WordType tmp1 = (tmp & 0xF);
       if ( tmp1 < 10 ) {
 	s << static_cast<char>('0' + tmp1);
@@ -674,7 +703,9 @@ TvFunc::print(ostream& s,
 // @brief バイナリファイルの書き出し
 // @param[in] s 出力先のストリーム
 void
-TvFunc::dump(ostream& s) const
+TvFunc::dump(
+  ostream& s
+) const
 {
   s.write(reinterpret_cast<const char*>(&mInputNum), sizeof(mInputNum));
   s.write(reinterpret_cast<const char*>(mVector), sizeof(WordType) * mBlockNum);
@@ -683,10 +714,12 @@ TvFunc::dump(ostream& s) const
 // @brief バイナリファイルの読み込み
 // @param[in] s 入力元のストリーム
 void
-TvFunc::restore(istream& s)
+TvFunc::restore(
+  istream& s
+)
 {
   s.read(reinterpret_cast<char*>(&mInputNum), sizeof(mInputNum));
-  int nblk = nblock(mInputNum);
+  SizeType nblk = nblock(mInputNum);
   if ( mBlockNum != nblk ) {
     delete [] mVector;
     mBlockNum = nblk;
@@ -698,7 +731,9 @@ TvFunc::restore(istream& s)
 // @brief コファクターマスクを得る．
 // @param[in] pos 入力番号 ( 0 <= pos <= 5 )
 TvFunc::WordType
-TvFunc::c_mask(int pos)
+TvFunc::c_mask(
+  SizeType pos
+)
 {
   return c_masks[pos];
 }
@@ -707,8 +742,10 @@ TvFunc::c_mask(int pos)
 // @param[in] var_id 変数番号
 // @param[in] block_id ブロック番号
 TvFunc::WordType
-TvFunc::lit_pat(int var_id,
-		int block_id)
+TvFunc::lit_pat(
+  SizeType var_id,
+  SizeType block_id
+)
 {
   if ( var_id < NIPW ) {
     // block_id に無関係
@@ -718,7 +755,7 @@ TvFunc::lit_pat(int var_id,
     // ちょっとトリッキーなコード
     // block_id の var_id1 ビットめが1の時 0 - 1 = ~0が
     // 0 の 0 が返される．
-    int var_id1 = var_id - NIPW;
+    SizeType var_id1 = var_id - NIPW;
     return 0ULL - ((block_id >> var_id1) & 1ULL);
   }
 }

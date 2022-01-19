@@ -5,7 +5,7 @@
 /// @brief SopCube のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2021 Yusuke Matsunaga
+/// Copyright (C) 2017, 2018, 2021, 2022 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Sop.h"
@@ -35,26 +35,26 @@ public:
   /// * 空のキューブを作る．
   explicit
   SopCube(
-    int variable_num ///< [in] 変数の数
+    SizeType variable_num ///< [in] 変数の数
   );
 
   /// @brief コンストラクタ
   ///
   /// * 単一のリテラルからなるキューブを作る．
   SopCube(
-    int variable_num, ///< [in] 変数の数
-    Literal lit       ///< [in] リテラル
+    SizeType variable_num, ///< [in] 変数の数
+    Literal lit            ///< [in] リテラル
   );
 
   /// @brief コンストラクタ
   SopCube(
-    int variable_num,               ///< [in] 変数の数
+    SizeType variable_num,          ///< [in] 変数の数
     const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
   );
 
   /// @brief コンストラクタ
   SopCube(
-    int variable_num,                   ///< [in] 変数の数
+    SizeType variable_num,              ///< [in] 変数の数
     initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト初期化子
   );
 
@@ -92,14 +92,14 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 変数の数を返す．
-  int
+  SizeType
   variable_num() const
   {
     return mVariableNum;
   }
 
   /// @brief リテラル数を返す．
-  int
+  SizeType
   literal_num() const;
 
   /// @brief 指定した変数のパタンを読み出す．
@@ -232,8 +232,8 @@ private:
   ///
   /// 危険なので普通は使わないように
   SopCube(
-    int variable_num, ///< [in] 変数の数
-    SopBitVect* body  ///< [in] キューブのパタンを表す本体
+    SizeType variable_num, ///< [in] 変数の数
+    SopBitVect* body       ///< [in] キューブのパタンを表す本体
   );
 
   /// @brief mBody を削除する．
@@ -261,7 +261,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数の数
-  int mVariableNum;
+  SizeType mVariableNum;
 
   // 内容を表すビットベクタ
   SopBitVect* mBody;

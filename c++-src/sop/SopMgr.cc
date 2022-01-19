@@ -3,9 +3,8 @@
 /// @brief AlgMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018 Yusuke Matsunaga
+/// Copyright (C) 2017, 2018, 2022 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "SopMgr.h"
 #include "SopBlock.h"
@@ -19,7 +18,9 @@ BEGIN_NONAMESPACE
 
 inline
 SopBitVect
-lit2bv(Literal lit)
+lit2bv(
+  Literal lit
+)
 {
   return static_cast<SopBitVect>(lit.is_positive() ? SopPat::_1 : SopPat::_0);
 }
@@ -31,9 +32,9 @@ END_NONAMESPACE
 //////////////////////////////////////////////////////////////////////
 
 // @brief コンストラクタ
-// @param[in] variable_num 変数の数
-SopMgr::SopMgr(int variable_num) :
-  mVarNum(variable_num)
+SopMgr::SopMgr(
+  SizeType variable_num
+) : mVarNum(variable_num)
 {
   _init_buff();
 }
@@ -48,7 +49,9 @@ BEGIN_NONAMESPACE
 
 // 表引きを使ってリテラル数の計算を行う．
 int
-_count(SopBitVect pat)
+_count(
+  SopBitVect pat
+)
 {
   int table[] = {
     // utils/gen_bitcount_tbl.py で生成
@@ -77,14 +80,15 @@ _count(SopBitVect pat)
 END_NONAMESPACE
 
 // @brief ビットベクタ上のリテラル数を数える．
-// @param[in] src 対象のブロック
-int
-SopMgr::literal_num(const SopBlock& src)
+SizeType
+SopMgr::literal_num(
+  const SopBlock& src
+)
 {
   // 8 ビットごとに区切って表引きで計算する．
   const SopBitVect* bv = src.bitvect();
   const SopBitVect* bv_end = _calc_offset(bv, src.cube_num());
-  int ans = 0;
+  SizeType ans = 0;
   for ( ; bv != bv_end; ++ bv ) {
     SopBitVect pat = *bv;
     SopBitVect p1 = pat & 0xFFUL;
@@ -108,20 +112,20 @@ SopMgr::literal_num(const SopBlock& src)
 }
 
 // @brief ビットベクタ上の特定のリテラルの出現頻度を数える．
-// @param[in] src 対象のブロック
-// @param[in] lit 対象のリテラル
-int
-SopMgr::literal_num(const SopBlock& src,
-		    Literal lit)
+SizeType
+SopMgr::literal_num(
+  const SopBlock& src,
+  Literal lit
+)
 {
   VarId var_id = lit.varid();
-  int blk = _block_pos(var_id);
-  int sft = _shift_num(var_id);
+  SizeType blk = _block_pos(var_id);
+  SizeType sft = _shift_num(var_id);
   SopBitVect pat = lit2bv(lit);
   SopBitVect mask = pat << sft;
   const SopBitVect* bv = src.bitvect();
   const SopBitVect* bv_end = _calc_offset(bv, src.cube_num());
-  int ans = 0;
+  SizeType ans = 0;
   for ( ; bv != bv_end; bv += _cube_size() ) {
     if ( (bv[blk] & mask) == mask ) {
       ++ ans;
@@ -131,45 +135,36 @@ SopMgr::literal_num(const SopBlock& src,
 }
 
 // @brief キューブ/カバー用の領域を確保する．
-// @param[in] cube_num キューブ数
-//
-// キューブの時は cube_num = 1 とする．
 SopBitVect*
-SopMgr::new_body(int cube_num)
+SopMgr::new_body(
+  SizeType cube_num
+)
 {
-  int size = _cube_size() * cube_num;
+  SizeType size = _cube_size() * cube_num;
   SopBitVect* body = new SopBitVect[size];
-  for ( int i = 0; i < size; ++ i ) {
+  for ( SizeType i = 0; i < size; ++ i ) {
     body[i] = 0ULL;
   }
   return body;
 }
 
 // @brief キューブ/カバー用の領域を削除する．
-// @param[in] p 領域を指すポインタ
-// @param[in] cube_num キューブ数
-//
-// キューブの時は cube_num = 1 とする．
 void
-SopMgr::delete_body(SopBitVect* p,
-		    int cube_num)
+SopMgr::delete_body(
+  SopBitVect* p,
+  SizeType cube_num
+)
 {
   delete [] p;
 }
 
 // @brief 2つのカバーの論理和を計算する．
-// @param[in] dst_bv 結果を格納するビットベクタ
-// @param[in] src1 1つめのブロック
-// @param[in] src2 2つめのブロック
-// @return 結果のキューブ数を返す．
-//
-// * dst_bv には十分な容量があると仮定する．
-// * dst_bv != src1.bitvect() を仮定する．
-// * dst_bv != src2.bitvect() を仮定する．
-int
-SopMgr::cover_sum(SopBitVect* dst_bv,
-		  const SopBlock& src1,
-		  const SopBlock& src2)
+SizeType
+SopMgr::cover_sum(
+  SopBitVect* dst_bv,
+  const SopBlock& src1,
+  const SopBlock& src2
+)
 {
   const SopBitVect* bv1 = src1.bitvect();
   ASSERT_COND ( dst_bv != bv1 );
@@ -179,7 +174,7 @@ SopMgr::cover_sum(SopBitVect* dst_bv,
   ASSERT_COND ( dst_bv != bv2 );
   const SopBitVect* bv2_end = _calc_offset(bv2, src2.cube_num());
 
-  int nc = 0;
+  SizeType nc = 0;
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int res = cube_compare(bv1, bv2);
     if ( res > 0 ) {
@@ -215,18 +210,12 @@ SopMgr::cover_sum(SopBitVect* dst_bv,
 }
 
 // @brief 2つのカバーの差分を計算する．
-// @param[in] dst_bv 結果を格納するビットベクタ
-// @param[in] src1 1つめのブロック
-// @param[in] src2 2つめのブロック
-// @return 結果のキューブ数を返す．
-//
-// * dst_bv には十分な容量があると仮定する．
-// * dst_bv != src2.bitvect() を仮定する．
-// * dst_bv == src1.bitvect() でも正しく動く
-int
-SopMgr::cover_diff(SopBitVect* dst_bv,
-		   const SopBlock& src1,
-		   const SopBlock& src2)
+SizeType
+SopMgr::cover_diff(
+  SopBitVect* dst_bv,
+  const SopBlock& src1,
+  const SopBlock& src2
+)
 {
   const SopBitVect* bv1 = src1.bitvect();
   const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
@@ -234,7 +223,7 @@ SopMgr::cover_diff(SopBitVect* dst_bv,
   ASSERT_COND ( dst_bv != bv2 );
   const SopBitVect* bv2_end = _calc_offset(bv2, src2.cube_num());
 
-  int nc = 0;
+  SizeType nc = 0;
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int res = cube_compare(bv1, bv2);
     if ( res > 0 ) {
@@ -261,21 +250,12 @@ SopMgr::cover_diff(SopBitVect* dst_bv,
 }
 
 // @brief 2つのカバーの論理積を計算する．
-// @param[in] dst_bv 結果を格納するビットベクタ
-// @param[in] src1 1つめのブロック
-// @param[in] src2 2つめのブロック
-// @return 結果のキューブ数を返す．
-//
-// * dst_bv には十分な容量があると仮定する．
-// * dst_bv != src2.bitvect() を仮定する．
-// * src2.cubenum() > 1 の時は dst_bv != src1.bitvect()
-//   を仮定する．
-// * src2.cubenum() == 1 の時は dst_bv == src1.bitvect()
-//   でも正しく動く．
-int
-SopMgr::cover_product(SopBitVect* dst_bv,
-		      const SopBlock& src1,
-		      const SopBlock& src2)
+SizeType
+SopMgr::cover_product(
+  SopBitVect* dst_bv,
+  const SopBlock& src1,
+  const SopBlock& src2
+)
 {
   const SopBitVect* bv1 = src1.bitvect();
   ASSERT_COND( dst_bv != bv1 || src2.cube_num() == 1 );
@@ -284,7 +264,7 @@ SopMgr::cover_product(SopBitVect* dst_bv,
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  int nc = 0;
+  SizeType nc = 0;
   SopBitVect* dst_bv0 = dst_bv;
   const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
   const SopBitVect* bv2_end = _calc_offset(bv2_start, src2.cube_num());
@@ -301,21 +281,16 @@ SopMgr::cover_product(SopBitVect* dst_bv,
 }
 
 // @brief カバーとリテラルとの論理積を計算する．
-// @param[in] dst_bv 結果を格納するビットベクタ
-// @param[in] src1 1つめのブロック
-// @param[in] lit 対象のリテラル
-// @return 結果のキューブ数を返す．
-//
-// * dst_bv には十分な容量があると仮定する．
-// * dst_bv == src1.bitvect() でも正しく動く．
-int
-SopMgr::cover_product(SopBitVect* dst_bv,
-		      const SopBlock& src1,
-		      Literal lit)
+SizeType
+SopMgr::cover_product(
+  SopBitVect* dst_bv,
+  const SopBlock& src1,
+  Literal lit
+)
 {
   VarId var_id = lit.varid();
-  int blk = _block_pos(var_id);
-  int sft = _shift_num(var_id);
+  SizeType blk = _block_pos(var_id);
+  SizeType sft = _shift_num(var_id);
   SopBitVect pat = lit2bv(lit);
   SopBitVect pat1 = pat << sft;
   SopBitVect mask = 3UL << sft;
@@ -324,7 +299,7 @@ SopMgr::cover_product(SopBitVect* dst_bv,
   const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  int nc = 0;
+  SizeType nc = 0;
   for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
     SopBitVect tmp = bv1[blk] | pat1;
     if ( (tmp & mask) == mask ) {
@@ -341,21 +316,15 @@ SopMgr::cover_product(SopBitVect* dst_bv,
 }
 
 // @brief カバーの代数的除算を行う．
-// @param[in] dst_bv 結果を格納するビットベクタ
-// @param[in] src1 1つめのブロック
-// @param[in] src2 2つめのブロック
-// @return 結果のキューブ数を返す．
-//
-// * dst_bv には十分な容量があると仮定する．
-// * dst_bv == src1.bitvect() でも正しく動く．
-// * dst_bv == src2.bitvect() でも正しく動く．
-int
-SopMgr::cover_quotient(SopBitVect* dst_bv,
-		       const SopBlock& src1,
-		       const SopBlock& src2)
+SizeType
+SopMgr::cover_quotient(
+  SopBitVect* dst_bv,
+  const SopBlock& src1,
+  const SopBlock& src2
+)
 {
-  int nc1 = src1.cube_num();
-  int nc2 = src2.cube_num();
+  SizeType nc1 = src1.cube_num();
+  SizeType nc2 = src2.cube_num();
 
   // 作業領域のビットベクタを確保する．
   _resize_buff(nc1);
@@ -368,8 +337,8 @@ SopMgr::cover_quotient(SopBitVect* dst_bv,
   // ので bv1 の各キューブについて bv2 の各キューブで割ってみて
   // 成功した場合，その商を記録する．
   vector<bool> mark(nc1, false);
-  for ( int i = 0; i < nc1; ++ i ) {
-    for ( int j = 0; j < nc2; ++ j ) {
+  for ( SizeType i = 0; i < nc1; ++ i ) {
+    for ( SizeType j = 0; j < nc2; ++ j ) {
       if ( cube_quotient(mTmpBuff, i, bv1, i, bv2, j) ) {
 	mark[i] = true;
 	break;
@@ -378,18 +347,18 @@ SopMgr::cover_quotient(SopBitVect* dst_bv,
   }
 
   // 商のキューブは tmp 中に nc2 回現れているはず．
-  vector<int> pos_list;
+  vector<SizeType> pos_list;
   pos_list.reserve(nc1);
-  for ( int i = 0; i < nc1; ++ i ) {
+  for ( SizeType i = 0; i < nc1; ++ i ) {
     if ( !mark[i] ) {
       // 対象ではない．
       continue;
     }
     const SopBitVect* tmp1 = _calc_offset(mTmpBuff, i);
 
-    int c = 1;
-    vector<int> tmp_list;
-    for ( int i2 = i + 1; i2 < nc1; ++ i2 ) {
+    SizeType c = 1;
+    vector<SizeType> tmp_list;
+    for ( SizeType i2 = i + 1; i2 < nc1; ++ i2 ) {
       const SopBitVect* tmp2 = _calc_offset(mTmpBuff, i2);
       if ( mark[i2] && cube_compare(tmp1, tmp2) == 0 ) {
 	++ c;
@@ -407,7 +376,7 @@ SopMgr::cover_quotient(SopBitVect* dst_bv,
     }
   }
 
-  for ( int pos: pos_list ) {
+  for ( SizeType pos: pos_list ) {
     const SopBitVect* tmp = _calc_offset(mTmpBuff, pos);
     cube_copy(dst_bv, tmp);
     dst_bv += _cube_size();
@@ -417,27 +386,22 @@ SopMgr::cover_quotient(SopBitVect* dst_bv,
 }
 
 // @brief カバーをリテラルで割る．
-// @param[in] dst_bv 結果を格納するビットベクタ
-// @param[in] src1 1つめのブロック
-// @param[in] lit 対象のリテラル
-// @return 結果のキューブ数を返す．
-//
-// * dst_bv には十分な容量があると仮定する．
-// * dst_bv == src1.bitvect() でも正しく動く．
-int
-SopMgr::cover_quotient(SopBitVect* dst_bv,
-		       const SopBlock& src1,
-		       Literal lit)
+SizeType
+SopMgr::cover_quotient(
+  SopBitVect* dst_bv,
+  const SopBlock& src1,
+  Literal lit
+)
 {
   VarId var_id = lit.varid();
-  int blk = _block_pos(var_id);
-  int sft = _shift_num(var_id);
+  SizeType blk = _block_pos(var_id);
+  SizeType sft = _shift_num(var_id);
   SopBitVect pat = lit2bv(lit);
   SopBitVect pat1 = pat << sft;
   SopBitVect mask = 3UL << sft;
   SopBitVect nmask = ~mask;
-  int nb = _cube_size();
-  int nc = 0;
+  SizeType nb = _cube_size();
+  SizeType nc = 0;
   const SopBitVect* bv1 = src1.bitvect();
   const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
   for ( ; bv1 != bv1_end; bv1 += nb ) {
@@ -453,11 +417,10 @@ SopMgr::cover_quotient(SopBitVect* dst_bv,
 }
 
 // @brief カバー中のすべてのキューブの共通部分を求める．
-// @param[in] src1 1つめのブロック
-//
-// * 共通部分がないときは空のキューブとなる．
 SopCube
-SopMgr::common_cube(const SopBlock& src1)
+SopMgr::common_cube(
+  const SopBlock& src1
+)
 {
   const SopBitVect* bv1 = src1.bitvect();
   const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
@@ -488,18 +451,16 @@ SopMgr::common_cube(const SopBlock& src1)
 }
 
 // @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
-// @param[in] dst_bv コピー先のビットベクタ
-// @param[in] lit_list キューブを表すリテラルのリスト
-//
-// * dst_bv には十分な容量があると仮定する．
 void
-SopMgr::cube_set(SopBitVect* dst_bv,
-		 const vector<Literal>& lit_list)
+SopMgr::cube_set(
+  SopBitVect* dst_bv,
+  const vector<Literal>& lit_list
+)
 {
   for ( auto lit: lit_list ) {
     VarId var_id = lit.varid();
-    int blk = _block_pos(var_id);
-    int sft = _shift_num(var_id);
+    SizeType blk = _block_pos(var_id);
+    SizeType sft = _shift_num(var_id);
     SopBitVect pat = lit2bv(lit);
     SopBitVect mask = pat << sft;
     dst_bv[blk] |= mask;
@@ -507,18 +468,16 @@ SopMgr::cube_set(SopBitVect* dst_bv,
 }
 
 // @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
-// @param[in] dst_bv コピー先のビットベクタ
-// @param[in] lit_list キューブを表すリテラルのリスト初期化子
-//
-// * dst_bv には十分な容量があると仮定する．
 void
-SopMgr::cube_set(SopBitVect* dst_bv,
-		 std::initializer_list<Literal>& lit_list)
+SopMgr::cube_set(
+  SopBitVect* dst_bv,
+  std::initializer_list<Literal>& lit_list
+)
 {
   for ( auto lit: lit_list ) {
     VarId var_id = lit.varid();
-    int blk = _block_pos(var_id);
-    int sft = _shift_num(var_id);
+    SizeType blk = _block_pos(var_id);
+    SizeType sft = _shift_num(var_id);
     SopBitVect pat = lit2bv(lit);
     SopBitVect mask = pat << sft;
     dst_bv[blk] |= mask;
@@ -526,17 +485,14 @@ SopMgr::cube_set(SopBitVect* dst_bv,
 }
 
 // @brief マージソートを行う下請け関数
-// @param[in] bv 対象のビットベクタ
-// @param[in] start 開始位置
-// @param[in] end 終了位置
-//
-// bv[start] - bv[end - 1] の領域をソートする．
 void
-SopMgr::_sort(SopBitVect* bv,
-	      int start,
-	      int end)
+SopMgr::_sort(
+  SopBitVect* bv,
+  SizeType start,
+  SizeType end
+)
 {
-  int n = end - start;
+  SizeType n = end - start;
   if ( n <= 1 ) {
     return;
   }
@@ -652,11 +608,11 @@ SopMgr::_sort(SopBitVect* bv,
   }
 
   // 半分に分割してそれぞれソートする．
-  int hn = (n + 1) / 2;
-  int start1 = start;
-  int end1 = start + hn;
-  int start2 = end1;
-  int end2 = end;
+  SizeType hn = (n + 1) / 2;
+  SizeType start1 = start;
+  SizeType end1 = start + hn;
+  SizeType start2 = end1;
+  SizeType end2 = end;
   _sort(bv, start1, end1);
   _sort(bv, start2, end2);
 
@@ -705,16 +661,11 @@ SopMgr::_sort(SopBitVect* bv,
 }
 
 // @brief カバー(を表すビットベクタ)の比較を行う．
-// @param[in] src1 1つめのブロック
-// @param[in] src2 2つめのブロック
-// @retval -1 src1 <  src2
-// @retval  0 src1 == src2
-// @retval  1 src1 >  src2
-//
-// 比較はキューブごとの辞書式順序で行う．
 int
-SopMgr::cover_compare(const SopBlock& src1,
-		      const SopBlock& src2)
+SopMgr::cover_compare(
+  const SopBlock& src1,
+  const SopBlock& src2
+)
 {
   const SopBitVect* bv1 = src1.bitvect();
   const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
@@ -739,9 +690,10 @@ SopMgr::cover_compare(const SopBlock& src1,
 }
 
 // @brief ビットベクタからハッシュ値を計算する．
-// @param[in] src1 1つめのブロック
 SizeType
-SopMgr::hash(const SopBlock& src1)
+SopMgr::hash(
+  const SopBlock& src1
+)
 {
   // キューブは常にソートされているので
   // 順番は考慮する必要はない．
@@ -762,14 +714,11 @@ SopMgr::hash(const SopBlock& src1)
 }
 
 // @brief キューブ(を表すビットベクタ)の比較を行う．
-// @param[in] bv1 1つめのキューブを表すビットベクタ
-// @param[in] bv2 2つめのキューブを表すビットベクタ
-// @retval -1 bv1 <  bv2
-// @retval  0 bv1 == bv2
-// @retval  1 bv1 >  bv2
 int
-SopMgr::cube_compare(const SopBitVect* bv1,
-		     const SopBitVect* bv2)
+SopMgr::cube_compare(
+  const SopBitVect* bv1,
+  const SopBitVect* bv2
+)
 {
   const SopBitVect* bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
@@ -788,11 +737,11 @@ SopMgr::cube_compare(const SopBitVect* bv1,
 }
 
 // @brief 2つのキューブの積が空でない時 true を返す．
-// @param[in] bv1 1つめのキューブを表すビットベクタ
-// @param[in] bv2 2つめのキューブを表すビットベクタ
 bool
-SopMgr::cube_check_conflict(const SopBitVect* bv1,
-			    const SopBitVect* bv2)
+SopMgr::cube_check_conflict(
+  const SopBitVect* bv1,
+  const SopBitVect* bv2
+)
 {
   const SopBitVect* bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
@@ -812,12 +761,11 @@ SopMgr::cube_check_conflict(const SopBitVect* bv1,
 }
 
 // @brief 一方のキューブが他方のキューブに含まれているか調べる．
-// @param[in] bv1 1つめのキューブを表すビットベクタ
-// @param[in] bv2 2つめのキューブを表すビットベクタ
-// @return 1つめのキューブが2つめのキューブ に含まれていたら true を返す．
 bool
-SopMgr::cube_check_containment(const SopBitVect* bv1,
-			       const SopBitVect* bv2)
+SopMgr::cube_check_containment(
+  const SopBitVect* bv1,
+  const SopBitVect* bv2
+)
 {
   const SopBitVect* bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
@@ -831,12 +779,11 @@ SopMgr::cube_check_containment(const SopBitVect* bv1,
 }
 
 // @brief ２つのキューブに共通なリテラルがあれば true を返す．
-// @param[in] bv1 1つめのキューブを表すビットベクタ
-// @param[in] bv2 2つめのキューブを表すビットベクタ
-// @return ２つのキューブに共通なリテラルがあれば true を返す．
 bool
-SopMgr::cube_check_intersect(const SopBitVect* bv1,
-			     const SopBitVect* bv2)
+SopMgr::cube_check_intersect(
+  const SopBitVect* bv1,
+  const SopBitVect* bv2
+)
 {
   const SopBitVect* bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
@@ -850,9 +797,10 @@ SopMgr::cube_check_intersect(const SopBitVect* bv1,
 }
 
 // @brief キューブ(を表すビットベクタ)をクリアする．
-// @param[in] dst_bv 対象のビットベクタ
 void
-SopMgr::cube_clear(SopBitVect* dst_bv)
+SopMgr::cube_clear(
+  SopBitVect* dst_bv
+)
 {
   SopBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
   while ( dst_bv != dst_bv_end ) {
@@ -862,15 +810,12 @@ SopMgr::cube_clear(SopBitVect* dst_bv)
 }
 
 // @brief 2つのキューブの積を計算する．
-// @param[in] dst_bv コピー先のビットベクタ
-// @param[in] bv1 1つめのキューブを表すビットベクタ
-// @param[in] bv2 2つめのキューブを表すビットベクタ
-// @retval true 積が空でなかった．
-// @retval false 積が空だった．
 bool
-SopMgr::cube_product(SopBitVect* dst_bv,
-		     const SopBitVect* bv1,
-		     const SopBitVect* bv2)
+SopMgr::cube_product(
+  SopBitVect* dst_bv,
+  const SopBitVect* bv1,
+  const SopBitVect* bv2
+)
 {
   SopBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
   while ( dst_bv != dst_bv_end ) {
@@ -892,14 +837,12 @@ SopMgr::cube_product(SopBitVect* dst_bv,
 }
 
 // @brief キューブによる商を求める．
-// @param[in] dst_bv コピー先のビットベクタ
-// @param[in] bv1 1つめのキューブを表すビットベクタ
-// @param[in] bv2 2つめのキューブを表すビットベクタ
-// @return 正しく割ることができたら true を返す．
 bool
-SopMgr::cube_quotient(SopBitVect* dst_bv,
-		      const SopBitVect* bv1,
-		      const SopBitVect* bv2)
+SopMgr::cube_quotient(
+  SopBitVect* dst_bv,
+  const SopBitVect* bv1,
+  const SopBitVect* bv2
+)
 {
   SopBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
   while ( dst_bv != dst_bv_end ) {
@@ -918,16 +861,15 @@ SopMgr::cube_quotient(SopBitVect* dst_bv,
 }
 
 // @brief 要素のチェック
-// @param[in] bv ビットベクタ
-// @param[in] lit 対象のリテラル
-// @return lit を含んでいたら true を返す．
 bool
-SopMgr::litset_check(SopBitVect* bv,
-		     Literal lit)
+SopMgr::litset_check(
+  SopBitVect* bv,
+  Literal lit
+)
 {
   VarId var_id = lit.varid();
-  int blk = _block_pos(var_id);
-  int sft = _shift_num(var_id);
+  SizeType blk = _block_pos(var_id);
+  SizeType sft = _shift_num(var_id);
   SopBitVect pat = lit2bv(lit);
   SopBitVect mask = pat << sft;
   if ( bv[blk] & mask ) {
@@ -939,11 +881,11 @@ SopMgr::litset_check(SopBitVect* bv,
 }
 
 // @brief ユニオン演算
-// @param[in] dst_bv 対象のビットベクタ
-// @param[in] src_bv 加えるビットベクタ
 void
-SopMgr::litset_union(SopBitVect* dst_bv,
-		     const SopBitVect* src_bv)
+SopMgr::litset_union(
+  SopBitVect* dst_bv,
+  const SopBitVect* src_bv
+)
 {
   SopBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
   for ( ; dst_bv != dst_bv_end; ++ dst_bv, ++ src_bv ) {
@@ -952,26 +894,21 @@ SopMgr::litset_union(SopBitVect* dst_bv,
 }
 
 // @brief カバー/キューブの内容を出力する．
-// @param[in] s 出力先のストリーム
-// @param[in] bv カバー/キューブを表すビットベクタ
-// @param[in] start キューブの開始位置
-// @param[in] end キューブの終了位置
-// @param[in] varname_list 変数名のリスト
-//
-// end は実際の末尾 + 1 を指す．
 void
-SopMgr::print(ostream& s,
-	      const SopBitVect* bv,
-	      int start,
-	      int end,
-	      const vector<string>& varname_list)
+SopMgr::print(
+  ostream& s,
+  const SopBitVect* bv,
+  SizeType start,
+  SizeType end,
+  const vector<string>& varname_list
+)
 {
   const char* plus = "";
-  for ( int i = start; i < end; ++ i ) {
+  for ( SizeType i = start; i < end; ++ i ) {
     s << plus;
     plus = " + ";
     const char* spc = "";
-    for ( int j = 0; j < variable_num(); ++ j ) {
+    for ( SizeType j = 0; j < variable_num(); ++ j ) {
       string varname;
       if ( varname_list.size() > j ) {
 	varname = varname_list[j];
@@ -1006,9 +943,11 @@ SopMgr::_init_buff()
 // @brief mTmpBuff に必要な領域を確保する．
 // @param[in] req_size 要求するキューブ数
 void
-SopMgr::_resize_buff(int req_size)
+SopMgr::_resize_buff(
+  SizeType req_size
+)
 {
-  int old_size = mTmpBuffSize;
+  SizeType old_size = mTmpBuffSize;
   while ( mTmpBuffSize < req_size ) {
     mTmpBuffSize <<= 1;
   }
