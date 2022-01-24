@@ -10,6 +10,8 @@
 
 #include "ym/logic.h"
 #include "ym/Literal.h"
+#include "ym/BinDec.h"
+#include "ym/BinEnc.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -551,13 +553,13 @@ public:
   /// @brief バイナリストリームに出力する．
   void
   dump(
-    ostream& s ///< [in] 出力ストリーム
+    BinEnc& s ///< [in] 出力ストリーム
   ) const;
 
   /// @brief バイナリストリームから読み込む．
   void
   restore(
-    istream& s ///< [in] 入力ストリーム
+    BinDec& s ///< [in] 入力ストリーム
   );
 
   /// @}
@@ -687,6 +689,34 @@ operator<<(
   ostream& s,      ///< [in] 出力ストリーム
   const Expr& expr ///< [in] 論理式
 );
+
+/// @relates Expr
+/// @brief 論理式の内容のバイナリ出力
+/// @return s
+inline
+BinEnc&
+operator<<(
+  BinEnc& s,      ///< [in] 出力ストリーム
+  const Expr& expr ///< [in] 論理式
+)
+{
+  expr.dump(s);
+  return s;
+}
+
+/// @relates Expr
+/// @brief 論理式の内容のバイナリ入力
+/// @return s
+inline
+BinDec&
+operator>>(
+  BinDec& s, ///< [in] 入力ストリーム
+  Expr& expr ///< [out] 論理式
+)
+{
+  expr.restore(s);
+  return s;
+}
 
 END_NAMESPACE_YM_LOGIC
 

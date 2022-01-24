@@ -77,6 +77,7 @@ ExprWriter::opstr() const
   for ( auto i: { 0, 1, 2, 3 } ) {
     op[i] = mOpStrArray[i];
   }
+  return op;
 }
 
 // NOT演算子の文字列を得る．

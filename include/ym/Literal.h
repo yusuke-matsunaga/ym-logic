@@ -9,6 +9,8 @@
 /// All rights reserved.
 
 #include "ym_config.h"
+#include "ym/BinDec.h"
+#include "ym/BinEnc.h"
 #include "ym/VarId.h"
 
 
@@ -192,19 +194,19 @@ public:
   /// @brief バイナリファイルに出力する．
   void
   dump(
-    ostream& s ///< [in] 出力先のストリーム
+    BinEnc& s ///< [in] 出力先のストリーム
   ) const
   {
-    s.write(reinterpret_cast<const char*>(&mBody), sizeof(mBody));
+    s << mBody;
   }
 
   /// @brief バイナリファイルから読み込む．
   void
   restore(
-    istream& s ///< [in] 入力元のストリーム
+    BinDec& s ///< [in] 入力元のストリーム
   )
   {
-    s.read(reinterpret_cast<char*>(&mBody), sizeof(mBody));
+    s >> mBody;
   }
 
 
@@ -351,6 +353,34 @@ operator<<(
   else {
     s << "-X-";
   }
+  return s;
+}
+
+/// @relates Literal
+/// @brief Literal の内容をバイナリ出力する関数
+/// @return s
+inline
+BinEnc&
+operator<<(
+  BinEnc& s,        ///< [in] 出力ストリーム
+  const Literal& lit ///< [in] 象のリテラル
+)
+{
+  lit.dump(s);
+  return s;
+}
+
+/// @relates Literal
+/// @brief Literal の内容をバイナリ入力する関数
+/// @return s
+inline
+BinDec&
+operator>>(
+  BinDec& s,   ///< [in] 入力ストリーム
+  Literal& lit ///< [out] 対象のリテラル
+)
+{
+  lit.restore(s);
   return s;
 }
 

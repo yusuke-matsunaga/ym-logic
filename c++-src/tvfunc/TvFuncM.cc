@@ -79,15 +79,16 @@ END_NONAMESPACE
 
 // 入力数と出力数のみ指定したコンストラクタ
 // 中身は恒偽関数
-TvFuncM::TvFuncM(int ni,
-		 int no) :
-  mInputNum(ni),
-  mOutputNum(no),
-  mBlockNum1(nblock(ni)),
-  mBlockNum(mBlockNum1 * no),
-  mVector(new TvFuncM::WordType[mBlockNum])
+TvFuncM::TvFuncM(
+  SizeType ni,
+  SizeType no
+) : mInputNum{ni},
+    mOutputNum{no},
+    mBlockNum1{nblock(ni)},
+    mBlockNum{mBlockNum1 * no},
+    mVector{new WordType[mBlockNum]}
 {
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] = 0ULL;
   }
 }
@@ -95,12 +96,14 @@ TvFuncM::TvFuncM(int ni,
 // @brief TvFunc を用いたコンストラクタ
 // @param[in] src_list 各出力の論理関数
 // @note src_list の関数の入力数は等しくなければならない．
-TvFuncM::TvFuncM(const vector<TvFunc>& src_list)
+TvFuncM::TvFuncM(
+  const vector<TvFunc>& src_list
+)
 {
   ASSERT_COND( !src_list.empty() );
   const TvFunc& first = src_list.front();
-  int ni = first.input_num();
-  int no = src_list.size();
+  SizeType ni = first.input_num();
+  SizeType no = src_list.size();
   // 全ての関数の入力数が等しいことを確認しておく．
   for ( auto f: src_list ) {
     ASSERT_COND( f.input_num() == ni );
@@ -111,35 +114,37 @@ TvFuncM::TvFuncM(const vector<TvFunc>& src_list)
   mBlockNum1 = nblock(ni);
   mBlockNum = mBlockNum1 * no;
   mVector = new TvFuncM::WordType[mBlockNum];
-  for ( int i: Range(no) ) {
-    int offset = i * mBlockNum1;
+  for ( SizeType i: Range(no) ) {
+    SizeType offset = i * mBlockNum1;
     const TvFunc& src1 = src_list[i];
-    for ( int b: Range(mBlockNum1) ) {
+    for ( SizeType b: Range(mBlockNum1) ) {
       mVector[offset + b] = src1.raw_data(b);
     }
   }
 }
 
 // コピーコンストラクタ
-TvFuncM::TvFuncM(const TvFuncM& src) :
-  mInputNum(src.mInputNum),
-  mOutputNum(src.mOutputNum),
-  mBlockNum1(src.mBlockNum1),
-  mBlockNum(src.mBlockNum),
-  mVector(new TvFuncM::WordType[mBlockNum])
+TvFuncM::TvFuncM(
+  const TvFuncM& src
+) : mInputNum{src.mInputNum},
+    mOutputNum{src.mOutputNum},
+    mBlockNum1{src.mBlockNum1},
+    mBlockNum{src.mBlockNum},
+    mVector{new WordType[mBlockNum]}
 {
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] = src.mVector[b];
   }
 }
 
 // ムーブコンストラクタ
-TvFuncM::TvFuncM(TvFuncM&& src) :
-  mInputNum(src.mInputNum),
-  mOutputNum(src.mOutputNum),
-  mBlockNum1(src.mBlockNum1),
-  mBlockNum(src.mBlockNum),
-  mVector(src.mVector)
+TvFuncM::TvFuncM(
+  TvFuncM&& src
+) : mInputNum{src.mInputNum},
+    mOutputNum{src.mOutputNum},
+    mBlockNum1{src.mBlockNum1},
+    mBlockNum{src.mBlockNum},
+    mVector{src.mVector}
 {
   src.mInputNum = 0;
   src.mOutputNum = 1;
@@ -149,25 +154,27 @@ TvFuncM::TvFuncM(TvFuncM&& src) :
 }
 
 // @brief TvFunc からの変換用コンストラクタ
-TvFuncM::TvFuncM(const TvFunc& src) :
-  mInputNum(src.mInputNum),
-  mOutputNum(1),
-  mBlockNum1(nblock(mInputNum)),
-  mBlockNum(mBlockNum1),
-  mVector(new TvFuncM::WordType[mBlockNum])
+TvFuncM::TvFuncM(
+  const TvFunc& src
+) : mInputNum{src.mInputNum},
+    mOutputNum{1},
+    mBlockNum1{nblock(mInputNum)},
+    mBlockNum{mBlockNum1},
+    mVector{new TvFuncM::WordType[mBlockNum]}
 {
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] = src.raw_data(b);
   }
 }
 
 // @brief TvFunc からの変換用ムーブコンストラクタ
-TvFuncM::TvFuncM(TvFunc&& src) :
-  mInputNum(src.input_num()),
-  mOutputNum(1),
-  mBlockNum1(nblock(mInputNum)),
-  mBlockNum(mBlockNum1),
-  mVector(src.mVector)
+TvFuncM::TvFuncM(
+  TvFunc&& src
+) : mInputNum{src.input_num()},
+    mOutputNum{1},
+    mBlockNum1{nblock(mInputNum)},
+    mBlockNum{mBlockNum1},
+    mVector{src.mVector}
 {
   src.mInputNum = 0;
   src.mBlockNum = 0;
@@ -176,7 +183,9 @@ TvFuncM::TvFuncM(TvFunc&& src) :
 
 // コピー代入演算子
 TvFuncM&
-TvFuncM::operator=(const TvFuncM& src)
+TvFuncM::operator=(
+  const TvFuncM& src
+)
 {
   if ( mBlockNum != src.mBlockNum ) {
     delete [] mVector;
@@ -187,7 +196,7 @@ TvFuncM::operator=(const TvFuncM& src)
   mInputNum = src.mInputNum;
   mOutputNum = src.mOutputNum;
 
-  for ( int b: Range(mBlockNum) ) {
+  for ( SizeType b: Range(mBlockNum) ) {
     mVector[b] = src.mVector[b];
   }
 
@@ -196,7 +205,9 @@ TvFuncM::operator=(const TvFuncM& src)
 
 // ムーブ代入演算子
 TvFuncM&
-TvFuncM::operator=(TvFuncM&& src)
+TvFuncM::operator=(
+  TvFuncM&& src
+)
 {
   mInputNum = src.mInputNum;
   mOutputNum = src.mOutputNum;
@@ -276,7 +287,9 @@ TvFuncM::invert_int()
 
 // src1 との論理積を計算し自分に代入する．
 TvFuncM&
-TvFuncM::and_int(const TvFuncM& src1)
+TvFuncM::and_int(
+  const TvFuncM& src1
+)
 {
   for ( int b: Range(mBlockNum) ) {
     mVector[b] &= src1.mVector[b];
@@ -286,7 +299,9 @@ TvFuncM::and_int(const TvFuncM& src1)
 
 // src1 との論理和を計算し自分に代入する．
 TvFuncM&
-TvFuncM::or_int(const TvFuncM& src1)
+TvFuncM::or_int(
+  const TvFuncM& src1
+)
 {
   for ( int b: Range(mBlockNum) ) {
     mVector[b] |= src1.mVector[b];
@@ -296,7 +311,9 @@ TvFuncM::or_int(const TvFuncM& src1)
 
 // src1 との排他的論理和を計算し自分に代入する．
 TvFuncM&
-TvFuncM::xor_int(const TvFuncM& src1)
+TvFuncM::xor_int(
+  const TvFuncM& src1
+)
 {
   for ( int b: Range(mBlockNum) ) {
     mVector[b] ^= src1.mVector[b];
@@ -309,8 +326,10 @@ TvFuncM::xor_int(const TvFuncM& src1)
 // @param[in] pol 極性
 // @return 自身への参照を返す．
 TvFuncM&
-TvFuncM::cofactor_int(VarId varid,
-		      bool inv)
+TvFuncM::cofactor_int(
+  VarId varid,
+  bool inv
+)
 {
   int pos = varid.val();
   if ( pos < NIPW ) {
@@ -355,7 +374,9 @@ TvFuncM::cofactor_int(VarId varid,
 // @brief 1出力の論理関数を切り出す．
 // @param[in] ovar 出力番号
 TvFunc
-TvFuncM::slice(VarId ovar) const
+TvFuncM::slice(
+  VarId ovar
+) const
 {
 #if 1
   TvFunc ans(input_num());
@@ -379,7 +400,9 @@ TvFuncM::slice(VarId ovar) const
 
 // var がサポートの時 true を返す．
 bool
-TvFuncM::check_sup(VarId var) const
+TvFuncM::check_sup(
+  VarId var
+) const
 {
   int i = var.val();
   if ( i < NIPW ) {
@@ -412,9 +435,11 @@ TvFuncM::check_sup(VarId var) const
 
 // var1 と var2 の変数が対称のとき true を返す．
 bool
-TvFuncM::check_sym(VarId var1,
-		   VarId var2,
-		   bool inv) const
+TvFuncM::check_sym(
+  VarId var1,
+  VarId var2,
+  bool inv
+) const
 {
   int i = var1.val();
   int j = var2.val();
@@ -496,9 +521,11 @@ TvFuncM::check_sym(VarId var1,
 
 // npnmap に従った変換を行う．
 TvFuncM
-TvFuncM::xform(const NpnMapM& npnmap) const
+TvFuncM::xform(
+  const NpnMapM& npnmap
+) const
 {
-  int ni_pow = 1UL << mInputNum;
+  SizeType ni_pow = 1UL << mInputNum;
 
 #if defined(DEBUG)
   cout << "xform" << endl
@@ -506,9 +533,9 @@ TvFuncM::xform(const NpnMapM& npnmap) const
        << npnmap << endl;
 #endif
 
-  int imask = 0;
-  int ipat[kMaxNi];
-  for ( int i: Range(mInputNum) ) {
+  SizeType imask = 0;
+  SizeType ipat[kMaxNi];
+  for ( SizeType i: Range(mInputNum) ) {
     VarId src_var(i);
     NpnVmap imap = npnmap.imap(src_var);
     if ( imap.inv() ) {
@@ -527,9 +554,9 @@ TvFuncM::xform(const NpnMapM& npnmap) const
     VarId dst_var = omap.var();
     int dst_pos = dst_var.val();
     TvFuncM::WordType omask = omap.inv() ? 1ULL : 0ULL;
-    for ( int p: Range(ni_pow) ) {
-      int new_p = 0;
-      int tmp = p;
+    for ( SizeType p: Range(ni_pow) ) {
+      SizeType new_p = 0;
+      SizeType tmp = p;
       for ( int i: Range(mInputNum) ) {
 	if ( tmp & 1 ) {
 	  new_p |= ipat[i];
@@ -570,8 +597,10 @@ TvFuncM::hash() const
 // @retval  1 left > right
 // @note 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
 int
-compare(const TvFuncM& left,
-	const TvFuncM& right)
+compare(
+  const TvFuncM& left,
+  const TvFuncM& right
+)
 {
   if ( left.mInputNum < right.mInputNum ) {
     return -1;
@@ -587,8 +616,8 @@ compare(const TvFuncM& left,
     return 1;
   }
 
-  int n = left.mBlockNum;
-  for ( int b: Range(n) ) {
+  SizeType n = left.mBlockNum;
+  for ( SizeType b: Range(n) ) {
     TvFuncM::WordType w1 = left.mVector[b];
     TvFuncM::WordType w2 = right.mVector[b];
     if ( w1 < w2 ) {
@@ -605,16 +634,18 @@ compare(const TvFuncM& left,
 // @relates TvFuncM
 // @brief 交差チェック
 bool
-operator&&(const TvFuncM& func1,
-	   const TvFuncM& func2)
+operator&&(
+  const TvFuncM& func1,
+  const TvFuncM& func2
+)
 {
   if ( func1.mInputNum != func2.mInputNum ||
        func1.mOutputNum != func2.mOutputNum ) {
     return false;
   }
 
-  int n = func1.mBlockNum;
-  for ( int b: Range(n) ) {
+  SizeType n = func1.mBlockNum;
+  for ( SizeType b: Range(n) ) {
     TvFuncM::WordType w1 = func1.mVector[b];
     TvFuncM::WordType w2 = func2.mVector[b];
     if ( (w1 & w2) != 0U ) {
@@ -627,11 +658,13 @@ operator&&(const TvFuncM& func1,
 // 内容の出力
 // mode は 2 か 16
 void
-TvFuncM::print(ostream& s,
-	       int mode) const
+TvFuncM::print(
+  ostream& s,
+  int mode
+) const
 {
-  int ni_pow = 1UL << mInputNum;
-  const int wordsize = sizeof(TvFuncM::WordType) * 8;
+  SizeType ni_pow = 1UL << mInputNum;
+  const SizeType wordsize = sizeof(TvFuncM::WordType) * 8;
   if ( mode == 2 ) {
     TvFuncM::WordType* bp = mVector;
     TvFuncM::WordType tmp = *bp;
@@ -657,7 +690,7 @@ TvFuncM::print(ostream& s,
     }
   }
   else if ( mode == 16 ) {
-    int ni_pow4 = ni_pow / 4;
+    SizeType ni_pow4 = ni_pow / 4;
     TvFuncM::WordType* bp = mVector;
     TvFuncM::WordType tmp = *bp;
     for ( int o: Range(mOutputNum) ) {
@@ -695,20 +728,22 @@ TvFuncM::print(ostream& s,
 // @brief バイナリファイルの書き出し
 // @param[in] s 出力先のストリーム
 void
-TvFuncM::dump(ostream& s) const
+TvFuncM::dump(
+  BinEnc& s
+) const
 {
-  s.write(reinterpret_cast<const char*>(&mInputNum), sizeof(mInputNum));
-  s.write(reinterpret_cast<const char*>(&mOutputNum), sizeof(mOutputNum));
-  s.write(reinterpret_cast<const char*>(mVector), sizeof(WordType) * mBlockNum);
+  s << mInputNum << mOutputNum;
+  s.write_block(reinterpret_cast<const ymuint8*>(mVector), mBlockNum * sizeof(WordType));
 }
 
 // @brief バイナリファイルの読み込み
 // @param[in] s 入力元のストリーム
 void
-TvFuncM::restore(istream& s)
+TvFuncM::restore(
+  BinDec& s
+)
 {
-  s.read(reinterpret_cast<char*>(&mInputNum), sizeof(mInputNum));
-  s.read(reinterpret_cast<char*>(&mOutputNum), sizeof(mOutputNum));
+  s >> mInputNum >> mOutputNum;
   mBlockNum1 = nblock(mInputNum);
   int nblk = mBlockNum1 * mOutputNum;
   if ( mBlockNum != nblk ) {
@@ -716,7 +751,7 @@ TvFuncM::restore(istream& s)
     mBlockNum = nblk;
     mVector = new TvFuncM::WordType[mBlockNum];
   }
-  s.read(reinterpret_cast<char*>(mVector), sizeof(WordType) * mBlockNum);
+  s.read_block(reinterpret_cast<ymuint8*>(mVector), mBlockNum * sizeof(WordType));
 }
 
 END_NAMESPACE_YM

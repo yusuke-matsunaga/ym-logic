@@ -8,7 +8,6 @@
 /// Copyright (C) 2005-2011, 2017, 2018 Yusuke Matsunaga
 /// All rights reserved.
 
-
 #include "ym/TvFunc.h"
 
 
@@ -25,47 +24,63 @@ public:
 
 public:
   /// @brief 入力数と出力数を指定したコンストラクタ
-  /// @param[in] ni 入力数
-  /// @param[in] no 出力数 ( > 0 )
   ///
   /// 中身は恒偽関数となる．
   explicit
-  TvFuncM(int ni = 0,
-	  int no = 1);
+  TvFuncM(
+    SizeType ni = 0, ///< [in] 入力数
+    SizeType no = 1  ///< [in] 出力数 ( > 0 )
+  );
 
   /// @brief コピーコンストラクタ
-  TvFuncM(const TvFuncM& src);
+  TvFuncM(
+    const TvFuncM& src
+  );
 
   /// @brief ムーブコンストラクタ
-  TvFuncM(TvFuncM&& src);
+  TvFuncM(
+    TvFuncM&& src
+  );
 
   /// @brief TvFunc からの変換用コピーコンストラクタ
   explicit
-  TvFuncM(const TvFunc& src);
+  TvFuncM(
+    const TvFunc& src
+  );
 
   /// @brief TvFunc からの変換用ムーブコンストラクタ
   explicit
-  TvFuncM(TvFunc&& src);
+  TvFuncM(
+    TvFunc&& src
+  );
 
   /// @brief TvFunc のリストを用いたコンストラクタ
   /// @param[in] src_list 各出力の論理関数
   ///
   /// src_list の関数の入力数は等しくなければならない．
-  TvFuncM(const vector<TvFunc>& src_list);
+  TvFuncM(
+    const vector<TvFunc>& src_list
+  );
 
   /// @brief TvFunc のリストを用いたコンストラクタ
   /// @param[in] src_list 各出力の論理関数
   ///
   /// src_list の関数の入力数は等しくなければならない．
-  TvFuncM(const list<TvFunc>& src_list);
+  TvFuncM(
+    const list<TvFunc>& src_list
+  );
 
   /// @brief コピー代入演算子
   TvFuncM&
-  operator=(const TvFuncM& src);
+  operator=(
+    const TvFuncM& src
+  );
 
   /// @brief ムーブ代入演算子
   TvFuncM&
-  operator=(TvFuncM&& src);
+  operator=(
+    TvFuncM&& src
+  );
 
   /// @brief デストラクタ
   ~TvFuncM();
@@ -78,22 +93,37 @@ public:
 
   /// @brief 否定した関数を返す．
   TvFuncM
-  invert() const;
+  invert() const
+  {
+    return TvFuncM(*this).invert_int();
+  }
 
   /// @brief 論理積を返す．
-  /// @param[in] right オペランド
   TvFuncM
-  and_op(const TvFuncM& right) const;
+  and_op(
+    const TvFuncM& right ///< [in] オペランド
+  ) const
+  {
+    return TvFuncM(*this).and_int(right);
+  }
 
   /// @brief 論理和を返す．
-  /// @param[in] right オペランド
   TvFuncM
-  or_op(const TvFuncM& right) const;
+  or_op(
+    const TvFuncM& right ///< [in] オペランド
+  ) const
+  {
+    return TvFuncM(*this).or_int(right);
+  }
 
   /// @brief 排他的論理和を返す．
-  /// @param[in] right オペランド
   TvFuncM
-  xor_op(const TvFuncM& right) const;
+  xor_op(
+    const TvFuncM& right ///< [in] オペランド
+  ) const
+  {
+    return TvFuncM(*this).xor_int(right);
+  }
 
 
 public:
@@ -107,32 +137,35 @@ public:
   invert_int();
 
   /// @brief right との論理積を計算し自分に代入する．
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  and_int(const TvFuncM& right);
+  and_int(
+    const TvFuncM& right ///< [in] 対象のオブジェクト
+  );
 
   /// @brief right との論理和を計算し自分に代入する．
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  or_int(const TvFuncM& right);
+  or_int(
+    const TvFuncM& right ///< [in] 対象のオブジェクト
+  );
 
   /// @brief right との排他的論理和を計算し自分に代入する．
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  xor_int(const TvFuncM& right);
+  xor_int(
+    const TvFuncM& right ///< [in] 対象のオブジェクト
+  );
 
   /// @brief コファクターを計算し自分に代入する．
-  /// @param[in] varid 変数番号
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   /// @return 自身への参照を返す．
   TvFuncM&
-  cofactor_int(VarId varid,
-	       bool inv);
+  cofactor_int(
+    VarId varid, ///< [in] 変数番号
+    bool inv     ///< [in] 極性
+                 ///<  - false: 反転なし (正極性)
+                 ///<  - true:  反転あり (負極性)
+  );
 
 
 public:
@@ -141,22 +174,34 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief right との論理積を計算し自分に代入する．
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  operator&=(const TvFuncM& right);
+  operator&=(
+    const TvFuncM& right ///< [in] 対象のオブジェクト
+  )
+  {
+    return and_int(right);
+  }
 
   /// @brief right との論理和を計算し自分に代入する．
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  operator|=(const TvFuncM& right);
+  operator|=(
+    const TvFuncM& right ///< [in] 対象のオブジェクト
+  )
+  {
+    return or_int(right);
+  }
 
   /// @brief right との排他的論理和を計算し自分に代入する．
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  operator^=(const TvFuncM& right);
+  operator^=(
+    const TvFuncM& right ///< [in] 対象のオブジェクト
+  )
+  {
+    return xor_int(right);
+  }
 
 
 public:
@@ -166,46 +211,46 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 自分自身を否定する．
-  /// @param[in] ovar 出力番号
   /// @return 自身への参照を返す．
   TvFuncM&
-  invert_int(VarId ovar);
+  invert_int(
+    VarId ovar ///< [in] 出力番号
+  );
 
   /// @brief right との論理積を計算し自分に代入する．
-  /// @param[in] ovar 出力番号
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  and_int(VarId ovar,
-	  const TvFunc& right);
+  and_int(
+    VarId ovar,         ///< [in] 出力番号
+    const TvFunc& right ///< [in] 対象のオブジェクト
+  );
 
   /// @brief right との論理和を計算し自分に代入する．
-  /// @param[in] ovar 出力番号
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  or_int(VarId ovar,
-	 const TvFunc& right);
+  or_int(
+    VarId ovar,         ///< [in] 出力番号
+    const TvFunc& right ///< [in] 対象のオブジェクト
+  );
 
   /// @brief right との排他的論理和を計算し自分に代入する．
-  /// @param[in] ovar 出力番号
-  /// @param[in] right 論理対象のオブジェクト
   /// @return 自身への参照を返す．
   TvFuncM&
-  xor_int(VarId ovar,
-	  const TvFunc& right);
+  xor_int(
+    VarId ovar,         ///< [in] 出力番号
+    const TvFunc& right ///< [in] 対象のオブジェクト
+  );
 
   /// @brief コファクターを計算し自分に代入する．
-  /// @param[in] ovar 出力番号
-  /// @param[in] varid 変数番号
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   /// @return 自身への参照を返す．
   TvFuncM&
-  cofactor_int(VarId ovar,
-	       VarId varid,
-	       bool inv);
+  cofactor_int(
+    VarId ovar,  ///< [in] 出力番号
+    VarId varid, ///< [in] 変数番号
+    bool inv     ///< [in] 極性
+		 ///<   - false: 反転なし (正極性)
+		 ///<   - true:  反転あり (負極性)
+  );
 
 
 public:
@@ -214,40 +259,54 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 入力数を得る．
-  int
-  input_num() const;
+  SizeType
+  input_num() const
+  {
+    return mInputNum;
+  }
 
   /// @brief 出力数を得る．
-  int
-  output_num() const;
+  SizeType
+  output_num() const
+  {
+    return mOutputNum;
+  }
 
   /// @brief 1出力の論理関数を切り出す．
-  /// @param[in] ovar 出力番号
   TvFunc
-  slice(VarId ovar) const;
+  slice(
+    VarId ovar ///< [in] 出力番号
+  ) const;
 
   /// @brief 入力値を2進数と見なしたときの pos 番目の値を得る．
-  /// @param[in] ovar 出力番号
-  /// @param[in] pos 位置番号 ( 0 <= pos < 2^(input_num()) )
   /// 答は 0 か 1 だが int 型
   int
-  value(VarId ovar,
-	int pos) const;
+  value(
+    VarId ovar, ///< [in] 出力番号
+    int pos     ///< [in] 位置番号 ( 0 <= pos < 2^(input_num()) )
+  ) const
+  {
+    SizeType opos = ovar.val();
+    return (mVector[block(pos) + opos * mBlockNum1] >> shift(pos)) & 1;
+  }
 
   /// @brief varid 番目の変数がサポートの時 true を返す．
-  /// @param[in] varid 変数番号
   bool
-  check_sup(VarId varid) const;
+  check_sup(
+    VarId varid ///< [in] 変数番号
+  ) const;
 
   /// @brief pos1 番目と pos2 番目の変数が対称のとき true を返す．
   /// @param[in] pos1, pos2 変数番号
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
+  /// @param[in] inv
   bool
-  check_sym(VarId pos1,
-	    VarId pos2,
-	    bool inv = false) const;
+  check_sym(
+    VarId var1,      ///< [in] 変数1
+    VarId var2,      ///< [in] 変数2
+    bool inv = false ///< [in] 極性
+                     ///<  - false: 反転なし (正極性)
+                     ///<  - true:  反転あり (負極性)
+  ) const;
 
   /// @brief ハッシュ値を返す．
   SizeType
@@ -260,12 +319,13 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 内容の出力
-  /// @param[in] s 出力先のストリーム
-  /// @param[in] mode 出力モード
-  /// @note mode は 2 か 16
   void
-  print(ostream& s,
-	int mode = 2) const;
+  print(
+    ostream& s,  ///< [in] 出力先のストリーム
+    int mode = 2 ///< [in] 出力モード
+                 ///<  -  2: 2進表記
+                 ///<  - 16: 16進表記
+  ) const;
 
 
 public:
@@ -274,14 +334,16 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief バイナリファイルの書き出し
-  /// @param[in] s 出力先のストリーム
   void
-  dump(ostream& s) const;
+  dump(
+    BinEnc& s ///< [in] 出力先のストリーム
+  ) const;
 
   /// @brief バイナリファイルの読み込み
-  /// @param[in] s 入力元のストリーム
   void
-  restore(istream& s);
+  restore(
+    BinDec& s ///< [in] 入力元のストリーム
+  );
 
 
 public:
@@ -291,19 +353,23 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief コファクターを返す．
-  /// @param[in] varid 変数番号
-  /// @param[in] inv 極性
-  ///                - false: 反転なし (正極性)
-  ///                - true:  反転あり (負極性)
   TvFuncM
-  cofactor(VarId varid,
-	   bool inv) const;
+  cofactor(
+    VarId varid, ///< [in] 変数番号
+    bool inv     ///< [in] 極性
+                 ///<  - false: 反転なし (正極性)
+                 ///<  - true:  反転あり (負極性)
+  ) const
+  {
+    return TvFuncM(*this).cofactor_int(varid, inv);
+  }
 
   /// @brief npnmap に従った変換を行う．
-  /// @param[in] npnmap 変換マップ
   /// @return 変換した関数を返す．
   TvFuncM
-  xform(const NpnMapM& npnmap) const;
+  xform(
+    const NpnMapM& npnmap ///< [in] 変換マップ
+  ) const;
 
 
 public:
@@ -312,12 +378,20 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief ブロック数を得る．
-  int
-  nblk() const;
+  SizeType
+  nblk() const
+  {
+    return mBlockNum;
+  }
 
   /// @brief 生のデータを得る．
   WordType
-  raw_data(int blk) const;
+  raw_data(
+    SizeType blk ///< [in] ブロック番号
+  ) const
+  {
+    return mVector[blk];
+  }
 
 
 public:
@@ -329,7 +403,7 @@ public:
   /// 特に根拠はないが，これなら Walsh 係数が 32 ビット整数で収まる．
   /// あと真理値表ベースの手法ではこれくらいが限度
   static
-  constexpr int kMaxNi = 20;
+  constexpr SizeType kMaxNi = 20;
 
 
 public:
@@ -340,13 +414,17 @@ public:
 
   friend
   int
-  compare(const TvFuncM& left,
-	  const TvFuncM& right);
+  compare(
+    const TvFuncM& left,
+    const TvFuncM& right
+  );
 
   friend
   bool
-  operator&&(const TvFuncM& left,
-	     const TvFuncM& right);
+  operator&&(
+    const TvFuncM& left,
+    const TvFuncM& right
+  );
 
 
 private:
@@ -356,18 +434,36 @@ private:
 
   /// @brief 入力数 ni のベクタを納めるのに必要なブロック数を計算する．
   static
-  int
-  nblock(int ni);
+  SizeType
+  nblock(
+    SizeType ni
+  )
+  {
+    const SizeType wsize = sizeof(WordType) * 8;
+    return ((1 << ni) + wsize - 1) / wsize;
+  }
 
   /// @brief ipos 番目の要素のブロック位置を計算する．
   static
-  int
-  block(int pos);
+  SizeType
+  block(
+    SizeType pos
+  )
+  {
+    const SizeType wsize = sizeof(WordType) * 8;
+    return pos / wsize;
+  }
 
   /// @brief ipos 番目の要素のシフト量を計算する．
   static
-  int
-  shift(int pos);
+  SizeType
+  shift(
+    SizeType pos
+  )
+  {
+    const SizeType wsize = sizeof(WordType) * 8;
+    return pos % wsize;
+  }
 
 
 private:
@@ -376,16 +472,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  int mInputNum;
+  SizeType mInputNum;
 
   // 出力数
-  int mOutputNum;
+  SizeType mOutputNum;
 
   // 1出力分のブロック数
-  int mBlockNum1;
+  SizeType mBlockNum1;
 
   // ブロック数
-  int mBlockNum;
+  SizeType mBlockNum;
 
   // パックされた真理値ベクトル
   WordType* mVector;
@@ -399,515 +495,285 @@ private:
 
 /// @relates TvFuncM
 /// @brief 否定を求める．
-/// @param[in] src ソースの関数
+inline
 TvFuncM
-operator~(const TvFuncM& src);
+operator~(
+  const TvFuncM& src ///< [in] ソースの関数
+)
+{
+  return TvFuncM(src).invert_int();
+}
 
 /// @relates TvFuncM
 /// @brief 否定を求める．
-/// @param[in] src ソースの関数
-TvFuncM
-operator~(const TvFuncM&& src);
-
-/// @relates TvFuncM
-/// @brief 論理積を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator&(const TvFuncM& left,
-	  const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 論理積を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator&(const TvFuncM&& left,
-	  const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 論理積を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator&(const TvFuncM& left,
-	  const TvFuncM&& right);
-
-/// @relates TvFuncM
-/// @brief 論理積を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator&(const TvFuncM&& left,
-	  const TvFuncM&& right);
-
-/// @relates TvFuncM
-/// @brief 論理和を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator|(const TvFuncM& left,
-	  const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 論理和を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator|(const TvFuncM&& left,
-	  const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 論理和を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator|(const TvFuncM& left,
-	  const TvFuncM&& right);
-
-/// @relates TvFuncM
-/// @brief 論理和を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator|(const TvFuncM&& left,
-	  const TvFuncM&& right);
-
-/// @relates TvFuncM
-/// @brief 排他的論理和を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator^(const TvFuncM& left,
-	  const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 排他的論理和を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator^(const TvFuncM&& left,
-	  const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 排他的論理和を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator^(const TvFuncM& left,
-	  const TvFuncM&& right);
-
-/// @relates TvFuncM
-/// @brief 排他的論理和を求める．
-/// @param[in] left, right オペランド
-TvFuncM
-operator^(const TvFuncM&& left,
-	  const TvFuncM&& right);
-
-/// @relates TvFunc
-/// @brief 比較関数
-/// @param[in] left, right オペランド
-/// @retval -1 left < right
-/// @retval  0 left = right
-/// @retval  1 left > right
-/// @note 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
-int
-compare(const TvFuncM& left,
-	const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 等価比較
-/// @param[in] left, right オペランド
-/// @note 入力数/出力数の異なる関数間の比較は false を返す．
-bool
-operator==(const TvFuncM& left,
-	   const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 非等価比較
-/// @param[in] left, right オペランド
-/// @note 入力数/出力数の異なる関数間の比較は true を返す．
-bool
-operator!=(const TvFuncM& left,
-	   const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 大小比較(小なり)
-/// @param[in] left, right オペランド
-/// @note 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
-bool
-operator<(const TvFuncM& left,
-	  const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 大小比較(大なり)
-/// @param[in] left, right オペランド
-/// @note 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
-bool
-operator>(const TvFuncM& left,
-	  const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 大小比較(小なりイコール)
-/// @param[in] left, right オペランド
-/// @note 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
-bool
-operator<=(const TvFuncM& left,
-	   const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 大小比較(大なりイコール)
-/// @param[in] left, right オペランド
-/// @note 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
-bool
-operator>=(const TvFuncM& left,
-	   const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief 交差チェック
-/// @param[in] left, right オペランド
-/// @note 入力数/出力数の異なる関数間の比較は false を返す．
-bool
-operator&&(const TvFuncM& left,
-	   const TvFuncM& right);
-
-/// @relates TvFuncM
-/// @brief ストリームに対する出力
-/// @param[in] s 出力先のストリーム
-/// @param[in] func 対象の関数
-ostream&
-operator<<(ostream& s,
-	   const TvFuncM& func);
-
-
-
-//////////////////////////////////////////////////////////////////////
-// インライン関数の定義
-//////////////////////////////////////////////////////////////////////
-
-// 入力数を得る．
-inline
-int
-TvFuncM::input_num() const
-{
-  return mInputNum;
-}
-
-// @brief 出力数を得る．
-inline
-int
-TvFuncM::output_num() const
-{
-  return mOutputNum;
-}
-
-// 入力値を2進数と見なしたときの (ovar, pos) 番目の値を得る．
-// 答は 0 か 1 だが int 型
-inline
-int
-TvFuncM::value(VarId ovar,
-	       int pos) const
-{
-  int opos = ovar.val();
-  return (mVector[block(pos) + opos * mBlockNum1] >> shift(pos)) & 1;
-}
-
-// ブロック数を得る．
-inline
-int
-TvFuncM::nblk() const
-{
-  return mBlockNum;
-}
-
-// 生のデータを得る．
-inline
-TvFuncM::WordType
-TvFuncM::raw_data(int blk) const
-{
-  return mVector[blk];
-}
-
-// 入力数 ni, 出力数 no のベクタを納めるのに必要なブロック数を計算する．
-inline
-int
-TvFuncM::nblock(int ni)
-{
-  const int wsize = sizeof(WordType) * 8;
-  return ((1 << ni) + wsize - 1) / wsize;
-}
-
-// pos 番目の要素のブロック位置を計算する．
-inline
-int
-TvFuncM::block(int pos)
-{
-  const int wsize = sizeof(WordType) * 8;
-  return pos / wsize;
-}
-
-// pos 番目の要素のシフト量を計算する．
-inline
-int
-TvFuncM::shift(int pos)
-{
-  const int wsize = sizeof(WordType) * 8;
-  return pos % wsize;
-}
-
-// @brief 否定した関数を返す．
 inline
 TvFuncM
-TvFuncM::invert() const
-{
-  return TvFuncM(*this).invert_int();
-}
-
-// @brief 論理積を返す．
-// @param[in] right オペランド
-inline
-TvFuncM
-TvFuncM::and_op(const TvFuncM& right) const
-{
-  return TvFuncM(*this).and_int(right);
-}
-
-// @brief 論理和を返す．
-// @param[in] right オペランド
-inline
-TvFuncM
-TvFuncM::or_op(const TvFuncM& right) const
-{
-  return TvFuncM(*this).or_int(right);
-}
-
-// @brief 排他的論理和を返す．
-// @param[in] right オペランド
-inline
-TvFuncM
-TvFuncM::xor_op(const TvFuncM& right) const
-{
-  return TvFuncM(*this).xor_int(right);
-}
-
-// @brief right との論理積を計算し自分に代入する．
-// @param[in] right 論理対象のオブジェクト
-// @return 自身への参照を返す．
-inline
-TvFuncM&
-TvFuncM::operator&=(const TvFuncM& right)
-{
-  return and_int(right);
-}
-
-// @brief right との論理和を計算し自分に代入する．
-// @param[in] right 論理対象のオブジェクト
-// @return 自身への参照を返す．
-inline
-TvFuncM&
-TvFuncM::operator|=(const TvFuncM& right)
-{
-  return or_int(right);
-}
-
-// @brief right との排他的論理和を計算し自分に代入する．
-// @param[in] right 論理対象のオブジェクト
-// @return 自身への参照を返す．
-inline
-TvFuncM&
-TvFuncM::operator^=(const TvFuncM& right)
-{
-  return xor_int(right);
-}
-
-// 否定を求める．
-inline
-TvFuncM
-operator~(const TvFuncM& src)
+operator~(
+  const TvFuncM&& src ///< [in] ソースの関数
+)
 {
   return TvFuncM(src).invert_int();
 }
 
-// 否定を求める．
+/// @relates TvFuncM
+/// @brief 論理積を求める．
 inline
 TvFuncM
-operator~(const TvFuncM&& src)
-{
-  return TvFuncM(src).invert_int();
-}
-
-// 論理積を求める．
-inline
-TvFuncM
-operator&(const TvFuncM& left,
-	  const TvFuncM& right)
+operator&(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return TvFuncM(left).and_int(right);
 }
 
-// 論理積を求める．
+/// @relates TvFuncM
+/// @brief 論理積を求める．
 inline
 TvFuncM
-operator&(const TvFuncM&& left,
-	  const TvFuncM& right)
+operator&(
+  const TvFuncM&& left, ///< [in] オペランド1
+  const TvFuncM& right  ///< [in] オペランド2
+)
 {
   return TvFuncM(left).and_int(right);
 }
 
-// 論理積を求める．
+/// @relates TvFuncM
+/// @brief 論理積を求める．
 inline
 TvFuncM
-operator&(const TvFuncM& left,
-	  const TvFuncM&& right)
+operator&(
+  const TvFuncM& left,  ///< [in] オペランド1
+  const TvFuncM&& right ///< [in] オペランド2t
+)
 {
   return TvFuncM(right).and_int(left);
 }
 
-// 論理積を求める．
+/// @relates TvFuncM
+/// @brief 論理積を求める．
 inline
 TvFuncM
-operator&(const TvFuncM&& left,
-	  const TvFuncM&& right)
+operator&(
+  const TvFuncM&& left, ///< [in] オペランド1
+  const TvFuncM&& right ///< [in] オペランド2
+)
 {
   return TvFuncM(left).and_int(right);
 }
 
-// 論理和を求める．
+/// @relates TvFuncM
+/// @brief 論理和を求める．
 inline
 TvFuncM
-operator|(const TvFuncM& left,
-	  const TvFuncM& right)
+operator|(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return TvFuncM(left).or_int(right);
 }
 
-// 論理和を求める．
+/// @relates TvFuncM
+/// @brief 論理和を求める．
 inline
 TvFuncM
-operator|(const TvFuncM&& left,
-	  const TvFuncM& right)
+operator|(
+  const TvFuncM&& left, ///< [in] オペランド1
+  const TvFuncM& right  ///< [in] オペランド2
+)
 {
   return TvFuncM(left).or_int(right);
 }
 
-// 論理和を求める．
+/// @relates TvFuncM
+/// @brief 論理和を求める．
 inline
 TvFuncM
-operator|(const TvFuncM& left,
-	  const TvFuncM&& right)
+operator|(
+  const TvFuncM& left,  ///< [in] オペランド1
+  const TvFuncM&& right ///< [in] オペランド2t
+)
 {
   return TvFuncM(right).or_int(left);
 }
 
-// 論理和を求める．
+/// @relates TvFuncM
+/// @brief 論理和を求める．
 inline
 TvFuncM
-operator|(const TvFuncM&& left,
-	  const TvFuncM&& right)
+operator|(
+  const TvFuncM&& left, ///< [in] オペランド1
+  const TvFuncM&& right ///< [in] オペランド2
+)
 {
   return TvFuncM(left).or_int(right);
 }
 
-// 排他的論理和を求める．
+/// @relates TvFuncM
+/// @brief 排他的論理和を求める．
 inline
 TvFuncM
-operator^(const TvFuncM& left,
-	  const TvFuncM& right)
+operator^(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return TvFuncM(left).xor_int(right);
 }
 
-// 排他的論理和を求める．
+/// @relates TvFuncM
+/// @brief 排他的論理和を求める．
 inline
 TvFuncM
-operator^(const TvFuncM&& left,
-	  const TvFuncM& right)
+operator^(
+  const TvFuncM&& left, ///< [in] オペランド1
+  const TvFuncM& right  ///< [in] オペランド2
+)
 {
   return TvFuncM(left).xor_int(right);
 }
 
-// 排他的論理和を求める．
+/// @relates TvFuncM
+/// @brief 排他的論理和を求める．
 inline
 TvFuncM
-operator^(const TvFuncM& left,
-	  const TvFuncM&& right)
+operator^(
+  const TvFuncM& left,  ///< [in] オペランド1
+  const TvFuncM&& right ///< [in] オペランド2
+)
 {
   return TvFuncM(right).xor_int(left);
 }
 
-// 排他的論理和を求める．
+/// @relates TvFuncM
+/// @brief 排他的論理和を求める．
 inline
 TvFuncM
-operator^(const TvFuncM&& left,
-	  const TvFuncM&& right)
+operator^(
+  const TvFuncM&& left, ///< [in] オペランド1
+  const TvFuncM&& right ///< [in] オペランド2
+)
 {
   return TvFuncM(left).xor_int(right);
 }
 
-// @brief コファクターを返す．
-// @param[in] varid 変数番号
-// @param[in] inv 極性
-//                - false: 反転なし (正極性)
-//                - true:  反転あり (負極性)
-inline
-TvFuncM
-TvFuncM::cofactor(VarId varid,
-		  bool inv) const
-{
-  return TvFuncM(*this).cofactor_int(varid, inv);
-}
+/// @relates TvFunc
+/// @brief 比較関数
+/// @retval -1 left < right
+/// @retval  0 left = right
+/// @retval  1 left > right
+///
+/// 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
+int
+compare(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+);
 
-// @relates TvFuncM
-// @brief 等価比較
-// @param[in] left, right オペランド
-// @note 入力数/出力数の異なる関数間の比較は false を返す．
+/// @relates TvFuncM
+/// @brief 等価比較
+///
+/// 入力数/出力数の異なる関数間の比較は false を返す．
 inline
 bool
-operator==(const TvFuncM& left,
-	   const TvFuncM& right)
+operator==(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return compare(left, right) == 0;
 }
 
-// 等価比較
+/// @relates TvFuncM
+/// @brief 非等価比較
+///
+/// 入力数/出力数の異なる関数間の比較は true を返す．
 inline
 bool
-operator!=(const TvFuncM& left,
-	   const TvFuncM& right)
+operator!=(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return !operator==(left, right);
 }
 
-// @relates TvFuncM
-// @brief 大小比較(小なり)
-// @param[in] left, right オペランド
-// @note 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
+/// @relates TvFuncM
+/// @brief 大小比較(小なり)
+///
+/// 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
 inline
 bool
-operator<(const TvFuncM& left,
-	  const TvFuncM& right)
+operator<(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return compare(left, right) == -1;
 }
 
+/// @relates TvFuncM
+/// @brief 大小比較(大なり)
+///
+/// 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
 inline
 bool
-operator>(const TvFuncM& left,
-	  const TvFuncM& right)
+operator>(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return operator<(right, left);
 }
 
+/// @relates TvFuncM
+/// @brief 大小比較(小なりイコール)
+///
+/// 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
 inline
 bool
-operator<=(const TvFuncM& left,
-	   const TvFuncM& right)
+operator<=(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return !operator<(right, left);
 }
 
+/// @relates TvFuncM
+/// @brief 大小比較(大なりイコール)
+///
+/// 入力数/出力数の異なる関数間の比較はまず入力数つぎに出力数で比較する．
 inline
 bool
-operator>=(const TvFuncM& left,
-	   const TvFuncM& right)
+operator>=(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+)
 {
   return !operator<(left, right);
 }
 
-// ストリームに対する出力
+/// @relates TvFuncM
+/// @brief 交差チェック
+///
+/// 入力数/出力数の異なる関数間の比較は false を返す．
+bool
+operator&&(
+  const TvFuncM& left, ///< [in] オペランド1
+  const TvFuncM& right ///< [in] オペランド2
+);
+
+/// @relates TvFuncM
+/// @brief ストリームに対する出力
 inline
 ostream&
-operator<<(ostream& s,
-	   const TvFuncM& func)
+operator<<(
+  ostream& s,         ///< [in] 出力先のストリーム
+  const TvFuncM& func ///< [in] 対象の関数
+)
 {
   func.print(s, 2);
   return s;

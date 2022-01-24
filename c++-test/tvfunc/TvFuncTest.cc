@@ -37,10 +37,13 @@ public:
   }
 
   void
-  check_func(const TvFunc& func,
-	     const vector<int>& exp_values,
-	     bool fast,
-	     const string& str = string());
+  check_func(
+    const TvFunc& func,
+    const vector<int>& exp_values,
+    bool fast,
+    const string& str = string()
+  );
+
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -60,16 +63,18 @@ public:
 
 
 // コンストラクタ
-TvFuncTestWithParam::TvFuncTestWithParam() :
-  mRandDist(0, 1)
+TvFuncTestWithParam::TvFuncTestWithParam(
+) : mRandDist(0, 1)
 {
 }
 
 void
-TvFuncTestWithParam::check_func(const TvFunc& func,
-				const vector<int>& exp_values,
-				bool fast,
-				const string& str)
+TvFuncTestWithParam::check_func(
+  const TvFunc& func,
+  const vector<int>& exp_values,
+  bool fast,
+  const string& str
+)
 {
   // value() のテスト
   // 同時に0と1の数も数えておく．
@@ -279,11 +284,25 @@ TvFuncTestWithParam::check_func(const TvFunc& func,
       }
     }
   }
+
+  // dump/restore のテスト
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  func.dump(bos);
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  TvFunc func2;
+  func2.restore(bis);
+
+  EXPECT_EQ( func2, func );
 }
 
 void
-check_op(const TvFunc& func1,
-	 const TvFunc& func2)
+check_op(
+  const TvFunc& func1,
+  const TvFunc& func2
+)
 {
   int ni = func1.input_num();
   int ni_exp = 1U << ni;

@@ -568,8 +568,10 @@ BEGIN_NONAMESPACE
 
 // 論理式をバイナリダンプする．
 void
-dump_expr(ostream& s,
-	  const Expr& expr)
+dump_expr(
+  BinEnc& s,
+  const Expr& expr
+)
 {
   if ( expr.is_zero() ) {
     s << static_cast<ymuint8>(0);
@@ -605,7 +607,7 @@ dump_expr(ostream& s,
     ASSERT_NOT_REACHED;
   }
 
-  int nc = expr.child_num();
+  SizeType nc = expr.child_num();
   s << type
     << nc;
   for ( int i = 0; i < nc; ++ i ) {
@@ -615,10 +617,12 @@ dump_expr(ostream& s,
 
 // ストリームから論理式を作る．
 Expr
-restore_expr(istream& s)
+restore_expr(
+  BinDec& s
+)
 {
   ymuint8 type;
-  s.read(reinterpret_cast<char*>(&type), sizeof(type));
+  s >> type;
   switch ( type ) {
   case 0:
     return Expr::make_zero();
@@ -642,10 +646,10 @@ restore_expr(istream& s)
   }
 
   // 残りは論理演算
-  int nc;
-  s.read(reinterpret_cast<char*>(&nc), sizeof(nc));
+  SizeType nc;
+  s >> nc;
   vector<Expr> child_list(nc);
-  for (int i = 0; i < nc; ++ i) {
+  for ( SizeType i = 0; i < nc; ++ i ) {
     child_list[i] = restore_expr(s);
   }
 
@@ -673,7 +677,9 @@ END_NONAMESPACE
 // @brief 論理式の内容を文字列にする．
 // @param[in] expr 論理式
 string
-to_string(const Expr& expr)
+to_string(
+  const Expr& expr
+)
 {
   ostringstream os;
   os << expr;
@@ -682,14 +688,18 @@ to_string(const Expr& expr)
 
 // @brief バイナリストリームに出力する．
 void
-Expr::dump(ostream& s) const
+Expr::dump(
+  BinEnc& s
+) const
 {
   dump_expr(s, *this);
 }
 
 // @brief バイナリストリームから読み込む．
 void
-Expr::restore(istream& s)
+Expr::restore(
+  BinDec& s
+)
 {
   *this = restore_expr(s);
 }

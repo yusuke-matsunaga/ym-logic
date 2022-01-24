@@ -40,6 +40,17 @@ TEST(ExprTest, empty_constr)
   EXPECT_EQ( 0, expr.literal_num() );
   EXPECT_EQ( 0, expr.input_size() );
   EXPECT_EQ( 0, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_zero)
@@ -68,6 +79,17 @@ TEST(ExprTest, make_zero)
   EXPECT_EQ( 0, expr.literal_num() );
   EXPECT_EQ( 0, expr.input_size() );
   EXPECT_EQ( 0, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_one)
@@ -96,6 +118,17 @@ TEST(ExprTest, make_one)
   EXPECT_EQ( 0, expr.literal_num() );
   EXPECT_EQ( 0, expr.input_size() );
   EXPECT_EQ( 0, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_literal1)
@@ -128,6 +161,17 @@ TEST(ExprTest, make_literal1)
   EXPECT_EQ( 0, expr.literal_num(VarId(0), true) );
   EXPECT_EQ( 1, expr.input_size() );
   EXPECT_EQ( 1, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_literal2)
@@ -161,6 +205,8 @@ TEST(ExprTest, make_literal2)
   EXPECT_EQ( 1, expr.literal_num(VarId(0), true) );
   EXPECT_EQ( 1, expr.input_size() );
   EXPECT_EQ( 1, expr.sop_literal_num() );
+
+  // 式自体は上と同一なので dump/restore はテストは不要
 }
 
 TEST(ExprTest, make_posi_literal)
@@ -272,6 +318,17 @@ TEST(ExprTest, and_op1)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, and_op2)
@@ -319,6 +376,17 @@ TEST(ExprTest, and_op2)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_and1)
@@ -367,6 +435,17 @@ TEST(ExprTest, make_and1)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_and2)
@@ -415,6 +494,17 @@ TEST(ExprTest, make_and2)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, and_int)
@@ -463,6 +553,17 @@ TEST(ExprTest, and_int)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, or_op1)
@@ -510,6 +611,17 @@ TEST(ExprTest, or_op1)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, or_op2)
@@ -557,6 +669,17 @@ TEST(ExprTest, or_op2)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_or1)
@@ -605,6 +728,17 @@ TEST(ExprTest, make_or1)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_or2)
@@ -653,6 +787,17 @@ TEST(ExprTest, make_or2)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, or_int)
@@ -701,6 +846,17 @@ TEST(ExprTest, or_int)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 2, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, xor_op1)
@@ -748,6 +904,17 @@ TEST(ExprTest, xor_op1)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 4, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, xor_op2)
@@ -795,6 +962,17 @@ TEST(ExprTest, xor_op2)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 4, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_xor1)
@@ -843,6 +1021,17 @@ TEST(ExprTest, make_xor1)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 4, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, make_xor2)
@@ -891,6 +1080,17 @@ TEST(ExprTest, make_xor2)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 4, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, xor_int)
@@ -939,6 +1139,17 @@ TEST(ExprTest, xor_int)
   EXPECT_EQ( 1, expr.literal_num(VarId(1), true) );
   EXPECT_EQ( 2, expr.input_size() );
   EXPECT_EQ( 4, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, inv1)
@@ -989,6 +1200,17 @@ TEST(ExprTest, compose1)
   ostringstream oss;
   oss << expr;
   EXPECT_EQ( string("( ( V_1 & V_3 ) | ( ~V_1 & V_2 ) )"), oss.str() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, compose2)
@@ -1006,16 +1228,27 @@ TEST(ExprTest, compose2)
   Expr lit4n = Expr::make_nega_literal(var4);
 
   Expr expr0 = lit0p | lit4n;
-  Expr expr1 = lit1p & lit3p;
-  Expr expr2 = ~(lit1n & lit2p);
+  Expr child1 = lit1p & lit3p;
+  Expr child2 = ~(lit1n & lit2p);
   unordered_map<VarId, Expr> comp_map;
-  comp_map[var0] = expr1;
-  comp_map[var4] = expr2;
+  comp_map[var0] = child1;
+  comp_map[var4] = child2;
   Expr expr = expr0.compose(comp_map);
 
   ostringstream oss;
   oss << expr;
   EXPECT_EQ( string("( ( V_1 & V_3 ) | ( ~V_1 & V_2 ) )"), oss.str() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, compose3)
@@ -1033,16 +1266,27 @@ TEST(ExprTest, compose3)
   Expr lit4n = Expr::make_nega_literal(var4);
 
   Expr expr0 = lit0p | lit4n;
-  Expr expr1 = lit1p & lit3p;
-  Expr expr2 = ~(lit1n & lit2p);
+  Expr child1 = lit1p & lit3p;
+  Expr child2 = ~(lit1n & lit2p);
   vector<pair<VarId, Expr>> comp_list;
-  comp_list.push_back(make_pair(var0, expr1));
-  comp_list.push_back(make_pair(var4, expr2));
+  comp_list.push_back(make_pair(var0, child1));
+  comp_list.push_back(make_pair(var4, child2));
   Expr expr = expr0.compose(comp_list);
 
   ostringstream oss;
   oss << expr;
   EXPECT_EQ( string("( ( V_1 & V_3 ) | ( ~V_1 & V_2 ) )"), oss.str() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, remap_var1)
@@ -1065,6 +1309,17 @@ TEST(ExprTest, remap_var1)
   ostringstream oss;
   oss << expr;
   EXPECT_EQ( string("( ( V_1 & V_3 ) | ( ~V_1 & V_2 ) )"), oss.str() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, remap_var2)
@@ -1087,6 +1342,17 @@ TEST(ExprTest, remap_var2)
   ostringstream oss;
   oss << expr;
   EXPECT_EQ( string("( ( V_1 & V_3 ) | ( ~V_1 & V_2 ) )"), oss.str() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, eval1)
@@ -1171,6 +1437,17 @@ TEST(ExprTest, from_string1)
   ostringstream oss;
   oss << expr;
   EXPECT_EQ( string("( V_0 | ( V_1 & ~V_2 ) )"), oss.str() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, from_string2)
@@ -1184,6 +1461,17 @@ TEST(ExprTest, from_string2)
   ostringstream oss;
   oss << expr;
   EXPECT_EQ( string("( V_0 | ( V_1 & ~V_2 ) )"), oss.str() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
 TEST(ExprTest, from_string3)

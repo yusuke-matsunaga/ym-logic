@@ -9,6 +9,8 @@
 /// All rights reserved.
 
 #include "ym_config.h"
+#include "ym/BinDec.h"
+#include "ym/BinEnc.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -107,19 +109,19 @@ public:
   /// @brief バイナリファイルに出力する．
   void
   dump(
-    ostream& s ///< [in] 出力先のストリーム
+    BinEnc& s ///< [in] 出力先のストリーム
   ) const
   {
-    s.write(reinterpret_cast<const char*>(&mVal), sizeof(mVal));
+    s << mVal;
   }
 
   /// @brief バイナリファイルを読み込む．
   void
   restore(
-    istream& s ///< [in] 入力ストリーム
+    BinDec& s ///< [in] 入力ストリーム
   )
   {
-    s.read(reinterpret_cast<char*>(&mVal), sizeof(mVal));
+    s >> mVal;
   }
 
 
@@ -214,6 +216,32 @@ operator<<(
   else {
     s << "---";
   }
+  return s;
+}
+
+/// @relates VarId
+/// @brief バイナリ出力
+inline
+BinEnc&
+operator<<(
+  BinEnc& s,        ///< [in] 出力先のストリーム
+  const VarId& varid ///< [in] 対象の変数
+)
+{
+  varid.dump(s);
+  return s;
+}
+
+/// @relates VarId
+/// @brief バイナリ入力
+inline
+BinDec&
+operator>>(
+  BinDec& s,   ///< [in] 出力先のストリーム
+  VarId& varid ///< [out] 対象の変数
+)
+{
+  varid.restore(s);
   return s;
 }
 

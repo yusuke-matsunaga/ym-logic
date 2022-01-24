@@ -701,35 +701,32 @@ TvFunc::print(
 }
 
 // @brief バイナリファイルの書き出し
-// @param[in] s 出力先のストリーム
 void
 TvFunc::dump(
-  ostream& s
+  BinEnc& s
 ) const
 {
-  s.write(reinterpret_cast<const char*>(&mInputNum), sizeof(mInputNum));
-  s.write(reinterpret_cast<const char*>(mVector), sizeof(WordType) * mBlockNum);
+  s << mInputNum;
+  s.write_block(reinterpret_cast<const ymuint8*>(mVector), mBlockNum * sizeof(WordType));
 }
 
 // @brief バイナリファイルの読み込み
-// @param[in] s 入力元のストリーム
 void
 TvFunc::restore(
-  istream& s
+  BinDec& s
 )
 {
-  s.read(reinterpret_cast<char*>(&mInputNum), sizeof(mInputNum));
+  s >> mInputNum;
   SizeType nblk = nblock(mInputNum);
   if ( mBlockNum != nblk ) {
     delete [] mVector;
     mBlockNum = nblk;
     mVector = new TvFunc::WordType[mBlockNum];
   }
-  s.read(reinterpret_cast<char*>(mVector), sizeof(WordType) * mBlockNum);
+  s.read_block(reinterpret_cast<ymuint8*>(mVector), mBlockNum * sizeof(WordType));
 }
 
 // @brief コファクターマスクを得る．
-// @param[in] pos 入力番号 ( 0 <= pos <= 5 )
 TvFunc::WordType
 TvFunc::c_mask(
   SizeType pos
