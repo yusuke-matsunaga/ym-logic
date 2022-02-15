@@ -6,17 +6,18 @@
 /// Copyright (C) 2017 Yusuke Matsunaga
 /// All rights reserved.
 
-
 #include "ym/TvFunc.h"
 #include "NpnMgr.h"
-#include "ym/StopWatch.h"
+#include "ym/Timer.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
 int
-npn_test2(int argc,
-	  char** argv)
+npn_test2(
+  int argc,
+  char** argv
+)
 {
   if ( argc != 2 ) {
     cerr << "USAGE: npn_test2 <filename>" << endl;
@@ -30,7 +31,7 @@ npn_test2(int argc,
     return -1;
   }
 
-  StopWatch timer;
+  Timer timer;
 
   ymuint tvcount = 0;
   ymuint tvmax = 0;
@@ -91,7 +92,7 @@ npn_test2(int argc,
     }
   }
 
-  USTime time = timer.time();
+  auto time = timer.get_time();
   cout << "CPU time:        " << time << endl
        << "Total recursion: " << tvcount << endl
        << "Max recursion:   " << tvmax << endl
@@ -102,8 +103,10 @@ npn_test2(int argc,
 END_NAMESPACE_YM_LOGIC
 
 int
-main(int argc,
-     char** argv)
+main(
+  int argc,
+  char** argv
+)
 {
   return nsYm::nsLogic::npn_test2(argc, argv);
 }

@@ -6,19 +6,20 @@
 /// Copyright (C) 2017 Yusuke Matsunaga
 /// All rights reserved.
 
-
 #include "ym/TvFunc.h"
 #include "NpnMgr.h"
 #include "ym/Range.h"
-#include "ym/StopWatch.h"
+#include "ym/Timer.h"
 #include <random>
 
 
 BEGIN_NAMESPACE_YM_LOGIC
 
 int
-npn_test(int argc,
-	 char** argv)
+npn_test(
+  int argc,
+  char** argv
+)
 {
   int ni = 4;
   int nf = 10000;
@@ -36,7 +37,7 @@ npn_test(int argc,
     nf = atoi(argv[2]);
   }
 
-  StopWatch timer;
+  Timer timer;
   std::mt19937 rg;
   timer.start();
   int ni_exp = 1U << ni;
@@ -101,7 +102,7 @@ npn_test(int argc,
   }
 
   timer.stop();
-  USTime time = timer.time();
+  auto time = timer.get_time();
   cout << "# of inputs:     " << ni << endl
        << "# of functions:  " << nf << " functions" << endl
        << "CPU time:        " << time << endl
@@ -114,8 +115,10 @@ npn_test(int argc,
 END_NAMESPACE_YM_LOGIC
 
 int
-main(int argc,
-     char** argv)
+main(
+  int argc,
+  char** argv
+)
 {
   return nsYm::nsLogic::npn_test(argc, argv);
 }

@@ -9,9 +9,8 @@
 include_directories (
   ${PROJECT_BINARY_DIR}/include
   ${PROJECT_SOURCE_DIR}/ym-common/include
-  ${PROJECT_SOURCE_DIR}/ym-base/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/private_include
+  include
+  private_include
   )
 
 
@@ -19,9 +18,9 @@ include_directories (
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(c++-test)
-add_subdirectory(py-test)
-add_subdirectory(tests)
+add_subdirectory(tests/c++)
+add_subdirectory(tests/python)
+add_subdirectory(tests/programs)
 
 
 # ===================================================================
@@ -29,40 +28,40 @@ add_subdirectory(tests)
 # ===================================================================
 
 set (sop_SOURCES
-  c++-src/sop/SopCover.cc
-  c++-src/sop/SopCube.cc
-  c++-src/sop/SopMgr.cc
-  c++-src/sop/KernelGen.cc
-  c++-src/sop/LitSet.cc
-  c++-src/sop/BestKernel.cc
-  c++-src/sop/OneLevel0Kernel.cc
-  c++-src/sop/WeakDivision.cc
+  c++-srcs/sop/SopCover.cc
+  c++-srcs/sop/SopCube.cc
+  c++-srcs/sop/SopMgr.cc
+  c++-srcs/sop/KernelGen.cc
+  c++-srcs/sop/LitSet.cc
+  c++-srcs/sop/BestKernel.cc
+  c++-srcs/sop/OneLevel0Kernel.cc
+  c++-srcs/sop/WeakDivision.cc
   )
 
 set (expr_SOURCES
-  c++-src/expr/Expr.cc
-  c++-src/expr/ExprMgr.cc
-  c++-src/expr/ExprNode.cc
-  c++-src/expr/ExprParser.cc
-  c++-src/expr/ExprWriter.cc
+  c++-srcs/expr/Expr.cc
+  c++-srcs/expr/ExprMgr.cc
+  c++-srcs/expr/ExprNode.cc
+  c++-srcs/expr/ExprParser.cc
+  c++-srcs/expr/ExprWriter.cc
   )
 
 set (npn_SOURCES
-  c++-src/npn/IgPartition.cc
-  c++-src/npn/NpnMap.cc
-  c++-src/npn/NpnMapM.cc
-  c++-src/npn/NpnMgr.cc
-  c++-src/npn/PolConf.cc
-  c++-src/npn/walsh_01_normalize.cc
-  c++-src/npn/walsh_2_refine.cc
-  c++-src/npn/walsh_w0_refine.cc
-  c++-src/npn/walsh_w1_refine.cc
+  c++-srcs/npn/IgPartition.cc
+  c++-srcs/npn/NpnMap.cc
+  c++-srcs/npn/NpnMapM.cc
+  c++-srcs/npn/NpnMgr.cc
+  c++-srcs/npn/PolConf.cc
+  c++-srcs/npn/walsh_01_normalize.cc
+  c++-srcs/npn/walsh_2_refine.cc
+  c++-srcs/npn/walsh_w0_refine.cc
+  c++-srcs/npn/walsh_w1_refine.cc
   )
 
 set (tvfunc_SOURCES
-  c++-src/tvfunc/TvFunc.cc
-  c++-src/tvfunc/TvFunc_walsh.cc
-  c++-src/tvfunc/TvFuncM.cc
+  c++-srcs/tvfunc/TvFunc.cc
+  c++-srcs/tvfunc/TvFunc_walsh.cc
+  c++-srcs/tvfunc/TvFuncM.cc
   )
 
 set (ym_logic_SOURCES

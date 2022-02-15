@@ -7,8 +7,8 @@
 # インクルードパスの設定
 # ===================================================================
 include_directories (
-  ${PROJECT_SOURCE_DIR}/ym-logic/c++-src/sop
-  ${PROJECT_SOURCE_DIR}/ym-logic/c++-src/npn
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/npn
   ${GTEST_INCLUDE_DIR}
   )
 
@@ -51,6 +51,11 @@ ym_add_gtest ( logic_TvFunc_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
+target_include_directories ( logic_TvFunc_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-base/include
+  )
+
 ym_add_gtest ( logic_TvFuncMove_test
   tvfunc/TvFuncMove.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
@@ -85,6 +90,11 @@ ym_add_gtest ( logic_NpnMgr_test
   npn/NpnMgrTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories ( logic_NpnMgr_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-base/include
   )
 
 ym_add_gtest ( logic_SopMgr_test
