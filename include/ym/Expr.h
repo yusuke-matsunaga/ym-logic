@@ -5,7 +5,7 @@
 /// @brief Expr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017, 2018, 2020, 2021 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2018, 2020, 2021, 2022 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
@@ -345,6 +345,13 @@ public:
   is_valid() const
   {
     return mRootPtr != nullptr;
+  }
+
+  /// @brief 適正な値を持っていない時 true を返す．
+  bool
+  is_invalid() const
+  {
+    return !is_valid();
   }
 
   /// @brief 恒偽関数のチェック
