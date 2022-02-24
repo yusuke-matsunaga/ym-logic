@@ -378,6 +378,9 @@ Expr::make_tv(
   SizeType ni
 ) const
 {
+  if ( is_invalid() ) {
+    return TvFunc::make_zero(0);
+  }
   SizeType ni2{input_size()};
   if ( ni < ni2 ) {
     ni = ni2;
@@ -630,6 +633,7 @@ dump_expr(
 {
   if ( expr.is_invalid() ) {
     s << static_cast<ymuint8>(255);
+    cout << "dump_expr: " << 255 << endl;
     return;
   }
   if ( expr.is_zero() ) {
@@ -674,6 +678,24 @@ dump_expr(
   }
 }
 
+Expr
+restore_expr(BinDec&);
+
+vector<Expr>
+restore_child_list(
+  BinDec& s
+)
+{
+  SizeType nc;
+  s >> nc;
+  vector<Expr> child_list(nc);
+  for ( SizeType i = 0; i < nc; ++ i ) {
+    child_list[i] = restore_expr(s);
+  }
+  return child_list;
+}
+
+
 // ストリームから論理式を作る．
 Expr
 restore_expr(
@@ -705,25 +727,15 @@ restore_expr(
       var.restore(s);
       return Expr::make_nega_literal(var);
     }
-  }
 
-  // 残りは論理演算
-  SizeType nc;
-  s >> nc;
-  vector<Expr> child_list(nc);
-  for ( SizeType i = 0; i < nc; ++ i ) {
-    child_list[i] = restore_expr(s);
-  }
-
-  switch ( type ) {
   case 4:
-    return Expr::make_and(child_list);
+    return Expr::make_and(restore_child_list(s));
 
   case 5:
-    return Expr::make_or(child_list);
+    return Expr::make_or(restore_child_list(s));
 
   case 6:
-    return Expr::make_xor(child_list);
+    return Expr::make_xor(restore_child_list(s));
 
   default:
     ASSERT_NOT_REACHED;
