@@ -392,6 +392,9 @@ Expr::make_tv(
 bool
 Expr::is_zero() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_zero();
 }
 
@@ -399,6 +402,9 @@ Expr::is_zero() const
 bool
 Expr::is_one() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_one();
 }
 
@@ -406,6 +412,9 @@ Expr::is_one() const
 bool
 Expr::is_constant() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_constant();
 }
 
@@ -413,6 +422,9 @@ Expr::is_constant() const
 bool
 Expr::is_posi_literal() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_posiliteral();
 }
 
@@ -420,6 +432,9 @@ Expr::is_posi_literal() const
 bool
 Expr::is_nega_literal() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_negaliteral();
 }
 
@@ -427,14 +442,20 @@ Expr::is_nega_literal() const
 bool
 Expr::is_literal() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_literal();
 }
 
 // リテラルの時に変数番号を返す．
-// リテラルでなければ kVarMaxId を返す．
+// リテラルでなければ不正な値を返す．
 VarId
 Expr::varid() const
 {
+  if ( is_invalid() ) {
+    return VarId::illegal();
+  }
   return root()->varid();
 }
 
@@ -445,6 +466,9 @@ Expr::varid() const
 Literal
 Expr::literal() const
 {
+  if ( is_invalid() ) {
+    return Literal::x();
+  }
   return root()->literal();
 }
 
@@ -452,6 +476,9 @@ Expr::literal() const
 bool
 Expr::is_and() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_and();
 }
 
@@ -459,6 +486,9 @@ Expr::is_and() const
 bool
 Expr::is_or() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_or();
 }
 
@@ -466,6 +496,9 @@ Expr::is_or() const
 bool
 Expr::is_xor() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_xor();
 }
 
@@ -473,6 +506,9 @@ Expr::is_xor() const
 bool
 Expr::is_op() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_op();
 }
 
@@ -482,6 +518,12 @@ check_equiv(
   const Expr& right
 )
 {
+  if ( left.is_invalid() && right.is_invalid() ) {
+    return true;
+  }
+  if ( left.is_invalid() || right.is_invalid() ) {
+    return false;
+  }
   return posi_equiv(left.root(), right.root());
 }
 
@@ -492,6 +534,9 @@ compare_type(
   const Expr& src2
 )
 {
+  if ( src1.is_invalid() || src2.is_invalid() ) {
+    return false;
+  }
   return src1.root()->type() == src2.root()->type();
 }
 
@@ -500,6 +545,9 @@ compare_type(
 SizeType
 Expr::child_num() const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   return root()->child_num();
 }
 
@@ -519,6 +567,9 @@ Expr::child(
 bool
 Expr::is_simple() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_simple();
 }
 
@@ -526,6 +577,9 @@ Expr::is_simple() const
 bool
 Expr::is_simple_and() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_simple_and();
 }
 
@@ -533,6 +587,9 @@ Expr::is_simple_and() const
 bool
 Expr::is_simple_or() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_simple_or();
 }
 
@@ -540,6 +597,9 @@ Expr::is_simple_or() const
 bool
 Expr::is_simple_xor() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_simple_xor();
 }
 
@@ -547,6 +607,9 @@ Expr::is_simple_xor() const
 bool
 Expr::is_sop() const
 {
+  if ( is_invalid() ) {
+    return false;
+  }
   return root()->is_sop();
 }
 
@@ -554,6 +617,9 @@ Expr::is_sop() const
 SizeType
 Expr::literal_num() const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   return root()->litnum();
 }
 
@@ -563,6 +629,9 @@ Expr::literal_num(
   VarId varid
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   return root()->litnum(varid);
 }
 
@@ -573,6 +642,9 @@ Expr::literal_num(
   bool inv
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   return root()->litnum(varid, inv);
 }
 
@@ -580,6 +652,9 @@ Expr::literal_num(
 SizeType
 Expr::input_size() const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   return root()->input_size();
 }
 
@@ -587,6 +662,9 @@ Expr::input_size() const
 SizeType
 Expr::sop_cube_num() const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   SopLit l = root()->soplit(false);
   return l.np();
 }
@@ -595,6 +673,9 @@ Expr::sop_cube_num() const
 SizeType
 Expr::sop_literal_num() const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   SopLit l = root()->soplit(false);
   return l.nl();
 }
@@ -605,6 +686,9 @@ Expr::sop_literal_num(
   VarId varid
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   SopLit l = root()->soplit(false, varid);
   return l.nl();
 }
@@ -617,6 +701,9 @@ Expr::sop_literal_num(
   bool inv
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
   SopLit l = root()->soplit(false, varid, inv);
   return l.nl();
 }

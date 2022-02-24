@@ -53,6 +53,44 @@ TEST(ExprTest, empty_constr)
   EXPECT_TRUE( check_equiv(expr2, expr) );
 }
 
+TEST(ExprTest, make_invalid)
+{
+  Expr expr{Expr::make_invalid()};
+
+  EXPECT_FALSE( expr.is_valid() );
+  EXPECT_FALSE( expr.is_zero() );
+  EXPECT_FALSE( expr.is_one() );
+  EXPECT_FALSE( expr.is_constant() );
+  EXPECT_FALSE( expr.is_posi_literal() );
+  EXPECT_FALSE( expr.is_nega_literal() );
+  EXPECT_FALSE( expr.is_literal() );
+  EXPECT_FALSE( expr.is_and() );
+  EXPECT_FALSE( expr.is_or() );
+  EXPECT_FALSE( expr.is_xor() );
+  EXPECT_FALSE( expr.is_op() );
+  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_FALSE( expr.is_simple() );
+  EXPECT_FALSE( expr.is_simple_and() );
+  EXPECT_FALSE( expr.is_simple_or() );
+  EXPECT_FALSE( expr.is_simple_xor() );
+  EXPECT_FALSE( expr.is_sop() );
+
+  EXPECT_EQ( 0, expr.literal_num() );
+  EXPECT_EQ( 0, expr.input_size() );
+  EXPECT_EQ( 0, expr.sop_literal_num() );
+
+  ostringstream obuf;
+  BinEnc bos{obuf};
+  bos << expr;
+
+  istringstream ibuf{obuf.str()};
+  BinDec bis{ibuf};
+  Expr expr2;
+  bis >> expr2;
+
+  EXPECT_TRUE( check_equiv(expr2, expr) );
+}
+
 TEST(ExprTest, make_zero)
 {
   Expr expr = Expr::make_zero();
