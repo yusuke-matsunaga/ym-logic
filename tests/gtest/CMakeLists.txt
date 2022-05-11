@@ -6,11 +6,6 @@
 # ===================================================================
 # インクルードパスの設定
 # ===================================================================
-include_directories (
-  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
-  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/npn
-  ${GTEST_INCLUDE_DIR}
-  )
 
 
 # ===================================================================
@@ -63,9 +58,19 @@ ym_add_gtest ( logic_InputInfo_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
+target_include_directories( logic_InputInfo_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/npn
+  )
+
 ym_add_gtest ( logic_IgPartition_test
   npn/IgPartitionTest.cc
   $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_IgPartition_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/npn
   )
 
 ym_add_gtest ( logic_NpnMap_test
@@ -78,20 +83,31 @@ ym_add_gtest ( logic_w01_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
+target_include_directories( logic_w01_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/npn
+  )
+
 ym_add_gtest ( logic_NpnMgr_test
   npn/NpnMgrTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
-target_include_directories ( logic_NpnMgr_test
+target_include_directories( logic_NpnMgr_test
   PRIVATE
   ${PROJECT_SOURCE_DIR}/ym-base/include
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/npn
   )
 
 ym_add_gtest ( logic_SopMgr_test
   sop/SopMgrTest.cc
   $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_SopMgr_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
   )
 
 ym_add_gtest ( logic_SopCube_test
@@ -109,9 +125,19 @@ ym_add_gtest ( logic_Kernel_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
+target_include_directories( logic_Kernel_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
+  )
+
 ym_add_gtest ( logic_GenFactor_test
   sop/GenFactorTest.cc
   $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_GenFactor_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
   )
 
 
