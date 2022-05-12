@@ -18,10 +18,10 @@ TEST(ExprTest, empty_constr)
 {
   Expr expr;
 
-  EXPECT_TRUE( expr.is_valid() );
-  EXPECT_TRUE( expr.is_zero() );
+  EXPECT_FALSE( expr.is_valid() );
+  EXPECT_FALSE( expr.is_zero() );
   EXPECT_FALSE( expr.is_one() );
-  EXPECT_TRUE( expr.is_constant() );
+  EXPECT_FALSE( expr.is_constant() );
   EXPECT_FALSE( expr.is_posi_literal() );
   EXPECT_FALSE( expr.is_nega_literal() );
   EXPECT_FALSE( expr.is_literal() );
@@ -31,11 +31,11 @@ TEST(ExprTest, empty_constr)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.child_num() );
-  EXPECT_TRUE( expr.is_simple() );
+  EXPECT_FALSE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
   EXPECT_FALSE( expr.is_simple_xor() );
-  EXPECT_TRUE( expr.is_sop() );
+  EXPECT_FALSE( expr.is_sop() );
 
   EXPECT_EQ( 0, expr.literal_num() );
   EXPECT_EQ( 0, expr.input_size() );

@@ -28,7 +28,8 @@ Expr::Expr(
 // デフォルトコンストラクタ
 Expr::Expr()
 {
-  set_root(ExprMgr::the_obj().make_zero());
+  // 不正値
+  set_root(nullptr);
 }
 
 // コピーコンストラクタ
@@ -84,35 +85,35 @@ Expr::set_root(
 Expr
 Expr::make_invalid()
 {
-  return Expr(nullptr);
+  return Expr{nullptr};
 }
 
 // 定数 0 の論理式を作る
 Expr
 Expr::make_zero()
 {
-  return Expr(ExprMgr::the_obj().make_zero());
+  return Expr{ExprMgr::the_obj().make_zero()};
 }
 
 // 定数 1 の論理式を作る
 Expr
 Expr::make_one()
 {
-  return Expr(ExprMgr::the_obj().make_one());
+  return Expr{ExprMgr::the_obj().make_one()};
 }
 
 // 肯定のリテラルを作る．
 Expr
 Expr::make_posi_literal(VarId varid)
 {
-  return Expr(ExprMgr::the_obj().make_posiliteral(varid));
+  return Expr{ExprMgr::the_obj().make_posiliteral(varid)};
 }
 
 // 否定のリテラルを作る．
 Expr
 Expr::make_nega_literal(VarId varid)
 {
-  return Expr(ExprMgr::the_obj().make_negaliteral(varid));
+  return Expr{ExprMgr::the_obj().make_negaliteral(varid)};
 }
 
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
@@ -126,7 +127,7 @@ Expr::and_op(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
-  return Expr(mgr.make_and(begin));
+  return Expr{mgr.make_and(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ n 入力ANDの論理式を作るクラス・メソッド
@@ -142,7 +143,7 @@ Expr::make_and(
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
-  return Expr(mgr.make_and(begin));
+  return Expr{mgr.make_and(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ 2 入力ORの論理式を作るクラス・メソッド
@@ -156,7 +157,7 @@ Expr::or_op(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
-  return Expr(mgr.make_or(begin));
+  return Expr{mgr.make_or(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ n 入力ORの論理式を作るクラス・メソッド
@@ -172,7 +173,7 @@ Expr::make_or(
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
-  return Expr(mgr.make_or(begin));
+  return Expr{mgr.make_or(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
@@ -186,7 +187,7 @@ Expr::xor_op(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
-  return Expr(mgr.make_xor(begin));
+  return Expr{mgr.make_xor(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ n 入力XORの論理式を作るクラス・メソッド
@@ -202,7 +203,7 @@ Expr::make_xor(
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
-  return Expr(mgr.make_xor(begin));
+  return Expr{mgr.make_xor(begin)};
 }
 
 // 論理式をパーズしてファクタードフォームを作る．
@@ -237,7 +238,7 @@ Expr
 Expr::invert() const
 {
   auto& mgr{ExprMgr::the_obj()};
-  return Expr(mgr.complement(root()));
+  return Expr{mgr.complement(root())};
 }
 
 // 自分の論理式と src の論理式の論理積を計算し自分に代入する．
@@ -290,7 +291,7 @@ Expr::compose(
 ) const
 {
   auto& mgr{ExprMgr::the_obj()};
-  return Expr(mgr.compose(root(), varid, src.root()));
+  return Expr{mgr.compose(root(), varid, src.root())};
 }
 
 // comp_map にしたがって複数のリテラルの置き換えを行う．
@@ -300,7 +301,7 @@ Expr::compose(
 ) const
 {
   auto& mgr{ExprMgr::the_obj()};
-  return Expr(mgr.compose(root(), comp_map));
+  return Expr{mgr.compose(root(), comp_map)};
 }
 
 // @brief 複数変数の compose 演算
@@ -320,7 +321,7 @@ Expr::compose(
     comp_map[p.first] = p.second;
   }
   auto& mgr{ExprMgr::the_obj()};
-  return Expr(mgr.compose(root(), comp_map));
+  return Expr{mgr.compose(root(), comp_map)};
 }
 
 // 与えられた論理式のリテラル番号を再マップする．
@@ -330,7 +331,7 @@ Expr::remap_var(
 ) const
 {
   auto& mgr{ExprMgr::the_obj()};
-  return Expr(mgr.remap_var(root(), varmap));
+  return Expr{mgr.remap_var(root(), varmap)};
 }
 
 // 与えられた論理式のリテラル番号を再マップする．
@@ -344,7 +345,7 @@ Expr::remap_var(
     varmap[p.first] = p.second;
   }
   auto& mgr{ExprMgr::the_obj()};
-  return Expr(mgr.remap_var(root(), varmap));
+  return Expr{mgr.remap_var(root(), varmap)};
 }
 
 // 重複した式を取り除く
@@ -379,7 +380,7 @@ Expr::make_tv(
 ) const
 {
   if ( is_invalid() ) {
-    return TvFunc::make_zero(0);
+    return TvFunc::make_invalid();
   }
   SizeType ni2{input_size()};
   if ( ni < ni2 ) {
@@ -558,7 +559,7 @@ Expr::child(
 ) const
 {
   ASSERT_COND( 0 <= pos && pos < child_num() );
-  return Expr(root()->child(pos));
+  return Expr{root()->child(pos)};
 }
 
 // 一種類の演算子のみからなる式のとき true を返す．
@@ -720,7 +721,6 @@ dump_expr(
 {
   if ( expr.is_invalid() ) {
     s << static_cast<ymuint8>(255);
-    cout << "dump_expr: " << 255 << endl;
     return;
   }
   if ( expr.is_zero() ) {

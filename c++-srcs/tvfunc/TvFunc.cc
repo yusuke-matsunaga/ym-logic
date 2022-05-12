@@ -98,6 +98,14 @@ END_NONAMESPACE
 // 論理関数を表すクラス
 //////////////////////////////////////////////////////////////////////
 
+// @brief 不正値を作るコンストラクタ
+TvFunc::TvFunc(
+) : mInputNum{0},
+    mBlockNum{0},
+    mVector{nullptr}
+{
+}
+
 // 入力数のみ指定したコンストラクタ
 // 中身は恒偽関数
 TvFunc::TvFunc(
@@ -706,8 +714,14 @@ TvFunc::dump(
   BinEnc& s
 ) const
 {
-  s << mInputNum;
-  s.write_block(reinterpret_cast<const ymuint8*>(mVector), mBlockNum * sizeof(WordType));
+  if ( is_invalid() ) {
+    // 不正値
+    s << static_cast<SizeType>(-1);
+  }
+  else {
+    s << mInputNum;
+    s.write_block(reinterpret_cast<const ymuint8*>(mVector), mBlockNum * sizeof(WordType));
+  }
 }
 
 // @brief バイナリファイルの読み込み
@@ -717,13 +731,24 @@ TvFunc::restore(
 )
 {
   s >> mInputNum;
-  SizeType nblk = nblock(mInputNum);
-  if ( mBlockNum != nblk ) {
-    delete [] mVector;
-    mBlockNum = nblk;
-    mVector = new TvFunc::WordType[mBlockNum];
+  if ( mInputNum == - 1 ) {
+    // 不正値
+    mInputNum = 0;
+    mBlockNum = 0;
+    if ( mVector != nullptr ) {
+      delete [] mVector;
+    }
+    mVector = nullptr;
   }
-  s.read_block(reinterpret_cast<ymuint8*>(mVector), mBlockNum * sizeof(WordType));
+  else {
+    SizeType nblk = nblock(mInputNum);
+    if ( mBlockNum != nblk ) {
+      delete [] mVector;
+      mBlockNum = nblk;
+      mVector = new TvFunc::WordType[mBlockNum];
+    }
+    s.read_block(reinterpret_cast<ymuint8*>(mVector), mBlockNum * sizeof(WordType));
+  }
 }
 
 // @brief コファクターマスクを得る．

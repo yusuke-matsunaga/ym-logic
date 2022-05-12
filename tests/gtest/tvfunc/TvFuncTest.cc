@@ -3,9 +3,8 @@
 /// @brief TvFuncTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017 Yusuke Matsunaga
+/// Copyright (C) 2017, 2022 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "gtest/gtest.h"
 #include "ym/TvFunc.h"
@@ -1015,5 +1014,21 @@ TEST(TvFuncTest, expand_lit2)
 INSTANTIATE_TEST_SUITE_P(Test0to20,
 			 TvFuncTestWithParam,
 			 ::testing::Range(0, 21));
+
+TEST(TvFuncTest, invalid_func)
+{
+  TvFunc f1; // デフォルトで不正値となる．
+
+  ostringstream strbuf1;
+  BinEnc enc{strbuf1};
+  f1.dump(enc);
+
+  istringstream strbuf2{strbuf1.str()};
+  BinDec dec{strbuf2};
+  TvFunc f2 = TvFunc::make_zero(10);
+  f2.restore(dec);
+
+  EXPECT_EQ( f2, f1 );
+}
 
 END_NAMESPACE_YM
