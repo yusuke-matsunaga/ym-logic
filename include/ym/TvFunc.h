@@ -325,6 +325,10 @@ public:
     SizeType pos ///< [in] 位置番号 ( 0 <= pos < 2^(input_num()) )
   ) const
   {
+    if ( is_invalid() ) {
+      // 例外処理
+      return 0;
+    }
     return (mVector[block(pos)] >> shift(pos)) & 1;
   }
 

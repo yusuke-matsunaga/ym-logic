@@ -481,6 +481,11 @@ TvFunc::xform(
   const NpnMap& npnmap
 ) const
 {
+  if ( is_invalid() ) {
+    // 不正値は変換しても不正値
+    return TvFunc::make_invalid();
+  }
+
 #if defined(DEBUG)
   cout << "xform" << endl
        << *this << endl
