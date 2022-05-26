@@ -235,6 +235,10 @@ TvFunc::count_one() const
 int
 TvFunc::walsh_0() const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
+
   switch ( input_num() ) {
   case 0: return (1 << 0) - count_onebits_0(mVector[0]) * 2;
   case 1: return (1 << 1) - count_onebits_1(mVector[0]) * 2;
@@ -261,6 +265,10 @@ TvFunc::walsh_1(
   VarId varid
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
+
   SizeType pos = varid.val();
   switch ( input_num() ) {
   case 0: ASSERT_NOT_REACHED;
@@ -292,6 +300,10 @@ TvFunc::walsh_2(
   VarId var2
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
+
   SizeType i = var1.val();
   SizeType j = var2.val();
 
@@ -1225,6 +1237,10 @@ TvFunc::walsh_01(
   int vec[]
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
+
   switch ( input_num() ) {
   case  0: return walsh_01_0(mVector, vec);
   case  1: return walsh_01_1(mVector, vec);
@@ -2907,6 +2923,10 @@ TvFunc::walsh_012(
   int vec2[]
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
+
   switch ( input_num() ) {
   case  0: return walsh_012_0(mVector, vec1, vec2);
   case  1: return walsh_012_1(mVector, vec1, vec2);
@@ -3272,6 +3292,10 @@ TvFunc::walsh_w0(
   int ibits
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
+
   int ans;
   switch ( input_num() ) {
   case  0: ans = walsh_w0_0(mVector[0], ibits, w); break;
@@ -3342,6 +3366,10 @@ TvFunc::walsh_w1(
   int ibits
 ) const
 {
+  if ( is_invalid() ) {
+    return 0;
+  }
+
   int idx = var.val();
   int ans;
   if ( input_num() <= 6 ) {

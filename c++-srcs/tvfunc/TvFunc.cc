@@ -669,6 +669,11 @@ TvFunc::print(
   int mode
 ) const
 {
+  if ( is_invalid() ) {
+    // 空
+    return;
+  }
+
   SizeType ni_pow = 1 << mInputNum;
   const SizeType wordsize = sizeof(TvFunc::WordType) * 8;
   if ( mode == 2 ) {
