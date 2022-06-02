@@ -20,7 +20,12 @@ ExprWriter::dump(
   const unordered_map<VarId, string>& var_names
 ) const
 {
-  dump_sub(s, expr, var_names);
+  if ( expr.is_invalid() ) {
+    s << "---";
+  }
+  else {
+    dump_sub(s, expr, var_names);
+  }
   return s;
 }
 
@@ -31,7 +36,7 @@ ExprWriter::dump(
   const Expr& expr
 ) const
 {
-  dump_sub(s, expr, unordered_map<VarId, string>());
+  dump(s, expr, unordered_map<VarId, string>());
   return s;
 }
 
