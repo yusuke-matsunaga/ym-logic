@@ -19,7 +19,7 @@ include_directories (
 # ===================================================================
 
 add_subdirectory(tests/gtest)
-add_subdirectory(tests/python)
+#add_subdirectory(tests/python)
 add_subdirectory(tests/programs)
 
 
