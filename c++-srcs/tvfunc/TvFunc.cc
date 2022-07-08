@@ -187,6 +187,50 @@ TvFunc::TvFunc(
   }
 }
 
+// @brief 文字列からの変換コンストラクタ
+TvFunc::TvFunc(
+  const string& str
+)
+{
+  SizeType ni;
+  SizeType n = str.size();
+  ni = 0;
+  while ( (1 << ni) < n ) {
+    ++ ni;
+  }
+  ASSERT_COND( (1 << ni) == n );
+
+  mInputNum = ni;
+  mBlockNum = nblock(ni);
+  mVector = new TvFunc::WordType[mBlockNum];
+  SizeType base = 0;
+  TvFunc::WordType bitpat = 0ULL;
+  TvFunc::WordType bitmask = 1ULL;
+  for ( char c: str ) {
+    if ( c == '0' ) {
+      ;
+    }
+    else if ( c == '1' ) {
+      bitpat |= bitmask;
+    }
+    else {
+      ASSERT_NOT_REACHED;
+    }
+    bitmask <<= 1;
+    if ( bitmask == 0UL ) {
+      mVector[base] = bitpat;
+      ++ base;
+      bitmask = 1ULL;
+      bitpat = 0ULL;
+    }
+  }
+  if ( bitmask != 1ULL ) {
+    mVector[base] = bitpat;
+    ++ base;
+  }
+
+}
+
 // コピーコンストラクタ
 TvFunc::TvFunc(
   const TvFunc& src
@@ -383,6 +427,38 @@ TvFunc::check_sup(
     }
   }
   return false;
+}
+
+// @brief 定数0関数の時に true を返す．
+bool
+TvFunc::is_zero() const
+{
+  for ( SizeType b: Range(mBlockNum) ) {
+    TvFunc::WordType word = mVector[b];
+    if ( word != 0UL ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// @brief 定数1関数の時に true を返す．
+bool
+TvFunc::is_one() const
+{
+  TvFunc::WordType mask = vec_mask(mInputNum);
+  if ( mInputNum < NIPW ) {
+    return (mVector[0] & mask) == mask;
+  }
+  else {
+    for ( SizeType b: Range(mBlockNum) ) {
+      TvFunc::WordType word = mVector[b];
+      if ( word != mask ) {
+	return false;
+      }
+    }
+    return true;
+  }
 }
 
 // i 番目と j 番目の変数が対称のとき true を返す．
@@ -594,6 +670,17 @@ TvFunc::npn_cannonical_all_map() const
   return map_list;
 }
 
+// @brief 内容を表す文字列を返す．
+string
+TvFunc::str(
+  int mode
+) const
+{
+  ostringstream buf;
+  print(buf, mode);
+  return buf.str();
+}
+
 // ハッシュ値を返す．
 SizeType
 TvFunc::hash() const
@@ -715,6 +802,34 @@ TvFunc::print(
   }
   else {
     ASSERT_NOT_REACHED;
+  }
+}
+
+// @brief .truth フォーマットの読み込み．
+// @return 関数のベクタを返す．
+vector<TvFunc>
+TvFunc::read_truth(
+  istream& s
+)
+{
+  vector<TvFunc> func_vect;
+  string line;
+  while ( getline(s, line) ) {
+    func_vect.push_back(TvFunc{line});
+  }
+  return func_vect;
+}
+
+// @brief .truth フォーマットの書き出し．
+void
+TvFunc::write_truth(
+  ostream& s,
+  const vector<TvFunc>& func_vect
+)
+{
+  for ( const auto& func: func_vect ) {
+    func.print(s);
+    s << endl;
   }
 }
 

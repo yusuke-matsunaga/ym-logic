@@ -57,6 +57,13 @@ public:
     const vector<int>& values ///< [in] 真理値のベクタ
   );
 
+  /// @brief 文字列からの変換コンストラクタ
+  ///
+  /// str の長さは 2^n でなければならない．
+  TvFunc(
+    const string& str ///< [in] 0と1からなる文字列
+  );
+
   /// @brief コピーコンストラクタ
   TvFunc(
     const TvFunc& src ///< [in] コピー元のソースオブジェクト
@@ -332,6 +339,14 @@ public:
     return (mVector[block(pos)] >> shift(pos)) & 1;
   }
 
+  /// @brief 定数0関数の時に true を返す．
+  bool
+  is_zero() const;
+
+  /// @brief 定数1関数の時に true を返す．
+  bool
+  is_one() const;
+
   /// @brief 0 の数を数える．
   SizeType
   count_zero() const;
@@ -403,6 +418,16 @@ public:
     bool inv = false ///< [in] 反転属性
   ) const;
 
+  /// @brief 内容を表す文字列を返す．
+  ///
+  /// この値はコンストラクタで用いることができる．
+  string
+  str(
+    int mode = 2 ///< [in] 出力モード
+                 ///< -  2: 2進モード
+                 ///< - 16: 16進モード
+  ) const;
+
   /// @brief ハッシュ値を返す．
   SizeType
   hash() const;
@@ -421,6 +446,28 @@ public:
                  ///< -  2: 2進モード
                  ///< - 16: 16進モード
   ) const;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  //  ファイル入出力用の関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief .truth フォーマットの読み込み．
+  /// @return 関数のベクタを返す．
+  static
+  vector<TvFunc>
+  read_truth(
+    istream& s ///< [in] 入力ストリーム
+  );
+
+  /// @brief .truth フォーマットの書き出し．
+  static
+  void
+  write_truth(
+    ostream& s,                     ///< [in] 出力ストリーム
+    const vector<TvFunc>& func_vect ///< [in] 関数のベクタ
+  );
 
 
 public:

@@ -94,6 +94,10 @@ TvFuncTestWithParam::check_func(
   EXPECT_EQ( n0, func.count_zero() ) << str;
   EXPECT_EQ( n1, func.count_one() ) << str;
 
+  // is_zero(), is_one() のテスト
+  EXPECT_EQ( n1 == 0, func.is_zero() ) << str;
+  EXPECT_EQ( n0 == 0, func.is_one() ) << str;
+
   // invert_int() のテスト
   TvFunc fn(func);
   fn.invert_int();
@@ -1029,6 +1033,14 @@ TEST(TvFuncTest, invalid_func)
   f2.restore(dec);
 
   EXPECT_EQ( f2, f1 );
+}
+
+TEST(TvFuncTest, from_str)
+{
+  TvFunc f{"0111"};
+
+  string f_str = f.str();
+  EXPECT_EQ( "0111", f_str );
 }
 
 END_NAMESPACE_YM
