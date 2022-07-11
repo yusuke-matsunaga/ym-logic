@@ -206,7 +206,8 @@ TvFunc::TvFunc(
   SizeType base = 0;
   TvFunc::WordType bitpat = 0ULL;
   TvFunc::WordType bitmask = 1ULL;
-  for ( char c: str ) {
+  for ( SizeType i = 0; i < n; ++ i ) {
+    char c = str[n - i - 1];
     if ( c == '0' ) {
       ;
     }
@@ -802,34 +803,6 @@ TvFunc::print(
   }
   else {
     ASSERT_NOT_REACHED;
-  }
-}
-
-// @brief .truth フォーマットの読み込み．
-// @return 関数のベクタを返す．
-vector<TvFunc>
-TvFunc::read_truth(
-  istream& s
-)
-{
-  vector<TvFunc> func_vect;
-  string line;
-  while ( getline(s, line) ) {
-    func_vect.push_back(TvFunc{line});
-  }
-  return func_vect;
-}
-
-// @brief .truth フォーマットの書き出し．
-void
-TvFunc::write_truth(
-  ostream& s,
-  const vector<TvFunc>& func_vect
-)
-{
-  for ( const auto& func: func_vect ) {
-    func.print(s);
-    s << endl;
   }
 }
 
