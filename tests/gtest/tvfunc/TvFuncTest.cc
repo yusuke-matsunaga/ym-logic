@@ -1037,10 +1037,29 @@ TEST(TvFuncTest, invalid_func)
 
 TEST(TvFuncTest, from_str)
 {
-  TvFunc f{"0111"};
+  const char* fstr = "0111";
+  TvFunc f{fstr};
 
-  string f_str = f.str();
-  EXPECT_EQ( "0111", f_str );
+  EXPECT_EQ( fstr, f.str() );
+}
+
+TEST(TvFuncTest, hex_str)
+{
+  const char* fstr = "0111";
+  TvFunc f{fstr};
+
+  ostringstream buf;
+  f.print(buf, 16);
+  auto xstr = buf.str();
+  EXPECT_EQ( "7", xstr );
+}
+
+TEST(TvFuncTest, from_vect)
+{
+  vector<int> vect{0, 1, 1, 1};
+  TvFunc f{2, vect};
+
+  EXPECT_EQ( "1110", f.str() );
 }
 
 END_NAMESPACE_YM

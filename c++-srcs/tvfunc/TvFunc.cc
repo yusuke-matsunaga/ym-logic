@@ -762,43 +762,41 @@ TvFunc::print(
     return;
   }
 
+  // value(0) は LSB なので右端となる．
+  // 出力するのは左端からなので反転させる必要がある．
   SizeType ni_pow = 1 << mInputNum;
   const SizeType wordsize = sizeof(TvFunc::WordType) * 8;
   if ( mode == 2 ) {
-    TvFunc::WordType* bp = mVector;
-    SizeType offset = 0;
-    TvFunc::WordType tmp = *bp;
     for ( SizeType p: Range(ni_pow) ) {
-      s << (tmp & 1LL);
-      tmp >>= 1;
-      ++ offset;
-      if ( offset == wordsize ) {
-	offset = 0;
-	++ bp;
-	tmp = *bp;
-      }
+      s << value(ni_pow - p - 1);
     }
   }
   else if ( mode == 16 ) {
-    SizeType ni_pow4 = ni_pow / 4;
-    TvFunc::WordType* bp = mVector;
-    SizeType offset = 0;
-    TvFunc::WordType tmp = *bp;
-    for ( SizeType p: Range(ni_pow4) ) {
-      TvFunc::WordType tmp1 = (tmp & 0xF);
-      if ( tmp1 < 10 ) {
-	s << static_cast<char>('0' + tmp1);
+    switch ( mInputNum ) {
+    case 0:
+      if ( value(0) ) {
+	s << "1";
       }
       else {
-	s << static_cast<char>('A' + tmp1 - 10);
+	s << "0";
       }
-      tmp >>= 4;
-      offset += 4;
-      if ( offset == wordsize ) {
-	offset = 0;
-	++ bp;
-	tmp = *bp;
+      break;
+    case 1:
+      {
+	int v = value(0) + value(1) * 2;
+	s << v;
       }
+      break;
+    default:
+      for ( SizeType p: Range_<SizeType, 4>(ni_pow) ) {
+	SizeType pos = ni_pow - p - 4;
+	int v = value(pos + 0);
+	v += value(pos + 1) * 2;
+	v += value(pos + 2) * 4;
+	v += value(pos + 3) * 8;
+	s << hex << v << dec;
+      }
+      break;
     }
   }
   else {
