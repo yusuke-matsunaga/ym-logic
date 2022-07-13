@@ -713,6 +713,31 @@ SopMgr::hash(
   return ans;
 }
 
+// @brief Expr に変換する．
+Expr
+SopMgr::to_expr(
+  const SopBitVect* bv,
+  SizeType cube_num
+)
+{
+  Expr ans = Expr::make_zero();
+  for ( SizeType c = 0; c < cube_num; ++ c ) {
+    Expr prod = Expr::make_one();
+    for ( SizeType i = 0; i < variable_num(); ++ i ) {
+      VarId var{i};
+      auto pat = get_pat(bv, c, var);
+      if ( pat == SopPat::_1 ) {
+	prod &= Expr::make_posi_literal(var);
+      }
+      else if ( pat == SopPat::_0 ) {
+	prod &= Expr::make_nega_literal(var);
+      }
+    }
+    ans |= prod;
+  }
+  return ans;
+}
+
 // @brief キューブ(を表すビットベクタ)の比較を行う．
 int
 SopMgr::cube_compare(

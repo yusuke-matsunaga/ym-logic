@@ -363,6 +363,14 @@ compare(
   return mgr.cube_compare(left.mBody, right.mBody);
 }
 
+// @brief Expr に変換する．
+Expr
+SopCube::to_expr() const
+{
+  SopMgr mgr{mVariableNum};
+  return mgr.to_expr(mBody, 1);
+}
+
 // @breif SopBlock を返す．
 SopBlock
 SopCube::block() const

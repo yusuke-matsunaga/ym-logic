@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/Sop.h"
+#include "ym/Expr.h"
 #include "ym/Literal.h"
 
 
@@ -302,6 +303,10 @@ public:
   /// 共通なキューブがない場合には空のキューブを返す．
   SopCube
   common_cube() const;
+
+  /// @brief Expr に変換する．
+  Expr
+  to_expr() const;
 
   /// @brief ハッシュ値を返す．
   SizeType

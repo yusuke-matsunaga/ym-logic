@@ -3665,5 +3665,23 @@ TEST(SopCoverTest, common_cube)
   EXPECT_FALSE( cube1.has_literal(~lit9) );
 };
 
+TEST(SopCoverTest, to_expr1)
+{
+  VarId var0{0};
+  VarId var1{1};
+  VarId var2{2};
+
+  Literal lit0{var0, false};
+  Literal lit1{var1, false};
+  Literal lit2{var2, false};
+
+  SopCube cube1{3, {lit0, lit1}};
+  SopCube cube2{3, {~lit2}};
+  SopCover cover1{3, {cube1, cube2}};
+
+  auto expr = cover1.to_expr();
+  auto expr_str = to_string(expr);
+  EXPECT_EQ( "( ( V_0 & V_1 ) | ~V_2 )", expr_str );
+}
 
 END_NAMESPACE_YM

@@ -575,6 +575,14 @@ SopCover::common_cube() const
   return mgr.common_cube(block());
 }
 
+// @brief Expr に変換する．
+Expr
+SopCover::to_expr() const
+{
+  SopMgr mgr{mVariableNum};
+  return mgr.to_expr(mBody, mCubeNum);
+}
+
 // @brief ハッシュ値を返す．
 SizeType
 SopCover::hash() const

@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/Sop.h"
+#include "ym/Expr.h"
 #include "ym/Literal.h"
 
 
@@ -205,6 +206,10 @@ public:
   operator/=(
     Literal right ///< [in] オペランドのリテラル
   );
+
+  /// @brief Expr に変換する．
+  Expr
+  to_expr() const;
 
   /// @breif SopBlock を返す．
   SopBlock
