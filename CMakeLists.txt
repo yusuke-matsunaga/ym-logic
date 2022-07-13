@@ -60,6 +60,7 @@ set (npn_SOURCES
 
 set (tvfunc_SOURCES
   c++-srcs/tvfunc/TvFunc.cc
+  c++-srcs/tvfunc/TvFunc_bcf.cc
   c++-srcs/tvfunc/TvFunc_walsh.cc
   c++-srcs/tvfunc/TvFuncM.cc
   )
