@@ -11,6 +11,7 @@
 #include "ym/logic.h"
 #include "ym/VarId.h"
 #include "ym/Literal.h"
+#include "ym/SopCover.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -360,6 +361,9 @@ public:
   count_one() const;
 
   /// @brief 0次の Walsh 係数を求める．
+  /// @retval 1 positive unate
+  /// @retval 0 binate
+  /// @retval -1 negative unate
   int
   walsh_0() const;
 
@@ -414,6 +418,16 @@ public:
     VarId var ///< [in] 変数
   ) const;
 
+  /// @brief unateness を調べる．
+  /// @retval 0 binate
+  /// @retval 1 positive unate
+  /// @retval 2 negative unate
+  /// @retval 3 independent
+  int
+  check_unate(
+    VarId varid ///< [in] 変数
+  ) const;
+
   /// @brief var1 と var2 が対称のとき true を返す．
   bool
   check_sym(
@@ -421,6 +435,10 @@ public:
     VarId var2,      ///< [in] 第2変数
     bool inv = false ///< [in] 反転属性
   ) const;
+
+  /// @brief Blake's Cannonical Form を求める．
+  SopCover
+  BCF() const;
 
   /// @brief 内容を表す文字列を返す．
   ///

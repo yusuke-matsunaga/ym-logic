@@ -399,6 +399,38 @@ TvFunc::cofactor_int(
   return *this;
 }
 
+// @brief 定数0関数の時に true を返す．
+bool
+TvFunc::is_zero() const
+{
+  for ( SizeType b: Range(mBlockNum) ) {
+    TvFunc::WordType word = mVector[b];
+    if ( word != 0UL ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// @brief 定数1関数の時に true を返す．
+bool
+TvFunc::is_one() const
+{
+  TvFunc::WordType mask = vec_mask(mInputNum);
+  if ( mInputNum < NIPW ) {
+    return (mVector[0] & mask) == mask;
+  }
+  else {
+    for ( SizeType b: Range(mBlockNum) ) {
+      TvFunc::WordType word = mVector[b];
+      if ( word != mask ) {
+	return false;
+      }
+    }
+    return true;
+  }
+}
+
 // 変数がサポートの時 true を返す．
 bool
 TvFunc::check_sup(
@@ -430,36 +462,72 @@ TvFunc::check_sup(
   return false;
 }
 
-// @brief 定数0関数の時に true を返す．
-bool
-TvFunc::is_zero() const
+// @brief unateness を調べる．
+int
+TvFunc::check_unate(
+  VarId varid
+) const
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    TvFunc::WordType word = mVector[b];
-    if ( word != 0UL ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-// @brief 定数1関数の時に true を返す．
-bool
-TvFunc::is_one() const
-{
-  TvFunc::WordType mask = vec_mask(mInputNum);
-  if ( mInputNum < NIPW ) {
-    return (mVector[0] & mask) == mask;
-  }
-  else {
+  bool positive_unate = true;
+  bool negative_unate = true;
+  SizeType i = varid.val();
+  if ( i < NIPW ) {
+    // ブロックごとにチェック
+    SizeType dist = 1 << i;
+    TvFunc::WordType mask = c_masks[i];
     for ( SizeType b: Range(mBlockNum) ) {
       TvFunc::WordType word = mVector[b];
-      if ( word != mask ) {
-	return false;
+      auto pat0 = word & ~mask;
+      auto pat1 = word &  mask;
+      pat0 |= pat0 << dist;
+      pat1 |= pat1 >> dist;
+      if ( pat0 == pat1 ) {
+	continue;
+      }
+      auto patc = pat0 & pat1;
+      if ( patc == pat0 ) {
+	negative_unate = false;
+      }
+      else if ( patc == pat1 ) {
+	positive_unate = false;
+      }
+      else {
+	return 0;
       }
     }
-    return true;
   }
+  else {
+    // ブロック単位でチェック
+    SizeType i5 = i - NIPW;
+    SizeType check = 1 << i5;
+    for ( SizeType b: Range(mBlockNum) ) {
+      if ( b & check ) {
+	auto f0 = mVector[b ^ check];
+	auto f1 = mVector[b];
+	if ( f0 == f1 ) {
+	  continue;
+	}
+	auto fc = f0 & f1;
+	if ( fc == f0 ) {
+	  negative_unate = false;
+	}
+	else if ( fc == f1 ) {
+	  positive_unate = false;
+	}
+	else {
+	  return 0;
+	}
+      }
+    }
+  }
+  int ans = 0;
+  if ( positive_unate ) {
+    ans |= 1;
+  }
+  if ( negative_unate ) {
+    ans |= 2;
+  }
+  return ans;
 }
 
 // i 番目と j 番目の変数が対称のとき true を返す．

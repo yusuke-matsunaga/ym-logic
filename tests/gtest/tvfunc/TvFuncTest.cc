@@ -98,6 +98,56 @@ TvFuncTestWithParam::check_func(
   EXPECT_EQ( n1 == 0, func.is_zero() ) << str;
   EXPECT_EQ( n0 == 0, func.is_one() ) << str;
 
+  // check_sup() のテスト
+  for ( SizeType i = 0; i < ni; ++ i ) {
+    int bit = 1 << i;
+    bool sup = false;
+    for ( int p: Range(ni_exp) ) {
+      if ( p & bit ) {
+	if ( func.value(p) != func.value(p ^ bit) ) {
+	  sup = true;
+	  break;
+	}
+      }
+    }
+    EXPECT_EQ( sup, func.check_sup(VarId{i}) );
+  }
+
+  // check_unate() のテスト
+  for ( SizeType i = 0; i < ni; ++ i ) {
+    int bit = 1 << i;
+    bool p_unate = true;
+    bool n_unate = true;
+    for ( int p: Range(ni_exp) ) {
+      if ( p & bit ) {
+	auto p0 = func.value(p ^ bit);
+	auto p1 = func.value(p);
+	auto pc = p0 & p1;
+	if ( p0 < p1 ) {
+	  n_unate = false;
+	}
+	if ( p0 > p1 ) {
+	  p_unate = false;
+	}
+      }
+    }
+    int unate = 0;
+    if ( p_unate ) {
+      unate |= 1;
+    }
+    if ( n_unate ) {
+      unate |= 2;
+    }
+    if ( unate != func.check_unate(VarId{i}) ) {
+      cout << "VarId: " << i << endl;
+      func.print(cout);
+      cout << endl;
+      cout << "F0: " << func.cofactor(VarId{i}, true) << endl
+	   << "F1: " << func.cofactor(VarId{i}, false) << endl;
+    }
+    EXPECT_EQ( unate, func.check_unate(VarId{i}) );
+  }
+
   // invert_int() のテスト
   TvFunc fn(func);
   fn.invert_int();
