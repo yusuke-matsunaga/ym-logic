@@ -440,6 +440,10 @@ public:
   SopCover
   BCF() const;
 
+  /// @brief Blake's Cannonical Form を表す Expr を求める．
+  Expr
+  BCF_expr() const;
+
   /// @brief 内容を表す文字列を返す．
   ///
   /// この値はコンストラクタで用いることができる．

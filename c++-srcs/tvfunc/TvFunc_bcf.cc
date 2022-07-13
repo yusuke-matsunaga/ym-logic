@@ -136,4 +136,12 @@ TvFunc::BCF() const
   return SopCover{ni, cov};
 }
 
+// @brief Blake's Cannonical Form を表す Expr を求める．
+Expr
+TvFunc::BCF_expr() const
+{
+  auto cov = BCF();
+  return cov.to_expr();
+}
+
 END_NAMESPACE_YM
