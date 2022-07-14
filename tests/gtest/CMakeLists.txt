@@ -140,6 +140,11 @@ target_include_directories( logic_GenFactor_test
   ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
   )
 
+ym_add_gtest( logic_bdd_test
+  bdd/bdd_test.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
 
 # ===================================================================
 #  インストールターゲットの設定
