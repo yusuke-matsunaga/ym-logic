@@ -9,6 +9,7 @@
 #include "ym/BddMgr.h"
 #include "ym/BddVar.h"
 #include "ym/Bdd.h"
+#include "ym/BddError.h"
 #include "BddMgrImpl.h"
 
 
@@ -76,6 +77,21 @@ BddMgr::make_nega_literal(
 )
 {
   return make_literal(var, true);
+}
+
+// @brief 真理値表形式の文字列からBDDを作る．
+Bdd
+BddMgr::from_truth(
+  const string& str,
+  const vector<BddVar>& var_list
+)
+{
+  SizeType ni = var_list.size();
+  if ( (1 << ni) != str.size() ) {
+    throw BddError{"BddMgr::from_truth(): wrong string length"};
+  }
+  auto e = mImpl->from_truth(str, var_list);
+  return Bdd{mImpl, e};
 }
 
 END_NAMESPACE_YM

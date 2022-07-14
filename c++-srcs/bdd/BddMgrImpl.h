@@ -105,6 +105,17 @@ public:
     BddEdge edge    ///< [in] 対象の根の枝
   );
 
+  /// @brief 真理値表形式の文字列からBDDを作る．
+  ///
+  /// str の形式は以下の通り
+  /// - big endian: 0文字目が(1, 1, 1, 1)に対応する
+  /// - 最初の変数が LSB に対応する．
+  BddEdge
+  from_truth(
+    const string& str,             ///< [in] 01の文字列
+    const vector<BddVar>& var_list ///< [in] 変数のリスト
+  );
+
   /// @brief インデックスから変数を返す．
   const BddVar&
   var(
@@ -154,6 +165,13 @@ private:
     BddEdge edge
   );
 
+  /// @brief from_truth の下請け関数
+  BddEdge
+  truth_step(
+    const string& str,
+    SizeType pos
+  );
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -177,6 +195,12 @@ private:
 
   // コファクター用の極性
   bool mCofacInv;
+
+  // truth 用の演算結果テーブル
+  unordered_map<string, BddEdge> mTruthTable;
+
+  // truth 用の変数リスト
+  vector<BddVar> mTruthVarList;
 
 };
 

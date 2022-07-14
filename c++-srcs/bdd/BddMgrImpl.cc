@@ -362,6 +362,47 @@ BddMgrImpl::count_size(
 {
 }
 
+// @brief 真理値表形式の文字列からBDDを作る．
+BddEdge
+BddMgrImpl::from_truth(
+  const string& str,
+  const vector<BddVar>& var_list
+)
+{
+  mTruthTable.clear();
+  mTruthVarList = var_list;
+  return truth_step(str, var_list.size() - 1);
+}
+
+// @brief from_truth の下請け関数
+BddEdge
+BddMgrImpl::truth_step(
+  const string& str,
+  SizeType pos
+)
+{
+  if ( str == "0" ) {
+    return BddEdge::make_zero();
+  }
+  if ( str == "1" ) {
+    return BddEdge::make_one();
+  }
+  if ( mTruthTable.count(str) == 0 ) {
+    SizeType n = str.size();
+    SizeType h = n / 2;
+    string str0 = str.substr(h);
+    string str1 = str.substr(0, h);
+    auto e0 = truth_step(str0, pos - 1);
+    auto e1 = truth_step(str1, pos - 1);
+    auto ans = new_node(mTruthVarList[pos].index(), e0, e1);
+    mTruthTable.emplace(str, ans);
+    return ans;
+  }
+  else {
+    return mTruthTable.at(str);
+  }
+}
+
 // @brief ノードを作る．
 BddEdge
 BddMgrImpl::new_node(

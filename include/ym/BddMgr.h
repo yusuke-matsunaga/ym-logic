@@ -71,6 +71,17 @@ public:
     BddVar var  ///< [in] 変数
   );
 
+  /// @brief 真理値表形式の文字列からBDDを作る．
+  ///
+  /// str の形式は以下の通り
+  /// - big endian: 0文字目が(1, 1, 1, 1)に対応する
+  /// - 最初の変数が LSB に対応する．
+  Bdd
+  from_truth(
+    const string& str,             ///< [in] 01の文字列
+    const vector<BddVar>& var_list ///< [in] 変数のリスト
+  );
+
 
 private:
   //////////////////////////////////////////////////////////////////////
