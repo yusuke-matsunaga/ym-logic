@@ -65,11 +65,20 @@ set (tvfunc_SOURCES
   c++-srcs/tvfunc/TvFuncM.cc
   )
 
+set (bdd_SOURCES
+  c++-srcs/bdd/Bdd.cc
+  c++-srcs/bdd/BddMgr.cc
+  c++-srcs/bdd/BddMgrImpl.cc
+  c++-srcs/bdd/BddNodeTable.cc
+  c++-srcs/bdd/BddApplyTable.cc
+  )
+
 set (ym_logic_SOURCES
   ${sop_SOURCES}
   ${expr_SOURCES}
   ${npn_SOURCES}
   ${tvfunc_SOURCES}
+  ${bdd_SOURCES}
   )
 
 

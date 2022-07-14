@@ -444,6 +444,14 @@ public:
   Expr
   BCF_expr() const;
 
+  /// @brief Merge With Containment を行って積和系論理式を得る．
+  SopCover
+  MWC() const;
+
+  /// @brief Merge With Containment を行って Expr を得る．
+  Expr
+  MWC_expr() const;
+
   /// @brief 内容を表す文字列を返す．
   ///
   /// この値はコンストラクタで用いることができる．

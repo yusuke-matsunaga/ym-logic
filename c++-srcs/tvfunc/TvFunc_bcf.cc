@@ -17,6 +17,27 @@ BEGIN_NONAMESPACE
 
 bool debug = false;
 
+// キューブの表している論理関数を作る．
+TvFunc
+make_func(
+  SizeType ni,
+  const SopCube& cube
+)
+{
+  TvFunc f_cube = TvFunc::make_one(ni);
+  for ( SizeType i = 0; i < ni; ++ i ) {
+    VarId var{i};
+    auto pat = cube.get_pat(var);
+    if ( pat == SopPat::_1 ) {
+      f_cube &= TvFunc::make_posi_literal(ni, var);
+    }
+    else if ( pat == SopPat::_0 ) {
+      f_cube &= TvFunc::make_nega_literal(ni, var);
+    }
+  }
+  return f_cube;
+}
+
 vector<SopCube>
 bcf_sub(
   SizeType ni,
@@ -79,34 +100,14 @@ bcf_sub(
   auto R = ~fc;
   Literal lit0{varid, true};
   for ( auto& cube: c0 ) {
-    TvFunc f_cube = TvFunc::make_one(ni);
-    for ( SizeType i = 0; i < ni; ++ i ) {
-      VarId var{i};
-      auto pat = cube.get_pat(var);
-      if ( pat == SopPat::_1 ) {
-	f_cube &= TvFunc::make_posi_literal(ni, var);
-      }
-      else if ( pat == SopPat::_0 ) {
-	f_cube &= TvFunc::make_nega_literal(ni, var);
-      }
-    }
+    auto f_cube = make_func(ni, cube);
     if ( f_cube && R ) {
       cc.push_back(cube * lit0);
     }
   }
   Literal lit1{varid, false};
   for ( auto& cube: c1 ) {
-    TvFunc f_cube = TvFunc::make_one(ni);
-    for ( SizeType i = 0; i < ni; ++ i ) {
-      VarId var{i};
-      auto pat = cube.get_pat(var);
-      if ( pat == SopPat::_1 ) {
-	f_cube &= TvFunc::make_posi_literal(ni, var);
-      }
-      else if ( pat == SopPat::_0 ) {
-	f_cube &= TvFunc::make_nega_literal(ni, var);
-      }
-    }
+    auto f_cube = make_func(ni, cube);
     if ( f_cube && R ) {
       cc.push_back(cube * lit1);
     }
@@ -142,6 +143,137 @@ TvFunc::BCF_expr() const
 {
   auto cov = BCF();
   return cov.to_expr();
+}
+
+BEGIN_NONAMESPACE
+
+bool
+check_containment(
+  const SopCube& cube,
+  const vector<SopCube>& cover
+)
+{
+  for ( auto cube1: cover ) {
+    if ( cube.check_containment(cube1) ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+vector<SopCube>
+mwc_sub(
+  SizeType ni,
+  const TvFunc& f,
+  SizeType var
+)
+{
+
+  if ( f.is_zero() ) {
+    if ( debug ) {
+      cout << " ==> 0" << endl;
+    }
+    return vector<SopCube>{};
+  }
+  if ( f.is_one() ) {
+    if ( debug ) {
+      cout << " ==> 1" << endl;
+    }
+    return vector<SopCube>{SopCube{ni}};
+  }
+
+  ASSERT_COND( var < ni );
+
+  VarId varid{var};
+
+  // コファクターに対して再帰する．
+  auto f0 = f.cofactor(varid, true);
+  auto f1 = f.cofactor(varid, false);
+
+  auto cov0 = mwc_sub(ni, f0, var + 1);
+  auto cov1 = mwc_sub(ni, f1, var + 1);
+
+  // cov0, cov1 で同一のものを探す．
+  // 同時に他方に包含されているキューブを削除する．
+  vector<SopCube> ans_list;
+  SizeType n0 = cov0.size();
+  SizeType n1 = cov1.size();
+  auto r0 = ~f0;
+  auto r1 = ~f1;
+  Literal lit0{varid, true};
+  Literal lit1{varid, false};
+  SizeType i0 = 0;
+  SizeType i1 = 0;
+  while ( i0 < n0 && i1 < n1 ) {
+    const auto& cube0 = cov0[i0];
+    const auto& cube1 = cov1[i1];
+    int stat = compare(cube0, cube1);
+    if ( stat < 0 ) {
+      ++ i0;
+      if ( check_containment(cube0, cov1) ) {
+	ans_list.push_back(std::move(cube0));
+      }
+      else {
+	ans_list.push_back(cube0 * lit0);
+      }
+    }
+    else if ( stat > 0 ) {
+      ++ i1;
+      if ( check_containment(cube1, cov0) ) {
+	ans_list.push_back(std::move(cube1));
+      }
+      else {
+	ans_list.push_back(cube1 * lit1);
+      }
+    }
+    else {
+      ++ i0;
+      ++ i1;
+      ans_list.push_back(std::move(cube0));
+    }
+  }
+  while ( i0 < n0 ) {
+    const auto& cube0 = cov0[i0];
+    if ( check_containment(cube0, cov1) ) {
+      ans_list.push_back(std::move(cube0));
+    }
+    else {
+      ans_list.push_back(cube0 * lit0);
+    }
+    ++ i0;
+  }
+  while ( i1 < n1 ) {
+    const auto& cube1 = cov1[i1];
+    if ( check_containment(cube1, cov0) ) {
+      ans_list.push_back(std::move(cube1));
+    }
+    else {
+      ans_list.push_back(cube1 * lit1);
+    }
+    ++ i1;
+  }
+  sort(ans_list.begin(), ans_list.end());
+  return ans_list;
+}
+
+END_NONAMESPACE
+
+// @brief Merge With Containment を行って積和系論理式を得る．
+SopCover
+TvFunc::MWC() const
+{
+  SizeType ni = input_num();
+  auto cov = mwc_sub(ni, *this, 0);
+  return SopCover{ni, cov};
+}
+
+// @brief Merge With Containment を行って Expr を得る．
+Expr
+TvFunc::MWC_expr() const
+{
+  auto cov = MWC();
+  auto expr = cov.to_expr();
+  return expr;
 }
 
 END_NAMESPACE_YM
