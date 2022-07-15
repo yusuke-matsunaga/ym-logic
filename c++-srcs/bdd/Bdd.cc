@@ -305,13 +305,8 @@ Bdd::size(
   if ( bdd_list.empty() ) {
     return 0;
   }
-  auto mgr = bdd_list[0].mMgr;
-  ASSERT_COND( mgr != nullptr );
-  SizeType n = bdd_list.size();
-  vector<BddEdge> edge_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    edge_list[i] = bdd_list[i].mRoot;
-  }
+  vector<BddEdge> edge_list;
+  auto mgr = root_list(bdd_list, edge_list);
   return mgr->count_size(edge_list);
 }
 
@@ -411,6 +406,48 @@ Bdd::display(
       s << endl;
     }
   }
+}
+
+// @brief dot 形式で出力する．
+void
+Bdd::gen_dot(
+  ostream& s
+) const
+{
+  gen_dot(s, {*this});
+}
+
+// @brief 複数のBDDを dot 形式で出力する．
+void
+Bdd::gen_dot(
+  ostream& s,
+  const vector<Bdd>& bdd_list
+)
+{
+  vector<BddEdge> edge_list;
+  auto mgr = root_list(bdd_list, edge_list);
+  return mgr->gen_dot(s, edge_list);
+}
+
+// @brief BDDの根の枝のリストを作る．
+BddMgrImpl*
+Bdd::root_list(
+  const vector<Bdd>& bdd_list,
+  vector<BddEdge>& edge_list
+)
+{
+  ASSERT_COND ( !bdd_list.empty() );
+
+  auto mgr = bdd_list[0].mMgr;
+  ASSERT_COND( mgr != nullptr );
+  SizeType n = bdd_list.size();
+  edge_list.clear();
+  edge_list.reserve(n);
+  for ( auto& bdd: bdd_list ) {
+    ASSERT_COND( bdd.mMgr == mgr );
+    edge_list.push_back(bdd.mRoot);
+  }
+  return mgr;
 }
 
 END_NAMESPACE_YM

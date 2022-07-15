@@ -324,6 +324,20 @@ public:
     ostream& s ///< [in] 出力ストリーム
   ) const;
 
+  /// @brief dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s ///< [in] 出力ストリーム
+  ) const;
+
+  /// @brief 複数のBDDを dot 形式で出力する．
+  static
+  void
+  gen_dot(
+    ostream& s,                 ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
   /// @}
   //////////////////////////////////////////////////////////////////////
 
@@ -343,6 +357,14 @@ private:
   void
   change_root(
     BddEdge new_root ///< [in] 変更する枝
+  );
+
+  /// @brief BDDの根の枝のリストを作る．
+  static
+  BddMgrImpl*
+  root_list(
+    const vector<Bdd>& bdd_list, ///< [in] BDDのリスト
+    vector<BddEdge>& edge_list   ///< [out] 根の枝を格納するのリスト
   );
 
 

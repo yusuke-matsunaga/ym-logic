@@ -111,6 +111,13 @@ public:
     const vector<BddEdge>& edge_list ///< [in] 対象の根の枝のリスト
   );
 
+  /// @brief 内容を dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                      ///< [in] 出力ストリーム
+    const vector<BddEdge>& edge_list ///< [in] 対象の根の枝のリスト
+  );
+
   /// @brief 真理値表形式の文字列からBDDを作る．
   ///
   /// str の形式は以下の通り

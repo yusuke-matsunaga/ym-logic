@@ -388,6 +388,141 @@ BddMgrImpl::count_size(
   return mark.size();
 }
 
+BEGIN_NONAMESPACE
+
+void
+gen_node_list(
+  BddEdge e,
+  unordered_map<BddNode*, SizeType>& node_map,
+  vector<BddNode*>& node_list
+)
+{
+  if ( e.is_const() ) {
+    return;
+  }
+  auto node = e.node();
+  if ( node_map.count(node) == 0 ) {
+    SizeType id = node_list.size();
+    node_map.emplace(node, id);
+    node_list.push_back(node);
+    gen_node_list(node->edge0(), node_map, node_list);
+    gen_node_list(node->edge1(), node_map, node_list);
+  }
+}
+
+void
+dot_edge(
+  ostream& s,
+  BddEdge edge,
+  const unordered_map<BddNode*, SizeType>& node_map,
+  bool zero
+)
+{
+  if ( edge.is_zero() ) {
+    s << "const0";
+  }
+  else if ( edge.is_one() ) {
+    s << "const1";
+  }
+  else {
+    auto node = edge.node();
+    auto inv = edge.inv();
+    auto id = node_map.at(node);
+    s << "node" << id
+      << "[";
+    const char* comma = "";
+    if ( zero ) {
+      s << "style=dotted";
+      comma = ",";
+    }
+    if ( inv ) {
+      s << comma << "dir=both,arrowtail=odot";
+      comma = ",";
+    }
+    s << "]";
+  }
+  s << ";" << endl;
+}
+
+END_NONAMESPACE
+
+// @brief 内容を dot 形式で出力する．
+void
+BddMgrImpl::gen_dot(
+  ostream& s,
+  const vector<BddEdge>& edge_list
+)
+{
+  // ノードのリストを作る．
+  unordered_map<BddNode*, SizeType> node_map;
+  vector<BddNode*> node_list;
+  for ( auto edge: edge_list ) {
+    gen_node_list(edge, node_map, node_list);
+  }
+
+  // dot の開始
+  s << "digraph bdd {" << endl
+    << "  graph [rankdir = TB];" << endl;
+
+  // 根のノードの定義
+  SizeType i = 1;
+  for ( auto edge: edge_list ) {
+    s << "  root" << i
+      << " [shape=box,label=\"BDD#"
+      << i << "\"];" << endl;
+    ++ i;
+  }
+
+  // ノードの定義
+  SizeType max_index = 0;
+  for ( auto node: node_list ) {
+    auto id = node_map.at(node);
+    s << "  node" << id
+      << " [label=\""
+      << node->index()
+      << "\"];" << endl;
+    if ( max_index < node->index() ) {
+      max_index = node->index();
+    }
+  }
+
+  // 終端の定義
+  s << "  const0 [shape=box,label=\"0\"];" << endl;
+  s << "  const1 [shape=box,label=\"1\"];" << endl;
+
+  // 根の枝の定義
+  i = 1;
+  for ( auto edge: edge_list ) {
+    s << "  root" << i << " -> ";
+    dot_edge(s, edge, node_map, false);
+    ++ i;
+  }
+
+  // 枝の定義
+  vector<vector<SizeType>> rank_node_list(max_index + 1);
+  for ( auto node: node_list ) {
+    auto id = node_map.at(node);
+    s << "  node" << id << " -> ";
+    dot_edge(s, node->edge0(), node_map, true);
+    s << "  node" << id << " -> ";
+    dot_edge(s, node->edge1(), node_map, false);
+    rank_node_list[node->index()].push_back(id);
+  }
+
+  // ランクの設定
+  for ( auto& node_list: rank_node_list ) {
+    s << "  { rank = same;";
+    for ( auto id: node_list ) {
+      s << " node" << id << ";";
+    }
+    s << "}" << endl;
+  }
+
+  // dot の終了
+  s << "}" << endl;
+
+}
+
 // @brief 真理値表形式の文字列からBDDを作る．
 BddEdge
 BddMgrImpl::from_truth(
@@ -397,7 +532,7 @@ BddMgrImpl::from_truth(
 {
   mTruthTable.clear();
   mTruthVarList = var_list;
-  return truth_step(str, var_list.size() - 1);
+  return truth_step(str, 0);
 }
 
 // @brief from_truth の下請け関数
@@ -418,9 +553,9 @@ BddMgrImpl::truth_step(
     SizeType h = n / 2;
     string str0 = str.substr(h);
     string str1 = str.substr(0, h);
-    auto e0 = truth_step(str0, pos - 1);
-    auto e1 = truth_step(str1, pos - 1);
-    auto ans = new_node(mTruthVarList[pos].index(), e0, e1);
+    auto e0 = truth_step(str0, pos + 1);
+    auto e1 = truth_step(str1, pos + 1);
+    auto ans = new_node(pos, e0, e1);
     mTruthTable.emplace(str, ans);
     return ans;
   }
