@@ -307,6 +307,13 @@ public:
   SizeType
   size() const;
 
+  /// @brief 複数のBDDのノード数を数える．
+  static
+  SizeType
+  size(
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
   /// @brief ハッシュ値を返す．
   SizeType
   hash() const;

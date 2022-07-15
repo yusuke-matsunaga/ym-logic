@@ -6,6 +6,7 @@
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
+#include <libgen.h>
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
 
@@ -45,16 +46,26 @@ truth_test(
     BddMgr mgr;
     vector<BddVar> var_list;
     string buf;
+    SizeType ni = 0;
+    SizeType no = 0;
+    SizeType nsingle = 0;
+    SizeType nall = 0;
+    vector<Bdd> func_list;
     while ( getline(s, buf) ) {
       SizeType n = buf.size();
-      SizeType ni = log2(n);
+      ni = log2(n);
       ASSERT_COND( (1 << ni) == n );
       while ( var_list.size() < ni ) {
 	var_list.push_back(mgr.new_variable());
       }
       auto f = mgr.from_truth(buf, var_list);
-      f.display(cout);
+      func_list.push_back(f);
+      nsingle += f.size();
     }
+    no = func_list.size();
+    nall = Bdd::size(func_list);
+    cout << basename(argv[i]) << ": #i " << ni << ": #o " << no
+	 << ": #n " << nsingle << ": #a " << nall << endl;
   }
   return 0;
 }

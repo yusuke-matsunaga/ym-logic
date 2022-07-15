@@ -292,7 +292,27 @@ SizeType
 Bdd::size() const
 {
   ASSERT_COND( mMgr != nullptr );
-  return mMgr->count_size(mRoot);
+  vector<BddEdge> edge_list{mRoot};
+  return mMgr->count_size(edge_list);
+}
+
+// @brief 複数のBDDのノード数を数える．
+SizeType
+Bdd::size(
+  const vector<Bdd>& bdd_list
+)
+{
+  if ( bdd_list.empty() ) {
+    return 0;
+  }
+  auto mgr = bdd_list[0].mMgr;
+  ASSERT_COND( mgr != nullptr );
+  SizeType n = bdd_list.size();
+  vector<BddEdge> edge_list(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    edge_list[i] = bdd_list[i].mRoot;
+  }
+  return mgr->count_size(edge_list);
 }
 
 // @brief ハッシュ値を返す．

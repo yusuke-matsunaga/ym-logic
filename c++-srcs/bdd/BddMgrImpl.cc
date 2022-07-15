@@ -354,12 +354,38 @@ BddMgrImpl::check_sym(
 {
 }
 
+BEGIN_NONAMESPACE
+
+void
+count_dfs(
+  BddEdge e,
+  unordered_set<BddNode*>& mark
+)
+{
+  if ( e.is_const() ) {
+    return;
+  }
+  auto node = e.node();
+  if ( mark.count(node) == 0 ) {
+    mark.emplace(node);
+    count_dfs(node->edge0(), mark);
+    count_dfs(node->edge1(), mark);
+  }
+}
+
+END_NONAMESPACE
+
 // @brief ノード数を数える．
 SizeType
 BddMgrImpl::count_size(
-  BddEdge edge
+  const vector<BddEdge>& edge_list
 )
 {
+  unordered_set<BddNode*> mark;
+  for ( auto edge: edge_list ) {
+    count_dfs(edge, mark);
+  }
+  return mark.size();
 }
 
 // @brief 真理値表形式の文字列からBDDを作る．

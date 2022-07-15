@@ -105,6 +105,12 @@ public:
     BddEdge edge    ///< [in] 対象の根の枝
   );
 
+  /// @brief ノード数を数える．
+  SizeType
+  count_size(
+    const vector<BddEdge>& edge_list ///< [in] 対象の根の枝のリスト
+  );
+
   /// @brief 真理値表形式の文字列からBDDを作る．
   ///
   /// str の形式は以下の通り
