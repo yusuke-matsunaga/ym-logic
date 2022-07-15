@@ -346,22 +346,22 @@ display_edge(
 )
 {
   if ( e.is_zero() ) {
-    s << " ZERO  ";
+    s << "   ZERO";
   }
   else if ( e.is_one() ) {
-    s << "  ONE  ";
+    s << "    ONE";
   }
   else {
     auto node = e.node();
     auto inv = e.inv();
+    SizeType id = node_map.at(node);
+    s << setw(6) << id;
     if ( inv ) {
       s << "~";
     }
     else {
       s << " ";
     }
-    SizeType id = node_map.at(node);
-    s << setw(6) << id;
   }
 }
 
@@ -382,7 +382,7 @@ Bdd::display(
     dfs(BddEdge{mRoot}, node_list, node_map);
     for ( auto node: node_list ) {
       SizeType id = node_map.at(node);
-      s << setw(6) << id << ": " << node->index();
+      s << setw(6) << id << ": " << setw(4) << node->index();
       auto edge0 = node->edge0();
       display_edge(s, edge0, node_map);
       s << ": ";

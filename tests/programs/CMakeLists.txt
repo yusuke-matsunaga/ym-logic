@@ -9,3 +9,4 @@
 
 add_subdirectory(mwc_test)
 add_subdirectory(npn_test)
+add_subdirectory(bdd)

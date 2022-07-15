@@ -12,6 +12,22 @@
 
 BEGIN_NAMESPACE_YM
 
+BEGIN_NONAMESPACE
+
+SizeType
+log2(
+  SizeType x
+)
+{
+  SizeType y = 0;
+  while ( (1 << y) < x ) {
+    ++ y;
+  }
+  return y;
+}
+
+END_NONAMESPACE
+
 int
 truth_test(
   int argc,
@@ -25,25 +41,19 @@ truth_test(
       cerr << filename << ": No such file." << endl;
       return 1;
     }
+
+    BddMgr mgr;
+    vector<BddVar> var_list;
     string buf;
     while ( getline(s, buf) ) {
       SizeType n = buf.size();
-      auto f = BddMgr
-      TvFunc f{buf};
-      func_list.push_back(f);
-      auto expr = f.MWC_expr();
-      auto f_expr = expr.make_tv(f.input_num());
-      if ( f != f_expr ) {
-	bad_outputs.push_back(func_list.size() - 1);
+      SizeType ni = log2(n);
+      ASSERT_COND( (1 << ni) == n );
+      while ( var_list.size() < ni ) {
+	var_list.push_back(mgr.new_variable());
       }
-      lit_num += expr.literal_num();
-    }
-    SizeType no = func_list.size();
-    SizeType ni = no > 0 ? func_list[0].input_num() : 0;
-    cout << basename(argv[i]) << ": #i: " << ni << " #o: " << no
-	 << " #L: " << lit_num << endl;
-    for ( auto i: bad_outputs ) {
-      cout << "O#" << i << ": " << func_list[i] << endl;
+      auto f = mgr.from_truth(buf, var_list);
+      f.display(cout);
     }
   }
   return 0;
