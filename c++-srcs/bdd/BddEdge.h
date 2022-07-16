@@ -8,10 +8,10 @@
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/logic.h"
+#include "ym/bdd_nsdef.h"
 
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_YM_BDD
 
 class BddNode;
 
@@ -196,6 +196,6 @@ operator!=(
   return !left.operator==(right);
 }
 
-END_NAMESPACE_YM
+END_NAMESPACE_YM_BDD
 
 #endif // BDDEDGE_H

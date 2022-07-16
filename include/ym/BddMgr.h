@@ -8,11 +8,11 @@
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/logic.h"
+#include "ym/bdd_nsdef.h"
 #include "ym/BddVar.h"
 
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_YM_BDD
 
 class Bdd;
 class BddMgrImpl;
@@ -93,6 +93,6 @@ private:
 
 };
 
-END_NAMESPACE_YM
+END_NAMESPACE_YM_BDD
 
 #endif // BDDMGR_H

@@ -1,0 +1,70 @@
+#ifndef NODECOUNTER_H
+#define NODECOUNTER_H
+
+/// @file NodeCounter.h
+/// @brief NodeCounter のヘッダファイル
+/// @author Yusuke Matsunaga (松永 裕介)
+///
+/// Copyright (C) 2022 Yusuke Matsunaga
+/// All rights reserved.
+
+#include "ym/bdd_nsdef.h"
+
+
+BEGIN_NAMESPACE_YM_BDD
+
+class BddEdge;
+class BddNode;
+
+//////////////////////////////////////////////////////////////////////
+/// @class NodeCounter NodeCounter.h "NodeCounter.h"
+/// @brief BDD のノードを数えるクラス
+//////////////////////////////////////////////////////////////////////
+class NodeCounter
+{
+public:
+
+  /// @brief コンストラクタ
+  NodeCounter() = default;
+
+  /// @brief デストラクタ
+  ~NodeCounter() = default;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ノード数を数える．
+  SizeType
+  count(
+    const vector<BddEdge>& root_list ///< [in] 根のリスト
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief count の下請け関数
+  void
+  count_step(
+    BddEdge edge ///< [in] 枝
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // ノードの辞書
+  unordered_set<BddNode*> mNodeSet;
+
+};
+
+END_NAMESPACE_YM_BDD
+
+#endif // NODECOUNTER_H

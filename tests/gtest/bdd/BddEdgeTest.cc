@@ -10,7 +10,7 @@
 #include "BddEdge.h"
 
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_YM_BDD
 
 TEST(BddEdgeTest, make_zero)
 {
@@ -42,4 +42,4 @@ TEST(BddEdgeTest, make_invalid)
   EXPECT_TRUE( e.is_invalid() );
 }
 
-END_NAMESPACE_YM
+END_NAMESPACE_YM_BDD

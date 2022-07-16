@@ -69,8 +69,15 @@ set (bdd_SOURCES
   c++-srcs/bdd/Bdd.cc
   c++-srcs/bdd/BddMgr.cc
   c++-srcs/bdd/BddMgrImpl.cc
-  c++-srcs/bdd/BddNodeTable.cc
-  c++-srcs/bdd/BddApplyTable.cc
+  c++-srcs/bdd/IteOp.cc
+  c++-srcs/bdd/CofactorOp.cc
+  c++-srcs/bdd/CheckSupOp.cc
+  c++-srcs/bdd/CheckSymOp.cc
+  c++-srcs/bdd/TruthOp.cc
+  c++-srcs/bdd/NodeCounter.cc
+  c++-srcs/bdd/NodeCollector.cc
+  c++-srcs/bdd/NodeDisp.cc
+  c++-srcs/bdd/DotGen.cc
   )
 
 set (ym_logic_SOURCES

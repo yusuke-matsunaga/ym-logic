@@ -1,0 +1,74 @@
+#ifndef DOTGEN_H
+#define DOTGEN_H
+
+/// @file DotGen.h
+/// @brief DotGen のヘッダファイル
+/// @author Yusuke Matsunaga (松永 裕介)
+///
+/// Copyright (C) 2022 Yusuke Matsunaga
+/// All rights reserved.
+
+#include "ym/bdd_nsdef.h"
+#include "NodeCollector.h"
+
+
+BEGIN_NAMESPACE_YM_BDD
+
+//////////////////////////////////////////////////////////////////////
+/// @class DotGen DotGen.h "DotGen.h"
+/// @brief dot 形式の出力を行うクラス
+//////////////////////////////////////////////////////////////////////
+class DotGen :
+  public NodeCollector
+{
+public:
+
+  /// @brief コンストラクタ
+  DotGen(
+    ostream& s ///< [in] 出力ストリーム
+  ) : mS{s}
+  {
+  }
+
+  /// @brief デストラクタ
+  ~DotGen() = default;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief dot 形式で出力する．
+  void
+  write(
+    const vector<BddEdge>& root_list ///< [in] 根のリスト
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 枝の内容を出力する．
+  void
+  write_edge(
+    BddEdge edge, ///< [in] 枝
+    bool zero     ///< [in] 0枝の時 true にするフラグ
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // 出力ストリーム
+  ostream& mS;
+
+};
+
+END_NAMESPACE_YM_BDD
+
+#endif // DOTGEN_H

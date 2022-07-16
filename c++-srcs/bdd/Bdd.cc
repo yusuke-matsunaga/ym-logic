@@ -11,9 +11,16 @@
 #include "BddEdge.h"
 #include "BddMgrImpl.h"
 #include "BddNode.h"
+#include "CofactorOp.h"
+#include "CheckSupOp.h"
+#include "CheckSymOp.h"
+#include "NodeCounter.h"
+#include "NodeDisp.h"
+#include "DotGen.h"
+#include "IteOp.h"
 
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_YM_BDD
 
 // @brief 空のコンストラクタ
 Bdd::Bdd() : mMgr{nullptr}
@@ -80,7 +87,8 @@ Bdd::and_op(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->and_op(mRoot, right.mRoot);
+  IteOp op{mMgr};
+  auto e = op.and_step(mRoot, right.mRoot);
   return Bdd{mMgr, e};
 }
 
@@ -92,7 +100,8 @@ Bdd::or_op(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->or_op(mRoot, right.mRoot);
+  IteOp op{mMgr};
+  auto e = op.or_step(mRoot, right.mRoot);
   return Bdd{mMgr, e};
 }
 
@@ -104,7 +113,8 @@ Bdd::xor_op(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->xor_op(mRoot, right.mRoot);
+  IteOp op{mMgr};
+  auto e = op.xor_step(mRoot, right.mRoot);
   return Bdd{mMgr, e};
 }
 
@@ -116,7 +126,8 @@ Bdd::cofactor(
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  auto e = mMgr->cofactor_op(mRoot, var.index(), inv);
+  CofactorOp op{mMgr, var.index(), inv};
+  auto e = op.op_step(mRoot);
   return Bdd{mMgr, e};
 }
 
@@ -137,7 +148,8 @@ Bdd::and_int(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->and_op(mRoot, right.mRoot);
+  IteOp op{mMgr};
+  auto e = op.and_step(mRoot, right.mRoot);
   change_root(e);
   return *this;
 }
@@ -150,7 +162,8 @@ Bdd::or_int(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->or_op(mRoot, right.mRoot);
+  IteOp op{mMgr};
+  auto e = op.or_step(mRoot, right.mRoot);
   change_root(e);
   return *this;
 }
@@ -163,7 +176,8 @@ Bdd::xor_int(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->xor_op(mRoot, right.mRoot);
+  IteOp op{mMgr};
+  auto e = op.xor_step(mRoot, right.mRoot);
   change_root(e);
   return *this;
 }
@@ -176,7 +190,8 @@ Bdd::cofactor_int(
 )
 {
   ASSERT_COND( mMgr != nullptr );
-  auto e = mMgr->cofactor_op(mRoot, var.index(), inv);
+  CofactorOp op{mMgr, var.index(), inv};
+  auto e = op.op_step(mRoot);
   change_root(e);
   return *this;
 }
@@ -201,8 +216,8 @@ Bdd::check_sup(
   BddVar var
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
-  return mMgr->check_sup(mRoot, var.index());
+  CheckSupOp op{var.index()};
+  return op.op_step(mRoot);
 }
 
 // @brief 与えられた変数に対して対称の時 true を返す．
@@ -213,8 +228,8 @@ Bdd::check_sym(
   bool inv
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
-  return mMgr->check_sym(mRoot, var1.index(), var2.index(), inv);
+  CheckSymOp op{var1.index(), var2.index(), inv};
+  return op.op_step(mRoot);
 }
 
 // @brief 根の変数とコファクターを求める．
@@ -291,9 +306,11 @@ Bdd::root_cofactor1() const
 SizeType
 Bdd::size() const
 {
-  ASSERT_COND( mMgr != nullptr );
-  vector<BddEdge> edge_list{mRoot};
-  return mMgr->count_size(edge_list);
+  if ( mMgr == nullptr ) {
+    return 0;
+  }
+  NodeCounter nc;
+  return nc.count({mRoot});
 }
 
 // @brief 複数のBDDのノード数を数える．
@@ -306,8 +323,9 @@ Bdd::size(
     return 0;
   }
   vector<BddEdge> edge_list;
-  auto mgr = root_list(bdd_list, edge_list);
-  return mgr->count_size(edge_list);
+  (void) root_list(bdd_list, edge_list);
+  NodeCounter nc;
+  return nc.count(edge_list);
 }
 
 // @brief ハッシュ値を返す．
@@ -332,56 +350,6 @@ Bdd::change_root(
   }
 }
 
-BEGIN_NONAMESPACE
-
-void
-dfs(
-  BddEdge e,
-  vector<BddNode*>& node_list,
-  unordered_map<BddNode*, SizeType>& node_map
-)
-{
-  if ( !e.is_const() ) {
-    auto node = e.node();
-    if ( node_map.count(node) == 0 ) {
-      SizeType id = node_list.size();
-      node_map.emplace(node, id);
-      node_list.push_back(node);
-      dfs(node->edge0(), node_list, node_map);
-      dfs(node->edge1(), node_list, node_map);
-    }
-  }
-}
-
-void
-display_edge(
-  ostream& s,
-  BddEdge e,
-  const unordered_map<BddNode*, SizeType>& node_map
-)
-{
-  if ( e.is_zero() ) {
-    s << "   ZERO";
-  }
-  else if ( e.is_one() ) {
-    s << "    ONE";
-  }
-  else {
-    auto node = e.node();
-    auto inv = e.inv();
-    SizeType id = node_map.at(node);
-    s << setw(6) << id;
-    if ( inv ) {
-      s << "~";
-    }
-    else {
-      s << " ";
-    }
-  }
-}
-
-END_NONAMESPACE
-
 // @brief 内容を出力する．
 void
 Bdd::display(
@@ -392,19 +360,8 @@ Bdd::display(
     s << "Invalid BDD" << endl;
   }
   else {
-    vector<BddNode*> node_list;
-    unordered_map<BddNode*, SizeType> node_map;
-    dfs(BddEdge{mRoot}, node_list, node_map);
-    for ( auto node: node_list ) {
-      SizeType id = node_map.at(node);
-      s << setw(6) << id << ": " << setw(4) << node->index();
-      auto edge0 = node->edge0();
-      display_edge(s, edge0, node_map);
-      s << ": ";
-      auto edge1 = node->edge1();
-      display_edge(s, edge1, node_map);
-      s << endl;
-    }
+    NodeDisp nd{s};
+    nd.write({mRoot});
   }
 }
 
@@ -414,7 +371,8 @@ Bdd::gen_dot(
   ostream& s
 ) const
 {
-  gen_dot(s, {*this});
+  DotGen dg{s};
+  dg.write({mRoot});
 }
 
 // @brief 複数のBDDを dot 形式で出力する．
@@ -425,8 +383,9 @@ Bdd::gen_dot(
 )
 {
   vector<BddEdge> edge_list;
-  auto mgr = root_list(bdd_list, edge_list);
-  return mgr->gen_dot(s, edge_list);
+  (void) root_list(bdd_list, edge_list);
+  DotGen dg{s};
+  dg.write(edge_list);
 }
 
 // @brief BDDの根の枝のリストを作る．
@@ -450,4 +409,21 @@ Bdd::root_list(
   return mgr;
 }
 
-END_NAMESPACE_YM
+// @brief If-Then-Else 演算
+Bdd
+ite(
+  const Bdd& cond,
+  const Bdd& then_f,
+  const Bdd& else_f
+)
+{
+  auto mgr = cond.mMgr;
+  ASSERT_COND( mgr != nullptr );
+  ASSERT_COND( mgr == then_f.mMgr );
+  ASSERT_COND( mgr == else_f.mMgr );
+  IteOp op{mgr};
+  auto e = op.ite_step(cond.mRoot, then_f.mRoot, else_f.mRoot);
+  return Bdd{mgr, e};
+}
+
+END_NAMESPACE_YM_BDD

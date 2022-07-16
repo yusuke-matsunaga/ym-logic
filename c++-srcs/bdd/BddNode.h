@@ -8,11 +8,11 @@
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/logic.h"
+#include "ym/bdd_nsdef.h"
 #include "BddEdge.h"
 
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_YM_BDD
 
 //////////////////////////////////////////////////////////////////////
 /// @class BddNode BddNode.h "ym/BddNode.h"
@@ -120,6 +120,44 @@ private:
 
 };
 
-END_NAMESPACE_YM
+/// @brief 先頭のノードを分解する．
+inline
+SizeType
+decomp(
+  BddEdge left,
+  BddEdge right,
+  BddEdge& left0,
+  BddEdge& left1,
+  BddEdge& right0,
+  BddEdge& right1
+)
+{
+  auto l_node = left.node();
+  auto l_inv = left.inv();
+  auto l_index = l_node->index();
+  auto r_node = right.node();
+  auto r_inv = right.inv();
+  auto r_index = r_node->index();
+  auto top = std::min(l_index, r_index);
+  if ( l_index == top ) {
+    left0 = l_node->edge0(l_inv);
+    left1 = l_node->edge1(l_inv);
+  }
+  else {
+    left0 = left;
+    left1 = left;
+  }
+  if ( r_index == top ) {
+    right0 = r_node->edge0(r_inv);
+    right1 = r_node->edge1(r_inv);
+  }
+  else {
+    right0 = right;
+    right1 = right;
+  }
+  return top;
+}
+
+END_NAMESPACE_YM_BDD
 
 #endif // BDDNODE_H

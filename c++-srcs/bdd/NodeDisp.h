@@ -1,0 +1,72 @@
+#ifndef NODEDISP_H
+#define NODEDISP_H
+
+/// @file NodeDisp.h
+/// @brief NodeDisp のヘッダファイル
+/// @author Yusuke Matsunaga (松永 裕介)
+///
+/// Copyright (C) 2022 Yusuke Matsunaga
+/// All rights reserved.
+
+#include "NodeCollector.h"
+
+
+BEGIN_NAMESPACE_YM_BDD
+
+//////////////////////////////////////////////////////////////////////
+/// @class NodeDisp NodeDisp.h "NodeDisp.h"
+/// @brief BDD の内容を出力するためのクラス
+//////////////////////////////////////////////////////////////////////
+class NodeDisp :
+  public NodeCollector
+{
+public:
+
+  /// @brief コンストラクタ
+  NodeDisp(
+    ostream& s ///< [in] 出力ストリーム
+  ) : mS{s}
+  {
+  }
+
+  /// @brief デストラクタ
+  ~NodeDisp() = default;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 出力する．
+  void
+  write(
+    const vector<BddEdge>& root_list ///< [in] 根のリスト
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 枝の内容を出力する．
+  void
+  write_edge(
+    BddEdge edge ///< [in] 枝
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // 出力ストリーム
+  ostream& mS;
+
+};
+
+END_NAMESPACE_YM_BDD
+
+#endif // NODEDISP_H

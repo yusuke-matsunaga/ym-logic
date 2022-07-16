@@ -8,10 +8,10 @@
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/logic.h"
+#include "ym/bdd_nsdef.h"
 
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_YM_BDD
 
 class BddEdge;
 class BddMgrImpl;
@@ -131,7 +131,10 @@ public:
   Bdd
   operator^(
     const Bdd& right ///< [in] オペランド
-  ) const;
+  ) const
+  {
+    return xor_op(right);
+  }
 
   /// @brief コファクターを計算する．
   /// @return 結果を返す．
@@ -367,6 +370,15 @@ private:
     vector<BddEdge>& edge_list   ///< [out] 根の枝を格納するのリスト
   );
 
+  /// @brief If-Then-Else 演算
+  friend
+  Bdd
+  ite(
+    const Bdd& cond,   ///< [in] 条件
+    const Bdd& then_f, ///< [in] 条件が成り立ったとき選ばれる関数
+    const Bdd& else_f  ///< [in] 条件が成り立たなかった時選ばれる関数
+  );
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -381,7 +393,7 @@ private:
 
 };
 
-END_NAMESPACE_YM
+END_NAMESPACE_YM_BDD
 
 BEGIN_NAMESPACE_STD
 

@@ -8,16 +8,14 @@
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/logic.h"
+#include "ym/bdd_nsdef.h"
+#include "ym/BddVar.h"
 #include "BddNode.h"
 #include "BddNodeTable.h"
-#include "BddApplyTable.h"
 #include "BddEdge.h"
 
 
-BEGIN_NAMESPACE_YM
-
-class BddVar;
+BEGIN_NAMESPACE_YM_BDD
 
 //////////////////////////////////////////////////////////////////////
 /// @class BddMgrImpl BddMgrImpl.h "BddMgrImpl.h"
@@ -44,89 +42,6 @@ public:
   BddVar
   new_variable(
     const string& name = string{} ///< [in] 変数名(オプショナル)
-  );
-
-  /// @brief 論理積を計算する．
-  /// @return 結果の枝を返す．
-  BddEdge
-  and_op(
-    BddEdge left, ///< [in] オペランド1
-    BddEdge right ///< [in] オペランド2
-  );
-
-  /// @brief 論理和を計算する．
-  /// @return 結果の枝を返す．
-  BddEdge
-  or_op(
-    BddEdge left, ///< [in] オペランド1
-    BddEdge right ///< [in] オペランド2
-  );
-
-  /// @brief 排他的論理和を計算する．
-  /// @return 結果の枝を返す．
-  BddEdge
-  xor_op(
-    BddEdge left, ///< [in] オペランド1
-    BddEdge right ///< [in] オペランド2
-  );
-
-  /// @brief コファクターを計算する．
-  /// @return 結果の枝を返す．
-  BddEdge
-  cofactor_op(
-    BddEdge edge,   ///< [in] 対象の根の枝
-    SizeType index, ///< [in] 変数インデックス
-    bool inv        ///< [in] 反転フラグ
-  );
-
-  /// @brief サポートチェックを行う．
-  /// @retval true サポートだった
-  /// @retval false サポートではなかった．
-  bool
-  check_sup(
-    BddEdge edge,  ///< [in] 対象の根の枝
-    SizeType index ///< [in] 変数インデックス
-  );
-
-  /// @brief 対称変数のチェックを行う．
-  /// @retval true 対称だった
-  /// @retval false 対称ではなかった．
-  bool
-  check_sym(
-    BddEdge edge,    ///< [in] 対象の根の枝
-    SizeType index1, ///< [in] 変数インデックス1
-    SizeType index2, ///< [in] 変数インデックス1
-    bool inv         ///< [in] 反転フラグ
-  );
-
-  /// @brief ノード数を数える．
-  SizeType
-  count_size(
-    BddEdge edge    ///< [in] 対象の根の枝
-  );
-
-  /// @brief ノード数を数える．
-  SizeType
-  count_size(
-    const vector<BddEdge>& edge_list ///< [in] 対象の根の枝のリスト
-  );
-
-  /// @brief 内容を dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,                      ///< [in] 出力ストリーム
-    const vector<BddEdge>& edge_list ///< [in] 対象の根の枝のリスト
-  );
-
-  /// @brief 真理値表形式の文字列からBDDを作る．
-  ///
-  /// str の形式は以下の通り
-  /// - big endian: 0文字目が(1, 1, 1, 1)に対応する
-  /// - 最初の変数が LSB に対応する．
-  BddEdge
-  from_truth(
-    const string& str,             ///< [in] 01の文字列
-    const vector<BddVar>& var_list ///< [in] 変数のリスト
   );
 
   /// @brief インデックスから変数を返す．
@@ -165,24 +80,26 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief コファクターを計算する．
-  /// @return 結果の枝を返す．
-  BddEdge
-  cofactor_step(
-    BddEdge edge ///< [in] 対象の根の枝
+  /// @brief 該当するノードを探す．
+  ///
+  /// なければ nullptr を返す．
+  BddNode*
+  find(
+    SizeType index, ///< [in] インデックス
+    BddEdge edge0,  ///< [in] 0枝
+    BddEdge edge1   ///< [in] 1枝
+  ) const;
+
+  /// @brief ノードを登録する．
+  void
+  put(
+    BddNode* node ///< [in] 結果のノード
   );
 
-  /// @brief サポートチェックを行う．
-  bool
-  check_sup_step(
-    BddEdge edge
-  );
-
-  /// @brief from_truth の下請け関数
-  BddEdge
-  truth_step(
-    const string& str,
-    SizeType pos
+  /// @brief 表を拡張する．
+  void
+  extend(
+    SizeType req_size ///< [in] 要求サイズ
   );
 
 
@@ -194,29 +111,23 @@ private:
   // 変数のリスト
   vector<BddVar> mVarList;
 
-  // ノードテーブル
-  BddNodeTable mNodeTable;
+  // 表のサイズ
+  SizeType mSize{0};
 
-  // 演算結果テーブル
-  BddApplyTable mApplyTable;
+  // ハッシュ用のモジュロサイズ
+  SizeType mHashSize{0};
 
-  // コファクター用の演算結果テーブル
-  unordered_map<BddNode*, BddEdge> mCofacTable;
+  // 表の本体
+  BddNode** mTable{nullptr};
 
-  // コファクター用のインデックス
-  SizeType mCofacIndex;
+  // 格納されているノード数
+  SizeType mCount{0};
 
-  // コファクター用の極性
-  bool mCofacInv;
-
-  // truth 用の演算結果テーブル
-  unordered_map<string, BddEdge> mTruthTable;
-
-  // truth 用の変数リスト
-  vector<BddVar> mTruthVarList;
+  // テーブルを拡張する目安
+  SizeType mNextLimit;
 
 };
 
-END_NAMESPACE_YM
+END_NAMESPACE_YM_BDD
 
-#endif // BDDMGR_H
+#endif // BDDMGRIMPL_H

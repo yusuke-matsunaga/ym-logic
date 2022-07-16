@@ -183,7 +183,6 @@ TEST(BddTest, and1)
   BddVar v1 = bdd.root_decomp(f0, f1);
 
   EXPECT_EQ( var1, v1 );
-  EXPECT_EQ( var1.index(), v1.index() );
   EXPECT_TRUE( f0.is_zero() );
 
   Bdd f10;
@@ -193,6 +192,70 @@ TEST(BddTest, and1)
   EXPECT_EQ( var2, v2 );
   EXPECT_TRUE( f10.is_zero() );
   EXPECT_TRUE( f11.is_one() );
+}
+
+TEST(BddTest, or1)
+{
+  BddMgr mgr;
+  BddVar var1 = mgr.new_variable("var1");
+  BddVar var2 = mgr.new_variable("var2");
+
+  Bdd bdd1 = mgr.make_posi_literal(var1);
+  Bdd bdd2 = mgr.make_posi_literal(var2);
+
+  EXPECT_EQ( var1, bdd1.root_var() );
+  EXPECT_EQ( var2, bdd2.root_var() );
+
+  Bdd bdd = bdd1 | bdd2;
+
+  Bdd f0;
+  Bdd f1;
+  BddVar v1 = bdd.root_decomp(f0, f1);
+
+  EXPECT_EQ( var1, v1 );
+  EXPECT_TRUE( f1.is_one() );
+
+  Bdd f00;
+  Bdd f01;
+  BddVar v2 = f0.root_decomp(f00, f01);
+
+  EXPECT_EQ( var2, v2 );
+  EXPECT_TRUE( f00.is_zero() );
+  EXPECT_TRUE( f01.is_one() );
+}
+
+TEST(BddTest, xor1)
+{
+  BddMgr mgr;
+  BddVar var1 = mgr.new_variable("var1");
+  BddVar var2 = mgr.new_variable("var2");
+
+  Bdd bdd1 = mgr.make_posi_literal(var1);
+  Bdd bdd2 = mgr.make_posi_literal(var2);
+
+  EXPECT_EQ( var1, bdd1.root_var() );
+  EXPECT_EQ( var2, bdd2.root_var() );
+
+  Bdd bdd = bdd1 ^ bdd2;
+
+  Bdd f0;
+  Bdd f1;
+  BddVar v1 = bdd.root_decomp(f0, f1);
+  EXPECT_EQ( var1, v1 );
+
+  Bdd f00;
+  Bdd f01;
+  BddVar v2 = f0.root_decomp(f00, f01);
+  EXPECT_EQ( var2, v2 );
+  EXPECT_TRUE( f00.is_zero() );
+  EXPECT_TRUE( f01.is_one() );
+
+  Bdd f10;
+  Bdd f11;
+  BddVar v3 = f1.root_decomp(f10, f11);
+  EXPECT_EQ( var2, v3 );
+  EXPECT_TRUE( f10.is_one() );
+  EXPECT_TRUE( f11.is_zero() );
 }
 
 END_NAMESPACE_YM

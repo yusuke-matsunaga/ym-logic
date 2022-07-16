@@ -11,9 +11,10 @@
 #include "ym/Bdd.h"
 #include "ym/BddError.h"
 #include "BddMgrImpl.h"
+#include "TruthOp.h"
 
 
-BEGIN_NAMESPACE_YM
+BEGIN_NAMESPACE_YM_BDD
 
 // @brief コンストラクタ
 BddMgr::BddMgr(
@@ -90,8 +91,9 @@ BddMgr::from_truth(
   if ( (1 << ni) != str.size() ) {
     throw BddError{"BddMgr::from_truth(): wrong string length"};
   }
-  auto e = mImpl->from_truth(str, var_list);
+  TruthOp op{mImpl};
+  auto e = op.op_step(str, 0);
   return Bdd{mImpl, e};
 }
 
-END_NAMESPACE_YM
+END_NAMESPACE_YM_BDD
