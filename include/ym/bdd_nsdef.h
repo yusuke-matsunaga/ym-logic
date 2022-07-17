@@ -30,7 +30,6 @@ BEGIN_NAMESPACE_YM_BDD
 
 class Bdd;
 class BddMgr;
-class BddVar;
 
 END_NAMESPACE_YM_BDD
 
@@ -39,7 +38,6 @@ BEGIN_NAMESPACE_YM
 
 using nsBdd::Bdd;
 using nsBdd::BddMgr;
-using nsBdd::BddVar;
 
 END_NAMESPACE_YM
 

@@ -59,17 +59,6 @@ BddMgrImpl::~BddMgrImpl()
   delete [] mTable;
 }
 
-// @brief 変数を割り当てる．
-BddVar
-BddMgrImpl::new_variable(
-  const string& name
-)
-{
-  SizeType index = mVarList.size();
-  mVarList.push_back(BddVar{index, name});
-  return mVarList.back();
-}
-
 // @brief ノードを作る．
 BddEdge
 BddMgrImpl::new_node(

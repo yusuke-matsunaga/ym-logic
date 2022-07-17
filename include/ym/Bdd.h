@@ -9,13 +9,14 @@
 /// All rights reserved.
 
 #include "ym/bdd_nsdef.h"
+#include "ym/VarId.h"
+#include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
 
 class BddEdge;
 class BddMgrImpl;
-class BddVar;
 
 //////////////////////////////////////////////////////////////////////
 /// @class Bdd Bdd.h "ym/Bdd.h"
@@ -140,10 +141,10 @@ public:
   /// @return 結果を返す．
   Bdd
   cofactor(
-    BddVar var, ///< [in] 変数
-    bool inv    ///< [in] 反転フラグ
-                ///<  - false: 反転なし (正極性)
-                ///<  - true:  反転あり (負極性)
+    VarId var, ///< [in] 変数
+    bool inv   ///< [in] 反転フラグ
+               ///<  - false: 反転なし (正極性)
+               ///<  - true:  反転あり (負極性)
   ) const;
 
   /// @}
@@ -216,10 +217,10 @@ public:
   /// @return 自分自身への参照を返す．
   Bdd&
   cofactor_int(
-    BddVar var, ///< [in] 変数
-    bool inv    ///< [in] 反転フラグ
-                ///<  - false: 反転なし (正極性)
-                ///<  - true:  反転あり (負極性)
+    VarId var, ///< [in] 変数
+    bool inv   ///< [in] 反転フラグ
+               ///<  - false: 反転なし (正極性)
+               ///<  - true:  反転あり (負極性)
   );
 
   /// @}
@@ -257,22 +258,37 @@ public:
   /// @brief 与えられた変数がサポートの時 true を返す．
   bool
   check_sup(
-    BddVar var ///< [in] 変数
+    VarId var ///< [in] 変数
   ) const;
 
   /// @brief 与えられた変数に対して対称の時 true を返す．
   bool
   check_sym(
-    BddVar var1,     ///< [in] 変数1
-    BddVar var2,     ///< [in] 変数2
+    VarId var1,      ///< [in] 変数1
+    VarId var2,      ///< [in] 変数2
     bool inv = false ///< [in] 反転フラグ
   ) const;
+
+  /// @brief サポート変数のリストを得る．
+  /// @return サポート変数の論理積を表すBDDを返す．
+  Bdd
+  get_support() const;
+
+  /// @brief 1となるパスを求める．
+  /// @return 論理積を表すBDDを返す．
+  Bdd
+  get_onepath() const;
+
+  /// @brief 0となるパスを求める．
+  /// @return 論理積を表すBDDを返す．
+  Bdd
+  get_zeropath() const;
 
   /// @brief 根の変数とコファクターを求める．
   ///
   /// 自身が葉のノードの場合，不正な変数を返す．
   /// f0, f1 には自分自身が入る．
-  BddVar
+  VarId
   root_decomp(
     Bdd& f0, ///< [out] 負のコファクター
     Bdd& f1  ///< [out] 正のコファクター
@@ -281,7 +297,7 @@ public:
   /// @brief 根の変数を得る．
   ///
   /// 自身が葉のノードの場合，不正な変数を返す．
-  BddVar
+  VarId
   root_var() const;
 
   /// @brief 負のコファクターを返す．
@@ -296,6 +312,12 @@ public:
   /// 自身が葉のノードの場合，自分自身を返す．
   Bdd
   root_cofactor1() const;
+
+  /// @brief 評価を行う．
+  bool
+  eval(
+    const vector<bool>& inputs ///< [in] 入力値ベクタ
+  ) const;
 
   /// @brief 等価比較演算
   bool
@@ -322,6 +344,18 @@ public:
   size(
     const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
+
+  /// @brief 変数のリストに変換する．
+  ///
+  /// 変換できない時は例外を送出する．
+  vector<VarId>
+  to_varlist() const;
+
+  /// @brief リテラルのリストの変換する．
+  ///
+  /// 変換できない時は例外を送出する．
+  vector<Literal>
+  to_litlist() const;
 
   /// @brief ハッシュ値を返す．
   SizeType

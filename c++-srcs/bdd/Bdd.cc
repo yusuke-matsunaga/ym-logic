@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "ym/BddVar.h"
+#include "ym/BddError.h"
 #include "BddEdge.h"
 #include "BddMgrImpl.h"
 #include "BddNode.h"
@@ -18,6 +18,8 @@
 #include "NodeDisp.h"
 #include "DotGen.h"
 #include "IteOp.h"
+#include "SupOp.h"
+#include "OneOp.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -121,12 +123,12 @@ Bdd::xor_op(
 // @brief コファクターを計算する．
 Bdd
 Bdd::cofactor(
-  BddVar var,
+  VarId var,
   bool inv
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  CofactorOp op{mMgr, var.index(), inv};
+  CofactorOp op{mMgr, var.val(), inv};
   auto e = op.op_step(mRoot);
   return Bdd{mMgr, e};
 }
@@ -185,12 +187,12 @@ Bdd::xor_int(
 // @brief コファクターを計算して代入する．
 Bdd&
 Bdd::cofactor_int(
-  BddVar var,
+  VarId var,
   bool inv
 )
 {
   ASSERT_COND( mMgr != nullptr );
-  CofactorOp op{mMgr, var.index(), inv};
+  CofactorOp op{mMgr, var.val(), inv};
   auto e = op.op_step(mRoot);
   change_root(e);
   return *this;
@@ -213,27 +215,57 @@ Bdd::is_one() const
 // @brief 与えられた変数がサポートの時 true を返す．
 bool
 Bdd::check_sup(
-  BddVar var
+  VarId var
 ) const
 {
-  CheckSupOp op{var.index()};
+  CheckSupOp op{var.val()};
   return op.op_step(mRoot);
 }
 
 // @brief 与えられた変数に対して対称の時 true を返す．
 bool
 Bdd::check_sym(
-  BddVar var1,
-  BddVar var2,
+  VarId var1,
+  VarId var2,
   bool inv
 ) const
 {
-  CheckSymOp op{var1.index(), var2.index(), inv};
+  CheckSymOp op{var1.val(), var2.val(), inv};
   return op.op_step(mRoot);
 }
 
+// @brief サポート変数のリストを得る．
+Bdd
+Bdd::get_support() const
+{
+  ASSERT_COND( mMgr != nullptr );
+  SupOp op{mMgr};
+  auto e = op.op_step(mRoot);
+  return Bdd{mMgr, e};
+}
+
+// @brief 1となるパスを求める．
+Bdd
+Bdd::get_onepath() const
+{
+  ASSERT_COND( mMgr != nullptr );
+  OneOp op{mMgr};
+  auto e = op.op_step(mRoot);
+  return Bdd{mMgr, e};
+}
+
+// @brief 0となるパスを求める．
+Bdd
+Bdd::get_zeropath() const
+{
+  ASSERT_COND( mMgr != nullptr );
+  OneOp op{mMgr};
+  auto e = op.op_step(~BddEdge{mRoot});
+  return Bdd{mMgr, e};
+}
+
 // @brief 根の変数とコファクターを求める．
-BddVar
+VarId
 Bdd::root_decomp(
   Bdd& f0,
   Bdd& f1
@@ -245,28 +277,28 @@ Bdd::root_decomp(
   if ( node == nullptr ) {
     f0 = *this;
     f1 = *this;
-    return BddVar::make_invalid();
+    return VarId::illegal();
   }
   else {
     auto oinv = root.inv();
     f0 = Bdd{mMgr, node->edge0(oinv)};
     f1 = Bdd{mMgr, node->edge1(oinv)};
-    return mMgr->var(node->index());
+    return VarId{node->index()};
   }
 }
 
 // @brief 根の変数を得る．
-BddVar
+VarId
 Bdd::root_var() const
 {
   ASSERT_COND( mMgr != nullptr );
   BddEdge root{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
-    return BddVar::make_invalid();
+    return VarId::illegal();
   }
   else {
-    return mMgr->var(node->index());
+    return VarId{node->index()};
   }
 }
 
@@ -299,6 +331,32 @@ Bdd::root_cofactor1() const
   else {
     auto oinv = root.inv();
     return Bdd{mMgr, node->edge1(oinv)};
+  }
+}
+
+// @brief 評価を行う．
+bool
+Bdd::eval(
+  const vector<bool>& inputs ///< [in] 入力値ベクタ
+) const
+{
+  BddEdge edge{mRoot};
+  for ( ; ; ) {
+    if ( edge.is_zero() ) {
+      return false;
+    }
+    if ( edge.is_one() ) {
+      return true;
+    }
+    auto node = edge.node();
+    auto inv = edge.inv();
+    auto index = node->index();
+    if ( inputs[index] ) {
+      edge = node->edge1(inv);
+    }
+    else {
+      edge = node->edge0(inv);
+    }
   }
 }
 
@@ -336,6 +394,55 @@ Bdd::size(
   (void) root_list(bdd_list, edge_list);
   NodeCounter nc;
   return nc.count(edge_list);
+}
+
+// @brief 変数のリストに変換する．
+vector<VarId>
+Bdd::to_varlist() const
+{
+  ASSERT_COND( mMgr != nullptr );
+  BddEdge edge{mRoot};
+  vector<VarId> var_list;
+  while ( !edge.is_const() ) {
+    auto node = edge.node();
+    if ( edge.inv() ) {
+      throw BddError{"Bdd::to_varlist(): Not a variable list."};
+    }
+    var_list.push_back(VarId{node->index()});
+    if ( !node->edge0().is_zero() ) {
+      throw BddError{"Bdd::to_varlist(): Not a variable list."};
+    }
+    edge = node->edge1();
+  }
+  return var_list;
+}
+
+// @brief リテラルのリストの変換する．
+vector<Literal>
+Bdd::to_litlist() const
+{
+  ASSERT_COND( mMgr != nullptr );
+  BddEdge edge{mRoot};
+  vector<Literal> lit_list;
+  while ( !edge.is_const() ) {
+    auto node = edge.node();
+    auto inv = edge.inv();
+    auto e0 = node->edge0(inv);
+    auto e1 = node->edge1(inv);
+    VarId var{node->index()};
+    if ( e0.is_zero() ) {
+      lit_list.push_back(Literal{var, false});
+      edge = e1;
+    }
+    else if ( e1.is_zero() ) {
+      lit_list.push_back(Literal{var, true});
+      edge = e0;
+    }
+    else {
+      throw BddError{"Bdd::to_litlist(): Not a literal list."};
+    }
+  }
+  return lit_list;
 }
 
 // @brief ハッシュ値を返す．

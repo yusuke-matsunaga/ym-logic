@@ -141,7 +141,7 @@ target_include_directories( logic_GenFactor_test
   )
 
 ym_add_gtest( logic_BddTest
-  bdd/bdd_test.cc
+  bdd/BddTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )

@@ -44,18 +44,11 @@ dot_test(
     }
 
     BddMgr mgr;
-    vector<BddVar> var_list;
     string buf;
     SizeType ni = 0;
     vector<Bdd> func_list;
     while ( getline(s, buf) ) {
-      SizeType n = buf.size();
-      ni = log2(n);
-      ASSERT_COND( (1 << ni) == n );
-      while ( var_list.size() < ni ) {
-	var_list.push_back(mgr.new_variable());
-      }
-      auto f = mgr.from_truth(buf, var_list);
+      auto f = mgr.from_truth(buf);
       func_list.push_back(f);
     }
     Bdd::gen_dot(cout, func_list);

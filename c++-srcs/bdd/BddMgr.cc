@@ -7,7 +7,6 @@
 /// All rights reserved.
 
 #include "ym/BddMgr.h"
-#include "ym/BddVar.h"
 #include "ym/Bdd.h"
 #include "ym/BddError.h"
 #include "BddMgrImpl.h"
@@ -28,15 +27,6 @@ BddMgr::~BddMgr()
   delete mImpl;
 }
 
-// @brief 変数を割り当てる．
-BddVar
-BddMgr::new_variable(
-  const string& name
-)
-{
-  return mImpl->new_variable(name);
-}
-
 // @brief 恒儀関数を作る．
 Bdd
 BddMgr::make_zero()
@@ -54,18 +44,18 @@ BddMgr::make_one()
 // @brief リテラル関数を作る．
 Bdd
 BddMgr::make_literal(
-  BddVar var,
+  VarId var,
   bool inv
 )
 {
-  auto e = mImpl->new_node(var.index(), BddEdge::make_zero(), BddEdge::make_one());
+  auto e = mImpl->new_node(var.val(), BddEdge::make_zero(), BddEdge::make_one());
   return Bdd{mImpl, e * inv};
 }
 
 // @brief 肯定のリテラル関数を作る．
 Bdd
 BddMgr::make_posi_literal(
-  BddVar var
+  VarId var
 )
 {
   return make_literal(var, false);
@@ -74,7 +64,7 @@ BddMgr::make_posi_literal(
 // @brief 否定のリテラル関数を作る．
 Bdd
 BddMgr::make_nega_literal(
-  BddVar var
+  VarId var
 )
 {
   return make_literal(var, true);
@@ -83,14 +73,9 @@ BddMgr::make_nega_literal(
 // @brief 真理値表形式の文字列からBDDを作る．
 Bdd
 BddMgr::from_truth(
-  const string& str,
-  const vector<BddVar>& var_list
+  const string& str
 )
 {
-  SizeType ni = var_list.size();
-  if ( (1 << ni) != str.size() ) {
-    throw BddError{"BddMgr::from_truth(): wrong string length"};
-  }
   TruthOp op{mImpl};
   auto e = op.op_step(str, 0);
   return Bdd{mImpl, e};

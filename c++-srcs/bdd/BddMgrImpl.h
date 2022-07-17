@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/bdd_nsdef.h"
-#include "ym/BddVar.h"
 #include "BddNode.h"
 #include "BddEdge.h"
 
@@ -35,23 +34,6 @@ public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief 変数を割り当てる．
-  /// @return 変数を返す．
-  BddVar
-  new_variable(
-    const string& name = string{} ///< [in] 変数名(オプショナル)
-  );
-
-  /// @brief インデックスから変数を返す．
-  const BddVar&
-  var(
-    SizeType index ///< [in] 変数インデックス
-  ) const
-  {
-    ASSERT_COND( 0 <= index && index < mVarList.size() );
-    return mVarList[index];
-  }
 
   /// @brief ノードを作る．
   BddEdge
@@ -106,9 +88,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
-
-  // 変数のリスト
-  vector<BddVar> mVarList;
 
   // 表のサイズ
   SizeType mSize{0};
