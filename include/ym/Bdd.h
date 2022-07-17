@@ -297,6 +297,12 @@ public:
   Bdd
   root_cofactor1() const;
 
+  /// @brief 等価比較演算
+  bool
+  operator==(
+    const Bdd& right ///< [in] オペランド
+  ) const;
+
   /// @}
   //////////////////////////////////////////////////////////////////////
 
@@ -392,6 +398,17 @@ private:
   ympuint mRoot;
 
 };
+
+/// @brief 非等価比較演算
+inline
+bool
+operator!=(
+  const Bdd& left, ///< [in] オペランド1
+  const Bdd& right ///< [in] オペランド2
+)
+{
+  return !left.operator==(right);
+}
 
 END_NAMESPACE_YM_BDD
 

@@ -11,7 +11,6 @@
 #include "ym/bdd_nsdef.h"
 #include "ym/BddVar.h"
 #include "BddNode.h"
-#include "BddNodeTable.h"
 #include "BddEdge.h"
 
 

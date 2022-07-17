@@ -302,6 +302,16 @@ Bdd::root_cofactor1() const
   }
 }
 
+// @brief 等価比較演算
+bool
+Bdd::operator==(
+  const Bdd& right ///< [in] オペランド
+) const
+{
+  ASSERT_COND( mMgr == right.mMgr );
+  return mRoot == right.mRoot;
+}
+
 // @brief ノード数を返す．
 SizeType
 Bdd::size() const
