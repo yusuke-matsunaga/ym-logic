@@ -55,11 +55,22 @@ public:
     BddEdge edge ///< [in] 対象の枝
   );
 
+  /// @brief ガーベージコレクションを行う．
+  void
+  garbage_collection();
+
   /// @brief ノード数を返す．
   SizeType
   node_num()
   {
     return mNodeNum;
+  }
+
+  /// @brief ガーベージノード数を返す．
+  SizeType
+  garbage_num()
+  {
+    return mGarbageNum;
   }
 
   /// @brief GC を起動するしきい値を返す．
@@ -76,6 +87,20 @@ public:
   )
   {
     mGcLimit = limit;
+  }
+
+  /// @brief GC を許可する．
+  void
+  enable_gc()
+  {
+    mGcEnable = true;
+  }
+
+  /// @brief GC を禁止する．
+  void
+  disable_gc()
+  {
+    mGcEnable = false;
   }
 
 
@@ -129,10 +154,13 @@ private:
   SizeType mNextLimit;
 
   // ガーベージノード数
-  SizeType mGarbageNum;
+  SizeType mGarbageNum{0};
 
   // GC を起こすしきい値
-  SizeType mGcLimit;
+  SizeType mGcLimit{1024};
+
+  // GC の許可フラグ
+  bool mGcEnable;
 
 };
 

@@ -39,7 +39,7 @@ public:
     const Bdd& src ///< [in] コピー元のBDD
   );
 
-  /// @brief 代入演算子
+  /// @brief コピー代入演算子
   Bdd&
   operator=(
     const Bdd& src ///< [in] コピー元のBDD

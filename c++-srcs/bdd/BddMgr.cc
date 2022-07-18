@@ -104,4 +104,18 @@ BddMgr::set_gc_limit(
   mImpl->set_gc_limit(limit);
 }
 
+// @brief GC を許可する．
+void
+BddMgr::enable_gc()
+{
+  mImpl->enable_gc();
+}
+
+// @brief GC を禁止する．
+void
+BddMgr::disable_gc()
+{
+  mImpl->disable_gc();
+}
+
 END_NAMESPACE_YM_BDD

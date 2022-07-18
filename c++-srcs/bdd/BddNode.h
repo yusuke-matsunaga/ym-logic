@@ -21,7 +21,6 @@ BEGIN_NAMESPACE_YM_BDD
 class BddNode
 {
   friend class BddMgrImpl;
-  friend class BddNodeTable;
 
 private:
 
@@ -37,7 +36,7 @@ private:
   }
 
   /// @brief デストラクタ
-  ~BddNode();
+  ~BddNode() = default;
 
 
 public:

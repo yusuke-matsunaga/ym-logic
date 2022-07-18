@@ -36,32 +36,34 @@ Bdd::Bdd(
 ) : mMgr{mgr},
     mRoot{root.body()}
 {
+  if ( mMgr != nullptr ) {
+    mMgr->activate(mRoot);
+  }
 }
 
 // @brief コピーコンストラクタ
 Bdd::Bdd(
   const Bdd& src
-) : mMgr{src.mMgr},
-    mRoot{src.mRoot}
+) : Bdd{src.mMgr, src.mRoot}
 {
-  if ( mMgr != nullptr ) {
-    mMgr->activate(mRoot);
-  }
+  // いわゆる delegate constructor
 }
 
-// @brief 代入演算子
+// @brief コピー代入演算子
 Bdd&
 Bdd::operator=(
   const Bdd& src
 )
 {
-  if ( mMgr != nullptr ) {
-    mMgr->deactivate(mRoot);
-  }
-  mMgr = src.mMgr;
-  mRoot = src.mRoot;
-  if ( mMgr != nullptr ) {
-    mMgr->activate(mRoot);
+  if ( mRoot != src.mRoot ) {
+    if ( mMgr != nullptr ) {
+      mMgr->deactivate(mRoot);
+    }
+    mMgr = src.mMgr;
+    mRoot = src.mRoot;
+    if ( mMgr != nullptr ) {
+      mMgr->activate(mRoot);
+    }
   }
   return *this;
 }
@@ -71,6 +73,7 @@ Bdd::~Bdd()
 {
   if ( mMgr != nullptr ) {
     mMgr->deactivate(mRoot);
+    mMgr->garbage_collection();
   }
 }
 

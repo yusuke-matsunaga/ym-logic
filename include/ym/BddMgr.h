@@ -87,6 +87,16 @@ public:
     SizeType limit
   );
 
+  /// @brief GC を許可する．
+  ///
+  /// ただちに GC が起動するわけではない．
+  void
+  enable_gc();
+
+  /// @brief GC を禁止する．
+  void
+  disable_gc();
+
 
 private:
   //////////////////////////////////////////////////////////////////////

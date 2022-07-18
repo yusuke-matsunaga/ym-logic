@@ -17,7 +17,7 @@ def is_prime(x):
             return False
     return True
 
-for b in range(10, 21):
+for b in range(10, 31):
     n = 1 << b
     while not is_prime(n):
         n -= 1

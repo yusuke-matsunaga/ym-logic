@@ -27,6 +27,16 @@ SizeType tablesize[] = {
   262139,
   524287,
   1048573,
+  2097143,
+  4194301,
+  8388593,
+  16777213,
+  33554393,
+  67108859,
+  134217689,
+  268435399,
+  536870909,
+  1073741789,
   0
 };
 
@@ -81,6 +91,7 @@ BddMgrImpl::new_node(
   auto node = find(index, edge0, edge1);
   if ( node == nullptr ) {
     // なかったので新規に作る．
+    ++ mGarbageNum;
     node = new BddNode{index, edge0, edge1};
     // テーブルに登録する．
     put(node);
@@ -97,6 +108,11 @@ BddMgrImpl::activate(
   auto node = edge.node();
   if ( node != nullptr ) {
     ++ node->mRefCount;
+    if ( node->mRefCount == 1 ) {
+      -- mGarbageNum;
+      activate(node->edge0());
+      activate(node->edge1());
+    }
   }
 }
 
@@ -109,6 +125,34 @@ BddMgrImpl::deactivate(
   auto node = edge.node();
   if ( node != nullptr ) {
     -- node->mRefCount;
+    if ( node->mRefCount == 0 ) {
+      ++ mGarbageNum;
+      deactivate(node->edge0());
+      deactivate(node->edge1());
+    }
+  }
+}
+
+// @brief ガーベージコレクションを行う．
+void
+BddMgrImpl::garbage_collection()
+{
+  if ( mGcEnable && mGarbageNum >= mGcLimit ) {
+    for ( SizeType i = 0; i < mHashSize; ++ i ) {
+      BddNode** pprev = &mTable[i];
+      BddNode* node;
+      while ( (node = *pprev) != nullptr ) {
+	if ( node->mRefCount == 0 ) {
+	  *pprev = node->mLink;
+	  delete node;
+	}
+	else {
+	  pprev = &node->mLink;
+	}
+      }
+    }
+    mNodeNum -= mGarbageNum;
+    mGarbageNum = 0;
   }
 }
 
