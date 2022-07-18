@@ -86,6 +86,12 @@ public:
     return invert();
   }
 
+  /// @brief 極性をかけ合わせる．
+  Bdd
+  operator*(
+    bool inv ///< [in] 反転フラグ
+  );
+
   /// @brief 論理積を返す．
   /// @return 結果を返す．
   Bdd
@@ -161,6 +167,13 @@ public:
   /// @return 自分自身への参照を返す．
   Bdd&
   invert_int();
+
+  /// @brief 極性をかけ合わせて代入する．
+  /// @return 自分自身への参照を返す．
+  Bdd&
+  operator*=(
+    bool inv ///< [in] 反転フラグ
+  );
 
   /// @brief 論理積を計算して代入する．
   /// @return 自分自身への参照を返す．

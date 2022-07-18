@@ -45,15 +45,38 @@ public:
 
   /// @brief ノード(枝)の参照回数を増やす．
   void
-  inc_ref(
+  activate(
     BddEdge edge ///< [in] 対象の枝
   );
 
   /// @brief ノード(枝)の参照回数を減らす．
   void
-  dec_ref(
+  deactivate(
     BddEdge edge ///< [in] 対象の枝
   );
+
+  /// @brief ノード数を返す．
+  SizeType
+  node_num()
+  {
+    return mNodeNum;
+  }
+
+  /// @brief GC を起動するしきい値を返す．
+  SizeType
+  gc_limit()
+  {
+    return mGcLimit;
+  }
+
+  /// @brief GC を起動するしきい値を設定する．
+  void
+  set_gc_limit(
+    SizeType limit
+  )
+  {
+    mGcLimit = limit;
+  }
 
 
 private:
@@ -93,16 +116,23 @@ private:
   SizeType mSize{0};
 
   // ハッシュ用のモジュロサイズ
+  // 素数になるように調整されている．
   SizeType mHashSize{0};
 
   // 表の本体
   BddNode** mTable{nullptr};
 
   // 格納されているノード数
-  SizeType mCount{0};
+  SizeType mNodeNum{0};
 
   // テーブルを拡張する目安
   SizeType mNextLimit;
+
+  // ガーベージノード数
+  SizeType mGarbageNum;
+
+  // GC を起こすしきい値
+  SizeType mGcLimit;
 
 };
 

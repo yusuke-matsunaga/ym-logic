@@ -45,7 +45,7 @@ Bdd::Bdd(
     mRoot{src.mRoot}
 {
   if ( mMgr != nullptr ) {
-    mMgr->inc_ref(mRoot);
+    mMgr->activate(mRoot);
   }
 }
 
@@ -56,12 +56,12 @@ Bdd::operator=(
 )
 {
   if ( mMgr != nullptr ) {
-    mMgr->dec_ref(mRoot);
+    mMgr->deactivate(mRoot);
   }
   mMgr = src.mMgr;
   mRoot = src.mRoot;
   if ( mMgr != nullptr ) {
-    mMgr->inc_ref(mRoot);
+    mMgr->activate(mRoot);
   }
   return *this;
 }
@@ -70,7 +70,7 @@ Bdd::operator=(
 Bdd::~Bdd()
 {
   if ( mMgr != nullptr ) {
-    mMgr->dec_ref(mRoot);
+    mMgr->deactivate(mRoot);
   }
 }
 
@@ -79,6 +79,15 @@ Bdd
 Bdd::invert() const
 {
   return Bdd{mMgr, ~BddEdge{mRoot}};
+}
+
+// @brief 極性をかけ合わせる．
+Bdd
+Bdd::operator*(
+  bool inv
+)
+{
+  return Bdd{mMgr, BddEdge{mRoot} * inv};
 }
 
 // @brief 論理積を返す．
@@ -137,8 +146,25 @@ Bdd::cofactor(
 Bdd&
 Bdd::invert_int()
 {
-  // これは BddMgr を介さない．
-  mRoot = ~mRoot;
+  if ( mMgr != nullptr ) {
+    // 実はこれは BddMgr を介さない．
+    // ただ不正値の時には演算を行わない．
+    mRoot = ~mRoot;
+  }
+  return *this;
+}
+
+// @brief 極性をかけ合わせて代入する．
+Bdd&
+Bdd::operator*=(
+  bool inv
+)
+{
+  if ( mMgr != nullptr ) {
+    // 実はこれは BddMgr を介さない．
+    // ただ不正値の時には演算を行わない．
+    mRoot *= inv;
+  }
   return *this;
 }
 
@@ -461,8 +487,8 @@ Bdd::change_root(
 )
 {
   if ( mRoot != new_root ) {
-    mMgr->dec_ref(mRoot);
-    mMgr->inc_ref(new_root);
+    mMgr->deactivate(mRoot);
+    mMgr->activate(new_root);
     mRoot = new_root.body();
   }
 }

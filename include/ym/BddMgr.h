@@ -73,6 +73,20 @@ public:
     const string& str ///< [in] 01の文字列
   );
 
+  /// @brief ノード数を返す．
+  SizeType
+  node_num() const;
+
+  /// @brief GC を起動するしきい値を返す．
+  SizeType
+  gc_limit() const;
+
+  /// @brief GC を起動するしきい値を設定する．
+  void
+  set_gc_limit(
+    SizeType limit
+  );
+
 
 private:
   //////////////////////////////////////////////////////////////////////

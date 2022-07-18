@@ -90,7 +90,7 @@ BddMgrImpl::new_node(
 
 // @brief ノード(枝)の参照回数を増やす．
 void
-BddMgrImpl::inc_ref(
+BddMgrImpl::activate(
   BddEdge edge
 )
 {
@@ -102,7 +102,7 @@ BddMgrImpl::inc_ref(
 
 // @brief ノード(枝)の参照回数を減らす．
 void
-BddMgrImpl::dec_ref(
+BddMgrImpl::deactivate(
   BddEdge edge
 )
 {
@@ -140,7 +140,7 @@ BddMgrImpl::put(
   BddNode* node
 )
 {
-  if ( mCount >= mNextLimit ) {
+  if ( mNodeNum >= mNextLimit ) {
     // テーブルを拡張する．
     extend(mSize * 2);
   }
@@ -149,7 +149,7 @@ BddMgrImpl::put(
   auto prev = mTable[pos];
   mTable[pos] = node;
   node->mLink = prev;
-  ++ mCount;
+  ++ mNodeNum;
 }
 
 // @brief 表を拡張する．

@@ -81,4 +81,27 @@ BddMgr::from_truth(
   return Bdd{mImpl, e};
 }
 
+// @brief ノード数を返す．
+SizeType
+BddMgr::node_num() const
+{
+  return mImpl->node_num();
+}
+
+// @brief GC を起動するしきい値を返す．
+SizeType
+BddMgr::gc_limit() const
+{
+  return mImpl->gc_limit();
+}
+
+// @brief GC を起動するしきい値を設定する．
+void
+BddMgr::set_gc_limit(
+  SizeType limit
+)
+{
+  mImpl->set_gc_limit(limit);
+}
+
 END_NAMESPACE_YM_BDD
