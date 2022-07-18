@@ -79,7 +79,7 @@ BddTest::check(
   vector<bool> inputs(ni);
   for ( SizeType p = 0; p < n; ++ p ) {
     for ( SizeType i = 0; i < ni; ++ i ) {
-      if ( p & (1 << i) ) {
+      if ( p & (1 << (ni - i - 1)) ) {
 	inputs[i] = true;
       }
       else {
@@ -102,6 +102,9 @@ BddTest::check(
     buf << ")";
     EXPECT_EQ( exp_val, val ) << buf.str();
   }
+
+  auto str = bdd.to_truth(ni);
+  EXPECT_EQ( exp_str, str );
 }
 
 
@@ -290,7 +293,21 @@ TEST_F(BddTest, func1)
   Bdd var3 = literal(2);
   Bdd bdd = (var1 & ~var2) | var3;
 
-  check(bdd, "11110010");
+  check(bdd, "10111010");
+}
+
+TEST_F(BddTest, from_truth1)
+{
+  const char* exp_str = "10010110";
+  Bdd bdd = mMgr.from_truth(exp_str);
+  check(bdd, exp_str);
+}
+
+TEST_F(BddTest, from_truth2)
+{
+  const char* exp_str = "10010101";
+  Bdd bdd = mMgr.from_truth(exp_str);
+  check(bdd, exp_str);
 }
 
 END_NAMESPACE_YM

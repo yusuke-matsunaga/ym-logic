@@ -370,6 +370,14 @@ public:
   vector<Literal>
   to_litlist() const;
 
+  /// @brief 内容を真理値表の文字列に変換する．
+  ///
+  /// 実際の変数が input_num を超えた時の動作は不定
+  string
+  to_truth(
+    SizeType input_num ///< [in] 入力変数の数
+  ) const;
+
   /// @brief ハッシュ値を返す．
   SizeType
   hash() const;

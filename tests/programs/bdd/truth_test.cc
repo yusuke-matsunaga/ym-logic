@@ -55,6 +55,7 @@ truth_test(
       ni = log2(n);
       ASSERT_COND( (1 << ni) == n );
       auto f = mgr.from_truth(buf);
+      ASSERT_COND( f.to_truth(ni) == buf );
       func_list.push_back(f);
       nsingle += f.size();
     }
