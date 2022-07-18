@@ -98,7 +98,11 @@ public:
   or_step(
     BddEdge left,
     BddEdge right
-  );
+  )
+  {
+    // De Morgan の法則
+    return ~and_step(~left, ~right);
+  }
 
   /// @brief XOR演算を行う．
   BddEdge
@@ -118,9 +122,6 @@ private:
 
   // AND用のテーブル
   unordered_map<ApplyKey, BddEdge> mAndTable;
-
-  // OR用のテーブル
-  unordered_map<ApplyKey, BddEdge> mOrTable;
 
   // XOR用のテーブル
   unordered_map<ApplyKey, BddEdge> mXorTable;

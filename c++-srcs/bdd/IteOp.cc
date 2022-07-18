@@ -175,58 +175,6 @@ IteOp::and_step(
   return result;
 }
 
-// @brief OR演算を行う．
-BddEdge
-IteOp::or_step(
-  BddEdge left,
-  BddEdge right
-)
-{
-  // trivial case のチェック
-
-  // case 1: 片方が 1 なら 1 を返す．
-  if ( left.is_one() || right.is_one() ) {
-    return BddEdge::make_one();
-  }
-
-  // case 2: 片方が 0 なら他方を返す．
-  if ( left.is_zero() ) {
-    return right;
-  }
-  if ( right.is_zero() ) {
-    return left;
-  }
-
-  // case 3: 等しかったらそのまま返す．
-  if ( left == right ) {
-    return left;
-  }
-
-  // case 4: 極性違いで等しかったら 1 を返す．
-  if ( left.node() == right.node() ) {
-    return BddEdge::make_one();
-  }
-
-  // 演算結果テーブルを調べる．
-  ApplyKey key{left, right};
-  if ( mOrTable.count(key) > 0 ) {
-    return mOrTable.at(key);
-  }
-
-  // 見つからなかったので実際に apply 演算を行う．
-  // 先頭のインデックスで分解する．
-  BddEdge left0, left1;
-  BddEdge right0, right1;
-  auto top = decomp(left, right,
-		    left0, left1,
-		    right0, right1);
-  auto ans0 = or_step(left0, right0);
-  auto ans1 = or_step(left1, right1);
-  auto result = new_node(top, ans0, ans1);
-  mOrTable.emplace(key, result);
-  return result;
-}
-
 // @brief XOR演算を行う．
 BddEdge
 IteOp::xor_step(
