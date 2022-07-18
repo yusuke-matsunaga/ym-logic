@@ -8,7 +8,7 @@
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ApplyKey.h"
+#include "Apply2Key.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -87,7 +87,7 @@ private:
   unordered_map<BddNode*, bool> mTable1;
 
   // 演算結果テーブル2
-  unordered_map<ApplyKey, bool> mTable2;
+  unordered_map<Apply2Key, bool> mTable2;
 };
 
 END_NAMESPACE_YM_BDD

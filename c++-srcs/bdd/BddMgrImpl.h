@@ -11,6 +11,8 @@
 #include "ym/bdd_nsdef.h"
 #include "BddNode.h"
 #include "BddEdge.h"
+#include "Apply2Key.h"
+#include "Apply3Key.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -34,6 +36,53 @@ public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief AND 演算を行う．
+  BddEdge
+  and_op(
+    BddEdge left,
+    BddEdge right
+  )
+  {
+    mAndTable.clear();
+    return and_step(left, right);
+  }
+
+  /// @brief OR 演算を行う．
+  BddEdge
+  or_op(
+    BddEdge left,
+    BddEdge right
+  )
+  {
+    // DeMorgan の法則
+    return ~and_op(~left, ~right);
+  }
+
+  /// @brief XOR 演算を行う．
+  BddEdge
+  xor_op(
+    BddEdge left,
+    BddEdge right
+  )
+  {
+    mXorTable.clear();
+    return xor_step(left, right);
+  }
+
+  /// @brief ITE 演算を行う．
+  BddEdge
+  ite_op(
+    BddEdge e0,
+    BddEdge e1,
+    BddEdge e2
+  )
+  {
+    mAndTable.clear();
+    mXorTable.clear();
+    mIteTable.clear();
+    return ite_step(e0, e1, e2);
+  }
 
   /// @brief ノードを作る．
   BddEdge
@@ -109,20 +158,37 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 該当するノードを探す．
-  ///
-  /// なければ nullptr を返す．
-  BddNode*
-  find(
-    SizeType index, ///< [in] インデックス
-    BddEdge edge0,  ///< [in] 0枝
-    BddEdge edge1   ///< [in] 1枝
-  ) const;
+  /// @brief AND 演算を行う．
+  BddEdge
+  and_step(
+    BddEdge left,
+    BddEdge right
+  );
 
-  /// @brief ノードを登録する．
-  void
-  put(
-    BddNode* node ///< [in] 結果のノード
+  /// @brief OR 演算を行う．
+  BddEdge
+  or_step(
+    BddEdge left,
+    BddEdge right
+  )
+  {
+    // DeMorgan の法則
+    return ~and_step(~left, ~right);
+  }
+
+  /// @brief XOR 演算を行う．
+  BddEdge
+  xor_step(
+    BddEdge left,
+    BddEdge right
+  );
+
+  /// @brief ITE 演算を行う．
+  BddEdge
+  ite_step(
+    BddEdge e0,
+    BddEdge e1,
+    BddEdge e2
   );
 
   /// @brief 表を拡張する．
@@ -161,6 +227,15 @@ private:
 
   // GC の許可フラグ
   bool mGcEnable;
+
+  // AND用のテーブル
+  unordered_map<Apply2Key, BddEdge> mAndTable;
+
+  // XOR用のテーブル
+  unordered_map<Apply2Key, BddEdge> mXorTable;
+
+  // ITE用のテーブル
+  unordered_map<Apply3Key, BddEdge> mIteTable;
 
 };
 

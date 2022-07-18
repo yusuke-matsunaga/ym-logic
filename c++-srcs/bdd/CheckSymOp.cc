@@ -73,7 +73,7 @@ CheckSymOp::op_step2(
     return false;
   }
 
-  ApplyKey key{edge0, edge1};
+  Apply2Key key{edge0, edge1};
   if ( mTable2.count(key) > 0 ) {
     return mTable2.at(key);
   }

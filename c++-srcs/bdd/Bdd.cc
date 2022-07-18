@@ -17,7 +17,6 @@
 #include "NodeCounter.h"
 #include "NodeDisp.h"
 #include "DotGen.h"
-#include "IteOp.h"
 #include "SupOp.h"
 #include "OneOp.h"
 
@@ -101,8 +100,7 @@ Bdd::and_op(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  IteOp op{mMgr};
-  auto e = op.and_step(mRoot, right.mRoot);
+  auto e = mMgr->and_op(mRoot, right.mRoot);
   return Bdd{mMgr, e};
 }
 
@@ -114,8 +112,7 @@ Bdd::or_op(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  IteOp op{mMgr};
-  auto e = op.or_step(mRoot, right.mRoot);
+  auto e = mMgr->or_op(mRoot, right.mRoot);
   return Bdd{mMgr, e};
 }
 
@@ -127,8 +124,7 @@ Bdd::xor_op(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  IteOp op{mMgr};
-  auto e = op.xor_step(mRoot, right.mRoot);
+  auto e = mMgr->xor_op(mRoot, right.mRoot);
   return Bdd{mMgr, e};
 }
 
@@ -179,8 +175,7 @@ Bdd::and_int(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  IteOp op{mMgr};
-  auto e = op.and_step(mRoot, right.mRoot);
+  auto e = mMgr->and_op(mRoot, right.mRoot);
   change_root(e);
   return *this;
 }
@@ -193,8 +188,7 @@ Bdd::or_int(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  IteOp op{mMgr};
-  auto e = op.or_step(mRoot, right.mRoot);
+  auto e = mMgr->or_op(mRoot, right.mRoot);
   change_root(e);
   return *this;
 }
@@ -207,8 +201,7 @@ Bdd::xor_int(
 {
   ASSERT_COND( mMgr != nullptr );
   ASSERT_COND( mMgr == right.mMgr );
-  IteOp op{mMgr};
-  auto e = op.xor_step(mRoot, right.mRoot);
+  auto e = mMgr->xor_op(mRoot, right.mRoot);
   change_root(e);
   return *this;
 }
@@ -567,8 +560,7 @@ ite(
   ASSERT_COND( mgr != nullptr );
   ASSERT_COND( mgr == then_f.mMgr );
   ASSERT_COND( mgr == else_f.mMgr );
-  IteOp op{mgr};
-  auto e = op.ite_step(cond.mRoot, then_f.mRoot, else_f.mRoot);
+  auto e = mgr->ite_op(cond.mRoot, then_f.mRoot, else_f.mRoot);
   return Bdd{mgr, e};
 }
 
