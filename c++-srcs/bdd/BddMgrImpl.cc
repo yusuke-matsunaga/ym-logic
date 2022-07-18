@@ -101,9 +101,9 @@ BddMgrImpl::and_step(
   }
 
   // 演算結果テーブルを調べる．
-  Apply2Key key{left, right};
-  if ( mAndTable.count(key) > 0 ) {
-    return mAndTable.at(key);
+  Apply3Key key{left, right, BddEdge::make_zero()};
+  if ( mIteTable.count(key) > 0 ) {
+    return mIteTable.at(key);
   }
 
   // 見つからなかったので実際に apply 演算を行う．
@@ -116,7 +116,7 @@ BddMgrImpl::and_step(
   auto ans0 = and_step(left0, right0);
   auto ans1 = and_step(left1, right1);
   auto result = new_node(top, ans0, ans1);
-  mAndTable.emplace(key, result);
+  mIteTable.emplace(key, result);
   return result;
 }
 
@@ -156,9 +156,9 @@ BddMgrImpl::xor_step(
   }
 
   // 演算結果テーブルを調べる．
-  Apply2Key key{left, right};
-  if ( mXorTable.count(key) > 0 ) {
-    return mXorTable.at(key);
+  Apply3Key key{left, ~right, right};
+  if ( mIteTable.count(key) > 0 ) {
+    return mIteTable.at(key);
   }
 
   // 見つからなかったので実際に apply 演算を行う．
@@ -171,7 +171,7 @@ BddMgrImpl::xor_step(
   auto ans0 = xor_step(left0, right0);
   auto ans1 = xor_step(left1, right1);
   auto result = new_node(top, ans0, ans1);
-  mXorTable.emplace(key, result);
+  mIteTable.emplace(key, result);
   return result;
 }
 
@@ -392,6 +392,7 @@ BddMgrImpl::garbage_collection()
     mNodeNum -= mGarbageNum;
     mGarbageNum = 0;
 
+    mIteTable.clear();
   }
 }
 

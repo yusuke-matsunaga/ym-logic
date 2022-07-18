@@ -11,7 +11,6 @@
 #include "ym/bdd_nsdef.h"
 #include "BddNode.h"
 #include "BddEdge.h"
-#include "Apply2Key.h"
 #include "Apply3Key.h"
 
 
@@ -44,7 +43,6 @@ public:
     BddEdge right
   )
   {
-    mAndTable.clear();
     return and_step(left, right);
   }
 
@@ -66,7 +64,6 @@ public:
     BddEdge right
   )
   {
-    mXorTable.clear();
     return xor_step(left, right);
   }
 
@@ -78,9 +75,6 @@ public:
     BddEdge e2
   )
   {
-    mAndTable.clear();
-    mXorTable.clear();
-    mIteTable.clear();
     return ite_step(e0, e1, e2);
   }
 
@@ -227,12 +221,6 @@ private:
 
   // GC の許可フラグ
   bool mGcEnable;
-
-  // AND用のテーブル
-  unordered_map<Apply2Key, BddEdge> mAndTable;
-
-  // XOR用のテーブル
-  unordered_map<Apply2Key, BddEdge> mXorTable;
 
   // ITE用のテーブル
   unordered_map<Apply3Key, BddEdge> mIteTable;
