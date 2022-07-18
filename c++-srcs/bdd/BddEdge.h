@@ -147,6 +147,24 @@ public:
     return BddEdge{mBody | 1UL};
   }
 
+  /// @brief 自身を正極性にする．
+  /// @return 自身の参照を返す．
+  BddEdge&
+  make_positive()
+  {
+    mBody &= ~1UL;
+    return *this;
+  }
+
+  /// @brief 自身を負極性にする．
+  /// @return 自身の参照を返す．
+  BddEdge&
+  make_negative()
+  {
+    mBody |= 1UL;
+    return *this;
+  }
+
   /// @brief 極性と掛け合わせる．
   BddEdge
   operator*(

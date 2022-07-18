@@ -50,8 +50,8 @@ hash_func(
 {
   SizeType v{0};
   v += index;
-  v += edge0.hash() * 3;
-  v += edge1.hash() * 7;
+  v += edge0.hash() * 13;
+  v += edge1.hash() * 17;
   return v;
 }
 
@@ -98,6 +98,11 @@ BddMgrImpl::and_step(
   // case 4: 極性違いで等しかったら 0 を返す．
   if ( left.node() == right.node() ) {
     return BddEdge::make_zero();
+  }
+
+  // 正規化を行う．
+  if ( left.body() > right.body() ) {
+    std::swap(left, right);
   }
 
   // 演算結果テーブルを調べる．
@@ -155,6 +160,14 @@ BddMgrImpl::xor_step(
     return BddEdge::make_one();
   }
 
+  // 正規化を行う．
+  bool oinv = left.inv() * right.inv();
+  left.make_positive();
+  right.make_positive();
+  if ( left.body() > right.body() ) {
+    std::swap(left, right);
+  }
+
   // 演算結果テーブルを調べる．
   Apply3Key key{left, ~right, right};
   if ( mIteTable.count(key) > 0 ) {
@@ -172,7 +185,7 @@ BddMgrImpl::xor_step(
   auto ans1 = xor_step(left1, right1);
   auto result = new_node(top, ans0, ans1);
   mIteTable.emplace(key, result);
-  return result;
+  return result * oinv;
 }
 
 // @brief ITE 演算を行う．
