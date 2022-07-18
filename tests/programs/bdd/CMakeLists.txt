@@ -90,3 +90,46 @@ target_compile_options ( dot_test_d
 target_link_libraries ( dot_test_d
   ${YM_LIB_DEPENDS}
   )
+
+
+# ===================================================================
+#  blif2bdd
+# ===================================================================
+
+set ( blif2bdd_SOURCES
+  blif2bdd.cc
+  Bnet2Bdd.cc
+  )
+
+add_executable ( blif2bdd
+  ${blif2bdd_SOURCES}
+  $<TARGET_OBJECTS:ym_bnet_obj>
+  $<TARGET_OBJECTS:ym_cell_obj>
+  $<TARGET_OBJECTS:ym_logic_obj>
+  $<TARGET_OBJECTS:ym_base_obj>
+  )
+
+target_link_libraries ( blif2bdd
+  ${YM_LIB_DEPENDS}
+  )
+
+
+# ===================================================================
+#  blif2bdd_d
+# ===================================================================
+
+add_executable ( blif2bdd_d
+  ${blif2bdd_SOURCES}
+  $<TARGET_OBJECTS:ym_bnet_obj_d>
+  $<TARGET_OBJECTS:ym_cell_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  )
+
+target_compile_options ( blif2bdd_d
+  PRIVATE "-g"
+  )
+
+target_link_libraries ( blif2bdd_d
+  ${YM_LIB_DEPENDS}
+  )
