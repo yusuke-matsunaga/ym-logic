@@ -90,7 +90,7 @@ public:
   Bdd
   operator*(
     bool inv ///< [in] 反転フラグ
-  );
+  ) const;
 
   /// @brief 論理積を返す．
   /// @return 結果を返す．
@@ -152,6 +152,39 @@ public:
                ///<  - false: 反転なし (正極性)
                ///<  - true:  反転あり (負極性)
   ) const;
+
+  /// @brief コファクターを計算する．
+  /// @return 結果を返す．
+  Bdd
+  cofactor(
+    Literal lit ///< [in] リテラル
+  ) const;
+
+  /// @brief cofactor の別名
+  Bdd
+  operator/(
+    Literal lit ///< [in] リテラル
+  ) const
+  {
+    return cofactor(lit);
+  }
+
+  /// @brief コファクターを計算する．
+  Bdd
+  cofactor(
+    const Bdd& cube ///< [in] コファクターのキューブ
+                    /// cube.is_cube() = true でなければならない．
+  ) const;
+
+  /// @brief cofactor の別名
+  Bdd
+  operator/(
+    const Bdd& cube ///< [in] コファクターのキューブ
+                    /// cube.is_cube() = true でなければならない．
+  )
+  {
+    return cofactor(cube);
+  }
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -236,6 +269,42 @@ public:
                ///<  - true:  反転あり (負極性)
   );
 
+  /// @brief コファクターを計算して代入する．
+  /// @return 自分自身への参照を返す．
+  Bdd&
+  cofactor_int(
+    Literal lit ///< [in] リテラル
+  );
+
+  /// @brief cofactor_int の別名
+  /// @return 自分自身への参照を返す．
+  Bdd&
+  operator/=(
+    Literal lit ///< [in] リテラル
+  )
+  {
+    return cofactor_int(lit);
+  }
+
+  /// @brief コファクターを計算して代入する．
+  /// @return 自分自身への参照を返す．
+  Bdd&
+  cofactor_int(
+    const Bdd& cube ///< [in] コファクターのキューブ
+                    /// cube.is_cube() = true でなければならない．
+  );
+
+  /// @brief cofactor_int の別名
+  /// @return 自分自身への参照を返す．
+  Bdd&
+  operator/=(
+    const Bdd& cube ///< [in] コファクターのキューブ
+                    /// cube.is_cube() = true でなければならない．
+  )
+  {
+    return cofactor_int(cube);
+  }
+
   /// @}
   //////////////////////////////////////////////////////////////////////
 
@@ -268,6 +337,14 @@ public:
   bool
   is_one() const;
 
+  /// @brief 積項の時 true を返す．
+  bool
+  is_cube() const;
+
+  /// @brief 正リテラルの積項の時 true を返す．
+  bool
+  is_posicube() const;
+
   /// @brief 与えられた変数がサポートの時 true を返す．
   bool
   check_sup(
@@ -289,11 +366,15 @@ public:
 
   /// @brief 1となるパスを求める．
   /// @return 論理積を表すBDDを返す．
+  ///
+  /// 結果のBDDは is_cube() = true となっている．
   Bdd
   get_onepath() const;
 
   /// @brief 0となるパスを求める．
   /// @return 論理積を表すBDDを返す．
+  ///
+  /// 結果のBDDは is_cube() = true となっている．
   Bdd
   get_zeropath() const;
 
@@ -325,6 +406,10 @@ public:
   /// 自身が葉のノードの場合，自分自身を返す．
   Bdd
   root_cofactor1() const;
+
+  /// @brief 根が否定されている時 true を返す．
+  bool
+  root_inv() const;
 
   /// @brief 評価を行う．
   bool

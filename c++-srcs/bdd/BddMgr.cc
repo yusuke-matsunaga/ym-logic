@@ -48,8 +48,8 @@ BddMgr::make_literal(
   bool inv
 )
 {
-  auto e = mImpl->new_node(var.val(), BddEdge::make_zero(), BddEdge::make_one());
-  return Bdd{mImpl, e * inv};
+  auto e = mImpl->make_literal(var.val()) *  inv;
+  return Bdd{mImpl, e};
 }
 
 // @brief 肯定のリテラル関数を作る．

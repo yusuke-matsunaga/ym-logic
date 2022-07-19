@@ -11,11 +11,10 @@
 #include "ym/bdd_nsdef.h"
 #include "OpBase.h"
 #include "BddEdge.h"
+#include "Apply2Key.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
-
-class BddNode;
 
 //////////////////////////////////////////////////////////////////////
 /// @class CofactorOp CofactorOp.h "CofactorOp.h"
@@ -28,12 +27,8 @@ public:
 
   /// @brief コンストラクタ
   CofactorOp(
-    BddMgrImpl* mgr, ///< [in] マネージャ
-    SizeType index,  ///< [in] インデックス
-    bool inv         ///< [in] 極性
-  ) : OpBase{mgr},
-      mIndex{index},
-      mInv{inv}
+    BddMgrImpl* mgr ///< [in] マネージャ
+  ) : OpBase{mgr}
   {
   }
 
@@ -49,7 +44,8 @@ public:
   /// @brief コファクターを計算する．
   BddEdge
   op_step(
-    BddEdge edge ///< [in] 枝
+    BddEdge edge,  ///< [in] 枝
+    BddEdge cedge  ///< [in] 制約の枝
   );
 
 
@@ -59,13 +55,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 演算結果テーブル
-  unordered_map<BddNode*, BddEdge> mTable;
-
-  // コファクター用のインデックス
-  SizeType mIndex;
-
-  // コファクターの極性
-  bool mInv;
+  unordered_map<Apply2Key, BddEdge> mTable;
 
 };
 

@@ -67,6 +67,7 @@ public:
     return xor_step(left, right);
   }
 
+  /// @brief
   /// @brief ITE 演算を行う．
   BddEdge
   ite_op(
@@ -76,6 +77,15 @@ public:
   )
   {
     return ite_step(e0, e1, e2);
+  }
+
+  // @brief リテラル関数を作る．
+  BddEdge
+  make_literal(
+    SizeType index ///< [in] インデックス
+  )
+  {
+    return new_node(index, BddEdge::make_zero(), BddEdge::make_one());
   }
 
   /// @brief ノードを作る．

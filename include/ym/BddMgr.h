@@ -10,6 +10,7 @@
 
 #include "ym/bdd_nsdef.h"
 #include "ym/VarId.h"
+#include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -50,6 +51,12 @@ public:
   make_literal(
     VarId var,       ///< [in] 変数
     bool inv = false ///< [in] 反転フラグ
+  );
+
+  /// @brief リテラル関数を作る．
+  Bdd
+  make_literal(
+    Literal lit ///< [in] リテラル
   );
 
   /// @brief 肯定のリテラル関数を作る．

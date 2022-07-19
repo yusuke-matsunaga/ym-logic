@@ -15,7 +15,8 @@ BEGIN_NAMESPACE_YM_BDD
 // @brief コファクターを計算する．
 BddEdge
 CofactorOp::op_step(
-  BddEdge edge ///< [in] 枝
+  BddEdge edge,
+  BddEdge cedge
 )
 {
   // 終端ならそのまま返す．
@@ -23,34 +24,63 @@ CofactorOp::op_step(
     return edge;
   }
 
-  auto node = edge.node();
-  auto index = node->index();
-  auto inv = edge.inv();
-  if ( index == mIndex ) {
-    if ( mInv ) {
-      return node->edge0(inv);
-    }
-    else {
-      return node->edge1(inv);
-    }
+  // cedge が 0 なら 0 を返す．
+  if ( cedge.is_zero() ) {
+    return BddEdge::make_zero();
   }
-  if ( index > mIndex ) {
-    return edge;
+  // cedge が 1 なら edge を返す．
+  if ( cedge.is_one() ) {
+    return BddEdge::make_one();
   }
 
-  BddEdge ans;
-  if ( mTable.count(node) == 0 ) {
-    auto edge0 = node->edge0();
-    auto edge1 = node->edge1();
-    auto ans0 = op_step(edge0);
-    auto ans1 = op_step(edge1);
-    ans = new_node(index, ans0, ans1);
-    mTable.emplace(node, ans);
+  // 正規化する．
+  bool oinv = edge.inv();
+  edge.make_positive();
+
+  Apply2Key key{edge, cedge};
+  if ( mTable.count(key) > 0 ) {
+    return mTable.at(key) * oinv;
   }
-  else {
-    ans = mTable.at(node);
+
+  auto node = edge.node();
+  auto index = node->index();
+  auto edge0 = node->edge0();
+  auto edge1 = node->edge1();
+
+  auto cnode = cedge.node();
+  auto cindex = cnode->index();
+  auto cinv = cedge.inv();
+  BddEdge result;
+  if ( index == cindex ) {
+    if ( cnode->edge0(cinv).is_zero() ) {
+      result = op_step(edge1, cnode->edge1(cinv));
+    }
+    else if ( cnode->edge1(cinv).is_zero() ) {
+      result = op_step(edge0, cnode->edge0(cinv));
+    }
+    else {
+      ASSERT_NOT_REACHED;
+    }
   }
-  return ans * inv;
+  else if ( index < cindex ) {
+    auto ans0 = op_step(edge0, cedge);
+    auto ans1 = op_step(edge1, cedge);
+    result = new_node(index, ans0, ans1);;
+  }
+  else { // index > cindex
+    if ( cnode->edge0(cinv).is_zero() ) {
+      cedge = cnode->edge1(cinv);
+    }
+    else if ( cnode->edge1(cinv).is_zero() ) {
+      cedge = cnode->edge1(cinv);
+    }
+    else {
+      ASSERT_NOT_REACHED;
+    }
+    result = op_step(edge, cedge);
+  }
+  mTable.emplace(key, result);
+  return result * oinv;
 }
 
 END_NAMESPACE_YM_BDD

@@ -87,7 +87,7 @@ Bdd::invert() const
 Bdd
 Bdd::operator*(
   bool inv
-)
+) const
 {
   return Bdd{mMgr, BddEdge{mRoot} * inv};
 }
@@ -136,8 +136,32 @@ Bdd::cofactor(
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  CofactorOp op{mMgr, var.val(), inv};
-  auto e = op.op_step(mRoot);
+  auto cedge = mMgr->make_literal(var.val()) * inv;
+  Bdd cbdd{mMgr, cedge}; // GC 用にロックする必要がある．
+  CofactorOp op{mMgr};
+  auto e = op.op_step(mRoot, cedge);
+  return Bdd{mMgr, e};
+}
+
+// @brief コファクターを計算する．
+Bdd
+Bdd::cofactor(
+  Literal lit
+) const
+{
+  return cofactor(lit.varid(), lit.is_negative());
+}
+
+// @brief コファクターを計算する．
+Bdd
+Bdd::cofactor(
+  const Bdd& cube
+) const
+{
+  ASSERT_COND( mMgr != nullptr );
+  ASSERT_COND( mMgr == cube.mMgr );
+  CofactorOp op{mMgr};
+  auto e = op.op_step(mRoot, cube.mRoot);
   return Bdd{mMgr, e};
 }
 
@@ -214,8 +238,33 @@ Bdd::cofactor_int(
 )
 {
   ASSERT_COND( mMgr != nullptr );
-  CofactorOp op{mMgr, var.val(), inv};
-  auto e = op.op_step(mRoot);
+  auto cedge = mMgr->make_literal(var.val()) * inv;
+  Bdd cbdd{mMgr, cedge}; // GC 用にロックする必要がある．
+  CofactorOp op{mMgr};
+  auto e = op.op_step(mRoot, cedge);
+  change_root(e);
+  return *this;
+}
+
+// @brief コファクターを計算して代入する．
+Bdd&
+Bdd::cofactor_int(
+  Literal lit
+)
+{
+  return cofactor_int(lit.varid(), lit.is_negative());
+  return *this;
+}
+
+/// @brief コファクターを計算して代入する．
+Bdd&
+Bdd::cofactor_int(
+  const Bdd& cube
+)
+{
+  ASSERT_COND( mMgr != nullptr );
+  CofactorOp op{mMgr};
+  auto e = op.op_step(mRoot, cube.mRoot);
   change_root(e);
   return *this;
 }
@@ -232,6 +281,60 @@ bool
 Bdd::is_one() const
 {
   return mMgr != nullptr && BddEdge{mRoot}.is_one();
+}
+
+// @brief 積項の時 true を返す．
+bool
+Bdd::is_cube() const
+{
+  if ( mMgr == nullptr ) {
+    return false;
+  }
+  BddEdge e{mRoot};
+  if ( e.is_zero() ) {
+    return false;
+  }
+  while ( !e.is_one() ) {
+    auto node = e.node();
+    auto inv = e.inv();
+    auto e0 = node->edge0(inv);
+    auto e1 = node->edge1(inv);
+    if ( e0.is_zero() ) {
+      e = e1;
+    }
+    else if ( e1.is_zero() ) {
+      e = e0;
+    }
+    else {
+      return false;
+    }
+  }
+  return true;
+}
+
+// @brief 正リテラルの積項の時 true を返す．
+bool
+Bdd::is_posicube() const
+{
+  if ( mMgr == nullptr ) {
+    return false;
+  }
+  BddEdge e{mRoot};
+  if ( e.is_zero() ) {
+    return false;
+  }
+  while ( !e.is_one() ) {
+    auto node = e.node();
+    auto inv = e.inv();
+    auto e0 = node->edge0(inv);
+    if ( e0.is_zero() ) {
+      e = node->edge1(inv);
+    }
+    else {
+      return false;
+    }
+  }
+  return true;
 }
 
 // @brief 与えられた変数がサポートの時 true を返す．
@@ -356,12 +459,21 @@ Bdd::root_cofactor1() const
   }
 }
 
+// @brief 根が否定されている時 true を返す．
+bool
+Bdd::root_inv() const
+{
+  ASSERT_COND ( mMgr != nullptr );
+  return static_cast<bool>(mRoot & 1UL);
+}
+
 // @brief 評価を行う．
 bool
 Bdd::eval(
   const vector<bool>& inputs ///< [in] 入力値ベクタ
 ) const
 {
+  ASSERT_COND ( mMgr != nullptr );
   BddEdge edge{mRoot};
   for ( ; ; ) {
     if ( edge.is_zero() ) {
@@ -423,17 +535,14 @@ vector<VarId>
 Bdd::to_varlist() const
 {
   ASSERT_COND( mMgr != nullptr );
+  if ( !is_posicube() ) {
+    throw BddError{"Bdd::to_varlist(): Not a variable list."};
+  }
   BddEdge edge{mRoot};
   vector<VarId> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
-    if ( edge.inv() ) {
-      throw BddError{"Bdd::to_varlist(): Not a variable list."};
-    }
     var_list.push_back(VarId{node->index()});
-    if ( !node->edge0().is_zero() ) {
-      throw BddError{"Bdd::to_varlist(): Not a variable list."};
-    }
     edge = node->edge1();
   }
   return var_list;
@@ -444,6 +553,9 @@ vector<Literal>
 Bdd::to_litlist() const
 {
   ASSERT_COND( mMgr != nullptr );
+  if ( !is_cube() ) {
+    throw BddError{"Bdd::to_litlist(): Not a literal list."};
+  }
   BddEdge edge{mRoot};
   vector<Literal> lit_list;
   while ( !edge.is_const() ) {
@@ -459,9 +571,6 @@ Bdd::to_litlist() const
     else if ( e1.is_zero() ) {
       lit_list.push_back(Literal{var, true});
       edge = e0;
-    }
-    else {
-      throw BddError{"Bdd::to_litlist(): Not a literal list."};
     }
   }
   return lit_list;
