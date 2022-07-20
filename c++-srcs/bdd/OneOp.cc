@@ -18,7 +18,7 @@ OneOp::op_step(
 )
 {
   if ( edge.is_one() ) {
-    return BddEdge::make_one();
+    return BddEdge::one();
   }
   ASSERT_COND( !edge.is_const() );
 
@@ -28,11 +28,11 @@ OneOp::op_step(
   auto edge1 = node->edge1(inv);
   if ( !edge1.is_zero() ) {
     auto tmp = op_step(edge1);
-    return new_node(node->index(), BddEdge::make_zero(), tmp);
+    return new_node(node->index(), BddEdge::zero(), tmp);
   }
   else { // !edge0.is_zero()
     auto tmp = op_step(edge0);
-    return new_node(node->index(), tmp, BddEdge::make_zero());
+    return new_node(node->index(), tmp, BddEdge::zero());
   }
 }
 

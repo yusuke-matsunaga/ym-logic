@@ -85,7 +85,7 @@ public:
     SizeType index ///< [in] インデックス
   )
   {
-    return new_node(index, BddEdge::make_zero(), BddEdge::make_one());
+    return new_node(index, BddEdge::zero(), BddEdge::one());
   }
 
   /// @brief ノードを作る．

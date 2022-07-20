@@ -38,36 +38,36 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 恒儀関数を作る．
+  /// @brief 恒偽関数を作る．
   Bdd
-  make_zero();
+  zero();
 
-  /// @brief 恒新関数を作る．
+  /// @brief 恒真関数を作る．
   Bdd
-  make_one();
+  one();
 
   /// @brief リテラル関数を作る．
   Bdd
-  make_literal(
+  literal(
     VarId var,       ///< [in] 変数
     bool inv = false ///< [in] 反転フラグ
   );
 
   /// @brief リテラル関数を作る．
   Bdd
-  make_literal(
+  literal(
     Literal lit ///< [in] リテラル
   );
 
   /// @brief 肯定のリテラル関数を作る．
   Bdd
-  make_posi_literal(
+  posi_literal(
     VarId var ///< [in] 変数
   );
 
   /// @brief 否定のリテラル関数を作る．
   Bdd
-  make_nega_literal(
+  nega_literal(
     VarId var ///< [in] 変数
   );
 

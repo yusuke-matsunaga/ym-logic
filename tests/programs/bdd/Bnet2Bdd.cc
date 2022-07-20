@@ -27,7 +27,7 @@ Bnet2Bdd::make_global_func()
 {
   SizeType ni = mNetwork.input_num();
   for ( SizeType i = 0; i < ni; ++ i ) {
-    auto bdd = mMgr.make_posi_literal(VarId{i});
+    auto bdd = mMgr.posi_literal(VarId{i});
     mBddMap.emplace(mNetwork.input_id(i), bdd);
   }
   for ( SizeType id: mNetwork.logic_id_list() ) {
@@ -58,9 +58,9 @@ Bnet2Bdd::make_node_func(
   }
   switch ( node.type() ) {
   case BnNodeType::C0:
-    return mMgr.make_zero();
+    return mMgr.zero();
   case BnNodeType::C1:
-    return mMgr.make_one();
+    return mMgr.one();
   case BnNodeType::Buff:
     return fanin_list[0];
   case BnNodeType::Not:
@@ -84,7 +84,7 @@ Bnet2Bdd::make_node_func(
   default:
     ASSERT_NOT_REACHED;
   }
-  return Bdd::make_invalid();
+  return Bdd::invalid();
 }
 
 // @brief 論理積を計算する．
@@ -93,7 +93,7 @@ Bnet2Bdd::make_and(
   const vector<Bdd>& fanin_list
 )
 {
-  auto bdd = mMgr.make_one();
+  auto bdd = mMgr.one();
   for ( auto bdd1: fanin_list ) {
     bdd &= bdd1;
   }
@@ -106,7 +106,7 @@ Bnet2Bdd::make_or(
   const vector<Bdd>& fanin_list
 )
 {
-  auto bdd = mMgr.make_zero();
+  auto bdd = mMgr.zero();
   for ( auto bdd1: fanin_list ) {
     bdd |= bdd1;
   }
@@ -119,7 +119,7 @@ Bnet2Bdd::make_xor(
   const vector<Bdd>& fanin_list
 )
 {
-  auto bdd = mMgr.make_zero();
+  auto bdd = mMgr.zero();
   for ( auto bdd1: fanin_list ) {
     bdd ^= bdd1;
   }
@@ -134,10 +134,10 @@ Bnet2Bdd::make_expr(
 )
 {
   if ( expr.is_zero() ) {
-    return mMgr.make_zero();
+    return mMgr.zero();
   }
   if ( expr.is_one() ) {
-    return mMgr.make_one();
+    return mMgr.one();
   }
   if ( expr.is_posi_literal() ) {
     return fanin_list[expr.varid().val()];
@@ -160,7 +160,7 @@ Bnet2Bdd::make_expr(
     return make_xor(child_funcs);
   }
   ASSERT_NOT_REACHED;
-  return Bdd::make_invalid();
+  return Bdd::invalid();
 }
 
 // @brief 真理値表を計算する．
@@ -171,7 +171,7 @@ Bnet2Bdd::make_func(
 )
 {
   // 未完
-  return Bdd::make_invalid();
+  return Bdd::invalid();
 }
 
 END_NAMESPACE_YM

@@ -43,7 +43,7 @@ public:
   /// @brief 定数0を表す枝を返す．
   static
   BddEdge
-  make_zero()
+  zero()
   {
     return BddEdge{0UL};
   }
@@ -51,7 +51,7 @@ public:
   /// @brief 定数1を表す枝を返す．
   static
   BddEdge
-  make_one()
+  one()
   {
     return BddEdge{1UL};
   }
@@ -59,7 +59,7 @@ public:
   /// @brief 不正値を表す枝を返す．
   static
   BddEdge
-  make_invalid()
+  invalid()
   {
     return BddEdge{4UL};
   }

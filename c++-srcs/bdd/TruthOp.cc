@@ -19,10 +19,10 @@ TruthOp::op_step(
 )
 {
   if ( str == "0" ) {
-    return BddEdge::make_zero();
+    return BddEdge::zero();
   }
   if ( str == "1" ) {
-    return BddEdge::make_one();
+    return BddEdge::one();
   }
   if ( mTable.count(str) > 0 ) {
     return mTable.at(str);

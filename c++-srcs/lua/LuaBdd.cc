@@ -94,9 +94,9 @@ bdd_gc(
   return 0;
 }
 
-// 恒儀関数を作る．
+// 恒偽関数を作る．
 int
-bddmgr_make_zero(
+bddmgr_zero(
   lua_State* L
 )
 {
@@ -104,18 +104,154 @@ bddmgr_make_zero(
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
-    return lua.error_end("Error: BddMgr:make_zero() expects no arguments.");
+    return lua.error_end("Error: BddMgr:zero() expects no arguments.");
   }
 
   auto obj = LuaBdd::to_bddmgr(L, 1);
   ASSERT_COND( obj != nullptr );
 
   auto bddp = bdd_new(lua);
-  auto src = obj->make_zero();
-  src.display(cout);
+  *bddp = obj->zero();
 
-  *bddp = src;
+  return 1;
+}
 
+// 恒真関数を作る．
+int
+bddmgr_one(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 1 ) {
+    return lua.error_end("Error: BddMgr:one() expects no arguments.");
+  }
+
+  auto obj = LuaBdd::to_bddmgr(L, 1);
+  ASSERT_COND( obj != nullptr );
+
+  auto bddp = bdd_new(lua);
+  *bddp = obj->one();
+
+  return 1;
+}
+
+// リテラル関数を作る．
+int
+bddmgr_literal(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 && n != 3 ) {
+    return lua.error_end("Error: BddMgr:literal() expects one or two arguments.");
+  }
+  bool inv{false};
+  if ( n == 3 ) {
+    inv = lua.to_boolean(3);
+  }
+
+  bool ok;
+  lua_Integer val;
+  tie(ok, val) = lua.to_integer(2);
+  if ( !ok ) {
+    return lua.error_end("Error: BddMgr:literal(): 1st argument should be an integer.");
+  }
+
+  auto obj = LuaBdd::to_bddmgr(L, 1);
+  ASSERT_COND( obj != nullptr );
+
+  auto bddp = bdd_new(lua);
+  SizeType index = val;
+  *bddp = obj->literal(VarId{index}, inv);
+
+  return 1;
+}
+
+// 肯定リテラル関数を作る．
+int
+bddmgr_posi_literal(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: BddMgr:posi_literal() expects one argument.");
+  }
+
+  bool ok;
+  lua_Integer val;
+  tie(ok, val) = lua.to_integer(2);
+  if ( !ok ) {
+    return lua.error_end("Error: BddMgr:posi_literal(): 1st argument should be an integer.");
+  }
+
+  auto obj = LuaBdd::to_bddmgr(L, 1);
+  ASSERT_COND( obj != nullptr );
+
+  auto bddp = bdd_new(lua);
+  SizeType index = val;
+  *bddp = obj->posi_literal(VarId{index});
+
+  return 1;
+}
+
+// 否定リテラル関数を作る．
+int
+bddmgr_nega_literal(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: BddMgr:nega_literal() expects one arguments");
+  }
+
+  bool ok;
+  lua_Integer val;
+  tie(ok, val) = lua.to_integer(2);
+  if ( !ok ) {
+    return lua.error_end("Error: BddMgr:nega_literal(): 1st argument should be an integer.");
+  }
+
+  auto obj = LuaBdd::to_bddmgr(L, 1);
+  ASSERT_COND( obj != nullptr );
+
+  auto bddp = bdd_new(lua);
+  SizeType index = val;
+  *bddp = obj->nega_literal(VarId{index});
+
+  return 1;
+}
+
+// 真理値表形式の文字列からBDDを作る．
+int
+bddmgr_from_truth(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: BddMgr:from_truth() expects one arguments");
+  }
+
+  string str = lua.to_string(2);
+
+  auto obj = LuaBdd::to_bddmgr(L, 1);
+  ASSERT_COND( obj != nullptr );
+
+  auto bddp = bdd_new(lua);
+  *bddp = obj->from_truth(str);
 
   return 1;
 }
@@ -167,7 +303,12 @@ LuaBdd::init(
 
   // BddMgr のメンバ関数(メソッド)テーブル
   static const struct luaL_Reg bddmgr_mt[] = {
-    {"make_zero",     bddmgr_make_zero},
+    {"zero",         bddmgr_zero},
+    {"one",          bddmgr_one},
+    {"literal",      bddmgr_literal},
+    {"posi_literal", bddmgr_posi_literal},
+    {"nega_literal", bddmgr_nega_literal},
+    {"from_truth",   bddmgr_from_truth},
     {nullptr,         nullptr}
   };
 

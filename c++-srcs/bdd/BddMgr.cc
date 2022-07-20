@@ -29,21 +29,21 @@ BddMgr::~BddMgr()
 
 // @brief 恒儀関数を作る．
 Bdd
-BddMgr::make_zero()
+BddMgr::zero()
 {
-  return Bdd{mImpl, BddEdge::make_zero()};
+  return Bdd{mImpl, BddEdge::zero()};
 }
 
 // @brief 恒新関数を作る．
 Bdd
-BddMgr::make_one()
+BddMgr::one()
 {
-  return Bdd{mImpl, BddEdge::make_one()};
+  return Bdd{mImpl, BddEdge::one()};
 }
 
 // @brief リテラル関数を作る．
 Bdd
-BddMgr::make_literal(
+BddMgr::literal(
   VarId var,
   bool inv
 )
@@ -54,20 +54,20 @@ BddMgr::make_literal(
 
 // @brief 肯定のリテラル関数を作る．
 Bdd
-BddMgr::make_posi_literal(
+BddMgr::posi_literal(
   VarId var
 )
 {
-  return make_literal(var, false);
+  return literal(var, false);
 }
 
 // @brief 否定のリテラル関数を作る．
 Bdd
-BddMgr::make_nega_literal(
+BddMgr::nega_literal(
   VarId var
 )
 {
-  return make_literal(var, true);
+  return literal(var, true);
 }
 
 // @brief 真理値表形式の文字列からBDDを作る．

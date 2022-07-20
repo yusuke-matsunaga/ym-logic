@@ -79,7 +79,7 @@ BddMgrImpl::and_step(
 
   // case 1: 片方が 0 なら 0 を返す．
   if ( left.is_zero() || right.is_zero() ) {
-    return BddEdge::make_zero();
+    return BddEdge::zero();
   }
 
   // case 2: 片方が 1 なら他方を返す．
@@ -97,7 +97,7 @@ BddMgrImpl::and_step(
 
   // case 4: 極性違いで等しかったら 0 を返す．
   if ( left.node() == right.node() ) {
-    return BddEdge::make_zero();
+    return BddEdge::zero();
   }
 
   // 正規化を行う．
@@ -106,7 +106,7 @@ BddMgrImpl::and_step(
   }
 
   // 演算結果テーブルを調べる．
-  Apply3Key key{left, right, BddEdge::make_zero()};
+  Apply3Key key{left, right, BddEdge::zero()};
   if ( mIteTable.count(key) > 0 ) {
     return mIteTable.at(key);
   }
@@ -152,12 +152,12 @@ BddMgrImpl::xor_step(
 
   // case 3: 等しかったら 0 を返す．
   if ( left == right ) {
-    return BddEdge::make_zero();
+    return BddEdge::zero();
   }
 
   // case 4: 極性違いで等しかったら 1 を返す．
   if ( left.node() == right.node() ) {
-    return BddEdge::make_one();
+    return BddEdge::one();
   }
 
   // 正規化を行う．

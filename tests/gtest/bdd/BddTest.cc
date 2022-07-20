@@ -31,7 +31,7 @@ public:
     SizeType index ///< [in] インデックス
   )
   {
-    return mMgr.make_literal(VarId{index});
+    return mMgr.literal(VarId{index});
   }
 
 
@@ -122,7 +122,7 @@ TEST_F(BddTest, invalid1)
 TEST_F(BddTest, invalid2)
 {
   // 不正値になっているはず．
-  Bdd bdd = Bdd::make_invalid();
+  Bdd bdd = Bdd::invalid();
 
   EXPECT_TRUE( bdd.is_invalid() );
   EXPECT_FALSE( bdd.is_valid() );
@@ -132,7 +132,7 @@ TEST_F(BddTest, invalid2)
 
 TEST_F(BddTest, zero)
 {
-  Bdd bdd = mMgr.make_zero();
+  Bdd bdd = mMgr.zero();
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -144,7 +144,7 @@ TEST_F(BddTest, zero)
 
 TEST_F(BddTest, one)
 {
-  Bdd bdd = mMgr.make_one();
+  Bdd bdd = mMgr.one();
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -157,7 +157,7 @@ TEST_F(BddTest, one)
 TEST_F(BddTest, lit1)
 {
   VarId var{0};
-  Bdd bdd = mMgr.make_literal(var);
+  Bdd bdd = mMgr.literal(var);
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -178,7 +178,7 @@ TEST_F(BddTest, lit1)
 TEST_F(BddTest, lit2)
 {
   VarId var{0};
-  Bdd bdd = mMgr.make_literal(var, false);
+  Bdd bdd = mMgr.literal(var, false);
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -199,7 +199,7 @@ TEST_F(BddTest, lit2)
 TEST_F(BddTest, lit3)
 {
   VarId var{0};
-  Bdd bdd = mMgr.make_literal(var, true);
+  Bdd bdd = mMgr.literal(var, true);
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -220,7 +220,7 @@ TEST_F(BddTest, lit3)
 TEST_F(BddTest, lit4)
 {
   VarId var{0};
-  Bdd bdd = mMgr.make_posi_literal(var);
+  Bdd bdd = mMgr.posi_literal(var);
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -241,7 +241,7 @@ TEST_F(BddTest, lit4)
 TEST_F(BddTest, lit5)
 {
   VarId var{0};
-  Bdd bdd = mMgr.make_nega_literal(var);
+  Bdd bdd = mMgr.nega_literal(var);
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );

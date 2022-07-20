@@ -58,7 +58,7 @@ public:
   /// @brief 不正な値を作る．
   static
   Bdd
-  make_invalid()
+  invalid()
   {
     return Bdd{};
   }

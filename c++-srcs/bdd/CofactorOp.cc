@@ -26,11 +26,11 @@ CofactorOp::op_step(
 
   // cedge が 0 なら 0 を返す．
   if ( cedge.is_zero() ) {
-    return BddEdge::make_zero();
+    return BddEdge::zero();
   }
   // cedge が 1 なら edge を返す．
   if ( cedge.is_one() ) {
-    return BddEdge::make_one();
+    return BddEdge::one();
   }
 
   // 正規化する．

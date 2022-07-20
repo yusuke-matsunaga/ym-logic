@@ -12,9 +12,9 @@
 
 BEGIN_NAMESPACE_YM_BDD
 
-TEST(BddEdgeTest, make_zero)
+TEST(BddEdgeTest, zero)
 {
-  auto e = BddEdge::make_zero();
+  auto e = BddEdge::zero();
 
   EXPECT_TRUE( e.is_zero() );
   EXPECT_FALSE( e.is_one() );
@@ -22,9 +22,9 @@ TEST(BddEdgeTest, make_zero)
   EXPECT_FALSE( e.is_invalid() );
 }
 
-TEST(BddEdgeTest, make_one)
+TEST(BddEdgeTest, one)
 {
-  auto e = BddEdge::make_one();
+  auto e = BddEdge::one();
 
   EXPECT_FALSE( e.is_zero() );
   EXPECT_TRUE( e.is_one() );
@@ -32,9 +32,9 @@ TEST(BddEdgeTest, make_one)
   EXPECT_FALSE( e.is_invalid() );
 }
 
-TEST(BddEdgeTest, make_invalid)
+TEST(BddEdgeTest, invalid)
 {
-  auto e = BddEdge::make_invalid();
+  auto e = BddEdge::invalid();
 
   EXPECT_FALSE( e.is_zero() );
   EXPECT_FALSE( e.is_one() );
