@@ -4,6 +4,12 @@
 
 
 # ===================================================================
+# パッケージの検査
+# ===================================================================
+ym_init_lua()
+
+
+# ===================================================================
 # インクルードパスの設定
 # ===================================================================
 include_directories (
@@ -98,6 +104,23 @@ ym_add_object_library ( ym_logic
   ${ym_logic_SOURCES}
   )
 
+if ( LUA_FOUND )
+  ym_add_object_library ( ym_luabdd
+    c++-srcs/lua/LuaBdd.cc
+    )
+
+  target_include_directories ( ym_luabdd_obj
+    PRIVATE ${LUA_INCLUDE_DIR}
+  )
+
+  target_include_directories ( ym_luabdd_obj_d
+    PRIVATE ${LUA_INCLUDE_DIR}
+  )
+
+  target_include_directories ( ym_luabdd_obj_p
+    PRIVATE ${LUA_INCLUDE_DIR}
+  )
+endif ( LUA_FOUND )
 
 # ===================================================================
 #  インストールターゲットの設定
