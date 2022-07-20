@@ -54,7 +54,7 @@ Bdd::operator=(
   const Bdd& src
 )
 {
-  if ( mRoot != src.mRoot ) {
+  if ( mMgr != src.mMgr || mRoot != src.mRoot ) {
     if ( mMgr != nullptr ) {
       mMgr->deactivate(mRoot);
     }
