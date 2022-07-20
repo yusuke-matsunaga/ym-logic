@@ -22,6 +22,14 @@ NodeDisp::write(
   for ( auto edge: root_list ) {
     get_node(edge);
   }
+  SizeType i = 1;
+  for ( auto edge: root_list ) {
+    mS << "Root#" << i;
+    ++ i;
+    mS << ": ";
+    write_edge(edge);
+    mS << endl;
+  }
   for ( auto node: node_list() ) {
     SizeType id = node_id(node);
     mS << setw(6) << id << ": "
