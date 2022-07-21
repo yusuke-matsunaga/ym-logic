@@ -77,6 +77,14 @@ public:
     int idx       ///< [in] スタック上のインデックス
   );
 
+  /// @brief スタックから Bdd のリストを取り出す．
+  static
+  vector<Bdd>
+  to_bdd_list(
+    lua_State* L, ///< [in] lua インタープリタ
+    int idx	  ///< [in] スタック上のインデックス
+  );
+
 };
 
 END_NAMESPACE_YM

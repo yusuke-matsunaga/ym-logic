@@ -988,9 +988,9 @@ bdd_size(
   return 1;
 }
 
-// 複数のBDDのノード数を返す．
+// 複数の BDD のノード数を返す．
 int
-bdd_size_of(
+size_of_bdds(
   lua_State* L
 )
 {
@@ -998,27 +998,12 @@ bdd_size_of(
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
-    return lua.error_end("Error: bdd.size_of() expects no arguments.");
-  }
-  if ( !lua.is_table(1) ) {
-    return lua.error_end("Error: bdd.is_sizeof(): 1st argument should be a table of Bdds.");
+    return lua.error_end("Error: size_of_bdds() expects one argument.");
   }
 
-  SizeType nl = lua.L_len(1);
-  vector<Bdd> bdd_list(nl);
-  for ( SizeType i = 0; i < nl; ++ i ) {
-    lua.get_table(1, i + 1);
-    auto obj = LuaBdd::to_bdd(L, 1);
-    if ( obj == nullptr ) {
-      return lua.error_end("Error: bdd.is_sizeof(): 1st argument should be a table of Bdds.");
-    }
-    bdd_list[i] = *obj;
-  }
-
+  auto bdd_list = LuaBdd::to_bdd_list(L, 1);
   SizeType v = Bdd::size(bdd_list);
-
   lua.push_integer(v);
-
   return 1;
 }
 
@@ -1185,6 +1170,35 @@ bdd_gen_dot(
   return 1;
 }
 
+// 複数の BDD を dot 形式で出力する．
+int
+gen_dot_for_bdds(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: Bdd:gen_dot() expects one argument.");
+  }
+
+  auto bdd_list = LuaBdd::to_bdd_list(L, 1);
+
+  auto filename = lua.to_string(2);
+  ofstream s{filename};
+  if ( !s ) {
+    ostringstream buf;
+    buf << "Error: Bdd:gen_dot(): Could not create "
+	<< filename << ".";
+    return lua.error_end(buf.str());
+  }
+  Bdd::gen_dot(s, bdd_list);
+
+  lua.push_boolean(true);
+  return 1;
+}
+
 END_NONAMESPACE
 
 // @brief Bdd 関係の初期化を行う．
@@ -1241,7 +1255,6 @@ LuaBdd::init(
     {"root_inv",       bdd_root_inv},
     {"eval",           bdd_eval},
     {"size",           bdd_size},
-    {"size_of",        bdd_size_of},
     {"to_varlist",     bdd_to_varlist},
     {"to_litlist",     bdd_to_litlist},
     {"to_truth",       bdd_to_truth},
@@ -1252,8 +1265,10 @@ LuaBdd::init(
 
   lua.reg_metatable(BDD_SIGNATURE, bdd_gc, bdd_mt);
 
-  // 生成関数を登録する．
-  mylib.push_back({"new_bddmgr",    bddmgr_new});
+  // グローバル関数を登録する．
+  mylib.push_back({"new_bddmgr",   bddmgr_new});
+  mylib.push_back({"size_of_bdds", size_of_bdds});
+  mylib.push_back({"gen_dot_for_bdds", gen_dot_for_bdds});
 }
 
 // @brief 対象を BddMgr として取り出す．
@@ -1278,6 +1293,33 @@ LuaBdd::to_bdd(
   Luapp lua{L};
   auto p = lua.L_checkudata(idx, BDD_SIGNATURE);
   return reinterpret_cast<Bdd*>(p);
+}
+
+// @brief スタックから Bdd のリストを取り出す．
+vector<Bdd>
+LuaBdd::to_bdd_list(
+  lua_State* L,
+  int idx
+)
+{
+  Luapp lua{L};
+
+  if ( !lua.is_table(idx) ) {
+    return {};
+  }
+
+  SizeType nl = lua.L_len(idx);
+  vector<Bdd> bdd_list(nl);
+  for ( SizeType i = 0; i < nl; ++ i ) {
+    lua.get_table(idx, i + 1);
+    auto obj = LuaBdd::to_bdd(L, -1);
+    if ( obj == nullptr ) {
+      return {};
+    }
+    bdd_list[i] = *obj;
+    lua.pop(1);
+  }
+  return bdd_list;
 }
 
 END_NAMESPACE_YM
