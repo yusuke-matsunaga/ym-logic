@@ -43,6 +43,16 @@ SupOp::merge_step(
   BddEdge edge1
 )
 {
+  ASSERT_COND( !edge0.is_zero() );
+  ASSERT_COND( !edge1.is_zero() );
+
+  if ( edge0.is_one() ) {
+    return edge1;
+  }
+  if ( edge1.is_one() ) {
+    return edge0;
+  }
+
   auto node0 = edge0.node();
   auto node1 = edge1.node();
   auto index0 = node0->index();
