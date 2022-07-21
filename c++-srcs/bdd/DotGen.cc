@@ -73,6 +73,13 @@ DotGen::write(
     rank_node_list[node->index()].push_back(id);
   }
 
+  // 根のランクの設定
+  mS << "  { rank = same; ";
+  for ( SizeType i = 0; i < root_list.size(); ++ i ) {
+    mS << " root" << (i + 1) << ";";
+  }
+  mS << "}" << endl;
+
   // ランクの設定
   for ( auto& node_list: rank_node_list ) {
     mS << "  { rank = same;";
@@ -93,6 +100,7 @@ DotGen::write_edge(
   bool zero
 )
 {
+  bool inv{false};
   if ( edge.is_zero() ) {
     mS << "const0";
   }
@@ -100,23 +108,22 @@ DotGen::write_edge(
     mS << "const1";
   }
   else {
+    inv = edge.inv();
     auto node = edge.node();
-    auto inv = edge.inv();
     auto id = node_id(node);
-    mS << "node" << id
-      << "[";
-    const char* comma = "";
-    if ( zero ) {
-      mS << "style=dotted";
-      comma = ",";
-    }
-    if ( inv ) {
-      mS << comma << "dir=both,arrowtail=odot";
-      comma = ",";
-    }
-    mS << "]";
+    mS << "node" << id;
   }
-  mS << ";" << endl;
+  const char* comma = "";
+  mS << "[";
+  if ( zero ) {
+    mS << "style=dotted";
+    comma = ",";
+  }
+  if ( inv ) {
+    mS << comma << "dir=both,arrowtail=odot";
+    comma = ",";
+  }
+  mS << "];" << endl;
 }
 
 END_NAMESPACE_YM_BDD
