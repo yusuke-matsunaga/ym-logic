@@ -373,6 +373,153 @@ bddmgr_disable_gc(
   return 1;
 }
 
+// NOT 演算を行う．
+int
+bdd_not(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 1 ) {
+    return lua.error_end("Error: Bdd:not() expects one arguments.");
+  }
+
+  auto obj = LuaBdd::to_bdd(L, 1);
+  ASSERT_COND( obj != nullptr );
+
+  auto bddp = bdd_new(lua);
+  *bddp = obj->invert();
+
+  return 1;
+}
+
+// AND 演算を行う．
+int
+bdd_and(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: Bdd:not() expects two arguments.");
+  }
+
+  auto obj1 = LuaBdd::to_bdd(L, 1);
+  ASSERT_COND( obj1 != nullptr );
+
+  auto obj2 = LuaBdd::to_bdd(L, 2);
+  ASSERT_COND( obj2 != nullptr );
+
+  auto bddp = bdd_new(lua);
+  *bddp = obj1->and_op(*obj2);
+
+  return 1;
+}
+
+// OR 演算を行う．
+int
+bdd_or(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: Bdd:or() expects two arguments.");
+  }
+
+  auto obj1 = LuaBdd::to_bdd(L, 1);
+  ASSERT_COND( obj1 != nullptr );
+
+  auto obj2 = LuaBdd::to_bdd(L, 2);
+  ASSERT_COND( obj2 != nullptr );
+
+  auto bddp = bdd_new(lua);
+  *bddp = obj1->or_op(*obj2);
+
+  return 1;
+}
+
+// XOR 演算を行う．
+int
+bdd_xor(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: Bdd:xor() expects two arguments.");
+  }
+
+  auto obj1 = LuaBdd::to_bdd(L, 1);
+  ASSERT_COND( obj1 != nullptr );
+
+  auto obj2 = LuaBdd::to_bdd(L, 2);
+  ASSERT_COND( obj2 != nullptr );
+
+  auto bddp = bdd_new(lua);
+  *bddp = obj1->xor_op(*obj2);
+
+  return 1;
+}
+
+// cofactor 演算を行う．
+int
+bdd_cofactor(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: Bdd:cofactor() expects two arguments.");
+  }
+
+  auto obj1 = LuaBdd::to_bdd(L, 1);
+  ASSERT_COND( obj1 != nullptr );
+
+  auto obj2 = LuaBdd::to_bdd(L, 2);
+  ASSERT_COND( obj2 != nullptr );
+
+  auto bddp = bdd_new(lua);
+  *bddp = obj1->cofactor(*obj2);
+
+  return 1;
+}
+
+// 等価比較演算を行う．
+int
+bdd_eq(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: Bdd:not() expects two arguments.");
+  }
+
+  auto obj1 = LuaBdd::to_bdd(L, 1);
+  ASSERT_COND( obj1 != nullptr );
+
+  auto obj2 = LuaBdd::to_bdd(L, 2);
+  ASSERT_COND( obj2 != nullptr );
+
+  auto b = *obj1 == *obj2;
+  lua.push_boolean(b);
+
+  return 1;
+}
+
 // 変数によるコファクターを求める．
 int
 bdd_vcofactor(
@@ -792,8 +939,27 @@ bdd_eval(
     return lua.error_end("Error: Bdd:eval() expects one argument.");
   }
 
+  if ( !lua.is_table(2) ) {
+    return lua.error_end("Error: Bdd:eval(): 1st argument should be a table.");
+  }
+
   auto obj = LuaBdd::to_bdd(L, 1);
   ASSERT_COND( obj != nullptr );
+
+  // 要素数
+  SizeType ni = lua.L_len(2);
+
+  // 入力値のリストを作る．
+  vector<bool> inputs(ni);
+  for ( SizeType i = 0; i < ni; ++ i ) {
+    auto t = lua.get_table(2, i + 1);
+    if ( t != LUA_TBOOLEAN ) {
+      return lua.error_end("Error: Bdd:eval(): 1st argument should an array of Boolean.");
+    }
+    auto b = lua.to_boolean(-1);
+    lua.pop(1);
+    inputs[i] = b;
+  }
 
   bool b = obj->eval(inputs);
   lua.push_boolean(b);
@@ -822,6 +988,40 @@ bdd_size(
   return 1;
 }
 
+// 複数のBDDのノード数を返す．
+int
+bdd_size_of(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 1 ) {
+    return lua.error_end("Error: bdd.size_of() expects no arguments.");
+  }
+  if ( !lua.is_table(1) ) {
+    return lua.error_end("Error: bdd.is_sizeof(): 1st argument should be a table of Bdds.");
+  }
+
+  SizeType nl = lua.L_len(1);
+  vector<Bdd> bdd_list(nl);
+  for ( SizeType i = 0; i < nl; ++ i ) {
+    lua.get_table(1, i + 1);
+    auto obj = LuaBdd::to_bdd(L, 1);
+    if ( obj == nullptr ) {
+      return lua.error_end("Error: bdd.is_sizeof(): 1st argument should be a table of Bdds.");
+    }
+    bdd_list[i] = *obj;
+  }
+
+  SizeType v = Bdd::size(bdd_list);
+
+  lua.push_integer(v);
+
+  return 1;
+}
+
 // 変数のリストに変換する．
 int
 bdd_to_varlist(
@@ -839,6 +1039,54 @@ bdd_to_varlist(
   ASSERT_COND( obj != nullptr );
 
   auto varlist = obj->to_varlist();
+
+  // 要素数
+  SizeType nv = varlist.size();
+
+  // 結果のテーブルを作る．
+  lua.create_table(nv, 0);
+  for ( SizeType i = 0; i < nv; ++ i ) {
+    SizeType v = varlist[i].val();
+    lua.push_integer(v);
+    lua.set_table(-2, i + 1);
+  }
+
+  return 1;
+}
+
+// 変数のリストに変換する．
+int
+bdd_to_litlist(
+  lua_State* L
+)
+{
+  Luapp lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 1 ) {
+    return lua.error_end("Error: Bdd:to_varlist() expects no arguments.");
+  }
+
+  auto obj = LuaBdd::to_bdd(L, 1);
+  ASSERT_COND( obj != nullptr );
+
+  auto litlist = obj->to_litlist();
+
+  // 要素数
+  SizeType nl = litlist.size();
+
+  // 結果のテーブルを作る．
+  lua.create_table(nl, 0);
+  for ( SizeType i = 0; i < nl; ++ i ) {
+    auto lit= litlist[i];
+    // リテラルを要素数2のテーブルで表す．
+    lua.create_table(2, 0);
+    lua.push_integer(lit.varid().val());
+    lua.set_table(-2, 1);
+    lua.push_boolean(lit.is_negative());
+    lua.set_table(-2, 2);
+    lua.set_table(-2, i + 1);
+  }
 
   return 1;
 }
@@ -968,7 +1216,12 @@ LuaBdd::init(
 
   // Bdd のメンバ関数(メソッド)テーブル
   static const struct luaL_Reg bdd_mt[] = {
-    {"cofactor",       bdd_cofactor},
+    {"__bnot",         bdd_not},
+    {"__band",         bdd_and},
+    {"__bor",          bdd_or},
+    {"__bxor",         bdd_xor},
+    {"__div",          bdd_cofactor},
+    {"__eq",           bdd_eq},
     {"vcofactor",      bdd_vcofactor},
     {"is_valid",       bdd_is_valid},
     {"is_invalid",     bdd_is_invalid},
@@ -978,7 +1231,7 @@ LuaBdd::init(
     {"is_posicube",    bdd_is_posicube},
     {"check_sup",      bdd_check_sup},
     {"check_sym",      bdd_check_sym},
-    {"get_suport",     bdd_get_support},
+    {"get_support",    bdd_get_support},
     {"get_onepath",    bdd_get_onepath},
     {"get_zeropath",   bdd_get_zeropath},
     {"root_decomp",    bdd_root_decomp},
@@ -988,6 +1241,7 @@ LuaBdd::init(
     {"root_inv",       bdd_root_inv},
     {"eval",           bdd_eval},
     {"size",           bdd_size},
+    {"size_of",        bdd_size_of},
     {"to_varlist",     bdd_to_varlist},
     {"to_litlist",     bdd_to_litlist},
     {"to_truth",       bdd_to_truth},
