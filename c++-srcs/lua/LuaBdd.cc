@@ -7,7 +7,6 @@
 /// All rights reserved.
 
 #include "ym/LuaBdd.h"
-#include "ym/Luapp.h"
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
 
@@ -49,7 +48,9 @@ bddmgr_gc(
   lua_State* L
 )
 {
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  LuaBdd lua{L};
+
+  auto obj = lua.to_bddmgr(1);
   if ( obj ) {
     // デストラクタを明示的に起動する．
     obj->~BddMgr();
@@ -62,20 +63,10 @@ bddmgr_gc(
 // Bdd を生成する関数
 Bdd*
 bdd_new(
-  Luapp& lua
+  LuaBdd& lua
 )
 {
-  // メモリ領域は Lua で確保する．
-  void* p = lua.new_userdata(sizeof(Bdd));
-  auto obj = new (p) Bdd{};
-
-  // Bdd 用の metatable を取ってくる．
-  lua.L_getmetatable(BDD_SIGNATURE);
-
-  // それを今作った userdata にセットする．
-  lua.set_metatable(-2);
-
-  return obj;
+  return lua.new_bdd();
 }
 
 // Bdd 用のデストラクタ
@@ -84,7 +75,9 @@ bdd_gc(
   lua_State* L
 )
 {
-  auto obj = LuaBdd::to_bdd(L, 1);
+  LuaBdd lua{L};
+
+  auto obj = lua.to_bdd(1);
   if ( obj ) {
     // デストラクタを明示的に起動する．
     obj->~Bdd();
@@ -100,17 +93,17 @@ bddmgr_zero(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: BddMgr:zero() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->zero();
 
   return 1;
@@ -122,17 +115,17 @@ bddmgr_one(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: BddMgr:one() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->one();
 
   return 1;
@@ -144,7 +137,7 @@ bddmgr_literal(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 && n != 3 ) {
@@ -162,10 +155,10 @@ bddmgr_literal(
     return lua.error_end("Error: BddMgr:literal(): 1st argument should be an integer.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   SizeType index = val;
   *bddp = obj->literal(VarId{index}, inv);
 
@@ -178,7 +171,7 @@ bddmgr_posi_literal(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
@@ -192,10 +185,10 @@ bddmgr_posi_literal(
     return lua.error_end("Error: BddMgr:posi_literal(): 1st argument should be an integer.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   SizeType index = val;
   *bddp = obj->posi_literal(VarId{index});
 
@@ -208,7 +201,7 @@ bddmgr_nega_literal(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
@@ -222,10 +215,10 @@ bddmgr_nega_literal(
     return lua.error_end("Error: BddMgr:nega_literal(): 1st argument should be an integer.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   SizeType index = val;
   *bddp = obj->nega_literal(VarId{index});
 
@@ -238,7 +231,7 @@ bddmgr_from_truth(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
@@ -247,10 +240,10 @@ bddmgr_from_truth(
 
   string str = lua.to_string(2);
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->from_truth(str);
 
   return 1;
@@ -262,14 +255,14 @@ bddmgr_node_num(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: BddMgr:node_num() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(L, 1);
   ASSERT_COND( obj != nullptr );
 
   SizeType v = obj->node_num();
@@ -284,14 +277,14 @@ bddmgr_gc_limit(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: BddMgr:gc_limit() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
   SizeType v = obj->gc_limit();
@@ -306,14 +299,14 @@ bddmgr_set_gc_limit(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: BddMgr:gc_limit() expects one argument.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
   bool ok;
@@ -335,14 +328,14 @@ bddmgr_enable_gc(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: BddMgr:enable_gc() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
   obj->enable_gc();
@@ -357,14 +350,14 @@ bddmgr_disable_gc(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: BddMgr:disable_gc() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bddmgr(L, 1);
+  auto obj = lua.to_bddmgr(1);
   ASSERT_COND( obj != nullptr );
 
   obj->disable_gc();
@@ -379,17 +372,17 @@ bdd_not(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:not() expects one arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->invert();
 
   return 1;
@@ -401,20 +394,20 @@ bdd_and(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: Bdd:not() expects two arguments.");
   }
 
-  auto obj1 = LuaBdd::to_bdd(L, 1);
+  auto obj1 = lua.to_bdd(L, 1);
   ASSERT_COND( obj1 != nullptr );
 
-  auto obj2 = LuaBdd::to_bdd(L, 2);
+  auto obj2 = lua.to_bdd(2);
   ASSERT_COND( obj2 != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj1->and_op(*obj2);
 
   return 1;
@@ -426,20 +419,20 @@ bdd_or(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: Bdd:or() expects two arguments.");
   }
 
-  auto obj1 = LuaBdd::to_bdd(L, 1);
+  auto obj1 = lua.to_bdd(1);
   ASSERT_COND( obj1 != nullptr );
 
-  auto obj2 = LuaBdd::to_bdd(L, 2);
+  auto obj2 = lua.to_bdd(2);
   ASSERT_COND( obj2 != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj1->or_op(*obj2);
 
   return 1;
@@ -451,20 +444,20 @@ bdd_xor(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: Bdd:xor() expects two arguments.");
   }
 
-  auto obj1 = LuaBdd::to_bdd(L, 1);
+  auto obj1 = lua.to_bdd(1);
   ASSERT_COND( obj1 != nullptr );
 
-  auto obj2 = LuaBdd::to_bdd(L, 2);
+  auto obj2 = lua.to_bdd(2);
   ASSERT_COND( obj2 != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj1->xor_op(*obj2);
 
   return 1;
@@ -476,20 +469,20 @@ bdd_cofactor(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: Bdd:cofactor() expects two arguments.");
   }
 
-  auto obj1 = LuaBdd::to_bdd(L, 1);
+  auto obj1 = lua.to_bdd(1);
   ASSERT_COND( obj1 != nullptr );
 
-  auto obj2 = LuaBdd::to_bdd(L, 2);
+  auto obj2 = lua.to_bdd(2);
   ASSERT_COND( obj2 != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj1->cofactor(*obj2);
 
   return 1;
@@ -501,17 +494,17 @@ bdd_eq(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: Bdd:not() expects two arguments.");
   }
 
-  auto obj1 = LuaBdd::to_bdd(L, 1);
+  auto obj1 = lua.to_bdd(1);
   ASSERT_COND( obj1 != nullptr );
 
-  auto obj2 = LuaBdd::to_bdd(L, 2);
+  auto obj2 = lua.to_bdd(2);
   ASSERT_COND( obj2 != nullptr );
 
   auto b = *obj1 == *obj2;
@@ -526,14 +519,14 @@ bdd_vcofactor(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 && n != 3 ) {
     return lua.error_end("Error: Bdd:is_valid() expects one or two arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   bool ok;
@@ -548,7 +541,7 @@ bdd_vcofactor(
     inv = lua.to_boolean(3);
   }
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->cofactor(VarId(v), inv);
 
   return 1;
@@ -560,14 +553,14 @@ bdd_is_valid(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:is_valid() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   lua.push_boolean(obj->is_valid());
@@ -580,14 +573,14 @@ bdd_is_invalid(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:is_invalid() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   lua.push_boolean(obj->is_invalid());
@@ -600,14 +593,14 @@ bdd_is_zero(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:is_zero() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   lua.push_boolean(obj->is_zero());
@@ -620,14 +613,14 @@ bdd_is_one(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:is_one() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   lua.push_boolean(obj->is_one());
@@ -640,14 +633,14 @@ bdd_is_cube(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:is_cube() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   lua.push_boolean(obj->is_cube());
@@ -660,14 +653,14 @@ bdd_is_posicube(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:is_posicube() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   lua.push_boolean(obj->is_posicube());
@@ -680,14 +673,14 @@ bdd_check_sup(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: Bdd:check_sup() expects one argument.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   bool ok;
@@ -708,14 +701,14 @@ bdd_check_sym(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 3 && n != 4) {
     return lua.error_end("Error: Bdd:check_sup() expects two or three arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   bool ok;
@@ -747,17 +740,17 @@ bdd_get_support(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:get_support() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->get_support();
 
   return 1;
@@ -769,17 +762,17 @@ bdd_get_onepath(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:get_onepath() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->get_onepath();
 
   return 1;
@@ -791,17 +784,17 @@ bdd_get_zeropath(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:get_zeropath() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->get_zeropath();
 
   return 1;
@@ -813,24 +806,24 @@ bdd_root_decomp(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:root_decomp() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   Bdd f0;
   Bdd f1;
   auto var = obj->root_decomp(f0, f1);
 
-  auto bddp0 = bdd_new(lua);
+  auto bddp0 = lua.new_bdd();
   *bddp0 = f0;
 
-  auto bddp1 = bdd_new(lua);
+  auto bddp1 = lua.new_bdd();
   *bddp1 = f1;
 
   lua.push_integer(var.val());
@@ -844,14 +837,14 @@ bdd_root_var(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:root_var() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   auto var = obj->root_var();
@@ -866,17 +859,17 @@ bdd_root_cofactor0(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:root_cofactor0() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->root_cofactor0();
 
   return 1;
@@ -888,17 +881,17 @@ bdd_root_cofactor1(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:root_cofactor1() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = bdd_new(lua);
+  auto bddp = lua.new_bdd();
   *bddp = obj->root_cofactor1();
 
   return 1;
@@ -910,14 +903,14 @@ bdd_root_inv(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:root_inv() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   bool b = obj->root_inv();
@@ -932,7 +925,7 @@ bdd_eval(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
@@ -943,7 +936,7 @@ bdd_eval(
     return lua.error_end("Error: Bdd:eval(): 1st argument should be a table.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   // 要素数
@@ -973,14 +966,14 @@ bdd_size(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:size() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   lua.push_integer(obj->size());
@@ -994,7 +987,7 @@ size_of_bdds(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
@@ -1013,14 +1006,14 @@ bdd_to_varlist(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:to_varlist() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   auto varlist = obj->to_varlist();
@@ -1045,14 +1038,14 @@ bdd_to_litlist(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 ) {
     return lua.error_end("Error: Bdd:to_varlist() expects no arguments.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   auto litlist = obj->to_litlist();
@@ -1082,14 +1075,14 @@ bdd_to_truth(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: Bdd:to_truth() expects one argument.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   bool ok;
@@ -1111,14 +1104,14 @@ bdd_display(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 1 && n != 2 ) {
     return lua.error_end("Error: Bdd:display() expects at most one argument.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   if ( n == 1 ) {
@@ -1146,14 +1139,14 @@ bdd_gen_dot(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
     return lua.error_end("Error: Bdd:gen_dot() expects one argument.");
   }
 
-  auto obj = LuaBdd::to_bdd(L, 1);
+  auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
   auto filename = lua.to_string(2);
@@ -1176,7 +1169,7 @@ gen_dot_for_bdds(
   lua_State* L
 )
 {
-  Luapp lua{L};
+  LuaBdd lua{L};
 
   SizeType n = lua.get_top();
   if ( n != 2 ) {
@@ -1204,12 +1197,9 @@ END_NONAMESPACE
 // @brief Bdd 関係の初期化を行う．
 void
 LuaBdd::init(
-  lua_State* L,
   vector<struct luaL_Reg>& mylib
 )
 {
-  Luapp lua{L};
-
   // BddMgr のメンバ関数(メソッド)テーブル
   static const struct luaL_Reg bddmgr_mt[] = {
     {"zero",         bddmgr_zero},
@@ -1226,7 +1216,7 @@ LuaBdd::init(
     {nullptr,        nullptr}
   };
 
-  lua.reg_metatable(BDDMGR_SIGNATURE, bddmgr_gc, bddmgr_mt);
+  reg_metatable(BDDMGR_SIGNATURE, bddmgr_gc, bddmgr_mt);
 
   // Bdd のメンバ関数(メソッド)テーブル
   static const struct luaL_Reg bdd_mt[] = {
@@ -1263,7 +1253,7 @@ LuaBdd::init(
     {nullptr,          nullptr}
   };
 
-  lua.reg_metatable(BDD_SIGNATURE, bdd_gc, bdd_mt);
+  reg_metatable(BDD_SIGNATURE, bdd_gc, bdd_mt);
 
   // グローバル関数を登録する．
   mylib.push_back({"new_bddmgr",   bddmgr_new});
@@ -1274,52 +1264,62 @@ LuaBdd::init(
 // @brief 対象を BddMgr として取り出す．
 BddMgr*
 LuaBdd::to_bddmgr(
-  lua_State* L,
   int idx
 )
 {
-  Luapp lua{L};
-  auto p = lua.L_checkudata(idx, BDDMGR_SIGNATURE);
+  auto p = L_checkudata(idx, BDDMGR_SIGNATURE);
   return reinterpret_cast<BddMgr*>(p);
 }
 
 // @brief 対象を Bdd として取り出す．
 Bdd*
 LuaBdd::to_bdd(
-  lua_State* L,
   int idx
 )
 {
-  Luapp lua{L};
-  auto p = lua.L_checkudata(idx, BDD_SIGNATURE);
+  auto p = L_checkudata(idx, BDD_SIGNATURE);
   return reinterpret_cast<Bdd*>(p);
 }
 
 // @brief スタックから Bdd のリストを取り出す．
 vector<Bdd>
 LuaBdd::to_bdd_list(
-  lua_State* L,
   int idx
 )
 {
-  Luapp lua{L};
-
-  if ( !lua.is_table(idx) ) {
+  if ( !is_table(idx) ) {
     return {};
   }
 
-  SizeType nl = lua.L_len(idx);
+  SizeType nl = L_len(idx);
   vector<Bdd> bdd_list(nl);
   for ( SizeType i = 0; i < nl; ++ i ) {
-    lua.get_table(idx, i + 1);
-    auto obj = LuaBdd::to_bdd(L, -1);
+    get_table(idx, i + 1);
+    auto obj = to_bdd(-1);
     if ( obj == nullptr ) {
       return {};
     }
     bdd_list[i] = *obj;
-    lua.pop(1);
+    pop(1);
   }
   return bdd_list;
+}
+
+// @brief lua の管理下にある Bdd オブジェクトを作る．
+Bdd*
+LuaBdd::new_bdd()
+{
+  // メモリ領域は Lua で確保する．
+  void* p = new_userdata(sizeof(Bdd));
+  auto obj = new (p) Bdd{};
+
+  // Bdd 用の metatable を取ってくる．
+  L_getmetatable(BDD_SIGNATURE);
+
+  // それを今作った userdata にセットする．
+  set_metatable(-2);
+
+  return obj;
 }
 
 END_NAMESPACE_YM
