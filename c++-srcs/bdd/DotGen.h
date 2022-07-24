@@ -105,6 +105,9 @@ private:
   // 出力ストリーム
   ostream& mS;
 
+  // グラフの属性リスト
+  unordered_map<string, string> mGraphAttrList;
+
   // 根の属性リスト
   unordered_map<string, string> mRootAttrList;
 

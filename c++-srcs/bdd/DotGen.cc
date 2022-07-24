@@ -20,6 +20,7 @@ DotGen::DotGen(
 ) : mS{s}
 {
   // デフォルト値の設定
+  mGraphAttrList.emplace("rankdir", "TB");
   mRootAttrList.emplace("shape", "box");
   mTerminalAttrList.emplace("shape", "box");
   mTerminal0AttrList.emplace("label", "\"0\"");
@@ -40,7 +41,10 @@ DotGen::DotGen(
     else {
       auto type = attr_name.substr(0, pos);
       auto attr_name1 = attr_name.substr(pos + 1);
-      if ( type == "root" ) {
+      if ( type == "graph" ) {
+	mGraphAttrList.emplace(attr_name1, attr_val);
+      }
+      else if ( type == "root" ) {
 	mRootAttrList.emplace(attr_name1, attr_val);
       }
       else if ( type == "node" ) {
@@ -81,7 +85,10 @@ DotGen::write(
 
   // dot の開始
   mS << "digraph bdd {" << endl
-     << "  graph [rankdir = TB];" << endl;
+     << "  graph";
+  attr_begin();
+  attr_add(mGraphAttrList);
+  attr_end();
 
   // 根のノードの定義
   SizeType i = 1;
@@ -94,7 +101,6 @@ DotGen::write(
     buf << "\"BDD#" << i << "\"";
     attr_add("label", buf.str());
     attr_end();
-    mS << endl;
     ++ i;
   }
 
@@ -109,7 +115,6 @@ DotGen::write(
     attr_add("label", buf.str());
     attr_add(mNodeAttrList);
     attr_end();
-    mS << endl;
     if ( max_index < node->index() ) {
       max_index = node->index();
     }
@@ -202,7 +207,6 @@ DotGen::write_terminal(
     attr_add(mTerminal0AttrList);
   }
   attr_end();
-  mS << endl;
 }
 
 // @brief 枝の内容を出力する．
@@ -238,7 +242,6 @@ DotGen::write_edge(
     attr_add("arrowtail", "odot");
   }
   attr_end();
-  mS << endl;
 }
 
 // @breif 属性出力を開始する．
@@ -286,6 +289,7 @@ DotGen::attr_end()
   if ( mAttrStr == ", " ) {
     mS << "]";
   }
+  mS << endl;
 }
 
 END_NAMESPACE_YM_BDD

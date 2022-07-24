@@ -52,6 +52,7 @@ dot_test(
       func_list.push_back(f);
     }
     unordered_map<string, string> attr_dict;
+    attr_dict["graph:bgcolor"] = "yellow";
     attr_dict["0edge:color"] = "blue";
     attr_dict["1edge:color"] = "red";
     attr_dict["node:color"] = "green";
