@@ -51,7 +51,15 @@ dot_test(
       auto f = mgr.from_truth(buf);
       func_list.push_back(f);
     }
-    Bdd::gen_dot(cout, func_list);
+    unordered_map<string, string> attr_dict;
+    attr_dict["0edge:color"] = "blue";
+    attr_dict["1edge:color"] = "red";
+    attr_dict["node:color"] = "green";
+    attr_dict["node:style"] = "filled";
+    attr_dict["terminal:style"] = "filled";
+    attr_dict["terminal0:color"] = "blue";
+    attr_dict["terminal1:color"] = "red";
+    Bdd::gen_dot(cout, func_list, attr_dict);
   }
   return 0;
 }

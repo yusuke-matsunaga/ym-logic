@@ -681,10 +681,11 @@ Bdd::display(
 // @brief dot 形式で出力する．
 void
 Bdd::gen_dot(
-  ostream& s
+  ostream& s,
+  const unordered_map<string, string>& attr_dict
 ) const
 {
-  DotGen dg{s};
+  DotGen dg{s, attr_dict};
   dg.write({mRoot});
 }
 
@@ -692,12 +693,13 @@ Bdd::gen_dot(
 void
 Bdd::gen_dot(
   ostream& s,
-  const vector<Bdd>& bdd_list
+  const vector<Bdd>& bdd_list,
+  const unordered_map<string, string>& attr_dict
 )
 {
   vector<BddEdge> edge_list;
   (void) root_list(bdd_list, edge_list);
-  DotGen dg{s};
+  DotGen dg{s, attr_dict};
   dg.write(edge_list);
 }
 

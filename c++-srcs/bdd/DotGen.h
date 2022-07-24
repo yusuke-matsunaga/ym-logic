@@ -25,10 +25,9 @@ public:
 
   /// @brief コンストラクタ
   DotGen(
-    ostream& s ///< [in] 出力ストリーム
-  ) : mS{s}
-  {
-  }
+    ostream& s,                                    ///< [in] 出力ストリーム
+    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
+  );
 
   /// @brief デストラクタ
   ~DotGen() = default;
@@ -51,12 +50,51 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief ルート名を返す．
+  string
+  root_name(
+    SizeType i ///< [in] 番号
+  );
+
+  /// @brief ノード名を返す．
+  string
+  node_name(
+    BddNode* node ///< [in] ノード
+  );
+
+  /// @brief 終端ノードの内容を出力する．
+  void
+  write_terminal(
+    bool one ///< [in] 1 のノードの時に true にする．
+  );
+
   /// @brief 枝の内容を出力する．
   void
   write_edge(
     BddEdge edge, ///< [in] 枝
     bool zero     ///< [in] 0枝の時 true にするフラグ
   );
+
+  /// @breif 属性出力を開始する．
+  void
+  attr_begin();
+
+  /// @brief 属性リストの内容を追加する．
+  void
+  attr_add(
+    const unordered_map<string, string>& attr_list ///< [in] 属性リスト
+  );
+
+  /// @brief 属性を追加する．
+  void
+  attr_add(
+    const string& attr_name, ///< [in] 属性名
+    const string& attr_val   ///< [in] 属性値
+  );
+
+  /// @brief 属性出力を終了する．
+  void
+  attr_end();
 
 
 private:
@@ -66,6 +104,30 @@ private:
 
   // 出力ストリーム
   ostream& mS;
+
+  // 根の属性リスト
+  unordered_map<string, string> mRootAttrList;
+
+  // ノードの属性リスト
+  unordered_map<string, string> mNodeAttrList;
+
+  // 終端の属性リスト
+  unordered_map<string, string> mTerminalAttrList;
+
+  // 終端0の属性リスト
+  unordered_map<string, string> mTerminal0AttrList;
+
+  // 終端1の属性リスト
+  unordered_map<string, string> mTerminal1AttrList;
+
+  // 0枝の属性リスト
+  unordered_map<string, string> m0EdgeAttrList;
+
+  // 1枝の属性リスト
+  unordered_map<string, string> m1EdgeAttrList;
+
+  // 属性出力用の文字列
+  string mAttrStr;
 
 };
 
