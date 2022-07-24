@@ -502,6 +502,12 @@ private:
     BddEdge root
   );
 
+  /// @brief マネージャが異なる場合コピーする．
+  BddEdge
+  copy_edge(
+    const Bdd& src
+  ) const;
+
   /// @brief 根の枝を変更する．
   void
   change_root(

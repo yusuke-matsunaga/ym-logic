@@ -268,6 +268,17 @@ TEST_F(BddTest, and1)
   check(bdd, "1000");
 }
 
+TEST_F(BddTest, and2)
+{
+
+  Bdd var1 = literal(0);
+  BddMgr mgr2;
+  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd bdd = var1 & var2;
+
+  check(bdd, "1000");
+}
+
 TEST_F(BddTest, or1)
 {
   Bdd var1 = literal(0);
@@ -277,10 +288,30 @@ TEST_F(BddTest, or1)
   check(bdd, "1110");
 }
 
+TEST_F(BddTest, or2)
+{
+  Bdd var1 = literal(0);
+  BddMgr mgr2;
+  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd bdd = var1 | var2;
+
+  check(bdd, "1110");
+}
+
 TEST_F(BddTest, xor1)
 {
   Bdd var1 = literal(0);
   Bdd var2 = literal(1);
+  Bdd bdd = var1 ^ var2;
+
+  check(bdd, "0110");
+}
+
+TEST_F(BddTest, xor2)
+{
+  Bdd var1 = literal(0);
+  BddMgr mgr2;
+  Bdd var2 = mgr2.literal(VarId{1});
   Bdd bdd = var1 ^ var2;
 
   check(bdd, "0110");
@@ -308,6 +339,20 @@ TEST_F(BddTest, from_truth2)
   const char* exp_str = "10010101";
   Bdd bdd = mMgr.from_truth(exp_str);
   check(bdd, exp_str);
+}
+
+TEST_F(BddTest, copy)
+{
+  const char* exp_str = "1001010110111010";
+  Bdd bdd = mMgr.from_truth(exp_str);
+
+  BddMgr mgr1;
+  Bdd bdd1 = mgr1.copy(bdd);
+  check(bdd1, exp_str);
+
+  Bdd bdd2 = mMgr.copy(bdd1);
+
+  EXPECT_EQ( bdd, bdd2 );
 }
 
 END_NAMESPACE_YM

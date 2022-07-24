@@ -11,6 +11,7 @@
 #include "BddEdge.h"
 #include "BddMgrImpl.h"
 #include "BddNode.h"
+#include "CopyOp.h"
 #include "CofactorOp.h"
 #include "CheckSupOp.h"
 #include "CheckSymOp.h"
@@ -76,6 +77,21 @@ Bdd::~Bdd()
   }
 }
 
+// @brief マネージャが異なる場合コピーする．
+BddEdge
+Bdd::copy_edge(
+  const Bdd& src
+) const
+{
+  if ( src.mMgr == mMgr ) {
+    return src.mRoot;
+  }
+  else {
+    CopyOp op{mMgr};
+    return op.copy_step(src.mRoot);
+  }
+}
+
 // @brief 否定した関数を返す．
 Bdd
 Bdd::invert() const
@@ -99,8 +115,8 @@ Bdd::and_op(
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->and_op(mRoot, right.mRoot);
+  BddEdge redge = copy_edge(right);
+  auto e = mMgr->and_op(mRoot, redge);
   return Bdd{mMgr, e};
 }
 
@@ -111,8 +127,8 @@ Bdd::or_op(
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->or_op(mRoot, right.mRoot);
+  BddEdge redge = copy_edge(right);
+  auto e = mMgr->or_op(mRoot, redge);
   return Bdd{mMgr, e};
 }
 
@@ -123,8 +139,8 @@ Bdd::xor_op(
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->xor_op(mRoot, right.mRoot);
+  BddEdge redge = copy_edge(right);
+  auto e = mMgr->xor_op(mRoot, redge);
   return Bdd{mMgr, e};
 }
 
@@ -159,9 +175,9 @@ Bdd::cofactor(
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  ASSERT_COND( mMgr == cube.mMgr );
+  BddEdge redge = copy_edge(cube);
   CofactorOp op{mMgr};
-  auto e = op.op_step(mRoot, cube.mRoot);
+  auto e = op.op_step(mRoot, redge);
   return Bdd{mMgr, e};
 }
 
@@ -198,8 +214,8 @@ Bdd::and_int(
 )
 {
   ASSERT_COND( mMgr != nullptr );
-  ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->and_op(mRoot, right.mRoot);
+  BddEdge redge = copy_edge(right);
+  auto e = mMgr->and_op(mRoot, redge);
   change_root(e);
   return *this;
 }
@@ -211,8 +227,8 @@ Bdd::or_int(
 )
 {
   ASSERT_COND( mMgr != nullptr );
-  ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->or_op(mRoot, right.mRoot);
+  BddEdge redge = copy_edge(right);
+  auto e = mMgr->or_op(mRoot, redge);
   change_root(e);
   return *this;
 }
@@ -224,8 +240,8 @@ Bdd::xor_int(
 )
 {
   ASSERT_COND( mMgr != nullptr );
-  ASSERT_COND( mMgr == right.mMgr );
-  auto e = mMgr->xor_op(mRoot, right.mRoot);
+  BddEdge redge = copy_edge(right);
+  auto e = mMgr->xor_op(mRoot, redge);
   change_root(e);
   return *this;
 }
@@ -500,8 +516,7 @@ Bdd::operator==(
   const Bdd& right ///< [in] オペランド
 ) const
 {
-  ASSERT_COND( mMgr == right.mMgr );
-  return mRoot == right.mRoot;
+  return mMgr == right.mMgr && mRoot == right.mRoot;
 }
 
 // @brief ノード数を返す．

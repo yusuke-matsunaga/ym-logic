@@ -75,6 +75,7 @@ set (bdd_SOURCES
   c++-srcs/bdd/Bdd.cc
   c++-srcs/bdd/BddMgr.cc
   c++-srcs/bdd/BddMgrImpl.cc
+  c++-srcs/bdd/CopyOp.cc
   c++-srcs/bdd/CofactorOp.cc
   c++-srcs/bdd/CheckSupOp.cc
   c++-srcs/bdd/CheckSymOp.cc

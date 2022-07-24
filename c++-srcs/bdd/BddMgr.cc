@@ -10,6 +10,7 @@
 #include "ym/Bdd.h"
 #include "ym/BddError.h"
 #include "BddMgrImpl.h"
+#include "CopyOp.h"
 #include "TruthOp.h"
 
 
@@ -25,6 +26,22 @@ BddMgr::BddMgr(
 BddMgr::~BddMgr()
 {
   delete mImpl;
+}
+
+// @brief BDD をコピーする．
+Bdd
+BddMgr::copy(
+  const Bdd& src
+)
+{
+  if ( src.mMgr == mImpl ) {
+    return Bdd{mImpl, src.mRoot};
+  }
+  else {
+    CopyOp op{mImpl};
+    auto e = op.copy_step(src.mRoot);
+    return Bdd{mImpl, e};
+  }
 }
 
 // @brief 恒儀関数を作る．
