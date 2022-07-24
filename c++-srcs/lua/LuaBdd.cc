@@ -1133,6 +1133,15 @@ bdd_display(
   return 1;
 }
 
+// 属性リストを取り出す．
+unordered_map<string, string>
+get_attr_list(
+  LuaBdd& lua,
+  int idx
+)
+{
+}
+
 // dot 形式で出力する．
 int
 bdd_gen_dot(
@@ -1142,8 +1151,8 @@ bdd_gen_dot(
   LuaBdd lua{L};
 
   SizeType n = lua.get_top();
-  if ( n != 2 ) {
-    return lua.error_end("Error: Bdd:gen_dot() expects one argument.");
+  if ( n != 2 && n != 3 ) {
+    return lua.error_end("Error: Bdd:gen_dot() expects one or two arguments.");
   }
 
   auto obj = lua.to_bdd(1);
@@ -1157,7 +1166,17 @@ bdd_gen_dot(
 	<< filename << ".";
     return lua.error_end(buf.str());
   }
-  obj->gen_dot(s);
+
+  if ( n == 3 ) {
+    if ( !lua.is_table(3) ) {
+      return lua.error_end("Error: Bdd:gen_dot(): 2nd argument should be a table.");
+    }
+    auto attr_list = get_attr_list(lua, 3);
+    obj->gen_dot(s, attr_list);
+  }
+  else {
+    obj->gen_dot(s);
+  }
 
   lua.push_boolean(true);
   return 1;
@@ -1172,8 +1191,8 @@ gen_dot_for_bdds(
   LuaBdd lua{L};
 
   SizeType n = lua.get_top();
-  if ( n != 2 ) {
-    return lua.error_end("Error: Bdd:gen_dot() expects one argument.");
+  if ( n != 2 && n != 3 ) {
+    return lua.error_end("Error: gen_dot_for_bdds() expects one or two arguments.");
   }
 
   auto bdd_list = LuaBdd::to_bdd_list(L, 1);
@@ -1186,7 +1205,17 @@ gen_dot_for_bdds(
 	<< filename << ".";
     return lua.error_end(buf.str());
   }
-  Bdd::gen_dot(s, bdd_list);
+
+  if ( n == 3 ) {
+    if ( !lua.is_table(3) ) {
+      return lua.error_end("Error: gen_dot_for_bdds(): 3rd argument should be a table.");
+    }
+    auto attr_list = get_attr_list(lua, 3);
+    Bdd::gen_dot(s, bdd_list, attr_list);
+  }
+  else {
+    Bdd::gen_dot(s, bdd_list);
+  }
 
   lua.push_boolean(true);
   return 1;
