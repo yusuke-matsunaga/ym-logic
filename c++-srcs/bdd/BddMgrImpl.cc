@@ -268,8 +268,8 @@ BddMgrImpl::ite_step(
 
   BddEdge e00, e01;
   if ( index0 == top ) {
-    e00 = node0->edge0(inv0);
-    e01 = node0->edge1(inv0);
+    e00 = node0->edge0() * inv0;
+    e01 = node0->edge1() * inv0;
   }
   else {
     e00 = e01 = e0;
@@ -277,8 +277,8 @@ BddMgrImpl::ite_step(
 
   BddEdge e10, e11;
   if ( index1 == top ) {
-    e10 = node1->edge0(inv1);
-    e11 = node1->edge1(inv1);
+    e10 = node1->edge0() * inv1;
+    e11 = node1->edge1() * inv1;
   }
   else {
     e10 = e11 = e1;
@@ -286,8 +286,8 @@ BddMgrImpl::ite_step(
 
   BddEdge e20, e21;
   if ( index2 == top ) {
-    e20 = node2->edge0(inv2);
-    e21 = node2->edge1(inv2);
+    e20 = node2->edge0() * inv2;
+    e21 = node2->edge1() * inv2;
   }
   else {
     e20 = e21 = e2;

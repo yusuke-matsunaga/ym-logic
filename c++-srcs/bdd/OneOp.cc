@@ -24,8 +24,8 @@ OneOp::op_step(
 
   auto node = edge.node();
   auto inv = edge.inv();
-  auto edge0 = node->edge0(inv);
-  auto edge1 = node->edge1(inv);
+  auto edge0 = node->edge0() * inv;
+  auto edge1 = node->edge1() * inv;
   if ( !edge1.is_zero() ) {
     auto tmp = op_step(edge1);
     return new_node(node->index(), BddEdge::zero(), tmp);

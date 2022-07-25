@@ -52,11 +52,13 @@ CofactorOp::op_step(
   auto cinv = cedge.inv();
   BddEdge result;
   if ( index == cindex ) {
-    if ( cnode->edge0(cinv).is_zero() ) {
-      result = op_step(edge1, cnode->edge1(cinv));
+    auto cedge0 = cnode->edge0() * cinv;
+    auto cedge1 = cnode->edge1() * cinv;
+    if ( cedge0.is_zero() ) {
+      result = op_step(edge1, cedge1);
     }
-    else if ( cnode->edge1(cinv).is_zero() ) {
-      result = op_step(edge0, cnode->edge0(cinv));
+    else if ( cedge1.is_zero() ) {
+      result = op_step(edge0, cedge0);
     }
     else {
       ASSERT_NOT_REACHED;
@@ -68,11 +70,13 @@ CofactorOp::op_step(
     result = new_node(index, ans0, ans1);;
   }
   else { // index > cindex
-    if ( cnode->edge0(cinv).is_zero() ) {
-      cedge = cnode->edge1(cinv);
+    auto cedge0 = cnode->edge0() * cinv;
+    auto cedge1 = cnode->edge1() * cinv;
+    if ( cedge0.is_zero() ) {
+      cedge = cedge1;
     }
-    else if ( cnode->edge1(cinv).is_zero() ) {
-      cedge = cnode->edge1(cinv);
+    else if ( cedge1.is_zero() ) {
+      cedge = cedge0;
     }
     else {
       ASSERT_NOT_REACHED;

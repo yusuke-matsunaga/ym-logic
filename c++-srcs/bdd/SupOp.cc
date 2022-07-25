@@ -13,7 +13,7 @@ BEGIN_NAMESPACE_YM_BDD
 
 // @brief サポートを表すBDDを返す．
 BddEdge
-SupOp::op_step(
+SupOp::get_step(
   BddEdge edge
 )
 {
@@ -28,17 +28,17 @@ SupOp::op_step(
   auto index = node->index();
   auto edge0 = node->edge0();
   auto edge1 = node->edge1();
-  auto r0 = op_step(edge0);
-  auto r1 = op_step(edge1);
-  auto tmp = merge_step(r0, r1);
+  auto r0 = get_step(edge0);
+  auto r1 = get_step(edge1);
+  auto tmp = cup_step(r0, r1);
   auto result = new_node(index, BddEdge::zero(), tmp);
   mTable.emplace(node, result);
   return result;
 }
 
-// @brief 2つのBDDをマージする．
+// @brief サポートのユニオンを求める．
 BddEdge
-SupOp::merge_step(
+SupOp::cup_step(
   BddEdge edge0,
   BddEdge edge1
 )
@@ -59,15 +59,81 @@ SupOp::merge_step(
   auto index1 = node1->index();
   auto top = std::min(index0, index1);
   if ( index0 < index1 ) {
-    auto tmp = merge_step(node0->edge1(), edge1);
+    auto tmp = cup_step(node0->edge1(), edge1);
     return new_node(index0, BddEdge::zero(), tmp);
   }
   else if ( index0 == index1 ) {
-    auto tmp = merge_step(node0->edge1(), node1->edge1());
+    auto tmp = cup_step(node0->edge1(), node1->edge1());
     return new_node(index0, BddEdge::zero(), tmp);
   }
   else {
-    auto tmp = merge_step(edge0, node1->edge1());
+    auto tmp = cup_step(edge0, node1->edge1());
+    return new_node(index1, BddEdge::zero(), tmp);
+  }
+}
+
+// @brief サポートのインターセクションを求める．
+BddEdge
+SupOp::cap_step(
+  BddEdge edge0,
+  BddEdge edge1
+)
+{
+  ASSERT_COND( !edge0.is_zero() );
+  ASSERT_COND( !edge1.is_zero() );
+
+  if ( edge0.is_one() || edge1.is_one() ) {
+    return BddEdge::one();
+  }
+
+  auto node0 = edge0.node();
+  auto node1 = edge1.node();
+  auto index0 = node0->index();
+  auto index1 = node1->index();
+  auto top = std::min(index0, index1);
+  if ( index0 < index1 ) {
+    return cap_step(node0->edge1(), edge1);
+  }
+  else if ( index0 == index1 ) {
+    auto tmp = cap_step(node0->edge1(), node1->edge1());
+    return new_node(index0, BddEdge::zero(), tmp);
+  }
+  else {
+    return cap_step(edge0, node1->edge1());
+  }
+}
+
+// @brief サポートのユニオンを求める．
+BddEdge
+SupOp::diff_step(
+  BddEdge edge0,
+  BddEdge edge1
+)
+{
+  ASSERT_COND( !edge0.is_zero() );
+  ASSERT_COND( !edge1.is_zero() );
+
+  if ( edge0.is_one() ) {
+    return BddEdge::one();
+  }
+  if ( edge1.is_one() ) {
+    return edge0;
+  }
+
+  auto node0 = edge0.node();
+  auto node1 = edge1.node();
+  auto index0 = node0->index();
+  auto index1 = node1->index();
+  auto top = std::min(index0, index1);
+  if ( index0 < index1 ) {
+    auto tmp = diff_step(node0->edge1(), edge1);
+    return new_node(index0, BddEdge::zero(), tmp);
+  }
+  else if ( index0 == index1 ) {
+    return diff_step(node0->edge1(), node1->edge1());
+  }
+  else {
+    auto tmp = diff_step(edge0, node1->edge1());
     return new_node(index1, BddEdge::zero(), tmp);
   }
 }

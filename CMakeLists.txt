@@ -73,6 +73,14 @@ set (tvfunc_SOURCES
 
 set (bdd_SOURCES
   c++-srcs/bdd/Bdd.cc
+  c++-srcs/bdd/Bdd_check.cc
+  c++-srcs/bdd/Bdd_cofactor.cc
+  c++-srcs/bdd/Bdd_display.cc
+  c++-srcs/bdd/Bdd_gen_dot.cc
+  c++-srcs/bdd/Bdd_op.cc
+  c++-srcs/bdd/Bdd_size.cc
+  c++-srcs/bdd/Bdd_sup.cc
+  c++-srcs/bdd/Bdd_truth.cc
   c++-srcs/bdd/BddMgr.cc
   c++-srcs/bdd/BddMgrImpl.cc
   c++-srcs/bdd/CopyOp.cc

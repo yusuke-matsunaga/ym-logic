@@ -311,6 +311,63 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
+  /// @name サポート集合を表すBDDに関する演算
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief サポート集合のユニオンを求める．
+  friend
+  Bdd
+  support_cup(
+    const Bdd& left, ///< [in] 第1オペランド
+    const Bdd& right ///< [in] 第2オペランド
+  )
+  {
+    return Bdd{left}.support_cup_int(right);
+  }
+
+  /// @brief サポート集合のユニオンを計算して代入する．
+  Bdd&
+  support_cup_int(
+    const Bdd& right ///< [in] 第2オペランド
+  );
+
+  /// @brief サポート集合のインターセクションを求める．
+  friend
+  Bdd
+  support_cap(
+    const Bdd& left, ///< [in] 第1オペランド
+    const Bdd& right ///< [in] 第2オペランド
+  )
+  {
+    return Bdd{left}.support_cap_int(right);
+  }
+
+  /// @brief サポート集合のインターセクションを計算して代入する．
+  Bdd&
+  support_cap_int(
+    const Bdd& right ///< [in] 第2オペランド
+  );
+
+  /// @brief サポート集合の差を求める．
+  friend
+  Bdd
+  support_diff(
+    const Bdd& left, ///< [in] 第1オペランド
+    const Bdd& right ///< [in] 第2オペランド
+  )
+  {
+    return Bdd{left}.support_diff_int(right);
+  }
+
+  /// @brief サポート集合の差を計算して代入する．
+  Bdd&
+  support_diff_int(
+    const Bdd& right ///< [in] 第2オペランド
+  );
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
   /// @name 内容を取得する関数
   /// @{
   //////////////////////////////////////////////////////////////////////

@@ -65,24 +65,6 @@ public:
     return mEdge1;
   }
 
-  /// @brief 極性補正を行った0枝を返す．
-  BddEdge
-  edge0(
-    bool inv ///< [in] 反転フラグ
-  ) const
-  {
-    return mEdge0 * inv;
-  }
-
-  /// @brief 極性補正を行った1枝を返す．
-  BddEdge
-  edge1(
-    bool inv ///< [in] 反転フラグ
-  ) const
-  {
-    return mEdge1 * inv;
-  }
-
   /// @brief 参照回数を返す．
   SizeType
   ref_count() const
@@ -139,16 +121,16 @@ decomp(
   auto r_index = r_node->index();
   auto top = std::min(l_index, r_index);
   if ( l_index == top ) {
-    left0 = l_node->edge0(l_inv);
-    left1 = l_node->edge1(l_inv);
+    left0 = l_node->edge0() * l_inv;
+    left1 = l_node->edge1() * l_inv;
   }
   else {
     left0 = left;
     left1 = left;
   }
   if ( r_index == top ) {
-    right0 = r_node->edge0(r_inv);
-    right1 = r_node->edge1(r_inv);
+    right0 = r_node->edge0() * r_inv;
+    right1 = r_node->edge1() * r_inv;
   }
   else {
     right0 = right;

@@ -41,23 +41,30 @@ public:
 
   /// @brief サポートを表すBDDを返す．
   BddEdge
-  op_step(
+  get_step(
     BddEdge edge ///< [in] 枝
   );
 
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief 2つのBDDをマージする．
+  /// @brief サポートのユニオンを求める．
   BddEdge
-  merge_step(
+  cup_step(
     BddEdge edge0,
     BddEdge edge1
   );
 
+  /// @brief サポートのインターセクションを求める．
+  BddEdge
+  cap_step(
+    BddEdge edge0,
+    BddEdge edge1
+  );
+
+  /// @brief サポートの差を求める．
+  BddEdge
+  diff_step(
+    BddEdge edge0,
+    BddEdge edge1
+  );
 
 private:
   //////////////////////////////////////////////////////////////////////
