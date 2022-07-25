@@ -1140,6 +1140,17 @@ get_attr_list(
   int idx
 )
 {
+  unordered_map<string, string> attr_list;
+  auto key_list = lua.get_table_keys(idx);
+  for ( auto key: key_list ) {
+    string val;
+    auto ret = lua.get_string_field(idx, key.c_str(), val);
+    if ( ret != Luapp::OK ) {
+      throw LuaError{"get_string_field"};
+    }
+    attr_list.emplace(key, val);
+  }
+  return attr_list;
 }
 
 // dot 形式で出力する．
