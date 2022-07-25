@@ -58,6 +58,23 @@ public:
     return mNodeList;
   }
 
+  /// @brief インデックスの最大値+1を得る．
+  SizeType
+  max_index() const
+  {
+    return mIndexedNodeList.size();
+  }
+
+  /// @brief インデックスごとのノードリストを返す．
+  const vector<BddNode*>&
+  indexed_node_list(
+    SizeType index ///< [in] インデックス ( 0 <= index < max_index() )
+  ) const
+  {
+    ASSERT_COND( 0 <= index && index < max_index() );
+    return mIndexedNodeList[index];
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -66,6 +83,9 @@ private:
 
   // ノードリスト
   vector<BddNode*> mNodeList;
+
+  // インデックスごとのノードリスト
+  vector<vector<BddNode*>> mIndexedNodeList;
 
   // ノード番号の対応表
   unordered_map<BddNode*, SizeType> mNodeMap;

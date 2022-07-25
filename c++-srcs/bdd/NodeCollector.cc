@@ -28,6 +28,11 @@ NodeCollector::get_node(
     SizeType id = mNodeList.size();
     mNodeMap.emplace(node, id);
     mNodeList.push_back(node);
+    SizeType index = node->index();
+    while ( mIndexedNodeList.size() <= index ) {
+      mIndexedNodeList.push_back(vector<BddNode*>{});
+    }
+    mIndexedNodeList[index].push_back(node);
     get_node(node->edge0());
     get_node(node->edge1());
   }
