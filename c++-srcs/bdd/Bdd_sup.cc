@@ -127,6 +127,9 @@ Bdd
 Bdd::get_onepath() const
 {
   ASSERT_COND( mMgr != nullptr );
+  if ( is_zero() ) {
+    return Bdd{mMgr, BddEdge::zero()};
+  }
   OneOp op{mMgr};
   auto e = op.op_step(mRoot);
   return Bdd{mMgr, e};
@@ -136,10 +139,7 @@ Bdd::get_onepath() const
 Bdd
 Bdd::get_zeropath() const
 {
-  ASSERT_COND( mMgr != nullptr );
-  OneOp op{mMgr};
-  auto e = op.op_step(~BddEdge{mRoot});
-  return Bdd{mMgr, e};
+  return invert().get_onepath();
 }
 
 // @brief 変数のリストに変換する．

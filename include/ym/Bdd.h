@@ -181,7 +181,7 @@ public:
   operator/(
     const Bdd& cube ///< [in] コファクターのキューブ
                     /// cube.is_cube() = true でなければならない．
-  )
+  ) const
   {
     return cofactor(cube);
   }

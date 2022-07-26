@@ -17,7 +17,9 @@
 BEGIN_NAMESPACE_YM_BDD
 
 // @brief 空のコンストラクタ
-Bdd::Bdd() : mMgr{nullptr}
+Bdd::Bdd(
+) : mMgr{nullptr},
+    mRoot{0}
 {
 }
 
@@ -47,16 +49,15 @@ Bdd::operator=(
   const Bdd& src
 )
 {
-  if ( mMgr != src.mMgr || mRoot != src.mRoot ) {
-    if ( mMgr != nullptr ) {
-      mMgr->deactivate(mRoot);
-    }
-    mMgr = src.mMgr;
-    mRoot = src.mRoot;
-    if ( mMgr != nullptr ) {
-      mMgr->activate(mRoot);
-    }
+  // この順序なら自分自身に代入しても正しく動作する．
+  if ( src.mMgr != nullptr ) {
+    src.mMgr->activate(src.mRoot);
   }
+  if ( mMgr != nullptr ) {
+    mMgr->deactivate(mRoot);
+  }
+  mMgr = src.mMgr;
+  mRoot = src.mRoot;
   return *this;
 }
 
@@ -65,7 +66,6 @@ Bdd::~Bdd()
 {
   if ( mMgr != nullptr ) {
     mMgr->deactivate(mRoot);
-    mMgr->garbage_collection();
   }
 }
 
@@ -107,7 +107,7 @@ Bdd::invert_int()
   if ( mMgr != nullptr ) {
     // 実はこれは BddMgr を介さない．
     // ただ不正値の時には演算を行わない．
-    mRoot = ~mRoot;
+    mRoot = (~BddEdge{mRoot}).body();
   }
   return *this;
 }
@@ -121,7 +121,7 @@ Bdd::operator*=(
   if ( mMgr != nullptr ) {
     // 実はこれは BddMgr を介さない．
     // ただ不正値の時には演算を行わない．
-    mRoot *= inv;
+    mRoot = (BddEdge{mRoot} * inv).body();
   }
   return *this;
 }
@@ -270,11 +270,11 @@ Bdd::change_root(
   BddEdge new_root
 )
 {
-  if ( mRoot != new_root ) {
-    mMgr->deactivate(mRoot);
-    mMgr->activate(new_root);
-    mRoot = new_root.body();
-  }
+  // この順序なら new_root と mRoot が等しくても
+  // 正しく動く
+  mMgr->activate(new_root);
+  mMgr->deactivate(mRoot);
+  mRoot = new_root.body();
 }
 
 // @brief BDDの根の枝のリストを作る．
@@ -296,22 +296,6 @@ Bdd::root_list(
     edge_list.push_back(bdd.mRoot);
   }
   return mgr;
-}
-
-// @brief If-Then-Else 演算
-Bdd
-ite(
-  const Bdd& cond,
-  const Bdd& then_f,
-  const Bdd& else_f
-)
-{
-  auto mgr = cond.mMgr;
-  ASSERT_COND( mgr != nullptr );
-  ASSERT_COND( mgr == then_f.mMgr );
-  ASSERT_COND( mgr == else_f.mMgr );
-  auto e = mgr->ite_op(cond.mRoot, then_f.mRoot, else_f.mRoot);
-  return Bdd{mgr, e};
 }
 
 END_NAMESPACE_YM_BDD

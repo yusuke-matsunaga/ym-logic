@@ -140,19 +140,27 @@ target_include_directories( logic_GenFactor_test
   ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
   )
 
-ym_add_gtest( logic_BddTest
+ym_add_gtest( logic_BddMgr_test
+  bdd/BddMgr_test.cc
   bdd/BddTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
-ym_add_gtest( logic_BddEdgeTest
-  bdd/BddEdgeTest.cc
+ym_add_gtest( logic_Bdd_test
+  bdd/Bdd_test.cc
+  bdd/BddTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
-target_include_directories ( logic_BddEdgeTest
+ym_add_gtest( logic_BddEdge_test
+  bdd/BddEdge_test.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories ( logic_BddEdge_test
   PRIVATE
   ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/bdd
   )

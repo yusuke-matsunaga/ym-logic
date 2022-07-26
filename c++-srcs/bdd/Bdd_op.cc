@@ -90,4 +90,20 @@ Bdd::xor_int(
   return *this;
 }
 
+// @brief If-Then-Else 演算
+Bdd
+ite(
+  const Bdd& cond,
+  const Bdd& then_f,
+  const Bdd& else_f
+)
+{
+  auto mgr = cond.mMgr;
+  ASSERT_COND( mgr != nullptr );
+  auto then_edge = cond.copy_edge(then_f);
+  auto else_edge = cond.copy_edge(else_f);
+  auto e = mgr->ite_op(cond.mRoot, then_edge, else_edge);
+  return Bdd{mgr, e};
+}
+
 END_NAMESPACE_YM_BDD

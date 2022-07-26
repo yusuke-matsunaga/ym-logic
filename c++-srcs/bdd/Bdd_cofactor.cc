@@ -23,10 +23,8 @@ Bdd::cofactor(
 {
   ASSERT_COND( mMgr != nullptr );
   auto cedge = mMgr->make_literal(var.val()) * inv;
-  Bdd cbdd{mMgr, cedge}; // GC 用にロックする必要がある．
-  CofactorOp op{mMgr};
-  auto e = op.op_step(mRoot, cedge);
-  return Bdd{mMgr, e};
+  Bdd cube{mMgr, cedge}; // GC 用にロックする必要がある．
+  return cofactor(cube);
 }
 
 // @brief コファクターを計算する．
@@ -80,8 +78,9 @@ Bdd::cofactor_int(
 )
 {
   ASSERT_COND( mMgr != nullptr );
+  BddEdge redge = copy_edge(cube);
   CofactorOp op{mMgr};
-  auto e = op.op_step(mRoot, cube.mRoot);
+  auto e = op.op_step(mRoot, redge);
   change_root(e);
   return *this;
 }

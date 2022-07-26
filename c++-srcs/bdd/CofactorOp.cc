@@ -30,7 +30,7 @@ CofactorOp::op_step(
   }
   // cedge が 1 なら edge を返す．
   if ( cedge.is_one() ) {
-    return BddEdge::one();
+    return edge;
   }
 
   // 正規化する．

@@ -356,15 +356,7 @@ BddMgrImpl::activate(
   BddEdge edge
 )
 {
-  auto node = edge.node();
-  if ( node != nullptr ) {
-    ++ node->mRefCount;
-    if ( node->mRefCount == 1 ) {
-      -- mGarbageNum;
-      activate(node->edge0());
-      activate(node->edge1());
-    }
-  }
+  inc_ref(edge);
 }
 
 // @brief ノード(枝)の参照回数を減らす．
@@ -373,13 +365,40 @@ BddMgrImpl::deactivate(
   BddEdge edge
 )
 {
+  dec_ref(edge);
+  garbage_collection();
+}
+
+// @brief ノード(枝)の参照回数を増やす．
+void
+BddMgrImpl::inc_ref(
+  BddEdge edge
+)
+{
+  auto node = edge.node();
+  if ( node != nullptr ) {
+    ++ node->mRefCount;
+    if ( node->mRefCount == 1 ) {
+      -- mGarbageNum;
+      inc_ref(node->edge0());
+      inc_ref(node->edge1());
+    }
+  }
+}
+
+// @brief ノード(枝)の参照回数を減らす．
+void
+BddMgrImpl::dec_ref(
+  BddEdge edge
+)
+{
   auto node = edge.node();
   if ( node != nullptr ) {
     -- node->mRefCount;
     if ( node->mRefCount == 0 ) {
       ++ mGarbageNum;
-      deactivate(node->edge0());
-      deactivate(node->edge1());
+      dec_ref(node->edge0());
+      dec_ref(node->edge1());
     }
   }
 }

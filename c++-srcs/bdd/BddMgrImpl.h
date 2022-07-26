@@ -168,6 +168,18 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief ノード(枝)の参照回数を増やす．
+  void
+  inc_ref(
+    BddEdge edge ///< [in] 対象の枝
+  );
+
+  /// @brief ノード(枝)の参照回数を減らす．
+  void
+  dec_ref(
+    BddEdge edge ///< [in] 対象の枝
+  );
+
   /// @brief AND 演算を行う．
   BddEdge
   and_step(
