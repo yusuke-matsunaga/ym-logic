@@ -53,8 +53,8 @@ dot_test(
     }
     unordered_map<string, string> attr_dict;
     attr_dict["graph:bgcolor"] = "yellow";
-    attr_dict["0edge:color"] = "blue";
-    attr_dict["1edge:color"] = "red";
+    attr_dict["edge0:color"] = "blue";
+    attr_dict["edge1:color"] = "red";
     attr_dict["node:color"] = "green";
     attr_dict["node:style"] = "filled";
     attr_dict["terminal:style"] = "filled";

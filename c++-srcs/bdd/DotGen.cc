@@ -25,7 +25,7 @@ DotGen::DotGen(
   mTerminalAttrList.emplace("shape", "box");
   mTerminal0AttrList.emplace("label", "\"0\"");
   mTerminal1AttrList.emplace("label", "\"1\"");
-  m0EdgeAttrList.emplace("style", "dotted");
+  mEdge0AttrList.emplace("style", "dotted");
   for ( auto& p: attr_dict ) {
     auto attr_name = p.first;
     auto attr_val = p.second;
@@ -35,8 +35,7 @@ DotGen::DotGen(
       mRootAttrList.emplace(attr_name, attr_val);
       mNodeAttrList.emplace(attr_name, attr_val);
       mTerminalAttrList.emplace(attr_name, attr_val);
-      m0EdgeAttrList.emplace(attr_name, attr_val);
-      m1EdgeAttrList.emplace(attr_name, attr_val);
+      mEdgeAttrList.emplace(attr_name, attr_val);
     }
     else {
       auto type = attr_name.substr(0, pos);
@@ -59,11 +58,14 @@ DotGen::DotGen(
       else if ( type == "terminal1" ) {
 	mTerminal1AttrList.emplace(attr_name1, attr_val);
       }
-      else if ( type == "0edge" ) {
-	m0EdgeAttrList.emplace(attr_name1, attr_val);
+      else if ( type == "edge" ) {
+	mEdgeAttrList.emplace(attr_name1, attr_val);
       }
-      else if ( type == "1edge" ) {
-	m1EdgeAttrList.emplace(attr_name1, attr_val);
+      else if ( type == "edge0" ) {
+	mEdge0AttrList.emplace(attr_name1, attr_val);
+      }
+      else if ( type == "edge1" ) {
+	mEdge1AttrList.emplace(attr_name1, attr_val);
       }
       else {
 	// type error
@@ -225,11 +227,12 @@ DotGen::write_edge(
   }
 
   attr_begin();
+  attr_add(mEdgeAttrList);
   if ( zero ) {
-    attr_add(m0EdgeAttrList);
+    attr_add(mEdge0AttrList);
   }
   else {
-    attr_add(m1EdgeAttrList);
+    attr_add(mEdge1AttrList);
   }
   if ( inv ) {
     attr_add("dir", "both");

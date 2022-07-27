@@ -123,11 +123,14 @@ private:
   // 終端1の属性リスト
   unordered_map<string, string> mTerminal1AttrList;
 
+  // 枝の属性のリスト
+  unordered_map<string, string> mEdgeAttrList;
+
   // 0枝の属性リスト
-  unordered_map<string, string> m0EdgeAttrList;
+  unordered_map<string, string> mEdge0AttrList;
 
   // 1枝の属性リスト
-  unordered_map<string, string> m1EdgeAttrList;
+  unordered_map<string, string> mEdge1AttrList;
 
   // 属性出力用の文字列
   string mAttrStr;
