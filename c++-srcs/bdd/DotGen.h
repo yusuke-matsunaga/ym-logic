@@ -10,6 +10,7 @@
 
 #include "ym/bdd_nsdef.h"
 #include "NodeCollector.h"
+#include "DotWriter.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -62,39 +63,13 @@ private:
     BddNode* node ///< [in] ノード
   );
 
-  /// @brief 終端ノードの内容を出力する．
-  void
-  write_terminal(
-    bool one ///< [in] 1 のノードの時に true にする．
-  );
-
   /// @brief 枝の内容を出力する．
   void
   write_edge(
-    BddEdge edge, ///< [in] 枝
-    bool zero     ///< [in] 0枝の時 true にするフラグ
+    const string& from_node, ///< [in] 始点のノード名
+    BddEdge edge,            ///< [in] 枝
+    bool zero                ///< [in] 0枝の時 true にするフラグ
   );
-
-  /// @breif 属性出力を開始する．
-  void
-  attr_begin();
-
-  /// @brief 属性リストの内容を追加する．
-  void
-  attr_add(
-    const unordered_map<string, string>& attr_list ///< [in] 属性リスト
-  );
-
-  /// @brief 属性を追加する．
-  void
-  attr_add(
-    const string& attr_name, ///< [in] 属性名
-    const string& attr_val   ///< [in] 属性値
-  );
-
-  /// @brief 属性出力を終了する．
-  void
-  attr_end();
 
 
 private:
@@ -102,8 +77,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 出力ストリーム
-  ostream& mS;
+  // Dot出力器
+  DotWriter mWriter;
 
   // グラフの属性リスト
   unordered_map<string, string> mGraphAttrList;
@@ -114,26 +89,17 @@ private:
   // ノードの属性リスト
   unordered_map<string, string> mNodeAttrList;
 
-  // 終端の属性リスト
-  unordered_map<string, string> mTerminalAttrList;
-
   // 終端0の属性リスト
   unordered_map<string, string> mTerminal0AttrList;
 
   // 終端1の属性リスト
   unordered_map<string, string> mTerminal1AttrList;
 
-  // 枝の属性のリスト
-  unordered_map<string, string> mEdgeAttrList;
-
   // 0枝の属性リスト
   unordered_map<string, string> mEdge0AttrList;
 
   // 1枝の属性リスト
   unordered_map<string, string> mEdge1AttrList;
-
-  // 属性出力用の文字列
-  string mAttrStr;
 
 };
 

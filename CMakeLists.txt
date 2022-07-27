@@ -93,6 +93,7 @@ set (bdd_SOURCES
   c++-srcs/bdd/NodeCollector.cc
   c++-srcs/bdd/NodeDisp.cc
   c++-srcs/bdd/DotGen.cc
+  c++-srcs/bdd/DotWriter.cc
   c++-srcs/bdd/SupOp.cc
   c++-srcs/bdd/OneOp.cc
   )

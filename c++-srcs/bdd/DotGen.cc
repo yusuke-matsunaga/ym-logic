@@ -17,13 +17,14 @@ BEGIN_NAMESPACE_YM_BDD
 DotGen::DotGen(
   ostream& s,
   const unordered_map<string, string>& attr_dict
-) : mS{s}
+) : mWriter{s}
 {
   // デフォルト値の設定
   mGraphAttrList.emplace("rankdir", "TB");
   mRootAttrList.emplace("shape", "box");
-  mTerminalAttrList.emplace("shape", "box");
+  mTerminal0AttrList.emplace("shape", "box");
   mTerminal0AttrList.emplace("label", "\"0\"");
+  mTerminal1AttrList.emplace("shape", "box");
   mTerminal1AttrList.emplace("label", "\"1\"");
   mEdge0AttrList.emplace("style", "dotted");
   for ( auto& p: attr_dict ) {
@@ -34,8 +35,10 @@ DotGen::DotGen(
       // 全てのタイプに指定する．
       mRootAttrList.emplace(attr_name, attr_val);
       mNodeAttrList.emplace(attr_name, attr_val);
-      mTerminalAttrList.emplace(attr_name, attr_val);
-      mEdgeAttrList.emplace(attr_name, attr_val);
+      mTerminal0AttrList.emplace(attr_name, attr_val);
+      mTerminal1AttrList.emplace(attr_name, attr_val);
+      mEdge0AttrList.emplace(attr_name, attr_val);
+      mEdge1AttrList.emplace(attr_name, attr_val);
     }
     else {
       auto type = attr_name.substr(0, pos);
@@ -50,7 +53,8 @@ DotGen::DotGen(
 	mNodeAttrList.emplace(attr_name1, attr_val);
       }
       else if ( type == "terminal" ) {
-	mTerminalAttrList.emplace(attr_name1, attr_val);
+	mTerminal0AttrList.emplace(attr_name1, attr_val);
+	mTerminal1AttrList.emplace(attr_name1, attr_val);
       }
       else if ( type == "terminal0" ) {
 	mTerminal0AttrList.emplace(attr_name1, attr_val);
@@ -59,7 +63,8 @@ DotGen::DotGen(
 	mTerminal1AttrList.emplace(attr_name1, attr_val);
       }
       else if ( type == "edge" ) {
-	mEdgeAttrList.emplace(attr_name1, attr_val);
+	mEdge0AttrList.emplace(attr_name1, attr_val);
+	mEdge1AttrList.emplace(attr_name1, attr_val);
       }
       else if ( type == "edge0" ) {
 	mEdge0AttrList.emplace(attr_name1, attr_val);
@@ -86,76 +91,71 @@ DotGen::write(
   }
 
   // dot の開始
-  mS << "digraph bdd {" << endl
-     << "  graph";
-  attr_begin();
-  attr_add(mGraphAttrList);
-  attr_end();
+  mWriter.graph_begin("bdd", mGraphAttrList);
 
   // 根のノードの定義
   SizeType i = 1;
   for ( auto edge: root_list ) {
-    mS << "  "
-       << root_name(i);
-    attr_begin();
-    attr_add(mRootAttrList);
+    auto attr_list{mRootAttrList};
     ostringstream buf;
     buf << "\"BDD#" << i << "\"";
-    attr_add("label", buf.str());
-    attr_end();
+    attr_list.emplace("label", buf.str());
+    mWriter.write_node(root_name(i), attr_list);
     ++ i;
   }
 
   // ノードの定義
   for ( auto node: node_list() ) {
-    mS << "  "
-       << node_name(node);
-    attr_begin();
+    auto attr_list{mNodeAttrList};
     ostringstream buf;
     buf << "\"" << node->index() << "\"";
-    attr_add("label", buf.str());
-    attr_add(mNodeAttrList);
-    attr_end();
+    attr_list.emplace("label", buf.str());
+    mWriter.write_node(node_name(node), attr_list);
   }
 
   // 終端の定義
-  write_terminal(false);
-  write_terminal(true);
+  mWriter.write_node("const0", mTerminal0AttrList);
+  mWriter.write_node("const1", mTerminal1AttrList);
 
   // 根の枝の定義
   i = 1;
   for ( auto edge: root_list ) {
-    mS << "  " << root_name(i);
-    write_edge(edge, false);
+    write_edge(root_name(i), edge, false);
     ++ i;
   }
 
   // 枝の定義
   for ( auto node: node_list() ) {
-    mS << "  " << node_name(node);
-    write_edge(node->edge0(), true);
-    mS << "  " << node_name(node);
-    write_edge(node->edge1(), false);
+    write_edge(node_name(node), node->edge0(), true);
+    write_edge(node_name(node), node->edge1(), false);
   }
 
   // 根のランクの設定
-  mS << "  { rank = same;";
-  for ( SizeType i = 1; i <= root_list.size(); ++ i ) {
-    mS << " " << root_name(i) << ";";
-  }
-  mS << "}" << endl;
-
-  // ランクの設定
-  for ( SizeType i = 0; i < max_index(); ++ i ) {
-    mS << "  { rank = same;";
-    for ( auto node: indexed_node_list(i) ) {
-      mS << " " << node_name(node) << ";";
+  {
+    SizeType n = root_list.size();
+    vector<string> node_list(n);
+    for ( SizeType i = 0; i < n; ++ i ) {
+      node_list[i] = root_name(i + 1);
     }
-    mS << "}" << endl;
+    mWriter.write_rank_group(node_list);
   }
 
-  // dot の終了
-  mS << "}" << endl;
+  // ノードのランクの設定
+  for ( SizeType i = 0; i < max_index(); ++ i ) {
+    SizeType n = indexed_node_list(i).size();
+    vector<string> node_list;
+    node_list.reserve(n);
+    for ( auto node: indexed_node_list(i) ) {
+      node_list.push_back(node_name(node));
+    }
+    mWriter.write_rank_group(node_list);
+  }
+
+  // 終端ノードのランクの設定
+  vector<string> terminal_nodes{"const0", "const1"};
+  mWriter.write_rank_group(terminal_nodes);
+
+  mWriter.graph_end();
 }
 
 // @brief ルート名を返す．
@@ -180,113 +180,35 @@ DotGen::node_name(
   return buf.str();
 }
 
-// @brief 終端ノードの内容を出力する．
-void
-DotGen::write_terminal(
-  bool one
-)
-{
-  mS << "  " << "const";
-  if ( one ) {
-    mS << "1";
-  }
-  else {
-    mS << "0";
-  }
-
-  attr_begin();
-  attr_add(mTerminalAttrList);
-  if ( one ) {
-    attr_add(mTerminal1AttrList);
-  }
-  else {
-    attr_add(mTerminal0AttrList);
-  }
-  attr_end();
-}
-
 // @brief 枝の内容を出力する．
 void
 DotGen::write_edge(
+  const string& from_node,
   BddEdge edge,
   bool zero
 )
 {
-  mS << " -> ";
+  string to_node;
   bool inv{false};
   if ( edge.is_zero() ) {
-    mS << "const0";
+    to_node = "const0";
   }
   else if ( edge.is_one() ) {
-    mS << "const1";
+    to_node = "const1";
   }
   else {
     inv = edge.inv();
     auto node = edge.node();
-    mS << node_name(node);
+    to_node = node_name(node);
   }
 
-  attr_begin();
-  attr_add(mEdgeAttrList);
-  if ( zero ) {
-    attr_add(mEdge0AttrList);
-  }
-  else {
-    attr_add(mEdge1AttrList);
-  }
+  auto attr_list{zero ? mEdge0AttrList : mEdge1AttrList};
   if ( inv ) {
-    attr_add("dir", "both");
-    attr_add("arrowtail", "odot");
-  }
-  attr_end();
-}
-
-// @breif 属性出力を開始する．
-void
-DotGen::attr_begin()
-{
-  mAttrStr = " [";
-}
-
-// @brief 属性リストの内容を追加する．
-void
-DotGen::attr_add(
-  const unordered_map<string, string>& attr_list
-)
-{
-  for ( auto& p: attr_list ) {
-    auto attr_name = p.first;
-    auto attr_val = p.second;
-    attr_add(attr_name, attr_val);
-  }
-}
-
-// @brief 属性を追加する．
-void
-DotGen::attr_add(
-  const string& attr_name,
-  const string& attr_val
-)
-{
-  if ( attr_val == string{} ) {
-    return;
+    attr_list.emplace("dir", "both");
+    attr_list.emplace("arrowtail", "odot");
   }
 
-  mS << mAttrStr;
-  mAttrStr = ", ";
-  mS << attr_name
-     << " = "
-     << attr_val;
-}
-
-// @brief 属性出力を終了する．
-void
-DotGen::attr_end()
-{
-  if ( mAttrStr == ", " ) {
-    mS << "]";
-  }
-  mS << endl;
+  mWriter.write_edge(from_node, to_node, attr_list);
 }
 
 END_NAMESPACE_YM_BDD
