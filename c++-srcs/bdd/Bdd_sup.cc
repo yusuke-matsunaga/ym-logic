@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVarSet.h"
 #include "ym/BddError.h"
 #include "BddEdge.h"
 #include "BddNode.h"
@@ -56,6 +57,35 @@ Bdd::support_diff_int(
   auto e = op.diff_step(mRoot, right.mRoot);
   change_root(e);
   return *this;
+}
+
+// @brief サポート集合が共通部分を持つか調べる．
+bool
+Bdd::support_check_intersect(
+  const Bdd& right
+) const
+{
+  ASSERT_COND( is_posicube() );
+  ASSERT_COND( right.is_posicube() );
+
+  BddEdge e1{mRoot};
+  BddEdge e2{right.mRoot};
+  while ( !e1.is_one() && !e2.is_one() ) {
+    auto node1 = e1.node();
+    auto node2 = e2.node();
+    auto index1 = node1->index();
+    auto index2 = node2->index();
+    if ( index1 == index2 ) {
+      return true;
+    }
+    else if ( index1 < index2 ) {
+      e1 = node1->edge1();
+    }
+    else { // index > index2
+      e2 = node2->edge1();
+    }
+  }
+  return false;
 }
 
 // @brief 積項の時 true を返す．
@@ -113,13 +143,13 @@ Bdd::is_posicube() const
 }
 
 // @brief サポート変数のリストを得る．
-Bdd
+BddVarSet
 Bdd::get_support() const
 {
   ASSERT_COND( mMgr != nullptr );
   SupOp op{mMgr};
   auto e = op.get_step(mRoot);
-  return Bdd{mMgr, e};
+  return BddVarSet{Bdd{mMgr, e}};
 }
 
 // @brief 1となるパスを求める．

@@ -43,9 +43,9 @@ public:
   /// @brief サポートのテストを行う．
   void
   test_support(
-    const Bdd& bdd, ///< [in] 対象のBDD
-    const Bdd& sup, ///< [in] そのサポート
-    SizeType max_v  ///< [in] 変数番号の最大値 + 1
+    const Bdd& bdd,       ///< [in] 対象のBDD
+    const BddVarSet& sup, ///< [in] そのサポート
+    SizeType max_v        ///< [in] 変数番号の最大値 + 1
   );
 
   /// @brief onepathのテストを行う．

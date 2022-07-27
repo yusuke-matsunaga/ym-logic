@@ -83,6 +83,7 @@ set (bdd_SOURCES
   c++-srcs/bdd/Bdd_truth.cc
   c++-srcs/bdd/BddMgr.cc
   c++-srcs/bdd/BddMgrImpl.cc
+  c++-srcs/bdd/BddVarSet.cc
   c++-srcs/bdd/CopyOp.cc
   c++-srcs/bdd/CofactorOp.cc
   c++-srcs/bdd/CheckSupOp.cc

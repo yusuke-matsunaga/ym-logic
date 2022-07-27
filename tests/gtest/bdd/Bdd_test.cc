@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 #include "ym/Bdd.h"
+#include "ym/BddVarSet.h"
 #include "ym/BddMgr.h"
 #include "BddTest.h"
 
@@ -608,10 +609,15 @@ TEST_F(BddTest, support_cup1)
   Bdd bdd1 = lit1 & lit2 & lit3;
   Bdd bdd2 = lit2 & lit4;
 
-  Bdd bdd = support_cup(bdd1, bdd2);
-
-  const char* exp_str = "1000000000000000";
-  check(bdd, exp_str);
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  BddVarSet sup = sup1 + sup2;
+  vector<VarId> var_list = sup.to_varlist();
+  EXPECT_EQ( 4, var_list.size() );
+  EXPECT_EQ( VarId{0}, var_list[0] );
+  EXPECT_EQ( VarId{1}, var_list[1] );
+  EXPECT_EQ( VarId{2}, var_list[2] );
+  EXPECT_EQ( VarId{3}, var_list[3] );
 }
 
 TEST_F(BddTest, support_cup_int1)
@@ -624,11 +630,17 @@ TEST_F(BddTest, support_cup_int1)
   Bdd bdd1 = lit1 & lit2 & lit3;
   Bdd bdd2 = lit2 & lit4;
 
-  Bdd bdd = bdd1.support_cup_int(bdd2);
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  BddVarSet sup = sup1 += sup2;
+  vector<VarId> var_list = sup1.to_varlist();
+  EXPECT_EQ( 4, var_list.size() );
+  EXPECT_EQ( VarId{0}, var_list[0] );
+  EXPECT_EQ( VarId{1}, var_list[1] );
+  EXPECT_EQ( VarId{2}, var_list[2] );
+  EXPECT_EQ( VarId{3}, var_list[3] );
 
-  const char* exp_str = "1000000000000000";
-  check(bdd1, exp_str);
-  check(bdd, exp_str);
+  EXPECT_EQ( sup1, sup );
 }
 
 TEST_F(BddTest, support_cap1)
@@ -641,10 +653,13 @@ TEST_F(BddTest, support_cap1)
   Bdd bdd1 = lit1 & lit2 & lit3;
   Bdd bdd2 = lit2 & lit4;
 
-  Bdd bdd = support_cap(bdd1, bdd2);
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  BddVarSet sup = sup1 & sup2;
+  vector<VarId> var_list = sup.to_varlist();
 
-  const char* exp_str = "1111000011110000";
-  check(bdd, exp_str);
+  EXPECT_EQ( 1, var_list.size() );
+  EXPECT_EQ( VarId{1}, var_list[0] );
 }
 
 TEST_F(BddTest, support_cap_int1)
@@ -657,11 +672,15 @@ TEST_F(BddTest, support_cap_int1)
   Bdd bdd1 = lit1 & lit2 & lit3;
   Bdd bdd2 = lit2 & lit4;
 
-  Bdd bdd = bdd1.support_cap_int(bdd2);
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  BddVarSet sup = sup1 &= sup2;
+  vector<VarId> var_list = sup1.to_varlist();
 
-  const char* exp_str = "1111000011110000";
-  check(bdd1, exp_str);
-  check(bdd, exp_str);
+  EXPECT_EQ( 1, var_list.size() );
+  EXPECT_EQ( VarId{1}, var_list[0] );
+
+  EXPECT_EQ( sup1, sup );
 }
 
 TEST_F(BddTest, support_diff1)
@@ -674,10 +693,14 @@ TEST_F(BddTest, support_diff1)
   Bdd bdd1 = lit1 & lit2 & lit3;
   Bdd bdd2 = lit2 & lit4;
 
-  Bdd bdd = support_diff(bdd1, bdd2);
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  BddVarSet sup = sup1 - sup2;
+  vector<VarId> var_list = sup.to_varlist();
 
-  const char* exp_str = "1100110000000000";
-  check(bdd, exp_str);
+  EXPECT_EQ( 2, var_list.size() );
+  EXPECT_EQ( VarId{0}, var_list[0] );
+  EXPECT_EQ( VarId{2}, var_list[1] );
 }
 
 TEST_F(BddTest, support_diff_int1)
@@ -690,11 +713,50 @@ TEST_F(BddTest, support_diff_int1)
   Bdd bdd1 = lit1 & lit2 & lit3;
   Bdd bdd2 = lit2 & lit4;
 
-  Bdd bdd = bdd1.support_diff_int(bdd2);
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  BddVarSet sup = sup1 -= sup2;
+  vector<VarId> var_list = sup.to_varlist();
 
-  const char* exp_str = "1100110000000000";
-  check(bdd1, exp_str);
-  check(bdd, exp_str);
+  EXPECT_EQ( 2, var_list.size() );
+  EXPECT_EQ( VarId{0}, var_list[0] );
+  EXPECT_EQ( VarId{2}, var_list[1] );
+
+  EXPECT_EQ( sup1, sup );
+}
+
+TEST_F(BddTest, support_check_intersect1)
+{
+  Bdd lit1 = literal(0);
+  Bdd lit2 = literal(1);
+  Bdd lit3 = literal(2);
+  Bdd lit4 = literal(3);
+
+  Bdd bdd1 = lit1 & lit2 & lit3;
+  Bdd bdd2 = lit2 & lit4;
+
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  bool result = sup1 && sup2;
+
+  EXPECT_TRUE( result );
+}
+
+TEST_F(BddTest, support_check_intersect2)
+{
+  Bdd lit1 = literal(0);
+  Bdd lit2 = literal(1);
+  Bdd lit3 = literal(2);
+  Bdd lit4 = literal(3);
+
+  Bdd bdd1 = lit1 & lit3;
+  Bdd bdd2 = lit2 & lit4;
+
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  bool result = sup1 && sup2;
+
+  EXPECT_FALSE( result );
 }
 
 TEST_F(BddTest, is_cube1)
@@ -810,7 +872,7 @@ TEST_F(BddTest, get_support1)
 
   Bdd bdd = (lit1 & lit3) | (~lit1 & lit5) | (lit3 & ~lit7);
 
-  Bdd sup = bdd.get_support();
+  BddVarSet sup = bdd.get_support();
 
   test_support(bdd, sup, 8);
 }
@@ -823,7 +885,7 @@ TEST_F(BddTest, get_support2)
 
   Bdd bdd = (lit1 & lit2) | (~lit1 & lit2) | lit3;
 
-  Bdd sup = bdd.get_support();
+  BddVarSet sup = bdd.get_support();
 
   test_support(bdd, sup, 4);
 }

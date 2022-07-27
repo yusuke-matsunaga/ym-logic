@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 #include "ym/Bdd.h"
+#include "ym/BddVarSet.h"
 #include "ym/BddMgr.h"
 #include "BddTest.h"
 
@@ -112,11 +113,10 @@ BddTest::test_check_sup(
 void
 BddTest::test_support(
   const Bdd& bdd,
-  const Bdd& sup,
+  const BddVarSet& sup,
   SizeType max_v
 )
 {
-  EXPECT_TRUE( sup.is_posicube() );
   auto var_list = sup.to_varlist();
   vector<bool> sup_mark(max_v, false);
   for ( auto var: var_list ) {

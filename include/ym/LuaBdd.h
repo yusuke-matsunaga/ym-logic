@@ -115,6 +115,28 @@ public:
   Bdd*
   new_bdd();
 
+  /// @brief 対象が BddVarSet の時 true を返す．
+  bool
+  is_bddvarset(
+    int idx       ///< [in] スタック上のインデックス
+  )
+  {
+    auto obj = to_bddvarset(idx);
+    return obj != nullptr;
+  }
+
+  /// @brief 対象を BddVarSet として取り出す．
+  ///
+  /// BddVarSet でない時は nullptr を返す．
+  BddVarSet*
+  to_bddvarset(
+    int idx       ///< [in] スタック上のインデックス
+  );
+
+  /// @brief lua の管理下にある BddVarSet オブジェクトを作る．
+  BddVarSet*
+  new_bddvarset();
+
 
 public:
   //////////////////////////////////////////////////////////////////////

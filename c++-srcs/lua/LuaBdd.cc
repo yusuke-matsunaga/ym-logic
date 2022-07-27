@@ -8,6 +8,7 @@
 
 #include "ym/LuaBdd.h"
 #include "ym/Bdd.h"
+#include "ym/BddVarSet.h"
 #include "ym/BddMgr.h"
 
 
@@ -20,6 +21,9 @@ const char* BDDMGR_SIGNATURE{"Luapp.BddMgr"};
 
 // Bdd 用のシグネチャ
 const char* BDD_SIGNATURE{"Luapp.Bdd"};
+
+// BddVarSet 用のシグネチャ
+const char* BDDVARSET_SIGNATURE{"Luapp.BddVarSet"};
 
 // BddMgr を生成する関数
 int
@@ -750,7 +754,7 @@ bdd_get_support(
   auto obj = lua.to_bdd(1);
   ASSERT_COND( obj != nullptr );
 
-  auto bddp = lua.new_bdd();
+  auto bddp = lua.new_bddvarset();
   *bddp = obj->get_support();
 
   return 1;
@@ -1002,38 +1006,6 @@ size_of_bdds(
 
 // 変数のリストに変換する．
 int
-bdd_to_varlist(
-  lua_State* L
-)
-{
-  LuaBdd lua{L};
-
-  SizeType n = lua.get_top();
-  if ( n != 1 ) {
-    return lua.error_end("Error: Bdd:to_varlist() expects no arguments.");
-  }
-
-  auto obj = lua.to_bdd(1);
-  ASSERT_COND( obj != nullptr );
-
-  auto varlist = obj->to_varlist();
-
-  // 要素数
-  SizeType nv = varlist.size();
-
-  // 結果のテーブルを作る．
-  lua.create_table(nv, 0);
-  for ( SizeType i = 0; i < nv; ++ i ) {
-    SizeType v = varlist[i].val();
-    lua.push_integer(v);
-    lua.set_table(-2, i + 1);
-  }
-
-  return 1;
-}
-
-// 変数のリストに変換する．
-int
 bdd_to_litlist(
   lua_State* L
 )
@@ -1232,6 +1204,140 @@ gen_dot_for_bdds(
   return 1;
 }
 
+// BddVarSet を生成する関数
+BddVarSet*
+bddvarset_new(
+  LuaBdd& lua
+)
+{
+  return lua.new_bddvarset();
+}
+
+// BddVarSet 用のデストラクタ
+int
+bddvarset_gc(
+  lua_State* L
+)
+{
+  LuaBdd lua{L};
+
+  auto obj = lua.to_bddvarset(1);
+  if ( obj ) {
+    // デストラクタを明示的に起動する．
+    obj->~BddVarSet();
+  }
+
+  // メモリは Lua が開放する．
+  return 0;
+}
+
+// 和集合を求める．
+int
+bddvarset_cup(
+  lua_State* L
+)
+{
+  LuaBdd lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: BddVarSet: + expects two arguments.");
+  }
+
+  auto obj = lua.to_bddvarset(1);
+  ASSERT_COND( obj != nullptr );
+
+  auto obj2 = lua.to_bddvarset(2);
+  ASSERT_COND( obj2 != nullptr );
+
+  auto bddp = lua.new_bddvarset();
+  *bddp = *obj + *obj2;
+
+  return 1;
+}
+
+// 差集合を求める．
+int
+bddvarset_diff(
+  lua_State* L
+)
+{
+  LuaBdd lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: BddVarSet: - expects two arguments.");
+  }
+
+  auto obj = lua.to_bddvarset(1);
+  ASSERT_COND( obj != nullptr );
+
+  auto obj2 = lua.to_bddvarset(2);
+  ASSERT_COND( obj2 != nullptr );
+
+  auto bddp = lua.new_bddvarset();
+  *bddp = *obj - *obj2;
+
+  return 1;
+}
+
+// 共通集合を求める．
+int
+bddvarset_cap(
+  lua_State* L
+)
+{
+  LuaBdd lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 2 ) {
+    return lua.error_end("Error: BddVarSet: - expects two arguments.");
+  }
+
+  auto obj = lua.to_bddvarset(1);
+  ASSERT_COND( obj != nullptr );
+
+  auto obj2 = lua.to_bddvarset(2);
+  ASSERT_COND( obj2 != nullptr );
+
+  auto bddp = lua.new_bddvarset();
+  *bddp = *obj & *obj2;
+
+  return 1;
+}
+
+// 変数のリストに変換する．
+int
+bddvarset_to_varlist(
+  lua_State* L
+)
+{
+  LuaBdd lua{L};
+
+  SizeType n = lua.get_top();
+  if ( n != 1 ) {
+    return lua.error_end("Error: Bdd:to_varlist() expects no arguments.");
+  }
+
+  auto obj = lua.to_bddvarset(1);
+  ASSERT_COND( obj != nullptr );
+
+  auto varlist = obj->to_varlist();
+
+  // 要素数
+  SizeType nv = varlist.size();
+
+  // 結果のテーブルを作る．
+  lua.create_table(nv, 0);
+  for ( SizeType i = 0; i < nv; ++ i ) {
+    SizeType v = varlist[i].val();
+    lua.push_integer(v);
+    lua.set_table(-2, i + 1);
+  }
+
+  return 1;
+}
+
 END_NONAMESPACE
 
 // @brief Bdd 関係の初期化を行う．
@@ -1285,7 +1391,6 @@ LuaBdd::init(
     {"root_inv",       bdd_root_inv},
     {"eval",           bdd_eval},
     {"size",           bdd_size},
-    {"to_varlist",     bdd_to_varlist},
     {"to_litlist",     bdd_to_litlist},
     {"to_truth",       bdd_to_truth},
     {"display",        bdd_display},
@@ -1294,6 +1399,15 @@ LuaBdd::init(
   };
 
   reg_metatable(BDD_SIGNATURE, bdd_gc, bdd_mt);
+
+  // BddVarSet のメンバ関数(メソッド)テーブル
+  static const struct luaL_Reg bddvarset_mt[] = {
+    {"__add",          bddvarset_cup},
+    {"__sub",          bddvarset_diff},
+    {"__band",         bddvarset_cap},
+    {"to_varlist",     bddvarset_to_varlist},
+    {nullptr,          nullptr}
+  };
 
   // グローバル関数を登録する．
   mylib.push_back({"new_bddmgr",   bddmgr_new});
@@ -1355,6 +1469,33 @@ LuaBdd::new_bdd()
 
   // Bdd 用の metatable を取ってくる．
   L_getmetatable(BDD_SIGNATURE);
+
+  // それを今作った userdata にセットする．
+  set_metatable(-2);
+
+  return obj;
+}
+
+// @brief 対象を BddVarSet として取り出す．
+BddVarSet*
+LuaBdd::to_bddvarset(
+  int idx
+)
+{
+  auto p = L_checkudata(idx, BDDVARSET_SIGNATURE);
+  return reinterpret_cast<BddVarSet*>(p);
+}
+
+// @brief lua の管理下にある Bdd オブジェクトを作る．
+BddVarSet*
+LuaBdd::new_bddvarset()
+{
+  // メモリ領域は Lua で確保する．
+  void* p = new_userdata(sizeof(BddVarSet));
+  auto obj = new (p) BddVarSet{};
+
+  // BddVarSet 用の metatable を取ってくる．
+  L_getmetatable(BDDVARSET_SIGNATURE);
 
   // それを今作った userdata にセットする．
   set_metatable(-2);

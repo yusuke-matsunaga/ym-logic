@@ -15,6 +15,7 @@
 
 BEGIN_NAMESPACE_YM_BDD
 
+class BddVarSet;
 class BddEdge;
 class BddMgrImpl;
 
@@ -309,21 +310,10 @@ public:
   //////////////////////////////////////////////////////////////////////
 
 
-public:
+protected:
   //////////////////////////////////////////////////////////////////////
   /// @name サポート集合を表すBDDに関する演算
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief サポート集合のユニオンを求める．
-  friend
-  Bdd
-  support_cup(
-    const Bdd& left, ///< [in] 第1オペランド
-    const Bdd& right ///< [in] 第2オペランド
-  )
-  {
-    return Bdd{left}.support_cup_int(right);
-  }
 
   /// @brief サポート集合のユニオンを計算して代入する．
   Bdd&
@@ -331,39 +321,29 @@ public:
     const Bdd& right ///< [in] 第2オペランド
   );
 
-  /// @brief サポート集合のインターセクションを求める．
-  friend
-  Bdd
-  support_cap(
-    const Bdd& left, ///< [in] 第1オペランド
-    const Bdd& right ///< [in] 第2オペランド
-  )
-  {
-    return Bdd{left}.support_cap_int(right);
-  }
-
   /// @brief サポート集合のインターセクションを計算して代入する．
   Bdd&
   support_cap_int(
     const Bdd& right ///< [in] 第2オペランド
   );
 
-  /// @brief サポート集合の差を求める．
-  friend
-  Bdd
-  support_diff(
-    const Bdd& left, ///< [in] 第1オペランド
-    const Bdd& right ///< [in] 第2オペランド
-  )
-  {
-    return Bdd{left}.support_diff_int(right);
-  }
-
   /// @brief サポート集合の差を計算して代入する．
   Bdd&
   support_diff_int(
     const Bdd& right ///< [in] 第2オペランド
   );
+
+  /// @brief サポート集合が共通部分を持つか調べる．
+  bool
+  support_check_intersect(
+    const Bdd& right ///< [in] 第2オペランド
+  ) const;
+
+  /// @brief 変数のリストに変換する．
+  ///
+  /// 変換できない時は例外を送出する．
+  vector<VarId>
+  to_varlist() const;
 
 
 public:
@@ -417,8 +397,8 @@ public:
   ) const;
 
   /// @brief サポート変数のリストを得る．
-  /// @return サポート変数の論理積を表すBDDを返す．
-  Bdd
+  /// @return サポート変数の表すBDD(BddVarSet)を返す．
+  BddVarSet
   get_support() const;
 
   /// @brief 1となるパスを求める．
@@ -499,12 +479,6 @@ public:
   size(
     const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
-
-  /// @brief 変数のリストに変換する．
-  ///
-  /// 変換できない時は例外を送出する．
-  vector<VarId>
-  to_varlist() const;
 
   /// @brief リテラルのリストの変換する．
   ///
