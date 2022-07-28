@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-//#include "ym/BddMgr.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -103,6 +102,10 @@ public:
   /// 変換できない時は例外を送出する．
   vector<VarId>
   to_varlist() const;
+
+  /// @brief 先頭の変数を返す．
+  VarId
+  top_var() const;
 
   /// @brief 内容を表すBDDを返す．
   Bdd

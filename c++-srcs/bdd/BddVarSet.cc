@@ -113,4 +113,11 @@ BddVarSet::to_varlist() const
   return Bdd::to_varlist();
 }
 
+// @brief 先頭の変数を返す．
+VarId
+BddVarSet::top_var() const
+{
+  return Bdd::root_var();
+}
+
 END_NAMESPACE_YM_BDD
