@@ -92,8 +92,8 @@ CheckSymOp::op_step2(
     ASSERT_COND( !edge1.is_const() );
     auto node1 = edge1.node();
     auto inv1 = edge1.inv();
-    edge10 = node1->edge0() * inv1;
-    edge11 = node1->edge1() * inv1;
+    edge10 = node1->edge0() ^ inv1;
+    edge11 = node1->edge1() ^ inv1;
     top = node1->index();
   }
   else if ( edge1.is_const() ) {
@@ -101,8 +101,8 @@ CheckSymOp::op_step2(
     ASSERT_COND( !edge0.is_const() );
     auto node0 = edge0.node();
     auto inv0 = edge0.inv();
-    edge00 = node0->edge0() * inv0;
-    edge01 = node0->edge1() * inv0;
+    edge00 = node0->edge0() ^ inv0;
+    edge01 = node0->edge1() ^ inv0;
     top = node0->index();
   }
   else {

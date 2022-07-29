@@ -93,11 +93,11 @@ Bdd::invert() const
 
 // @brief 極性をかけ合わせる．
 Bdd
-Bdd::operator*(
+Bdd::operator^(
   bool inv
 ) const
 {
-  return Bdd{mMgr, BddEdge{mRoot} * inv};
+  return Bdd{mMgr, BddEdge{mRoot} ^ inv};
 }
 
 // @brief 自分自身を否定する．
@@ -114,14 +114,14 @@ Bdd::invert_int()
 
 // @brief 極性をかけ合わせて代入する．
 Bdd&
-Bdd::operator*=(
+Bdd::operator^=(
   bool inv
 )
 {
   if ( mMgr != nullptr ) {
     // 実はこれは BddMgr を介さない．
     // ただ不正値の時には演算を行わない．
-    mRoot = (BddEdge{mRoot} * inv).body();
+    mRoot = (BddEdge{mRoot} ^ inv).body();
   }
   return *this;
 }
@@ -157,8 +157,8 @@ Bdd::root_decomp(
   }
   else {
     auto oinv = root.inv();
-    f0 = Bdd{mMgr, node->edge0() * oinv};
-    f1 = Bdd{mMgr, node->edge1() * oinv};
+    f0 = Bdd{mMgr, node->edge0() ^ oinv};
+    f1 = Bdd{mMgr, node->edge1() ^ oinv};
     return VarId{node->index()};
   }
 }
@@ -190,7 +190,7 @@ Bdd::root_cofactor0() const
   }
   else {
     auto oinv = root.inv();
-    return Bdd{mMgr, node->edge0() * oinv};
+    return Bdd{mMgr, node->edge0() ^ oinv};
   }
 }
 
@@ -206,7 +206,7 @@ Bdd::root_cofactor1() const
   }
   else {
     auto oinv = root.inv();
-    return Bdd{mMgr, node->edge1() * oinv};
+    return Bdd{mMgr, node->edge1() ^ oinv};
   }
 }
 
@@ -242,7 +242,7 @@ Bdd::eval(
     else {
       edge = node->edge0();
     }
-    edge *= inv;
+    edge ^= inv;
   }
 }
 

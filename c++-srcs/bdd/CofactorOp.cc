@@ -39,7 +39,7 @@ CofactorOp::op_step(
 
   Apply2Key key{edge, cedge};
   if ( mTable.count(key) > 0 ) {
-    return mTable.at(key) * oinv;
+    return mTable.at(key) ^ oinv;
   }
 
   auto node = edge.node();
@@ -52,8 +52,8 @@ CofactorOp::op_step(
   auto cinv = cedge.inv();
   BddEdge result;
   if ( index == cindex ) {
-    auto cedge0 = cnode->edge0() * cinv;
-    auto cedge1 = cnode->edge1() * cinv;
+    auto cedge0 = cnode->edge0() ^ cinv;
+    auto cedge1 = cnode->edge1() ^ cinv;
     if ( cedge0.is_zero() ) {
       result = op_step(edge1, cedge1);
     }
@@ -70,8 +70,8 @@ CofactorOp::op_step(
     result = new_node(index, ans0, ans1);;
   }
   else { // index > cindex
-    auto cedge0 = cnode->edge0() * cinv;
-    auto cedge1 = cnode->edge1() * cinv;
+    auto cedge0 = cnode->edge0() ^ cinv;
+    auto cedge1 = cnode->edge1() ^ cinv;
     if ( cedge0.is_zero() ) {
       cedge = cedge1;
     }
@@ -84,7 +84,7 @@ CofactorOp::op_step(
     result = op_step(edge, cedge);
   }
   mTable.emplace(key, result);
-  return result * oinv;
+  return result ^ oinv;
 }
 
 END_NAMESPACE_YM_BDD

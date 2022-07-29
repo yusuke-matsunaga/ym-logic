@@ -22,7 +22,7 @@ Bdd::cofactor(
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  auto cedge = mMgr->make_literal(var.val()) * inv;
+  auto cedge = mMgr->make_literal(var.val()) ^ inv;
   Bdd cube{mMgr, cedge}; // GC 用にロックする必要がある．
   return cofactor(cube);
 }
@@ -57,7 +57,7 @@ Bdd::cofactor_int(
 )
 {
   ASSERT_COND( mMgr != nullptr );
-  auto cedge = mMgr->make_literal(var.val()) * inv;
+  auto cedge = mMgr->make_literal(var.val()) ^ inv;
   Bdd cbdd{mMgr, cedge}; // GC 用にロックする必要がある．
   return cofactor_int(cbdd);
 }

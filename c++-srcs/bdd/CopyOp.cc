@@ -31,8 +31,8 @@ CopyOp::copy_step(
     auto rnode = mTable.at(node);
     return BddEdge{rnode, inv};
   }
-  auto edge0 = node->edge0() * inv;
-  auto edge1 = node->edge1() * inv;
+  auto edge0 = node->edge0() ^ inv;
+  auto edge1 = node->edge1() ^ inv;
   auto redge0 = copy_step(edge0);
   auto redge1 = copy_step(edge1);
   auto redge = new_node(index, redge0, redge1);

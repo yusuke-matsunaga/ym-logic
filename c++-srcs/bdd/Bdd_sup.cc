@@ -102,8 +102,8 @@ Bdd::is_cube() const
   while ( !e.is_one() ) {
     auto node = e.node();
     auto inv = e.inv();
-    auto e0 = node->edge0() * inv;
-    auto e1 = node->edge1() * inv;
+    auto e0 = node->edge0() ^ inv;
+    auto e1 = node->edge1() ^ inv;
     if ( e0.is_zero() ) {
       e = e1;
     }
@@ -131,9 +131,9 @@ Bdd::is_posicube() const
   while ( !e.is_one() ) {
     auto node = e.node();
     auto inv = e.inv();
-    auto e0 = node->edge0() * inv;
+    auto e0 = node->edge0() ^ inv;
     if ( e0.is_zero() ) {
-      e = node->edge1() * inv;
+      e = node->edge1() ^ inv;
     }
     else {
       return false;
@@ -203,8 +203,8 @@ Bdd::to_litlist() const
   while ( !edge.is_const() ) {
     auto node = edge.node();
     auto inv = edge.inv();
-    auto e0 = node->edge0() * inv;
-    auto e1 = node->edge1() * inv;
+    auto e0 = node->edge0() ^ inv;
+    auto e1 = node->edge1() ^ inv;
     VarId var{node->index()};
     if ( e0.is_zero() ) {
       lit_list.push_back(Literal{var, false});

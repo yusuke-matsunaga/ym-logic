@@ -65,7 +65,7 @@ BddMgr::literal(
   bool inv
 )
 {
-  auto e = mImpl->make_literal(var.val()) *  inv;
+  auto e = mImpl->make_literal(var.val()) ^ inv;
   return Bdd{mImpl, e};
 }
 

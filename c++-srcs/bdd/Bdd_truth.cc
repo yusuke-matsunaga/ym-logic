@@ -40,8 +40,8 @@ truth_step(
   else {
     auto node = edge.node();
     auto inv = edge.inv();
-    auto edge0 = node->edge0() * inv;
-    auto edge1 = node->edge1() * inv;
+    auto edge0 = node->edge0() ^ inv;
+    auto edge1 = node->edge1() ^ inv;
     auto ans0 = truth_step(edge0, node->index() + 1, input_num);
     auto ans1 = truth_step(edge1, node->index() + 1, input_num);
     gap = node->index() - index;

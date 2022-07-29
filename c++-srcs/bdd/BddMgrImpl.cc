@@ -161,7 +161,7 @@ BddMgrImpl::xor_step(
   }
 
   // 正規化を行う．
-  bool oinv = left.inv() * right.inv();
+  bool oinv = left.inv() ^ right.inv();
   left.make_positive();
   right.make_positive();
   if ( left.body() > right.body() ) {
@@ -171,9 +171,8 @@ BddMgrImpl::xor_step(
   // 演算結果テーブルを調べる．
   Apply3Key key{left, ~right, right};
   if ( mIteTable.count(key) > 0 ) {
-    return mIteTable.at(key);
+    return mIteTable.at(key) ^ oinv;
   }
-
   // 見つからなかったので実際に apply 演算を行う．
   // 先頭のインデックスで分解する．
   BddEdge left0, left1;
@@ -185,7 +184,7 @@ BddMgrImpl::xor_step(
   auto ans1 = xor_step(left1, right1);
   auto result = new_node(top, ans0, ans1);
   mIteTable.emplace(key, result);
-  return result * oinv;
+  return result ^ oinv;
 }
 
 // @brief ITE 演算を行う．
@@ -226,9 +225,9 @@ BddMgrImpl::ite_step(
   if ( e1 == e2 ) {
     return e1;
   }
-  // e1 と e2 が相補的であれば e0 と e1 の XNOR となる．
+  // e1 と e2 が相補的であれば e0 と e2 の XOR となる．
   if ( e1 == ~e2 ) {
-    return ~xor_step(e0, e1);
+    return xor_step(e0, e2);
   }
   // e0 と e1 が等しければ e0 | e2 となる．
   if ( e0 == e1 ) {
@@ -247,6 +246,11 @@ BddMgrImpl::ite_step(
     return or_step(~e0, e1);
   }
 
+  // e0 が正極性になるように正規化する．
+  if ( e0.inv() ) {
+    e0.make_positive();
+    std::swap(e1, e2);
+  }
   Apply3Key key{e0, e1, e2};
   if ( mIteTable.count(key) > 0 ) {
     return mIteTable.at(key);
@@ -268,8 +272,8 @@ BddMgrImpl::ite_step(
 
   BddEdge e00, e01;
   if ( index0 == top ) {
-    e00 = node0->edge0() * inv0;
-    e01 = node0->edge1() * inv0;
+    e00 = node0->edge0() ^ inv0;
+    e01 = node0->edge1() ^ inv0;
   }
   else {
     e00 = e01 = e0;
@@ -277,8 +281,8 @@ BddMgrImpl::ite_step(
 
   BddEdge e10, e11;
   if ( index1 == top ) {
-    e10 = node1->edge0() * inv1;
-    e11 = node1->edge1() * inv1;
+    e10 = node1->edge0() ^ inv1;
+    e11 = node1->edge1() ^ inv1;
   }
   else {
     e10 = e11 = e1;
@@ -286,8 +290,8 @@ BddMgrImpl::ite_step(
 
   BddEdge e20, e21;
   if ( index2 == top ) {
-    e20 = node2->edge0() * inv2;
-    e21 = node2->edge1() * inv2;
+    e20 = node2->edge0() ^ inv2;
+    e21 = node2->edge1() ^ inv2;
   }
   else {
     e20 = e21 = e2;
@@ -315,8 +319,8 @@ BddMgrImpl::new_node(
 
   // 極性の正規化を行う．
   bool oinv{edge0.inv()};
-  edge0 *= oinv;
-  edge1 *= oinv;
+  edge0 ^= oinv;
+  edge1 ^= oinv;
 
   // ノードテーブルを探す．
   // ハッシュ値を求める．

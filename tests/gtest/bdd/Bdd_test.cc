@@ -91,7 +91,7 @@ TEST_F(BddTest, pol_inv1)
   const char* src_str = "1101";
   Bdd bdd = from_truth(src_str);
 
-  Bdd bdd1 = bdd * true;
+  Bdd bdd1 = bdd ^ true;
   const char* exp_str = "0010";
   check(bdd1, exp_str);
 }
@@ -101,7 +101,7 @@ TEST_F(BddTest, pol_inv_int1)
   const char* src_str = "1101";
   Bdd bdd = from_truth(src_str);
 
-  bdd *= true;
+  bdd ^= true;
   const char* exp_str = "0010";
   check(bdd, exp_str);
 }
@@ -111,7 +111,7 @@ TEST_F(BddTest, pol_inv2)
   const char* src_str = "1101";
   Bdd bdd = from_truth(src_str);
 
-  Bdd bdd1 = bdd * false;
+  Bdd bdd1 = bdd ^ false;
   check(bdd1, src_str);
 }
 
@@ -120,7 +120,7 @@ TEST_F(BddTest, pol_inv_int2)
   const char* src_str = "1101";
   Bdd bdd = from_truth(src_str);
 
-  bdd *= false;
+  bdd ^= false;
   check(bdd, src_str);
 }
 
@@ -366,6 +366,16 @@ TEST_F(BddTest, xor_int4)
 
   check(var1, "0110");
   check(bdd, "0110");
+}
+
+TEST_F(BddTest, xor3)
+{
+  Bdd var1 = literal(0);
+  Bdd var2 = literal(1);
+  Bdd var3 = literal(2);
+  Bdd bdd = var1 ^ var2 ^ var3;
+
+  check(bdd, "10010110");
 }
 
 TEST_F(BddTest, complex_expr1)

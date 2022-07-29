@@ -89,7 +89,7 @@ public:
 
   /// @brief 極性をかけ合わせる．
   Bdd
-  operator*(
+  operator^(
     bool inv ///< [in] 反転フラグ
   ) const;
 
@@ -205,7 +205,7 @@ public:
   /// @brief 極性をかけ合わせて代入する．
   /// @return 自分自身への参照を返す．
   Bdd&
-  operator*=(
+  operator^=(
     bool inv ///< [in] 反転フラグ
   );
 

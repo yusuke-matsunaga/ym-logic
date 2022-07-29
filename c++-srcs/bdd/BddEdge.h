@@ -167,7 +167,7 @@ public:
 
   /// @brief 極性と掛け合わせる．
   BddEdge
-  operator*(
+  operator^(
     bool inv ///< [in] 反転フラグ
   ) const
   {
@@ -176,7 +176,7 @@ public:
 
   /// @brief 極性と掛け合わせて代入する．
   BddEdge&
-  operator*=(
+  operator^=(
     bool inv ///< [in] 反転フラグ
   )
   {
