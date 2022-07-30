@@ -735,6 +735,24 @@ TEST_F(BddTest, support_diff_int1)
   EXPECT_EQ( sup1, sup );
 }
 
+TEST_F(BddTest, support_diff2)
+{
+  Bdd lit1 = literal(0);
+  Bdd lit2 = literal(1);
+  Bdd lit3 = literal(2);
+  Bdd lit4 = literal(3);
+
+  Bdd bdd1 = lit2 & lit3 & lit4;
+  Bdd bdd2 = lit1 & lit2 & lit3 & lit4;
+
+  BddVarSet sup1 = bdd1.get_support();
+  BddVarSet sup2 = bdd2.get_support();
+  BddVarSet sup = sup1 - sup2;
+  vector<VarId> var_list = sup.to_varlist();
+
+  EXPECT_EQ( 0, var_list.size() );
+}
+
 TEST_F(BddTest, support_check_intersect1)
 {
   Bdd lit1 = literal(0);
@@ -742,8 +760,8 @@ TEST_F(BddTest, support_check_intersect1)
   Bdd lit3 = literal(2);
   Bdd lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  Bdd bdd1 = lit2 & lit3 & lit4;
+  Bdd bdd2 = lit1 & lit2 & lit3 & lit4;
 
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();

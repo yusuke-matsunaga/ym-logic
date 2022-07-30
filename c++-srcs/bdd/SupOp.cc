@@ -124,7 +124,6 @@ SupOp::diff_step(
   auto node1 = edge1.node();
   auto index0 = node0->index();
   auto index1 = node1->index();
-  auto top = std::min(index0, index1);
   if ( index0 < index1 ) {
     auto tmp = diff_step(node0->edge1(), edge1);
     return new_node(index0, BddEdge::zero(), tmp);
@@ -132,9 +131,8 @@ SupOp::diff_step(
   else if ( index0 == index1 ) {
     return diff_step(node0->edge1(), node1->edge1());
   }
-  else {
-    auto tmp = diff_step(edge0, node1->edge1());
-    return new_node(index1, BddEdge::zero(), tmp);
+  else { // index0 > index1
+    return diff_step(edge0, node1->edge1());
   }
 }
 
