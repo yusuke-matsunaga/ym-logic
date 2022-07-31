@@ -96,6 +96,8 @@ set (bdd_SOURCES
   c++-srcs/bdd/DotWriter.cc
   c++-srcs/bdd/SupOp.cc
   c++-srcs/bdd/OneOp.cc
+  c++-srcs/bdd/CompOp.cc
+  c++-srcs/bdd/MultiCompOp.cc
   )
 
 set (ym_logic_SOURCES

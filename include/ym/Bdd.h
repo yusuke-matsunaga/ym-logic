@@ -306,6 +306,40 @@ public:
     return cofactor_int(cube);
   }
 
+  /// @brief (単一)compose演算
+  Bdd
+  compose(
+    VarId index,     ///< [in] 対象のインデックス
+    const Bdd& cfunc ///< [in] 置き換える関数
+  ) const;
+
+  /// @brief (単一)compose演算を行って代入する．
+  Bdd&
+  compose_int(
+    VarId index,     ///< [in] 対象のインデックス
+    const Bdd& cfunc ///< [in] 置き換える関数
+  );
+
+  /// @brief 複合compose演算
+  Bdd
+  multi_compose(
+    const unordered_map<VarId, Bdd>& compose_map ///< [in] 変換マップ
+  ) const;
+
+  /// @brief 複合compose演算を行って代入する．
+  Bdd&
+  multi_compose_int(
+    const unordered_map<VarId, Bdd>& compose_map ///< [in] 変換マップ
+  );
+
+  /// @brief 変数順を入れ替える演算
+  ///
+  /// 極性も入れ替え可能
+  Bdd
+  remap_vars(
+    const unordered_map<VarId, Literal>& varmap ///< [in] 変数の対応表
+  ) const;
+
   /// @}
   //////////////////////////////////////////////////////////////////////
 
