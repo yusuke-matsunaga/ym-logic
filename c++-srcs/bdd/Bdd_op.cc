@@ -11,7 +11,6 @@
 #include "BddEdge.h"
 #include "BddMgrImpl.h"
 #include "BddNode.h"
-#include "CompOp.h"
 #include "MultiCompOp.h"
 
 
@@ -108,51 +107,13 @@ ite(
   return Bdd{mgr, e};
 }
 
-// @brief (単一)compose演算
-Bdd
-Bdd::compose(
-  VarId index,
-  const Bdd& cfunc
-) const
-{
-  ASSERT_COND( mMgr != nullptr );
-  BddEdge cedge = copy_edge(cfunc);
-  CompOp op{mMgr, index.val(), cedge};
-  auto e = op.comp_op(mRoot);
-  return Bdd{mMgr, e};
-}
-
-// @brief (単一)compose演算を行って代入する．
-Bdd&
-Bdd::compose_int(
-  VarId index,
-  const Bdd& cfunc
-)
-{
-  ASSERT_COND( mMgr != nullptr );
-  BddEdge cedge = copy_edge(cfunc);
-  CompOp op{mMgr, index.val(), cedge};
-  auto e = op.comp_op(mRoot);
-  change_root(e);
-  return *this;
-}
-
 // @brief 複合compose演算
 Bdd
 Bdd::multi_compose(
   const unordered_map<VarId, Bdd>& compose_map
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
-  unordered_map<SizeType, BddEdge> cmap;
-  for ( auto& p: compose_map ) {
-    auto var = p.first;
-    auto& bdd = p.second;
-    auto cedge = copy_edge(bdd);
-    cmap.emplace(var.val(), cedge);
-  }
-  MultiCompOp op{mMgr, cmap};
-  auto e = op.mcomp_op(mRoot);
+  auto e = mcomp_sub(compose_map);
   return Bdd{mMgr, e};
 }
 
@@ -162,6 +123,17 @@ Bdd::multi_compose_int(
   const unordered_map<VarId, Bdd>& compose_map
 )
 {
+  auto e = mcomp_sub(compose_map);
+  change_root(e);
+  return *this;
+}
+
+// @brief multi_compose() の共通関数
+BddEdge
+Bdd::mcomp_sub(
+  const unordered_map<VarId, Bdd>& compose_map
+) const
+{
   ASSERT_COND( mMgr != nullptr );
   unordered_map<SizeType, BddEdge> cmap;
   for ( auto& p: compose_map ) {
@@ -172,8 +144,7 @@ Bdd::multi_compose_int(
   }
   MultiCompOp op{mMgr, cmap};
   auto e = op.mcomp_op(mRoot);
-  change_root(e);
-  return *this;
+  return e;
 }
 
 // @brief 変数順を入れ替える演算

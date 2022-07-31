@@ -311,14 +311,20 @@ public:
   compose(
     VarId index,     ///< [in] 対象のインデックス
     const Bdd& cfunc ///< [in] 置き換える関数
-  ) const;
+  ) const
+  {
+    return multi_compose({{index, cfunc}});
+  }
 
   /// @brief (単一)compose演算を行って代入する．
   Bdd&
   compose_int(
     VarId index,     ///< [in] 対象のインデックス
     const Bdd& cfunc ///< [in] 置き換える関数
-  );
+  )
+  {
+    return multi_compose_int({{index, cfunc}});
+  }
 
   /// @brief 複合compose演算
   Bdd
@@ -599,6 +605,12 @@ private:
     const Bdd& then_f, ///< [in] 条件が成り立ったとき選ばれる関数
     const Bdd& else_f  ///< [in] 条件が成り立たなかった時選ばれる関数
   );
+
+  /// @brief multi_compose() の共通関数
+  BddEdge
+  mcomp_sub(
+    const unordered_map<VarId, Bdd>& compose_map ///< [in] 変換マップ
+  ) const;
 
 
 private:
