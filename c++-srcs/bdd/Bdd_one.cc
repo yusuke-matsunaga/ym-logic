@@ -7,8 +7,6 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-//#include "ym/BddVarSet.h"
-//#include "ym/BddError.h"
 #include "BddEdge.h"
 #include "BddNode.h"
 #include "OneOp.h"
