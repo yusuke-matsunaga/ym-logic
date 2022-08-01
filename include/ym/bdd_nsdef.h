@@ -31,6 +31,7 @@ BEGIN_NAMESPACE_YM_BDD
 class Bdd;
 class BddVarSet;
 class BddMgr;
+struct BddInfo;
 
 END_NAMESPACE_YM_BDD
 
@@ -40,6 +41,7 @@ BEGIN_NAMESPACE_YM
 using nsBdd::Bdd;
 using nsBdd::BddVarSet;
 using nsBdd::BddMgr;
+using nsBdd::BddInfo;
 
 END_NAMESPACE_YM
 

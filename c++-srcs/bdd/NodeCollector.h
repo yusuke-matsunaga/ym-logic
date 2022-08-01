@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/bdd_nsdef.h"
+#include "ym/Bdd.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -25,7 +26,9 @@ class NodeCollector
 public:
 
   /// @brief コンストラクタ
-  NodeCollector() = default;
+  NodeCollector(
+    const vector<BddEdge>& root_list ///< [in] 根の枝のリスト
+  );
 
   /// @brief デストラクタ
   ~NodeCollector() = default;
@@ -36,11 +39,19 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief ノードを集める．
-  void
-  get_node(
-    BddEdge edge ///< [in] 枝
-  );
+  /// @brief 根の枝を表す整数のリストを返す．
+  const vector<BddEdge>&
+  root_list() const
+  {
+    return mRootList;
+  }
+
+  /// @brief ノードリストを返す．
+  const vector<BddNode*>&
+  node_list() const
+  {
+    return mNodeList;
+  }
 
   /// @brief ノード番号を得る．
   SizeType
@@ -51,29 +62,23 @@ public:
     return mNodeMap.at(node);
   }
 
-  /// @brief ノードリストを返す．
-  const vector<BddNode*>&
-  node_list() const
-  {
-    return mNodeList;
-  }
-
-  /// @brief インデックスの最大値+1を得る．
+  /// @brief BddEdge の情報を整数値に変換する．
   SizeType
-  max_index() const
-  {
-    return mIndexedNodeList.size();
-  }
+  edge2int(
+    BddEdge edge ///< [in] 枝
+  ) const;
 
-  /// @brief インデックスごとのノードリストを返す．
-  const vector<BddNode*>&
-  indexed_node_list(
-    SizeType index ///< [in] インデックス ( 0 <= index < max_index() )
-  ) const
-  {
-    ASSERT_COND( 0 <= index && index < max_index() );
-    return mIndexedNodeList[index];
-  }
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ノードを集める．
+  void
+  get_node(
+    BddEdge edge ///< [in] 枝
+  );
 
 
 private:
@@ -81,11 +86,11 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
+  // 根の枝のリスト
+  vector<BddEdge> mRootList;
+
   // ノードリスト
   vector<BddNode*> mNodeList;
-
-  // インデックスごとのノードリスト
-  vector<vector<BddNode*>> mIndexedNodeList;
 
   // ノード番号の対応表
   unordered_map<BddNode*, SizeType> mNodeMap;

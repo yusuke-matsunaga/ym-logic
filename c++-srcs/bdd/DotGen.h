@@ -9,18 +9,18 @@
 /// All rights reserved.
 
 #include "ym/bdd_nsdef.h"
-#include "NodeCollector.h"
 #include "DotWriter.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
 
+class BddEdge;
+
 //////////////////////////////////////////////////////////////////////
 /// @class DotGen DotGen.h "DotGen.h"
 /// @brief dot 形式の出力を行うクラス
 //////////////////////////////////////////////////////////////////////
-class DotGen :
-  public NodeCollector
+class DotGen
 {
 public:
 
@@ -42,7 +42,7 @@ public:
   /// @brief dot 形式で出力する．
   void
   write(
-    const vector<BddEdge>& root_list ///< [in] 根のリスト
+    const vector<Bdd>& root_list ///< [in] 根のリスト
   );
 
 
@@ -60,14 +60,14 @@ private:
   /// @brief ノード名を返す．
   string
   node_name(
-    BddNode* node ///< [in] ノード
+    SizeType id ///< [in] 番号
   );
 
   /// @brief 枝の内容を出力する．
   void
   write_edge(
     const string& from_node, ///< [in] 始点のノード名
-    BddEdge edge,            ///< [in] 枝
+    SizeType edge,           ///< [in] 枝
     bool zero                ///< [in] 0枝の時 true にするフラグ
   );
 

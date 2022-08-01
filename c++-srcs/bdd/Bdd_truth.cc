@@ -7,13 +7,8 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-//#include "ym/BddError.h"
 #include "BddEdge.h"
-//#include "BddMgrImpl.h"
 #include "BddNode.h"
-//#include "CopyOp.h"
-//#include "NodeCounter.h"
-//#include "NodeDisp.h"
 
 
 BEGIN_NAMESPACE_YM_BDD

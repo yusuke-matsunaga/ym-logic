@@ -11,6 +11,7 @@
 #include "ym/bdd_nsdef.h"
 #include "ym/VarId.h"
 #include "ym/Literal.h"
+#include "ym/BddInfo.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -534,15 +535,46 @@ public:
     SizeType input_num ///< [in] 入力変数の数
   ) const;
 
+  /// @brief 同じ構造を持つか調べる．
+  ///
+  /// 同じマネージャに属するBDDなら同じノードだが
+  /// マネージャが異なる場合には構造を調べる必要がある．
+  bool
+  is_identical(
+    const Bdd& right ///< [in] 比較対象のBDD
+  ) const;
+
   /// @brief ハッシュ値を返す．
   SizeType
   hash() const;
+
+  /// @brief ノードの情報を取り出す．
+  vector<BddInfo>
+  node_info(
+    SizeType& root_edge ///< [out] 根の情報を格納する変数
+  ) const;
+
+  /// @brief 複数のBDDのノードの情報を取り出す．
+  static
+  vector<BddInfo>
+  node_info(
+    const vector<Bdd>& bdd_list,     ///< [in] BDDのリスト
+    vector<SizeType>& root_edge_list ///< [out] 根の情報を格納するリスト
+  );
 
   /// @brief 内容を出力する．
   void
   display(
     ostream& s ///< [in] 出力ストリーム
   ) const;
+
+  /// @brief 複数のBDDの内容を出力する．
+  static
+  void
+  display(
+    ostream& s,                 ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
 
   /// @brief dot 形式で出力する．
   void

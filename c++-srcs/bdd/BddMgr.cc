@@ -135,4 +135,73 @@ BddMgr::disable_gc()
   mImpl->disable_gc();
 }
 
+
+//////////////////////////////////////////////////////////////////////
+// クラス TruthOp
+//////////////////////////////////////////////////////////////////////
+
+// @brief 真理値表の文字列からBDDを作る．
+BddEdge
+TruthOp::op_step(
+  const string& str,
+  SizeType index
+)
+{
+  if ( str == "0" ) {
+    return BddEdge::zero();
+  }
+  if ( str == "1" ) {
+    return BddEdge::one();
+  }
+  if ( mTable.count(str) > 0 ) {
+    return mTable.at(str);
+  }
+
+  SizeType n = str.size();
+  SizeType h = n / 2;
+  string str0 = str.substr(h);
+  string str1 = str.substr(0, h);
+  auto e0 = op_step(str0, index + 1);
+  auto e1 = op_step(str1, index + 1);
+  auto ans = new_node(index, e0, e1);
+  mTable.emplace(str, ans);
+  return ans;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// クラス CopyOp
+//////////////////////////////////////////////////////////////////////
+
+// @brief コピーする．
+BddEdge
+CopyOp::copy_step(
+  BddEdge edge
+)
+{
+  if ( edge.is_zero() ) {
+    return BddEdge::zero();
+  }
+  if ( edge.is_one() ) {
+    return BddEdge::one();
+  }
+
+  auto node = edge.node();
+  auto inv = edge.inv();
+  auto index = node->index();
+  if ( mTable.count(node) > 0 ) {
+    auto rnode = mTable.at(node);
+    return BddEdge{rnode, inv};
+  }
+  auto edge0 = node->edge0() ^ inv;
+  auto edge1 = node->edge1() ^ inv;
+  auto redge0 = copy_step(edge0);
+  auto redge1 = copy_step(edge1);
+  auto redge = new_node(index, redge0, redge1);
+  auto rnode = redge.node();
+  ASSERT_COND( redge.inv() == inv );
+  mTable.emplace(node, rnode);
+  return redge;
+}
+
 END_NAMESPACE_YM_BDD

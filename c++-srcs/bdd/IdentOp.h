@@ -1,36 +1,31 @@
-#ifndef NODEDISP_H
-#define NODEDISP_H
+#ifndef IDENTOP_H
+#define IDENTOP_H
 
-/// @file NodeDisp.h
-/// @brief NodeDisp のヘッダファイル
+/// @file IdentOp.h
+/// @brief IdentOp のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "NodeCollector.h"
+#include "Apply2Key.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
 
 //////////////////////////////////////////////////////////////////////
-/// @class NodeDisp NodeDisp.h "NodeDisp.h"
-/// @brief BDD の内容を出力するためのクラス
+/// @class IdentOp IdentOp.h "IdentOp.h"
+/// @brief 構造が同じかチェックする．
 //////////////////////////////////////////////////////////////////////
-class NodeDisp :
-  public NodeCollector
+class IdentOp
 {
 public:
 
   /// @brief コンストラクタ
-  NodeDisp(
-    ostream& s ///< [in] 出力ストリーム
-  ) : mS{s}
-  {
-  }
+  IdentOp() = default;
 
   /// @brief デストラクタ
-  ~NodeDisp() = default;
+  ~IdentOp() = default;
 
 
 public:
@@ -38,10 +33,11 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 出力する．
-  void
-  write(
-    const vector<BddEdge>& root_list ///< [in] 根のリスト
+  /// @brief 同じ構造かチェックする．
+  bool
+  ident_step(
+    BddEdge left,
+    BddEdge right
   );
 
 
@@ -50,23 +46,17 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 枝の内容を出力する．
-  void
-  write_edge(
-    BddEdge edge ///< [in] 枝
-  );
-
 
 private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 出力ストリーム
-  ostream& mS;
+  // 演算結果テーブル
+  unordered_map<Apply2Key, bool> mTable;
 
 };
 
 END_NAMESPACE_YM_BDD
 
-#endif // NODEDISP_H
+#endif // IDENTOP_H

@@ -1,15 +1,45 @@
 
-/// @file OneOp.cc
-/// @brief OneOp の実装ファイル
+/// @file Bdd.cc
+/// @brief Bdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
+#include "ym/Bdd.h"
+//#include "ym/BddVarSet.h"
+//#include "ym/BddError.h"
+#include "BddEdge.h"
+#include "BddNode.h"
 #include "OneOp.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
+
+// @brief 1となるパスを求める．
+Bdd
+Bdd::get_onepath() const
+{
+  ASSERT_COND( mMgr != nullptr );
+  if ( is_zero() ) {
+    return Bdd{mMgr, BddEdge::zero()};
+  }
+  OneOp op{mMgr};
+  auto e = op.op_step(mRoot);
+  return Bdd{mMgr, e};
+}
+
+// @brief 0となるパスを求める．
+Bdd
+Bdd::get_zeropath() const
+{
+  return invert().get_onepath();
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// クラス OneOp
+//////////////////////////////////////////////////////////////////////
 
 // @brief 1に至るパスを求める．
 BddEdge

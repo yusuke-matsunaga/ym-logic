@@ -7,8 +7,6 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "BddEdge.h"
-#include "NodeCounter.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -20,8 +18,9 @@ Bdd::size() const
   if ( mMgr == nullptr ) {
     return 0;
   }
-  NodeCounter nc;
-  return nc.count({mRoot});
+  SizeType dummy;
+  auto node_list = node_info(dummy);
+  return node_list.size();
 }
 
 // @brief 複数のBDDのノード数を数える．
@@ -33,10 +32,9 @@ Bdd::size(
   if ( bdd_list.empty() ) {
     return 0;
   }
-  vector<BddEdge> edge_list;
-  (void) root_list(bdd_list, edge_list);
-  NodeCounter nc;
-  return nc.count(edge_list);
+  vector<SizeType> root_list;
+  auto node_list = node_info(bdd_list, root_list);
+  return node_list.size();
 }
 
 END_NAMESPACE_YM_BDD

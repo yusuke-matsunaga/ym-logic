@@ -1106,4 +1106,28 @@ TEST_F(BddTest, size4)
   EXPECT_EQ( 3, Bdd::size({bdd1, bdd2, bdd3}) );
 }
 
+TEST_F(BddTest, is_identical1)
+{
+  Bdd bdd1 = from_truth("1011");
+  Bdd bdd2 = from_truth("1011");
+
+  EXPECT_TRUE( bdd1.is_identical(bdd2) );
+
+  BddMgr mgr2;
+  Bdd bdd3 = mgr2.from_truth("1011");
+  EXPECT_TRUE( bdd1.is_identical(bdd3) );
+}
+
+TEST_F(BddTest, is_identical2)
+{
+  Bdd bdd1 = from_truth("1011");
+  Bdd bdd2 = from_truth("1010");
+
+  EXPECT_FALSE( bdd1.is_identical(bdd2) );
+
+  BddMgr mgr2;
+  Bdd bdd3 = mgr2.from_truth("1010");
+  EXPECT_FALSE( bdd1.is_identical(bdd3) );
+}
+
 END_NAMESPACE_YM

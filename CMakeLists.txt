@@ -77,6 +77,8 @@ set (bdd_SOURCES
   c++-srcs/bdd/Bdd_cofactor.cc
   c++-srcs/bdd/Bdd_display.cc
   c++-srcs/bdd/Bdd_gen_dot.cc
+  c++-srcs/bdd/Bdd_ident.cc
+  c++-srcs/bdd/Bdd_one.cc
   c++-srcs/bdd/Bdd_op.cc
   c++-srcs/bdd/Bdd_size.cc
   c++-srcs/bdd/Bdd_sup.cc
@@ -84,19 +86,8 @@ set (bdd_SOURCES
   c++-srcs/bdd/BddMgr.cc
   c++-srcs/bdd/BddMgrImpl.cc
   c++-srcs/bdd/BddVarSet.cc
-  c++-srcs/bdd/CopyOp.cc
-  c++-srcs/bdd/CofactorOp.cc
-  c++-srcs/bdd/CheckSupOp.cc
-  c++-srcs/bdd/CheckSymOp.cc
-  c++-srcs/bdd/TruthOp.cc
-  c++-srcs/bdd/NodeCounter.cc
-  c++-srcs/bdd/NodeCollector.cc
-  c++-srcs/bdd/NodeDisp.cc
-  c++-srcs/bdd/DotGen.cc
   c++-srcs/bdd/DotWriter.cc
-  c++-srcs/bdd/SupOp.cc
-  c++-srcs/bdd/OneOp.cc
-  c++-srcs/bdd/MultiCompOp.cc
+  c++-srcs/bdd/NodeCollector.cc
   )
 
 set (ym_logic_SOURCES
