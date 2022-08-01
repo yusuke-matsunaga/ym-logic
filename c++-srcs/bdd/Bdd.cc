@@ -12,7 +12,6 @@
 #include "BddMgrImpl.h"
 #include "BddNode.h"
 #include "CopyOp.h"
-#include "NodeCollector.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
