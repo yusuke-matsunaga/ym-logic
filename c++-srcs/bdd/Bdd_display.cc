@@ -70,7 +70,9 @@ Bdd::display(
   else {
     SizeType root_edge;
     auto node_list = node_info(root_edge);
+    s << "Root: ";
     write_edge(s, root_edge);
+    s << endl;
     for ( auto& node: node_list ) {
       write_node(s, node);
     }
