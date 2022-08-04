@@ -27,7 +27,6 @@ class BddMgrImpl;
 class Bdd
 {
   friend class BddMgr;
-  friend class BddMgrImpl;
 
 public:
 
@@ -306,6 +305,15 @@ public:
   {
     return cofactor_int(cube);
   }
+
+  /// @brief If-Then-Else 演算
+  friend
+  Bdd
+  ite(
+    const Bdd& cond,   ///< [in] 条件
+    const Bdd& then_f, ///< [in] 条件が成り立ったとき選ばれる関数
+    const Bdd& else_f  ///< [in] 条件が成り立たなかった時選ばれる関数
+  );
 
   /// @brief (単一)compose演算
   Bdd
@@ -594,6 +602,24 @@ public:
     = {}
   );
 
+  /// @brief 独自形式でバイナリダンプする．
+  ///
+  /// 復元には BddMgr::restore() を用いる．
+  void
+  dump(
+    ostream& s ///< [in] 出力ストリーム
+  ) const;
+
+  /// @brief 複数のBDDを独自形式でバイナリダンプする．
+  ///
+  /// 復元には BddMgr::restore() を用いる．
+  static
+  void
+  dump(
+    ostream& s,                 ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
   /// @}
   //////////////////////////////////////////////////////////////////////
 
@@ -627,15 +653,6 @@ private:
   root_list(
     const vector<Bdd>& bdd_list, ///< [in] BDDのリスト
     vector<BddEdge>& edge_list   ///< [out] 根の枝を格納するのリスト
-  );
-
-  /// @brief If-Then-Else 演算
-  friend
-  Bdd
-  ite(
-    const Bdd& cond,   ///< [in] 条件
-    const Bdd& then_f, ///< [in] 条件が成り立ったとき選ばれる関数
-    const Bdd& else_f  ///< [in] 条件が成り立たなかった時選ばれる関数
   );
 
   /// @brief multi_compose() の共通関数

@@ -49,10 +49,11 @@ Bdd::node_info(
   node_list.reserve(nc.node_list().size());
   for ( auto node: nc.node_list() ) {
     SizeType id = nc.node_id(node);
+    ASSERT_COND( id == node_list.size() + 1 );
     SizeType index = node->index();
     SizeType edge0 = nc.edge2int(node->edge0());
     SizeType edge1 = nc.edge2int(node->edge1());
-    node_list.push_back(BddInfo{id, index, edge0, edge1});
+    node_list.push_back(BddInfo{index, edge0, edge1});
   }
   return node_list;
 }
@@ -86,11 +87,11 @@ NodeCollector::get_node(
 
   auto node = edge.node();
   if ( mNodeMap.count(node) == 0 ) {
+    get_node(node->edge0());
+    get_node(node->edge1());
     SizeType id = mNodeList.size() + 1;
     mNodeMap.emplace(node, id);
     mNodeList.push_back(node);
-    get_node(node->edge0());
-    get_node(node->edge1());
   }
 }
 

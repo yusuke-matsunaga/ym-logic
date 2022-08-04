@@ -131,12 +131,16 @@ DotGen::write(
   }
 
   // ノードの定義
-  for ( auto node: node_list ) {
-    auto attr_list{mNodeAttrList};
-    ostringstream buf;
-    buf << "\"" << node.index << "\"";
-    attr_list.emplace("label", buf.str());
-    mWriter.write_node(node_name(node.id), attr_list);
+  {
+    SizeType id = 1;
+    for ( auto node: node_list ) {
+      auto attr_list{mNodeAttrList};
+      ostringstream buf;
+      buf << "\"" << node.index << "\"";
+      attr_list.emplace("label", buf.str());
+      mWriter.write_node(node_name(id), attr_list);
+      ++ id;
+    }
   }
 
   // 終端の定義
@@ -151,9 +155,13 @@ DotGen::write(
   }
 
   // 枝の定義
-  for ( auto node: node_list ) {
-    write_edge(node_name(node.id), node.edge0, true);
-    write_edge(node_name(node.id), node.edge1, false);
+  {
+    SizeType id = 1;
+    for ( auto node: node_list ) {
+      write_edge(node_name(id), node.edge0, true);
+      write_edge(node_name(id), node.edge1, false);
+      ++ id;
+    }
   }
 
   // 根のランクの設定
@@ -175,18 +183,22 @@ DotGen::write(
     }
   }
   ++ max_index;
-  vector<vector<BddInfo>> indexed_node_list(max_index);
-  for ( auto node: node_list ) {
-    SizeType index = node.index;
-    indexed_node_list[index].push_back(node);
+  vector<vector<SizeType>> indexed_node_list(max_index);
+  {
+    SizeType id = 1;
+    for ( auto node: node_list ) {
+      SizeType index = node.index;
+      indexed_node_list[index].push_back(id);
+      ++ id;
+    }
   }
   for ( SizeType i = 0; i < max_index; ++ i ) {
     auto& node_list = indexed_node_list[i];
     SizeType n = node_list.size();
     vector<string> node_name_list;
     node_name_list.reserve(n);
-    for ( auto node: node_list ) {
-      node_name_list.push_back(node_name(node.id));
+    for ( auto id: node_list ) {
+      node_name_list.push_back(node_name(id));
     }
     mWriter.write_rank_group(node_name_list);
   }

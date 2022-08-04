@@ -8,6 +8,7 @@
 
 #include "ym/Bdd.h"
 #include "ym/BddInfo.h"
+#include "ym/BddError.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -42,18 +43,21 @@ write_edge(
 
 // @brief ノードの内容を出力する．
 void
-write_node(
+write_node_list(
   ostream& s,
-  const BddInfo& node
+  const vector<BddInfo>& node_list
 )
 {
-  SizeType id = node.id;
-  s << setw(6) << id << ": "
-    << setw(4) << node.index;
-  write_edge(s, node.edge0);
-  s << ": ";
-  write_edge(s, node.edge1);
-  s << endl;
+  SizeType id = 1;
+  for ( auto& node: node_list ) {
+    s << setw(6) << id << ": "
+      << setw(4) << node.index;
+    write_edge(s, node.edge0);
+    s << ": ";
+    write_edge(s, node.edge1);
+    s << endl;
+    ++ id;
+  }
 }
 
 END_NONAMESPACE
@@ -73,9 +77,7 @@ Bdd::display(
     s << "Root: ";
     write_edge(s, root_edge);
     s << endl;
-    for ( auto& node: node_list ) {
-      write_node(s, node);
-    }
+    write_node_list(s, node_list);
   }
 }
 
@@ -91,9 +93,8 @@ Bdd::display(
   for ( auto root: root_edge_list ) {
     write_edge(s, root);
   }
-  for ( auto& node: node_list ) {
-    write_node(s, node);
-  }
+  s << endl;
+  write_node_list(s, node_list);
 }
 
 END_NAMESPACE_YM_BDD

@@ -35,6 +35,7 @@ blif2bdd(
     Bnet2Bdd bnet2bdd{mgr, net};
     auto global_func = bnet2bdd.make_global_func();
     cout << basename(argv[i]) << ": " << Bdd::size(global_func) << endl;
+    Bdd::display(cout, global_func);
     mgr.disable_gc();
   }
   return 0;

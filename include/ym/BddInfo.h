@@ -22,7 +22,6 @@ BEGIN_NAMESPACE_YM_BDD
 //////////////////////////////////////////////////////////////////////
 struct BddInfo
 {
-  SizeType id;    ///< ノード番号
   SizeType index; ///< インデックス
   SizeType edge0; ///< 0枝
   SizeType edge1; ///< 1枝

@@ -76,6 +76,7 @@ set (bdd_SOURCES
   c++-srcs/bdd/Bdd_check.cc
   c++-srcs/bdd/Bdd_cofactor.cc
   c++-srcs/bdd/Bdd_display.cc
+  c++-srcs/bdd/Bdd_dump.cc
   c++-srcs/bdd/Bdd_gen_dot.cc
   c++-srcs/bdd/Bdd_ident.cc
   c++-srcs/bdd/Bdd_one.cc

@@ -25,7 +25,6 @@ BddMgr::BddMgr(
 // @brief デストラクタ
 BddMgr::~BddMgr()
 {
-  delete mImpl;
 }
 
 // @brief BDD をコピーする．
@@ -34,13 +33,13 @@ BddMgr::copy(
   const Bdd& src
 )
 {
-  if ( src.mMgr == mImpl ) {
-    return Bdd{mImpl, src.mRoot};
+  if ( src.mMgr == impl() ) {
+    return Bdd{impl(), src.mRoot};
   }
   else {
-    CopyOp op{mImpl};
+    CopyOp op{impl()};
     auto e = op.copy_step(src.mRoot);
-    return Bdd{mImpl, e};
+    return Bdd{impl(), e};
   }
 }
 
@@ -48,14 +47,14 @@ BddMgr::copy(
 Bdd
 BddMgr::zero()
 {
-  return Bdd{mImpl, BddEdge::zero()};
+  return Bdd{impl(), BddEdge::zero()};
 }
 
 // @brief 恒新関数を作る．
 Bdd
 BddMgr::one()
 {
-  return Bdd{mImpl, BddEdge::one()};
+  return Bdd{impl(), BddEdge::one()};
 }
 
 // @brief リテラル関数を作る．
@@ -66,7 +65,7 @@ BddMgr::literal(
 )
 {
   auto e = mImpl->make_literal(var.val()) ^ inv;
-  return Bdd{mImpl, e};
+  return Bdd{impl(), e};
 }
 
 // @brief 肯定のリテラル関数を作る．
@@ -93,9 +92,9 @@ BddMgr::from_truth(
   const string& str
 )
 {
-  TruthOp op{mImpl};
+  TruthOp op{impl()};
   auto e = op.op_step(str, 0);
-  return Bdd{mImpl, e};
+  return Bdd{impl(), e};
 }
 
 // @brief ノード数を返す．

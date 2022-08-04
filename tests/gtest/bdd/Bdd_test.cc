@@ -1130,4 +1130,23 @@ TEST_F(BddTest, is_identical2)
   EXPECT_FALSE( bdd1.is_identical(bdd3) );
 }
 
+TEST_F(BddTest, dump_restore)
+{
+  Bdd bdd1 = from_truth("1100");
+  Bdd bdd2 = from_truth("1010");
+  Bdd bdd3 = from_truth("1000");
+
+  ostringstream obuf;
+  Bdd::dump(obuf, {bdd1, bdd2, bdd3});
+  string tmp = obuf.str();
+
+  istringstream ibuf{tmp};
+  auto bdd_list = mMgr.restore(ibuf);
+
+  EXPECT_EQ( 3, bdd_list.size() );
+  EXPECT_EQ( bdd1, bdd_list[0] );
+  EXPECT_EQ( bdd2, bdd_list[1] );
+  EXPECT_EQ( bdd3, bdd_list[2] );
+}
+
 END_NAMESPACE_YM
