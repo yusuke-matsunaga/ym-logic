@@ -11,6 +11,7 @@
 #include "ym/bdd_nsdef.h"
 #include "ym/VarId.h"
 #include "ym/Literal.h"
+#include "ym/BinDec.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -93,7 +94,7 @@ public:
   /// @return 生成されたBDDのリストを返す．
   vector<Bdd>
   restore(
-    istream& s ///< [in] 入力ストリーム
+    BinDec& s ///< [in] 入力ストリーム
   );
 
   /// @brief ノード数を返す．

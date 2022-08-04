@@ -12,6 +12,7 @@
 #include "ym/VarId.h"
 #include "ym/Literal.h"
 #include "ym/BddInfo.h"
+#include "ym/BinEnc.h"
 
 
 BEGIN_NAMESPACE_YM_BDD
@@ -607,7 +608,7 @@ public:
   /// 復元には BddMgr::restore() を用いる．
   void
   dump(
-    ostream& s ///< [in] 出力ストリーム
+    BinEnc& s ///< [in] 出力ストリーム
   ) const;
 
   /// @brief 複数のBDDを独自形式でバイナリダンプする．
@@ -616,7 +617,7 @@ public:
   static
   void
   dump(
-    ostream& s,                 ///< [in] 出力ストリーム
+    BinEnc& s,                  ///< [in] 出力ストリーム
     const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 

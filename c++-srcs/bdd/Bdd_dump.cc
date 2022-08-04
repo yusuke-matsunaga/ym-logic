@@ -26,47 +26,47 @@ const char* BDD_SIG{"ym_bdd1.0"};
 // SizeType をダンプする．
 void
 dump_int(
-  BinEnc& enc,
+  BinEnc& s,
   SizeType num
 )
 {
   if ( num <= 127 ) {
-    enc.write_8(static_cast<ymuint8>(num));
+    s.write_8(static_cast<ymuint8>(num));
   }
   else {
     SizeType num1 = (num & 127) | 128;
-    enc.write_8(static_cast<ymuint8>(num1));
-    dump_int(enc, (num >> 7));
+    s.write_8(static_cast<ymuint8>(num1));
+    dump_int(s, (num >> 7));
   }
 }
 
 // 枝の情報をダンプする．
 void
 dump_edge(
-  BinEnc& enc,
+  BinEnc& s,
   SizeType id,
   SizeType edge
 )
 {
   auto node = BddInfo::edge2node(edge);
   if ( node == 0 ) { // 定数
-    dump_int(enc, edge);
+    dump_int(s, edge);
   }
   else {
     auto inv = BddInfo::edge2inv(edge);
     SizeType delta = id - node;
-    dump_int(enc, (delta * 2) + static_cast<SizeType>(inv));
+    dump_int(s, (delta * 2) + static_cast<SizeType>(inv));
   }
 }
 
 SizeType
 restore_int(
-  BinDec& dec
+  BinDec& s
 )
 {
   SizeType num = 0;
   for ( SizeType weight = 1; ; weight *= 128 ) {
-    SizeType c = dec.read_8();
+    SizeType c = s.read_8();
     num += (c & 127) * weight;
     if ( (c & 128) == 0 ) {
       break;
@@ -77,11 +77,11 @@ restore_int(
 
 SizeType
 restore_edge(
-  BinDec& dec,
+  BinDec& s,
   SizeType id
 )
 {
-  auto val = restore_int(dec);
+  auto val = restore_int(s);
   auto delta = BddInfo::edge2node(val);
   if ( delta == 0 ) {
     return val;
@@ -96,7 +96,7 @@ END_NONAMESPACE
 // @brief 独自形式でバイナリダンプする．
 void
 Bdd::dump(
-  ostream& s
+  BinEnc& s
 ) const
 {
   dump(s, {*this});
@@ -105,38 +105,37 @@ Bdd::dump(
 // @brief 複数のBDDを独自形式でバイナリダンプする．
 void
 Bdd::dump(
-  ostream& s,
+  BinEnc& s,
   const vector<Bdd>& bdd_list
 )
 {
-  BinEnc enc{s};
   SizeType n = bdd_list.size();
   // シグネチャ
-  enc.write_string(BDD_SIG);
+  s.write_signature(BDD_SIG);
   // 要素数
-  enc.write_64(n);
+  s.write_64(n);
 
   vector<SizeType> root_edge_list;
   auto node_list = node_info(bdd_list, root_edge_list);
   // 根の枝
   for ( auto root_edge: root_edge_list ) {
-    dump_int(enc, root_edge);
+    dump_int(s, root_edge);
   }
   // ノードリスト
   SizeType id = 1;
   for ( auto& node: node_list ) {
     // インデックス
-    dump_int(enc, node.index);
+    dump_int(s, node.index);
     // 0枝
-    dump_edge(enc, id, node.edge0);
+    dump_edge(s, id, node.edge0);
     // 1枝
-    dump_edge(enc, id, node.edge1);
+    dump_edge(s, id, node.edge1);
     ++ id;
   }
   // end-marker
-  dump_int(enc, 0);
-  dump_int(enc, 0);
-  dump_int(enc, 0);
+  dump_int(s, 0);
+  dump_int(s, 0);
+  dump_int(s, 0);
 }
 
 BEGIN_NONAMESPACE
@@ -163,27 +162,24 @@ END_NONAMESPACE
 // @brief バイナリダンプから復元する．
 vector<Bdd>
 BddMgr::restore(
-  istream& s
+  BinDec& s
 )
 {
-  BinDec dec{s};
-
-  string sig = dec.read_string();
-  SizeType n = dec.read_64();
-  if ( sig != BDD_SIG ) {
+  if ( !s.read_signature(BDD_SIG) ) {
     throw BddError{"Bdd::restore(): wrong signature"};
   }
 
+  SizeType n = s.read_64();
   vector<SizeType> root_info_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
-    root_info_list[i] = restore_int(dec);
+    root_info_list[i] = restore_int(s);
   }
 
   vector<BddEdge> edge_list;
   for ( SizeType id = 1; ; ++ id ) {
-    SizeType index = restore_int(dec);
-    SizeType edge0_info = restore_edge(dec, id);
-    SizeType edge1_info = restore_edge(dec, id);
+    SizeType index = restore_int(s);
+    SizeType edge0_info = restore_edge(s, id);
+    SizeType edge1_info = restore_edge(s, id);
     if ( index == 0 && edge0_info == 0 && edge1_info == 0 ) {
       break;
     }

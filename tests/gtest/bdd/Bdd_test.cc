@@ -10,6 +10,8 @@
 #include "ym/Bdd.h"
 #include "ym/BddVarSet.h"
 #include "ym/BddMgr.h"
+#include "ym/BinEnc.h"
+#include "ym/BinDec.h"
 #include "BddTest.h"
 
 
@@ -1137,11 +1139,13 @@ TEST_F(BddTest, dump_restore)
   Bdd bdd3 = from_truth("1000");
 
   ostringstream obuf;
-  Bdd::dump(obuf, {bdd1, bdd2, bdd3});
+  BinEnc enc{obuf};
+  Bdd::dump(enc, {bdd1, bdd2, bdd3});
   string tmp = obuf.str();
 
   istringstream ibuf{tmp};
-  auto bdd_list = mMgr.restore(ibuf);
+  BinDec dec{ibuf};
+  auto bdd_list = mMgr.restore(dec);
 
   EXPECT_EQ( 3, bdd_list.size() );
   EXPECT_EQ( bdd1, bdd_list[0] );
