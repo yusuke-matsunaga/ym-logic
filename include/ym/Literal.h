@@ -197,7 +197,7 @@ public:
     BinEnc& s ///< [in] 出力先のストリーム
   ) const
   {
-    s << mBody;
+    s.write_vint(mBody);
   }
 
   /// @brief バイナリファイルから読み込む．
@@ -206,7 +206,7 @@ public:
     BinDec& s ///< [in] 入力元のストリーム
   )
   {
-    s >> mBody;
+    mBody = s.read_vint();
   }
 
 
@@ -219,8 +219,7 @@ private:
   explicit
   Literal(
     SizeType body
-  ) :
-    mBody{body}
+  ) : mBody{body}
   {
   }
 

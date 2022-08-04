@@ -112,7 +112,7 @@ public:
     BinEnc& s ///< [in] 出力先のストリーム
   ) const
   {
-    s << mVal;
+    s.write_vint(mVal);
   }
 
   /// @brief バイナリファイルを読み込む．
@@ -121,7 +121,7 @@ public:
     BinDec& s ///< [in] 入力ストリーム
   )
   {
-    s >> mVal;
+    mVal = s.read_vint();
   }
 
 
