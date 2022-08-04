@@ -1522,4 +1522,23 @@ TEST(ExprTest, from_string3)
   EXPECT_EQ( string("syntax error"), err_msg);
 }
 
+TEST(ExprTest, dump_restore)
+{
+  string expr_str("0 | (1 & !2)");
+  string err_msg;
+  Expr expr = Expr::from_string(expr_str, err_msg);
+
+  ASSERT_TRUE( expr.is_valid() );
+
+  ostringstream obuf;
+  BinEnc enc{obuf};
+  expr.dump(enc);
+
+  istringstream ibuf{obuf.str()};
+  BinDec dec{ibuf};
+  auto expr2 = Expr::restore(dec);
+
+  EXPECT_TRUE( check_equiv(expr, expr2) );
+}
+
 END_NAMESPACE_YM

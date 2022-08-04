@@ -12,6 +12,8 @@
 #include "ym/VarId.h"
 #include "ym/Literal.h"
 #include "ym/SopCover.h"
+#include "ym/BinEnc.h"
+#include "ym/BinDec.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -497,6 +499,8 @@ public:
   ) const;
 
   /// @brief バイナリファイルの読み込み
+  ///
+  /// 自身に設定される．
   void
   restore(
     BinDec& s ///< [in] 入力元のストリーム

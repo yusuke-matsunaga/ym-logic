@@ -712,62 +712,6 @@ Expr::sop_literal_num(
 
 BEGIN_NONAMESPACE
 
-// 論理式をバイナリダンプする．
-void
-dump_expr(
-  BinEnc& s,
-  const Expr& expr
-)
-{
-  if ( expr.is_invalid() ) {
-    s << static_cast<ymuint8>(255);
-    return;
-  }
-  if ( expr.is_zero() ) {
-    s << static_cast<ymuint8>(0);
-    return;
-  }
-  if ( expr.is_one() ) {
-    s << static_cast<ymuint8>(1);
-    return;
-  }
-  if ( expr.is_posi_literal() ) {
-    s << static_cast<ymuint8>(2);
-    expr.varid().dump(s);
-    return;
-  }
-  if ( expr.is_nega_literal() ) {
-    s << static_cast<ymuint8>(3);
-    expr.varid().dump(s);
-    return;
-  }
-
-  // 残りは論理演算ノード
-  ymuint8 type = 0;
-  if ( expr.is_and() ) {
-    type = 4;
-  }
-  else if ( expr.is_or() ) {
-    type = 5;
-  }
-  else if ( expr.is_xor() ) {
-    type = 6;
-  }
-  else {
-    ASSERT_NOT_REACHED;
-  }
-
-  SizeType nc = expr.child_num();
-  s << type
-    << nc;
-  for ( int i = 0; i < nc; ++ i ) {
-    dump_expr(s, expr.child(i));
-  }
-}
-
-Expr
-restore_expr(BinDec&);
-
 vector<Expr>
 restore_child_list(
   BinDec& s
@@ -777,15 +721,16 @@ restore_child_list(
   s >> nc;
   vector<Expr> child_list(nc);
   for ( SizeType i = 0; i < nc; ++ i ) {
-    child_list[i] = restore_expr(s);
+    child_list[i] = Expr::restore(s);
   }
   return child_list;
 }
 
+END_NONAMESPACE
 
 // ストリームから論理式を作る．
 Expr
-restore_expr(
+Expr::restore(
   BinDec& s
 )
 {
@@ -829,10 +774,8 @@ restore_expr(
   }
 
   // ダミー
-  return Expr::make_zero();
+  return Expr::make_invalid();
 }
-
-END_NONAMESPACE
 
 // @relates Expr
 // @brief 論理式の内容を文字列にする．
@@ -853,16 +796,50 @@ Expr::dump(
   BinEnc& s
 ) const
 {
-  dump_expr(s, *this);
-}
+  if ( is_invalid() ) {
+    s << static_cast<ymuint8>(255);
+    return;
+  }
+  if ( is_zero() ) {
+    s << static_cast<ymuint8>(0);
+    return;
+  }
+  if ( is_one() ) {
+    s << static_cast<ymuint8>(1);
+    return;
+  }
+  if ( is_posi_literal() ) {
+    s << static_cast<ymuint8>(2);
+    varid().dump(s);
+    return;
+  }
+  if ( is_nega_literal() ) {
+    s << static_cast<ymuint8>(3);
+    varid().dump(s);
+    return;
+  }
 
-// @brief バイナリストリームから読み込む．
-void
-Expr::restore(
-  BinDec& s
-)
-{
-  *this = restore_expr(s);
+  // 残りは論理演算ノード
+  ymuint8 type = 0;
+  if ( is_and() ) {
+    type = 4;
+  }
+  else if ( is_or() ) {
+    type = 5;
+  }
+  else if ( is_xor() ) {
+    type = 6;
+  }
+  else {
+    ASSERT_NOT_REACHED;
+  }
+
+  SizeType nc = child_num();
+  s << type
+    << nc;
+  for ( SizeType i = 0; i < nc; ++ i ) {
+    child(i).dump(s);
+  }
 }
 
 END_NAMESPACE_YM_LOGIC

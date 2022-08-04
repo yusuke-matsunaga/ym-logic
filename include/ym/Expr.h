@@ -563,7 +563,8 @@ public:
   ) const;
 
   /// @brief バイナリストリームから読み込む．
-  void
+  static
+  Expr
   restore(
     BinDec& s ///< [in] 入力ストリーム
   );
@@ -720,7 +721,7 @@ operator>>(
   Expr& expr ///< [out] 論理式
 )
 {
-  expr.restore(s);
+  expr = Expr::restore(s);
   return s;
 }
 
