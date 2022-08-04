@@ -23,23 +23,6 @@ BEGIN_NONAMESPACE
 // ダンプ用のシグネチャ
 const char* BDD_SIG{"ym_bdd1.0"};
 
-// SizeType をダンプする．
-void
-dump_int(
-  BinEnc& s,
-  SizeType num
-)
-{
-  if ( num <= 127 ) {
-    s.write_8(static_cast<ymuint8>(num));
-  }
-  else {
-    SizeType num1 = (num & 127) | 128;
-    s.write_8(static_cast<ymuint8>(num1));
-    dump_int(s, (num >> 7));
-  }
-}
-
 // 枝の情報をダンプする．
 void
 dump_edge(
@@ -50,29 +33,14 @@ dump_edge(
 {
   auto node = BddInfo::edge2node(edge);
   if ( node == 0 ) { // 定数
-    dump_int(s, edge);
+    s.write_vint(edge);
   }
   else {
     auto inv = BddInfo::edge2inv(edge);
     SizeType delta = id - node;
-    dump_int(s, (delta * 2) + static_cast<SizeType>(inv));
+    SizeType val = (delta * 2) + static_cast<SizeType>(inv);
+    s.write_vint(val);
   }
-}
-
-SizeType
-restore_int(
-  BinDec& s
-)
-{
-  SizeType num = 0;
-  for ( SizeType weight = 1; ; weight *= 128 ) {
-    SizeType c = s.read_8();
-    num += (c & 127) * weight;
-    if ( (c & 128) == 0 ) {
-      break;
-    }
-  }
-  return num;
 }
 
 SizeType
@@ -81,7 +49,7 @@ restore_edge(
   SizeType id
 )
 {
-  auto val = restore_int(s);
+  auto val = s.read_vint();
   auto delta = BddInfo::edge2node(val);
   if ( delta == 0 ) {
     return val;
@@ -113,19 +81,19 @@ Bdd::dump(
   // シグネチャ
   s.write_signature(BDD_SIG);
   // 要素数
-  s.write_64(n);
+  s.write_vint(n);
 
   vector<SizeType> root_edge_list;
   auto node_list = node_info(bdd_list, root_edge_list);
   // 根の枝
   for ( auto root_edge: root_edge_list ) {
-    dump_int(s, root_edge);
+    s.write_vint(root_edge);
   }
   // ノードリスト
   SizeType id = 1;
   for ( auto& node: node_list ) {
     // インデックス
-    dump_int(s, node.index);
+    s.write_vint(node.index);
     // 0枝
     dump_edge(s, id, node.edge0);
     // 1枝
@@ -133,9 +101,9 @@ Bdd::dump(
     ++ id;
   }
   // end-marker
-  dump_int(s, 0);
-  dump_int(s, 0);
-  dump_int(s, 0);
+  s.write_vint(0);
+  s.write_vint(0);
+  s.write_vint(0);
 }
 
 BEGIN_NONAMESPACE
@@ -169,15 +137,15 @@ BddMgr::restore(
     throw BddError{"Bdd::restore(): wrong signature"};
   }
 
-  SizeType n = s.read_64();
+  SizeType n = s.read_vint();
   vector<SizeType> root_info_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
-    root_info_list[i] = restore_int(s);
+    root_info_list[i] = s.read_vint();
   }
 
   vector<BddEdge> edge_list;
   for ( SizeType id = 1; ; ++ id ) {
-    SizeType index = restore_int(s);
+    SizeType index = s.read_vint();
     SizeType edge0_info = restore_edge(s, id);
     SizeType edge1_info = restore_edge(s, id);
     if ( index == 0 && edge0_info == 0 && edge1_info == 0 ) {
