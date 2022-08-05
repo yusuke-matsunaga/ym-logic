@@ -83,6 +83,10 @@ Bdd::dump(
   // 要素数
   s.write_vint(n);
 
+  if ( n == 0 ) {
+    return;
+  }
+
   vector<SizeType> root_edge_list;
   auto node_list = node_info(bdd_list, root_edge_list);
   // 根の枝
@@ -138,6 +142,10 @@ BddMgr::restore(
   }
 
   SizeType n = s.read_vint();
+  if ( n == 0 ) {
+    return {};
+  }
+
   vector<SizeType> root_info_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     root_info_list[i] = s.read_vint();
