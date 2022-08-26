@@ -8,6 +8,7 @@
 
 #include "Bnet2Bdd.h"
 #include "ym/BnNode.h"
+#include "ym/BnNodeList.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -30,7 +31,8 @@ Bnet2Bdd::make_global_func()
     auto bdd = mMgr.posi_literal(VarId{i});
     mBddMap.emplace(mNetwork.input_id(i), bdd);
   }
-  for ( SizeType id: mNetwork.logic_id_list() ) {
+  for ( auto& node: mNetwork.logic_list() ) {
+    auto id = node.id();
     auto bdd = make_node_func(id);
     mBddMap.emplace(id, bdd);
   }
@@ -145,10 +147,11 @@ Bnet2Bdd::make_expr(
   if ( expr.is_nega_literal() ) {
     return ~fanin_list[expr.varid().val()];
   }
-  SizeType nc = expr.child_num();
-  vector<Bdd> child_funcs(nc);
-  for ( SizeType i = 0; i < nc; ++ i ) {
-    child_funcs[i] = make_expr(expr.child(i), fanin_list);
+  vector<Bdd> child_funcs;
+  child_funcs.reserve(expr.operand_num());
+  for ( auto& opr: expr.operand_list() ) {
+    auto bdd = make_expr(opr, fanin_list);
+    child_funcs.push_back(bdd);
   }
   if ( expr.is_and() ) {
     return make_and(child_funcs);

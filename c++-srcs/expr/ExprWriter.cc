@@ -169,10 +169,9 @@ ExprWriter::dump_sub(
     }
     s << "( ";
     string delim1 = "";
-    SizeType n{expr.child_num()};
-    for ( SizeType i = 0; i < n; ++ i ) {
+    for ( auto& opr: expr.operand_list() ) {
       s << delim1;
-      dump_sub(s, expr.child(i), var_names);
+      dump_sub(s, opr, var_names);
       delim1 = " " + delim + " ";
     }
     s << " )";

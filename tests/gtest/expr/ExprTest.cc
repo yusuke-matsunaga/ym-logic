@@ -30,7 +30,7 @@ TEST(ExprTest, empty_constr)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
-  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_EQ( 0, expr.operand_num() );
   EXPECT_FALSE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -68,7 +68,7 @@ TEST(ExprTest, make_invalid)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
-  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_EQ( 0, expr.operand_num() );
   EXPECT_FALSE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -107,7 +107,7 @@ TEST(ExprTest, make_zero)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
-  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_EQ( 0, expr.operand_num() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -146,7 +146,7 @@ TEST(ExprTest, make_one)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
-  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_EQ( 0, expr.operand_num() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -186,7 +186,7 @@ TEST(ExprTest, make_literal1)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
-  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_EQ( 0, expr.operand_num() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -230,7 +230,7 @@ TEST(ExprTest, make_literal2)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
-  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_EQ( 0, expr.operand_num() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -264,7 +264,7 @@ TEST(ExprTest, make_posi_literal)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
-  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_EQ( 0, expr.operand_num() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -296,7 +296,7 @@ TEST(ExprTest, make_nega_literal)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
-  EXPECT_EQ( 0, expr.child_num() );
+  EXPECT_EQ( 0, expr.operand_num() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -331,15 +331,15 @@ TEST(ExprTest, and_op1)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_TRUE( expr.is_simple_and() );
@@ -389,15 +389,15 @@ TEST(ExprTest, and_op2)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_TRUE( expr.is_simple_and() );
@@ -448,15 +448,15 @@ TEST(ExprTest, make_and1)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_TRUE( expr.is_simple_and() );
@@ -507,15 +507,15 @@ TEST(ExprTest, make_and2)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_TRUE( expr.is_simple_and() );
@@ -566,15 +566,15 @@ TEST(ExprTest, and_int)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_TRUE( expr.is_simple_and() );
@@ -624,15 +624,15 @@ TEST(ExprTest, or_op1)
   EXPECT_TRUE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -682,15 +682,15 @@ TEST(ExprTest, or_op2)
   EXPECT_TRUE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -741,15 +741,15 @@ TEST(ExprTest, make_or1)
   EXPECT_TRUE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -800,15 +800,15 @@ TEST(ExprTest, make_or2)
   EXPECT_TRUE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -859,15 +859,15 @@ TEST(ExprTest, or_int)
   EXPECT_TRUE( expr.is_or() );
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -917,15 +917,15 @@ TEST(ExprTest, xor_op1)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -975,15 +975,15 @@ TEST(ExprTest, xor_op2)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -1034,15 +1034,15 @@ TEST(ExprTest, make_xor1)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -1093,15 +1093,15 @@ TEST(ExprTest, make_xor2)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -1152,15 +1152,15 @@ TEST(ExprTest, xor_int)
   EXPECT_FALSE( expr.is_or() );
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
-  EXPECT_EQ( 2, expr.child_num() );
+  EXPECT_EQ( 2, expr.operand_num() );
 
-  Expr child0 = expr.child(0);
-  EXPECT_TRUE( child0.is_posi_literal() );
-  EXPECT_EQ( VarId(0), child0.varid() );
+  Expr opr0 = expr.operand(0);
+  EXPECT_TRUE( opr0.is_posi_literal() );
+  EXPECT_EQ( VarId(0), opr0.varid() );
 
-  Expr child1 = expr.child(1);
-  EXPECT_TRUE( child1.is_nega_literal() );
-  EXPECT_EQ( VarId(1), child1.varid() );
+  Expr opr1 = expr.operand(1);
+  EXPECT_TRUE( opr1.is_nega_literal() );
+  EXPECT_EQ( VarId(1), opr1.varid() );
 
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
@@ -1266,11 +1266,11 @@ TEST(ExprTest, compose2)
   Expr lit4n = Expr::make_nega_literal(var4);
 
   Expr expr0 = lit0p | lit4n;
-  Expr child1 = lit1p & lit3p;
-  Expr child2 = ~(lit1n & lit2p);
+  Expr opr1 = lit1p & lit3p;
+  Expr opr2 = ~(lit1n & lit2p);
   unordered_map<VarId, Expr> comp_map;
-  comp_map[var0] = child1;
-  comp_map[var4] = child2;
+  comp_map[var0] = opr1;
+  comp_map[var4] = opr2;
   Expr expr = expr0.compose(comp_map);
 
   ostringstream oss;
@@ -1304,11 +1304,11 @@ TEST(ExprTest, compose3)
   Expr lit4n = Expr::make_nega_literal(var4);
 
   Expr expr0 = lit0p | lit4n;
-  Expr child1 = lit1p & lit3p;
-  Expr child2 = ~(lit1n & lit2p);
+  Expr opr1 = lit1p & lit3p;
+  Expr opr2 = ~(lit1n & lit2p);
   vector<pair<VarId, Expr>> comp_list;
-  comp_list.push_back(make_pair(var0, child1));
-  comp_list.push_back(make_pair(var4, child2));
+  comp_list.push_back(make_pair(var0, opr1));
+  comp_list.push_back(make_pair(var4, opr2));
   Expr expr = expr0.compose(comp_list);
 
   ostringstream oss;

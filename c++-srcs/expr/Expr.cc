@@ -541,10 +541,10 @@ compare_type(
   return src1.root()->type() == src2.root()->type();
 }
 
-// AND/OR/XOR の時に子供の項の数を返す．
+// AND/OR/XOR の時にオペランドの項の数を返す．
 // それ以外のノードの時には 0 を返す．
 SizeType
-Expr::child_num() const
+Expr::operand_num() const
 {
   if ( is_invalid() ) {
     return 0;
@@ -552,14 +552,26 @@ Expr::child_num() const
   return root()->child_num();
 }
 
-// pos 番目の子供を返す．
+// pos 番目のオペランドを返す．
 Expr
-Expr::child(
-  int pos
+Expr::operand(
+  SizeType pos
 ) const
 {
-  ASSERT_COND( 0 <= pos && pos < child_num() );
+  ASSERT_COND( 0 <= pos && pos < operand_num() );
   return Expr{root()->child(pos)};
+}
+
+// @brief オペランドのリストの取得
+vector<Expr>
+Expr::operand_list() const
+{
+  SizeType n = operand_num();
+  vector<Expr> ans_list(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    ans_list[i] = Expr{root()->child(i)};
+  }
+  return ans_list;
 }
 
 // 一種類の演算子のみからなる式のとき true を返す．
@@ -713,17 +725,17 @@ Expr::sop_literal_num(
 BEGIN_NONAMESPACE
 
 vector<Expr>
-restore_child_list(
+restore_operand_list(
   BinDec& s
 )
 {
   SizeType nc;
   s >> nc;
-  vector<Expr> child_list(nc);
+  vector<Expr> opr_list(nc);
   for ( SizeType i = 0; i < nc; ++ i ) {
-    child_list[i] = Expr::restore(s);
+    opr_list[i] = Expr::restore(s);
   }
-  return child_list;
+  return opr_list;
 }
 
 END_NONAMESPACE
@@ -761,13 +773,13 @@ Expr::restore(
     }
 
   case 4:
-    return Expr::make_and(restore_child_list(s));
+    return Expr::make_and(restore_operand_list(s));
 
   case 5:
-    return Expr::make_or(restore_child_list(s));
+    return Expr::make_or(restore_operand_list(s));
 
   case 6:
-    return Expr::make_xor(restore_child_list(s));
+    return Expr::make_xor(restore_operand_list(s));
 
   default:
     ASSERT_NOT_REACHED;
@@ -834,11 +846,11 @@ Expr::dump(
     ASSERT_NOT_REACHED;
   }
 
-  SizeType nc = child_num();
+  SizeType no = operand_num();
   s << type
-    << nc;
-  for ( SizeType i = 0; i < nc; ++ i ) {
-    child(i).dump(s);
+    << no;
+  for ( auto& opr: operand_list() ) {
+    opr.dump(s);
   }
 }
 

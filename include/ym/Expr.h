@@ -420,7 +420,7 @@ public:
   /// @retval オペランドの個数 AND/OR/XOR の場合
   /// @retval 0 上記以外の場合
   SizeType
-  child_num() const;
+  operand_num() const;
 
   /// @brief オペランドの取得
   /// @return pos 番目のオペランドを返す．
@@ -428,9 +428,13 @@ public:
   /// ただし pos が範囲外の場合と演算子ノードでなかった場合には
   /// 0を表す式を返す．
   Expr
-  child(
-    int pos ///< [in] 取り出すオペランドの位置 (0 <= pos < child_num())
+  operand(
+    SizeType pos ///< [in] 取り出すオペランドの位置 (0 <= pos < operand_num())
   ) const;
+
+  /// @brief オペランドのリストの取得
+  vector<Expr>
+  operand_list() const;
 
   /// @brief "シンプル"な論理式のチェック
   /// @return シンプルな論理式のときに true を返す．
