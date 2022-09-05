@@ -256,6 +256,8 @@ BddMgrImpl::ite_step(
     return mIteTable.at(key);
   }
 
+  // e0, e1, e2 をトップの変数で分解する．
+
   auto node0 = e0.node();
   auto inv0 = e0.inv();
   auto index0 = node0->index();
@@ -270,6 +272,7 @@ BddMgrImpl::ite_step(
 
   auto top = std::min(std::min(index0, index1), index2);
 
+  // e0 -> e00, e01
   BddEdge e00, e01;
   if ( index0 == top ) {
     e00 = node0->edge0() ^ inv0;
@@ -279,6 +282,7 @@ BddMgrImpl::ite_step(
     e00 = e01 = e0;
   }
 
+  // e1 -> e10, e11
   BddEdge e10, e11;
   if ( index1 == top ) {
     e10 = node1->edge0() ^ inv1;
@@ -288,6 +292,7 @@ BddMgrImpl::ite_step(
     e10 = e11 = e1;
   }
 
+  // e2 -> e20, e21
   BddEdge e20, e21;
   if ( index2 == top ) {
     e20 = node2->edge0() ^ inv2;

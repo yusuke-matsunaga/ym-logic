@@ -200,19 +200,21 @@ MultiCompOp::mcomp_step(
   auto node = edge.node();
   auto index = node->index();
 
-  while ( mCompList[pos].first < index ) {
-    ++ pos;
-    if ( pos == mCompList.size() ) {
-      return edge;
-    }
-  }
-  auto cindex = mCompList[pos].first;
-
   BddEdge result;
   if ( mTable.count(node) > 0 ) {
     result = mTable.at(node);
   }
   else {
+    auto cindex = mCompList[pos].first;
+    while ( cindex < index ) {
+      ++ pos;
+      if ( pos == mCompList.size() ) {
+	return edge;
+      }
+      cindex = mCompList[pos].first;
+    }
+    ASSERT_COND( cindex >= index );
+
     auto edge0 = node->edge0();
     auto edge1 = node->edge1();
     if ( index < cindex ) {
@@ -220,15 +222,11 @@ MultiCompOp::mcomp_step(
       auto r1 = mcomp_step(edge1, pos);
       result = new_node(index, r0, r1);
     }
-    else if ( index == cindex ) {
+    else { // index == cindex
       auto r0 = mcomp_step(edge0, pos + 1);
       auto r1 = mcomp_step(edge1, pos + 1);
       auto cedge = mCompList[pos].second;
-      result = mgr()->ite_op(cedge, r0, r1);
-    }
-    else { // index > cindex
-      // 上の while 分の条件なのでここに来ることはない．
-      ASSERT_NOT_REACHED;
+      result = mgr()->ite_op(cedge, r1, r0);
     }
     mTable.emplace(node, result);
   }
