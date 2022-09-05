@@ -39,7 +39,7 @@ Bnet2Bdd::make_global_func()
   SizeType no = mNetwork.output_num();
   vector<Bdd> output_func(no);
   for ( SizeType i = 0; i < no; ++ i ) {
-    auto id = mNetwork.output_src_id(i);
+    auto id = mNetwork.output_node(i).output_src();
     auto bdd = mBddMap.at(id);
     output_func[i] = bdd;
   }
