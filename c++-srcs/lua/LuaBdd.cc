@@ -1343,7 +1343,8 @@ END_NONAMESPACE
 // @brief Bdd 関係の初期化を行う．
 void
 LuaBdd::init(
-  vector<struct luaL_Reg>& mylib
+  const char* parent,
+  const char* name
 )
 {
   // BddMgr のメンバ関数(メソッド)テーブル
@@ -1409,10 +1410,16 @@ LuaBdd::init(
     {nullptr,          nullptr}
   };
 
-  // グローバル関数を登録する．
-  mylib.push_back({"new_bddmgr",   bddmgr_new});
-  mylib.push_back({"size_of_bdds", size_of_bdds});
-  mylib.push_back({"gen_dot_for_bdds", gen_dot_for_bdds});
+  // モジュール関数テーブル
+  static const struct luaL_Reg func_table[] = {
+    {"new_mgr",      bddmgr_new},
+    {"size_of_bdds", size_of_bdds},
+    {"gen_dot",      gen_dot_for_bdds},
+    {nullptr,        nullptr}
+  };
+
+  luaL_newlib(lua_state(), func_table);
+  reg_module(parent, name);
 }
 
 // @brief 対象を BddMgr として取り出す．
