@@ -6,7 +6,6 @@
 # ===================================================================
 # パッケージの検査
 # ===================================================================
-ym_init_lua()
 
 
 # ===================================================================
@@ -15,6 +14,7 @@ ym_init_lua()
 include_directories (
   ${PROJECT_BINARY_DIR}/include
   ${PROJECT_SOURCE_DIR}/ym-common/include
+  ${PROJECT_SOURCE_DIR}/ym-base/include
   include
   private_include
   )
@@ -108,23 +108,6 @@ ym_add_object_library ( ym_logic
   ${ym_logic_SOURCES}
   )
 
-if ( LUA_FOUND )
-  ym_add_object_library ( ym_luabdd
-    c++-srcs/lua/LuaBdd.cc
-    )
-
-  target_include_directories ( ym_luabdd_obj
-    PRIVATE ${LUA_INCLUDE_DIR}
-  )
-
-  target_include_directories ( ym_luabdd_obj_d
-    PRIVATE ${LUA_INCLUDE_DIR}
-  )
-
-  target_include_directories ( ym_luabdd_obj_p
-    PRIVATE ${LUA_INCLUDE_DIR}
-  )
-endif ( LUA_FOUND )
 
 # ===================================================================
 #  インストールターゲットの設定

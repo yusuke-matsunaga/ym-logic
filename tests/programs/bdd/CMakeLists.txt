@@ -147,6 +147,12 @@ add_executable ( blif2bdd
   $<TARGET_OBJECTS:ym_base_obj>
   )
 
+target_include_directories ( blif2bdd
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-bnet/include
+  ${PROJECT_SOURCE_DIR}/ym-cell/include
+  )
+
 target_link_libraries ( blif2bdd
   ${YM_LIB_DEPENDS}
   )
@@ -162,6 +168,12 @@ add_executable ( blif2bdd_d
   $<TARGET_OBJECTS:ym_cell_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
+  )
+
+target_include_directories ( blif2bdd_d
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-bnet/include
+  ${PROJECT_SOURCE_DIR}/ym-cell/include
   )
 
 target_compile_options ( blif2bdd_d
