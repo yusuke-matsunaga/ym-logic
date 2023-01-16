@@ -187,13 +187,11 @@ public:
   /// @brief 論理式をパーズして Expr オブジェクトを作る．
   /// @return 変換された Expr オブジェクト
   ///
-  /// - エラーが起きたら msg にエラーメッセージをセットする．
-  /// - エラーの場合，返される Expr オブジェクトは valid でない( is_valid() == false )．
+  /// - エラーが起きたら std::invalid_argument 例外を送出する．
   static
   Expr
   from_string(
-    const string& expr_str, ///< [in] 論理式を表す文字列
-    string& err_msg         ///< [in] エラーメッセージを格納する文字列
+    const string& expr_str ///< [in] 論理式を表す文字列
   );
 
   /// @brief 確保していたメモリを開放する．
@@ -223,6 +221,16 @@ public:
   Expr
   invert() const;
 
+  /// @brief AND 演算
+  /// @return src2 の論理式との AND を返す．
+  Expr
+  operator&(
+    const Expr& src2  ///< [in] 第2オペランド
+  ) const
+  {
+    return Expr::and_op(*this, src2);
+  }
+
   /// @brief AND つき代入
   /// @return 自分自身
   ///
@@ -232,6 +240,16 @@ public:
     const Expr& src ///< [in] オペランド
   );
 
+  /// @brief OR 演算
+  /// @return src2 の論理式との OR を返す．
+  Expr
+  operator|(
+    const Expr& src2  ///< [in] 第2オペランド
+  ) const
+  {
+    return Expr::or_op(*this, src2);
+  }
+
   /// @brief OR つき代入
   /// @return 自分自身
   ///
@@ -240,6 +258,16 @@ public:
   operator|=(
     const Expr& src ///< [in] オペランド
   );
+
+  /// @brief XOR 演算
+  /// @return src2 の論理式との XOR を返す．
+  Expr
+  operator^(
+    const Expr& src2  ///< [in] 第2オペランド
+  ) const
+  {
+    return Expr::xor_op(*this, src2);
+  }
 
   /// @brief XOR つき代入
   /// @return 自分自身
@@ -554,6 +582,35 @@ public:
   //////////////////////////////////////////////////////////////////////
 
 
+  //////////////////////////////////////////////////////////////////////
+  /// @name 比較演算
+  /// @{
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 等価な論理式かどうかチェックする．
+  bool
+  operator==(
+    const Expr& right ///< [in] 第2オペランド
+  ) const;
+
+  /// @brief 非等価な論理式かどうかチェックする．
+  bool
+  operator!=(
+    const Expr& right ///< [in] 第2オペランド
+  ) const
+  {
+    return !operator==(right);
+  }
+
+  /// @}
+  //////////////////////////////////////////////////////////////////////
+
+
+  /// @brief 論理式の内容を文字列にする．
+  string
+  to_string() const;
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   /// @name バイナリダンプ/リストア関数
@@ -582,49 +639,6 @@ public:
   //////////////////////////////////////////////////////////////////////
   // friend 関数の宣言
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief AND 演算
-  /// @return src1 の論理式と src2 の論理式の AND を返す．
-  friend
-  Expr
-  operator&(
-    const Expr& src1, ///< [in] 第1オペランド
-    const Expr& src2  ///< [in] 第2オペランド
-  )
-  {
-    return Expr::and_op(src1, src2);
-  }
-
-  /// @brief OR 演算
-  /// @return src1 の論理式と src2 の論理式の OR を返す．
-  friend
-  Expr
-  operator|(
-    const Expr& src1, ///< [in] 第1オペランド
-    const Expr& src2  ///< [in] 第2オペランド
-  )
-  {
-    return Expr::or_op(src1, src2);
-  }
-
-  /// @brief XOR 演算
-  /// @return src1 の論理式と src2 の論理式の XOR を返す．
-  friend
-  Expr
-  operator^(
-    const Expr& src1, ///< [in] 第1オペランド
-    const Expr& src2  ///< [in] 第2オペランド
-  )
-  {
-    return Expr::xor_op(src1, src2);
-  }
-
-  friend
-  bool
-  check_equiv(
-    const Expr& left, ///< [in] 第1オペランド
-    const Expr& right ///< [in] 第2オペランド
-  );
 
   /// @brief 根の演算タイプの比較
   /// @return src1 と src2 の根のタイプが同じとき true を返す．
@@ -684,13 +698,6 @@ compare_type(
 );
 
 /// @}
-
-/// @relates Expr
-/// @brief 論理式の内容を文字列にする．
-string
-to_string(
-  const Expr& expr ///< [in] 論理式
-);
 
 /// @relates Expr
 /// @brief 論理式の内容のストリーム出力

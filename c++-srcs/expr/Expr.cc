@@ -207,21 +207,19 @@ Expr::make_xor(
 }
 
 // 論理式をパーズしてファクタードフォームを作る．
-// エラーが起きたら msg にエラーメッセージをセットする．
 Expr
 Expr::from_string(
-  const string& expr_str,
-  string& err_msg
+  const string& expr_str
 )
 {
-  err_msg = string();
+  string err_msg;
   try {
     ExprParser p(expr_str);
     return p.get_expr(ExprToken::END);
   }
   catch ( SyntaxError e ) {
     err_msg = e.mMsg;
-    return Expr::make_invalid();
+    throw std::invalid_argument{err_msg};
   }
 }
 
@@ -514,18 +512,17 @@ Expr::is_op() const
 }
 
 bool
-check_equiv(
-  const Expr& left,
+Expr::operator==(
   const Expr& right
-)
+) const
 {
-  if ( left.is_invalid() && right.is_invalid() ) {
+  if ( is_invalid() && right.is_invalid() ) {
     return true;
   }
-  if ( left.is_invalid() || right.is_invalid() ) {
+  if ( is_invalid() || right.is_invalid() ) {
     return false;
   }
-  return posi_equiv(left.root(), right.root());
+  return posi_equiv(root(), right.root());
 }
 
 // src1 と src2 の根のタイプが同じとき true を返す．
@@ -793,12 +790,10 @@ Expr::restore(
 // @brief 論理式の内容を文字列にする．
 // @param[in] expr 論理式
 string
-to_string(
-  const Expr& expr
-)
+Expr::to_string() const
 {
   ostringstream os;
-  os << expr;
+  os << *this;
   return os.str();
 }
 

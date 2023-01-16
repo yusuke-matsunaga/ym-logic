@@ -50,7 +50,7 @@ TEST(ExprTest, empty_constr)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_invalid)
@@ -88,7 +88,7 @@ TEST(ExprTest, make_invalid)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_zero)
@@ -127,7 +127,7 @@ TEST(ExprTest, make_zero)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_one)
@@ -166,7 +166,7 @@ TEST(ExprTest, make_one)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_literal1)
@@ -209,7 +209,7 @@ TEST(ExprTest, make_literal1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_literal2)
@@ -366,7 +366,7 @@ TEST(ExprTest, and_op1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, and_op2)
@@ -424,7 +424,7 @@ TEST(ExprTest, and_op2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_and1)
@@ -483,7 +483,7 @@ TEST(ExprTest, make_and1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_and2)
@@ -542,7 +542,7 @@ TEST(ExprTest, make_and2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, and_int)
@@ -601,7 +601,7 @@ TEST(ExprTest, and_int)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, or_op1)
@@ -659,7 +659,7 @@ TEST(ExprTest, or_op1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, or_op2)
@@ -717,7 +717,7 @@ TEST(ExprTest, or_op2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_or1)
@@ -776,7 +776,7 @@ TEST(ExprTest, make_or1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_or2)
@@ -835,7 +835,7 @@ TEST(ExprTest, make_or2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, or_int)
@@ -894,7 +894,7 @@ TEST(ExprTest, or_int)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, xor_op1)
@@ -952,7 +952,7 @@ TEST(ExprTest, xor_op1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, xor_op2)
@@ -1010,7 +1010,7 @@ TEST(ExprTest, xor_op2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_xor1)
@@ -1069,7 +1069,7 @@ TEST(ExprTest, make_xor1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, make_xor2)
@@ -1128,7 +1128,7 @@ TEST(ExprTest, make_xor2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, xor_int)
@@ -1187,7 +1187,7 @@ TEST(ExprTest, xor_int)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, inv1)
@@ -1248,7 +1248,7 @@ TEST(ExprTest, compose1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, compose2)
@@ -1286,7 +1286,7 @@ TEST(ExprTest, compose2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, compose3)
@@ -1324,7 +1324,7 @@ TEST(ExprTest, compose3)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, remap_var1)
@@ -1357,7 +1357,7 @@ TEST(ExprTest, remap_var1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, remap_var2)
@@ -1390,7 +1390,7 @@ TEST(ExprTest, remap_var2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, eval1)
@@ -1467,8 +1467,7 @@ TEST(ExprTest, make_tv1)
 TEST(ExprTest, from_string1)
 {
   string expr_str("0 + (1 * ~2)");
-  string err_msg;
-  Expr expr = Expr::from_string(expr_str, err_msg);
+  Expr expr = Expr::from_string(expr_str);
 
   EXPECT_TRUE( expr.is_valid() );
 
@@ -1485,14 +1484,13 @@ TEST(ExprTest, from_string1)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, from_string2)
 {
   string expr_str("0 | (1 & !2)");
-  string err_msg;
-  Expr expr = Expr::from_string(expr_str, err_msg);
+  Expr expr = Expr::from_string(expr_str);
 
   EXPECT_TRUE( expr.is_valid() );
 
@@ -1509,24 +1507,21 @@ TEST(ExprTest, from_string2)
   Expr expr2;
   bis >> expr2;
 
-  EXPECT_TRUE( check_equiv(expr2, expr) );
+  EXPECT_EQ( expr2, expr );
 }
 
 TEST(ExprTest, from_string3)
 {
   string expr_str("0 + + (1 * ~2)");
-  string err_msg;
-  Expr expr = Expr::from_string(expr_str, err_msg);
-
-  EXPECT_FALSE( expr.is_valid() );
-  EXPECT_EQ( string("syntax error"), err_msg);
+  EXPECT_THROW({
+      auto _ = Expr::from_string(expr_str);
+    }, std::invalid_argument);
 }
 
 TEST(ExprTest, dump_restore)
 {
   string expr_str("0 | (1 & !2)");
-  string err_msg;
-  Expr expr = Expr::from_string(expr_str, err_msg);
+  Expr expr = Expr::from_string(expr_str);
 
   ASSERT_TRUE( expr.is_valid() );
 
@@ -1538,7 +1533,7 @@ TEST(ExprTest, dump_restore)
   BinDec dec{ibuf};
   auto expr2 = Expr::restore(dec);
 
-  EXPECT_TRUE( check_equiv(expr, expr2) );
+  EXPECT_EQ( expr2, expr );
 }
 
 END_NAMESPACE_YM

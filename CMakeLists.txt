@@ -24,6 +24,7 @@ include_directories (
 # サブディレクトリの設定
 # ===================================================================
 
+add_subdirectory(py_ymlogic)
 add_subdirectory(tests/gtest)
 #add_subdirectory(tests/python)
 add_subdirectory(tests/programs)

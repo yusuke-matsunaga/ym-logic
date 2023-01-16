@@ -3680,7 +3680,7 @@ TEST(SopCoverTest, to_expr1)
   SopCover cover1{3, {cube1, cube2}};
 
   auto expr = cover1.to_expr();
-  auto expr_str = to_string(expr);
+  auto expr_str = expr.to_string();
   EXPECT_EQ( "( ( V_0 & V_1 ) | ~V_2 )", expr_str );
 }
 

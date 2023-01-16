@@ -2148,7 +2148,7 @@ TEST(SopCubeTest, to_expr1)
   SopCube cube1(3, {lit0, lit1, ~lit2});
 
   auto expr = cube1.to_expr();
-  auto expr_str = to_string(expr);
+  auto expr_str = expr.to_string();
   EXPECT_EQ( "( V_0 & V_1 & ~V_2 )", expr_str );
 }
 
