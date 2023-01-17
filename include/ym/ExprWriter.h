@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/VarId.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -45,11 +44,11 @@ public:
   /// @return s
   ostream&
   dump(
-    ostream& s,                                   ///< [in] 出力ストリーム
-    const Expr& expr,                             ///< [in] 式
-    const unordered_map<VarId, string>& var_names ///< [in] 各変数から変数名への写像
-                                                  ///<  var の変数名として var_names[var] を用いる．
-                                                  ///<  登録されていなければデフォルトの表記を用いる．
+    ostream& s,                                      ///< [in] 出力ストリーム
+    const Expr& expr,                                ///< [in] 式
+    const unordered_map<SizeType, string>& var_names ///< [in] 各変数から変数名への写像
+                                                     ///<  var の変数名として var_names[var] を用いる．
+                                                     ///<  登録されていなければデフォルトの表記を用いる．
   ) const;
 
   /// @brief 内容を文字列にする．
@@ -63,11 +62,12 @@ public:
   /// @return 式の内容を表す文字列
   string
   dump_to_string(
-    const Expr& expr,                              ///< [in] 出力ストリーム
-    const unordered_map<VarId, string>& var_names  ///< [in] 式
-						   ///< [in] 各変数から変数名への写像
-						   ///<  var の変数名として var_names[var] を用いる．
-  ) const;					   ///<  登録されていなければデフォルトの表記を用いる．
+    const Expr& expr,                                ///< [in] 出力ストリーム
+    const unordered_map<SizeType, string>& var_names ///< [in] 式
+						     ///< [in] 各変数から変数名への写像
+						     ///<  var の変数名として var_names[var] を用いる．
+                                                     ///<  登録されていなければデフォルトの表記を
+  ) const;
 
 
 public:
@@ -116,7 +116,7 @@ private:
   dump_sub(
     ostream& s,
     const Expr& expr,
-    const unordered_map<VarId, string>& var_names
+    const unordered_map<SizeType, string>& var_names
   ) const;
 
 

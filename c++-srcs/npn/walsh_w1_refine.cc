@@ -3,9 +3,8 @@
 /// @brief walsh_w1_refine の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/TvFunc.h"
 #include "IgPartition.h"
@@ -31,12 +30,12 @@ END_NONAMESPACE
 BEGIN_NAMESPACE_YM_LOGIC
 
 // @brief 重み別 w1 を用いて極性を確定させる．
-// @param[in] var 対象の変数
-// @param[inout] polconf_list 極性割当候補のリスト
 void
-walsh_w1_refine(const TvFunc& func,
-		VarId var,
-		vector<PolConf>& polconf_list)
+walsh_w1_refine(
+  const TvFunc& func,
+  SizeType var,
+  vector<PolConf>& polconf_list
+)
 {
   int ni = func.input_num();
 
@@ -175,7 +174,7 @@ walsh_w1_refine(const TvFunc& func,
 	   pos < igpart.partition_end(pid); ++ pos) {
 	int gid = igpart.group_id(pos);
 	int iid = igpart.input_id(gid);
-	int ww1 = func.walsh_w1(VarId(iid), w, false, 0U);
+	int ww1 = func.walsh_w1(iid, w, false, 0U);
 	w1_cmp.set_w1(gid, ww1);
       }
       int delta = igpart.refine(pid, w1_cmp);

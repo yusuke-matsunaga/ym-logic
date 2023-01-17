@@ -3,7 +3,7 @@
 /// @brief Bdd のユニットテスト
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include <gtest/gtest.h>
@@ -169,7 +169,7 @@ TEST_F(BddTest, and_op3)
 
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1.and_op(var2);
 
   check(bdd, "1000");
@@ -180,7 +180,7 @@ TEST_F(BddTest, and_int3)
 
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1.and_int(var2);
 
   check(var1, "1000");
@@ -192,7 +192,7 @@ TEST_F(BddTest, and_op4)
 
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1 & var2;
 
   check(bdd, "1000");
@@ -203,7 +203,7 @@ TEST_F(BddTest, and_int4)
 
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1 &= var2;
 
   check(var1, "1000");
@@ -252,7 +252,7 @@ TEST_F(BddTest, or_op3)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1.or_op(var2);
 
   check(bdd, "1110");
@@ -262,7 +262,7 @@ TEST_F(BddTest, or_int3)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1.or_int(var2);
 
   check(var1, "1110");
@@ -273,7 +273,7 @@ TEST_F(BddTest, or_op4)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1 | var2;
 
   check(bdd, "1110");
@@ -283,7 +283,7 @@ TEST_F(BddTest, or_int4)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1 |= var2;
 
   check(var1, "1110");
@@ -332,7 +332,7 @@ TEST_F(BddTest, xor_op3)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1.xor_op(var2);
 
   check(bdd, "0110");
@@ -342,7 +342,7 @@ TEST_F(BddTest, xor_int3)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1.xor_int(var2);
 
   check(var1, "0110");
@@ -353,7 +353,7 @@ TEST_F(BddTest, xor_op4)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1 ^ var2;
 
   check(bdd, "0110");
@@ -363,7 +363,7 @@ TEST_F(BddTest, xor_int4)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(VarId{1});
+  Bdd var2 = mgr2.literal(1);
   Bdd bdd = var1 ^= var2;
 
   check(var1, "0110");
@@ -396,7 +396,7 @@ TEST_F(BddTest, complex_expr2)
   Bdd var2 = literal(1);
   Bdd var3 = literal(2);
   BddMgr mgr2;
-  Bdd var4 = mgr2.literal(VarId{1});
+  Bdd var4 = mgr2.literal(1);
   Bdd bdd = (var1 & ~var2) | (var3 & ~var4);
 
   check(bdd, "00110010");
@@ -419,7 +419,7 @@ TEST_F(BddTest, cofactor1)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Bdd bdd1 = bdd.cofactor(VarId{0}, false);
+  Bdd bdd1 = bdd.cofactor(0, false);
 
   const char* exp_str = "10011001";
   check(bdd1, exp_str);
@@ -430,7 +430,7 @@ TEST_F(BddTest, cofactor_int1)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Bdd bdd1 = bdd.cofactor_int(VarId{0}, false);
+  Bdd bdd1 = bdd.cofactor_int(0, false);
 
   const char* exp_str = "10011001";
   check(bdd, exp_str);
@@ -442,7 +442,7 @@ TEST_F(BddTest, cofactor2)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Literal lit{VarId{0}, true};
+  Literal lit{0, true};
   Bdd bdd1 = bdd.cofactor(lit);
 
   const char* exp_str = "01110111";
@@ -454,7 +454,7 @@ TEST_F(BddTest, cofactor_int2)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Literal lit{VarId{0}, true};
+  Literal lit{0, true};
   Bdd bdd1 = bdd.cofactor_int(lit);
 
   const char* exp_str = "01110111";
@@ -467,7 +467,7 @@ TEST_F(BddTest, cofactor3)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Literal lit{VarId{0}, true};
+  Literal lit{0, true};
 
   Bdd bdd1 = bdd / lit;
 
@@ -480,7 +480,7 @@ TEST_F(BddTest, cofactor_int3)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Literal lit{VarId{0}, true};
+  Literal lit{0, true};
   Bdd bdd1 = bdd /= lit;
 
   const char* exp_str = "01110111";
@@ -524,8 +524,8 @@ TEST_F(BddTest, cofactor5)
   Bdd bdd = from_truth(src_str);
 
   BddMgr mgr2;
-  Bdd lit1 = mgr2.literal(VarId{0});
-  Bdd lit2 = mgr2.literal(VarId{2});
+  Bdd lit1 = mgr2.literal(0);
+  Bdd lit2 = mgr2.literal(2);
   Bdd cube = ~lit1 & lit2;
 
   Bdd bdd1 = bdd.cofactor(cube);
@@ -540,8 +540,8 @@ TEST_F(BddTest, cofactor_int5)
   Bdd bdd = from_truth(src_str);
 
   BddMgr mgr2;
-  Bdd lit1 = mgr2.literal(VarId{0});
-  Bdd lit2 = mgr2.literal(VarId{2});
+  Bdd lit1 = mgr2.literal(0);
+  Bdd lit2 = mgr2.literal(2);
   Bdd cube = ~lit1 & lit2;
 
   Bdd bdd1 = bdd.cofactor_int(cube);
@@ -586,8 +586,8 @@ TEST_F(BddTest, cofactor8)
   Bdd bdd = from_truth(src_str);
 
   BddMgr mgr2;
-  Bdd lit1 = mgr2.literal(VarId{0});
-  Bdd lit2 = mgr2.literal(VarId{2});
+  Bdd lit1 = mgr2.literal(0);
+  Bdd lit2 = mgr2.literal(2);
   Bdd cube = ~lit1 & lit2;
   Bdd bdd1 = bdd / cube;
   const char* exp_str = "00110011";
@@ -600,8 +600,8 @@ TEST_F(BddTest, cofactor_int8)
   Bdd bdd = from_truth(src_str);
 
   BddMgr mgr2;
-  Bdd lit1 = mgr2.literal(VarId{0});
-  Bdd lit2 = mgr2.literal(VarId{2});
+  Bdd lit1 = mgr2.literal(0);
+  Bdd lit2 = mgr2.literal(2);
   Bdd cube = ~lit1 & lit2;
 
   Bdd bdd1 = bdd /= cube;
@@ -624,12 +624,12 @@ TEST_F(BddTest, support_cup1)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();
   BddVarSet sup = sup1 + sup2;
-  vector<VarId> var_list = sup.to_varlist();
+  vector<SizeType> var_list = sup.to_varlist();
   EXPECT_EQ( 4, var_list.size() );
-  EXPECT_EQ( VarId{0}, var_list[0] );
-  EXPECT_EQ( VarId{1}, var_list[1] );
-  EXPECT_EQ( VarId{2}, var_list[2] );
-  EXPECT_EQ( VarId{3}, var_list[3] );
+  EXPECT_EQ( 0, var_list[0] );
+  EXPECT_EQ( 1, var_list[1] );
+  EXPECT_EQ( 2, var_list[2] );
+  EXPECT_EQ( 3, var_list[3] );
 }
 
 TEST_F(BddTest, support_cup_int1)
@@ -645,12 +645,12 @@ TEST_F(BddTest, support_cup_int1)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();
   BddVarSet sup = sup1 += sup2;
-  vector<VarId> var_list = sup1.to_varlist();
+  vector<SizeType> var_list = sup1.to_varlist();
   EXPECT_EQ( 4, var_list.size() );
-  EXPECT_EQ( VarId{0}, var_list[0] );
-  EXPECT_EQ( VarId{1}, var_list[1] );
-  EXPECT_EQ( VarId{2}, var_list[2] );
-  EXPECT_EQ( VarId{3}, var_list[3] );
+  EXPECT_EQ( 0, var_list[0] );
+  EXPECT_EQ( 1, var_list[1] );
+  EXPECT_EQ( 2, var_list[2] );
+  EXPECT_EQ( 3, var_list[3] );
 
   EXPECT_EQ( sup1, sup );
 }
@@ -668,10 +668,10 @@ TEST_F(BddTest, support_cap1)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();
   BddVarSet sup = sup1 & sup2;
-  vector<VarId> var_list = sup.to_varlist();
+  vector<SizeType> var_list = sup.to_varlist();
 
   EXPECT_EQ( 1, var_list.size() );
-  EXPECT_EQ( VarId{1}, var_list[0] );
+  EXPECT_EQ( 1, var_list[0] );
 }
 
 TEST_F(BddTest, support_cap_int1)
@@ -687,10 +687,10 @@ TEST_F(BddTest, support_cap_int1)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();
   BddVarSet sup = sup1 &= sup2;
-  vector<VarId> var_list = sup1.to_varlist();
+  vector<SizeType> var_list = sup1.to_varlist();
 
   EXPECT_EQ( 1, var_list.size() );
-  EXPECT_EQ( VarId{1}, var_list[0] );
+  EXPECT_EQ( 1, var_list[0] );
 
   EXPECT_EQ( sup1, sup );
 }
@@ -708,11 +708,11 @@ TEST_F(BddTest, support_diff1)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();
   BddVarSet sup = sup1 - sup2;
-  vector<VarId> var_list = sup.to_varlist();
+  vector<SizeType> var_list = sup.to_varlist();
 
   EXPECT_EQ( 2, var_list.size() );
-  EXPECT_EQ( VarId{0}, var_list[0] );
-  EXPECT_EQ( VarId{2}, var_list[1] );
+  EXPECT_EQ( 0, var_list[0] );
+  EXPECT_EQ( 2, var_list[1] );
 }
 
 TEST_F(BddTest, support_diff_int1)
@@ -728,11 +728,11 @@ TEST_F(BddTest, support_diff_int1)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();
   BddVarSet sup = sup1 -= sup2;
-  vector<VarId> var_list = sup.to_varlist();
+  vector<SizeType> var_list = sup.to_varlist();
 
   EXPECT_EQ( 2, var_list.size() );
-  EXPECT_EQ( VarId{0}, var_list[0] );
-  EXPECT_EQ( VarId{2}, var_list[1] );
+  EXPECT_EQ( 0, var_list[0] );
+  EXPECT_EQ( 2, var_list[1] );
 
   EXPECT_EQ( sup1, sup );
 }
@@ -750,7 +750,7 @@ TEST_F(BddTest, support_diff2)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();
   BddVarSet sup = sup1 - sup2;
-  vector<VarId> var_list = sup.to_varlist();
+  vector<SizeType> var_list = sup.to_varlist();
 
   EXPECT_EQ( 0, var_list.size() );
 }
@@ -848,49 +848,49 @@ TEST_F(BddTest, check_sup1)
 {
   Bdd bdd = from_truth("1100");
 
-  test_check_sup(bdd, VarId{0});
-  test_check_sup(bdd, VarId{1});
+  test_check_sup(bdd, 0);
+  test_check_sup(bdd, 1);
 }
 
 TEST_F(BddTest, check_sym1)
 {
   Bdd bdd = from_truth("111010101");
 
-  test_check_sym(bdd, VarId{0}, VarId{1});
-  test_check_sym(bdd, VarId{0}, VarId{2});
-  test_check_sym(bdd, VarId{1}, VarId{2});
+  test_check_sym(bdd, 0, 1);
+  test_check_sym(bdd, 0, 2);
+  test_check_sym(bdd, 1, 2);
 }
 
 TEST_F(BddTest, check_sym2)
 {
   Bdd bdd = from_truth("01001011");
 
-  test_check_sym(bdd, VarId{0}, VarId{1});
-  test_check_sym(bdd, VarId{0}, VarId{2});
-  test_check_sym(bdd, VarId{1}, VarId{2});
+  test_check_sym(bdd, 0, 1);
+  test_check_sym(bdd, 0, 2);
+  test_check_sym(bdd, 1, 2);
 }
 
 TEST_F(BddTest, check_sym3)
 {
   Bdd bdd = from_truth("0110");
 
-  test_check_sym(bdd, VarId{0}, VarId{1});
+  test_check_sym(bdd, 0, 1);
 }
 
 TEST_F(BddTest, check_sym4)
 {
   Bdd bdd = from_truth("01100101");
 
-  test_check_sym(bdd, VarId{0}, VarId{1});
-  test_check_sym(bdd, VarId{0}, VarId{2});
-  test_check_sym(bdd, VarId{1}, VarId{2});
+  test_check_sym(bdd, 0, 1);
+  test_check_sym(bdd, 0, 2);
+  test_check_sym(bdd, 1, 2);
 }
 
 TEST_F(BddTest, check_sym5)
 {
   Bdd bdd = from_truth("0100");
 
-  test_check_sym(bdd, VarId{0}, VarId{1});
+  test_check_sym(bdd, 0, 1);
 }
 
 TEST_F(BddTest, get_support1)
@@ -998,23 +998,23 @@ TEST_F(BddTest, root_decomp1)
 
   Bdd bdd0;
   Bdd bdd1;
-  VarId top = bdd.root_decomp(bdd0, bdd1);
+  auto top = bdd.root_decomp(bdd0, bdd1);
 
-  EXPECT_EQ( VarId{0}, top );
+  EXPECT_EQ( 0, top );
   EXPECT_TRUE( bdd0.is_zero() );
 
   Bdd bdd00;
   Bdd bdd01;
-  VarId dummy = bdd0.root_decomp(bdd00, bdd01);
-  EXPECT_EQ( VarId::illegal(), dummy );
+  auto dummy = bdd0.root_decomp(bdd00, bdd01);
+  EXPECT_EQ( BAD_VARID, dummy );
   EXPECT_EQ( bdd0, bdd00 );
   EXPECT_EQ( bdd0, bdd01 );
 
   Bdd bdd10;
   Bdd bdd11;
-  VarId second = bdd1.root_decomp(bdd10, bdd11);
+  auto second = bdd1.root_decomp(bdd10, bdd11);
 
-  EXPECT_EQ( VarId{1}, second );
+  EXPECT_EQ( 1, second );
   EXPECT_TRUE( bdd10.is_zero() );
   EXPECT_TRUE( bdd11.is_one() );
 }
@@ -1023,26 +1023,26 @@ TEST_F(BddTest, root_decomp2)
 {
   Bdd bdd = from_truth("1000");
 
-  VarId top = bdd.root_var();
+  auto top = bdd.root_var();
   Bdd bdd0 = bdd.root_cofactor0();
   Bdd bdd1 = bdd.root_cofactor1();
 
-  EXPECT_EQ( VarId{0}, top );
+  EXPECT_EQ( 0, top );
   EXPECT_TRUE( bdd0.is_zero() );
 
-  VarId dummy = bdd0.root_var();
+  auto dummy = bdd0.root_var();
   Bdd bdd00 = bdd0.root_cofactor0();
   Bdd bdd01 = bdd0.root_cofactor1();
 
-  EXPECT_EQ( VarId::illegal(), dummy );
+  EXPECT_EQ( BAD_VARID, dummy );
   EXPECT_EQ( bdd0, bdd00 );
   EXPECT_EQ( bdd0, bdd01 );
 
-  VarId second = bdd1.root_var();
+  auto second = bdd1.root_var();
   Bdd bdd10 = bdd1.root_cofactor0();
   Bdd bdd11 = bdd1.root_cofactor1();
 
-  EXPECT_EQ( VarId{1}, second );
+  EXPECT_EQ( 1, second );
   EXPECT_TRUE( bdd10.is_zero() );
   EXPECT_TRUE( bdd11.is_one() );
 }

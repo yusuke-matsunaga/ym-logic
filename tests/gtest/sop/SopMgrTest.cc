@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include "SopMgr.h"
 #include "SopBlock.h"
-#include "ym/VarId.h"
 #include "ym/Literal.h"
 
 
@@ -41,20 +40,23 @@ TEST(SopMgrTest, cube_set1)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv = mgr.new_body(1);
+  auto bv = mgr.new_body(1);
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
-  vector<Literal> lit_list{Literal(var0, false), Literal(var1, true), Literal(var2, false)};
+  Literal lit1{var0, false};
+  Literal lit2{var1, true};
+  Literal lit3{var2, false};
+  vector<Literal> lit_list{lit1, lit2, lit3};
 
   mgr.cube_set(bv, lit_list);
 
@@ -78,16 +80,16 @@ TEST(SopMgrTest, cube_set2)
 
   SopBitVect* bv = mgr.new_body(1);
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   mgr.cube_set(bv, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
 
@@ -111,16 +113,16 @@ TEST(SopMgrTest, cube_clear)
 
   SopBitVect* bv = mgr.new_body(1);
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   mgr.cube_set(bv, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
   mgr.cube_clear(bv);
@@ -141,16 +143,16 @@ TEST(SopMgrTest, cube_compare)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -179,16 +181,16 @@ TEST(SopMgrTest, cube_check_conflict)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -211,16 +213,16 @@ TEST(SopMgrTest, cube_check_containment)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -246,16 +248,16 @@ TEST(SopMgrTest, cube_check_intersect)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -279,16 +281,16 @@ TEST(SopMgrTest, cube_product)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -336,16 +338,16 @@ TEST(SopMgrTest, cube_quotient)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -393,16 +395,16 @@ TEST(SopMgrTest, cube_swap)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -442,16 +444,16 @@ TEST(SopMgrTest, cube_rotate3)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -505,16 +507,16 @@ TEST(SopMgrTest, cube_rotate4)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -582,16 +584,16 @@ TEST(SopMgrTest, cover_set1)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -625,16 +627,16 @@ TEST(SopMgrTest, cover_set2)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -668,16 +670,16 @@ TEST(SopMgrTest, sum1)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -719,16 +721,16 @@ TEST(SopMgrTest, sum2)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -770,16 +772,16 @@ TEST(SopMgrTest, diff)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -809,16 +811,16 @@ TEST(SopMgrTest, product1)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -881,16 +883,16 @@ TEST(SopMgrTest, product2)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -942,16 +944,16 @@ TEST(SopMgrTest, product3)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -978,16 +980,16 @@ TEST(SopMgrTest, quotient1)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -1044,16 +1046,16 @@ TEST(SopMgrTest, quotient2)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -1100,16 +1102,16 @@ TEST(SopMgrTest, common_cube)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -1141,16 +1143,16 @@ TEST(SopMgrTest, cover_compare1)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -1186,16 +1188,16 @@ TEST(SopMgrTest, cover_compare2)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 
@@ -1233,16 +1235,16 @@ TEST(SopMgrTest, cover_compare3)
 {
   const SizeType nv = 10;
 
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-  VarId var3{3};
-  VarId var4{4};
-  VarId var5{5};
-  VarId var6{6};
-  VarId var7{7};
-  VarId var8{8};
-  VarId var9{9};
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   SopMgr mgr{nv};
 

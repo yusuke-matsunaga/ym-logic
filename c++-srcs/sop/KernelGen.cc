@@ -3,9 +3,8 @@
 /// @brief KernelGen の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018 Yusuke Matsunaga
+/// Copyright (C) 2017, 2018, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "KernelGen.h"
 #include "LitSet.h"
@@ -90,8 +89,7 @@ KernelGen::generate(const SopCover& cover)
   int nv = cover.variable_num();
   vector<pair<int, Literal>> tmp_list;
   tmp_list.reserve(nv * 2);
-  for ( int i: Range(nv) ) {
-    VarId var(i);
+  for ( int var: Range(nv) ) {
     for ( auto lit: {Literal(var, false), Literal(var, true)} ) {
       int n = cover.literal_num(lit);
       if ( n >= 2 ) {

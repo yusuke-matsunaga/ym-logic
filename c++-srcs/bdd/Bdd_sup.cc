@@ -152,7 +152,7 @@ Bdd::get_support() const
 }
 
 // @brief 変数のリストに変換する．
-vector<VarId>
+vector<SizeType>
 Bdd::to_varlist() const
 {
   ASSERT_COND( mMgr != nullptr );
@@ -160,10 +160,10 @@ Bdd::to_varlist() const
     throw BddError{"Bdd::to_varlist(): Not a variable list."};
   }
   BddEdge edge{mRoot};
-  vector<VarId> var_list;
+  vector<SizeType> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
-    var_list.push_back(VarId{node->index()});
+    var_list.push_back(node->index());
     edge = node->edge1();
   }
   return var_list;
@@ -184,7 +184,7 @@ Bdd::to_litlist() const
     auto inv = edge.inv();
     auto e0 = node->edge0() ^ inv;
     auto e1 = node->edge1() ^ inv;
-    VarId var{node->index()};
+    SizeType var = node->index();
     if ( e0.is_zero() ) {
       lit_list.push_back(Literal{var, false});
       edge = e1;

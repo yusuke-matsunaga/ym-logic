@@ -31,9 +31,9 @@ public:
   ///
   /// var_set を省略した場合には空集合となる．
   BddVarSet(
-    BddMgr& mgr,                 ///< [in] BDDマネージャ
-    const vector<VarId>& var_set ///< [in] 変数のリスト
-    = vector<VarId>{}
+    BddMgr& mgr,                    ///< [in] BDDマネージャ
+    const vector<SizeType>& var_set ///< [in] 変数のリスト
+    = vector<SizeType>{}
   );
 
   /// @brief デストラクタ
@@ -100,11 +100,11 @@ public:
   /// @brief 変数のリストに変換する．
   ///
   /// 変換できない時は例外を送出する．
-  vector<VarId>
+  vector<SizeType>
   to_varlist() const;
 
   /// @brief 先頭の変数を返す．
-  VarId
+  SizeType
   top_var() const;
 
   /// @brief 内容を表すBDDを返す．

@@ -216,8 +216,7 @@ SopCover::to_literal_list() const
   for ( int i: Range(mCubeNum) ) {
     vector<Literal>& tmp_list = cube_list[i];
     tmp_list.reserve(mVariableNum);
-    for ( int j: Range(mVariableNum) ) {
-      VarId var(j);
+    for ( int var: Range(mVariableNum) ) {
       SopPat pat = mgr.get_pat(mBody, i, var);
       if ( pat == SopPat::_1 ) {
 	tmp_list.push_back(Literal(var, false));
@@ -235,7 +234,7 @@ SopCover::to_literal_list() const
 SopPat
 SopCover::get_pat(
   SizeType cube_id,
-  VarId var
+  SizeType var
 ) const
 {
   SopMgr mgr(mVariableNum);

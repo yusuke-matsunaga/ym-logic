@@ -17,12 +17,12 @@ BEGIN_NAMESPACE_YM_BDD
 // @brief コファクターを計算する．
 Bdd
 Bdd::cofactor(
-  VarId var,
+  SizeType var,
   bool inv
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  auto cedge = mMgr->make_literal(var.val()) ^ inv;
+  auto cedge = mMgr->make_literal(var) ^ inv;
   Bdd cube{mMgr, cedge}; // GC 用にロックする必要がある．
   return cofactor(cube);
 }
@@ -52,12 +52,12 @@ Bdd::cofactor(
 // @brief コファクターを計算して代入する．
 Bdd&
 Bdd::cofactor_int(
-  VarId var,
+  SizeType var,
   bool inv
 )
 {
   ASSERT_COND( mMgr != nullptr );
-  auto cedge = mMgr->make_literal(var.val()) ^ inv;
+  auto cedge = mMgr->make_literal(var) ^ inv;
   Bdd cbdd{mMgr, cedge}; // GC 用にロックする必要がある．
   return cofactor_int(cbdd);
 }

@@ -3,9 +3,8 @@
 /// @brief TvFuncMove の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2018, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "gtest/gtest.h"
 #include "ym/TvFunc.h"
@@ -52,8 +51,8 @@ TEST(TvFuncMove, copy_m)
   TvFuncM f(f_list);
 
   vector<TvFunc> g_list(2);
-  g_list[0] = TvFunc::make_posi_literal(20, VarId(0));
-  g_list[1] = TvFunc::make_nega_literal(20, VarId(1));
+  g_list[0] = TvFunc::make_posi_literal(20, 0);
+  g_list[1] = TvFunc::make_nega_literal(20, 1);
   TvFuncM g(g_list);
 
   for ( auto i = 0; i < 10000; ++ i ) {
@@ -62,10 +61,10 @@ TEST(TvFuncMove, copy_m)
     g = tmp;
   }
 
-  EXPECT_EQ( TvFunc::make_zero(20), f.slice(VarId(0)) );
-  EXPECT_EQ( TvFunc::make_one(20), f.slice(VarId(1)) );
-  EXPECT_EQ( TvFunc::make_posi_literal(20, VarId(0)), g.slice(VarId(0)) );
-  EXPECT_EQ( TvFunc::make_nega_literal(20, VarId(1)), g.slice(VarId(1)) );
+  EXPECT_EQ( TvFunc::make_zero(20), f.slice(0) );
+  EXPECT_EQ( TvFunc::make_one(20), f.slice(1) );
+  EXPECT_EQ( TvFunc::make_posi_literal(20, 0), g.slice(0) );
+  EXPECT_EQ( TvFunc::make_nega_literal(20, 1), g.slice(1) );
 }
 
 TEST(TvFuncMove, move_m)
@@ -76,8 +75,8 @@ TEST(TvFuncMove, move_m)
   TvFuncM f(f_list);
 
   vector<TvFunc> g_list(2);
-  g_list[0] = TvFunc::make_posi_literal(20, VarId(0));
-  g_list[1] = TvFunc::make_nega_literal(20, VarId(1));
+  g_list[0] = TvFunc::make_posi_literal(20, 0);
+  g_list[1] = TvFunc::make_nega_literal(20, 1);
   TvFuncM g(g_list);
 
   for ( auto i = 0; i < 10000; ++ i ) {
@@ -86,10 +85,10 @@ TEST(TvFuncMove, move_m)
     g = std::move(tmp);
   }
 
-  EXPECT_EQ( TvFunc::make_zero(20), f.slice(VarId(0)) );
-  EXPECT_EQ( TvFunc::make_one(20), f.slice(VarId(1)) );
-  EXPECT_EQ( TvFunc::make_posi_literal(20, VarId(0)), g.slice(VarId(0)) );
-  EXPECT_EQ( TvFunc::make_nega_literal(20, VarId(1)), g.slice(VarId(1)) );
+  EXPECT_EQ( TvFunc::make_zero(20), f.slice(0) );
+  EXPECT_EQ( TvFunc::make_one(20), f.slice(1) );
+  EXPECT_EQ( TvFunc::make_posi_literal(20, 0), g.slice(0) );
+  EXPECT_EQ( TvFunc::make_nega_literal(20, 1), g.slice(1) );
 }
 
 END_NAMESPACE_YM

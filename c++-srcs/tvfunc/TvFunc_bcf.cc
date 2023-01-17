@@ -25,8 +25,7 @@ make_func(
 )
 {
   TvFunc f_cube = TvFunc::make_one(ni);
-  for ( SizeType i = 0; i < ni; ++ i ) {
-    VarId var{i};
+  for ( SizeType var = 0; var < ni; ++ var ) {
     auto pat = cube.get_pat(var);
     if ( pat == SopPat::_1 ) {
       f_cube &= TvFunc::make_posi_literal(ni, var);
@@ -64,12 +63,10 @@ bcf_sub(
 
   ASSERT_COND( var < ni );
 
-  VarId varid{var};
-
   // コファクターに対して再帰する．
   // ただし，共通部分を求めて3分割する．
-  auto f0 = f.cofactor(varid, true);
-  auto f1 = f.cofactor(varid, false);
+  auto f0 = f.cofactor(var, true);
+  auto f1 = f.cofactor(var, false);
   auto fc = f0 & f1;
   if ( debug ) {
     cout << "  fc: " << fc << endl;
@@ -98,14 +95,14 @@ bcf_sub(
   }
   // 結果をマージする．
   auto R = ~fc;
-  Literal lit0{varid, true};
+  Literal lit0{var, true};
   for ( auto& cube: c0 ) {
     auto f_cube = make_func(ni, cube);
     if ( f_cube && R ) {
       cc.push_back(cube * lit0);
     }
   }
-  Literal lit1{varid, false};
+  Literal lit1{var, false};
   for ( auto& cube: c1 ) {
     auto f_cube = make_func(ni, cube);
     if ( f_cube && R ) {
@@ -184,11 +181,9 @@ mwc_sub(
 
   ASSERT_COND( var < ni );
 
-  VarId varid{var};
-
   // コファクターに対して再帰する．
-  auto f0 = f.cofactor(varid, true);
-  auto f1 = f.cofactor(varid, false);
+  auto f0 = f.cofactor(var, true);
+  auto f1 = f.cofactor(var, false);
 
   auto cov0 = mwc_sub(ni, f0, var + 1);
   auto cov1 = mwc_sub(ni, f1, var + 1);
@@ -200,8 +195,8 @@ mwc_sub(
   SizeType n1 = cov1.size();
   auto r0 = ~f0;
   auto r1 = ~f1;
-  Literal lit0{varid, true};
-  Literal lit1{varid, false};
+  Literal lit0{var, true};
+  Literal lit1{var, false};
   SizeType i0 = 0;
   SizeType i1 = 0;
   while ( i0 < n0 && i1 < n1 ) {

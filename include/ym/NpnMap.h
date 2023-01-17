@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/VarId.h"
 #include "ym/NpnVmap.h"
 #include "ym/TvFunc.h"
 
@@ -125,11 +124,11 @@ public:
   /// @brief 入力の変換内容の設定
   void
   set(
-    VarId src_var, ///< [in] 入力変数
-    VarId dst_var, ///< [in] 変換先の入力変数
-    bool inv       ///< [in] 極性
-                   ///<  - false: 反転なし (正極性)
-                   ///<  - true:  反転あり (負極性)
+    SizeType src_var, ///< [in] 入力変数
+    SizeType dst_var, ///< [in] 変換先の入力変数
+    bool inv          ///< [in] 極性
+                      ///<  - false: 反転なし (正極性)
+                      ///<  - true:  反転あり (負極性)
   )
   {
     set(src_var, NpnVmap(dst_var, inv));
@@ -139,8 +138,8 @@ public:
   /// @sa NpnVmap
   void
   set(
-    VarId src_var, ///< [in] 入力変数
-    NpnVmap imap   ///< [in] 変換情報(変換先の入力番号と極性)
+    SizeType src_var, ///< [in] 入力変数
+    NpnVmap imap      ///< [in] 変換情報(変換先の入力番号と極性)
   );
 
   /// @brief 出力極性を設定する．
@@ -180,12 +179,11 @@ public:
   /// @sa NpnVmap
   NpnVmap
   imap(
-    VarId var ///< [in] 入力変数
+    SizeType var ///< [in] 入力変数
   ) const
   {
-    int idx = var.val();
-    if ( idx < input_num() ) {
-      return mImap[idx];
+    if ( var < input_num() ) {
+      return mImap[var];
     }
     else {
       return NpnVmap::invalid();

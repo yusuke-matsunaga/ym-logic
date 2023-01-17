@@ -5,7 +5,7 @@
 /// @brief TvFuncM のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2017, 2018 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2017, 2018, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/TvFunc.h"
@@ -161,10 +161,10 @@ public:
   /// @return 自身への参照を返す．
   TvFuncM&
   cofactor_int(
-    VarId varid, ///< [in] 変数番号
-    bool inv     ///< [in] 極性
-                 ///<  - false: 反転なし (正極性)
-                 ///<  - true:  反転あり (負極性)
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 極性
+                    ///<  - false: 反転なし (正極性)
+                    ///<  - true:  反転あり (負極性)
   );
 
 
@@ -214,14 +214,14 @@ public:
   /// @return 自身への参照を返す．
   TvFuncM&
   invert_int(
-    VarId ovar ///< [in] 出力番号
+    SizeType ovar ///< [in] 出力番号
   );
 
   /// @brief right との論理積を計算し自分に代入する．
   /// @return 自身への参照を返す．
   TvFuncM&
   and_int(
-    VarId ovar,         ///< [in] 出力番号
+    SizeType ovar,      ///< [in] 出力番号
     const TvFunc& right ///< [in] 対象のオブジェクト
   );
 
@@ -229,7 +229,7 @@ public:
   /// @return 自身への参照を返す．
   TvFuncM&
   or_int(
-    VarId ovar,         ///< [in] 出力番号
+    SizeType ovar,      ///< [in] 出力番号
     const TvFunc& right ///< [in] 対象のオブジェクト
   );
 
@@ -237,7 +237,7 @@ public:
   /// @return 自身への参照を返す．
   TvFuncM&
   xor_int(
-    VarId ovar,         ///< [in] 出力番号
+    SizeType ovar,      ///< [in] 出力番号
     const TvFunc& right ///< [in] 対象のオブジェクト
   );
 
@@ -245,11 +245,11 @@ public:
   /// @return 自身への参照を返す．
   TvFuncM&
   cofactor_int(
-    VarId ovar,  ///< [in] 出力番号
-    VarId varid, ///< [in] 変数番号
-    bool inv     ///< [in] 極性
-		 ///<   - false: 反転なし (正極性)
-		 ///<   - true:  反転あり (負極性)
+    SizeType ovar,  ///< [in] 出力番号
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 極性
+		    ///<   - false: 反転なし (正極性)
+		    ///<   - true:  反転あり (負極性)
   );
 
 
@@ -275,25 +275,25 @@ public:
   /// @brief 1出力の論理関数を切り出す．
   TvFunc
   slice(
-    VarId ovar ///< [in] 出力番号
+    SizeType ovar ///< [in] 出力番号
   ) const;
 
   /// @brief 入力値を2進数と見なしたときの pos 番目の値を得る．
   /// 答は 0 か 1 だが int 型
   int
   value(
-    VarId ovar, ///< [in] 出力番号
-    int pos     ///< [in] 位置番号 ( 0 <= pos < 2^(input_num()) )
+    SizeType ovar, ///< [in] 出力番号
+    int pos        ///< [in] 位置番号 ( 0 <= pos < 2^(input_num()) )
   ) const
   {
-    SizeType opos = ovar.val();
+    SizeType opos = ovar;
     return (mVector[block(pos) + opos * mBlockNum1] >> shift(pos)) & 1;
   }
 
   /// @brief varid 番目の変数がサポートの時 true を返す．
   bool
   check_sup(
-    VarId varid ///< [in] 変数番号
+    SizeType varid ///< [in] 変数番号
   ) const;
 
   /// @brief pos1 番目と pos2 番目の変数が対称のとき true を返す．
@@ -301,8 +301,8 @@ public:
   /// @param[in] inv
   bool
   check_sym(
-    VarId var1,      ///< [in] 変数1
-    VarId var2,      ///< [in] 変数2
+    SizeType var1,   ///< [in] 変数1
+    SizeType var2,   ///< [in] 変数2
     bool inv = false ///< [in] 極性
                      ///<  - false: 反転なし (正極性)
                      ///<  - true:  反転あり (負極性)
@@ -355,10 +355,10 @@ public:
   /// @brief コファクターを返す．
   TvFuncM
   cofactor(
-    VarId varid, ///< [in] 変数番号
-    bool inv     ///< [in] 極性
-                 ///<  - false: 反転なし (正極性)
-                 ///<  - true:  反転あり (負極性)
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 極性
+                    ///<  - false: 反転なし (正極性)
+                    ///<  - true:  反転あり (負極性)
   ) const
   {
     return TvFuncM(*this).cofactor_int(varid, inv);

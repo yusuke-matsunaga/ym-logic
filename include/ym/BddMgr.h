@@ -5,11 +5,10 @@
 /// @brief BddMgr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/bdd_nsdef.h"
-#include "ym/VarId.h"
 #include "ym/Literal.h"
 #include "ym/BinDec.h"
 
@@ -59,7 +58,7 @@ public:
   /// @brief リテラル関数を作る．
   Bdd
   literal(
-    VarId var,       ///< [in] 変数
+    SizeType var,    ///< [in] 変数
     bool inv = false ///< [in] 反転フラグ
   );
 
@@ -72,13 +71,13 @@ public:
   /// @brief 肯定のリテラル関数を作る．
   Bdd
   posi_literal(
-    VarId var ///< [in] 変数
+    SizeType var ///< [in] 変数
   );
 
   /// @brief 否定のリテラル関数を作る．
   Bdd
   nega_literal(
-    VarId var ///< [in] 変数
+    SizeType var ///< [in] 変数
   );
 
   /// @brief 真理値表形式の文字列からBDDを作る．

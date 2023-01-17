@@ -109,7 +109,7 @@ public:
   /// @retval SopPat::_0 その変数が否定のリテラルとして現れる．
   SopPat
   get_pat(
-    VarId var ///< [in] 変数( 0 <= var_id.val() < variable_num() )
+    SizeType var ///< [in] 変数( 0 <= var_id.val() < variable_num() )
   ) const;
 
   /// @brief 指定したリテラルを含んでいたら true を返す．

@@ -26,18 +26,18 @@ TEST(LiteralTest, empty_constr)
 
 TEST(LiteralTest, simple_constr)
 {
-  VarId var(3);
-  Literal lit(var);
+  SizeType var{3};
+  Literal lit{var, false};
 
   EXPECT_TRUE( lit.is_valid() );
 
-  VarId var1 = lit.varid();
+  auto var1 = lit.varid();
   EXPECT_EQ( var, var1 );
 
   EXPECT_TRUE( lit.is_positive() );
   EXPECT_FALSE( lit.is_negative() );
 
-  Literal lit_n = ~lit;
+  auto lit_n = ~lit;
   EXPECT_NE( lit, lit_n );
 
   EXPECT_EQ( lit.varid(), lit_n.varid() );
@@ -53,23 +53,23 @@ TEST(LiteralTest, simple_constr)
   {
     ostringstream oss;
     oss << lit;
-    EXPECT_EQ( string("V_3"), oss.str() );
+    EXPECT_EQ( string("3"), oss.str() );
   }
   {
     ostringstream oss;
     oss << lit_n;
-    EXPECT_EQ( string("V_3'"), oss.str() );
+    EXPECT_EQ( string("3'"), oss.str() );
   }
 }
 
 TEST(LiteralTest, compare)
 {
-  VarId var1(1);
-  VarId var2(2);
-  Literal lit1p(var1);
-  Literal lit1n(var1, true);
-  Literal lit2p(var2);
-  Literal lit2n(var2, true);
+  SizeType var1{1};
+  SizeType var2{2};
+  Literal lit1p{var1, false};
+  Literal lit1n{var1, true};
+  Literal lit2p{var2, false};
+  Literal lit2n{var2, true};
 
   // lit1p vs lit1p
   EXPECT_TRUE(  lit1p == lit1p );

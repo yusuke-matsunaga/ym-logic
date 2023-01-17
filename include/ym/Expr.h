@@ -5,7 +5,7 @@
 /// @brief Expr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017, 2018, 2020, 2021, 2022 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017-2018, 2020-2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
@@ -32,7 +32,7 @@ class ExprNode;
 ///
 /// このクラスでは表現としての論理式を扱っているので論理関数としての
 /// 処理は行っていない．
-/// @sa VarId, Literal
+/// @sa Literal
 //////////////////////////////////////////////////////////////////////
 class Expr
 {
@@ -97,10 +97,10 @@ public:
   static
   Expr
   make_literal(
-    VarId varid, ///< [in] 変数番号
-    bool inv     ///< [in] 極性
-                 ///<      - false: 反転なし (正極性)
-                 ///<      - true:  反転あり (負極性)
+    SizeType varid,  ///< [in] 変数番号
+    bool inv = false ///< [in] 極性
+                     ///<      - false: 反転なし (正極性)
+                     ///<      - true:  反転あり (負極性)
   )
   {
     return inv ? make_nega_literal(varid) : make_posi_literal(varid);
@@ -122,7 +122,7 @@ public:
   static
   Expr
   make_posi_literal(
-    VarId varid ///< [in] 変数番号
+    SizeType varid ///< [in] 変数番号
   );
 
   /// @brief 負(否定)リテラル式の生成
@@ -130,7 +130,7 @@ public:
   static
   Expr
   make_nega_literal(
-    VarId varid ///< [in] 変数番号
+    SizeType varid ///< [in] 変数番号
   );
 
   /// @brief AND 式の生成
@@ -192,6 +192,16 @@ public:
   Expr
   from_string(
     const string& expr_str ///< [in] 論理式を表す文字列
+  );
+
+  /// @brief rep_string() 形式の文字列から変換する．
+  /// @return 変換された Expr オブジェクト
+  ///
+  /// - エラーが起きたら std::invalid_argument 例外を送出する．
+  static
+  Expr
+  from_rep_string(
+    const string& rep_str ///< [in] 論理式を表す文字列
   );
 
   /// @brief 確保していたメモリを開放する．
@@ -287,7 +297,7 @@ public:
   /// が含まれない場合にはなにも変わらない．
   Expr
   compose(
-    VarId varid,    ///< [in] 置き換え対象の変数番号
+    SizeType varid, ///< [in] 置き換え対象の変数番号
     const Expr& sub ///< [in] varid を置き換える先の論理式
   ) const;
 
@@ -297,8 +307,8 @@ public:
   /// 一度に複数の置き換えを行う
   Expr
   compose(
-    const unordered_map<VarId, Expr>& comp_map ///< [in] 置き換える変数をキーにして置き換える先の
-                                               ///< 論理式を値とした連想配列
+    const unordered_map<SizeType, Expr>& comp_map ///< [in] 置き換える変数をキーにして置き換える先の
+                                                  ///< 論理式を値とした連想配列
   ) const;
 
   /// @brief 複数変数の compose 演算
@@ -308,8 +318,8 @@ public:
   /// - comp_list 中に変数の重複が有った場合の動作は不定となる．
   Expr
   compose(
-    const vector<pair<VarId, Expr>>& comp_list ///< [in] 置き換える変数と置き換える先の
-                                               ///<  論理式をペアとしてリスト
+    const vector<pair<SizeType, Expr>>& comp_list ///< [in] 置き換える変数と置き換える先の
+                                                  ///<  論理式をペアとしてリスト
   ) const;
 
   /// @brief 変数番号を再マップする．
@@ -318,8 +328,8 @@ public:
   /// varmap に登録されていない場合には不変とする．
   Expr
   remap_var(
-    const unordered_map<VarId, VarId>& varmap ///< [in] 置き換え元の変数番号をキーとして
-                                              ///< 置き換え先の変数番号を値とした連想配列
+    const unordered_map<SizeType, SizeType>& varmap ///< [in] 置き換え元の変数番号をキーとして
+                                                    ///< 置き換え先の変数番号を値とした連想配列
   ) const;
 
   /// @brief 変数番号を再マップする．
@@ -329,7 +339,7 @@ public:
   /// - varlist 中に変数の重複が有った場合の動作は不定となる．
   Expr
   remap_var(
-    const vector<pair<VarId, VarId>>& varlist ///< [in] 置き換え元の変数番号と置き換え先の変数番号をペアとしたリスト
+    const vector<pair<SizeType, SizeType>>& varlist ///< [in] 置き換え元の変数番号と置き換え先の変数番号をペアとしたリスト
   ) const;
 
   /// @brief 簡単化
@@ -413,8 +423,8 @@ public:
 
   /// @brief リテラルの変数番号の取得
   /// @retval 変数番号 リテラルの場合
-  /// @retval kVarMaxId リテラル以外
-  VarId
+  /// @retval BAD_VARID リテラル以外
+  SizeType
   varid() const;
 
   /// @brief リテラルの取得
@@ -513,17 +523,17 @@ public:
   /// @return varid 番めの変数のリテラルの出現回数を得る．
   SizeType
   literal_num(
-    VarId varid ///< [in] 変数番号
+    SizeType varid ///< [in] 変数番号
   ) const;
 
   /// @brief リテラルの出現回数の取得
   /// @return varid 番めの変数の極性が inv のリテラルの出現回数を得る．
   SizeType
   literal_num(
-    VarId varid, ///< [in] 変数番号
-    bool inv     ///< [in] 極性
-                 ///<      - false: 反転なし (正極性)
-                 ///<      - true:  反転あり (負極性)
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 極性
+                    ///<      - false: 反転なし (正極性)
+                    ///<      - true:  反転あり (負極性)
   ) const;
 
   /// @brief リテラルの出現回数の取得
@@ -554,7 +564,7 @@ public:
   /// @return SOP形式の varid 番めの変数のリテラルの出現回数
   SizeType
   sop_literal_num(
-    VarId varid ///< [in] 変数番号
+    SizeType varid ///< [in] 変数番号
   ) const;
 
   /// @brief SOP形式に展開した時のテラルの出現回数の見積もり
@@ -562,10 +572,10 @@ public:
   /// inv のリテラルの出現回数
   SizeType
   sop_literal_num(
-    VarId varid, ///< [in] 変数番号
-    bool inv     ///< [in] 極性
-                 ///<      - false: 反転なし (正極性)
-                 ///<      - true:  反転あり (負極性)
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 極性
+                    ///<      - false: 反転なし (正極性)
+                    ///<      - true:  反転あり (負極性)
   ) const;
 
   /// @brief SOP形式に展開したときのリテラルの出現回数の見積もり
@@ -606,9 +616,22 @@ public:
   //////////////////////////////////////////////////////////////////////
 
 
+public:
+  //////////////////////////////////////////////////////////////////////
+  /// @name 文字列出力
+  /// @{
+  //////////////////////////////////////////////////////////////////////
+
   /// @brief 論理式の内容を文字列にする．
   string
   to_string() const;
+
+  /// @brief 圧縮形式の文字列を出力する．
+  string
+  rep_string() const;
+
+  /// @}
+  //////////////////////////////////////////////////////////////////////
 
 
 public:

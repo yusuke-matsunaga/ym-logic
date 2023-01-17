@@ -3,7 +3,7 @@
 /// @brief NpnMap の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2010, 2014, 2019, 2021 Yusuke Matsunaga
+/// Copyright (C) 2005-2010, 2014, 2019, 2021, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/NpnMap.h"
@@ -29,7 +29,7 @@ NpnMap::NpnMap(
 {
   set_ni(ni, ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
-    mImap[i] = NpnVmap(VarId(i), false);
+    mImap[i] = NpnVmap(i, false);
   }
 }
 
@@ -111,7 +111,7 @@ NpnMap::set_identity(
 {
   set_ni(new_ni, new_ni);
   for ( SizeType i = 0; i < new_ni; ++ i ) {
-    mImap[i] = NpnVmap(VarId(i), false);
+    mImap[i] = NpnVmap(i, false);
   }
   set_oinv(oinv);
 }
@@ -119,13 +119,12 @@ NpnMap::set_identity(
 // @brief 入力の変換内容の設定
 void
 NpnMap::set(
-  VarId var,
+  SizeType var,
   NpnVmap imap
 )
 {
-  SizeType src_pos = var.val();
-  if ( src_pos < input_num() ) {
-    mImap[src_pos] = imap;
+  if ( var < input_num() ) {
+    mImap[var] = imap;
   }
 }
 
@@ -175,16 +174,15 @@ inverse(
   SizeType src_ni = src.input_num();
   SizeType dst_ni = src.input_num2();
   NpnMap dst_map(dst_ni, src_ni);
-  for ( SizeType i = 0; i < src_ni; ++ i ) {
-    VarId src_var(i);
+  for ( SizeType src_var = 0; src_var < src_ni; ++ src_var ) {
     NpnVmap imap = src.imap(src_var);
     if ( !imap.is_invalid() ) {
-      VarId dst_var = imap.var();
-      if ( dst_var.val() >= dst_ni ) {
+      auto dst_var = imap.var();
+      if ( dst_var >= dst_ni ) {
 	if ( debug_npn_map ) {
 	  cerr << "inverse(src): srcの値域と定義域が一致しません．";
 	}
-	return NpnMap();
+	return NpnMap{};
       }
       bool inv = imap.inv();
       dst_map.set(dst_var, src_var, inv);
@@ -228,16 +226,15 @@ operator*(
 
   NpnMap dst_map(ni1, ni2_2);
   dst_map.set_oinv(src1.oinv() ^ src2.oinv());
-  for ( SizeType i1 = 0; i1 < ni1; ++ i1 ) {
-    VarId var1(i1);
-    NpnVmap imap1 = src1.imap(var1);
+  for ( SizeType var1 = 0; var1 < ni1; ++ var1 ) {
+    auto imap1 = src1.imap(var1);
     if ( imap1.is_invalid() ) {
       dst_map.set(var1, NpnVmap::invalid());
     }
     else {
-      VarId var2 = imap1.var();
+      auto var2 = imap1.var();
       bool inv2 = imap1.inv();
-      NpnVmap imap2 = src2.imap(var2);
+      auto imap2 = src2.imap(var2);
       if ( imap2.is_invalid() ) {
 	if ( debug_npn_map ) {
 	  cerr << "src1 * src2: src1の値域とsrc2の定義域が一致しません．";
@@ -245,7 +242,7 @@ operator*(
 	return NpnMap();
       }
       else {
-	VarId var3 = imap2.var();
+	auto var3 = imap2.var();
 	bool inv3 = imap2.inv();
 	dst_map.set(var1, var3, inv2 ^ inv3);
       }
@@ -274,13 +271,12 @@ operator<<(
     s << comma;
     comma = ", ";
     s << i << " ==> ";
-    VarId var(i);
-    NpnVmap imap = map.imap(var);
+    NpnVmap imap = map.imap(i);
     if ( imap.is_invalid() ) {
       s << "---";
     }
     else {
-      VarId dst_var = imap.var();
+      auto dst_var = imap.var();
       bool inv = imap.inv();
       if ( inv ) {
 	s << '~';
@@ -308,7 +304,7 @@ NpnMap::dump(
   SizeType ni2 = input_num2();
   bos << ni << ni2;
   for ( SizeType i = 0; i < ni; ++ i ) {
-    NpnVmap vmap = imap(VarId(i));
+    auto vmap = imap(i);
     vmap.dump(bos);
   }
   bos << oinv();
@@ -327,7 +323,7 @@ NpnMap::restore(
   for ( SizeType i = 0; i < ni; ++ i ) {
     NpnVmap vmap;
     vmap.restore(bis);
-    set(VarId(i), vmap);
+    set(i, vmap);
   }
   bool inv;
   bis >> inv;

@@ -10,7 +10,6 @@
 
 #include "ym/Sop.h"
 #include "ym/SopCube.h"
-#include "ym/VarId.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -74,10 +73,10 @@ public:
   get_pat(
     const SopBitVect* bv, ///< [in] ビットベクタ
     SizeType cube_id,     ///< [in] キューブ番号
-    VarId var             ///< [in] 変数 ( 0 <= var_id.val() < variable_num() )
+    SizeType var          ///< [in] 変数 ( 0 <= var_id.val() < variable_num() )
   )
   {
-    ASSERT_COND( var.val() >= 0 && var.val() < variable_num() );
+    ASSERT_COND( var >= 0 && var < variable_num() );
 
     SizeType blk = _block_pos(var) + _cube_size() * cube_id;
     SizeType sft = _shift_num(var);
@@ -702,21 +701,21 @@ private:
   static
   SizeType
   _block_pos(
-    VarId var_id ///< [in] 変数番号
+    SizeType var_id ///< [in] 変数番号
   )
   {
-    return var_id.val() / 32;
+    return var_id / 32;
   }
 
   /// @brief シフト量を計算する．
   static
   SizeType
   _shift_num(
-    VarId var_id ///< [in] 変数番号
+    SizeType var_id ///< [in] 変数番号
   )
   {
     // ソートしたときの見栄えの問題で左(MSB)から始める．
-    return (31 - (var_id.val() % 32)) * 2;
+    return (31 - (var_id % 32)) * 2;
   }
 
   /// @brief キューブ1つ分のブロックサイズを計算する．

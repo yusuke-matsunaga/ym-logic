@@ -3,9 +3,8 @@
 /// @brief IgPartition の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017 Yusuke Matsunaga
+/// Copyright (C) 2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "IgPartition.h"
 #include "PolConf.h"
@@ -24,23 +23,28 @@ class W1GnumBisymCmp
 public:
 
   // コンストラクタ
-  W1GnumBisymCmp(const InputInfo& info) :
-    mInfo(info)
+  W1GnumBisymCmp(
+    const InputInfo& info
+  ) : mInfo{info}
   {
   }
 
   // 大小比較関数
   bool
-  gt(int gid1,
-     int gid2)
+  gt(
+    int gid1,
+    int gid2
+  )
   {
     return mInfo.w1gt(gid1, gid2);
   }
 
   // 等価比較関数
   bool
-  eq(int gid1,
-     int gid2)
+  eq(
+    int gid1,
+    int gid2
+  )
   {
     return mInfo.w1eq(gid1, gid2);
   }
@@ -62,11 +66,9 @@ END_NONAMESPACE
 //////////////////////////////////////////////////////////////////////
 
 // @brief コンストラクタ
-// @param[in] iinfo 等価入力グループの情報
-//
-// w1:group_num:bisym の情報で初期分割を行う．
-IgPartition::IgPartition(const InputInfo& iinfo) :
-  mInputInfo(iinfo)
+IgPartition::IgPartition(
+  const InputInfo& iinfo
+) : mInputInfo{iinfo}
 {
   // 最初は1つの分割から始める．
   mGroupNum = iinfo.group_num();
@@ -82,9 +84,9 @@ IgPartition::IgPartition(const InputInfo& iinfo) :
 }
 
 // @brief コピーコンストラクタ
-// @param[in] src コピー元のソース
-IgPartition::IgPartition(const IgPartition& src) :
-  mInputInfo(src.mInputInfo)
+IgPartition::IgPartition(
+  const IgPartition& src
+) : mInputInfo{src.mInputInfo}
 {
   mGroupNum = src.mGroupNum;
   mPartitionNum = src.mPartitionNum;
@@ -114,21 +116,20 @@ IgPartition::is_resolved() const
 }
 
 // @brief 現在の状態を NpnMap に変換する．
-// @param[in] polconf 極性情報
 NpnMap
-IgPartition::to_npnmap(const PolConf& polconf) const
+IgPartition::to_npnmap(
+  const PolConf& polconf
+) const
 {
   NpnMap npnmap(mInputInfo.input_num());
   npnmap.set_oinv(polconf.oinv());
-  int dst_id = 0;
+  SizeType dst_var = 0;
   for (int i = 0; i < group_num(); ++ i) {
     int gid = group_id(i);
     int n = mInputInfo.elem_num(gid);
-    for (int j = 0; j < n; ++ j, ++ dst_id) {
-      VarId dst_var(dst_id);
-      int src_id = mInputInfo.elem(gid, j);
-      VarId src_var(src_id);
-      npnmap.set(src_var, dst_var, polconf.iinv(src_id));
+    for (int j = 0; j < n; ++ j, ++ dst_var) {
+      SizeType src_var = mInputInfo.elem(gid, j);
+      npnmap.set(src_var, dst_var, polconf.iinv(src_var));
     }
   }
   return npnmap;

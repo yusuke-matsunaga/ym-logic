@@ -110,7 +110,7 @@ ite(
 // @brief 複合compose演算
 Bdd
 Bdd::multi_compose(
-  const unordered_map<VarId, Bdd>& compose_map
+  const unordered_map<SizeType, Bdd>& compose_map
 ) const
 {
   auto e = mcomp_sub(compose_map);
@@ -120,7 +120,7 @@ Bdd::multi_compose(
 // @brief 複合compose演算を行って代入する．
 Bdd&
 Bdd::multi_compose_int(
-  const unordered_map<VarId, Bdd>& compose_map
+  const unordered_map<SizeType, Bdd>& compose_map
 )
 {
   auto e = mcomp_sub(compose_map);
@@ -131,7 +131,7 @@ Bdd::multi_compose_int(
 // @brief multi_compose() の共通関数
 BddEdge
 Bdd::mcomp_sub(
-  const unordered_map<VarId, Bdd>& compose_map
+  const unordered_map<SizeType, Bdd>& compose_map
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
@@ -140,7 +140,7 @@ Bdd::mcomp_sub(
     auto var = p.first;
     auto& bdd = p.second;
     auto cedge = copy_edge(bdd);
-    cmap.emplace(var.val(), cedge);
+    cmap.emplace(var, cedge);
   }
   MultiCompOp op{mMgr, cmap};
   auto e = op.mcomp_op(mRoot);
@@ -150,15 +150,15 @@ Bdd::mcomp_sub(
 // @brief 変数順を入れ替える演算
 Bdd
 Bdd::remap_vars(
-  const unordered_map<VarId, Literal>& varmap
+  const unordered_map<SizeType, Literal>& varmap
 ) const
 {
   ASSERT_COND( mMgr != nullptr );
-  unordered_map<VarId, Bdd> compose_map;
+  unordered_map<SizeType, Bdd> compose_map;
   for ( auto& p: varmap ) {
     auto var = p.first;
     auto lit = p.second;
-    auto e = mMgr->make_literal(lit.varid().val()) ^ lit.is_negative();
+    auto e = mMgr->make_literal(lit.varid()) ^ lit.is_negative();
     Bdd bdd{mMgr, e};
     compose_map.emplace(var, bdd);
   }

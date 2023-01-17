@@ -262,22 +262,21 @@ TvFunc::walsh_0() const
 // 1次の Walsh 係数を求める．
 int
 TvFunc::walsh_1(
-  VarId varid
+  SizeType varid
 ) const
 {
   if ( is_invalid() ) {
     return 0;
   }
 
-  SizeType pos = varid.val();
   switch ( input_num() ) {
   case 0: ASSERT_NOT_REACHED;
-  case 1: return (1 << 1) - count_onebits_1(mVector[0] ^ c_mask(pos)) * 2;
-  case 2: return (1 << 2) - count_onebits_2(mVector[0] ^ c_mask(pos)) * 2;
-  case 3: return (1 << 3) - count_onebits_3(mVector[0] ^ c_mask(pos)) * 2;
-  case 4: return (1 << 4) - count_onebits_4(mVector[0] ^ c_mask(pos)) * 2;
-  case 5: return (1 << 5) - count_onebits_5(mVector[0] ^ c_mask(pos)) * 2;
-  case 6: return (1 << 6) - count_onebits_6(mVector[0] ^ c_mask(pos)) * 2;
+  case 1: return (1 << 1) - count_onebits_1(mVector[0] ^ c_mask(varid)) * 2;
+  case 2: return (1 << 2) - count_onebits_2(mVector[0] ^ c_mask(varid)) * 2;
+  case 3: return (1 << 3) - count_onebits_3(mVector[0] ^ c_mask(varid)) * 2;
+  case 4: return (1 << 4) - count_onebits_4(mVector[0] ^ c_mask(varid)) * 2;
+  case 5: return (1 << 5) - count_onebits_5(mVector[0] ^ c_mask(varid)) * 2;
+  case 6: return (1 << 6) - count_onebits_6(mVector[0] ^ c_mask(varid)) * 2;
 
   default:
     ;
@@ -287,7 +286,7 @@ TvFunc::walsh_1(
   SizeType c = 0;
   int n = 1 << input_num();
   for ( SizeType b: Range(mBlockNum) ) {
-    TvFunc::WordType mask = lit_pat(pos, b);
+    TvFunc::WordType mask = lit_pat(varid, b);
     c += count_onebits(mVector[b] ^ mask);
   }
   return n - c * 2;
@@ -296,46 +295,43 @@ TvFunc::walsh_1(
 // 2次の Walsh 係数を求める．
 int
 TvFunc::walsh_2(
-  VarId var1,
-  VarId var2
+  SizeType var1,
+  SizeType var2
 ) const
 {
   if ( is_invalid() ) {
     return 0;
   }
 
-  SizeType i = var1.val();
-  SizeType j = var2.val();
-
-  if ( i == j ) {
+  if ( var1 == var2 ) {
     return 0;
   }
 
   switch ( input_num() ) {
   case 0:
   case 1: ASSERT_NOT_REACHED; return 0;
-  case 2: return (1 << 2) - count_onebits_2(mVector[0] ^ c_mask(i) ^ c_mask(j)) * 2;
-  case 3: return (1 << 3) - count_onebits_3(mVector[0] ^ c_mask(i) ^ c_mask(j)) * 2;
-  case 4: return (1 << 4) - count_onebits_4(mVector[0] ^ c_mask(i) ^ c_mask(j)) * 2;
-  case 5: return (1 << 5) - count_onebits_5(mVector[0] ^ c_mask(i) ^ c_mask(j)) * 2;
-  case 6: return (1 << 6) - count_onebits_6(mVector[0] ^ c_mask(i) ^ c_mask(j)) * 2;
+  case 2: return (1 << 2) - count_onebits_2(mVector[0] ^ c_mask(var1) ^ c_mask(var2)) * 2;
+  case 3: return (1 << 3) - count_onebits_3(mVector[0] ^ c_mask(var1) ^ c_mask(var2)) * 2;
+  case 4: return (1 << 4) - count_onebits_4(mVector[0] ^ c_mask(var1) ^ c_mask(var2)) * 2;
+  case 5: return (1 << 5) - count_onebits_5(mVector[0] ^ c_mask(var1) ^ c_mask(var2)) * 2;
+  case 6: return (1 << 6) - count_onebits_6(mVector[0] ^ c_mask(var1) ^ c_mask(var2)) * 2;
   }
 
-  // i と j を正規化する．
-  if ( i < j ) {
-    std::swap(i, j);
+  // var1 と var2 を正規化する．
+  if ( var1 < var2 ) {
+    std::swap(var1, var2);
   }
 
   SizeType c = 0;
-  if ( i < NIPW ) {
-    TvFunc::WordType mask = c_mask(i) ^ c_mask(j);
+  if ( var1 < NIPW ) {
+    TvFunc::WordType mask = c_mask(var1) ^ c_mask(var2);
     for ( SizeType b: Range(mBlockNum) ) {
       c += count_onebits(mVector[b] ^ mask);
     }
   }
-  else if ( j < NIPW ) {
-    // int check = 1 << (i - 5);
-    // int mask1 = c_mask(j);
+  else if ( var2 < NIPW ) {
+    // int check = 1 << (var1 - 5);
+    // int mask1 = c_mask(var2);
     // int mask0 = ~mask1;
     // for (int b: Range(mBlockNum)) {
     //   if ( b & check ) {
@@ -344,16 +340,16 @@ TvFunc::walsh_2(
     //     c += count_onebits(mVector[b] ^ mask1);
     //   }
     // }
-    SizeType i5 = i - NIPW;
-    TvFunc::WordType mask = c_mask(j);
+    SizeType i5 = var1 - NIPW;
+    TvFunc::WordType mask = c_mask(var2);
     for ( int b: Range(mBlockNum) ) {
       TvFunc::WordType mask1 = 0UL - ((b >> i5) & 1UL);
       c += count_onebits(mVector[b] ^ mask ^ mask1);
     }
   }
   else {
-    // int check1 = 1 << (i - 5);
-    // int check2 = 1 << (j - 5);
+    // int check1 = 1 << (var1 - 5);
+    // int check2 = 1 << (var2 - 5);
     // int check = check1 | check2;
     // for (int b: Range(mBlockNum)) {
     //   int tmp = b & check;
@@ -363,8 +359,8 @@ TvFunc::walsh_2(
     //     c += count_onebits(mVector[b]);
     //   }
     // }
-    SizeType i5 = i - NIPW;
-    SizeType j5 = j - NIPW;
+    SizeType i5 = var1 - NIPW;
+    SizeType j5 = var2 - NIPW;
     for ( SizeType b: Range(mBlockNum) ) {
       TvFunc::WordType mask = 0UL - (((b >> i5) ^ (b >> j5)) & 1UL);
       c += count_onebits(mVector[b] ^ mask);
@@ -3360,7 +3356,7 @@ TvFunc::walsh_w0(
 // 重み別の 1 次の Walsh 係数を求める．
 int
 TvFunc::walsh_w1(
-  VarId var,
+  SizeType var,
   int w,
   bool oinv,
   int ibits
@@ -3370,15 +3366,14 @@ TvFunc::walsh_w1(
     return 0;
   }
 
-  int idx = var.val();
   int ans;
   if ( input_num() <= 6 ) {
     TvFunc::WordType bitvec = mVector[0];
-    if ( ibits & (1U << idx) ) {
-      bitvec ^= ~c_mask(idx);
+    if ( ibits & (1U << var) ) {
+      bitvec ^= ~c_mask(var);
     }
     else {
-      bitvec ^= c_mask(idx);
+      bitvec ^= c_mask(var);
     }
     switch ( input_num() ) {
     case 0: ans = walsh_w0_0(bitvec, ibits, w); break;
@@ -3415,16 +3410,16 @@ TvFunc::walsh_w1(
       int* endp = &s_plist[end];
       int b1 = b0 ^ ibits1;
       TvFunc::WordType mask;
-      if ( idx < NIPW ) {
-	if ( ibits2 & (1 << idx) ) {
-	  mask = ~c_mask(idx);
+      if ( var < NIPW ) {
+	if ( ibits2 & (1 << var) ) {
+	  mask = ~c_mask(var);
 	}
 	else {
-	  mask = c_mask(idx);
+	  mask = c_mask(var);
 	}
       }
       else {
-	int var5 = idx - NIPW;
+	int var5 = var - NIPW;
 	// 2行下の式は1行下の式と同じ意味
 	// mask = (b0 & (1 << var5)) ? 0xFFFFFFFF : 0x00000000;
 	mask = 0UL - ((b0 >> var5) & 1UL);

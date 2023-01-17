@@ -151,7 +151,7 @@ public:
   SopPat
   get_pat(
     SizeType cube_id, ///< [in] キューブ番号 ( 0 <= cube_id < cube_num() )
-    VarId var_id      ///< [in] 変数( 0 <= var_id.val() < variable_num() )
+    SizeType var_id   ///< [in] 変数( 0 <= var_id.val() < variable_num() )
   ) const;
 
   /// @brief 論理和を計算する．

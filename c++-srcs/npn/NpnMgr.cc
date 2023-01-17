@@ -3,9 +3,8 @@
 /// @brief NpnMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "NpnMgr.h"
 #include "ym/TvFunc.h"
@@ -52,7 +51,7 @@ walsh_w0_refine(const TvFunc& func,
 extern
 void
 walsh_w1_refine(const TvFunc& func,
-		VarId var,
+		SizeType var,
 		vector<PolConf>& polconf_list);
 
 extern
@@ -63,7 +62,7 @@ walsh_w1_refine(const TvFunc& func,
 extern
 void
 walsh_2_refine(const TvFunc& func,
-	       VarId var,
+	       SizeType var,
 	       IgPartition& igpart);
 
 
@@ -212,7 +211,7 @@ NpnMgr::cannonical(const TvFunc& func)
       int pos = igpart.partition_begin(pid);
       int gid = igpart.group_id(pos);
       int iid = igpart.input_id(gid);
-      walsh_w1_refine(func1, VarId(iid), polconf_list);
+      walsh_w1_refine(func1, iid, polconf_list);
     }
   }
 
@@ -335,7 +334,7 @@ NpnMgr::tvmax_recur(const TvFunc& func,
       // この分割の変数との Walsh_2 係数で細分化する．
       w1_mark[iid] = true;
       IgPartition igpart1(igpart);
-      walsh_2_refine(func, VarId(iid), igpart1);
+      walsh_2_refine(func, iid, igpart1);
 
       tvmax_recur(func, igpart1, w1_mark);
       w1_mark[iid] = false;
@@ -348,7 +347,7 @@ NpnMgr::tvmax_recur(const TvFunc& func,
 	int iid = igpart.input_id(gid);
 	IgPartition igpart1(igpart);
 	igpart1._refine(pid, pos);
-	walsh_2_refine(func, VarId(iid), igpart1);
+	walsh_2_refine(func, iid, igpart1);
 
 	tvmax_recur(func, igpart1, w1_mark);
       }

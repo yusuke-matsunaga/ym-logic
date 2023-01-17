@@ -3,7 +3,7 @@
 /// @brief TvFuncTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2022 Yusuke Matsunaga
+/// Copyright (C) 2017, 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "gtest/gtest.h"
@@ -111,7 +111,7 @@ TvFuncTestWithParam::check_func(
 	}
       }
     }
-    EXPECT_EQ( sup, func.check_sup(VarId{i}) );
+    EXPECT_EQ( sup, func.check_sup(i) );
   }
 
   // check_unate() のテスト
@@ -139,14 +139,14 @@ TvFuncTestWithParam::check_func(
     if ( n_unate ) {
       unate |= 2;
     }
-    if ( unate != func.check_unate(VarId{i}) ) {
+    if ( unate != func.check_unate(i) ) {
       cout << "VarId: " << i << endl;
       func.print(cout);
       cout << endl;
-      cout << "F0: " << func.cofactor(VarId{i}, true) << endl
-	   << "F1: " << func.cofactor(VarId{i}, false) << endl;
+      cout << "F0: " << func.cofactor(i, true) << endl
+	   << "F1: " << func.cofactor(i, false) << endl;
     }
-    EXPECT_EQ( unate, func.check_unate(VarId{i}) );
+    EXPECT_EQ( unate, func.check_unate(i) );
   }
 
   // invert_int() のテスト
@@ -192,7 +192,6 @@ TvFuncTestWithParam::check_func(
 
   // walsh_1() のテスト
   for ( int i: Range(ni) ) {
-    VarId vid(i);
     int i_bit = 1U << i;
     int exp_w1 = 0;
     for ( int p: Range(ni_exp) ) {
@@ -207,7 +206,7 @@ TvFuncTestWithParam::check_func(
 	exp_w1 -= 1;
       }
     }
-    EXPECT_EQ( exp_w1, func.walsh_1(vid) );
+    EXPECT_EQ( exp_w1, func.walsh_1(i) );
     EXPECT_EQ( exp_w1, vec[i] );
     if ( ni < 14 ) {
       EXPECT_EQ( exp_w1, vec1[i] );
@@ -217,10 +216,8 @@ TvFuncTestWithParam::check_func(
   if ( ni < 14 ) {
     // walsh_2() のテスト
     for ( int i1: Range(ni) ) {
-      VarId vid1(i1);
       int i1_bit = 1U << i1;
       for ( int i2: Range(i1 + 1, ni) ) {
-	VarId vid2(i2);
 	int i2_bit = 1U << i2;
 	int exp_w2 = 0;
 	for ( int p: Range(ni_exp) ) {
@@ -237,7 +234,7 @@ TvFuncTestWithParam::check_func(
 	    exp_w2 -= 1;
 	  }
 	}
-	EXPECT_EQ( exp_w2, func.walsh_2(vid1, vid2) );
+	EXPECT_EQ( exp_w2, func.walsh_2(i1, i2) );
 	EXPECT_EQ( exp_w2, vec2[i1 * ni + i2] );
       }
     }
@@ -328,8 +325,7 @@ TvFuncTestWithParam::check_func(
 	EXPECT_EQ( ww0[w], func.walsh_w0(w, oinv, ibits) );
 	if ( ni < 14 ) {
 	  for ( int j: Range(ni) ) {
-	    VarId var(j);
-	    EXPECT_EQ( ww1[j][w], func.walsh_w1(var, w, oinv, ibits) );
+	    EXPECT_EQ( ww1[j][w], func.walsh_w1(j, w, oinv, ibits) );
 	  }
 	}
 	if ( debug ) {
@@ -443,7 +439,7 @@ TEST_P(TvFuncTestWithParam, literal1)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   for ( int i: Range(ni) ) {
-    TvFunc f1 = TvFunc::make_literal(ni, VarId(i), false);
+    TvFunc f1 = TvFunc::make_literal(ni, i, false);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
@@ -456,7 +452,7 @@ TEST_P(TvFuncTestWithParam, literal1)
     buf1 << "TvFunc::make_literal(" << ni << ", " << i << ", false)";
     check_func(f1, mValues, false, buf1.str());
 
-    TvFunc f2 = TvFunc::make_literal(ni, VarId(i), true);
+    TvFunc f2 = TvFunc::make_literal(ni, i, true);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
@@ -477,8 +473,7 @@ TEST_P(TvFuncTestWithParam, literal2)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   for ( int i: Range(ni) ) {
-    Literal lit(VarId(i), false);
-    TvFunc f1 = TvFunc::make_literal(ni, lit);
+    auto f1 = TvFunc::make_literal(ni, i, false);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
@@ -491,8 +486,7 @@ TEST_P(TvFuncTestWithParam, literal2)
     buf1 << "TvFunc::make_literal(" << ni << ", Literal(" << i << ", false))";
     check_func(f1, mValues, true, buf1.str());
 
-    lit = Literal(VarId(i), true);
-    TvFunc f2 = TvFunc::make_literal(ni, lit);
+    TvFunc f2 = TvFunc::make_literal(ni, i, true);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
@@ -513,7 +507,7 @@ TEST_P(TvFuncTestWithParam, posi_literal)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   for ( int i: Range(ni) ) {
-    TvFunc f1 = TvFunc::make_posi_literal(ni, VarId(i));
+    auto f1 = TvFunc::make_posi_literal(ni, i);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 1;
@@ -534,7 +528,7 @@ TEST_P(TvFuncTestWithParam, nega_literal)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   for ( int i: Range(ni) ) {
-    TvFunc f1 = TvFunc::make_nega_literal(ni, VarId(i));
+    TvFunc f1 = TvFunc::make_nega_literal(ni, i);
     for ( int p: Range(ni_exp) ) {
       if ( p & (1U << i) ) {
 	mValues[p] = 0;
@@ -651,7 +645,7 @@ TEST_P(TvFuncTestWithParam, check_sup1)
 	    }
 	  }
 	}
-	EXPECT_EQ( exp_ans, func.check_sup(VarId(j)) );
+	EXPECT_EQ( exp_ans, func.check_sup(j) );
       }
     }
   }
@@ -694,7 +688,7 @@ TEST_P(TvFuncTestWithParam, check_sup2)
 	  }
 	}
       }
-      EXPECT_EQ( exp_ans, func.check_sup(VarId(j)) );
+      EXPECT_EQ( exp_ans, func.check_sup(j) );
     }
   }
 }
@@ -762,10 +756,10 @@ TEST_P(TvFuncTestWithParam, check_sym)
 	  int exp_sym = check_sym(values, i1, i2);
 	  bool exp_sym0 = exp_sym & 1;
 	  bool exp_sym1 = (exp_sym >> 1) & 1;
-	  EXPECT_EQ( exp_sym0, func.check_sym(VarId(i1), VarId(i2), false) );
-	  EXPECT_EQ( exp_sym0, func.check_sym(VarId(i2), VarId(i1), false) );
-	  EXPECT_EQ( exp_sym1, func.check_sym(VarId(i1), VarId(i2), true) );
-	  EXPECT_EQ( exp_sym1, func.check_sym(VarId(i2), VarId(i1), true) );
+	  EXPECT_EQ( exp_sym0, func.check_sym(i1, i2, false) );
+	  EXPECT_EQ( exp_sym0, func.check_sym(i2, i1, false) );
+	  EXPECT_EQ( exp_sym1, func.check_sym(i1, i2, true) );
+	  EXPECT_EQ( exp_sym1, func.check_sym(i2, i1, true) );
 	  for ( int c2: Range(n2) ) {
 	    int j1 = rd(mRandGen);
 	    int j2 = rd(mRandGen);
@@ -775,8 +769,8 @@ TEST_P(TvFuncTestWithParam, check_sym)
 	    int exp_sym = check_sym(values, j1, j2);
 	    bool exp_sym0 = exp_sym & 1;
 	    bool exp_sym1 = (exp_sym >> 1) & 1;
-	    EXPECT_EQ( exp_sym0, func.check_sym(VarId(j1), VarId(j2), false) );
-	    EXPECT_EQ( exp_sym1, func.check_sym(VarId(j1), VarId(j2), true) );
+	    EXPECT_EQ( exp_sym0, func.check_sym(j1, j2, false) );
+	    EXPECT_EQ( exp_sym1, func.check_sym(j1, j2, true) );
 	  }
 	}
       }
@@ -800,13 +794,12 @@ TEST_P(TvFuncTestWithParam, cofactor)
       }
     }
     TvFunc func(ni, values);
-    for ( int i: Range(ni) ) {
-      VarId var(i);
+    for ( int var: Range(ni) ) {
       TvFunc func0 = func.cofactor(var, true);
       TvFunc func1 = func.cofactor(var, false);
       vector<int> values0(ni_exp, 0);
       vector<int> values1(ni_exp, 0);
-      int i_bit = 1U << i;
+      int i_bit = 1U << var;
       for ( int p: Range(ni_exp) ) {
 	if ( p & i_bit ) {
 	  values0[p] = values[p ^ i_bit];
@@ -858,7 +851,7 @@ TEST_P(TvFuncTestWithParam, xform)
       rpg.generate(mRandGen);
       for ( int i: Range(ni) ) {
 	bool iinv = mRandDist(mRandGen) ? true : false;
-	map.set(VarId(i), VarId(rpg.elem(i)), iinv);
+	map.set(i, rpg.elem(i), iinv);
       }
       TvFunc xfunc = func.xform(map);
 
@@ -866,8 +859,8 @@ TEST_P(TvFuncTestWithParam, xform)
       for ( int p: Range(ni_exp) ) {
 	int q = 0;
 	for ( int i: Range(ni) ) {
-	  NpnVmap vmap = map.imap(VarId(i));
-	  int j = vmap.var().val();
+	  auto vmap = map.imap(i);
+	  int j = vmap.var();
 	  bool iinv = vmap.inv();
 	  if ( p & (1 << i) ) {
 	    if ( !iinv ) {
@@ -905,7 +898,7 @@ TEST(TvFuncTest, shrink_0)
 
   EXPECT_EQ( ni, map.input_num() );
   for ( int i: Range(ni) ) {
-    NpnVmap imap = map.imap(VarId(i));
+    NpnVmap imap = map.imap(i);
     EXPECT_TRUE( imap.is_invalid() );
   }
 }
@@ -922,7 +915,7 @@ TEST(TvFuncTest, shrink_1)
 
   EXPECT_EQ( ni, map.input_num() );
   for ( int i: Range(ni) ) {
-    NpnVmap imap = map.imap(VarId(i));
+    NpnVmap imap = map.imap(i);
     EXPECT_TRUE( imap.is_invalid() );
   }
 }
@@ -930,24 +923,24 @@ TEST(TvFuncTest, shrink_1)
 TEST(TvFuncTest, shrink_lit1)
 {
   int ni = 10;
-  TvFunc func0 = TvFunc::make_literal(ni, VarId(0), false);
+  TvFunc func0 = TvFunc::make_literal(ni, 0, false);
 
   NpnMap map = func0.shrink_map();;
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::make_literal(1, VarId(0), false), func1);
+  EXPECT_EQ( TvFunc::make_literal(1, 0, false), func1);
 
   EXPECT_EQ( ni, map.input_num() );
 
   {
-    NpnVmap imap = map.imap(VarId(0));
+    NpnVmap imap = map.imap(0);
     EXPECT_FALSE( imap.is_invalid() );
-    EXPECT_EQ( VarId(0), imap.var() );
+    EXPECT_EQ( 0, imap.var() );
     EXPECT_FALSE( imap.inv() );
   }
 
   for ( int i: Range(1, ni) ) {
-    NpnVmap imap = map.imap(VarId(i));
+    NpnVmap imap = map.imap(i);
     EXPECT_TRUE( imap.is_invalid() );
   }
 }
@@ -955,19 +948,19 @@ TEST(TvFuncTest, shrink_lit1)
 TEST(TvFuncTest, shrink_lit2)
 {
   int ni = 10;
-  TvFunc func0 = TvFunc::make_literal(ni, VarId(2), false);
+  TvFunc func0 = TvFunc::make_literal(ni, 2, false);
 
   NpnMap map = func0.shrink_map();
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::make_literal(1, VarId(0), false), func1);
+  EXPECT_EQ( TvFunc::make_literal(1, 0, false), func1);
 
   EXPECT_EQ( ni, map.input_num() );
 
   {
-    NpnVmap imap = map.imap(VarId(2));
+    NpnVmap imap = map.imap(2);
     EXPECT_FALSE( imap.is_invalid() );
-    EXPECT_EQ( VarId(0), imap.var() );
+    EXPECT_EQ( 0, imap.var() );
     EXPECT_FALSE( imap.inv() );
   }
 
@@ -975,7 +968,7 @@ TEST(TvFuncTest, shrink_lit2)
     if ( i == 2 ) {
       continue;
     }
-    NpnVmap imap = map.imap(VarId(i));
+    NpnVmap imap = map.imap(i);
     EXPECT_TRUE( imap.is_invalid() );
   }
 }
@@ -983,8 +976,8 @@ TEST(TvFuncTest, shrink_lit2)
 TEST(TvFuncTest, shrink_lit3)
 {
   int ni = 10;
-  TvFunc lit1 = TvFunc::make_literal(ni, VarId(2), false);
-  TvFunc lit2 = TvFunc::make_literal(ni, VarId(5), false);
+  TvFunc lit1 = TvFunc::make_literal(ni, 2, false);
+  TvFunc lit2 = TvFunc::make_literal(ni, 5, false);
   TvFunc func0 = lit1 & ~lit2;
 
   NpnMap map = func0.shrink_map();
@@ -992,8 +985,8 @@ TEST(TvFuncTest, shrink_lit3)
 
   TvFunc func2;
   {
-    TvFunc lit1 = TvFunc::make_literal(2, VarId(0), false);
-    TvFunc lit2 = TvFunc::make_literal(2, VarId(1), false);
+    TvFunc lit1 = TvFunc::make_literal(2, 0, false);
+    TvFunc lit2 = TvFunc::make_literal(2, 1, false);
     func2 = lit1 & ~lit2;
   }
 
@@ -1002,16 +995,16 @@ TEST(TvFuncTest, shrink_lit3)
   EXPECT_EQ( ni, map.input_num() );
 
   {
-    NpnVmap imap = map.imap(VarId(2));
+    NpnVmap imap = map.imap(2);
     EXPECT_FALSE( imap.is_invalid() );
-    EXPECT_EQ( VarId(0), imap.var() );
+    EXPECT_EQ( 0, imap.var() );
     EXPECT_FALSE( imap.inv() );
   }
 
   {
-    NpnVmap imap = map.imap(VarId(5));
+    NpnVmap imap = map.imap(5);
     EXPECT_FALSE( imap.is_invalid() );
-    EXPECT_EQ( VarId(1), imap.var() );
+    EXPECT_EQ( 1, imap.var() );
     EXPECT_FALSE( imap.inv() );
   }
 
@@ -1019,7 +1012,7 @@ TEST(TvFuncTest, shrink_lit3)
     if ( i == 2 || i == 5 ) {
       continue;
     }
-    NpnVmap imap = map.imap(VarId(i));
+    NpnVmap imap = map.imap(i);
     EXPECT_TRUE( imap.is_invalid() );
   }
 }
@@ -1046,24 +1039,24 @@ TEST(TvFuncTest, expand_1)
 
 TEST(TvFuncTest, expand_lit1)
 {
-  TvFunc func0 = TvFunc::make_literal(1, VarId(0), false);
+  TvFunc func0 = TvFunc::make_literal(1, 0, false);
 
   NpnMap map(1, 10);
-  map.set(VarId(0), VarId(0), false);
+  map.set(0, 0, false);
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::make_literal(10, VarId(0), false), func1 );
+  EXPECT_EQ( TvFunc::make_literal(10, 0, false), func1 );
 }
 
 TEST(TvFuncTest, expand_lit2)
 {
-  TvFunc func0 = TvFunc::make_literal(2, VarId(1), false);
+  TvFunc func0 = TvFunc::make_literal(2, 1, false);
 
   NpnMap map(2, 10);
-  map.set(VarId(1), VarId(2), false);
+  map.set(1, 2, false);
   TvFunc func1 = func0.xform(map);
 
-  EXPECT_EQ( TvFunc::make_literal(10, VarId(2), false), func1 );
+  EXPECT_EQ( TvFunc::make_literal(10, 2, false), func1 );
 }
 
 INSTANTIATE_TEST_SUITE_P(Test0to20,
@@ -1126,7 +1119,7 @@ prime_cover(
     if ( func.value(p) ) {
       vector<Literal> lit_list;
       for ( SizeType i = 0; i < ni; ++ i ) {
-	Literal lit{VarId{i}, false};
+	Literal lit{i, false};
 	if ( p & (1 << i) ) {
 	  lit_list.push_back(lit);
 	}
@@ -1152,15 +1145,14 @@ prime_cover(
 	SizeType dpos = -1;
 	vector<Literal> lit_list;
 	for ( SizeType i = 0; i < ni; ++ i ) {
-	  VarId var{i};
-	  auto pat0 = cube0.get_pat(var);
-	  auto pat1 = cube1.get_pat(var);
+	  auto pat0 = cube0.get_pat(i);
+	  auto pat1 = cube1.get_pat(i);
 	  if ( pat0 == pat1 ) {
 	    if ( pat0 == SopPat::_1 ) {
-	      lit_list.push_back(Literal{var, false});
+	      lit_list.push_back(Literal{i, false});
 	    }
 	    else if ( pat0 == SopPat::_0 ) {
-	      lit_list.push_back(Literal{var, true});
+	      lit_list.push_back(Literal{i, true});
 	    }
 	    continue;
 	  }

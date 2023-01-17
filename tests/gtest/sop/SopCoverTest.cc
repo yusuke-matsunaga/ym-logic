@@ -3,32 +3,19 @@
 /// @brief SopCoverTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2018, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-
 #include <gtest/gtest.h>
+#include "SopTest.h"
 #include "ym/SopCover.h"
 #include "ym/SopCube.h"
 
 
 BEGIN_NAMESPACE_YM
 
-TEST(SopCoverTest, constructor1)
+TEST_F(SopTest, constructor1)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -40,7 +27,7 @@ TEST(SopCoverTest, constructor1)
   Literal lit8(var8, false);
   Literal lit9(var9, false);
 
-  SopCover cover1(nv);
+  SopCover cover1{nv};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  0, cover1.cube_num() );
@@ -67,21 +54,8 @@ TEST(SopCoverTest, constructor1)
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 };
 
-TEST(SopCoverTest, constructor2)
+TEST_F(SopTest, constructor2)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -135,21 +109,8 @@ TEST(SopCoverTest, constructor2)
 
 };
 
-TEST(SopCoverTest, constructor3)
+TEST_F(SopTest, constructor3)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -199,21 +160,8 @@ TEST(SopCoverTest, constructor3)
 
 };
 
-TEST(SopCoverTest, constructor4)
+TEST_F(SopTest, constructor4)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -263,21 +211,8 @@ TEST(SopCoverTest, constructor4)
 
 };
 
-TEST(SopCoverTest, copy_constructor)
+TEST_F(SopTest, copy_constructor)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -329,21 +264,8 @@ TEST(SopCoverTest, copy_constructor)
 
 };
 
-TEST(SopCoverTest, copy_assignment)
+TEST_F(SopTest, copy_assignment)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -395,21 +317,8 @@ TEST(SopCoverTest, copy_assignment)
 
 };
 
-TEST(SopCoverTest, move_constructor)
+TEST_F(SopTest, move_constructor)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -463,21 +372,8 @@ TEST(SopCoverTest, move_constructor)
 
 };
 
-TEST(SopCoverTest, move_assignment)
+TEST_F(SopTest, move_assignment)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -531,21 +427,8 @@ TEST(SopCoverTest, move_assignment)
 
 };
 
-TEST(SopCoverTest, cube_constructor)
+TEST_F(SopTest, cube_constructor)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -593,21 +476,8 @@ TEST(SopCoverTest, cube_constructor)
 
 };
 
-TEST(SopCoverTest, cube_move_constructor)
+TEST_F(SopTest, cube_move_constructor)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -657,31 +527,8 @@ TEST(SopCoverTest, cube_move_constructor)
 
 };
 
-TEST(SopCoverTest, cover_cover_sum)
+TEST_F(SopTest, cover_cover_sum)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
-  Literal lit0(var0, false);
-  Literal lit1(var1, false);
-  Literal lit2(var2, false);
-  Literal lit3(var3, false);
-  Literal lit4(var4, false);
-  Literal lit5(var5, false);
-  Literal lit6(var6, false);
-  Literal lit7(var7, false);
-  Literal lit8(var8, false);
-  Literal lit9(var9, false);
 
   SopCover src1{nv, { {lit0, lit1} } };
   SopCover src2{nv, { {lit2, lit3} } };
@@ -723,21 +570,8 @@ TEST(SopCoverTest, cover_cover_sum)
 
 };
 
-TEST(SopCoverTest, cover_cube_sum)
+TEST_F(SopTest, cover_cube_sum)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -789,21 +623,8 @@ TEST(SopCoverTest, cover_cube_sum)
 
 };
 
-TEST(SopCoverTest, cube_cover_sum)
+TEST_F(SopTest, cube_cover_sum)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -855,21 +676,8 @@ TEST(SopCoverTest, cube_cover_sum)
 
 };
 
-TEST(SopCoverTest, Scover_cover_sum)
+TEST_F(SopTest, Scover_cover_sum)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -921,21 +729,8 @@ TEST(SopCoverTest, Scover_cover_sum)
 
 };
 
-TEST(SopCoverTest, Scover_cube_sum1)
+TEST_F(SopTest, Scover_cube_sum1)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -987,21 +782,8 @@ TEST(SopCoverTest, Scover_cube_sum1)
 
 };
 
-TEST(SopCoverTest, cube_Scover_sum)
+TEST_F(SopTest, cube_Scover_sum)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1053,21 +835,8 @@ TEST(SopCoverTest, cube_Scover_sum)
 
 };
 
-TEST(SopCoverTest, Icover_cover_sum)
+TEST_F(SopTest, Icover_cover_sum)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1119,21 +888,8 @@ TEST(SopCoverTest, Icover_cover_sum)
 
 };
 
-TEST(SopCoverTest, Icover_cube_sum)
+TEST_F(SopTest, Icover_cube_sum)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1185,21 +941,8 @@ TEST(SopCoverTest, Icover_cube_sum)
 
 };
 
-TEST(SopCoverTest, cover_cover_diff)
+TEST_F(SopTest, cover_cover_diff)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1248,21 +991,8 @@ TEST(SopCoverTest, cover_cover_diff)
 
 };
 
-TEST(SopCoverTest, Rcover_cover_diff)
+TEST_F(SopTest, Rcover_cover_diff)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1313,21 +1043,8 @@ TEST(SopCoverTest, Rcover_cover_diff)
 
 };
 
-TEST(SopCoverTest, cover_cube_diff)
+TEST_F(SopTest, cover_cube_diff)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1376,21 +1093,8 @@ TEST(SopCoverTest, cover_cube_diff)
 
 };
 
-TEST(SopCoverTest, Scover_cover_diff)
+TEST_F(SopTest, Scover_cover_diff)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1439,21 +1143,8 @@ TEST(SopCoverTest, Scover_cover_diff)
 
 };
 
-TEST(SopCoverTest, Scover_cube_diff)
+TEST_F(SopTest, Scover_cube_diff)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1502,21 +1193,8 @@ TEST(SopCoverTest, Scover_cube_diff)
 
 };
 
-TEST(SopCoverTest, Icover_cover_diff)
+TEST_F(SopTest, Icover_cover_diff)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1565,21 +1243,8 @@ TEST(SopCoverTest, Icover_cover_diff)
 
 };
 
-TEST(SopCoverTest, Icover_cube_diff)
+TEST_F(SopTest, Icover_cube_diff)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1628,21 +1293,8 @@ TEST(SopCoverTest, Icover_cube_diff)
 
 };
 
-TEST(SopCoverTest, cover_cover_product)
+TEST_F(SopTest, cover_cover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1700,21 +1352,8 @@ TEST(SopCoverTest, cover_cover_product)
 
 };
 
-TEST(SopCoverTest, cover_cube_product)
+TEST_F(SopTest, cover_cube_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1766,21 +1405,8 @@ TEST(SopCoverTest, cover_cube_product)
 
 };
 
-TEST(SopCoverTest, Rcover_cube_product)
+TEST_F(SopTest, Rcover_cube_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1834,21 +1460,8 @@ TEST(SopCoverTest, Rcover_cube_product)
 
 };
 
-TEST(SopCoverTest, cube_cover_product)
+TEST_F(SopTest, cube_cover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1900,21 +1513,8 @@ TEST(SopCoverTest, cube_cover_product)
 
 };
 
-TEST(SopCoverTest, cube_Rcover_product)
+TEST_F(SopTest, cube_Rcover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -1968,21 +1568,8 @@ TEST(SopCoverTest, cube_Rcover_product)
 
 };
 
-TEST(SopCoverTest, cover_literal_product)
+TEST_F(SopTest, cover_literal_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2033,21 +1620,8 @@ TEST(SopCoverTest, cover_literal_product)
 
 };
 
-TEST(SopCoverTest, Rcover_literal_product)
+TEST_F(SopTest, Rcover_literal_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2100,21 +1674,8 @@ TEST(SopCoverTest, Rcover_literal_product)
 
 };
 
-TEST(SopCoverTest, literal_cover_product)
+TEST_F(SopTest, literal_cover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2165,21 +1726,8 @@ TEST(SopCoverTest, literal_cover_product)
 
 };
 
-TEST(SopCoverTest, literal_Rcover_product)
+TEST_F(SopTest, literal_Rcover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2232,21 +1780,8 @@ TEST(SopCoverTest, literal_Rcover_product)
 
 };
 
-TEST(SopCoverTest, Scover_cover_product)
+TEST_F(SopTest, Scover_cover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2304,21 +1839,8 @@ TEST(SopCoverTest, Scover_cover_product)
 
 };
 
-TEST(SopCoverTest, cover_Scover_product)
+TEST_F(SopTest, cover_Scover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2376,21 +1898,8 @@ TEST(SopCoverTest, cover_Scover_product)
 
 };
 
-TEST(SopCoverTest, Scover_cube_product)
+TEST_F(SopTest, Scover_cube_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2442,21 +1951,8 @@ TEST(SopCoverTest, Scover_cube_product)
 
 };
 
-TEST(SopCoverTest, cube_Scover_product)
+TEST_F(SopTest, cube_Scover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2508,21 +2004,8 @@ TEST(SopCoverTest, cube_Scover_product)
 
 };
 
-TEST(SopCoverTest, Scover_literal_product)
+TEST_F(SopTest, Scover_literal_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2573,21 +2056,8 @@ TEST(SopCoverTest, Scover_literal_product)
 
 };
 
-TEST(SopCoverTest, literal_Scover_product)
+TEST_F(SopTest, literal_Scover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2638,21 +2108,8 @@ TEST(SopCoverTest, literal_Scover_product)
 
 };
 
-TEST(SopCoverTest, Icover_cover_product)
+TEST_F(SopTest, Icover_cover_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2710,21 +2167,8 @@ TEST(SopCoverTest, Icover_cover_product)
 
 };
 
-TEST(SopCoverTest, Icover_cube_product)
+TEST_F(SopTest, Icover_cube_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2776,21 +2220,8 @@ TEST(SopCoverTest, Icover_cube_product)
 
 };
 
-TEST(SopCoverTest, Icover_literal_product)
+TEST_F(SopTest, Icover_literal_product)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2841,21 +2272,8 @@ TEST(SopCoverTest, Icover_literal_product)
 
 };
 
-TEST(SopCoverTest, cover_cover_quotient)
+TEST_F(SopTest, cover_cover_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2905,21 +2323,8 @@ TEST(SopCoverTest, cover_cover_quotient)
 
 };
 
-TEST(SopCoverTest, cover_cube_quotient)
+TEST_F(SopTest, cover_cube_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -2969,21 +2374,8 @@ TEST(SopCoverTest, cover_cube_quotient)
 
 };
 
-TEST(SopCoverTest, cover_literal_quotient)
+TEST_F(SopTest, cover_literal_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3032,21 +2424,8 @@ TEST(SopCoverTest, cover_literal_quotient)
 
 };
 
-TEST(SopCoverTest, Rcover_cover_quotient)
+TEST_F(SopTest, Rcover_cover_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3098,21 +2477,8 @@ TEST(SopCoverTest, Rcover_cover_quotient)
 
 };
 
-TEST(SopCoverTest, Rcover_cube_quotient)
+TEST_F(SopTest, Rcover_cube_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3164,21 +2530,8 @@ TEST(SopCoverTest, Rcover_cube_quotient)
 
 };
 
-TEST(SopCoverTest, Rcover_literal_quotient)
+TEST_F(SopTest, Rcover_literal_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3229,21 +2582,8 @@ TEST(SopCoverTest, Rcover_literal_quotient)
 
 };
 
-TEST(SopCoverTest, Scover_cover_quotient)
+TEST_F(SopTest, Scover_cover_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3293,21 +2633,8 @@ TEST(SopCoverTest, Scover_cover_quotient)
 
 };
 
-TEST(SopCoverTest, Scover_cube_quotient)
+TEST_F(SopTest, Scover_cube_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3357,21 +2684,8 @@ TEST(SopCoverTest, Scover_cube_quotient)
 
 };
 
-TEST(SopCoverTest, Scover_literal_quotient)
+TEST_F(SopTest, Scover_literal_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3420,21 +2734,8 @@ TEST(SopCoverTest, Scover_literal_quotient)
 
 };
 
-TEST(SopCoverTest, Icover_cover_quotient)
+TEST_F(SopTest, Icover_cover_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3484,21 +2785,8 @@ TEST(SopCoverTest, Icover_cover_quotient)
 
 };
 
-TEST(SopCoverTest, Icover_cube_quotient)
+TEST_F(SopTest, Icover_cube_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3548,21 +2836,8 @@ TEST(SopCoverTest, Icover_cube_quotient)
 
 };
 
-TEST(SopCoverTest, Icover_literal_quotient)
+TEST_F(SopTest, Icover_literal_quotient)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3611,21 +2886,8 @@ TEST(SopCoverTest, Icover_literal_quotient)
 
 };
 
-TEST(SopCoverTest, common_cube)
+TEST_F(SopTest, common_cube)
 {
-  const int nv = 10;
-
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
-
   Literal lit0(var0, false);
   Literal lit1(var1, false);
   Literal lit2(var2, false);
@@ -3665,12 +2927,8 @@ TEST(SopCoverTest, common_cube)
   EXPECT_FALSE( cube1.has_literal(~lit9) );
 };
 
-TEST(SopCoverTest, to_expr1)
+TEST_F(SopTest, to_expr1)
 {
-  VarId var0{0};
-  VarId var1{1};
-  VarId var2{2};
-
   Literal lit0{var0, false};
   Literal lit1{var1, false};
   Literal lit2{var2, false};
@@ -3681,7 +2939,7 @@ TEST(SopCoverTest, to_expr1)
 
   auto expr = cover1.to_expr();
   auto expr_str = expr.to_string();
-  EXPECT_EQ( "( ( V_0 & V_1 ) | ~V_2 )", expr_str );
+  EXPECT_EQ( "( ( 0 & 1 ) | ~2 )", expr_str );
 }
 
 END_NAMESPACE_YM

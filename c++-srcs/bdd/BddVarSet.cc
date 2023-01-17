@@ -15,7 +15,7 @@ BEGIN_NAMESPACE_YM_BDD
 // @brief 要素のリストを指定したコンストラクタ
 BddVarSet::BddVarSet(
   BddMgr& mgr,
-  const vector<VarId>& var_set
+  const vector<SizeType>& var_set
 ) : Bdd{mgr.one()}
 {
   for ( auto var: var_set ) {
@@ -107,14 +107,14 @@ BddVarSet::size() const
 }
 
 // @brief 変数のリストに変換する．
-vector<VarId>
+vector<SizeType>
 BddVarSet::to_varlist() const
 {
   return Bdd::to_varlist();
 }
 
 // @brief 先頭の変数を返す．
-VarId
+SizeType
 BddVarSet::top_var() const
 {
   return Bdd::root_var();

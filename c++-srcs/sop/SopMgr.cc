@@ -3,7 +3,7 @@
 /// @brief AlgMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022 Yusuke Matsunaga
+/// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -34,7 +34,7 @@ END_NONAMESPACE
 // @brief コンストラクタ
 SopMgr::SopMgr(
   SizeType variable_num
-) : mVarNum(variable_num)
+) : mVarNum{variable_num}
 {
   _init_buff();
 }
@@ -86,26 +86,26 @@ SopMgr::literal_num(
 )
 {
   // 8 ビットごとに区切って表引きで計算する．
-  const SopBitVect* bv = src.bitvect();
-  const SopBitVect* bv_end = _calc_offset(bv, src.cube_num());
+  auto bv = src.bitvect();
+  auto bv_end = _calc_offset(bv, src.cube_num());
   SizeType ans = 0;
   for ( ; bv != bv_end; ++ bv ) {
-    SopBitVect pat = *bv;
-    SopBitVect p1 = pat & 0xFFUL;
+    auto pat = *bv;
+    auto p1 = pat & 0xFFUL;
     ans += _count(p1);
-    SopBitVect p2 = (pat >> 8) & 0xFFUL;
+    auto p2 = (pat >> 8) & 0xFFUL;
     ans += _count(p2);
-    SopBitVect p3 = (pat >> 16) & 0xFFUL;
+    auto p3 = (pat >> 16) & 0xFFUL;
     ans += _count(p3);
-    SopBitVect p4 = (pat >> 24) & 0xFFUL;
+    auto p4 = (pat >> 24) & 0xFFUL;
     ans += _count(p4);
-    SopBitVect p5 = (pat >> 32) & 0xFFUL;
+    auto p5 = (pat >> 32) & 0xFFUL;
     ans += _count(p5);
-    SopBitVect p6 = (pat >> 40) & 0xFFUL;
+    auto p6 = (pat >> 40) & 0xFFUL;
     ans += _count(p6);
-    SopBitVect p7 = (pat >> 48) & 0xFFUL;
+    auto p7 = (pat >> 48) & 0xFFUL;
     ans += _count(p7);
-    SopBitVect p8 = (pat >> 56);
+    auto p8 = (pat >> 56);
     ans += _count(p8);
   }
   return ans;
@@ -118,13 +118,13 @@ SopMgr::literal_num(
   Literal lit
 )
 {
-  VarId var_id = lit.varid();
-  SizeType blk = _block_pos(var_id);
-  SizeType sft = _shift_num(var_id);
-  SopBitVect pat = lit2bv(lit);
-  SopBitVect mask = pat << sft;
-  const SopBitVect* bv = src.bitvect();
-  const SopBitVect* bv_end = _calc_offset(bv, src.cube_num());
+  auto var_id = lit.varid();
+  auto blk = _block_pos(var_id);
+  auto sft = _shift_num(var_id);
+  auto pat = lit2bv(lit);
+  auto mask = pat << sft;
+  auto bv = src.bitvect();
+  auto bv_end = _calc_offset(bv, src.cube_num());
   SizeType ans = 0;
   for ( ; bv != bv_end; bv += _cube_size() ) {
     if ( (bv[blk] & mask) == mask ) {
@@ -140,8 +140,8 @@ SopMgr::new_body(
   SizeType cube_num
 )
 {
-  SizeType size = _cube_size() * cube_num;
-  SopBitVect* body = new SopBitVect[size];
+  auto size = _cube_size() * cube_num;
+  auto body = new SopBitVect[size];
   for ( SizeType i = 0; i < size; ++ i ) {
     body[i] = 0ULL;
   }
@@ -166,13 +166,13 @@ SopMgr::cover_sum(
   const SopBlock& src2
 )
 {
-  const SopBitVect* bv1 = src1.bitvect();
+  auto bv1 = src1.bitvect();
   ASSERT_COND ( dst_bv != bv1 );
-  const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
+  auto bv1_end = _calc_offset(bv1, src1.cube_num());
 
-  const SopBitVect* bv2 = src2.bitvect();
+  auto bv2 = src2.bitvect();
   ASSERT_COND ( dst_bv != bv2 );
-  const SopBitVect* bv2_end = _calc_offset(bv2, src2.cube_num());
+  auto bv2_end = _calc_offset(bv2, src2.cube_num());
 
   SizeType nc = 0;
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
@@ -217,11 +217,11 @@ SopMgr::cover_diff(
   const SopBlock& src2
 )
 {
-  const SopBitVect* bv1 = src1.bitvect();
-  const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
-  const SopBitVect* bv2 = src2.bitvect();
+  auto bv1 = src1.bitvect();
+  auto bv1_end = _calc_offset(bv1, src1.cube_num());
+  auto bv2 = src2.bitvect();
   ASSERT_COND ( dst_bv != bv2 );
-  const SopBitVect* bv2_end = _calc_offset(bv2, src2.cube_num());
+  auto bv2_end = _calc_offset(bv2, src2.cube_num());
 
   SizeType nc = 0;
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
@@ -257,19 +257,19 @@ SopMgr::cover_product(
   const SopBlock& src2
 )
 {
-  const SopBitVect* bv1 = src1.bitvect();
+  auto bv1 = src1.bitvect();
   ASSERT_COND( dst_bv != bv1 || src2.cube_num() == 1 );
-  const SopBitVect* bv2_start = src2.bitvect();
+  auto bv2_start = src2.bitvect();
   ASSERT_COND( dst_bv != bv2_start );
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
   SizeType nc = 0;
-  SopBitVect* dst_bv0 = dst_bv;
-  const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
-  const SopBitVect* bv2_end = _calc_offset(bv2_start, src2.cube_num());
+  auto dst_bv0 = dst_bv;
+  auto bv1_end = _calc_offset(bv1, src1.cube_num());
+  auto bv2_end = _calc_offset(bv2_start, src2.cube_num());
   for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
-    for ( const SopBitVect* bv2 = bv2_start; bv2 != bv2_end; bv2 += _cube_size() ) {
+    for ( auto bv2 = bv2_start; bv2 != bv2_end; bv2 += _cube_size() ) {
       if ( cube_product(dst_bv, bv1, bv2) ) {
 	dst_bv += _cube_size();
 	++ nc;
@@ -288,20 +288,20 @@ SopMgr::cover_product(
   Literal lit
 )
 {
-  VarId var_id = lit.varid();
-  SizeType blk = _block_pos(var_id);
-  SizeType sft = _shift_num(var_id);
-  SopBitVect pat = lit2bv(lit);
-  SopBitVect pat1 = pat << sft;
-  SopBitVect mask = 3UL << sft;
+  auto var_id = lit.varid();
+  auto blk = _block_pos(var_id);
+  auto sft = _shift_num(var_id);
+  auto pat = lit2bv(lit);
+  auto pat1 = pat << sft;
+  auto mask = 3UL << sft;
 
-  const SopBitVect* bv1 = src1.bitvect();
-  const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
+  auto bv1 = src1.bitvect();
+  auto bv1_end = _calc_offset(bv1, src1.cube_num());
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
   SizeType nc = 0;
   for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
-    SopBitVect tmp = bv1[blk] | pat1;
+    auto tmp = bv1[blk] | pat1;
     if ( (tmp & mask) == mask ) {
       // 相反するリテラルがあった．
       continue;
@@ -329,8 +329,8 @@ SopMgr::cover_quotient(
   // 作業領域のビットベクタを確保する．
   _resize_buff(nc1);
 
-  const SopBitVect* bv1 = src1.bitvect();
-  const SopBitVect* bv2 = src2.bitvect();
+  auto bv1 = src1.bitvect();
+  auto bv2 = src2.bitvect();
 
   // bv1 の各キューブは高々1つのキューブでしか割ることはできない．
   // ただし，除数も被除数も algebraic expression の場合
@@ -354,12 +354,12 @@ SopMgr::cover_quotient(
       // 対象ではない．
       continue;
     }
-    const SopBitVect* tmp1 = _calc_offset(mTmpBuff, i);
+    auto tmp1 = _calc_offset(mTmpBuff, i);
 
     SizeType c = 1;
     vector<SizeType> tmp_list;
     for ( SizeType i2 = i + 1; i2 < nc1; ++ i2 ) {
-      const SopBitVect* tmp2 = _calc_offset(mTmpBuff, i2);
+      auto tmp2 = _calc_offset(mTmpBuff, i2);
       if ( mark[i2] && cube_compare(tmp1, tmp2) == 0 ) {
 	++ c;
 	// i 番目のキューブと等しかったキューブ位置を記録する．
@@ -377,7 +377,7 @@ SopMgr::cover_quotient(
   }
 
   for ( SizeType pos: pos_list ) {
-    const SopBitVect* tmp = _calc_offset(mTmpBuff, pos);
+    auto tmp = _calc_offset(mTmpBuff, pos);
     cube_copy(dst_bv, tmp);
     dst_bv += _cube_size();
   }
@@ -393,17 +393,17 @@ SopMgr::cover_quotient(
   Literal lit
 )
 {
-  VarId var_id = lit.varid();
-  SizeType blk = _block_pos(var_id);
-  SizeType sft = _shift_num(var_id);
-  SopBitVect pat = lit2bv(lit);
-  SopBitVect pat1 = pat << sft;
-  SopBitVect mask = 3UL << sft;
-  SopBitVect nmask = ~mask;
-  SizeType nb = _cube_size();
+  auto var_id = lit.varid();
+  auto blk = _block_pos(var_id);
+  auto sft = _shift_num(var_id);
+  auto pat = lit2bv(lit);
+  auto pat1 = pat << sft;
+  auto mask = 3UL << sft;
+  auto nmask = ~mask;
+  auto nb = _cube_size();
   SizeType nc = 0;
-  const SopBitVect* bv1 = src1.bitvect();
-  const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
+  auto bv1 = src1.bitvect();
+  auto bv1_end = _calc_offset(bv1, src1.cube_num());
   for ( ; bv1 != bv1_end; bv1 += nb ) {
     if ( (bv1[blk] & mask) == pat1 ) {
       cube_copy(dst_bv, bv1);
@@ -422,11 +422,11 @@ SopMgr::common_cube(
   const SopBlock& src1
 )
 {
-  const SopBitVect* bv1 = src1.bitvect();
-  const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
+  auto bv1 = src1.bitvect();
+  auto bv1_end = _calc_offset(bv1, src1.cube_num());
 
-  SopBitVect* dst_bv0 = new_body(1);
-  SopBitVect* dst_bv = dst_bv0;
+  auto dst_bv0 = new_body(1);
+  auto dst_bv = dst_bv0;
 
   // 最初のキューブをコピーする．
   cube_copy(dst_bv, bv1);
@@ -435,8 +435,8 @@ SopMgr::common_cube(
   bv1 += _cube_size();
   while ( bv1 != bv1_end ) {
     SopBitVect tmp = 0ULL;
-    SopBitVect* dst_bv1 = dst_bv;
-    const SopBitVect* bv1_end1 = _calc_offset(bv1, 1);
+    auto dst_bv1 = dst_bv;
+    auto bv1_end1 = _calc_offset(bv1, 1);
     for ( ; bv1 != bv1_end1; ++ dst_bv1, ++ bv1) {
       *dst_bv &= *bv1;
       tmp |= *dst_bv;
@@ -458,11 +458,11 @@ SopMgr::cube_set(
 )
 {
   for ( auto lit: lit_list ) {
-    VarId var_id = lit.varid();
-    SizeType blk = _block_pos(var_id);
-    SizeType sft = _shift_num(var_id);
-    SopBitVect pat = lit2bv(lit);
-    SopBitVect mask = pat << sft;
+    auto var_id = lit.varid();
+    auto blk = _block_pos(var_id);
+    auto sft = _shift_num(var_id);
+    auto pat = lit2bv(lit);
+    auto mask = pat << sft;
     dst_bv[blk] |= mask;
   }
 }
@@ -475,11 +475,11 @@ SopMgr::cube_set(
 )
 {
   for ( auto lit: lit_list ) {
-    VarId var_id = lit.varid();
-    SizeType blk = _block_pos(var_id);
-    SizeType sft = _shift_num(var_id);
-    SopBitVect pat = lit2bv(lit);
-    SopBitVect mask = pat << sft;
+    auto var_id = lit.varid();
+    auto blk = _block_pos(var_id);
+    auto sft = _shift_num(var_id);
+    auto pat = lit2bv(lit);
+    auto mask = pat << sft;
     dst_bv[blk] |= mask;
   }
 }
@@ -498,8 +498,8 @@ SopMgr::_sort(
   }
   if ( n == 2 ) {
     // (0, 1) と (1, 0) の2通りだけ
-    SopBitVect* bv0 = _calc_offset(bv, start + 0);
-    SopBitVect* bv1 = _calc_offset(bv, start + 1);
+    auto bv0 = _calc_offset(bv, start + 0);
+    auto bv1 = _calc_offset(bv, start + 1);
     if ( cube_compare(bv0, bv1) < 0 ) {
       // (1, 0) だったので交換する．
       _resize_buff(1);
@@ -510,9 +510,9 @@ SopMgr::_sort(
   if ( n == 3 ) {
     // (0, 1, 2), (0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0)
     // の6通りなので虱潰し
-    SopBitVect* bv0 = _calc_offset(bv, start + 0);
-    SopBitVect* bv1 = _calc_offset(bv, start + 1);
-    SopBitVect* bv2 = _calc_offset(bv, start + 2);
+    auto bv0 = _calc_offset(bv, start + 0);
+    auto bv1 = _calc_offset(bv, start + 1);
+    auto bv2 = _calc_offset(bv, start + 2);
     if ( cube_compare(bv0, bv1) < 0 ) {
       // (1, 0, 2), (1, 2, 0), (2, 1, 0)
       if ( cube_compare(bv0, bv2) < 0 ) {
@@ -562,10 +562,10 @@ SopMgr::_sort(
     return;
   }
   if ( n == 4 ) {
-    SopBitVect* bv0 = _calc_offset(bv, start + 0);
-    SopBitVect* bv1 = _calc_offset(bv, start + 1);
-    SopBitVect* bv2 = _calc_offset(bv, start + 2);
-    SopBitVect* bv3 = _calc_offset(bv, start + 3);
+    auto bv0 = _calc_offset(bv, start + 0);
+    auto bv1 = _calc_offset(bv, start + 1);
+    auto bv2 = _calc_offset(bv, start + 2);
+    auto bv3 = _calc_offset(bv, start + 3);
     _resize_buff(1);
     // 0 と 1 を整列
     if ( cube_compare(bv0, bv1) < 0 ) {
@@ -619,8 +619,8 @@ SopMgr::_sort(
   // trivial case
   // 前半部分の末尾が後半部分の先頭より大きければ
   // すでに整列している．
-  const SopBitVect* bv_end1 = _calc_offset(bv, (end1 - 1));
-  const SopBitVect* bv_start2 = _calc_offset(bv, start2);
+  auto bv_end1 = _calc_offset(bv, (end1 - 1));
+  auto bv_start2 = _calc_offset(bv, start2);
   if ( cube_compare(bv_end1, bv_start2) > 0 ) {
     return;
   }
@@ -629,11 +629,11 @@ SopMgr::_sort(
   // 前半部分を一旦 mTmpBuff にコピーする．
   _resize_buff(hn);
   cover_copy(mTmpBuff, _calc_offset(bv,  start1), hn);
-  SopBitVect* bv1 = mTmpBuff;
-  SopBitVect* bv1_end = _calc_offset(mTmpBuff, hn);
-  SopBitVect* bv2 = _calc_offset(bv, start2);
-  SopBitVect* bv2_end = _calc_offset(bv, end2);
-  SopBitVect* dst_bv = _calc_offset(bv, start);
+  auto bv1 = mTmpBuff;
+  auto bv1_end = _calc_offset(mTmpBuff, hn);
+  auto bv2 = _calc_offset(bv, start2);
+  auto bv2_end = _calc_offset(bv, end2);
+  auto dst_bv = _calc_offset(bv, start);
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int comp_res = cube_compare(bv1, bv2);
     if ( comp_res > 0 ) {
@@ -667,10 +667,10 @@ SopMgr::cover_compare(
   const SopBlock& src2
 )
 {
-  const SopBitVect* bv1 = src1.bitvect();
-  const SopBitVect* bv1_end = _calc_offset(bv1, src1.cube_num());
-  const SopBitVect* bv2 = src2.bitvect();
-  const SopBitVect* bv2_end = _calc_offset(bv2, src2.cube_num());
+  auto bv1 = src1.bitvect();
+  auto bv1_end = _calc_offset(bv1, src1.cube_num());
+  auto bv2 = src2.bitvect();
+  auto bv2_end = _calc_offset(bv2, src2.cube_num());
   for ( ; bv1 != bv1_end && bv2 != bv2_end; bv1 += _cube_size(), bv2 += _cube_size() ) {
     int res = cube_compare(bv1, bv2);
     if ( res != 0 ) {
@@ -701,10 +701,10 @@ SopMgr::hash(
   // 本当は区別しなければならないがどうしようもないので
   // 16ビットに区切って単純に XOR を取る．
   SizeType ans = 0;
-  const SopBitVect* bv = src1.bitvect();
-  const SopBitVect* bv_end = _calc_offset(bv, src1.cube_num());
+  auto bv = src1.bitvect();
+  auto bv_end = _calc_offset(bv, src1.cube_num());
   for ( ; bv != bv_end; ++ bv ) {
-    SopBitVect pat = *bv;
+    auto pat = *bv;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
@@ -720,11 +720,10 @@ SopMgr::to_expr(
   SizeType cube_num
 )
 {
-  Expr ans = Expr::make_zero();
+  auto ans = Expr::make_zero();
   for ( SizeType c = 0; c < cube_num; ++ c ) {
-    Expr prod = Expr::make_one();
-    for ( SizeType i = 0; i < variable_num(); ++ i ) {
-      VarId var{i};
+    auto prod = Expr::make_one();
+    for ( SizeType var = 0; var < variable_num(); ++ var ) {
       auto pat = get_pat(bv, c, var);
       if ( pat == SopPat::_1 ) {
 	prod &= Expr::make_posi_literal(var);
@@ -745,10 +744,10 @@ SopMgr::cube_compare(
   const SopBitVect* bv2
 )
 {
-  const SopBitVect* bv1_end = _calc_offset(bv1, 1);
+  auto bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
-    SopBitVect pat1 = *bv1;
-    SopBitVect pat2 = *bv2;
+    auto pat1 = *bv1;
+    auto pat2 = *bv2;
     if ( pat1 < pat2 ) {
       return -1;
     }
@@ -768,13 +767,13 @@ SopMgr::cube_check_conflict(
   const SopBitVect* bv2
 )
 {
-  const SopBitVect* bv1_end = _calc_offset(bv1, 1);
+  auto bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
-    SopBitVect tmp = *bv1 | *bv2;
-    SopBitVect mask1 = 0x5555555555555555ULL;
-    SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
-    SopBitVect tmp1 = tmp & mask1;
-    SopBitVect tmp2 = tmp & mask2;
+    auto tmp = *bv1 | *bv2;
+    const SopBitVect mask1 = 0x5555555555555555ULL;
+    const SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
+    auto tmp1 = tmp & mask1;
+    auto tmp2 = tmp & mask2;
     if ( (tmp1 & (tmp2 >> 1)) != 0ULL ) {
       // 同じ変数の異なる極性のリテラルがあった．
       return true;
@@ -792,7 +791,7 @@ SopMgr::cube_check_containment(
   const SopBitVect* bv2
 )
 {
-  const SopBitVect* bv1_end = _calc_offset(bv1, 1);
+  auto bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
     if ( (~(*bv1) & *bv2) != 0ULL ) {
       return false;
@@ -810,7 +809,7 @@ SopMgr::cube_check_intersect(
   const SopBitVect* bv2
 )
 {
-  const SopBitVect* bv1_end = _calc_offset(bv1, 1);
+  auto bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
     if ( (*bv1 & *bv2) != 0ULL ) {
       return true;
@@ -827,7 +826,7 @@ SopMgr::cube_clear(
   SopBitVect* dst_bv
 )
 {
-  SopBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
+  auto dst_bv_end = _calc_offset(dst_bv, 1);
   while ( dst_bv != dst_bv_end ) {
     *dst_bv = 0ULL;
     ++ dst_bv;
@@ -842,13 +841,13 @@ SopMgr::cube_product(
   const SopBitVect* bv2
 )
 {
-  SopBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
+  auto dst_bv_end = _calc_offset(dst_bv, 1);
   while ( dst_bv != dst_bv_end ) {
-    SopBitVect tmp = *bv1 | *bv2;
-    SopBitVect mask1 = 0x5555555555555555ULL;
-    SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
-    SopBitVect tmp1 = tmp & mask1;
-    SopBitVect tmp2 = tmp & mask2;
+    auto tmp = *bv1 | *bv2;
+    const SopBitVect mask1 = 0x5555555555555555ULL;
+    const SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
+    auto tmp1 = tmp & mask1;
+    auto tmp2 = tmp & mask2;
     if ( (tmp1 & (tmp2 >> 1)) != 0ULL ) {
       // 同じ変数の異なる極性のリテラルがあった．
       return false;
@@ -869,10 +868,10 @@ SopMgr::cube_quotient(
   const SopBitVect* bv2
 )
 {
-  SopBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
+  auto dst_bv_end = _calc_offset(dst_bv, 1);
   while ( dst_bv != dst_bv_end ) {
-    SopBitVect pat1 = *bv1;
-    SopBitVect pat2 = *bv2;
+    auto pat1 = *bv1;
+    auto pat2 = *bv2;
     if ( (~pat1 & pat2) != 0ULL ) {
       // この場合の dst の値は不定
       return false;
@@ -892,11 +891,11 @@ SopMgr::litset_check(
   Literal lit
 )
 {
-  VarId var_id = lit.varid();
-  SizeType blk = _block_pos(var_id);
-  SizeType sft = _shift_num(var_id);
-  SopBitVect pat = lit2bv(lit);
-  SopBitVect mask = pat << sft;
+  auto var_id = lit.varid();
+  auto blk = _block_pos(var_id);
+  auto sft = _shift_num(var_id);
+  auto pat = lit2bv(lit);
+  auto mask = pat << sft;
   if ( bv[blk] & mask ) {
     return true;
   }
@@ -912,7 +911,7 @@ SopMgr::litset_union(
   const SopBitVect* src_bv
 )
 {
-  SopBitVect* dst_bv_end = _calc_offset(dst_bv, 1);
+  auto dst_bv_end = _calc_offset(dst_bv, 1);
   for ( ; dst_bv != dst_bv_end; ++ dst_bv, ++ src_bv ) {
     *dst_bv |= *src_bv;
   }
@@ -943,7 +942,7 @@ SopMgr::print(
 	buf << "v" << j;
 	varname = buf.str();
       }
-      SopPat pat = get_pat(bv, i, VarId(j));
+      auto pat = get_pat(bv, i, j);
       if ( pat == SopPat::_1 ) {
 	s << spc << varname;
 	spc = " ";

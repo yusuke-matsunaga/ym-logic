@@ -3,9 +3,8 @@
 /// @brief ExprParser の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2010, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2010, 2014, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ExprParser.h"
 
@@ -19,10 +18,10 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 
 // @brief コンストラクタ
-// @param[in] expr_str 論理式を表す文字列
-ExprParser::ExprParser(const string& expr_str) :
-  mExprStr{expr_str},
-  mInput{mExprStr}
+ExprParser::ExprParser(
+  const string& expr_str
+) : mExprStr{expr_str},
+    mInput{mExprStr}
 {
 }
 
@@ -32,20 +31,24 @@ ExprParser::~ExprParser()
 }
 
 // str からリテラル番号を得る．
-VarId
-ExprParser::str_to_literal(const string& str)
+SizeType
+ExprParser::str_to_literal(
+  const string& str
+)
 {
   SizeType id = 0;
   for ( char c: str ) {
     id *= 10;
     id += static_cast<ymuint>(c - '0');
   }
-  return VarId(id);
+  return id;
 }
 
 // トークンを一つ読み出す．
 ExprToken
-ExprParser::get_token(VarId& lit_id)
+ExprParser::get_token(
+  SizeType& lit_id
+)
 {
   string str;
   char c;
@@ -166,7 +169,7 @@ ExprParser::get_literal()
 {
   // ここに来る可能性のあるのは NUM, NOT, LP のみ
   // それ以外はエラー
-  VarId id;
+  SizeType id;
   auto token{get_token(id)};
 
   if ( token == ExprToken::ZERO ) {
@@ -237,7 +240,7 @@ ExprParser::get_expr(ExprToken end_token)
 
   for ( ; ; ) {
     // 次のトークンを調べる．
-    VarId dummy;
+    SizeType dummy;
     auto token{get_token(dummy)};
     if ( token == end_token ) {
       return expr;

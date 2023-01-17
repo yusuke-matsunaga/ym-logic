@@ -3,7 +3,7 @@
 /// @brief TvFunc の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017, 2022 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2022-2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/TvFunc.h"
@@ -137,17 +137,17 @@ TvFunc::TvFunc(
 // リテラル関数を作るコンストラクタ
 TvFunc::TvFunc(
   SizeType ni,
-  VarId varid,
+  SizeType varid,
   bool inv
 ) : mInputNum{ni},
     mBlockNum{nblock(ni)},
     mVector{new TvFunc::WordType[mBlockNum]}
 {
-  SizeType idx = varid.val();
-  ASSERT_COND( idx < ni );
+  ASSERT_COND( varid != BAD_VARID );
+  ASSERT_COND( varid < ni );
 
   for ( SizeType b: Range(mBlockNum) ) {
-    TvFunc::WordType pat = lit_pat(idx, b);
+    TvFunc::WordType pat = lit_pat(varid, b);
     if ( inv ) {
       pat = ~pat;
     }
@@ -353,16 +353,14 @@ TvFunc::xor_int(
 }
 
 // @brief コファクターを計算し自分に代入する．
-// @param[in] varid 変数番号
-// @param[in] pol 極性
-// @return 自身への参照を返す．
 TvFunc&
 TvFunc::cofactor_int(
-  VarId varid,
+  SizeType varid,
   bool inv
 )
 {
-  SizeType pos = varid.val();
+  ASSERT_COND( varid != BAD_VARID );
+  SizeType pos = varid;
   if ( pos < NIPW ) {
     TvFunc::WordType mask = c_masks[pos];
     if ( inv ) {
@@ -434,10 +432,11 @@ TvFunc::is_one() const
 // 変数がサポートの時 true を返す．
 bool
 TvFunc::check_sup(
-  VarId var
+  SizeType var
 ) const
 {
-  SizeType i = var.val();
+  ASSERT_COND( var != BAD_VARID );
+  SizeType i = var;
   if ( i < NIPW ) {
     // ブロックごとにチェック
     SizeType dist = 1 << i;
@@ -465,12 +464,13 @@ TvFunc::check_sup(
 // @brief unateness を調べる．
 int
 TvFunc::check_unate(
-  VarId varid
+  SizeType varid
 ) const
 {
+  ASSERT_COND( varid != BAD_VARID );
+  SizeType i = varid;
   bool positive_unate = true;
   bool negative_unate = true;
-  SizeType i = varid.val();
   if ( i < NIPW ) {
     // ブロックごとにチェック
     SizeType dist = 1 << i;
@@ -533,13 +533,15 @@ TvFunc::check_unate(
 // i 番目と j 番目の変数が対称のとき true を返す．
 bool
 TvFunc::check_sym(
-  VarId var1,
-  VarId var2,
+  SizeType var1,
+  SizeType var2,
   bool inv
 ) const
 {
-  SizeType i = var1.val();
-  SizeType j = var2.val();
+  ASSERT_COND( var1 != BAD_VARID );
+  ASSERT_COND( var2 != BAD_VARID );
+  SizeType i = var1;
+  SizeType j = var2;
 
   // i と j を正規化する．
   if ( i < j ) {
@@ -643,22 +645,20 @@ TvFunc::xform(
   for ( SizeType i: Range(new_ni) ) {
     ipat[i] = 0;
   }
-  for ( SizeType i: Range(mInputNum) ) {
-    VarId src_var{i};
-    NpnVmap imap = npnmap.imap(src_var);
+  for ( SizeType src_var: Range(mInputNum) ) {
+    auto imap = npnmap.imap(src_var);
     if ( imap.is_invalid() ) {
       continue;
     }
     if ( imap.inv() ) {
-      imask |= (1 << i);
+      imask |= (1 << src_var);
     }
-    VarId dst_var = imap.var();
-    SizeType j = dst_var.val();
-    ipat[j] = 1 << i;
+    auto dst_var = imap.var();
+    ipat[dst_var] = 1 << src_var;
   }
   TvFunc::WordType omask = npnmap.oinv() ? 1ULL : 0ULL;
 
-  TvFunc ans(new_ni);
+  TvFunc ans{new_ni};
   SizeType ni_pow = 1 << new_ni;
   for ( SizeType b: Range(ni_pow) ) {
     SizeType orig_b = 0;
@@ -688,7 +688,7 @@ TvFunc::shrink_map() const
   SizeType varmap = 0U;
   SizeType dst_ni = 0;
   for ( SizeType i: Range(mInputNum) ) {
-    if ( !check_sup(VarId(i)) ) {
+    if ( !check_sup(i) ) {
       varmap |= (1U << i);
     }
     else {
@@ -708,7 +708,7 @@ TvFunc::shrink_map() const
   SizeType rmap[kMaxNi];
   for ( SizeType i: Range(mInputNum) ) {
     if ( (varmap & (1U << i)) == 0U ) {
-      ans.set(VarId(i), VarId(j), false);
+      ans.set(i, j, false);
       rmap[j] = i;
       ++ j;
     }
@@ -925,8 +925,6 @@ TvFunc::c_mask(
 }
 
 // @brief リテラル関数のビットパタンを得る
-// @param[in] var_id 変数番号
-// @param[in] block_id ブロック番号
 TvFunc::WordType
 TvFunc::lit_pat(
   SizeType var_id,

@@ -3,9 +3,8 @@
 /// @brief w01test の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017 Yusuke Matsunaga
+/// Copyright (C) 2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "gtest/gtest.h"
 #include "ym/TvFunc.h"
@@ -17,16 +16,18 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 extern
 bool
-walsh_01_normalize(const TvFunc& func,
-		   NpnMap& xmap,
-		   InputInfo& input_info);
+walsh_01_normalize(
+  const TvFunc& func,
+  NpnMap& xmap,
+  InputInfo& input_info
+);
 
 TEST(w01test, walsh_01_normalize_and2)
 {
-  TvFunc lit0 = TvFunc::make_literal(2, Literal(VarId(0)));
-  TvFunc lit1 = TvFunc::make_literal(2, Literal(VarId(1)));
+  auto lit0 = TvFunc::make_literal(2, 0, false);
+  auto lit1 = TvFunc::make_literal(2, 1, false);
 
-  TvFunc and2 = lit0 & lit1;
+  auto and2 = lit0 & lit1;
 
   NpnMap xmap;
   InputInfo input_info;
@@ -45,21 +46,21 @@ TEST(w01test, walsh_01_normalize_and2)
   EXPECT_EQ( 2, xmap.input_num() );
   EXPECT_FALSE( xmap.oinv() );
 
-  VarId var0(0);
+  SizeType var0{0};
   EXPECT_EQ( var0, xmap.imap(var0).var() );
   EXPECT_FALSE( xmap.imap(var0).inv() );
 
-  VarId var1(1);
+  SizeType var1{1};
   EXPECT_EQ( var1, xmap.imap(var1).var() );
   EXPECT_FALSE( xmap.imap(var1).inv() );
 }
 
 TEST(w01test, walsh_01_normalize_xor2)
 {
-  TvFunc lit0 = TvFunc::make_literal(2, Literal(VarId(0)));
-  TvFunc lit1 = TvFunc::make_literal(2, Literal(VarId(1)));
+  auto lit0 = TvFunc::make_literal(2, Literal{0, false});
+  auto lit1 = TvFunc::make_literal(2, Literal{1, false});
 
-  TvFunc xor2 = (lit0 & ~lit1) | (~lit0 & lit1);
+  auto xor2 = (lit0 & ~lit1) | (~lit0 & lit1);
 
   NpnMap xmap;
   InputInfo input_info;
@@ -78,24 +79,24 @@ TEST(w01test, walsh_01_normalize_xor2)
   EXPECT_EQ( 2, xmap.input_num() );
   EXPECT_FALSE( xmap.oinv() );
 
-  VarId var0(0);
+  SizeType var0(0);
   EXPECT_EQ( var0, xmap.imap(var0).var() );
   EXPECT_FALSE( xmap.imap(var0).inv() );
 
-  VarId var1(1);
+  SizeType var1(1);
   EXPECT_EQ( var1, xmap.imap(var1).var() );
   EXPECT_FALSE( xmap.imap(var1).inv() );
 }
 
 TEST(w01test, walsh_01_normalize_ao221)
 {
-  TvFunc lit0 = TvFunc::make_literal(5, Literal(VarId(0)));
-  TvFunc lit1 = TvFunc::make_literal(5, Literal(VarId(1)));
-  TvFunc lit2 = TvFunc::make_literal(5, Literal(VarId(2)));
-  TvFunc lit3 = TvFunc::make_literal(5, Literal(VarId(3)));
-  TvFunc lit4 = TvFunc::make_literal(5, Literal(VarId(4)));
+  auto lit0 = TvFunc::make_literal(5, Literal(0, false));
+  auto lit1 = TvFunc::make_literal(5, Literal(1, false));
+  auto lit2 = TvFunc::make_literal(5, Literal(2, false));
+  auto lit3 = TvFunc::make_literal(5, Literal(3, false));
+  auto lit4 = TvFunc::make_literal(5, Literal(4, false));
 
-  TvFunc ao221 = (lit0 & lit1) | (~lit2 & ~lit3) | lit4;
+  auto ao221 = (lit0 & lit1) | (~lit2 & ~lit3) | lit4;
 
   NpnMap xmap;
   InputInfo input_info;
@@ -123,11 +124,11 @@ TEST(w01test, walsh_01_normalize_ao221)
   EXPECT_EQ( 5, xmap.input_num() );
   EXPECT_TRUE( xmap.oinv() );
 
-  VarId var0(0);
+  SizeType var0{0};
   EXPECT_EQ( var0, xmap.imap(var0).var() );
   EXPECT_TRUE( xmap.imap(var0).inv() );
 
-  VarId var1(1);
+  SizeType var1{1};
   EXPECT_EQ( var1, xmap.imap(var1).var() );
   EXPECT_TRUE( xmap.imap(var1).inv() );
 }

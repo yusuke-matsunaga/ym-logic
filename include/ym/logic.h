@@ -13,7 +13,6 @@
 /// 論理式(ファクタードフォーム)と論理関数を扱うためのクラスライブラリ
 /// C++ の機能を活かして論理演算子のオーバーロードを使っている．
 
-
 #include "ym_config.h"
 
 
@@ -47,7 +46,6 @@ END_NAMESPACE_YM_LOGIC
 
 BEGIN_NAMESPACE_YM
 
-class VarId;
 class Literal;
 class TvFunc;
 class TvFuncM;
@@ -59,6 +57,9 @@ using nsLogic::ExprWriter;
 using nsLogic::NpnMap;
 using nsLogic::NpnMapM;
 using nsLogic::NpnVmap;
+
+/// @brief 不正な変数番号
+const SizeType BAD_VARID = static_cast<SizeType>(-1);
 
 END_NAMESPACE_YM
 

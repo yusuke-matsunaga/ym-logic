@@ -3,7 +3,7 @@
 /// @brief Bdd のユニットテスト
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include <gtest/gtest.h>
@@ -29,15 +29,15 @@ public:
   void
   test_check_sym(
     const Bdd& bdd, ///< [in] 対象のBDD
-    VarId var1,     ///< [in] 変数1
-    VarId var2      ///< [in] 変数2
+    SizeType var1,  ///< [in] 変数1
+    SizeType var2   ///< [in] 変数2
   );
 
   /// @brief check_sup() のテストを行う．
   void
   test_check_sup(
     const Bdd& bdd, ///< [in] 対象のBDD
-    VarId var       ///< [in] 変数1
+    SizeType var    ///< [in] 変数1
   );
 
   /// @brief サポートのテストを行う．
@@ -68,7 +68,7 @@ public:
     SizeType index ///< [in] インデックス
   )
   {
-    return mMgr.literal(VarId{index});
+    return mMgr.literal(index);
   }
 
   /// @brief 真理値表形式の文字列からBDDを作る．

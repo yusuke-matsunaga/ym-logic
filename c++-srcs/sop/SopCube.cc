@@ -143,7 +143,7 @@ SopCube::delete_body()
 // @brief 指定した変数のパタンを読み出す．
 SopPat
 SopCube::get_pat(
-  VarId var
+  SizeType var
 ) const
 {
   SopMgr mgr(mVariableNum);
@@ -170,14 +170,13 @@ SopCube::to_literal_list() const
 
   vector<Literal> lit_list;
   lit_list.reserve(nl);
-  for ( SizeType i = 0; i < mVariableNum; ++ i ) {
-    VarId var(i);
-    SopPat pat = mgr.get_pat(mBody, 0, var);
+  for ( SizeType var = 0; var < mVariableNum; ++ var ) {
+    auto pat = mgr.get_pat(mBody, 0, var);
     if ( pat == SopPat::_1 ) {
-      lit_list.push_back(Literal(var, false));
+      lit_list.push_back(Literal{var, false});
     }
     else if ( pat == SopPat::_0 ) {
-      lit_list.push_back(Literal(var, true));
+      lit_list.push_back(Literal{var, true});
     }
   }
 

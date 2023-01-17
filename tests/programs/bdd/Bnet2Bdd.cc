@@ -28,7 +28,7 @@ Bnet2Bdd::make_global_func()
 {
   SizeType ni = mNetwork.input_num();
   for ( SizeType i = 0; i < ni; ++ i ) {
-    auto bdd = mMgr.posi_literal(VarId{i});
+    auto bdd = mMgr.posi_literal(i);
     mBddMap.emplace(mNetwork.input_id(i), bdd);
   }
   for ( auto& node: mNetwork.logic_list() ) {
@@ -142,10 +142,10 @@ Bnet2Bdd::make_expr(
     return mMgr.one();
   }
   if ( expr.is_posi_literal() ) {
-    return fanin_list[expr.varid().val()];
+    return fanin_list[expr.varid()];
   }
   if ( expr.is_nega_literal() ) {
-    return ~fanin_list[expr.varid().val()];
+    return ~fanin_list[expr.varid()];
   }
   vector<Bdd> child_funcs;
   child_funcs.reserve(expr.operand_num());

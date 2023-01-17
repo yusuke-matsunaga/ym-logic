@@ -13,6 +13,7 @@
 #include "ExprParser.h"
 #include "SopLit.h"
 #include "ym/TvFunc.h"
+#include "RepStringParser.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -104,16 +105,20 @@ Expr::make_one()
 
 // 肯定のリテラルを作る．
 Expr
-Expr::make_posi_literal(VarId varid)
+Expr::make_posi_literal(
+  SizeType varid
+)
 {
-  return Expr{ExprMgr::the_obj().make_posiliteral(varid)};
+  return Expr{ExprMgr::the_obj().make_posi_literal(varid)};
 }
 
 // 否定のリテラルを作る．
 Expr
-Expr::make_nega_literal(VarId varid)
+Expr::make_nega_literal(
+  SizeType varid
+)
 {
-  return Expr{ExprMgr::the_obj().make_negaliteral(varid)};
+  return Expr{ExprMgr::the_obj().make_nega_literal(varid)};
 }
 
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
@@ -123,7 +128,7 @@ Expr::and_op(
   const Expr& chd2
 )
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
@@ -138,7 +143,7 @@ Expr::make_and(
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
@@ -153,7 +158,7 @@ Expr::or_op(
   const Expr& chd2
 )
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
@@ -168,7 +173,7 @@ Expr::make_or(
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
@@ -183,7 +188,7 @@ Expr::xor_op(
   const Expr& chd2
 )
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
@@ -198,7 +203,7 @@ Expr::make_xor(
 {
   ASSERT_COND( chd_list.size() > 0 );
 
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
@@ -223,6 +228,19 @@ Expr::from_string(
   }
 }
 
+// rep_string() 形式の文字列から変換する．
+Expr
+Expr::from_rep_string(
+  const string& rep_str
+)
+{
+  if ( rep_str == string{} ) {
+    return Expr{};
+  }
+  RepStringParser parser{rep_str};
+  return Expr{ExprMgr::the_obj().from_rep_string(parser)};
+}
+
 // @brief 確保していたメモリを開放する．
 // @note メモリリークチェックのための関数なので通常は使用しない．
 void
@@ -235,7 +253,7 @@ Expr::__clear_memory()
 Expr
 Expr::invert() const
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   return Expr{mgr.complement(root())};
 }
 
@@ -245,7 +263,7 @@ Expr::operator&=(
   const Expr& src
 )
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
@@ -259,7 +277,7 @@ Expr::operator|=(
   const Expr& src
 )
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
@@ -273,7 +291,7 @@ Expr::operator^=(
   const Expr& src
 )
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
@@ -284,21 +302,21 @@ Expr::operator^=(
 // pos 番目のリテラルを src の論理式に置き換える．
 Expr
 Expr::compose(
-  VarId varid,
+  SizeType varid,
   const Expr& src
 ) const
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   return Expr{mgr.compose(root(), varid, src.root())};
 }
 
 // comp_map にしたがって複数のリテラルの置き換えを行う．
 Expr
 Expr::compose(
-  const unordered_map<VarId, Expr>& comp_map
+  const unordered_map<SizeType, Expr>& comp_map
 ) const
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   return Expr{mgr.compose(root(), comp_map)};
 }
 
@@ -311,50 +329,46 @@ Expr::compose(
 // - comp_list 中に変数の重複が有った場合の動作は不定となる．
 Expr
 Expr::compose(
-  const vector<pair<VarId, Expr>>& comp_list
+  const vector<pair<SizeType, Expr>>& comp_list
 ) const
 {
-  unordered_map<VarId, Expr> comp_map;
+  unordered_map<SizeType, Expr> comp_map;
   for ( auto p: comp_list ) {
-    comp_map[p.first] = p.second;
+    comp_map.emplace(p.first, p.second);
   }
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   return Expr{mgr.compose(root(), comp_map)};
 }
 
 // 与えられた論理式のリテラル番号を再マップする．
 Expr
 Expr::remap_var(
-  const unordered_map<VarId, VarId>& varmap
+  const unordered_map<SizeType, SizeType>& varmap
 ) const
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   return Expr{mgr.remap_var(root(), varmap)};
 }
 
 // 与えられた論理式のリテラル番号を再マップする．
 Expr
 Expr::remap_var(
-  const vector<pair<VarId, VarId>>& varlist
+  const vector<pair<SizeType, SizeType>>& varlist
 ) const
 {
-  unordered_map<VarId, VarId> varmap;
+  unordered_map<SizeType, SizeType> varmap;
   for ( auto p: varlist ) {
-    varmap[p.first] = p.second;
+    varmap.emplace(p.first, p.second);
   }
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   return Expr{mgr.remap_var(root(), varmap)};
 }
 
 // 重複した式を取り除く
-// expr + expr = expr
-// expr + ~expr = 1 のようなもの
-// 自分自身が簡単化された式に置き換わる．
-// 新しい式を返す．
 Expr&
 Expr::simplify()
 {
-  auto& mgr{ExprMgr::the_obj()};
+  auto& mgr = ExprMgr::the_obj();
   set_root(mgr.simplify(root()));
   return *this;
 }
@@ -448,20 +462,16 @@ Expr::is_literal() const
 }
 
 // リテラルの時に変数番号を返す．
-// リテラルでなければ不正な値を返す．
-VarId
+SizeType
 Expr::varid() const
 {
   if ( is_invalid() ) {
-    return VarId::illegal();
+    return BAD_VARID;
   }
   return root()->varid();
 }
 
 // @brief リテラルの取得
-// @return 対象がリテラルの場合リテラルを返す．
-//
-// そうでなければリテラルとして不正な値を返す．
 Literal
 Expr::literal() const
 {
@@ -636,7 +646,7 @@ Expr::literal_num() const
 // 特定の変数のリテラル数を得る．
 SizeType
 Expr::literal_num(
-  VarId varid
+  SizeType varid
 ) const
 {
   if ( is_invalid() ) {
@@ -648,7 +658,7 @@ Expr::literal_num(
 // 特定の変数の特定の極性のリテラル数を得る．
 SizeType
 Expr::literal_num(
-  VarId varid,
+  SizeType varid,
   bool inv
 ) const
 {
@@ -693,7 +703,7 @@ Expr::sop_literal_num() const
 // SOP形式に展開した時の varid 番めの変数のリテラルの出現回数を得る．
 SizeType
 Expr::sop_literal_num(
-  VarId varid
+  SizeType varid
 ) const
 {
   if ( is_invalid() ) {
@@ -707,14 +717,14 @@ Expr::sop_literal_num(
 // の出現回数を得る．
 SizeType
 Expr::sop_literal_num(
-  VarId varid,
+  SizeType varid,
   bool inv
 ) const
 {
   if ( is_invalid() ) {
     return 0;
   }
-  SopLit l = root()->soplit(false, varid, inv);
+  auto l = root()->soplit(false, varid, inv);
   return l.nl();
 }
 
@@ -757,15 +767,15 @@ Expr::restore(
 
   case 2:
     {
-      VarId var;
-      var.restore(s);
+      SizeType var;
+      s >> var;
       return Expr::make_posi_literal(var);
     }
 
   case 3:
     {
-      VarId var;
-      var.restore(s);
+      SizeType var;
+      s >> var;
       return Expr::make_nega_literal(var);
     }
 
@@ -786,15 +796,22 @@ Expr::restore(
   return Expr::make_invalid();
 }
 
-// @relates Expr
-// @brief 論理式の内容を文字列にする．
-// @param[in] expr 論理式
 string
 Expr::to_string() const
 {
   ostringstream os;
   os << *this;
   return os.str();
+}
+
+// @brief 圧縮形式の文字列を出力する．
+string
+Expr::rep_string() const
+{
+  if ( is_valid() ) {
+    return root()->rep_string();
+  }
+  return {};
 }
 
 // @brief バイナリストリームに出力する．
@@ -816,13 +833,13 @@ Expr::dump(
     return;
   }
   if ( is_posi_literal() ) {
-    s << static_cast<ymuint8>(2);
-    varid().dump(s);
+    s << static_cast<ymuint8>(2)
+      << varid();
     return;
   }
   if ( is_nega_literal() ) {
-    s << static_cast<ymuint8>(3);
-    varid().dump(s);
+    s << static_cast<ymuint8>(3)
+      << varid();
     return;
   }
 

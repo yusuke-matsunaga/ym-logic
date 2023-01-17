@@ -5,11 +5,10 @@
 /// @brief TvFunc のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2016, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2016-2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/VarId.h"
 #include "ym/Literal.h"
 #include "ym/SopCover.h"
 #include "ym/BinEnc.h"
@@ -120,7 +119,7 @@ public:
     SizeType ni ///< [in] 入力数
   )
   {
-    return TvFunc(ni);
+    return TvFunc{ni};
   }
 
   /// @brief 恒真関数を作る．
@@ -132,7 +131,7 @@ public:
   )
   {
     // 2番目の引数はダミー
-    return TvFunc(ni, 0);
+    return TvFunc{ni, 0};
   }
 
   /// @brief リテラル関数を作る．
@@ -140,14 +139,14 @@ public:
   static
   TvFunc
   make_literal(
-    SizeType ni, ///< [in] 入力数
-    VarId varid, ///< [in] リテラルの変数番号
-    bool inv     ///< [in] 反転属性
-                 ///<   - false: 反転なし (正極性)
-                 ///<   - true:  反転あり (負極性)
+    SizeType ni,    ///< [in] 入力数
+    SizeType varid, ///< [in] リテラルの変数番号
+    bool inv        ///< [in] 反転属性
+                    ///<   - false: 反転なし (正極性)
+                    ///<   - true:  反転あり (負極性)
   )
   {
-    return TvFunc(ni, varid, inv);
+    return TvFunc{ni, varid, inv};
   }
 
   /// @brief リテラル関数を作る．
@@ -159,7 +158,7 @@ public:
     Literal lit  ///< [in] リテラル
   )
   {
-    return TvFunc(ni, lit.varid(), lit.is_negative());
+    return TvFunc{ni, lit.varid(), lit.is_negative()};
   }
 
   /// @brief 肯定のリテラル関数を作る．
@@ -167,11 +166,11 @@ public:
   static
   TvFunc
   make_posi_literal(
-    SizeType ni, ///< [in] 入力数
-    VarId varid  ///< [in] リテラルの変数番号
+    SizeType ni,   ///< [in] 入力数
+    SizeType varid ///< [in] リテラルの変数番号
   )
   {
-    return TvFunc(ni, varid, false);
+    return TvFunc{ni, varid, false};
   }
 
   /// @brief 否定のリテラル関数を作る．
@@ -179,11 +178,11 @@ public:
   static
   TvFunc
   make_nega_literal(
-    SizeType ni, ///< [in] 入力数
-    VarId varid  ///< [in] リテラルの変数番号
+    SizeType ni,   ///< [in] 入力数
+    SizeType varid ///< [in] リテラルの変数番号
   )
   {
-    return TvFunc(ni, varid, true);
+    return TvFunc{ni, varid, true};
   }
 
 
@@ -196,7 +195,14 @@ public:
   TvFunc
   invert() const
   {
-    return TvFunc(*this).invert_int();
+    return TvFunc{*this}.invert_int();
+  }
+
+  /// @brief invert() の別名
+  TvFunc
+  operator~() const
+  {
+    return invert();
   }
 
   /// @brief 論理積を返す．
@@ -205,7 +211,7 @@ public:
     const TvFunc& right ///< [in] オペランド
   ) const
   {
-    return TvFunc(*this).and_int(right);
+    return TvFunc{*this}.and_int(right);
   }
 
   /// @brief 論理和を返す．
@@ -214,7 +220,7 @@ public:
     const TvFunc& right ///< [in] オペランド
   ) const
   {
-    return TvFunc(*this).or_int(right);
+    return TvFunc{*this}.or_int(right);
   }
 
   /// @brief 排他的論理和を返す．
@@ -223,7 +229,7 @@ public:
     const TvFunc& right ///< [in] オペランド
   ) const
   {
-    return TvFunc(*this).xor_int(right);
+    return TvFunc{*this}.xor_int(right);
   }
 
 
@@ -263,10 +269,10 @@ public:
   /// @return 自身への参照を返す．
   TvFunc&
   cofactor_int(
-    VarId varid, ///< [in] 変数番号
-    bool inv     ///< [in] 反転属性
-                 ///<  - false: 反転なし (正極性)
-                 ///<  - true:  反転あり (負極性)
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 反転属性
+                    ///<  - false: 反転なし (正極性)
+                    ///<  - true:  反転あり (負極性)
   );
 
 
@@ -372,14 +378,14 @@ public:
   /// @brief 1次の Walsh 係数を求める．
   int
   walsh_1(
-    VarId varid ///< [in] 変数
+    SizeType varid ///< [in] 変数
   ) const;
 
   /// @brief 2次の Walsh 係数を求める．
   int
   walsh_2(
-    VarId var1, ///< [in] 第1変数
-    VarId var2  ///< [in] 第2変数
+    SizeType var1, ///< [in] 第1変数
+    SizeType var2  ///< [in] 第2変数
   ) const;
 
   /// @brief 0次と 1次の Walsh 係数を求める．
@@ -408,16 +414,16 @@ public:
   /// @brief 重み別の 1 次の Walsh 係数を求める．
   int
   walsh_w1(
-    VarId var, ///< [in] 変数
-    int w,     ///< [in] 重み
-    bool oinv, ///< [in] 出力の反転属性
-    int ibits  ///< [in] 入力の反転属性のビットベクタ
+    SizeType var, ///< [in] 変数
+    int w,        ///< [in] 重み
+    bool oinv,    ///< [in] 出力の反転属性
+    int ibits     ///< [in] 入力の反転属性のビットベクタ
   ) const;
 
   /// @brief var がサポートの時 true を返す．
   bool
   check_sup(
-    VarId var ///< [in] 変数
+    SizeType var ///< [in] 変数
   ) const;
 
   /// @brief unateness を調べる．
@@ -427,14 +433,14 @@ public:
   /// @retval 3 independent
   int
   check_unate(
-    VarId varid ///< [in] 変数
+    SizeType varid ///< [in] 変数
   ) const;
 
   /// @brief var1 と var2 が対称のとき true を返す．
   bool
   check_sym(
-    VarId var1,      ///< [in] 第1変数
-    VarId var2,      ///< [in] 第2変数
+    SizeType var1,   ///< [in] 第1変数
+    SizeType var2,   ///< [in] 第2変数
     bool inv = false ///< [in] 反転属性
   ) const;
 
@@ -516,13 +522,13 @@ public:
   /// @brief コファクターを返す．
   TvFunc
   cofactor(
-    VarId varid, ///< [in] 変数番号
-    bool inv     ///< [in] 極性
-                 ///<  - false: 反転なし (正極性)
-                 ///<  - true:  反転あり (負極性)
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 極性
+                    ///<  - false: 反転なし (正極性)
+                    ///<  - true:  反転あり (負極性)
   ) const
   {
-    return TvFunc(*this).cofactor_int(varid, inv);
+    return TvFunc{*this}.cofactor_int(varid, inv);
   }
 
   /// @brief npnmap に従った変換を行う．
@@ -624,11 +630,11 @@ private:
   /// @param[in] varid 変数番号
   /// @param[in] inv 極性
   TvFunc(
-    SizeType ni, ///< [in] 入力数
-    VarId varid, ///< [in] 変数
-    bool inv     ///< [in] 反転属性
-                 ///< - false: 反転なし (正極性)
-                 ///< - true:  反転あり (負極性)
+    SizeType ni,    ///< [in] 入力数
+    SizeType varid, ///< [in] 変数
+    bool inv        ///< [in] 反転属性
+                    ///< - false: 反転なし (正極性)
+                    ///< - true:  反転あり (負極性)
   );
 
   /// @brief コファクターマスクを得る．
@@ -702,25 +708,14 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /// @relates TvFunc
-/// @brief 否定を求める．
+/// @brief 否定を求める
 inline
 TvFunc
 operator~(
-  const TvFunc& src ///< [in] オペランド
+  const TvFunc&& right ///< [in] オペランド
 )
 {
-  return TvFunc(src).invert_int();
-}
-
-/// @relates TvFunc
-/// @brief 否定を求める．
-inline
-TvFunc
-operator~(
-  const TvFunc&& src ///< [in] オペランド
-)
-{
-  return TvFunc(src).invert_int();
+  return TvFunc{right}.invert_int();
 }
 
 /// @relates TvFunc
@@ -732,7 +727,7 @@ operator&(
   const TvFunc& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).and_int(right);
+  return TvFunc{left}.and_op(right);
 }
 
 /// @relates TvFunc
@@ -744,7 +739,7 @@ operator&(
   const TvFunc& right  ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).and_int(right);
+  return TvFunc{left}.and_int(right);
 }
 
 /// @relates TvFunc
@@ -756,7 +751,7 @@ operator&(
   const TvFunc&& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(right).and_int(left);
+  return TvFunc{right}.and_int(left);
 }
 
 /// @relates TvFunc
@@ -768,7 +763,7 @@ operator&(
   const TvFunc&& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).and_int(right);
+  return TvFunc{left}.and_int(right);
 }
 
 /// @relates TvFunc
@@ -780,7 +775,7 @@ operator|(
   const TvFunc& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).or_int(right);
+  return TvFunc{left}.or_op(right);
 }
 
 /// @relates TvFunc
@@ -828,7 +823,7 @@ operator^(
   const TvFunc& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).xor_int(right);
+  return TvFunc{left}.xor_op(right);
 }
 
 /// @relates TvFunc

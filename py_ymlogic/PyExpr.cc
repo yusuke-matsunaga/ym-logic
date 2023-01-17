@@ -49,7 +49,7 @@ Expr_new(
   Expr src_expr;
   if ( expr_str != nullptr ) {
     try {
-      src_expr = Expr::from_string(expr_str);
+      src_expr = Expr::from_rep_string(expr_str);
     }
     catch ( std::invalid_argument& err ) {
       PyErr_SetString(PyExc_ValueError, err.what());
@@ -74,6 +74,17 @@ Expr_dealloc(
 // repr() 関数
 PyObject*
 Expr_repr(
+  PyObject* self
+)
+{
+  auto expr = PyExpr::_get(self);
+  auto tmp_str = expr.rep_string();
+  return Py_BuildValue("s", tmp_str.c_str());
+}
+
+// str() 関数
+PyObject*
+Expr_str(
   PyObject* self
 )
 {
@@ -131,7 +142,7 @@ Expr_make_literal(
 				    &id, &inv) ) {
     return nullptr;
   }
-  auto expr = Expr::make_literal(VarId{static_cast<SizeType>(id)}, inv);
+  auto expr = Expr::make_literal(static_cast<SizeType>(id), inv);
   return PyExpr::ToPyObject(expr);
 }
 
@@ -145,7 +156,7 @@ Expr_make_posi_literal(
   if ( !PyArg_ParseTuple(args, "i", &id) ) {
     return nullptr;
   }
-  auto expr = Expr::make_posi_literal(VarId{static_cast<SizeType>(id)});
+  auto expr = Expr::make_posi_literal(static_cast<SizeType>(id));
   return PyExpr::ToPyObject(expr);
 }
 
@@ -159,7 +170,7 @@ Expr_make_nega_literal(
   if ( !PyArg_ParseTuple(args, "i", &id) ) {
     return nullptr;
   }
-  auto expr = Expr::make_nega_literal(VarId{static_cast<SizeType>(id)});
+  auto expr = Expr::make_nega_literal(static_cast<SizeType>(id));
   return PyExpr::ToPyObject(expr);
 }
 
@@ -249,7 +260,7 @@ Expr_compose(
 			 PyDict_Type, &dict_obj) ) {
     return nullptr;
   }
-  unordered_map<VarId, Expr> comp_map;
+  unordered_map<SizeType, Expr> comp_map;
   PyObject* key;
   PyObject* value;
   Py_ssize_t pos = 0;
@@ -263,7 +274,7 @@ Expr_compose(
       return nullptr;
     }
     auto expr1 = PyExpr::_get(value);
-    comp_map.emplace(VarId{static_cast<SizeType>(id)}, expr1);
+    comp_map.emplace(static_cast<SizeType>(id), expr1);
   }
   auto expr = PyExpr::_get(self);
   auto ans_expr = expr.compose(comp_map);
@@ -571,8 +582,7 @@ Expr_varid(
 {
   auto expr = PyExpr::_get(self);
   auto varid = expr.varid();
-  auto val = varid.val();
-  return PyLong_FromLong(val);
+  return PyLong_FromLong(varid);
 }
 
 PyObject*
@@ -593,6 +603,17 @@ Expr_operand_list(
 }
 
 PyObject*
+Expr_input_size(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto expr = PyExpr::_get(self);
+  auto ans = expr.input_size();
+  return PyLong_FromLong(ans);
+}
+
+PyObject*
 Expr_literal_num(
   PyObject* self,
   void* Py_UNUSED(closure)
@@ -603,12 +624,51 @@ Expr_literal_num(
   return PyLong_FromLong(ans);
 }
 
+PyObject*
+Expr_sop_literal_num(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto expr = PyExpr::_get(self);
+  auto ans = expr.sop_literal_num();
+  return PyLong_FromLong(ans);
+}
+
 PyGetSetDef Expr_getsetters[] = {
   {"varid", Expr_varid, nullptr, PyDoc_STR("Variable ID"), nullptr},
   {"operand_list", Expr_operand_list, nullptr, PyDoc_STR("operand list"), nullptr},
+  {"input_size", Expr_input_size, nullptr, PyDoc_STR("input size"), nullptr},
   {"literal_num", Expr_literal_num, nullptr, PyDoc_STR("literal count"), nullptr},
+  {"sop_literal_num", Expr_sop_literal_num, nullptr, PyDoc_STR("literal count in SOP format"), nullptr},
   {nullptr, nullptr, nullptr, nullptr}
 };
+
+// 比較関数
+PyObject*
+Expr_richcmpfunc(
+  PyObject* self,
+  PyObject* other,
+  int op
+)
+{
+  if ( !PyExpr::_check(self) ||
+       !PyExpr::_check(other) ) {
+    goto not_implemented;
+  }
+  {
+    auto expr1 = PyExpr::_get(self);
+    auto expr2 = PyExpr::_get(other);
+    if ( op == Py_EQ ) {
+      return PyBool_FromLong(expr1 == expr2);
+    }
+    if ( op == Py_NE ) {
+      return PyBool_FromLong(expr1 != expr2);
+    }
+  }
+ not_implemented:
+  Py_RETURN_NOTIMPLEMENTED;
+}
 
 // 否定演算(単項演算の例)
 PyObject*
@@ -694,10 +754,12 @@ PyExpr::init(
   ExprType.tp_dealloc = Expr_dealloc;
   ExprType.tp_flags = Py_TPFLAGS_DEFAULT;
   ExprType.tp_doc = PyDoc_STR("Expr object");
+  ExprType.tp_richcompare = Expr_richcmpfunc;;
   ExprType.tp_methods = Expr_methods;
   ExprType.tp_getset = Expr_getsetters;
   ExprType.tp_new = Expr_new;
   ExprType.tp_repr = Expr_repr;
+  ExprType.tp_str = Expr_str;
   ExprType.tp_as_number = &Expr_number;
 
   // 型オブジェクトの登録

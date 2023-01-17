@@ -25,30 +25,64 @@ class ExprNodePtr
 public:
 
   /// @brief コンストラクタ
-  /// @param[in] ptr Cポインタ
-  ExprNodePtr(const ExprNode* ptr = nullptr);
+  ExprNodePtr(
+    const ExprNode* ptr = nullptr ///< [in] Cポインタ
+  ) : mPtr{ptr}
+  {
+    if ( mPtr ) {
+      mPtr->inc_ref();
+    }
+  }
 
   /// @brief コピーコンストラクタ
-  /// @param[in] src コピー元のオブジェクト
-  ExprNodePtr(const ExprNodePtr& src);
+  ExprNodePtr(
+    const ExprNodePtr& src ///< [in] コピー元のオブジェクト
+  ) : mPtr{src.mPtr}
+  {
+    if ( mPtr ) {
+      mPtr->inc_ref();
+    }
+  }
 
   /// @brief 代入演算子
-  /// @param[in] src 代入元のオブジェクト
   ExprNodePtr&
-  operator=(const ExprNodePtr& src);
+  operator=(
+    const ExprNodePtr& src ///< [in] 代入元のオブジェクト
+  )
+  {
+    if ( src.mPtr ) {
+      src.mPtr->inc_ref();
+    }
+    if ( mPtr ) {
+      mPtr->dec_ref();
+    }
+    mPtr = src.mPtr;
+    return *this;
+  }
 
   /// @brief デストラクタ
-  ~ExprNodePtr();
+  ~ExprNodePtr()
+  {
+    if ( mPtr ) {
+      mPtr->dec_ref();
+    }
+  }
 
 
 public:
 
   /// @brief 中身を取り出す演算子
-  operator const ExprNode*() const;
+  operator const ExprNode*() const
+  {
+    return mPtr;
+  }
 
   /// @brief 中身を取り出す演算子
   const ExprNode*
-  operator->() const;
+  operator->() const
+  {
+    return mPtr;
+  }
 
 
 private:
@@ -62,73 +96,6 @@ private:
 };
 
 typedef vector<ExprNodePtr> ExprNodeList;
-
-
-//////////////////////////////////////////////////////////////////////
-// インライン関数の定義
-//////////////////////////////////////////////////////////////////////
-
-// @brief コンストラクタ
-// @param[in] ptr Cポインタ
-inline
-ExprNodePtr::ExprNodePtr(const ExprNode* ptr) :
-  mPtr{ptr}
-{
-  if ( mPtr ) {
-    mPtr->inc_ref();
-  }
-}
-
-// @brief コピーコンストラクタ
-// @param[in] src コピー元のオブジェクト
-inline
-ExprNodePtr::ExprNodePtr(const ExprNodePtr& src) :
-  mPtr{src.mPtr}
-{
-  if ( mPtr ) {
-    mPtr->inc_ref();
-  }
-}
-
-// @brief 代入演算子
-// @param[in] src 代入元のオブジェクト
-inline
-ExprNodePtr&
-ExprNodePtr::operator=(const ExprNodePtr& src)
-{
-  if ( src.mPtr ) {
-    src.mPtr->inc_ref();
-  }
-  if ( mPtr ) {
-    mPtr->dec_ref();
-  }
-  mPtr = src.mPtr;
-  return *this;
-}
-
-// @brief デストラクタ
-inline
-ExprNodePtr::~ExprNodePtr()
-{
-  if ( mPtr ) {
-    mPtr->dec_ref();
-  }
-}
-
-// @brief 中身を取り出す演算子
-inline
-ExprNodePtr::operator const ExprNode*() const
-{
-  return mPtr;
-}
-
-// @brief 中身を取り出す演算子
-inline
-const ExprNode*
-ExprNodePtr::operator->() const
-{
-  return mPtr;
-}
 
 END_NAMESPACE_YM_LOGIC
 

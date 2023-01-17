@@ -60,18 +60,18 @@ BddMgr::one()
 // @brief リテラル関数を作る．
 Bdd
 BddMgr::literal(
-  VarId var,
+  SizeType var,
   bool inv
 )
 {
-  auto e = mImpl->make_literal(var.val()) ^ inv;
+  auto e = mImpl->make_literal(var) ^ inv;
   return Bdd{impl(), e};
 }
 
 // @brief 肯定のリテラル関数を作る．
 Bdd
 BddMgr::posi_literal(
-  VarId var
+  SizeType var
 )
 {
   return literal(var, false);
@@ -80,7 +80,7 @@ BddMgr::posi_literal(
 // @brief 否定のリテラル関数を作る．
 Bdd
 BddMgr::nega_literal(
-  VarId var
+  SizeType var
 )
 {
   return literal(var, true);

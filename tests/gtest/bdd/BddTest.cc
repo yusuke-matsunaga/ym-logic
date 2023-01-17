@@ -3,7 +3,7 @@
 /// @brief Bdd/BddMgr のユニットテスト用テストフィクスチャ
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include <gtest/gtest.h>
@@ -71,8 +71,8 @@ BddTest::check(
 void
 BddTest::test_check_sym(
   const Bdd& bdd,
-  VarId var1,
-  VarId var2
+  SizeType var1,
+  SizeType var2
 )
 {
   auto lit1 = mMgr.literal(var1);
@@ -96,7 +96,7 @@ BddTest::test_check_sym(
 void
 BddTest::test_check_sup(
   const Bdd& bdd,
-  VarId var
+  SizeType var
 )
 {
   auto lit1 = mMgr.literal(var);
@@ -120,14 +120,13 @@ BddTest::test_support(
   auto var_list = sup.to_varlist();
   vector<bool> sup_mark(max_v, false);
   for ( auto var: var_list ) {
-    sup_mark[var.val()] = true;
+    sup_mark[var] = true;
   }
 
-  for ( SizeType i = 0; i < max_v; ++ i ) {
-    VarId var{i};
+  for ( SizeType var = 0; var < max_v; ++ var ) {
     ostringstream buf;
     buf << ", where var = " << var;
-    EXPECT_EQ( sup_mark[i], bdd.check_sup(var) ) << buf.str();
+    EXPECT_EQ( sup_mark[var], bdd.check_sup(var) ) << buf.str();
   }
 }
 

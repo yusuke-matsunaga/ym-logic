@@ -17,22 +17,22 @@ BEGIN_NAMESPACE_YM_BDD
 // @brief 与えられた変数がサポートの時 true を返す．
 bool
 Bdd::check_sup(
-  VarId var
+  SizeType var
 ) const
 {
-  CheckSupOp op{var.val()};
+  CheckSupOp op{var};
   return op.op_step(mRoot);
 }
 
 // @brief 与えられた変数に対して対称の時 true を返す．
 bool
 Bdd::check_sym(
-  VarId var1,
-  VarId var2,
+  SizeType var1,
+  SizeType var2,
   bool inv
 ) const
 {
-  CheckSymOp op{var1.val(), var2.val(), inv};
+  CheckSymOp op{var1, var2, inv};
   return op.op_step(mRoot);
 }
 

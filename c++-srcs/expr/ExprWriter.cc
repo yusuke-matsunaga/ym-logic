@@ -17,7 +17,7 @@ ostream&
 ExprWriter::dump(
   ostream& s,
   const Expr& expr,
-  const unordered_map<VarId, string>& var_names
+  const unordered_map<SizeType, string>& var_names
 ) const
 {
   if ( expr.is_invalid() ) {
@@ -36,7 +36,7 @@ ExprWriter::dump(
   const Expr& expr
 ) const
 {
-  dump(s, expr, unordered_map<VarId, string>());
+  dump(s, expr, unordered_map<SizeType, string>());
   return s;
 }
 
@@ -55,7 +55,7 @@ ExprWriter::dump_to_string(
 string
 ExprWriter::dump_to_string(
   const Expr& expr,
-  const unordered_map<VarId, string>& var_names
+  const unordered_map<SizeType, string>& var_names
 ) const
 {
   ostringstream buf;
@@ -122,7 +122,7 @@ operator<<(
 {
   ExprWriter writer;
   // 空の map を渡す
-  return writer.dump(s, expr, unordered_map<VarId, string>());
+  return writer.dump(s, expr, unordered_map<SizeType, string>());
 }
 
 
@@ -131,7 +131,7 @@ void
 ExprWriter::dump_sub(
   ostream& s,
   const Expr& expr,
-  const unordered_map<VarId, string>& var_names
+  const unordered_map<SizeType, string>& var_names
 ) const
 {
   if ( expr.is_zero() ) {
@@ -144,7 +144,7 @@ ExprWriter::dump_sub(
     if ( expr.is_nega_literal() ) {
       s << not_str();
     }
-    VarId id{expr.varid()};
+    auto id = expr.varid();
     if ( var_names.count(id) > 0 ) {
       auto ans{var_names.at(id)};
       s << ans;

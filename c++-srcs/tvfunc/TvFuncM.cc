@@ -3,9 +3,8 @@
 /// @brief TvFuncM の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2018 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2018, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/TvFuncM.h"
 #include "ym/NpnMapM.h"
@@ -327,17 +326,16 @@ TvFuncM::xor_int(
 // @return 自身への参照を返す．
 TvFuncM&
 TvFuncM::cofactor_int(
-  VarId varid,
+  SizeType varid,
   bool inv
 )
 {
-  int pos = varid.val();
-  if ( pos < NIPW ) {
-    TvFuncM::WordType mask = c_masks[pos];
+  if ( varid < NIPW ) {
+    TvFuncM::WordType mask = c_masks[varid];
     if ( inv ) {
       mask = ~mask;
     }
-    int shift = 1 << pos;
+    int shift = 1 << varid;
     for ( int b: Range(mBlockNum) ) {
       TvFuncM::WordType pat = mVector[b] & mask;
       if ( inv ) {
@@ -350,8 +348,8 @@ TvFuncM::cofactor_int(
     }
   }
   else {
-    pos -= NIPW;
-    int bit = 1U << pos;
+    varid -= NIPW;
+    int bit = 1U << varid;
     for ( int i: Range(mOutputNum) ) {
       int offset = i * mBlockNum1;
       for ( int b: Range(mBlockNum1) ) {
@@ -375,13 +373,12 @@ TvFuncM::cofactor_int(
 // @param[in] ovar 出力番号
 TvFunc
 TvFuncM::slice(
-  VarId ovar
+  SizeType ovar
 ) const
 {
 #if 1
   TvFunc ans(input_num());
-  int pos = ovar.val();
-  int offset = mBlockNum1 * pos;
+  int offset = mBlockNum1 * ovar;
   for ( int b: Range(mBlockNum1) ) {
     ans.mVector[b] = mVector[b + offset];
   }
@@ -401,14 +398,13 @@ TvFuncM::slice(
 // var がサポートの時 true を返す．
 bool
 TvFuncM::check_sup(
-  VarId var
+  SizeType var
 ) const
 {
-  int i = var.val();
-  if ( i < NIPW ) {
+  if ( var < NIPW ) {
     // ブロックごとにチェック
-    int dist = 1U << i;
-    TvFuncM::WordType mask = c_masks[i];
+    int dist = 1U << var;
+    TvFuncM::WordType mask = c_masks[var];
     for ( int b: Range(mBlockNum) ) {
       TvFuncM::WordType word = mVector[b];
       if ( (word ^ (word << dist)) & mask ) {
@@ -418,10 +414,10 @@ TvFuncM::check_sup(
   }
   else {
     // ブロック単位でチェック
-    int i5 = i - NIPW;
+    int i5 = var - NIPW;
     int check = 1 << i5;
     for ( int i: Range(mOutputNum) ) {
-      int offset = i * mBlockNum1;
+      int offset = var * mBlockNum1;
       for ( int b: Range(mBlockNum1) ) {
 	if ( (b & check) &&
 	     (mVector[b + offset] != mVector[(b ^ check) + offset]) ) {
@@ -436,29 +432,24 @@ TvFuncM::check_sup(
 // var1 と var2 の変数が対称のとき true を返す．
 bool
 TvFuncM::check_sym(
-  VarId var1,
-  VarId var2,
+  SizeType var1,
+  SizeType var2,
   bool inv
 ) const
 {
-  int i = var1.val();
-  int j = var2.val();
-
-  // i と j を正規化する．
-  if ( i < j ) {
-    int tmp = i;
-    i = j;
-    j = tmp;
+  // var1 と var2 を正規化する．
+  if ( var1 < var2 ) {
+    std::swap(var1, var2);
   }
-  // ここ以降では必ず i > j が成り立つ．
+  // ここ以降では必ず var1 > var2 が成り立つ．
 
   bool ans = true;
-  if ( j >= NIPW ) {
-    // i >= NIPW (実際には i > NIPW)
-    // j >= NIPW
+  if ( var2 >= NIPW ) {
+    // var1 >= NIPW
+    // var2 >= NIPW
     // ブロック単位で比較する．
-    int mask_i = (1 << (i - NIPW));
-    int mask_j = (1 << (j - NIPW));
+    int mask_i = (1 << (var1 - NIPW));
+    int mask_j = (1 << (var2 - NIPW));
     int mask_all = mask_i | mask_j;
     int cond = inv ? 0 : mask_j;
     for ( int i: Range(mOutputNum) ) {
@@ -472,13 +463,13 @@ TvFuncM::check_sym(
       }
     }
   }
-  else if ( i >= NIPW ) {
-    // i >= NIPW
-    // j < NIPW
-    int mask_i = (1U << (i - NIPW));
+  else if ( var1 >= NIPW ) {
+    // var1 >= NIPW
+    // var2 < NIPW
+    int mask_i = (1U << (var1 - NIPW));
     int cond = inv ? 0UL : mask_i;
-    TvFuncM::WordType mask2 = ~c_masks[j];
-    int s = 1 << j;
+    TvFuncM::WordType mask2 = ~c_masks[var2];
+    int s = 1 << var2;
     for ( int i: Range(mOutputNum) ) {
       int offset = i * mBlockNum1;
       for ( int v: Range(mBlockNum1) ) {
@@ -491,11 +482,11 @@ TvFuncM::check_sym(
     }
   }
   else {
-    // i < NIPW
-    // j < NIPW
+    // var1 < NIPW
+    // var2 < NIPW
     if ( inv ) {
-      TvFuncM::WordType mask = sym_masks3[(i * (i - 1)) / 2 + j];
-      int s = (1U << i) + (1U << j);
+      TvFuncM::WordType mask = sym_masks3[(var1 * (var1 - 1)) / 2 + var2];
+      int s = (1U << var1) + (1U << var2);
       for ( int b: Range(mBlockNum) ) {
 	TvFuncM::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
@@ -505,8 +496,8 @@ TvFuncM::check_sym(
       }
     }
     else {
-      TvFuncM::WordType mask = sym_masks2[(i * (i - 1)) / 2 + j];
-      int s = (1U << i) - (1U << j);
+      TvFuncM::WordType mask = sym_masks2[(var1 * (var1 - 1)) / 2 + var2];
+      int s = (1U << var1) - (1U << var2);
       for ( int b: Range(mBlockNum) ) {
 	TvFuncM::WordType word = mVector[b];
 	if ( ((word >> s) ^ word) & mask ) {
@@ -535,24 +526,20 @@ TvFuncM::xform(
 
   SizeType imask = 0;
   SizeType ipat[kMaxNi];
-  for ( SizeType i: Range(mInputNum) ) {
-    VarId src_var(i);
+  for ( SizeType src_var: Range(mInputNum) ) {
     NpnVmap imap = npnmap.imap(src_var);
     if ( imap.inv() ) {
-      imask |= (1UL << i);
+      imask |= (1UL << src_var);
     }
-    VarId dst_var = imap.var();
-    int j = dst_var.val();
-    ipat[i] = 1 << j;
+    auto dst_var = imap.var();
+    ipat[src_var] = 1 << dst_var;
   }
 
   TvFuncM ans(mInputNum, mOutputNum);
 
-  for ( int o: Range(mOutputNum) ) {
-    VarId src_var(o);
-    NpnVmap omap = npnmap.omap(src_var);
-    VarId dst_var = omap.var();
-    int dst_pos = dst_var.val();
+  for ( SizeType src_var: Range(mOutputNum) ) {
+    auto omap = npnmap.omap(src_var);
+    auto dst_var = omap.var();
     TvFuncM::WordType omask = omap.inv() ? 1ULL : 0ULL;
     for ( SizeType p: Range(ni_pow) ) {
       SizeType new_p = 0;
@@ -563,8 +550,8 @@ TvFuncM::xform(
 	}
 	tmp >>= 1;
       }
-      TvFuncM::WordType pat = (value(VarId(o), p ^ imask) ^ omask);
-      ans.mVector[block(new_p) + dst_pos * mBlockNum1] |= pat << shift(new_p);
+      TvFuncM::WordType pat = (value(src_var, p ^ imask) ^ omask);
+      ans.mVector[block(new_p) + dst_var * mBlockNum1] |= pat << shift(new_p);
     }
   }
 

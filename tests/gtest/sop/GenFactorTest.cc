@@ -3,9 +3,8 @@
 /// @brief GenFactorTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2018, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include <gtest/gtest.h>
 #include "GenFactor.h"
@@ -20,16 +19,16 @@ TEST(GenFactorTest, quick_factor)
 {
   const int nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   Literal lit_a(var0, false);
   Literal lit_b(var1, false);
@@ -89,16 +88,16 @@ TEST(GenFactorTest, good_factor)
 {
   const int nv = 10;
 
-  VarId var0(0);
-  VarId var1(1);
-  VarId var2(2);
-  VarId var3(3);
-  VarId var4(4);
-  VarId var5(5);
-  VarId var6(6);
-  VarId var7(7);
-  VarId var8(8);
-  VarId var9(9);
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
 
   Literal lit_a(var0, false);
   Literal lit_b(var1, false);

@@ -3,9 +3,8 @@
 /// @brief NpnMgrTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017 Yusuke Matsunaga
+/// Copyright (C) 2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "gtest/gtest.h"
 #include "NpnMgr.h"
@@ -152,7 +151,7 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	    map.set_oinv(oinv);
 	    for ( int i: Range(ni) ) {
 	      bool iinv = (ip & (1U << i)) ? true : false;
-	      map.set(VarId(i), VarId(pg(i)), iinv);
+	      map.set(i, pg(i), iinv);
 	    }
 	    TvFunc f1 = f.xform(map);
 	    func_hash.insert(f1);
@@ -276,7 +275,7 @@ TEST_P(NpnMgrRandomTest, func_test)
 	  map.set_oinv(oinv);
 	  for ( int i: Range(ni) ) {
 	    bool iinv = rd2(mRandGen) ? true : false;
-	    map.set(VarId(i), VarId(dst_map[i]), iinv);
+	    map.set(i, dst_map[i], iinv);
 	  }
 	  TvFunc f1 = f.xform(map);
 
@@ -355,10 +354,10 @@ TEST(NpnMgrTest1, bug3)
   TvFunc cfunc = npnmgr.cannonical(func);
 
   NpnMap map1(4);
-  map1.set(VarId(0), VarId(0), false);
-  map1.set(VarId(1), VarId(1), false);
-  map1.set(VarId(2), VarId(3), false);
-  map1.set(VarId(3), VarId(2), false);
+  map1.set(0, 0, false);
+  map1.set(1, 1, false);
+  map1.set(2, 3, false);
+  map1.set(3, 2, false);
 
   TvFunc func1 = func.xform(map1);
 
@@ -375,10 +374,10 @@ TEST(NpnMgrTest1, bug4)
   TvFunc cfunc = npnmgr.cannonical(func);
 
   NpnMap map1(4);
-  map1.set(VarId(0), VarId(0), false);
-  map1.set(VarId(1), VarId(1), false);
-  map1.set(VarId(2), VarId(3), false);
-  map1.set(VarId(3), VarId(2), false);
+  map1.set(0, 0, false);
+  map1.set(1, 1, false);
+  map1.set(2, 3, false);
+  map1.set(3, 2, false);
 
   TvFunc func1 = func.xform(map1);
 
@@ -427,10 +426,10 @@ TEST(NpnMgrTest1, bug7)
   TvFunc cfunc = npnmgr.cannonical(func);
 
   NpnMap map1(4);
-  map1.set(VarId(0), VarId(0), true);
-  map1.set(VarId(1), VarId(1), false);
-  map1.set(VarId(2), VarId(2), false);
-  map1.set(VarId(3), VarId(3), false);
+  map1.set(0, 0, true);
+  map1.set(1, 1, false);
+  map1.set(2, 2, false);
+  map1.set(3, 3, false);
   map1.set_oinv(false);
   TvFunc func1 = func.xform(map1);
 
@@ -448,8 +447,8 @@ TEST(NpnMgrTest1, bug8)
 
   NpnMap map1(2);
   map1.set_oinv(false);
-  map1.set(VarId(0), VarId(0), true);
-  map1.set(VarId(1), VarId(1), false);
+  map1.set(0, 0, true);
+  map1.set(1, 1, false);
   TvFunc func1 = func.xform(map1);
 
   TvFunc cfunc1 = npnmgr.cannonical(func1);

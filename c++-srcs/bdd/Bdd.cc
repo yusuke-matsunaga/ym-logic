@@ -141,7 +141,7 @@ Bdd::is_one() const
 }
 
 // @brief 根の変数とコファクターを求める．
-VarId
+SizeType
 Bdd::root_decomp(
   Bdd& f0,
   Bdd& f1
@@ -153,28 +153,28 @@ Bdd::root_decomp(
   if ( node == nullptr ) {
     f0 = *this;
     f1 = *this;
-    return VarId::illegal();
+    return BAD_VARID;
   }
   else {
     auto oinv = root.inv();
     f0 = Bdd{mMgr, node->edge0() ^ oinv};
     f1 = Bdd{mMgr, node->edge1() ^ oinv};
-    return VarId{node->index()};
+    return node->index();
   }
 }
 
 // @brief 根の変数を得る．
-VarId
+SizeType
 Bdd::root_var() const
 {
   ASSERT_COND( mMgr != nullptr );
   BddEdge root{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
-    return VarId::illegal();
+    return BAD_VARID;
   }
   else {
-    return VarId{node->index()};
+    return node->index();
   }
 }
 

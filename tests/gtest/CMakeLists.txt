@@ -22,12 +22,6 @@
 #  ターゲットの設定
 # ===================================================================
 
-ym_add_gtest ( logic_VarId_test
-  common/VarIdTest.cc
-  $<TARGET_OBJECTS:ym_base_obj_d>
-  $<TARGET_OBJECTS:ym_logic_obj_d>
-  )
-
 ym_add_gtest ( logic_Literal_test
   common/LiteralTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>

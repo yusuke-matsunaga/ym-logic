@@ -3,9 +3,8 @@
 /// @brief walsh_2_refine の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/TvFunc.h"
 #include "IgPartition.h"
@@ -103,9 +102,11 @@ END_NONAMESPACE
 // @brief 重み別 w2 を用いて変数順序を確定させる．
 // @param[in] var_list 対象の変数リスト
 void
-walsh_2_refine(const TvFunc& func,
-	       VarId var,
-	       IgPartition& igpart)
+walsh_2_refine(
+  const TvFunc& func,
+  SizeType var,
+  IgPartition& igpart
+)
 {
   int ni = func.input_num();
 
@@ -124,7 +125,7 @@ walsh_2_refine(const TvFunc& func,
 	 pos < igpart.partition_end(pid); ++ pos) {
       int gid = igpart.group_id(pos);
       int iid = igpart.input_id(gid);
-      int w2 = func.walsh_2(var, VarId(iid));
+      int w2 = func.walsh_2(var, iid);
       w2_cmp.set_w2(gid, w2);
     }
     int delta = igpart.refine(pid, w2_cmp);

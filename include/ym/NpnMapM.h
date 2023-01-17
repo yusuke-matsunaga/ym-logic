@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/VarId.h"
 #include "ym/NpnVmap.h"
 
 
@@ -93,11 +92,11 @@ public:
   /// @brief 入力の変換内容の設定
   void
   set_imap(
-    VarId src_var, ///< [in] 入力番号
-    VarId dst_var, ///< [in] 変換先の入力番号
-    bool inv       ///< [in] 極性
-                   ///< - false: 反転なし (正極性)
-                   ///< - true:  反転あり (負極性)
+    SizeType src_var, ///< [in] 入力番号
+    SizeType dst_var, ///< [in] 変換先の入力番号
+    bool inv          ///< [in] 極性
+                      ///< - false: 反転なし (正極性)
+                      ///< - true:  反転あり (負極性)
   )
   {
     set_imap(src_var, NpnVmap(dst_var, inv));
@@ -107,18 +106,18 @@ public:
   /// @sa NpnVmap
   void
   set_imap(
-    VarId var,   ///< [in] 入力番号
-    NpnVmap imap ///< [in] 変換情報(変換先の入力番号と極性)
+    SizeType var, ///< [in] 入力番号
+    NpnVmap imap  ///< [in] 変換情報(変換先の入力番号と極性)
   );
 
   /// @brief 出力の変換内容の設定
   void
   set_omap(
-    VarId src_var, ///< [in] 出力番号
-    VarId dst_var, ///< [in] 変換先の出力番号
-    bool inv       ///< [in] 極性
-                   ///< - false: 反転なし (正極性)
-                   ///< - true:  反転あり (負極性)
+    SizeType src_var, ///< [in] 出力番号
+    SizeType dst_var, ///< [in] 変換先の出力番号
+    bool inv          ///< [in] 極性
+                      ///< - false: 反転なし (正極性)
+                      ///< - true:  反転あり (負極性)
   )
   {
     set_omap(src_var, NpnVmap(dst_var, inv));
@@ -128,8 +127,8 @@ public:
   /// @sa NpnVmap
   void
   set_omap(
-    VarId var,   ///< [in] 出力番号
-    NpnVmap omap ///< [in] 変換情報(変換先の出力番号と極性)
+    SizeType var, ///< [in] 出力番号
+    NpnVmap omap  ///< [in] 変換情報(変換先の出力番号と極性)
   );
 
 
@@ -160,12 +159,11 @@ public:
   /// @sa NpnVmap
   NpnVmap
   imap(
-    VarId var ///< [in] 入力番号
+    SizeType var ///< [in] 入力番号
   ) const
   {
-    SizeType idx = var.val();
-    if ( idx < input_num() ) {
-      return mMapArray[idx];
+    if ( var < input_num() ) {
+      return mMapArray[var];
     }
     return NpnVmap::invalid();
   }
@@ -177,12 +175,11 @@ public:
   /// @sa NpnVmap
   NpnVmap
   omap(
-    VarId var ///< [in] 出力番号
+    SizeType var ///< [in] 出力番号
   ) const
   {
-    SizeType idx = var.val();
-    if ( idx < output_num() ) {
-      return mMapArray[idx + input_num()];
+    if ( var < output_num() ) {
+      return mMapArray[var + input_num()];
     }
     return NpnVmap::invalid();
   }

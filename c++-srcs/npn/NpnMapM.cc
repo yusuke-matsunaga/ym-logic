@@ -74,9 +74,9 @@ NpnMapM::NpnMapM(
 {
   resize(src.input_num(), 1);
   for ( SizeType i = 0; i < mInputNum; ++ i ) {
-    mMapArray[i] = src.imap(VarId(i));
+    mMapArray[i] = src.imap(i);
   }
-  set_omap(VarId(0), VarId(0), src.oinv());
+  set_omap(0, 0, src.oinv());
 }
 
 // @brief デストラクタ
@@ -122,36 +122,34 @@ NpnMapM::set_identity(
 {
   resize(ni, no);
   for ( SizeType i = 0; i < ni; ++ i ) {
-    set_imap(VarId(i), VarId(i), false);
+    set_imap(i, i, false);
   }
   for ( SizeType i = 0; i < no; ++ i ) {
-    set_omap(VarId(i), VarId(i), false);
+    set_omap(i, i, false);
   }
 }
 
 // @brief 入力の変換内容の設定
 void
 NpnMapM::set_imap(
-  VarId var,
+  SizeType var,
   NpnVmap imap
 )
 {
-  SizeType pos = var.val();
-  if ( pos < input_num() ) {
-    mMapArray[pos] = imap;
+  if ( var < input_num() ) {
+    mMapArray[var] = imap;
   }
 }
 
 // @brief 出力の変換内容の設定
 void
 NpnMapM::set_omap(
-  VarId var,
+  SizeType var,
   NpnVmap omap
 )
 {
-  SizeType pos = var.val();
-  if ( pos < output_num() ) {
-    mMapArray[pos + mInputNum] = omap;
+  if ( var < output_num() ) {
+    mMapArray[var + mInputNum] = omap;
   }
 }
 
@@ -184,25 +182,23 @@ inverse(
 
   NpnMapM ans(ni, no);
 
-  for ( SizeType i = 0; i < ni; ++ i ) {
-    VarId src_var(i);
-    NpnVmap imap = src.imap(src_var);
+  for ( SizeType src_var = 0; src_var < ni; ++ src_var ) {
+    auto imap = src.imap(src_var);
     if ( imap.is_invalid() ) {
       // 不正な値を返す．
       return NpnMapM(ni, no);
     }
-    VarId dst_var = imap.var();
+    auto dst_var = imap.var();
     bool inv = imap.inv();
     ans.set_imap(dst_var, src_var, inv);
   }
-  for (SizeType i = 0; i < no; ++ i) {
-    VarId src_var(i);
-    NpnVmap omap = src.omap(src_var);
+  for (SizeType src_var = 0; src_var < no; ++ src_var) {
+    auto omap = src.omap(src_var);
     if ( omap.is_invalid() ) {
       // 不正な値を返す．
       return NpnMapM(ni, no);
     }
-    VarId dst_var = omap.var();
+    auto dst_var = omap.var();
     bool inv = omap.inv();
     ans.set_omap(dst_var, src_var, inv);
   }
@@ -226,36 +222,34 @@ operator*(
 
   NpnMapM ans(ni, no);
 
-  for (SizeType i = 0; i < ni; ++ i) {
-    VarId var1(i);
-    NpnVmap imap1 = src1.imap(var1);
+  for (SizeType var1 = 0; var1 < ni; ++ var1) {
+    auto imap1 = src1.imap(var1);
     if ( imap1.is_invalid() ) {
       return NpnMapM(ni, no);
     }
-    VarId var2 = imap1.var();
+    auto var2 = imap1.var();
     bool inv2 = imap1.inv();
-    NpnVmap imap2 = src2.imap(var2);
+    auto imap2 = src2.imap(var2);
     if ( imap2.is_invalid() ) {
       return NpnMapM(ni, no);
     }
-    VarId var3 = imap2.var();
+    auto var3 = imap2.var();
     bool inv3 = imap2.inv();
     ans.set_imap(var1, var3, inv2 ^ inv3);
   }
 
-  for (SizeType i = 0; i < no; ++ i) {
-    VarId var1(i);
-    NpnVmap omap1 = src1.omap(var1);
+  for (SizeType var1 = 0; var1 < no; ++ var1) {
+    auto omap1 = src1.omap(var1);
     if ( omap1.is_invalid() ) {
       return NpnMapM(ni, no);
     }
-    VarId var2 = omap1.var();
+    auto var2 = omap1.var();
     bool inv2 = omap1.inv();
-    NpnVmap omap2 = src2.omap(var2);
+    auto omap2 = src2.omap(var2);
     if ( omap2.is_invalid() ) {
       return NpnMapM(ni, no);
     }
-    VarId var3 = omap2.var();
+    auto var3 = omap2.var();
     bool inv3 = omap2.inv();
     ans.set_omap(var1, var3, inv2 ^ inv3);
   }
@@ -277,12 +271,12 @@ operator<<(
     s << comma;
     comma = ", ";
     s << i << " ==> ";
-    NpnVmap imap = map.imap(VarId(i));
+    auto imap = map.imap(i);
     if ( imap.is_invalid() ) {
       s << "--";
     }
     else {
-      VarId dst_var = imap.var();
+      auto dst_var = imap.var();
       bool inv = imap.inv();
       if ( inv ) {
 	s << "~";
@@ -298,12 +292,12 @@ operator<<(
     s << comma;
     comma = ", ";
     s << i << " ==> ";
-    NpnVmap omap = map.omap(VarId(i));
+    auto omap = map.omap(i);
     if ( omap.is_invalid() ) {
       s << "--";
     }
     else {
-      VarId dst_var = omap.var();
+      auto dst_var = omap.var();
       bool inv = omap.inv();
       if ( inv ) {
 	s << "~";
@@ -329,12 +323,12 @@ NpnMapM::dump(
   bos << no;
 
   for ( SizeType i = 0; i < ni; ++ i ) {
-    NpnVmap vmap = imap(VarId(i));
+    auto vmap = imap(i);
     vmap.dump(bos);
   }
 
   for ( SizeType i = 0; i < no; ++ i ) {
-    NpnVmap vmap = omap(VarId(i));
+    auto vmap = omap(i);
     vmap.dump(bos);
   }
 }
@@ -353,13 +347,13 @@ NpnMapM::restore(
   for ( SizeType i = 0; i < ni; ++ i ) {
     NpnVmap vmap;
     vmap.restore(bis);
-    set_imap(VarId(i), vmap);
+    set_imap(i, vmap);
   }
 
   for ( SizeType i = 0; i < no; ++ i ) {
     NpnVmap vmap;
     vmap.restore(bis);
-    set_omap(VarId(i), vmap);
+    set_omap(i, vmap);
   }
 }
 

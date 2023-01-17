@@ -5,9 +5,8 @@
 /// @brief ExprParser のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2014, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/Expr.h"
 
@@ -43,8 +42,10 @@ enum class ExprToken {
 };
 
 /// @brief トークンを出力する．主にデバッグ用
-ostream& operator<<(ostream& s,
-		    ExprToken token);
+ostream& operator<<(
+  ostream& s,
+  ExprToken token
+);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -72,8 +73,9 @@ class ExprParser
 public:
 
   /// @brief コンストラクタ
-  /// @param[in] expr_str 論理式を表す文字列
-  ExprParser(const string& expr_str);
+  ExprParser(
+    const string& expr_str ///< [in] 論理式を表す文字列
+  );
 
   /// @brief デストラクタ
   ~ExprParser();
@@ -85,14 +87,17 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief リテラル文字列からリテラル番号を得る．
-  VarId
-  str_to_literal(const string& str);
+  SizeType
+  str_to_literal(
+    const string& str
+  );
 
   /// @brief トークンを一つ読み出す．
-  /// @param[out] lit_id トークンが ExprToken::NUM の時にはリテラル番号を入れる．
   /// @return 読み出されたトークン値
   ExprToken
-  get_token(VarId& lit_id);
+  get_token(
+    SizeType& lit_id ///< [out] トークンが ExprToken::NUM の時にはリテラル番号を入れる．
+  );
 
   /// @brief 次のトークンが AND ならそれを読み出し true を返す．
   ///
@@ -110,7 +115,9 @@ public:
 
   /// @brief end_token で終わる論理式を読み出し Expr に変換する．
   Expr
-  get_expr(ExprToken end_token);
+  get_expr(
+    ExprToken end_token
+  );
 
 
 private:

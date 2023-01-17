@@ -5,13 +5,12 @@
 /// @brief Literal のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2016, 2017, 2022 Yusuke Matsunaga
+/// Copyright (C) 2005-2011, 2016-2017, 2022-2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym_config.h"
+#include "ym/logic.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
-#include "ym/VarId.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -31,7 +30,7 @@ public:
   Literal
   x()
   {
-    return Literal();
+    return Literal{};
   }
 
   /// @brief デフォルトコンストラクタ
@@ -42,8 +41,8 @@ public:
   /// @brief 変数番号と極性を指定したコンストラクタ
   explicit
   Literal(
-    VarId varid,     ///< [in] 変数番号
-    bool inv = false ///< [in] 極性
+    SizeType varid,  ///< [in] 変数番号
+    bool inv         ///< [in] 極性
                      ///   - false: 反転なし (正極性)
                      ///   - true:  反転あり (負極性)
   )
@@ -58,7 +57,7 @@ public:
     SizeType index ///< [in] 変数番号と極性をエンコードしたもの
   )
   {
-    return Literal(index);
+    return Literal{index};
   }
 
   // コピーコンストラクタ,代入演算子,デストラクタはデフォルト
@@ -73,17 +72,17 @@ public:
   /// @brief 内容を設定する．
   void
   set(
-    VarId varid,     ///< [in] 変数番号
+    SizeType varid,  ///< [in] 変数番号
     bool inv = false ///< [in] 極性
 		     ///   - false: 反転なし (正極性)
 		     ///   - true:  反転あり (負極性)
   )
   {
-    if ( varid.is_valid() ) {
-      mBody = (varid.val() << 1) + static_cast<SizeType>(inv);
+    if ( varid == BAD_VARID ) {
+      mBody = 0;
     }
     else {
-      mBody = static_cast<SizeType>(-1);
+      mBody = (varid << 1) + static_cast<SizeType>(inv);
     }
   }
 
@@ -97,19 +96,19 @@ public:
   bool
   is_valid() const
   {
-    return mBody != static_cast<SizeType>(-1);
+    return mBody != (BAD_VARID << 1);
   }
 
   /// @brief 変数番号を得る．
   /// @return 変数番号
-  VarId
+  SizeType
   varid() const
   {
     if ( is_valid() ) {
-      return VarId(mBody >> 1);
+      return mBody >> 1;
     }
     else {
-      return VarId::illegal();
+      return BAD_VARID;
     }
   }
 
@@ -230,7 +229,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数番号と極性をパックしたもの
-  SizeType mBody{static_cast<SizeType>(-1)};
+  SizeType mBody{BAD_VARID << 1};
 
 };
 

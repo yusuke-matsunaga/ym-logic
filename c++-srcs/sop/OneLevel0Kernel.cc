@@ -3,9 +3,8 @@
 /// @brief OneLevel0Kernel の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2018, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "OneLevel0Kernel.h"
 #include "ym/SopCover.h"
@@ -34,11 +33,12 @@ BEGIN_NONAMESPACE
 // なければ Literal::x() を返す．
 inline
 Literal
-find_literal(const SopCover& f)
+find_literal(
+  const SopCover& f
+)
 {
   int nv = f.variable_num();
-  for ( int i = 0; i < nv; ++ i ) {
-    VarId var(i);
+  for ( int var = 0; var < nv; ++ var ) {
     for ( auto lit: {Literal(var, false), Literal(var, true)} ) {
       int n = f.literal_num(lit);
       if ( n >= 2 ) {
@@ -55,7 +55,9 @@ END_NONAMESPACE
 // @param[in] f 対象の論理式
 // @return 除数を表す論理式を返す．
 SopCover
-OneLevel0Kernel::operator()(const SopCover& f) const
+OneLevel0Kernel::operator()(
+  const SopCover& f
+) const
 {
   if ( f.cube_num() < 2 ) {
     // f をこれ以上割ることはできない．

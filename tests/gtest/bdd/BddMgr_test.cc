@@ -3,7 +3,7 @@
 /// @brief BddMgr のユニットテスト
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include <gtest/gtest.h>
@@ -40,7 +40,7 @@ TEST_F(BddTest, one)
 
 TEST_F(BddTest, literal1)
 {
-  VarId var{0};
+  SizeType var{0};
   Bdd bdd = mMgr.literal(var);
 
   EXPECT_FALSE( bdd.is_invalid() );
@@ -52,7 +52,7 @@ TEST_F(BddTest, literal1)
 
   Bdd f0;
   Bdd f1;
-  VarId var1 = bdd.root_decomp(f0, f1);
+  auto var1 = bdd.root_decomp(f0, f1);
 
   EXPECT_EQ( var1, var );
   EXPECT_TRUE( f0.is_zero() );
@@ -61,7 +61,7 @@ TEST_F(BddTest, literal1)
 
 TEST_F(BddTest, literal2)
 {
-  VarId var{0};
+  SizeType var{0};
   Bdd bdd = mMgr.literal(var, false);
 
   EXPECT_FALSE( bdd.is_invalid() );
@@ -73,7 +73,7 @@ TEST_F(BddTest, literal2)
 
   Bdd f0;
   Bdd f1;
-  VarId var1 = bdd.root_decomp(f0, f1);
+  auto var1 = bdd.root_decomp(f0, f1);
 
   EXPECT_EQ( var1, var );
   EXPECT_TRUE( f0.is_zero() );
@@ -82,7 +82,7 @@ TEST_F(BddTest, literal2)
 
 TEST_F(BddTest, literal3)
 {
-  VarId var{0};
+  SizeType var{0};
   Bdd bdd = mMgr.literal(var, true);
 
   EXPECT_FALSE( bdd.is_invalid() );
@@ -94,7 +94,7 @@ TEST_F(BddTest, literal3)
 
   Bdd f0;
   Bdd f1;
-  VarId var1 = bdd.root_decomp(f0, f1);
+  auto var1 = bdd.root_decomp(f0, f1);
 
   EXPECT_EQ( var1, var );
   EXPECT_TRUE( f0.is_one() );
@@ -103,7 +103,7 @@ TEST_F(BddTest, literal3)
 
 TEST_F(BddTest, posi_literal)
 {
-  VarId var{0};
+  SizeType var{0};
   Bdd bdd = mMgr.posi_literal(var);
 
   EXPECT_FALSE( bdd.is_invalid() );
@@ -115,7 +115,7 @@ TEST_F(BddTest, posi_literal)
 
   Bdd f0;
   Bdd f1;
-  VarId var1 = bdd.root_decomp(f0, f1);
+  auto var1 = bdd.root_decomp(f0, f1);
 
   EXPECT_EQ( var1, var );
   EXPECT_TRUE( f0.is_zero() );
@@ -124,7 +124,7 @@ TEST_F(BddTest, posi_literal)
 
 TEST_F(BddTest, nega_literal)
 {
-  VarId var{0};
+  SizeType var{0};
   Bdd bdd = mMgr.nega_literal(var);
 
   EXPECT_FALSE( bdd.is_invalid() );
@@ -136,7 +136,7 @@ TEST_F(BddTest, nega_literal)
 
   Bdd f0;
   Bdd f1;
-  VarId var1 = bdd.root_decomp(f0, f1);
+  auto var1 = bdd.root_decomp(f0, f1);
 
   EXPECT_EQ( var1, var );
   EXPECT_TRUE( f0.is_one() );

@@ -22,36 +22,55 @@ include_directories(
 # ===================================================================
 
 set ( py_ymlogic_SOURCES
-  PyExpr.cc
-  ymlogic_module.cc
+  py_ymlogic.cc
   )
 
 
 # ===================================================================
-#  library ターゲットの設定
+#  executable ターゲットの設定
 # ===================================================================
 
-ym_add_object_library( py_ymlogic
+add_executable( py_ymlogic
   ${py_ymlogic_SOURCES}
-  )
-
-add_library ( py_ymlogiclib
-  SHARED
   $<TARGET_OBJECTS:py_ymlogic_obj>
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
   )
 
-set_target_properties( py_ymlogiclib
-  PROPERTIES
-  PREFIX ""
-  OUTPUT_NAME "ymlogic"
+target_compile_options( py_ymlogic
+  PRIVATE "-O3"
   )
 
-target_link_libraries( py_ymlogiclib
-  ${YM_LIB_DEPENDS}
+target_compile_definitions( py_ymlogic
+  PRIVATE "-DNODEBUG"
   )
+
+target_link_libraries ( py_ymlogic
+  ${YM_LIB_DEPENDS}
+  ${Python3_LIBRARIES}
+  )
+
+add_executable( py_ymlogic_d
+  ${py_ymlogic_SOURCES}
+  $<TARGET_OBJECTS:py_ymlogic_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  )
+
+target_compile_options( py_ymlogic_d
+  PRIVATE "-g"
+  )
+
+target_link_libraries ( py_ymlogic_d
+  ${YM_LIB_DEPENDS}
+  ${Python3_LIBRARIES}
+  )
+
 
 # ===================================================================
 # テストターゲット
 # ===================================================================
+
+add_test( py_ymlogic_test
+  py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
+  )

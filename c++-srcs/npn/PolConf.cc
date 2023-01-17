@@ -3,9 +3,8 @@
 /// @brief PolConf の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017 Yusuke Matsunaga
+/// Copyright (C) 2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "PolConf.h"
 #include "ym/NpnMap.h"
@@ -16,20 +15,24 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @brief NpnMap に変換する．
 // @param[in] ni 入力数
 NpnMap
-PolConf::to_npnmap(int ni) const
+PolConf::to_npnmap(
+  int ni
+) const
 {
   NpnMap map(ni);
   map.set_oinv(oinv());
   for (int i = 0; i < ni; ++ i) {
-    map.set(VarId(i), VarId(i), iinv(i));
+    map.set(i, i, iinv(i));
   }
   return map;
 }
 
 void
-print_polconf(ostream& s,
-	      const PolConf& polconf,
-	      int ni)
+print_polconf(
+  ostream& s,
+  const PolConf& polconf,
+  int ni
+)
 {
   ymuint32 inv_bits = polconf.iinv_bits();
   for (int i = 0; i < ni; ++ i) {
@@ -51,9 +54,11 @@ print_polconf(ostream& s,
 }
 
 void
-print_polconf_list(ostream& s,
-		   const vector<PolConf>& polconf_list,
-		   int ni)
+print_polconf_list(
+  ostream& s,
+  const vector<PolConf>& polconf_list,
+  int ni
+)
 {
   for (vector<PolConf>::const_iterator p = polconf_list.begin();
        p != polconf_list.end(); ++ p) {

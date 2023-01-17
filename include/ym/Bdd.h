@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/bdd_nsdef.h"
-#include "ym/VarId.h"
 #include "ym/Literal.h"
 #include "ym/BddInfo.h"
 #include "ym/BinEnc.h"
@@ -149,10 +148,10 @@ public:
   /// @return 結果を返す．
   Bdd
   cofactor(
-    VarId var, ///< [in] 変数
-    bool inv   ///< [in] 反転フラグ
-               ///<  - false: 反転なし (正極性)
-               ///<  - true:  反転あり (負極性)
+    SizeType var, ///< [in] 変数
+    bool inv      ///< [in] 反転フラグ
+                  ///<  - false: 反転なし (正極性)
+                  ///<  - true:  反転あり (負極性)
   ) const;
 
   /// @brief コファクターを計算する．
@@ -265,10 +264,10 @@ public:
   /// @return 自分自身への参照を返す．
   Bdd&
   cofactor_int(
-    VarId var, ///< [in] 変数
-    bool inv   ///< [in] 反転フラグ
-               ///<  - false: 反転なし (正極性)
-               ///<  - true:  反転あり (負極性)
+    SizeType var, ///< [in] 変数
+    bool inv      ///< [in] 反転フラグ
+                  ///<  - false: 反転なし (正極性)
+                  ///<  - true:  反転あり (負極性)
   );
 
   /// @brief コファクターを計算して代入する．
@@ -319,7 +318,7 @@ public:
   /// @brief (単一)compose演算
   Bdd
   compose(
-    VarId index,     ///< [in] 対象のインデックス
+    SizeType index,  ///< [in] 対象のインデックス
     const Bdd& cfunc ///< [in] 置き換える関数
   ) const
   {
@@ -329,7 +328,7 @@ public:
   /// @brief (単一)compose演算を行って代入する．
   Bdd&
   compose_int(
-    VarId index,     ///< [in] 対象のインデックス
+    SizeType index,  ///< [in] 対象のインデックス
     const Bdd& cfunc ///< [in] 置き換える関数
   )
   {
@@ -339,13 +338,13 @@ public:
   /// @brief 複合compose演算
   Bdd
   multi_compose(
-    const unordered_map<VarId, Bdd>& compose_map ///< [in] 変換マップ
+    const unordered_map<SizeType, Bdd>& compose_map ///< [in] 変換マップ
   ) const;
 
   /// @brief 複合compose演算を行って代入する．
   Bdd&
   multi_compose_int(
-    const unordered_map<VarId, Bdd>& compose_map ///< [in] 変換マップ
+    const unordered_map<SizeType, Bdd>& compose_map ///< [in] 変換マップ
   );
 
   /// @brief 変数順を入れ替える演算
@@ -353,7 +352,7 @@ public:
   /// 極性も入れ替え可能
   Bdd
   remap_vars(
-    const unordered_map<VarId, Literal>& varmap ///< [in] 変数の対応表
+    const unordered_map<SizeType, Literal>& varmap ///< [in] 変数の対応表
   ) const;
 
   /// @}
@@ -392,7 +391,7 @@ protected:
   /// @brief 変数のリストに変換する．
   ///
   /// 変換できない時は例外を送出する．
-  vector<VarId>
+  vector<SizeType>
   to_varlist() const;
 
 
@@ -435,14 +434,14 @@ public:
   /// @brief 与えられた変数がサポートの時 true を返す．
   bool
   check_sup(
-    VarId var ///< [in] 変数
+    SizeType var ///< [in] 変数
   ) const;
 
   /// @brief 与えられた変数に対して対称の時 true を返す．
   bool
   check_sym(
-    VarId var1,      ///< [in] 変数1
-    VarId var2,      ///< [in] 変数2
+    SizeType var1,   ///< [in] 変数1
+    SizeType var2,   ///< [in] 変数2
     bool inv = false ///< [in] 反転フラグ
   ) const;
 
@@ -469,7 +468,7 @@ public:
   ///
   /// 自身が葉のノードの場合，不正な変数を返す．
   /// f0, f1 には自分自身が入る．
-  VarId
+  SizeType
   root_decomp(
     Bdd& f0, ///< [out] 負のコファクター
     Bdd& f1  ///< [out] 正のコファクター
@@ -478,7 +477,7 @@ public:
   /// @brief 根の変数を得る．
   ///
   /// 自身が葉のノードの場合，不正な変数を返す．
-  VarId
+  SizeType
   root_var() const;
 
   /// @brief 負のコファクターを返す．
@@ -659,7 +658,7 @@ private:
   /// @brief multi_compose() の共通関数
   BddEdge
   mcomp_sub(
-    const unordered_map<VarId, Bdd>& compose_map ///< [in] 変換マップ
+    const unordered_map<SizeType, Bdd>& compose_map ///< [in] 変換マップ
   ) const;
 
 

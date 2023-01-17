@@ -3,9 +3,8 @@
 /// @brief ExprNode の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2010, 2014 Yusuke Matsunaga
+/// Copyright (C) 2005-2010, 2014, 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ExprNode.h"
 #include "ExprMgr.h"
@@ -21,8 +20,10 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 // 同一の式を表していたら true を返す．
 bool
-posi_equiv(const ExprNode* node0,
-	   const ExprNode* node1)
+posi_equiv(
+  const ExprNode* node0,
+  const ExprNode* node1
+)
 {
   if ( node0->type() != node1->type() ||
        node0->child_num() != node1->child_num() ) {
@@ -31,8 +32,8 @@ posi_equiv(const ExprNode* node0,
 
   SizeType n{node0->child_num()};
   for ( SizeType i = 0; i < n; ++ i ) {
-    auto chd0{node0->child(i)};
-    auto chd1{node1->child(i)};
+    auto chd0 = node0->child(i);
+    auto chd1 = node1->child(i);
     if ( !posi_equiv(chd0, chd1) ) {
       return false;
     }
@@ -48,8 +49,10 @@ posi_equiv(const ExprNode* node0,
 
 // 互いに否定の関係にある式を表していたら true を返す．
 bool
-nega_equiv(const ExprNode* node0,
-	   const ExprNode* node1)
+nega_equiv(
+  const ExprNode* node0,
+  const ExprNode* node1
+)
 {
   if ( node0->is_one() ) {
     return node0->is_zero();
@@ -74,8 +77,8 @@ nega_equiv(const ExprNode* node0,
       return false;
     }
     for ( SizeType i = 0; i < n; ++ i ) {
-      auto chd0{node0->child(i)};
-      auto chd1{node1->child(i)};
+      auto chd0 = node0->child(i);
+      auto chd1 = node1->child(i);
       if ( !nega_equiv(chd0, chd1) ) {
 	return false;
       }
@@ -87,8 +90,8 @@ nega_equiv(const ExprNode* node0,
       return false;
     }
     for ( SizeType i = 0; i < n; ++ i ) {
-      auto chd0{node0->child(i)};
-      auto chd1{node1->child(i)};
+      auto chd0 = node0->child(i);
+      auto chd1 = node1->child(i);
       if ( !nega_equiv(chd0, chd1) ) {
 	return false;
       }
@@ -101,8 +104,8 @@ nega_equiv(const ExprNode* node0,
     }
     bool inv = false;
     for ( SizeType i = 0; i < n; ++ i ) {
-      auto chd0{node0->child(i)};
-      auto chd1{node1->child(i)};
+      auto chd0 = node0->child(i);
+      auto chd1 = node1->child(i);
       if ( !nega_equiv(chd0, chd1) ) {
 	inv = !inv;
       }
@@ -120,8 +123,10 @@ nega_equiv(const ExprNode* node0,
 
 // @brief vals の値にしたがった評価を行う．
 ExprNode::BitVectType
-ExprNode::eval(const vector<BitVectType>& vals,
-	       BitVectType mask) const
+ExprNode::eval(
+  const vector<BitVectType>& vals,
+  BitVectType mask
+) const
 {
   if ( is_zero() ) {
     return 0UL;
@@ -130,13 +135,13 @@ ExprNode::eval(const vector<BitVectType>& vals,
     return ~0UL & mask;
   }
   if ( is_posiliteral() ) {
-    return vals[varid().val()];
+    return vals[varid()];
   }
   if ( is_negaliteral() ) {
-    return ~vals[varid().val()] & mask;
+    return ~vals[varid()] & mask;
   }
 
-  SizeType nc{child_num()};
+  SizeType nc = child_num();
   ASSERT_COND( nc > 0 );
 
   BitVectType ans{child(0)->eval(vals, mask)};
@@ -162,9 +167,10 @@ ExprNode::eval(const vector<BitVectType>& vals,
 }
 
 // @brief 真理値表を作成する．
-// @param[in] ni 入力数
 TvFunc
-ExprNode::make_tv(SizeType ni) const
+ExprNode::make_tv(
+  SizeType ni
+) const
 {
   if ( is_zero() ) {
     return TvFunc::make_zero(ni);
@@ -180,7 +186,7 @@ ExprNode::make_tv(SizeType ni) const
   }
 
   // あとは AND/OR/XOR のみ
-  SizeType nc{child_num()};
+  SizeType nc = child_num();
   ASSERT_COND( nc > 0 );
 
   TvFunc ans{child(0)->make_tv(ni)};
@@ -262,7 +268,9 @@ ExprNode::litnum() const
 
 // 特定の変数のリテラル数を返す．
 SizeType
-ExprNode::litnum(VarId id) const
+ExprNode::litnum(
+  SizeType id
+) const
 {
   if ( is_literal() && varid() == id ) {
     // リテラルならリテラル数は1
@@ -284,8 +292,10 @@ ExprNode::litnum(VarId id) const
 
 // 特定の変数の特定の極性のリテラル数を返す．
 SizeType
-ExprNode::litnum(VarId id,
-		 bool inv) const
+ExprNode::litnum(
+  SizeType id,
+  bool inv
+) const
 {
   if ( is_literal(inv) && varid() == id ) {
     // リテラルならリテラル数は1
@@ -309,7 +319,7 @@ SizeType
 ExprNode::input_size() const
 {
   if ( is_literal() ) {
-    return varid().val() + 1;
+    return varid() + 1;
   }
 
   SizeType ans = 0;
@@ -328,7 +338,9 @@ ExprNode::input_size() const
 
 // SOP形式の積項数とリテラル数を計算する．
 SopLit
-ExprNode::soplit(bool inverted) const
+ExprNode::soplit(
+  bool inverted
+) const
 {
   if ( is_literal() ) {
     return SopLit(1, 1);
@@ -336,7 +348,7 @@ ExprNode::soplit(bool inverted) const
 
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or && inverted) ) {
-    SopLit l(1, 0);
+    SopLit l{1, 0};
     for ( auto child: child_list() ) {
       auto l1{child->soplit(inverted)};
       l *= l1;
@@ -346,7 +358,7 @@ ExprNode::soplit(bool inverted) const
 
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
-    SopLit l(0, 0);
+    SopLit l{0, 0};
     for ( auto child: child_list() ) {
       SopLit l1 = child->soplit(inverted);
       l += l1;
@@ -355,29 +367,31 @@ ExprNode::soplit(bool inverted) const
   }
 
   if ( type() == ExprNode::Xor ) {
-    auto chd{child(0)};
-    auto lp{chd->soplit(inverted)};
-    auto ln{chd->soplit(inverted)};
-    SizeType nc{child_num()};
+    auto chd = child(0);
+    auto lp = chd->soplit(inverted);
+    auto ln = chd->soplit(inverted);
+    SizeType nc = child_num();
     for ( SizeType i = 1; i < nc; ++ i ) {
-      auto chd{child(i)};
-      auto l1p{lp};
-      auto l1n{ln};
-      auto l2p{chd->soplit(false)};
-      auto l2n{chd->soplit(true)};
+      auto chd = child(i);
+      auto l1p = lp;
+      auto l1n = ln;
+      auto l2p = chd->soplit(false);
+      auto l2n = chd->soplit(true);
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
     return lp;
   }
 
-  return SopLit(0, 0);
+  return SopLit{0, 0};
 }
 
 // SOP形式の積項数とリテラル数を計算する．
 SopLit
-ExprNode::soplit(bool inverted,
-		 VarId id) const
+ExprNode::soplit(
+  bool inverted,
+  SizeType id
+) const
 {
   if ( is_literal() ) {
     if ( varid() == id ) {
@@ -390,9 +404,9 @@ ExprNode::soplit(bool inverted,
 
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or  && inverted) ) {
-    SopLit l(1, 0);
+    SopLit l{1, 0};
     for ( auto child: child_list() ) {
-      auto l1{child->soplit(inverted, id)};
+      auto l1 = child->soplit(inverted, id);
       l *= l1;
     }
     return l;
@@ -400,25 +414,25 @@ ExprNode::soplit(bool inverted,
 
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
-    SopLit l(0, 0);
+    SopLit l{0, 0};
     for ( auto child: child_list() ) {
-      auto l1{child->soplit(inverted, id)};
+      auto l1 = child->soplit(inverted, id);
       l += l1;
     }
     return l;
   }
 
   if ( type() == ExprNode::Xor ) {
-    auto chd{child(0)};
-    auto lp{chd->soplit(inverted)};
-    auto ln{chd->soplit(inverted)};
-    SizeType nc{child_num()};
+    auto chd = child(0);
+    auto lp = chd->soplit(inverted);
+    auto ln = chd->soplit(inverted);
+    SizeType nc = child_num();
     for ( SizeType i = 1; i < nc; ++ i ) {
-      auto chd{child(i)};
-      auto l1p{lp};
-      auto l1n{ln};
-      auto l2p{chd->soplit(false, id)};
-      auto l2n{chd->soplit(true, id)};
+      auto chd = child(i);
+      auto l1p = lp;
+      auto l1n = ln;
+      auto l2p = chd->soplit(false, id);
+      auto l2n = chd->soplit(true, id);
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
@@ -430,24 +444,26 @@ ExprNode::soplit(bool inverted,
 
 // SOP形式の積項数とリテラル数を計算する．
 SopLit
-ExprNode::soplit(bool inverted,
-		 VarId id,
-		 bool inv) const
+ExprNode::soplit(
+  bool inverted,
+  SizeType id,
+  bool inv
+) const
 {
   if ( is_literal() ) {
     if ( varid() == id && is_literal(inv) ) {
-      return SopLit(1, 1);
+      return SopLit{1, 1};
     }
     else {
-      return SopLit(1, 0);
+      return SopLit{1, 0};
     }
   }
 
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or && inverted) ) {
-    SopLit l(1, 0);
+    SopLit l{1, 0};
     for ( auto child: child_list() ) {
-      auto l1{child->soplit(inverted, id, inv)};
+      auto l1 = child->soplit(inverted, id, inv);
       l *= l1;
     }
     return l;
@@ -455,38 +471,60 @@ ExprNode::soplit(bool inverted,
 
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
-    SopLit l(0, 0);
+    SopLit l{0, 0};
     for ( auto child: child_list() ) {
-      auto l1{child->soplit(inverted, id, inv)};
+      auto l1 = child->soplit(inverted, id, inv);
       l += l1;
     }
     return l;
   }
 
   if ( type() == ExprNode::Xor ) {
-    SizeType n{child_num()};
-    auto chd{child(0)};
-    auto lp{chd->soplit(inverted)};
-    auto ln{chd->soplit(inverted)};
+    SizeType n = child_num();
+    auto chd = child(0);
+    auto lp = chd->soplit(inverted);
+    auto ln = chd->soplit(inverted);
     for ( SizeType i = 1; i < n; ++ i ) {
-      auto chd{child(i)};
-      auto l1p{lp};
-      auto l1n{ln};
-      auto l2p{chd->soplit(false, id)};
-      auto l2n{chd->soplit(true, id)};
+      auto chd = child(i);
+      auto l1p = lp;
+      auto l1n = ln;
+      auto l2p = chd->soplit(false, id);
+      auto l2n = chd->soplit(true, id);
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
     return lp;
   }
 
-  return SopLit(0, 0);
+  return SopLit{0, 0};
+}
+
+// @brief 内容を表す文字列を返す．
+string
+ExprNode::rep_string() const
+{
+  // 逆ポーランド記法を用いる．
+  ostringstream buf;
+  switch ( type() ) {
+  case ExprNode::Const0:      buf << "C0"; break;
+  case ExprNode::Const1:      buf << "C1"; break;
+  case ExprNode::PosiLiteral: buf << "P" << varid(); break;
+  case ExprNode::NegaLiteral: buf << "N" << varid(); break;
+  case ExprNode::And:         buf << "A" << child_num(); break;
+  case ExprNode::Or:          buf << "O" << child_num(); break;
+  case ExprNode::Xor:         buf << "X" << child_num(); break;
+  }
+  for ( auto child: child_list() ) {
+    buf << child->rep_string();
+  }
+  return buf.str();
 }
 
 // @brief 内容を出力する．
-// @param[in] s 出力先のストリーム
 void
-ExprNode::print(ostream& s) const
+ExprNode::print(
+  ostream& s
+) const
 {
   switch ( type() ) {
   case ExprNode::Const0:      s << "0"; return;
