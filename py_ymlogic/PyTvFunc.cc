@@ -65,11 +65,13 @@ TvFunc_new(
     vector<int> values(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto obj1 = PySequence_GetItem(vect_obj, i);
-      if ( !PyLong_Check(obj1) ) {
+      auto val = PyLong_AsLong(obj1);
+      Py_XDECREF(obj1);
+      if ( val == -1 && PyErr_Occurred() ) {
 	PyErr_SetString(PyExc_ValueError, "argument 2 must be a sequence of ints");
 	return nullptr;
       }
-      values[i] = PyLong_AsLong(obj1);
+      values[i] = val;
     }
     func = TvFunc{ni, values};
   }

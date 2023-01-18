@@ -189,6 +189,30 @@ Expr_make_nega_literal(
   return PyExpr::ToPyObject(expr);
 }
 
+bool
+get_expr_list(
+  PyObject* arg_obj,
+  vector<Expr>& expr_list
+)
+{
+  if ( !PySequence_Check(arg_obj) ) {
+    return false;
+  }
+  SizeType n = PySequence_Size(arg_obj);
+  expr_list.clear();
+  expr_list.reserve(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto obj1 = PySequence_GetItem(arg_obj, i);
+    if ( !PyExpr::_check(obj1) ) {
+      Py_XDECREF(obj1);
+      return false;
+    }
+    expr_list.push_back(PyExpr::_get(obj1));
+    Py_XDECREF(obj1);
+  }
+  return true;
+}
+
 PyObject*
 Expr_make_and(
   PyObject* Py_UNUSED(self),
@@ -196,20 +220,13 @@ Expr_make_and(
 )
 {
   PyObject* list_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!",
-			 &PyList_Type, &list_obj) ) {
+  if ( !PyArg_ParseTuple(args, "O", &list_obj) ) {
     return nullptr;
   }
-  SizeType n = PyList_Size(list_obj);
-  vector<Expr> expr_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto obj1 = PyList_GetItem(list_obj, i);
-    if ( !PyExpr::_check(obj1) ) {
-      PyErr_SetString(PyExc_TypeError, "this function requires list of 'Expr's");
-      return nullptr;
-    }
-    auto expr1 = PyExpr::_get(obj1);
-    expr_list[i] = expr1;
+  vector<Expr> expr_list;
+  if ( !get_expr_list(list_obj, expr_list) ) {
+    PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'Expr's");
+    return nullptr;
   }
   auto expr = Expr::make_and(expr_list);
   return PyExpr::ToPyObject(expr);
@@ -222,20 +239,13 @@ Expr_make_or(
 )
 {
   PyObject* list_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!",
-			 &PyList_Type, &list_obj) ) {
+  if ( !PyArg_ParseTuple(args, "O", &list_obj) ) {
     return nullptr;
   }
-  SizeType n = PyList_Size(list_obj);
-  vector<Expr> expr_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto obj1 = PyList_GetItem(list_obj, i);
-    if ( !PyExpr::_check(obj1) ) {
-      PyErr_SetString(PyExc_TypeError, "this function requires list of 'Expr's");
-      return nullptr;
-    }
-    auto expr1 = PyExpr::_get(obj1);
-    expr_list[i] = expr1;
+  vector<Expr> expr_list;
+  if ( !get_expr_list(list_obj, expr_list) ) {
+    PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'Expr's");
+    return nullptr;
   }
   auto expr = Expr::make_or(expr_list);
   return PyExpr::ToPyObject(expr);
@@ -248,20 +258,13 @@ Expr_make_xor(
 )
 {
   PyObject* list_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!",
-			 &PyList_Type, &list_obj) ) {
+  if ( !PyArg_ParseTuple(args, "O", &list_obj) ) {
     return nullptr;
   }
-  SizeType n = PyList_Size(list_obj);
-  vector<Expr> expr_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto obj1 = PyList_GetItem(list_obj, i);
-    if ( !PyExpr::_check(obj1) ) {
-      PyErr_SetString(PyExc_TypeError, "this function requires list of 'Expr's");
-      return nullptr;
-    }
-    auto expr1 = PyExpr::_get(obj1);
-    expr_list[i] = expr1;
+  vector<Expr> expr_list;
+  if ( !get_expr_list(list_obj, expr_list) ) {
+    PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'Expr's");
+    return nullptr;
   }
   auto expr = Expr::make_xor(expr_list);
   return PyExpr::ToPyObject(expr);
@@ -388,11 +391,13 @@ Expr_eval(
   vector<Expr::BitVectType> vals(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto obj1 = PySequence_GetItem(vect_obj, i);
-    if ( !PyLong_Check(obj1) ) {
+    auto val = PyLong_AsLong(obj1);
+    Py_XDECREF(obj1);
+    if ( val == -1 && PyErr_Occurred() ) {
       PyErr_SetString(PyExc_TypeError, "argument 1 must be a vector of int");
       return nullptr;
     }
-    vals[i] = PyLong_AsLong(obj1);
+    vals[i] = val;
   }
   auto& expr = PyExpr::_get(self);
   auto ans = expr.eval(vals, mask);
