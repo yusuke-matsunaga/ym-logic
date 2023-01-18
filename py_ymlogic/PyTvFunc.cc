@@ -8,6 +8,7 @@
 
 #include "ym/PyTvFunc.h"
 #include "ym/PyLiteral.h"
+#include "ym/PyNpnMap.h"
 #include "ym/PyModule.h"
 
 
@@ -38,7 +39,7 @@ TvFunc_new(
   static const char* kwlist[] = {
     "",
     "",
-    nullptr;
+    nullptr
   };
   SizeType ni = -1;
   PyObject* vect_obj = nullptr;
@@ -50,10 +51,10 @@ TvFunc_new(
 
   TvFunc func;
   if ( ni == -1 ) {
-    func = make_invalid();
+    func = TvFunc::make_invalid();
   }
   else if ( vect_obj == nullptr ) {
-    func = make_zero(ni);
+    func = TvFunc::make_zero(ni);
   }
   else if ( PySequence_Check(vect_obj) ) {
     SizeType n = PySequence_Size(vect_obj);
@@ -70,7 +71,7 @@ TvFunc_new(
       }
       values[i] = PyLong_AsLong(obj1);
     }
-    func = TvFunc(ni, values);
+    func = TvFunc{ni, values};
   }
   else {
     PyErr_SetString(PyExc_ValueError, "argument 2 must be a sequence of ints");
@@ -96,8 +97,8 @@ TvFunc_repr(
   PyObject* self
 )
 {
-  auto& val = PyTvFunc::_get(self);
-  // val から 文字列を作る．
+  auto& func = PyTvFunc::_get(self);
+  // func から 文字列を作る．
   const char* tmp_str = nullptr;
   return Py_BuildValue("s", tmp_str);
 }
@@ -148,7 +149,7 @@ TvFunc_make_literal(
     "",
     "",
     "inv",
-    nullptr;
+    nullptr
   };
   SizeType ni = 0;
   PyObject* obj1 = nullptr;
@@ -177,29 +178,29 @@ TvFunc_make_literal(
 PyObject*
 TvFunc_make_posi_literal(
   PyObject* Py_UNUSED(self),
-  PyObject* args,
-  PyObject* kwds
+  PyObject* args
 )
 {
-  SizeType ni = 0;
-  if ( !PyArg_ParseTuple(args, "k", &ni) ) {
+  SizeType ni = -1;
+  SizeType varid = -1;
+  if ( !PyArg_ParseTuple(args, "kk", &ni, &varid) ) {
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(TvFunc::make_posi_literal(ni));
+  return PyTvFunc::ToPyObject(TvFunc::make_posi_literal(ni, varid));
 }
 
 PyObject*
 TvFunc_make_nega_literal(
   PyObject* Py_UNUSED(self),
-  PyObject* args,
-  PyObject* kwds
+  PyObject* args
 )
 {
-  SizeType ni = 0;
-  if ( !PyArg_ParseTuple(args, "k", &ni) ) {
+  SizeType ni = -1;
+  SizeType varid = -1;
+  if ( !PyArg_ParseTuple(args, "kk", &ni, &varid) ) {
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(TvFunc::make_nega_literal(ni));
+  return PyTvFunc::ToPyObject(TvFunc::make_nega_literal(ni, varid));
 }
 
 PyObject*
@@ -379,6 +380,21 @@ TvFunc_is_one(
 }
 
 PyObject*
+TvFunc_value(
+  PyObject* self,
+  PyObject* args
+)
+{
+  SizeType pos = -1;
+  if ( !PyArg_ParseTuple(args, "k", &pos) ) {
+    return nullptr;
+  }
+  auto& func = PyTvFunc::_get(self);
+  auto r = func.value(pos);
+  return PyLong_FromLong(r);
+}
+
+PyObject*
 TvFunc_count_zero(
   PyObject* self,
   PyObject* Py_UNUSED(args)
@@ -438,8 +454,64 @@ TvFunc_walsh_2(
     return nullptr;
   }
   auto& func = PyTvFunc::_get(self);
-  auto r = func.walsh_1(varid1, varid2);
+  auto r = func.walsh_2(varid1, varid2);
   return PyLong_FromLong(r);
+}
+
+PyObject*
+TvFunc_check_sup(
+  PyObject* self,
+  PyObject* args
+)
+{
+  SizeType varid = -1;
+  if ( !PyArg_ParseTuple(args, "k", &varid) ) {
+    return nullptr;
+  }
+  auto& func = PyTvFunc::_get(self);
+  auto r = func.check_sup(varid);
+  return PyBool_FromLong(r);
+}
+
+PyObject*
+TvFunc_check_unate(
+  PyObject* self,
+  PyObject* args
+)
+{
+  SizeType varid = -1;
+  if ( !PyArg_ParseTuple(args, "k", &varid) ) {
+    return nullptr;
+  }
+  auto& func = PyTvFunc::_get(self);
+  auto r = func.check_unate(varid);
+  return PyBool_FromLong(r);
+}
+
+PyObject*
+TvFunc_check_sym(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    "",
+    ""
+    "inv",
+    nullptr
+  };
+  SizeType varid1 = -1;
+  SizeType varid2 = -1;
+  int inv = false;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk|$p",
+				    const_cast<char**>(kwlist),
+				    &varid1, &varid2, &inv) ) {
+    return nullptr;
+  }
+  auto& func = PyTvFunc::_get(self);
+  auto r = func.check_sym(varid1, varid2, static_cast<bool>(inv));
+  return PyBool_FromLong(r);
 }
 
 // メソッド定義
@@ -448,14 +520,14 @@ PyMethodDef TvFunc_methods[] = {
    PyDoc_STR("make invalid function")},
   {"make_zero", TvFunc_make_zero, METH_STATIC | METH_VARARGS,
    PyDoc_STR("make ZERO function")},
-  {"make_one", TvFunc_make_zero, METH_STATIC_ | METH_VARARGS,
+  {"make_one", TvFunc_make_zero, METH_STATIC | METH_VARARGS,
    PyDoc_STR("make ONE function")},
   {"make_literal", reinterpret_cast<PyCFunction>(TvFunc_make_literal),
    METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make literal function")},
-  {"make_posi_literal", TvFunc_make_posi_literal, METH_STATIC_ | METH_VARARGS,
+  {"make_posi_literal", TvFunc_make_posi_literal, METH_STATIC | METH_VARARGS,
    PyDoc_STR("make positive literal function")},
-  {"make_nega_literal", TvFunc_make_nega_literal, METH_STATIC_ | METH_VARARGS,
+  {"make_nega_literal", TvFunc_make_nega_literal, METH_STATIC | METH_VARARGS,
    PyDoc_STR("make positive literal function")},
   {"cofactor", reinterpret_cast<PyCFunction>(TvFunc_cofactor),
    METH_VARARGS | METH_KEYWORDS,
@@ -463,12 +535,12 @@ PyMethodDef TvFunc_methods[] = {
   {"cofactor_int", reinterpret_cast<PyCFunction>(TvFunc_cofactor_int),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return the cofactor(inplace version)")},
-  {"xform", TvFunc_Xform, METH_VARARGS,
+  {"xform", TvFunc_xform, METH_VARARGS,
    PyDoc_STR("transform")},
   {"shrink_map", TvFunc_shrink_map, METH_NOARGS,
    PyDoc_STR("make the shrink map")},
   {"npn_cannonical_map", TvFunc_npn_cannonical_map, METH_NOARGS,
-   PyDoc_STR("make the cannonical map for NPN-equivalence"},
+   PyDoc_STR("make the cannonical map for NPN-equivalence")},
   {"npn_cannonical_all_map", TvFunc_npn_cannonical_all_map, METH_NOARGS,
    PyDoc_STR("make the list of all cannonical maps for NPN-equivalence")},
   {"is_valid", TvFunc_is_valid, METH_NOARGS,
@@ -491,7 +563,31 @@ PyMethodDef TvFunc_methods[] = {
    PyDoc_STR("return the Walsh 1st coefficient")},
   {"walsh_2", TvFunc_walsh_2, METH_VARARGS,
    PyDoc_STR("return the Walsh 2nd coefficient")},
+  {"check_sup", TvFunc_check_sup, METH_VARARGS,
+   PyDoc_STR("check if the specified input is a support")},
+  {"check_unate", TvFunc_check_unate, METH_VARARGS,
+   PyDoc_STR("check the unateness on the specified input")},
+  {"check_sym", reinterpret_cast<PyCFunction>(TvFunc_check_sym),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("check the symmetry between two inputs")},
   {nullptr, nullptr, 0, nullptr}
+};
+
+PyObject*
+TvFunc_input_num(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto& func = PyTvFunc::_get(self);
+  auto val = func.input_num();
+  return PyLong_FromLong(val);
+}
+
+// get/set 定義
+PyGetSetDef TvFunc_getset[] = {
+  {"input_num", TvFunc_input_num, nullptr, PyDoc_STR("input num"), nullptr},
+  {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
 // 比較関数
@@ -689,6 +785,7 @@ PyTvFunc::ToPyObject(
 )
 {
   auto obj = TvFuncType.tp_alloc(&TvFuncType, 0);
+  ASSERT_COND( obj != nullptr );
   auto tvfunc_obj = reinterpret_cast<TvFuncObject*>(obj);
   tvfunc_obj->mVal = new TvFunc{val};
   return obj;
@@ -703,6 +800,7 @@ PyTvFunc::ToPyObject(
   auto obj = TvFuncType.tp_alloc(&TvFuncType, 0);
   auto tvfunc_obj = reinterpret_cast<TvFuncObject*>(obj);
   tvfunc_obj->mVal = new TvFunc{std::move(val)};
+  ASSERT_COND( obj != nullptr );
   return obj;
 }
 

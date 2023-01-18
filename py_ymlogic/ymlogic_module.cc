@@ -11,6 +11,8 @@
 
 #include "ym_config.h"
 #include "ym/PyLiteral.h"
+#include "ym/PyNpnMap.h"
+#include "ym/PyTvFunc.h"
 #include "ym/PyExpr.h"
 #include "ym/PyModule.h"
 
@@ -44,6 +46,12 @@ PyInit_ymlogic()
   }
 
   if ( !PyLiteral::init(m) ) {
+    goto error;
+  }
+  if ( !PyNpnMap::init(m) ) {
+    goto error;
+  }
+  if ( !PyTvFunc::init(m) ) {
     goto error;
   }
   if ( !PyExpr::init(m) ) {

@@ -8,6 +8,7 @@
 
 #include "ym/PyExpr.h"
 #include "ym/PyLiteral.h"
+#include "ym/PyTvFunc.h"
 #include "ym/PyModule.h"
 
 
@@ -404,7 +405,13 @@ Expr_make_tv(
   PyObject* args
 )
 {
-  Py_RETURN_NONE;
+  SizeType ni = 0;
+  if ( !PyArg_ParseTuple(args, "|k", &ni) ) {
+    return nullptr;
+  }
+  auto& expr = PyExpr::_get(self);
+  auto func = expr.make_tv(ni);
+  return PyTvFunc::ToPyObject(std::move(func));
 }
 
 PyObject*

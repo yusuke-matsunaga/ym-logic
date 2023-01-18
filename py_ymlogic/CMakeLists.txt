@@ -24,6 +24,8 @@ include_directories(
 set ( py_ymlogic_SOURCES
   PyLiteral.cc
   PyExpr.cc
+  PyNpnMap.cc
+  PyTvFunc.cc
   ymlogic_module.cc
   )
 
