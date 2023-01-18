@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "ym/PyExpr.h"
+#include "ym/PyLiteral.h"
 #include "ym/PyModule.h"
 
 
@@ -135,14 +136,27 @@ Expr_make_literal(
     "inv",
     nullptr
   };
-  SizeType id = -1;
+  PyObject* obj1 = nullptr;
   int inv = 0;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|$p",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
 				    const_cast<char**>(kwlist),
-				    &id, &inv) ) {
+				    &obj1, &inv) ) {
     return nullptr;
   }
-  auto expr = Expr::make_literal(static_cast<SizeType>(id), inv);
+
+  Expr expr;
+  if ( PyLong_Check(obj1) ) {
+    SizeType varid = PyLong_AsLong(obj1);
+    expr = Expr::make_literal(varid, static_cast<bool>(inv));
+  }
+  else if ( PyLiteral::_check(obj1) ) {
+    auto lit = PyLiteral::_get(obj1);
+    expr = Expr::make_literal(lit);
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or a Literal");
+    return nullptr;
+  }
   return PyExpr::ToPyObject(expr);
 }
 
@@ -250,6 +264,26 @@ Expr_make_xor(
   }
   auto expr = Expr::make_xor(expr_list);
   return PyExpr::ToPyObject(expr);
+}
+
+PyObject*
+Expr_make_from_string(
+  PyObject* Py_UNUSED(self),
+  PyObject* args
+)
+{
+  const char* expr_str = nullptr;
+  if ( !PyArg_ParseTuple(args, "s", &expr_str) ) {
+    return nullptr;
+  }
+  try {
+    auto expr = Expr::from_string(expr_str);
+    return PyExpr::ToPyObject(expr);
+  }
+  catch ( std::invalid_argument ) {
+    PyErr_SetString(PyExc_ValueError, "invalid argument");
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -560,6 +594,87 @@ Expr_is_sop(
   return PyBool_FromLong(r);
 }
 
+PyObject*
+Expr_literal_num(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    "",
+    "inv",
+    nullptr
+  };
+  PyObject* obj1 = nullptr;
+  int inv_int = false;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O$p",
+				    const_cast<char**>(kwlist),
+				    &obj1, &inv_int) ) {
+    return nullptr;
+  }
+  auto expr = PyExpr::_get(self);
+  int ans = 0;
+  if ( obj1 == nullptr ) {
+    ans = expr.literal_num();
+  }
+  else if ( PyLong_Check(obj1) ) {
+    SizeType varid = PyLong_AsLong(obj1);
+    bool inv = static_cast<bool>(inv_int);
+    ans = expr.literal_num(varid, inv);
+  }
+  else if ( PyLiteral::_check(obj1) ) {
+    auto lit = PyLiteral::_get(obj1);
+    ans = expr.literal_num(lit);
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or a Literal");
+    return nullptr;
+  }
+  return PyLong_FromLong(ans);
+}
+
+PyObject*
+Expr_sop_literal_num(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    "",
+    "inv",
+    nullptr
+  };
+  PyObject* obj1 = nullptr;
+  int inv_int = false;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O$p",
+				    const_cast<char**>(kwlist),
+				    &obj1, &inv_int) ) {
+    return nullptr;
+  }
+  auto expr = PyExpr::_get(self);
+  int ans = 0;
+  if ( obj1 == nullptr ) {
+    ans = expr.sop_literal_num();
+  }
+  else if ( PyLong_Check(obj1) ) {
+    SizeType varid = PyLong_AsLong(obj1);
+    bool inv = static_cast<bool>(inv_int);
+    ans = expr.sop_literal_num(varid, inv);
+  }
+  else if ( PyLiteral::_check(obj1) ) {
+    auto lit = PyLiteral::_get(obj1);
+    ans = expr.sop_literal_num(lit);
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or a Literal");
+    return nullptr;
+  }
+  return PyLong_FromLong(ans);
+}
+
+
 // メソッド定義
 PyMethodDef Expr_methods[] = {
   {"make_invalid", Expr_make_invalid, METH_STATIC | METH_NOARGS,
@@ -581,6 +696,8 @@ PyMethodDef Expr_methods[] = {
    PyDoc_STR("make an OR object")},
   {"make_xor", Expr_make_xor, METH_STATIC | METH_VARARGS,
    PyDoc_STR("make an XOR object")},
+  {"make_from_string", Expr_make_from_string, METH_STATIC | METH_VARARGS,
+   PyDoc_STR("make Expr from string")},
   {"compose", Expr_compose, METH_VARARGS,
    PyDoc_STR("'compose' operation")},
   {"remap_var", Expr_remap_var, METH_VARARGS,
@@ -626,6 +743,12 @@ PyMethodDef Expr_methods[] = {
    PyDoc_STR("True if simple XOR expression")},
   {"is_sop", Expr_is_sop, METH_NOARGS,
    PyDoc_STR("True if SOP expression")},
+  {"literal_num", reinterpret_cast<PyCFunction>(Expr_literal_num),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("count the literal number")},
+  {"sop_literal_num", reinterpret_cast<PyCFunction>(Expr_sop_literal_num),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("count the literal number in SOP form")},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -638,6 +761,17 @@ Expr_varid(
   auto expr = PyExpr::_get(self);
   auto varid = expr.varid();
   return PyLong_FromLong(varid);
+}
+
+PyObject*
+Expr_literal(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto expr = PyExpr::_get(self);
+  auto lit = expr.literal();
+  return PyLiteral::ToPyObject(lit);
 }
 
 PyObject*
@@ -668,34 +802,11 @@ Expr_input_size(
   return PyLong_FromLong(ans);
 }
 
-PyObject*
-Expr_literal_num(
-  PyObject* self,
-  void* Py_UNUSED(closure)
-)
-{
-  auto expr = PyExpr::_get(self);
-  auto ans = expr.literal_num();
-  return PyLong_FromLong(ans);
-}
-
-PyObject*
-Expr_sop_literal_num(
-  PyObject* self,
-  void* Py_UNUSED(closure)
-)
-{
-  auto expr = PyExpr::_get(self);
-  auto ans = expr.sop_literal_num();
-  return PyLong_FromLong(ans);
-}
-
 PyGetSetDef Expr_getsetters[] = {
   {"varid", Expr_varid, nullptr, PyDoc_STR("Variable ID"), nullptr},
+  {"literal", Expr_literal, nullptr, PyDoc_STR("Literal"), nullptr},
   {"operand_list", Expr_operand_list, nullptr, PyDoc_STR("operand list"), nullptr},
   {"input_size", Expr_input_size, nullptr, PyDoc_STR("input size"), nullptr},
-  {"literal_num", Expr_literal_num, nullptr, PyDoc_STR("literal count"), nullptr},
-  {"sop_literal_num", Expr_sop_literal_num, nullptr, PyDoc_STR("literal count in SOP format"), nullptr},
   {nullptr, nullptr, nullptr, nullptr}
 };
 

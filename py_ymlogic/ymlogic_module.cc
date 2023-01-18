@@ -10,6 +10,7 @@
 #include <Python.h>
 
 #include "ym_config.h"
+#include "ym/PyLiteral.h"
 #include "ym/PyExpr.h"
 #include "ym/PyModule.h"
 
@@ -42,6 +43,9 @@ PyInit_ymlogic()
     return nullptr;
   }
 
+  if ( !PyLiteral::init(m) ) {
+    goto error;
+  }
   if ( !PyExpr::init(m) ) {
     goto error;
   }

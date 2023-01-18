@@ -22,6 +22,7 @@ include_directories(
 # ===================================================================
 
 set ( py_ymlogic_SOURCES
+  PyLiteral.cc
   PyExpr.cc
   ymlogic_module.cc
   )

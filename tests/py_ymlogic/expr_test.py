@@ -8,7 +8,7 @@
 """
 
 import pytest
-from ymlogic import Expr
+from ymlogic import Expr, Literal
 
 
 def test_empty_constr():
@@ -33,13 +33,15 @@ def test_empty_constr():
     assert not expr.is_simple_xor()
     assert not expr.is_sop()
 
-    assert expr.literal_num == 0
+    assert expr.literal_num() == 0
+    assert expr.sop_literal_num() == 0
+
     assert expr.input_size == 0
-    assert expr.sop_literal_num == 0
 
     rep_str = expr.__repr__()
     expr2 = Expr(rep_str)
     assert expr == expr2
+
 
 def test_make_invalid():
     expr = Expr.make_invalid()
@@ -63,9 +65,10 @@ def test_make_invalid():
     assert not expr.is_simple_xor()
     assert not expr.is_sop()
 
-    assert expr.literal_num == 0
+    assert expr.literal_num() == 0
+    assert expr.sop_literal_num() == 0
+
     assert expr.input_size == 0
-    assert expr.sop_literal_num == 0
 
     rep_str = expr.__repr__()
     expr2 = Expr(rep_str)
@@ -74,6 +77,7 @@ def test_make_invalid():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_make_zero():
     expr = Expr.make_zero()
@@ -97,9 +101,10 @@ def test_make_zero():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 0
+    assert expr.literal_num() == 0
+    assert expr.sop_literal_num() == 0
+
     assert expr.input_size == 0
-    assert expr.sop_literal_num == 0
 
     rep_str = expr.__repr__()
     expr2 = Expr(rep_str)
@@ -108,6 +113,7 @@ def test_make_zero():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_make_one():
     expr = Expr.make_one()
@@ -131,9 +137,10 @@ def test_make_one():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 0
+    assert expr.literal_num() == 0
+    assert expr.sop_literal_num() == 0
+
     assert expr.input_size == 0
-    assert expr.sop_literal_num == 0
 
     rep_str = expr.__repr__()
     expr2 = Expr(rep_str)
@@ -142,6 +149,7 @@ def test_make_one():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_make_literal1():
     var0 = 0
@@ -166,12 +174,26 @@ def test_make_literal1():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 1
-    assert expr.input_size == var0 + 1
-    assert expr.sop_literal_num == 1
+    assert expr.literal_num() == 1
+    for i in range(10):
+        exp_val = 1 if i == var0 else 0
+        assert expr.literal_num(i) == exp_val
+    assert expr.literal_num(var0, inv=False) == 1
+    assert expr.literal_num(var0, inv=True) == 0
+    assert expr.literal_num(Literal(var0, inv=False)) == 1
 
+    assert expr.sop_literal_num() == 1
+    for i in range(10):
+        exp_val = 1 if i == var0 else 0
+        assert expr.sop_literal_num(i) == exp_val
+    assert expr.sop_literal_num(var0, inv=False) == 1
+    assert expr.sop_literal_num(var0, inv=True) == 0
+    assert expr.sop_literal_num(Literal(var0, inv=False)) == 1
+
+    assert expr.input_size == var0 + 1
     assert expr.varid == var0
-    
+    assert expr.literal == Literal(var0)
+
     rep_str = expr.__repr__()
     expr2 = Expr(rep_str)
     assert expr == expr2
@@ -179,6 +201,7 @@ def test_make_literal1():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_make_literal2():
     var0 = 0
@@ -203,11 +226,12 @@ def test_make_literal2():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 1
-    assert expr.input_size == var0 + 1
-    assert expr.sop_literal_num == 1
+    assert expr.literal_num() == 1
+    assert expr.sop_literal_num() == 1
 
+    assert expr.input_size == var0 + 1
     assert expr.varid == var0
+    assert expr.literal == Literal(var0)
 
     rep_str = expr.__repr__()
     expr2 = Expr(rep_str)
@@ -216,6 +240,7 @@ def test_make_literal2():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_make_literal3():
     var0 = 0
@@ -240,11 +265,12 @@ def test_make_literal3():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 1
-    assert expr.input_size == var0 + 1
-    assert expr.sop_literal_num == 1
+    assert expr.literal_num() == 1
+    assert expr.sop_literal_num() == 1
 
+    assert expr.input_size == var0 + 1
     assert expr.varid == var0
+    assert expr.literal == Literal(var0, inv=True)
 
     rep_str = expr.__repr__()
     expr2 = Expr(rep_str)
@@ -253,6 +279,60 @@ def test_make_literal3():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
+
+def test_make_literal4():
+    var0 = 0
+    lit = Literal(var0, inv=False)
+    expr = Expr.make_literal(lit)
+
+    assert expr.is_valid()
+    assert not expr.is_invalid()
+    assert not expr.is_one()
+    assert not expr.is_zero()
+    assert not expr.is_constant()
+    assert expr.is_posi_literal()
+    assert not expr.is_nega_literal()
+    assert expr.is_literal()
+    assert not expr.is_and()
+    assert not expr.is_or()
+    assert not expr.is_xor()
+    assert not expr.is_op()
+    assert len(expr.operand_list) == 0
+    assert expr.is_simple()
+    assert not expr.is_simple_and()
+    assert not expr.is_simple_or()
+    assert not expr.is_simple_xor()
+    assert expr.is_sop()
+
+    assert expr.literal_num() == 1
+    for i in range(10):
+        exp_val = 1 if i == var0 else 0
+        assert expr.literal_num(i) == exp_val
+    assert expr.literal_num(var0, inv=False) == 1
+    assert expr.literal_num(var0, inv=True) == 0
+    assert expr.literal_num(Literal(var0, inv=False)) == 1
+
+    assert expr.sop_literal_num() == 1
+    for i in range(10):
+        exp_val = 1 if i == var0 else 0
+        assert expr.sop_literal_num(i) == exp_val
+    assert expr.sop_literal_num(var0, inv=False) == 1
+    assert expr.sop_literal_num(var0, inv=True) == 0
+    assert expr.sop_literal_num(Literal(var0, inv=False)) == 1
+
+    assert expr.input_size == var0 + 1
+    assert expr.varid == var0
+    assert expr.literal == Literal(var0)
+
+    rep_str = expr.__repr__()
+    expr2 = Expr(rep_str)
+    assert expr == expr2
+
+    rep_str = expr.__repr__()
+    dup_expr = Expr(rep_str)
+    assert expr == dup_expr
+
 
 def test_make_posi_literal():
     var0 = 1
@@ -277,10 +357,10 @@ def test_make_posi_literal():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 1
-    assert expr.input_size == var0 + 1
-    assert expr.sop_literal_num == 1
+    assert expr.literal_num() == 1
+    assert expr.sop_literal_num() == 1
 
+    assert expr.input_size == var0 + 1
     assert expr.varid == var0
 
     rep_str = expr.__repr__()
@@ -290,6 +370,7 @@ def test_make_posi_literal():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_make_nega_literal():
     var0 = 2
@@ -314,15 +395,16 @@ def test_make_nega_literal():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 1
-    assert expr.input_size == var0 + 1
-    assert expr.sop_literal_num == 1
+    assert expr.literal_num() == 1
+    assert expr.sop_literal_num() == 1
 
+    assert expr.input_size == var0 + 1
     assert expr.varid == var0
 
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_and_op1():
     var0 = 2
@@ -350,9 +432,10 @@ def test_and_op1():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 2
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 2
+
     assert expr.input_size == 6
-    assert expr.sop_literal_num == 2
 
     expr0, expr1 = expr.operand_list
 
@@ -365,6 +448,7 @@ def test_and_op1():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_and_op2():
     var0 = 2
@@ -393,9 +477,10 @@ def test_and_op2():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 2
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 2
+
     assert expr.input_size == 6
-    assert expr.sop_literal_num == 2
 
     expr0, expr1 = expr.operand_list
 
@@ -408,7 +493,8 @@ def test_and_op2():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
-    
+
+
 def test_make_and1():
     var0 = 2
     var1 = 5
@@ -435,10 +521,10 @@ def test_make_and1():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 2
-    assert expr.input_size == 6
-    assert expr.sop_literal_num == 2
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 2
 
+    assert expr.input_size == 6
     expr0, expr1 = expr.operand_list
 
     assert expr0.is_posi_literal()
@@ -450,6 +536,7 @@ def test_make_and1():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_or_op1():
     var0 = 1
@@ -477,10 +564,10 @@ def test_or_op1():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 2
-    assert expr.input_size == 8
-    assert expr.sop_literal_num == 2
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 2
 
+    assert expr.input_size == 8
     expr0, expr1 = expr.operand_list
 
     assert expr0.is_posi_literal()
@@ -492,6 +579,7 @@ def test_or_op1():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_or_op2():
     var0 = 1
@@ -520,9 +608,10 @@ def test_or_op2():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 2
-    assert expr.input_size == 8
-    assert expr.sop_literal_num == 2
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 2
+
+    assert expr.input_size == max(var0, var1) + 1
 
     expr0, expr1 = expr.operand_list
 
@@ -535,6 +624,7 @@ def test_or_op2():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_make_or1():
     var0 = 1
@@ -563,9 +653,10 @@ def test_make_or1():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 2
-    assert expr.input_size == 3
-    assert expr.sop_literal_num == 2
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 2
+
+    assert expr.input_size == max(var0, var1) + 1
 
     expr0, expr1 = expr.operand_list
 
@@ -578,6 +669,7 @@ def test_make_or1():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_xor_op1():
     var0 = 3
@@ -605,9 +697,10 @@ def test_xor_op1():
     assert expr.is_simple_xor()
     assert not expr.is_sop()
 
-    assert expr.literal_num == 2
-    assert expr.input_size == 5
-    assert expr.sop_literal_num == 4
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 4
+
+    assert expr.input_size == max(var0, var1) + 1
 
     expr0, expr1 = expr.operand_list
 
@@ -620,6 +713,7 @@ def test_xor_op1():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_xor_op2():
     var0 = 3
@@ -648,9 +742,10 @@ def test_xor_op2():
     assert expr.is_simple_xor()
     assert not expr.is_sop()
 
-    assert expr.literal_num == 2
-    assert expr.input_size == 5
-    assert expr.sop_literal_num == 4
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 4
+
+    assert expr.input_size == max(var0, var1) + 1
 
     expr0, expr1 = expr.operand_list
 
@@ -663,6 +758,7 @@ def test_xor_op2():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_make_xor1():
     var0 = 1
@@ -691,9 +787,10 @@ def test_make_xor1():
     assert expr.is_simple_xor()
     assert not expr.is_sop()
 
-    assert expr.literal_num == 2
-    assert expr.input_size == 3
-    assert expr.sop_literal_num == 4
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 4
+
+    assert expr.input_size == max(var0, var1) + 1
 
     expr0, expr1 = expr.operand_list
 
@@ -706,6 +803,7 @@ def test_make_xor1():
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_invert1():
     var0 = 5
@@ -732,13 +830,15 @@ def test_invert1():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 1
+    assert expr.literal_num() == 1
+    assert expr.sop_literal_num() == 1
+
     assert expr.input_size == var0 + 1
-    assert expr.sop_literal_num == 1
 
     rep_str = expr.__repr__()
     dup_expr = Expr(rep_str)
     assert expr == dup_expr
+
 
 def test_invert2():
     var0 = 1
@@ -768,9 +868,10 @@ def test_invert2():
     assert not expr.is_simple_xor()
     assert expr.is_sop()
 
-    assert expr.literal_num == 2
+    assert expr.literal_num() == 2
+    assert expr.sop_literal_num() == 2
+
     assert expr.input_size == max(var0, var1) + 1
-    assert expr.sop_literal_num == 2
 
     expr0, expr1 = expr.operand_list
 
@@ -779,6 +880,7 @@ def test_invert2():
 
     assert expr1.is_nega_literal()
     assert expr1.varid == var1
+
 
 def test_compose1():
     lit0 = Expr.make_posi_literal(0)
@@ -789,11 +891,12 @@ def test_compose1():
     expr0 = lit0 | (~lit1 & lit2)
     expr1 = lit1 & lit3
 
-    expr = expr0.compose({0:expr1})
+    expr = expr0.compose({0: expr1})
 
     expr_str = str(expr)
 
     assert expr_str == "( ( 1 & 3 ) | ( ~1 & 2 ) )"
+
 
 def test_compose2():
     lit0 = Expr.make_posi_literal(0)
@@ -805,13 +908,14 @@ def test_compose2():
     expr0 = lit0 | ~lit4
     opr1 = lit1 & lit3
     opr2 = ~(~lit1 & lit2)
-    comp_map = {0:opr1, 4:opr2}
-    
+    comp_map = {0: opr1, 4: opr2}
+
     expr = expr0.compose(comp_map)
 
     expr_str = str(expr)
 
     assert expr_str == "( ( 1 & 3 ) | ( ~1 & 2 ) )"
+
 
 def test_remap_var1():
     lit0 = Expr.make_posi_literal(0)
@@ -820,11 +924,12 @@ def test_remap_var1():
     lit3 = Expr.make_posi_literal(3)
 
     expr0 = (lit0 & lit3) | (~lit1 & lit2)
-    expr = expr0.remap_var({0:1})
+    expr = expr0.remap_var({0: 1})
 
     expr_str = str(expr)
 
     assert expr_str == "( ( 1 & 3 ) | ( ~1 & 2 ) )"
+
 
 def test_eval1():
     lit0 = Expr.make_posi_literal(0)
@@ -834,12 +939,12 @@ def test_eval1():
 
     expr = (lit0 & lit3) | (~lit1 & lit2)
 
-    vals = [ 0 for _ in range(4) ]
+    vals = [0 for _ in range(4)]
     mask = 0
     exp_val = 0
     for p in range(16):
         mask |= (1 << p)
-        val = [ False for _ in range(4) ]
+        val = [False for _ in range(4)]
         for i in range(4):
             if p & (1 << i):
                 vals[i] |= 1 << p
@@ -850,6 +955,7 @@ def test_eval1():
     val = expr.eval(vals, mask=mask)
 
     assert val == exp_val
+
 
 def test_make_tv1():
     lit0 = Expr.make_posi_literal(0)
@@ -862,7 +968,7 @@ def test_make_tv1():
     f = expr.make_tv()
 
     for p in range(16):
-        val = [ True if p & (1 << i) else False for i in range(4) ]
+        val = [True if p & (1 << i) else False for i in range(4)]
         if (val[0] and val[3]) or (not val[1] and val[2]):
             exp_val = 1
         else:
@@ -871,20 +977,21 @@ def test_make_tv1():
 
         assert fval == exp_val
 
-def test_from_string1():
+
+def test_make_from_string1():
     expr_str = "0 + (1 * ~2)"
-    expr = Expr.from_string(expr_str)
+    expr = Expr.make_from_string(expr_str)
 
     assert expr.is_valid()
 
     tmp_str = str(expr)
     exp_str = "( 0 | ( 1 & ~2 ) )"
-    assert tmp_str == expr_str
+    assert tmp_str == exp_str
 
-def test_bad_from_string1():
+
+def test_bad_make_from_string1():
     expr_str = "0 + + (1 * ~2)"
     with pytest.raises(Exception) as e:
-        _ = Expr.from_string(expr_str)
-    assert e.type == TypeError
-    assert str(e.value) == "invalid data"
-                
+        _ = Expr.make_from_string(expr_str)
+    assert e.type == ValueError
+    assert str(e.value) == "invalid argument"
