@@ -47,6 +47,16 @@ public:
     const TvFunc& val ///< [in] 値
   );
 
+  /// @brief TvFunc を表す PyObject を作る．
+  /// @return 生成した PyObject を返す．
+  ///
+  /// 返り値は新しい参照が返される．
+  static
+  PyObject*
+  ToPyObject(
+    TvFunc&& val ///< [in] 値
+  );
+
   /// @brief PyObject が TvFunc タイプか調べる．
   static
   bool
