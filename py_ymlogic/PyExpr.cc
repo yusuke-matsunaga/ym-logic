@@ -135,9 +135,9 @@ Expr_make_literal(
     "inv",
     nullptr
   };
-  int id = -1;
+  SizeType id = -1;
   int inv = 0;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "i|$p",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|$p",
 				    const_cast<char**>(kwlist),
 				    &id, &inv) ) {
     return nullptr;
@@ -152,8 +152,8 @@ Expr_make_posi_literal(
   PyObject* args
 )
 {
-  int id = -1;
-  if ( !PyArg_ParseTuple(args, "i", &id) ) {
+  SizeType id = -1;
+  if ( !PyArg_ParseTuple(args, "k", &id) ) {
     return nullptr;
   }
   auto expr = Expr::make_posi_literal(static_cast<SizeType>(id));
@@ -166,8 +166,8 @@ Expr_make_nega_literal(
   PyObject* args
 )
 {
-  int id = -1;
-  if ( !PyArg_ParseTuple(args, "i", &id) ) {
+  SizeType id = -1;
+  if ( !PyArg_ParseTuple(args, "k", &id) ) {
     return nullptr;
   }
   auto expr = Expr::make_nega_literal(static_cast<SizeType>(id));
@@ -181,7 +181,8 @@ Expr_make_and(
 )
 {
   PyObject* list_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!", PyList_Type, &list_obj) ) {
+  if ( !PyArg_ParseTuple(args, "O!",
+			 &PyList_Type, &list_obj) ) {
     return nullptr;
   }
   SizeType n = PyList_Size(list_obj);
@@ -206,7 +207,8 @@ Expr_make_or(
 )
 {
   PyObject* list_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!", PyList_Type, &list_obj) ) {
+  if ( !PyArg_ParseTuple(args, "O!",
+			 &PyList_Type, &list_obj) ) {
     return nullptr;
   }
   SizeType n = PyList_Size(list_obj);
@@ -231,7 +233,8 @@ Expr_make_xor(
 )
 {
   PyObject* list_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!", PyList_Type, &list_obj) ) {
+  if ( !PyArg_ParseTuple(args, "O!",
+			 &PyList_Type, &list_obj) ) {
     return nullptr;
   }
   SizeType n = PyList_Size(list_obj);
@@ -257,7 +260,7 @@ Expr_compose(
 {
   PyObject* dict_obj = nullptr;
   if ( !PyArg_ParseTuple(args, "O!",
-			 PyDict_Type, &dict_obj) ) {
+			 &PyDict_Type, &dict_obj) ) {
     return nullptr;
   }
   unordered_map<SizeType, Expr> comp_map;
@@ -287,7 +290,29 @@ Expr_remap_var(
   PyObject* args
 )
 {
-  Py_RETURN_NONE;
+  PyObject* dict_obj = nullptr;
+  if ( !PyArg_ParseTuple(args, "O!",
+			 &PyDict_Type, &dict_obj) ) {
+    return nullptr;
+  }
+  unordered_map<SizeType, SizeType> comp_map;
+  PyObject* key;
+  PyObject* value;
+  Py_ssize_t pos = 0;
+  while ( PyDict_Next(dict_obj, &pos, &key, &value) ) {
+    auto id = PyLong_AsLong(key);
+    if ( id == -1 && PyErr_Occurred() ) {
+      return nullptr;
+    }
+    auto val = PyLong_AsLong(value);
+    if ( val == -1 && PyErr_Occurred() ) {
+      return nullptr;
+    }
+    comp_map.emplace(static_cast<SizeType>(id), static_cast<SizeType>(val));
+  }
+  auto expr = PyExpr::_get(self);
+  auto ans_expr = expr.remap_var(comp_map);
+  return PyExpr::ToPyObject(ans_expr);
 }
 
 PyObject*
@@ -304,10 +329,39 @@ Expr_simplify(
 PyObject*
 Expr_eval(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  Py_RETURN_NONE;
+  static const char* kwlist[] = {
+    "",
+    "mask",
+    nullptr
+  };
+  PyObject* vect_obj = nullptr;
+  Expr::BitVectType mask = ~0UL;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$k",
+				    const_cast<char**>(kwlist),
+				    &vect_obj, &mask) ) {
+    return nullptr;
+  }
+  if ( !PySequence_Check(vect_obj) ) {
+    PyErr_SetString(PyExc_TypeError, "argument 1 must be a vector of int");
+    return nullptr;
+  }
+  SizeType n = PySequence_Size(vect_obj);
+  vector<Expr::BitVectType> vals(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto obj1 = PySequence_GetItem(vect_obj, i);
+    if ( !PyLong_Check(obj1) ) {
+      PyErr_SetString(PyExc_TypeError, "argument 1 must be a vector of int");
+      return nullptr;
+    }
+    vals[i] = PyLong_AsLong(obj1);
+  }
+  auto& expr = PyExpr::_get(self);
+  auto ans = expr.eval(vals, mask);
+  return PyLong_FromLong(ans);
 }
 
 PyObject*
@@ -517,9 +571,9 @@ PyMethodDef Expr_methods[] = {
   {"make_literal", reinterpret_cast<PyCFunction>(Expr_make_literal),
    METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make a LITERAL object")},
-  {"make_posi_literal", Expr_make_posi_literal, METH_STATIC | METH_NOARGS,
+  {"make_posi_literal", Expr_make_posi_literal, METH_STATIC | METH_VARARGS,
    PyDoc_STR("make a positive LITERAL object")},
-  {"make_nega_literal", Expr_make_nega_literal, METH_STATIC | METH_NOARGS,
+  {"make_nega_literal", Expr_make_nega_literal, METH_STATIC | METH_VARARGS,
    PyDoc_STR("make a negative LITERAL object")},
   {"make_and", Expr_make_and, METH_STATIC | METH_VARARGS,
    PyDoc_STR("make an AND object")},
@@ -533,7 +587,8 @@ PyMethodDef Expr_methods[] = {
    PyDoc_STR("remap variable")},
   {"simplify", Expr_simplify, METH_NOARGS,
    PyDoc_STR("simplify")},
-  {"eval", Expr_eval, METH_VARARGS,
+  {"eval", reinterpret_cast<PyCFunction>(Expr_eval),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("evaluate")},
   {"make_tv", Expr_make_tv, METH_VARARGS,
    PyDoc_STR("convert to TvFunc")},
