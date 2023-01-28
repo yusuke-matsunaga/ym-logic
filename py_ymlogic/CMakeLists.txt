@@ -26,6 +26,9 @@ set ( py_ymlogic_SOURCES
   PyExpr.cc
   PyNpnMap.cc
   PyTvFunc.cc
+  PyBddMgr.cc
+  PyBdd.cc
+  PyBddVarSet.cc
   ymlogic_module.cc
   )
 

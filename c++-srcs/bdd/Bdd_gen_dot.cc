@@ -136,7 +136,7 @@ DotGen::write(
     for ( auto node: node_list ) {
       auto attr_list{mNodeAttrList};
       ostringstream buf;
-      buf << "\"" << node.index << "\"";
+      buf << "\"" << node.index() << "\"";
       attr_list.emplace("label", buf.str());
       mWriter.write_node(node_name(id), attr_list);
       ++ id;
@@ -158,8 +158,8 @@ DotGen::write(
   {
     SizeType id = 1;
     for ( auto node: node_list ) {
-      write_edge(node_name(id), node.edge0, true);
-      write_edge(node_name(id), node.edge1, false);
+      write_edge(node_name(id), node.edge0(), true);
+      write_edge(node_name(id), node.edge1(), false);
       ++ id;
     }
   }
@@ -177,7 +177,7 @@ DotGen::write(
   // ノードのランクの設定
   SizeType max_index = 0;
   for ( auto node: node_list ) {
-    SizeType index = node.index;
+    SizeType index = node.index();
     if ( max_index < index ) {
       max_index = index;
     }
@@ -187,7 +187,7 @@ DotGen::write(
   {
     SizeType id = 1;
     for ( auto node: node_list ) {
-      SizeType index = node.index;
+      SizeType index = node.index();
       indexed_node_list[index].push_back(id);
       ++ id;
     }

@@ -17,14 +17,89 @@ BEGIN_NAMESPACE_YM_BDD
 /// @class BddInfo BddInfo.h "BddInfo.h"
 /// @grief ノードの情報を表す構造体
 ///
-/// 枝は最下位ビットが反転属性を表し，
-/// 残りがノード番号を表す．
+/// 内容の出力のために用いられる．
 //////////////////////////////////////////////////////////////////////
-struct BddInfo
+class BddInfo
 {
-  SizeType index; ///< インデックス
-  SizeType edge0; ///< 0枝
-  SizeType edge1; ///< 1枝
+public:
+  //////////////////////////////////////////////////////////////////////
+  // コンストラクタ/デストラクタ
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief コンストラクタ
+  BddInfo(
+    SizeType index, ///< [in] インデックス
+    SizeType edge0, ///< [in] 0枝の情報
+    SizeType edge1  ///< [in] 1枝の情報
+  ) : mIndex{index},
+      mEdge0{edge0},
+      mEdge1{edge1}
+  {
+  }
+
+  /// @brief デストラクタ
+  ~BddInfo() = default;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief インデックスを返す．
+  SizeType
+  index() const
+  {
+    return mIndex;
+  }
+
+  /// @brief 0枝の情報を返す．
+  SizeType
+  edge0() const
+  {
+    return mEdge0;
+  }
+
+  /// @brief 0枝のノード番号を返す．
+  SizeType
+  edge0_node() const
+  {
+    return edge2node(mEdge0);
+  }
+
+  /// @brief 0枝の極性(反転フラグ)を返す．
+  bool
+  edge0_inv() const
+  {
+    return edge2inv(mEdge0);
+  }
+
+  /// @brief 1枝の情報を返す．
+  SizeType
+  edge1() const
+  {
+    return mEdge1;
+  }
+
+  /// @brief 1枝のノード番号を返す．
+  SizeType
+  edge1_node() const
+  {
+    return edge2node(mEdge1);
+  }
+
+  /// @brief 1枝の極性(反転フラグ)を返す．
+  bool
+  edge1_inv() const
+  {
+    return edge2inv(mEdge1);
+  }
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 枝の情報の変換用
+  //////////////////////////////////////////////////////////////////////
 
   /// @brief 枝の情報からノード番号を取り出す．
   static
@@ -46,8 +121,22 @@ struct BddInfo
     return static_cast<bool>(edge & 1U);
   }
 
-};
 
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // インデックス
+  SizeType mIndex;
+
+  // 0枝の情報
+  SizeType mEdge0;
+
+  // 1枝の情報
+  SizeType mEdge1;
+
+};
 
 END_NAMESPACE_YM_BDD
 

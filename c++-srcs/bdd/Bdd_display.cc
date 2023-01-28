@@ -50,10 +50,10 @@ write_node_list(
   SizeType id = 1;
   for ( auto& node: node_list ) {
     s << setw(6) << id << ": "
-      << setw(4) << node.index;
-    write_edge(s, node.edge0);
+      << setw(4) << node.index();
+    write_edge(s, node.edge0());
     s << ": ";
-    write_edge(s, node.edge1);
+    write_edge(s, node.edge1());
     s << endl;
     ++ id;
   }

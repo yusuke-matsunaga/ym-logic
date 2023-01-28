@@ -93,6 +93,15 @@ public:
     const BddVarSet& right ///< [in] オペランド
   ) const;
 
+  /// @brief 非等価比較
+  bool
+  operator!=(
+    const BddVarSet& right ///< [in] オペランド
+  ) const
+  {
+    return !operator==(right);
+  }
+
   /// @brief サイズを返す．
   SizeType
   size() const;

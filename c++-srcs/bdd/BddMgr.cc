@@ -67,6 +67,15 @@ BddMgr::literal(
   return Bdd{impl(), e};
 }
 
+// @brief リテラル関数を作る．
+Bdd
+BddMgr::literal(
+  Literal lit
+)
+{
+  return literal(lit.varid(), lit.is_negative());
+}
+
 // @brief 肯定のリテラル関数を作る．
 Bdd
 BddMgr::posi_literal(

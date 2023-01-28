@@ -27,15 +27,14 @@ void
 dump_edge(
   BinEnc& s,
   SizeType id,
-  SizeType edge
+  SizeType node,
+  bool inv
 )
 {
-  auto node = BddInfo::edge2node(edge);
   if ( node == 0 ) { // 定数
-    s.write_vint(edge);
+    s.write_vint(static_cast<SizeType>(inv));
   }
   else {
-    auto inv = BddInfo::edge2inv(edge);
     SizeType delta = id - node;
     SizeType val = (delta * 2) + static_cast<SizeType>(inv);
     s.write_vint(val);
@@ -96,11 +95,11 @@ Bdd::dump(
   SizeType id = 1;
   for ( auto& node: node_list ) {
     // インデックス
-    s.write_vint(node.index);
+    s.write_vint(node.index());
     // 0枝
-    dump_edge(s, id, node.edge0);
+    dump_edge(s, id, node.edge0_node(), node.edge0_inv());
     // 1枝
-    dump_edge(s, id, node.edge1);
+    dump_edge(s, id, node.edge1_node(), node.edge1_inv());
     ++ id;
   }
   // end-marker
