@@ -193,6 +193,15 @@ public:
     return mBody == right.mBody;
   }
 
+  /// @brief 非等価比較
+  bool
+  operator!=(
+    BddEdge right
+  )
+  {
+    return !operator==(right);
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -203,16 +212,6 @@ private:
   ympuint mBody{0UL};
 
 };
-
-inline
-bool
-operator!=(
-  BddEdge left,
-  BddEdge right
-)
-{
-  return !left.operator==(right);
-}
 
 END_NAMESPACE_YM_BDD
 

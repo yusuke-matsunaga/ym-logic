@@ -3,7 +3,7 @@
 /// @brief Bdd::cofactor の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Bdd.h"
@@ -21,10 +21,13 @@ Bdd::cofactor(
   bool inv
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+
   auto cedge = mMgr->make_literal(var) ^ inv;
   Bdd cube{mMgr, cedge}; // GC 用にロックする必要がある．
-  return cofactor(cube);
+  CofactorOp op{mMgr};
+  auto e = op.op_step(mRoot, cedge);
+  return Bdd{mMgr, e};
 }
 
 // @brief コファクターを計算する．
@@ -42,8 +45,11 @@ Bdd::cofactor(
   const Bdd& cube
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
-  BddEdge redge = copy_edge(cube);
+  _check_valid();
+  cube._check_valid();
+  cube._check_cube();
+
+  auto redge = copy_edge(cube);
   CofactorOp op{mMgr};
   auto e = op.op_step(mRoot, redge);
   return Bdd{mMgr, e};
@@ -56,10 +62,14 @@ Bdd::cofactor_int(
   bool inv
 )
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+
   auto cedge = mMgr->make_literal(var) ^ inv;
   Bdd cbdd{mMgr, cedge}; // GC 用にロックする必要がある．
-  return cofactor_int(cbdd);
+  CofactorOp op{mMgr};
+  auto e = op.op_step(mRoot, cedge);
+  change_root(e);
+  return *this;
 }
 
 // @brief コファクターを計算して代入する．
@@ -77,7 +87,10 @@ Bdd::cofactor_int(
   const Bdd& cube
 )
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+  cube._check_valid();
+  cube._check_cube();
+
   BddEdge redge = copy_edge(cube);
   CofactorOp op{mMgr};
   auto e = op.op_step(mRoot, redge);

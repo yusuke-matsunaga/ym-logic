@@ -3,12 +3,11 @@
 /// @brief Bdd::display の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Bdd.h"
 #include "ym/BddInfo.h"
-#include "ym/BddError.h"
 
 
 BEGIN_NAMESPACE_YM_BDD

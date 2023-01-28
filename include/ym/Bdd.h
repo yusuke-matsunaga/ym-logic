@@ -5,7 +5,7 @@
 /// @brief Bdd のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/bdd_nsdef.h"
@@ -293,6 +293,8 @@ public:
   cofactor_int(
     const Bdd& cube ///< [in] コファクターのキューブ
                     /// cube.is_cube() = true でなければならない．
+                    /// そうでない場合は std::invalid_argument 例外が
+                    /// 送出される．
   );
 
   /// @brief cofactor_int の別名
@@ -301,6 +303,8 @@ public:
   operator/=(
     const Bdd& cube ///< [in] コファクターのキューブ
                     /// cube.is_cube() = true でなければならない．
+                    /// そうでない場合は std::invalid_argument 例外が
+                    /// 送出される．
   )
   {
     return cofactor_int(cube);
@@ -466,7 +470,7 @@ public:
 
   /// @brief 根の変数とコファクターを求める．
   ///
-  /// 自身が葉のノードの場合，不正な変数を返す．
+  /// 自身が葉のノードの場合，BAD_VARID を返す．
   /// f0, f1 には自分自身が入る．
   SizeType
   root_decomp(
@@ -476,7 +480,7 @@ public:
 
   /// @brief 根の変数を得る．
   ///
-  /// 自身が葉のノードの場合，不正な変数を返す．
+  /// 自身が葉のノードの場合，BAD_VARID を返す．
   SizeType
   root_var() const;
 
@@ -504,10 +508,22 @@ public:
   ) const;
 
   /// @brief 等価比較演算
+  ///
+  /// 構造が同じで異なるBDDとの等価比較は
+  /// is_identical() で行う．
   bool
   operator==(
     const Bdd& right ///< [in] オペランド
   ) const;
+
+  /// @brief 非等価比較演算
+  bool
+  operator!=(
+    const Bdd& right ///< [in] オペランド2
+  ) const
+  {
+    return !operator==(right);
+  }
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -537,7 +553,7 @@ public:
 
   /// @brief 内容を真理値表の文字列に変換する．
   ///
-  /// 実際の変数が input_num を超えた時の動作は不定
+  /// 実際の変数が input_num を超えた時は例外を送出する．
   string
   to_truth(
     SizeType input_num ///< [in] 入力変数の数
@@ -661,6 +677,39 @@ private:
     const unordered_map<SizeType, Bdd>& compose_map ///< [in] 変換マップ
   ) const;
 
+  /// @brief 適正な状態か調べる．
+  ///
+  /// is_valid() でない時は std::invalid_argument 例外を送出する．
+  void
+  _check_valid() const
+  {
+    if ( !is_valid() ) {
+      throw std::invalid_argument("invalid BDD");
+    }
+  }
+
+  /// @brief リテラルリストを表すBDDか調べる．
+  ///
+  /// is_cube() でない時は std::invalid_argument 例外を送出する．
+  void
+  _check_cube() const
+  {
+    if ( !is_cube() ) {
+      throw std::invalid_argument("not a cube");
+    }
+  }
+
+  /// @brief 変数リストを表すBDDか調べる．
+  ///
+  /// is_posicube() でない時は std::invalid_argument 例外を送出する．
+  void
+  _check_posicube() const
+  {
+    if ( !is_posicube() ) {
+      throw std::invalid_argument("not a positive cube");
+    }
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -674,17 +723,6 @@ private:
   ympuint mRoot;
 
 };
-
-/// @brief 非等価比較演算
-inline
-bool
-operator!=(
-  const Bdd& left, ///< [in] オペランド1
-  const Bdd& right ///< [in] オペランド2
-)
-{
-  return !left.operator==(right);
-}
 
 END_NAMESPACE_YM_BDD
 

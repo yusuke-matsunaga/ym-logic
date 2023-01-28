@@ -3,7 +3,7 @@
 /// @brief Bdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Bdd.h"
@@ -18,7 +18,8 @@ BEGIN_NAMESPACE_YM_BDD
 Bdd
 Bdd::get_onepath() const
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+
   if ( is_zero() ) {
     return Bdd{mMgr, BddEdge::zero()};
   }
@@ -48,7 +49,6 @@ OneOp::op_step(
   if ( edge.is_one() ) {
     return BddEdge::one();
   }
-  ASSERT_COND( !edge.is_const() );
 
   auto node = edge.node();
   auto inv = edge.inv();
@@ -58,10 +58,12 @@ OneOp::op_step(
     auto tmp = op_step(edge1);
     return new_node(node->index(), BddEdge::zero(), tmp);
   }
-  else { // !edge0.is_zero()
+  if ( !edge0.is_zero() ) {
     auto tmp = op_step(edge0);
     return new_node(node->index(), tmp, BddEdge::zero());
   }
+  ASSERT_NOT_REACHED;
+  return BddEdge{};
 }
 
 END_NAMESPACE_YM_BDD

@@ -3,12 +3,11 @@
 /// @brief BddMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/BddMgr.h"
 #include "ym/Bdd.h"
-#include "ym/BddError.h"
 #include "BddMgrImpl.h"
 #include "CopyOp.h"
 #include "TruthOp.h"
@@ -92,6 +91,18 @@ BddMgr::from_truth(
   const string& str
 )
 {
+  // str が適切な文字列か確認する．
+  for ( char c: str ) {
+    if ( c != '0' && c != '1' ) {
+      throw std::invalid_argument("only '0' or '1' are expected");
+    }
+  }
+  for ( SizeType n = str.size(); n > 1; n >>= 1 ) {
+    if ( (n % 2) != 0 ) {
+      throw std::invalid_argument("the length is expected to be the power of 2");
+    }
+  }
+
   TruthOp op{impl()};
   auto e = op.op_step(str, 0);
   return Bdd{impl(), e};
@@ -153,6 +164,7 @@ TruthOp::op_step(
     return BddEdge::one();
   }
   if ( mTable.count(str) > 0 ) {
+    // 同じ文字列の結果が記録されていたらそれを用いる．
     return mTable.at(str);
   }
 

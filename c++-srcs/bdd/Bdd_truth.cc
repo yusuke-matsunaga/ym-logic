@@ -3,7 +3,7 @@
 /// @brief Bdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Bdd.h"
@@ -22,6 +22,10 @@ truth_step(
   SizeType input_num
 )
 {
+  if ( input_num < index ) {
+    throw std::invalid_argument("Bdd::to_truth(): input_num is too small");
+  }
+
   SizeType gap;
   string ans;
   if ( edge.is_zero() ) {

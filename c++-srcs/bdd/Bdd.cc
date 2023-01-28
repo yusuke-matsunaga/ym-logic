@@ -7,7 +7,6 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "ym/BddError.h"
 #include "BddEdge.h"
 #include "BddMgrImpl.h"
 #include "BddNode.h"
@@ -21,6 +20,7 @@ Bdd::Bdd(
 ) : mMgr{nullptr},
     mRoot{0}
 {
+  // 不正値となる．
 }
 
 // @brief 内容を指定したコンストラクタ
@@ -130,14 +130,14 @@ Bdd::operator^=(
 bool
 Bdd::is_zero() const
 {
-  return mMgr != nullptr && BddEdge{mRoot}.is_zero();
+  return is_valid() && BddEdge{mRoot}.is_zero();
 }
 
 // @brief 定数1の時 true を返す．
 bool
 Bdd::is_one() const
 {
-  return mMgr != nullptr && BddEdge{mRoot}.is_one();
+  return is_valid() && BddEdge{mRoot}.is_one();
 }
 
 // @brief 根の変数とコファクターを求める．
@@ -147,8 +147,9 @@ Bdd::root_decomp(
   Bdd& f1
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
-  BddEdge root{mRoot};
+  _check_valid();
+
+  auto root = BddEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
     f0 = *this;
@@ -167,8 +168,9 @@ Bdd::root_decomp(
 SizeType
 Bdd::root_var() const
 {
-  ASSERT_COND( mMgr != nullptr );
-  BddEdge root{mRoot};
+  _check_valid();
+
+  auto root = BddEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
     return BAD_VARID;
@@ -182,8 +184,9 @@ Bdd::root_var() const
 Bdd
 Bdd::root_cofactor0() const
 {
-  ASSERT_COND( mMgr != nullptr );
-  BddEdge root{mRoot};
+  _check_valid();
+
+  auto root = BddEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
     return *this;
@@ -198,8 +201,9 @@ Bdd::root_cofactor0() const
 Bdd
 Bdd::root_cofactor1() const
 {
-  ASSERT_COND( mMgr != nullptr );
-  BddEdge root{mRoot};
+  _check_valid();
+
+  auto root = BddEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
     return *this;
@@ -214,7 +218,8 @@ Bdd::root_cofactor1() const
 bool
 Bdd::root_inv() const
 {
-  ASSERT_COND ( mMgr != nullptr );
+  _check_valid();
+
   return static_cast<bool>(mRoot & 1UL);
 }
 
@@ -224,8 +229,9 @@ Bdd::eval(
   const vector<bool>& inputs ///< [in] 入力値ベクタ
 ) const
 {
-  ASSERT_COND ( mMgr != nullptr );
-  BddEdge edge{mRoot};
+  _check_valid();
+
+  auto edge = BddEdge{mRoot};
   for ( ; ; ) {
     if ( edge.is_zero() ) {
       return false;
@@ -259,8 +265,9 @@ Bdd::operator==(
 SizeType
 Bdd::hash() const
 {
-  ASSERT_COND( mMgr != nullptr );
-  BddEdge root{mRoot};
+  _check_valid();
+
+  auto root = BddEdge{mRoot};
   return root.hash();
 }
 
@@ -270,6 +277,8 @@ Bdd::change_root(
   BddEdge new_root
 )
 {
+  _check_valid();
+
   // この順序なら new_root と mRoot が等しくても
   // 正しく動く
   mMgr->activate(new_root);
@@ -284,17 +293,18 @@ Bdd::root_list(
   vector<BddEdge>& edge_list
 )
 {
-  ASSERT_COND ( !bdd_list.empty() );
+  if ( bdd_list.empty() ) {
+    throw std::invalid_argument("empty list");
+  }
 
-  auto mgr = bdd_list[0].mMgr;
-  ASSERT_COND( mgr != nullptr );
   SizeType n = bdd_list.size();
   edge_list.clear();
   edge_list.reserve(n);
   for ( auto& bdd: bdd_list ) {
-    ASSERT_COND( bdd.mMgr == mgr );
+    bdd._check_valid();
     edge_list.push_back(bdd.mRoot);
   }
+  auto mgr = bdd_list[0].mMgr;
   return mgr;
 }
 

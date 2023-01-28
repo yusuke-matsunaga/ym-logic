@@ -3,7 +3,7 @@
 /// @brief Bdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Bdd.h"
@@ -174,9 +174,11 @@ CheckSymOp::op_step2(
     top = node0->index();
   }
   else {
-    top = decomp(edge0, edge1,
-		 edge00, edge01,
-		 edge10, edge11);
+    top = decomp(
+      edge0, edge1,
+      edge00, edge01,
+      edge10, edge11
+    );
   }
   if ( top < mIndex2 ) {
     auto ans = op_step2(edge00, edge10);

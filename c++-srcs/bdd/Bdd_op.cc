@@ -3,11 +3,10 @@
 /// @brief Bdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "ym/BddError.h"
 #include "BddEdge.h"
 #include "BddMgrImpl.h"
 #include "BddNode.h"
@@ -22,7 +21,9 @@ Bdd::and_op(
   const Bdd& right
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+  right._check_valid();
+
   BddEdge redge = copy_edge(right);
   auto e = mMgr->and_op(mRoot, redge);
   return Bdd{mMgr, e};
@@ -34,7 +35,9 @@ Bdd::or_op(
   const Bdd& right
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+  right._check_valid();
+
   BddEdge redge = copy_edge(right);
   auto e = mMgr->or_op(mRoot, redge);
   return Bdd{mMgr, e};
@@ -46,7 +49,9 @@ Bdd::xor_op(
   const Bdd& right
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+  right._check_valid();
+
   BddEdge redge = copy_edge(right);
   auto e = mMgr->xor_op(mRoot, redge);
   return Bdd{mMgr, e};
@@ -58,7 +63,9 @@ Bdd::and_int(
   const Bdd& right
 )
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+  right._check_valid();
+
   BddEdge redge = copy_edge(right);
   auto e = mMgr->and_op(mRoot, redge);
   change_root(e);
@@ -71,7 +78,9 @@ Bdd::or_int(
   const Bdd& right
 )
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+  right._check_valid();
+
   BddEdge redge = copy_edge(right);
   auto e = mMgr->or_op(mRoot, redge);
   change_root(e);
@@ -84,7 +93,9 @@ Bdd::xor_int(
   const Bdd& right
 )
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+  right._check_valid();
+
   BddEdge redge = copy_edge(right);
   auto e = mMgr->xor_op(mRoot, redge);
   change_root(e);
@@ -99,8 +110,11 @@ ite(
   const Bdd& else_f
 )
 {
+  cond._check_valid();
+  then_f._check_valid();
+  else_f._check_valid();
+
   auto mgr = cond.mMgr;
-  ASSERT_COND( mgr != nullptr );
   auto then_edge = cond.copy_edge(then_f);
   auto else_edge = cond.copy_edge(else_f);
   auto e = mgr->ite_op(cond.mRoot, then_edge, else_edge);
@@ -134,11 +148,13 @@ Bdd::mcomp_sub(
   const unordered_map<SizeType, Bdd>& compose_map
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+
   unordered_map<SizeType, BddEdge> cmap;
   for ( auto& p: compose_map ) {
     auto var = p.first;
     auto& bdd = p.second;
+    bdd._check_valid();
     auto cedge = copy_edge(bdd);
     cmap.emplace(var, cedge);
   }
@@ -153,7 +169,8 @@ Bdd::remap_vars(
   const unordered_map<SizeType, Literal>& varmap
 ) const
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+
   unordered_map<SizeType, Bdd> compose_map;
   for ( auto& p: varmap ) {
     auto var = p.first;

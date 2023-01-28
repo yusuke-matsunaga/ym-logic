@@ -3,12 +3,11 @@
 /// @brief Bdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Bdd.h"
 #include "ym/BddVarSet.h"
-#include "ym/BddError.h"
 #include "BddEdge.h"
 #include "BddNode.h"
 #include "SupOp.h"
@@ -22,8 +21,9 @@ Bdd::support_cup_int(
   const Bdd& right ///< [in] 第2オペランド
 )
 {
-  ASSERT_COND( is_posicube() );
-  ASSERT_COND( right.is_posicube() );
+  _check_posicube();
+  right._check_posicube();
+
   SupOp op{mMgr};
   auto e = op.cup_step(mRoot, right.mRoot);
   change_root(e);
@@ -36,8 +36,9 @@ Bdd::support_cap_int(
   const Bdd& right
 )
 {
-  ASSERT_COND( is_posicube() );
-  ASSERT_COND( right.is_posicube() );
+  _check_posicube();
+  right._check_posicube();
+
   SupOp op{mMgr};
   auto e = op.cap_step(mRoot, right.mRoot);
   change_root(e);
@@ -50,8 +51,9 @@ Bdd::support_diff_int(
   const Bdd& right ///< [in] 第2オペランド
 )
 {
-  ASSERT_COND( is_posicube() );
-  ASSERT_COND( right.is_posicube() );
+  _check_posicube();
+  right._check_posicube();
+
   SupOp op{mMgr};
   auto e = op.diff_step(mRoot, right.mRoot);
   change_root(e);
@@ -64,11 +66,11 @@ Bdd::support_check_intersect(
   const Bdd& right
 ) const
 {
-  ASSERT_COND( is_posicube() );
-  ASSERT_COND( right.is_posicube() );
+  _check_posicube();
+  right._check_posicube();
 
-  BddEdge e1{mRoot};
-  BddEdge e2{right.mRoot};
+  auto e1 = BddEdge{mRoot};
+  auto e2 = BddEdge{right.mRoot};
   while ( !e1.is_one() && !e2.is_one() ) {
     auto node1 = e1.node();
     auto node2 = e2.node();
@@ -94,7 +96,8 @@ Bdd::is_cube() const
   if ( mMgr == nullptr ) {
     return false;
   }
-  BddEdge e{mRoot};
+
+  auto e = BddEdge{mRoot};
   if ( e.is_zero() ) {
     return false;
   }
@@ -123,7 +126,8 @@ Bdd::is_posicube() const
   if ( mMgr == nullptr ) {
     return false;
   }
-  BddEdge e{mRoot};
+
+  auto e = BddEdge{mRoot};
   if ( e.is_zero() ) {
     return false;
   }
@@ -145,7 +149,8 @@ Bdd::is_posicube() const
 BddVarSet
 Bdd::get_support() const
 {
-  ASSERT_COND( mMgr != nullptr );
+  _check_valid();
+
   SupOp op{mMgr};
   auto e = op.get_step(mRoot);
   return BddVarSet{Bdd{mMgr, e}};
@@ -155,11 +160,10 @@ Bdd::get_support() const
 vector<SizeType>
 Bdd::to_varlist() const
 {
-  ASSERT_COND( mMgr != nullptr );
-  if ( !is_posicube() ) {
-    throw BddError{"Bdd::to_varlist(): Not a variable list."};
-  }
-  BddEdge edge{mRoot};
+  _check_valid();
+  _check_posicube();
+
+  auto edge = BddEdge{mRoot};
   vector<SizeType> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
@@ -173,11 +177,10 @@ Bdd::to_varlist() const
 vector<Literal>
 Bdd::to_litlist() const
 {
-  ASSERT_COND( mMgr != nullptr );
-  if ( !is_cube() ) {
-    throw BddError{"Bdd::to_litlist(): Not a literal list."};
-  }
-  BddEdge edge{mRoot};
+  _check_valid();
+  _check_cube();
+
+  auto edge = BddEdge{mRoot};
   vector<Literal> lit_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();

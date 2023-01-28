@@ -3,7 +3,7 @@
 /// @brief BddMgrImpl の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "BddMgrImpl.h"
@@ -115,9 +115,11 @@ BddMgrImpl::and_step(
   // 先頭のインデックスで分解する．
   BddEdge left0, left1;
   BddEdge right0, right1;
-  auto top = decomp(left, right,
-		    left0, left1,
-		    right0, right1);
+  auto top = decomp(
+    left, right,
+    left0, left1,
+    right0, right1
+  );
   auto ans0 = and_step(left0, right0);
   auto ans1 = and_step(left1, right1);
   auto result = new_node(top, ans0, ans1);
@@ -177,9 +179,11 @@ BddMgrImpl::xor_step(
   // 先頭のインデックスで分解する．
   BddEdge left0, left1;
   BddEdge right0, right1;
-  auto top = decomp(left, right,
-		    left0, left1,
-		    right0, right1);
+  auto top = decomp(
+    left, right,
+    left0, left1,
+    right0, right1
+  );
   auto ans0 = xor_step(left0, right0);
   auto ans1 = xor_step(left1, right1);
   auto result = new_node(top, ans0, ans1);

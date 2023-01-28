@@ -3,13 +3,12 @@
 /// @brief Bdd::dump の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
 #include "ym/BddInfo.h"
-#include "ym/BddError.h"
 #include "BddEdge.h"
 #include "BddMgrImpl.h"
 #include "ym/BinEnc.h"
@@ -138,7 +137,7 @@ BddMgr::restore(
 )
 {
   if ( !s.read_signature(BDD_SIG) ) {
-    throw BddError{"Bdd::restore(): wrong signature"};
+    throw std::invalid_argument{"Bdd::restore(): wrong signature"};
   }
 
   SizeType n = s.read_vint();
@@ -159,16 +158,16 @@ BddMgr::restore(
     if ( index == 0 && edge0_info == 0 && edge1_info == 0 ) {
       break;
     }
-    BddEdge edge0 = decode(edge0_info, edge_list);
-    BddEdge edge1 = decode(edge1_info, edge_list);
-    BddEdge edge = mImpl->new_node(index, edge0, edge1);
+    auto edge0 = decode(edge0_info, edge_list);
+    auto edge1 = decode(edge1_info, edge_list);
+    auto edge = mImpl->new_node(index, edge0, edge1);
     edge_list.push_back(edge);
   }
 
   vector<Bdd> bdd_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     SizeType root_info = root_info_list[i];
-    BddEdge edge = decode(root_info, edge_list);
+    auto edge = decode(root_info, edge_list);
     bdd_list[i] = Bdd{impl(), edge};
   }
   return bdd_list;

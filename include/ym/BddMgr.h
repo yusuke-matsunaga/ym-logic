@@ -82,8 +82,12 @@ public:
 
   /// @brief 真理値表形式の文字列からBDDを作る．
   ///
-  /// str の形式は以下の通り
-  /// - big endian: 0文字目が(1, 1, 1, 1)に対応する
+  /// str は '0' か '1' の文字列．
+  /// ただし，長さは2のべき乗である必要がある．
+  /// for some reason, この文字列は big endian となっている．
+  /// 0文字目が(1, 1, 1, 1)に対応する
+  ///
+  /// 不正な形式の場合は std::invalid_argument 例外を送出する．
   Bdd
   from_truth(
     const string& str ///< [in] 01の文字列
@@ -91,6 +95,8 @@ public:
 
   /// @brief バイナリダンプから復元する．
   /// @return 生成されたBDDのリストを返す．
+  ///
+  /// 不正な形式の場合は std::invalid_argument 例外を送出する．
   vector<Bdd>
   restore(
     BinDec& s ///< [in] 入力ストリーム
