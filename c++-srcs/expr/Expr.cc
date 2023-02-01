@@ -141,7 +141,9 @@ Expr::make_and(
   const vector<Expr>& chd_list
 )
 {
-  ASSERT_COND( chd_list.size() > 0 );
+  if ( chd_list.size() == 0 ) {
+    return make_one();
+  }
 
   auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};
@@ -171,7 +173,9 @@ Expr::make_or(
   const vector<Expr>& chd_list
 )
 {
-  ASSERT_COND( chd_list.size() > 0 );
+  if ( chd_list.size() == 0 ) {
+    return make_zero();
+  }
 
   auto& mgr = ExprMgr::the_obj();
   SizeType begin{mgr.nodestack_top()};

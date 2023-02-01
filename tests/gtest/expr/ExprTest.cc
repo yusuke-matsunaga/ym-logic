@@ -456,6 +456,26 @@ TEST_F(ExprTest, and_op2)
   EXPECT_EQ( expr2, expr );
 }
 
+TEST_F(ExprTest, make_and0)
+{
+  vector<Expr> lit_list{};
+  auto expr = Expr::make_and(lit_list);
+
+  EXPECT_TRUE( expr.is_valid() );
+  EXPECT_FALSE( expr.is_zero() );
+  EXPECT_TRUE( expr.is_one() );
+  EXPECT_TRUE( expr.is_constant() );
+  EXPECT_FALSE( expr.is_posi_literal() );
+  EXPECT_FALSE( expr.is_nega_literal() );
+  EXPECT_FALSE( expr.is_literal() );
+  EXPECT_EQ( BAD_VARID, expr.varid() );
+  EXPECT_FALSE( expr.is_and() );
+  EXPECT_FALSE( expr.is_or() );
+  EXPECT_FALSE( expr.is_xor() );
+  EXPECT_FALSE( expr.is_op() );
+  EXPECT_EQ( 0, expr.operand_num() );
+}
+
 TEST_F(ExprTest, make_and1)
 {
   auto lit0p = Expr::make_posi_literal(var0);
@@ -737,6 +757,26 @@ TEST_F(ExprTest, or_op2)
   bis >> expr2;
 
   EXPECT_EQ( expr2, expr );
+}
+
+TEST_F(ExprTest, make_or0)
+{
+  vector<Expr> lit_list{};
+  auto expr = Expr::make_or(lit_list);
+
+  EXPECT_TRUE( expr.is_valid() );
+  EXPECT_TRUE( expr.is_zero() );
+  EXPECT_FALSE( expr.is_one() );
+  EXPECT_TRUE( expr.is_constant() );
+  EXPECT_FALSE( expr.is_posi_literal() );
+  EXPECT_FALSE( expr.is_nega_literal() );
+  EXPECT_FALSE( expr.is_literal() );
+  EXPECT_EQ( BAD_VARID, expr.varid() );
+  EXPECT_FALSE( expr.is_and() );
+  EXPECT_FALSE( expr.is_or() );
+  EXPECT_FALSE( expr.is_xor() );
+  EXPECT_FALSE( expr.is_op() );
+  EXPECT_EQ( 0, expr.operand_num() );
 }
 
 TEST_F(ExprTest, make_or1)
