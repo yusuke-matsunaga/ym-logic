@@ -36,6 +36,8 @@ set (sop_SOURCES
   c++-srcs/sop/SopCover.cc
   c++-srcs/sop/SopCube.cc
   c++-srcs/sop/SopMgr.cc
+  c++-srcs/sop/SopMgr_cube.cc
+  c++-srcs/sop/SopMgr_cover.cc
   c++-srcs/sop/KernelGen.cc
   c++-srcs/sop/LitSet.cc
   c++-srcs/sop/BestKernel.cc

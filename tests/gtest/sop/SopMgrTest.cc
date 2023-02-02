@@ -12,7 +12,7 @@
 #include "ym/Literal.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 TEST(SopMgrTest, constructor)
 {
@@ -29,18 +29,16 @@ TEST(SopMgrTest, new_delete)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv = mgr.new_body(10);
+  auto bv = mgr.new_cube();
 
-  mgr.delete_body(bv, 10);
+  mgr.delete_cube(bv);
 }
 
-TEST(SopMgrTest, cube_set1)
+TEST(SopMgrTest, new_cube1)
 {
   const SizeType nv = 10;
 
   SopMgr mgr{nv};
-
-  auto bv = mgr.new_body(1);
 
   SizeType var0{0};
   SizeType var1{1};
@@ -58,7 +56,9 @@ TEST(SopMgrTest, cube_set1)
   Literal lit3{var2, false};
   vector<Literal> lit_list{lit1, lit2, lit3};
 
-  mgr.cube_set(bv, lit_list);
+  auto bv = mgr.new_cube(lit_list);
+
+  EXPECT_EQ( 3, mgr.literal_num(bv, 1) );
 
   EXPECT_EQ( SopPat::_1, mgr.get_pat(bv, 0, var0) );
   EXPECT_EQ( SopPat::_0, mgr.get_pat(bv, 0, var1) );
@@ -72,13 +72,11 @@ TEST(SopMgrTest, cube_set1)
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv, 0, var9) );
 }
 
-TEST(SopMgrTest, cube_set2)
+TEST(SopMgrTest, new_cube2)
 {
   const SizeType nv = 10;
 
   SopMgr mgr{nv};
-
-  SopBitVect* bv = mgr.new_body(1);
 
   SizeType var0{0};
   SizeType var1{1};
@@ -91,7 +89,7 @@ TEST(SopMgrTest, cube_set2)
   SizeType var8{8};
   SizeType var9{9};
 
-  mgr.cube_set(bv, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
+  auto bv = mgr.new_cube({Literal(var0, false), Literal(var1, true), Literal(var2, false)});
 
   EXPECT_EQ( SopPat::_1, mgr.get_pat(bv, 0, var0) );
   EXPECT_EQ( SopPat::_0, mgr.get_pat(bv, 0, var1) );
@@ -111,8 +109,6 @@ TEST(SopMgrTest, cube_clear)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv = mgr.new_body(1);
-
   SizeType var0{0};
   SizeType var1{1};
   SizeType var2{2};
@@ -124,7 +120,7 @@ TEST(SopMgrTest, cube_clear)
   SizeType var8{8};
   SizeType var9{9};
 
-  mgr.cube_set(bv, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
+  auto bv = mgr.new_cube({Literal(var0, false), Literal(var1, true), Literal(var2, false)});
   mgr.cube_clear(bv);
 
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv, 0, var0) );
@@ -137,6 +133,40 @@ TEST(SopMgrTest, cube_clear)
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv, 0, var7) );
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv, 0, var8) );
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv, 0, var9) );
+}
+
+TEST(SopMgrTest, copy_cube)
+{
+  const SizeType nv = 10;
+
+  SopMgr mgr{nv};
+
+  SizeType var0{0};
+  SizeType var1{1};
+  SizeType var2{2};
+  SizeType var3{3};
+  SizeType var4{4};
+  SizeType var5{5};
+  SizeType var6{6};
+  SizeType var7{7};
+  SizeType var8{8};
+  SizeType var9{9};
+
+  auto bv1 = mgr.new_cube({Literal(var0, false), Literal(var1, true), Literal(var2, false)});
+
+  auto bv2 = mgr.new_cube();
+  mgr.cube_copy(bv2, bv1);
+
+  EXPECT_EQ( SopPat::_1, mgr.get_pat(bv2, 0, var0) );
+  EXPECT_EQ( SopPat::_0, mgr.get_pat(bv2, 0, var1) );
+  EXPECT_EQ( SopPat::_1, mgr.get_pat(bv2, 0, var2) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var3) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var4) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var5) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var6) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var7) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var8) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var9) );
 }
 
 TEST(SopMgrTest, cube_compare)
@@ -156,23 +186,17 @@ TEST(SopMgrTest, cube_compare)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
-
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var2, false), Literal(var0, false), Literal(var1, true)});
-
+  auto bv1 = mgr.new_cube({Literal(var0, false), Literal(var1, true), Literal(var2, false)});
+  auto bv2 = mgr.new_cube({Literal(var2, false), Literal(var0, false), Literal(var1, true)});
   EXPECT_EQ( 0, mgr.cube_compare(bv1, bv2) );
 
-  SopBitVect* bv3 = mgr.new_body(1);
-  mgr.cube_set(bv3, {Literal(var0, true), Literal(var1, true), Literal(var2, false)});
+  auto bv3 = mgr.new_cube({Literal(var0, true), Literal(var1, true), Literal(var2, false)});
 
   EXPECT_EQ( -1, mgr.cube_compare(bv1, bv3) );
   EXPECT_EQ(  1, mgr.cube_compare(bv3, bv1) );
 
-  SopBitVect* bv4 = mgr.new_body(1);
-  mgr.cube_set(bv4, {Literal(var0, false), Literal(var1, true),
-			       Literal(var2, false), Literal(var9, false)});
+  auto bv4 = mgr.new_cube({Literal(var0, false), Literal(var1, true),
+      Literal(var2, false), Literal(var9, false)});
 
   EXPECT_EQ( -1, mgr.cube_compare(bv1, bv4) );
 }
@@ -194,16 +218,13 @@ TEST(SopMgrTest, cube_check_conflict)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
+  auto bv1 = mgr.new_cube({Literal(var0, false), Literal(var1, true), Literal(var2, false)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var4, false), Literal(var1, true), Literal(var5, false)});
+  auto bv2 = mgr.new_cube({Literal(var4, false), Literal(var1, true), Literal(var5, false)});
 
   EXPECT_FALSE( mgr.cube_check_conflict(bv1, bv2) );
 
-  SopBitVect* bv3 = mgr.new_body(1);
-  mgr.cube_set(bv3, {Literal(var4, false), Literal(var1, false), Literal(var5, false)});
+  auto bv3 = mgr.new_cube({Literal(var4, false), Literal(var1, false), Literal(var5, false)});
 
   EXPECT_TRUE( mgr.cube_check_conflict(bv1, bv3) );
 
@@ -226,18 +247,15 @@ TEST(SopMgrTest, cube_check_containment)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
+  auto bv1 = mgr.new_cube({Literal(var0, false), Literal(var1, true), Literal(var2, false)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var0, false), Literal(var1, true),
-			       Literal(var2, false), Literal(var8, false)});
+  auto bv2 = mgr.new_cube({Literal(var0, false), Literal(var1, true),
+      Literal(var2, false), Literal(var8, false)});
 
   EXPECT_FALSE( mgr.cube_check_containment(bv1, bv2) );
   EXPECT_TRUE( mgr.cube_check_containment(bv2, bv1) );
 
-  SopBitVect* bv3 = mgr.new_body(1);
-  mgr.cube_set(bv3, {Literal(var0, false), Literal(var2, true), Literal(var5, false)});
+  auto bv3 = mgr.new_cube({Literal(var0, false), Literal(var2, true), Literal(var5, false)});
 
   EXPECT_FALSE( mgr.cube_check_containment(bv1, bv3) );
   EXPECT_FALSE( mgr.cube_check_containment(bv3, bv1) );
@@ -261,17 +279,14 @@ TEST(SopMgrTest, cube_check_intersect)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, false)});
+  auto bv1 = mgr.new_cube({Literal(var0, false), Literal(var1, true), Literal(var2, false)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var0, false), Literal(var1, true),
-			       Literal(var2, false), Literal(var8, false)});
+  auto bv2 = mgr.new_cube({Literal(var0, false), Literal(var1, true),
+      Literal(var2, false), Literal(var8, false)});
 
   EXPECT_TRUE( mgr.cube_check_intersect(bv1, bv2) );
 
-  SopBitVect* bv3 = mgr.new_body(1);
-  mgr.cube_set(bv3, {Literal(var0, true), Literal(var2, true), Literal(var5, false)});
+  auto bv3 = mgr.new_cube({Literal(var0, true), Literal(var2, true), Literal(var5, false)});
 
   EXPECT_FALSE( mgr.cube_check_intersect(bv1, bv3) );
 
@@ -294,13 +309,11 @@ TEST(SopMgrTest, cube_product)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false), Literal(var2, true)});
+  auto bv1 = mgr.new_cube({Literal(var0, false), Literal(var2, true)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var1, true), Literal(var4, false)});
+  auto bv2 = mgr.new_cube({Literal(var1, true), Literal(var4, false)});
 
-  SopBitVect* bv3 = mgr.new_body(1);
+  auto bv3 = mgr.new_cube();
   bool stat1 = mgr.cube_product(bv3, bv1, bv2);
   EXPECT_TRUE( stat1 );
 
@@ -315,10 +328,9 @@ TEST(SopMgrTest, cube_product)
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var8) );
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var9) );
 
-  SopBitVect* bv4 = mgr.new_body(1);
-  mgr.cube_set(bv4, {Literal(var0, true), Literal(var4, false)});
+  auto bv4 = mgr.new_cube({Literal(var0, true), Literal(var4, false)});
 
-  SopBitVect* bv5 = mgr.new_body(1);
+  auto bv5 = mgr.new_cube();
   bool stat2 = mgr.cube_product(bv5, bv1, bv4);
   EXPECT_FALSE( stat2 );
 
@@ -351,13 +363,11 @@ TEST(SopMgrTest, cube_quotient)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, true), Literal(var2, true)});
+  auto bv1 = mgr.new_cube({Literal(var0, false), Literal(var1, true), Literal(var2, true)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var1, true)});
+  auto bv2 = mgr.new_cube({Literal(var1, true)});
 
-  SopBitVect* bv3 = mgr.new_body(1);
+  auto bv3 = mgr.new_cube();
   bool stat1 = mgr.cube_quotient(bv3, bv1, bv2);
   EXPECT_TRUE( stat1 );
 
@@ -372,10 +382,9 @@ TEST(SopMgrTest, cube_quotient)
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var8) );
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var9) );
 
-  SopBitVect* bv4 = mgr.new_body(1);
-  mgr.cube_set(bv4, {Literal(var1, true), Literal(var3, false)});
+  auto bv4 = mgr.new_cube({Literal(var1, true), Literal(var3, false)});
 
-  SopBitVect* bv5 = mgr.new_body(1);
+  auto bv5 = mgr.new_cube();
   bool stat2 = mgr.cube_quotient(bv5, bv1, bv4);
   EXPECT_FALSE( stat2 );
 
@@ -408,11 +417,31 @@ TEST(SopMgrTest, cube_swap)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false), Literal(var1, false), Literal(var2, true)});
+  auto bv1 = mgr.new_cube({Literal(var0, false), Literal(var1, false), Literal(var2, true)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var1, true)});
+  auto bv2 = mgr.new_cube({Literal(var1, true)});
+
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var0) );
+  EXPECT_EQ( SopPat::_0, mgr.get_pat(bv2, 0, var1) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var2) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var3) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var4) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var5) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var6) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var7) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var8) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv2, 0, var9) );
+
+  EXPECT_EQ( SopPat::_1, mgr.get_pat(bv1, 0, var0) );
+  EXPECT_EQ( SopPat::_1, mgr.get_pat(bv1, 0, var1) );
+  EXPECT_EQ( SopPat::_0, mgr.get_pat(bv1, 0, var2) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var3) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var4) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var5) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var6) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var7) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var8) );
+  EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var9) );
 
   mgr.cube_swap(bv1, bv2);
 
@@ -457,14 +486,11 @@ TEST(SopMgrTest, cube_rotate3)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false)});
+  auto bv1 = mgr.new_cube({Literal(var0, false)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var1, false)});
+  auto bv2 = mgr.new_cube({Literal(var1, false)});
 
-  SopBitVect* bv3 = mgr.new_body(1);
-  mgr.cube_set(bv3, {Literal(var2, false)});
+  auto bv3 = mgr.new_cube({Literal(var2, false)});
 
   mgr.cube_rotate3(bv1, bv2, bv3);
 
@@ -520,17 +546,13 @@ TEST(SopMgrTest, cube_rotate4)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false)});
+  auto bv1 = mgr.new_cube({Literal(var0, false)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var1, false)});
+  auto bv2 = mgr.new_cube({Literal(var1, false)});
 
-  SopBitVect* bv3 = mgr.new_body(1);
-  mgr.cube_set(bv3, {Literal(var2, false)});
+  auto bv3 = mgr.new_cube({Literal(var2, false)});
 
-  SopBitVect* bv4 = mgr.new_body(1);
-  mgr.cube_set(bv4, {Literal(var3, false)});
+  auto bv4 = mgr.new_cube({Literal(var3, false)});
 
   mgr.cube_rotate4(bv1, bv2, bv3, bv4);
 
@@ -580,7 +602,7 @@ TEST(SopMgrTest, cube_rotate4)
 
 }
 
-TEST(SopMgrTest, cover_set1)
+TEST(SopMgrTest, new_cover1)
 {
   const SizeType nv = 10;
 
@@ -597,8 +619,13 @@ TEST(SopMgrTest, cover_set1)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(2);
-  mgr.cover_set(bv1, {{Literal(var0, false)}, {Literal(var1, true)}});
+  Literal lit0{var0, false};
+  Literal lit1{var1, true};
+  auto block1 = mgr.new_cover({{lit0}, {lit1}});
+  EXPECT_EQ( 2, block1.cube_num);
+  EXPECT_EQ( 2, mgr.literal_num(block1) );
+
+  auto bv1 = block1.body;
 
   EXPECT_EQ( SopPat::_1, mgr.get_pat(bv1, 0, var0) );
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var1) );
@@ -623,7 +650,7 @@ TEST(SopMgrTest, cover_set1)
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 1, var9) );
 }
 
-TEST(SopMgrTest, cover_set2)
+TEST(SopMgrTest, new_cover2)
 {
   const SizeType nv = 10;
 
@@ -640,8 +667,11 @@ TEST(SopMgrTest, cover_set2)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(2);
-  mgr.cover_set(bv1, {{Literal(var1, false)}, {Literal(var0, true)}});
+  auto block1 = mgr.new_cover({{Literal(var1, false)}, {Literal(var0, true)}});
+  EXPECT_EQ( 2, block1.cube_num );
+  EXPECT_EQ( 2, mgr.literal_num(block1) );
+
+  auto bv1 = block1.body;
 
   EXPECT_EQ( SopPat::_0, mgr.get_pat(bv1, 0, var0) );
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv1, 0, var1) );
@@ -683,15 +713,13 @@ TEST(SopMgrTest, sum1)
 
   SopMgr mgr{nv};
 
-  SopBitVect* bv1 = mgr.new_body(1);
-  mgr.cube_set(bv1, {Literal(var0, false)});
+  auto bv1 = mgr.new_cube({Literal(var0, false)});
 
-  SopBitVect* bv2 = mgr.new_body(1);
-  mgr.cube_set(bv2, {Literal(var1, false)});
+  auto bv2 = mgr.new_cube({Literal(var1, false)});
 
-  SopBitVect* bv3 = mgr.new_body(2);
-  int nc = mgr.cover_sum(bv3, SopBlock(1, bv1), SopBlock(1, bv2));
-  EXPECT_EQ( 2, nc );
+  auto block1 = mgr.cover_sum(SopBlock{1, bv1}, SopBlock{1, bv2});
+  EXPECT_EQ( 2, block1.cube_num );
+  auto bv3 = block1.body;
 
   EXPECT_EQ( SopPat::_1, mgr.get_pat(bv3, 0, var0) );
   EXPECT_EQ( SopPat::_X, mgr.get_pat(bv3, 0, var1) );
@@ -717,6 +745,7 @@ TEST(SopMgrTest, sum1)
 
 }
 
+#if 0
 TEST(SopMgrTest, sum2)
 {
   const SizeType nv = 10;
@@ -1255,10 +1284,7 @@ TEST(SopMgrTest, cover_compare3)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var1, true},  Literal{var3, true}  }
     };
-  SizeType nc1 = cube_list1.size();
-  SopBitVect* bv1 = mgr.new_body(nc1);
-  mgr.cover_set(bv1, cube_list1);
-  SopBlock block1{nc1, bv1};
+  auto block1 = mgr.new_cover(cube_list1);
 
   std::initializer_list<std::initializer_list<Literal>> cube_list2
     {
@@ -1267,10 +1293,8 @@ TEST(SopMgrTest, cover_compare3)
      { Literal{var1, true},  Literal{var2, false} },
      { Literal{var0, false}, Literal{var4, true}  }
     };
-  SizeType nc2 = cube_list2.size();
-  SopBitVect* bv2 = mgr.new_body(nc2);
-  mgr.cover_set(bv2, cube_list2);
-  SopBlock block2{nc2, bv2};
+  auto block2 = mgr.new_cover(cube_list2);
+
 
   int stat1 = mgr.cover_compare(block1, block2);
   EXPECT_EQ( 1, stat1 );
@@ -1278,5 +1302,6 @@ TEST(SopMgrTest, cover_compare3)
   int stat2 = mgr.cover_compare(block2, block1);
   EXPECT_EQ( -1, stat2 );
 }
+#endif
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP

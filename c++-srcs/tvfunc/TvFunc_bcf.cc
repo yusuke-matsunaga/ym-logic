@@ -139,7 +139,7 @@ Expr
 TvFunc::BCF_expr() const
 {
   auto cov = BCF();
-  return cov.to_expr();
+  return cov.expr();
 }
 
 BEGIN_NONAMESPACE
@@ -267,7 +267,7 @@ Expr
 TvFunc::MWC_expr() const
 {
   auto cov = MWC();
-  auto expr = cov.to_expr();
+  auto expr = cov.expr();
   return expr;
 }
 

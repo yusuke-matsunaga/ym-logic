@@ -39,7 +39,7 @@ TEST_F(SopCubeTest, constructor1)
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( 0,  cube1.literal_num() );
 
-  auto lit_list = cube1.to_literal_list();
+  auto lit_list = cube1.literal_list();
   EXPECT_TRUE( lit_list.empty() );
 };
 
@@ -51,30 +51,30 @@ TEST_F(SopCubeTest, constructor2)
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( 1,  cube1.literal_num() );
 
-  auto lit_list = cube1.to_literal_list();
+  auto lit_list = cube1.literal_list();
   EXPECT_EQ( 1, lit_list.size() );
   EXPECT_EQ( lit, lit_list[0] );
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 
 };
 
@@ -89,31 +89,31 @@ TEST_F(SopCubeTest, constructor3)
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( nl,  cube1.literal_num() );
 
-  auto lit_list1 = cube1.to_literal_list();
+  auto lit_list1 = cube1.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
 
-  EXPECT_TRUE(  cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 
 };
 
@@ -128,31 +128,31 @@ TEST_F(SopCubeTest, constructor4)
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( nl,  cube1.literal_num() );
 
-  auto lit_list1 = cube1.to_literal_list();
+  auto lit_list1 = cube1.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
 
-  EXPECT_TRUE(  cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 
 };
 
@@ -168,31 +168,31 @@ TEST_F(SopCubeTest, copy_constructor)
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl,  cube2.literal_num() );
 
-  auto lit_list1 = cube2.to_literal_list();
+  auto lit_list1 = cube2.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
 
-  EXPECT_TRUE(  cube2.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube2.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube2.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube2.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var9, true)) );
 
 };
 
@@ -211,31 +211,31 @@ TEST_F(SopCubeTest, copy_assignment)
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl, cube2.literal_num() );
 
-  auto lit_list1 = cube2.to_literal_list();
+  auto lit_list1 = cube2.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
 
-  EXPECT_TRUE(  cube2.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube2.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube2.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube2.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var9, true)) );
 
 };
 
@@ -254,31 +254,31 @@ TEST_F(SopCubeTest, move_constructor)
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl, cube2.literal_num() );
 
-  auto lit_list1 = cube2.to_literal_list();
+  auto lit_list1 = cube2.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
 
-  EXPECT_TRUE(  cube2.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube2.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube2.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube2.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var9, true)) );
 
 };
 
@@ -300,31 +300,31 @@ TEST_F(SopCubeTest, move_assignment)
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl,  cube2.literal_num() );
 
-  auto lit_list1 = cube2.to_literal_list();
+  auto lit_list1 = cube2.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
   EXPECT_EQ( lit2, lit_list1[0] );
   EXPECT_EQ( lit1, lit_list1[1] );
 
-  EXPECT_TRUE(  cube2.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube2.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube2.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube2.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube2.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube2.check_literal(Literal(var9, true)) );
 
 };
 
@@ -375,26 +375,26 @@ TEST_F(SopCubeTest, cube_cube_product1)
 
   auto cube3 = cube1 * cube2;
 
-  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, cube_cube_product2)
@@ -408,26 +408,26 @@ TEST_F(SopCubeTest, cube_cube_product2)
 
   auto cube3 = cube1 * cube2;
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Rcube_cube_product1)
@@ -442,26 +442,26 @@ TEST_F(SopCubeTest, Rcube_cube_product1)
 
   EXPECT_EQ( 0, cube1.literal_num() );
 
-  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, cube_Rcube_product1)
@@ -476,26 +476,26 @@ TEST_F(SopCubeTest, cube_Rcube_product1)
 
   EXPECT_EQ( 0, cube2.literal_num() );
 
-  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Rcube_Rcube_product1)
@@ -510,26 +510,26 @@ TEST_F(SopCubeTest, Rcube_Rcube_product1)
 
   EXPECT_EQ( 0, cube1.literal_num() );
 
-  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, lit_cube_product1)
@@ -541,26 +541,26 @@ TEST_F(SopCubeTest, lit_cube_product1)
 
   auto cube3 = lit0 * cube1;
 
-  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, lit_Rcube_product1)
@@ -574,26 +574,26 @@ TEST_F(SopCubeTest, lit_Rcube_product1)
 
   EXPECT_EQ( 0, cube1.literal_num() );
 
-  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, lit_cube_product2)
@@ -605,26 +605,26 @@ TEST_F(SopCubeTest, lit_cube_product2)
 
   auto cube3 = lit0 * cube1;
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, cube_lit_product1)
@@ -636,26 +636,26 @@ TEST_F(SopCubeTest, cube_lit_product1)
 
   auto cube3 = cube1 * lit0;
 
-  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Rcube_lit_product1)
@@ -669,26 +669,26 @@ TEST_F(SopCubeTest, Rcube_lit_product1)
 
   EXPECT_EQ( 0, cube1.literal_num() );
 
-  EXPECT_TRUE(  cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, cube_lit_product2)
@@ -700,26 +700,26 @@ TEST_F(SopCubeTest, cube_lit_product2)
 
   auto cube3 = cube1 * lit0;
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Scube_cube_product1)
@@ -732,26 +732,26 @@ TEST_F(SopCubeTest, Scube_cube_product1)
 
   cube1 = cube1 * cube2;
 
-  EXPECT_TRUE(  cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Scube_cube_product2)
@@ -765,26 +765,26 @@ TEST_F(SopCubeTest, Scube_cube_product2)
 
   cube1 = cube1 * cube2;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Scube_literal_product1)
@@ -796,26 +796,26 @@ TEST_F(SopCubeTest, Scube_literal_product1)
 
   cube1 = cube1 * lit0;
 
-  EXPECT_TRUE(  cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Scube_literal_product2)
@@ -827,26 +827,26 @@ TEST_F(SopCubeTest, Scube_literal_product2)
 
   cube1 = cube1 * lit0;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, literal_Scube_product1)
@@ -858,26 +858,26 @@ TEST_F(SopCubeTest, literal_Scube_product1)
 
   cube1 = lit0 * cube1;
 
-  EXPECT_TRUE(  cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, literal_Scube_product2)
@@ -889,26 +889,26 @@ TEST_F(SopCubeTest, literal_Scube_product2)
 
   cube1 = lit0 * cube1;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Icube_cube_product1)
@@ -921,26 +921,26 @@ TEST_F(SopCubeTest, Icube_cube_product1)
 
   cube1 *= cube2;
 
-  EXPECT_TRUE(  cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Icube_cube_product2)
@@ -954,26 +954,26 @@ TEST_F(SopCubeTest, Icube_cube_product2)
 
   cube1 *= cube2;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Icube_literal_product1)
@@ -985,26 +985,26 @@ TEST_F(SopCubeTest, Icube_literal_product1)
 
   cube1 *= lit0;
 
-  EXPECT_TRUE(  cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Icube_literal_product2)
@@ -1016,26 +1016,26 @@ TEST_F(SopCubeTest, Icube_literal_product2)
 
   cube1 *= lit0;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, cube_cube_quotient1)
@@ -1048,26 +1048,26 @@ TEST_F(SopCubeTest, cube_cube_quotient1)
 
   auto cube3 = cube1 / cube2;
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Rcube_cube_quotient1)
@@ -1082,26 +1082,26 @@ TEST_F(SopCubeTest, Rcube_cube_quotient1)
 
   EXPECT_EQ( 0, cube1.literal_num() );
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, cube_cube_quotient2)
@@ -1114,26 +1114,26 @@ TEST_F(SopCubeTest, cube_cube_quotient2)
 
   auto cube3 = cube1 / cube2;
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, cube_lit_quotient1)
@@ -1145,26 +1145,26 @@ TEST_F(SopCubeTest, cube_lit_quotient1)
 
   auto cube3 = cube1 / lit0;
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Rcube_lit_quotient1)
@@ -1178,26 +1178,26 @@ TEST_F(SopCubeTest, Rcube_lit_quotient1)
 
   EXPECT_EQ( 0, cube1.literal_num() );
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, cube_lit_quotient2)
@@ -1209,26 +1209,26 @@ TEST_F(SopCubeTest, cube_lit_quotient2)
 
   auto cube3 = cube1 / lit0;
 
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube3.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Scube_cube_quotient1)
@@ -1241,26 +1241,26 @@ TEST_F(SopCubeTest, Scube_cube_quotient1)
 
   cube1 = cube1 / cube2;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Scube_cube_quotient2)
@@ -1273,26 +1273,26 @@ TEST_F(SopCubeTest, Scube_cube_quotient2)
 
   cube1 = cube1 / cube2;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Scube_literal_quotient1)
@@ -1304,26 +1304,26 @@ TEST_F(SopCubeTest, Scube_literal_quotient1)
 
   cube1 = cube1 / lit0;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Scube_literal_quotient2)
@@ -1335,26 +1335,26 @@ TEST_F(SopCubeTest, Scube_literal_quotient2)
 
   cube1 = cube1 / lit0;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Icube_cube_quotient1)
@@ -1367,26 +1367,26 @@ TEST_F(SopCubeTest, Icube_cube_quotient1)
 
   cube1 /= cube2;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Icube_cube_quotient2)
@@ -1399,26 +1399,26 @@ TEST_F(SopCubeTest, Icube_cube_quotient2)
 
   cube1 /= cube2;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Icube_literal_quotient1)
@@ -1430,26 +1430,26 @@ TEST_F(SopCubeTest, Icube_literal_quotient1)
 
   cube1 /= lit0;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_TRUE(  cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, Icube_literal_quotient2)
@@ -1461,26 +1461,26 @@ TEST_F(SopCubeTest, Icube_literal_quotient2)
 
   cube1 /= lit0;
 
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var0, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var1, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var2, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var3, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var4, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var5, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var6, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var7, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var8, true)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, false)) );
-  EXPECT_FALSE( cube1.has_literal(Literal(var9, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
 TEST_F(SopCubeTest, compare1)
@@ -1582,7 +1582,7 @@ TEST_F(SopCubeTest, to_expr1)
 
   SopCube cube1{3, {lit0, lit1, ~lit2}};
 
-  auto expr = cube1.to_expr();
+  auto expr = cube1.expr();
   auto expr_str = expr.to_string();
   EXPECT_EQ( "( 0 & 1 & ~2 )", expr_str );
 }

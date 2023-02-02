@@ -13,7 +13,7 @@
 #include "ym/Range.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 TEST(GenFactorTest, quick_factor)
 {
@@ -153,4 +153,4 @@ TEST(GenFactorTest, good_factor)
 #endif
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP

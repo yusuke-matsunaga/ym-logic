@@ -3,7 +3,7 @@
 /// @brief KernelGen の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2023 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "KernelGen.h"
@@ -11,7 +11,7 @@
 #include "ym/Range.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 // クラス KernelGen
@@ -29,11 +29,11 @@ KernelGen::~KernelGen()
 }
 
 // @brief カーネルとコカーネルを列挙する．
-// @param[in] cover 対象のカバー
-// @param[out] kernel_list カーネルとコカーネルのペアのリスト
 void
-KernelGen::all_kernel(const SopCover& cover,
-			 vector<pair<SopCover, SopCover>>& kernel_list)
+KernelGen::all_kernel(
+  const SopCover& cover,
+  vector<pair<SopCover, SopCover>>& kernel_list
+)
 {
   generate(cover);
 
@@ -46,9 +46,10 @@ KernelGen::all_kernel(const SopCover& cover,
 }
 
 // @brief 最も価値の高いカーネルを返す．
-// @param[in] cover 対象のカバー
 SopCover
-KernelGen::best_kernel(const SopCover& cover)
+KernelGen::best_kernel(
+  const SopCover& cover
+)
 {
   generate(cover);
 
@@ -81,12 +82,13 @@ KernelGen::best_kernel(const SopCover& cover)
 }
 
 // @brief カーネルとコカーネルを列挙する．
-// @param[in] cover 対象のカバー
 void
-KernelGen::generate(const SopCover& cover)
+KernelGen::generate(
+  const SopCover& cover
+)
 {
   // cover に2回以上現れるリテラルとその出現頻度のリストを作る．
-  int nv = cover.variable_num();
+  SizeType nv = cover.variable_num();
   vector<pair<int, Literal>> tmp_list;
   tmp_list.reserve(nv * 2);
   for ( int var: Range(nv) ) {
@@ -129,15 +131,13 @@ KernelGen::generate(const SopCover& cover)
 }
 
 // @brief カーネルを求める下請け関数
-// @param[in] cover 対象のカバー
-// @param[in] pos mLitList 上の位置
-// @param[in] ccube 今までに括りだされた共通のキューブ
-// @param[in] plits mLitList[0]〜mLitList[pos - 1] までをまとめたリテラル集合
 void
-KernelGen::kern_sub(const SopCover& cover,
-		       vector<Literal>::const_iterator p,
-		       const SopCube& ccube,
-		       const LitSet& plits)
+KernelGen::kern_sub(
+  const SopCover& cover,
+  vector<Literal>::const_iterator p,
+  const SopCube& ccube,
+  const LitSet& plits
+)
 {
   LitSet plits1(plits);
   while ( p != mEnd ) {
@@ -191,8 +191,10 @@ KernelGen::hash_clear()
 
 // @brief ハッシュ表に登録する．
 void
-KernelGen::hash_add(SopCover&& kernel,
-		    const SopCube& cokernel)
+KernelGen::hash_add(
+  SopCover&& kernel,
+  const SopCube& cokernel
+)
 {
   SizeType hash = kernel.hash();
   int index = hash % mHashSize;
@@ -221,7 +223,9 @@ KernelGen::hash_add(SopCover&& kernel,
 
 // @brief ハッシュ表をリサイズする．
 void
-KernelGen::hash_resize(int size)
+KernelGen::hash_resize(
+  SizeType size
+)
 {
   vector<Cell*> new_table(size, nullptr);
   for ( auto cell: mHashTable ) {
@@ -238,4 +242,4 @@ KernelGen::hash_resize(int size)
   mNextLimit = static_cast<int>(mHashSize * 1.8);
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP

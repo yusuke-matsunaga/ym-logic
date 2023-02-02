@@ -11,7 +11,7 @@
 #include "Divisor.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class BestKernel BestKernel.h "BestKernel.h"
@@ -35,13 +35,14 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 除数を求める．
-  /// @param[in] f 対象の論理式
   /// @return 除数を表す論理式を返す．
   SopCover
-  operator()(const SopCover& f) const override;
+  operator()(
+    const SopCover& f ///< [in] 対象の論理式
+  ) const override;
 
 };
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 #endif // BESTKERNEL_H

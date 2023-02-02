@@ -3,9 +3,8 @@
 /// @brief BestKernel の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "BestKernel.h"
 #include "ym/SopCover.h"
@@ -13,7 +12,7 @@
 #include "KernelGen.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 // クラス BestKernel
@@ -30,14 +29,14 @@ BestKernel::~BestKernel()
 }
 
 // @brief 除数を求める．
-// @param[in] f 対象の論理式
-// @return 除数を表す論理式を返す．
 SopCover
-BestKernel::operator()(const SopCover& f) const
+BestKernel::operator()(
+  const SopCover& f
+) const
 {
   KernelGen kernel_gen;
 
   return kernel_gen.best_kernel(f);
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP

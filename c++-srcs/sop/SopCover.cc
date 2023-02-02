@@ -13,7 +13,7 @@
 #include "SopMgr.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 // クラス SopCover
@@ -39,8 +39,8 @@ SopCover::SopCover(
     mBody{nullptr}
 {
   SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(mCubeCap);
-  mgr.cover_set(mBody, cube_list);
+  auto dst_block = mgr.new_cover(cube_list);
+  mBody = dst_block.body;
 }
 
 // @brief コンストラクタ
@@ -53,8 +53,8 @@ SopCover::SopCover(
     mBody{nullptr}
 {
   SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(mCubeCap);
-  mgr.cover_set(mBody, cube_list);
+  auto dst_block = mgr.new_cover(cube_list);
+  mBody = dst_block.body;
 }
 
 // @brief コンストラクタ
@@ -67,8 +67,8 @@ SopCover::SopCover(
     mBody{nullptr}
 {
   SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(mCubeCap);
-  mgr.cover_set(mBody, cube_list);
+  auto dst_block = mgr.new_cover(cube_list);
+  mBody = dst_block.body;
 }
 
 // @brief コピーコンストラクタ
@@ -79,9 +79,9 @@ SopCover::SopCover(
     mCubeCap{mCubeNum},
     mBody{nullptr}
 {
-  SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(mCubeCap);
-  mgr.cover_copy(mBody, src.mBody, mCubeNum);
+  SopMgr mgr{mVariableNum};
+  auto dst_block = mgr.new_cover(src.block());
+  mBody = dst_block.body;
 }
 
 // @brief コピー代入演算子
@@ -93,15 +93,14 @@ SopCover::operator=(
   if ( this != &src ) {
     SizeType n = src.cube_num();
     if ( mCubeCap < n ) {
-      SopMgr mgr(mVariableNum);
-      mgr.delete_body(mBody, mCubeCap);
+      SopMgr::delete_cube(mBody);
     }
     mVariableNum = src.mVariableNum;
     mCubeNum = src.mCubeNum;
     mCubeCap = mCubeNum;;
     SopMgr mgr(mVariableNum);
-    mBody = mgr.new_body(mCubeCap);
-    mgr.cover_copy(mBody, src.mBody, mCubeNum);
+    auto dst_block = mgr.new_cover(src.block());
+    mBody = dst_block.body;
   }
 
   return *this;
@@ -127,7 +126,7 @@ SopCover::operator=(
 )
 {
   SopMgr mgr(mVariableNum);
-  mgr.delete_body(mBody, 1);
+  SopMgr::delete_cube(mBody);
 
   mVariableNum = src.mVariableNum;
   mCubeNum = src.mCubeNum;
@@ -150,8 +149,8 @@ SopCover::SopCover(
     mBody{nullptr}
 {
   SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(mCubeCap);
-  mgr.cube_copy(mBody, cube);
+  auto dst_block = mgr.new_cover(cube.block());
+  mBody = dst_block.body;
 }
 
 // @brief キューブからのムーブ変換コンストラクタ
@@ -162,8 +161,7 @@ SopCover::SopCover(
     mCubeCap{mCubeNum},
     mBody{nullptr}
 {
-  SopMgr mgr(mVariableNum);
-  mBody = mgr.cube_move(cube);
+  mBody = SopMgr::cube_extract(cube);
 }
 
 // @brief 内容を指定したコンストラクタ
@@ -184,15 +182,14 @@ SopCover::SopCover(
 // ここに属しているすべてのキューブは削除される．
 SopCover::~SopCover()
 {
-  SopMgr mgr(mVariableNum);
-  mgr.delete_body(mBody, 1);
+  SopMgr::delete_cube(mBody);
 }
 
 // @brief リテラル数を返す．
 SizeType
 SopCover::literal_num() const
 {
-  SopMgr mgr(mVariableNum);
+  SopMgr mgr{variable_num()};
   return mgr.literal_num(block());
 }
 
@@ -202,27 +199,27 @@ SopCover::literal_num(
   Literal lit
 ) const
 {
-  SopMgr mgr(mVariableNum);
+  SopMgr mgr{variable_num()};
   return mgr.literal_num(block(), lit);
 }
 
 // @brief 内容をリテラルのリストのリストに変換する．
 vector<vector<Literal>>
-SopCover::to_literal_list() const
+SopCover::literal_list() const
 {
   vector<vector<Literal>> cube_list(mCubeNum);
 
-  SopMgr mgr(mVariableNum);
-  for ( int i: Range(mCubeNum) ) {
-    vector<Literal>& tmp_list = cube_list[i];
+  SopMgr mgr{variable_num()};
+  for ( SizeType i: Range(mCubeNum) ) {
+    auto& tmp_list = cube_list[i];
     tmp_list.reserve(mVariableNum);
-    for ( int var: Range(mVariableNum) ) {
+    for ( SizeType var: Range(mVariableNum) ) {
       SopPat pat = mgr.get_pat(mBody, i, var);
       if ( pat == SopPat::_1 ) {
-	tmp_list.push_back(Literal(var, false));
+	tmp_list.push_back(Literal{var, false});
       }
       else if ( pat == SopPat::_0 ) {
-	tmp_list.push_back(Literal(var, true));
+	tmp_list.push_back(Literal{var, true});
       }
     }
   }
@@ -237,7 +234,7 @@ SopCover::get_pat(
   SizeType var
 ) const
 {
-  SopMgr mgr(mVariableNum);
+  SopMgr mgr{variable_num()};
   return mgr.get_pat(mBody, cube_id, var);
 }
 
@@ -249,20 +246,28 @@ SopCover::block() const
   return SopBlock{mCubeNum, mBody};
 }
 
+// @brief 否定を計算する．
+SopCover
+SopCover::operator~() const
+{
+  SopMgr mgr{variable_num()};
+  auto ans_block = mgr.cover_complement(block());
+  return mgr.make_cover(ans_block);
+}
+
 // @brief 論理和を計算する．
 SopCover
 SopCover::operator+(
   const SopCover& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum + right.mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_sum(body, block(), right.block());
-
-  return SopCover(mVariableNum, nc, cap, body);
+  SopMgr mgr{variable_num()};
+  auto ans_block = mgr.cover_sum(block(), right.block());
+  return mgr.make_cover(ans_block);
 }
 
 // @brief 論理和を計算して代入する．
@@ -271,19 +276,18 @@ SopCover::operator+=(
   const SopCover& right
 )
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum + right.mCubeNum;
-  // 新しいブロックを作る．
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_sum(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_sum(block(), right.block());
 
-  mgr.delete_body(mBody, mCubeNum);
+  SopMgr::delete_cube(mBody);
 
-  mCubeNum = nc;
-  mCubeCap = cap;
-  mBody = body;
+  mCubeNum = dst_block.cube_num;
+  mCubeCap = mCubeNum;
+  mBody = dst_block.body;
 
   return *this;
 }
@@ -294,13 +298,13 @@ SopCover::operator+(
   const SopCube& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.variable_num() );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum + 1;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_sum(body, block(), right.block());
-  return SopCover(mVariableNum, nc, cap, body);
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_sum(block(), right.block());
+  return mgr.make_cover(dst_block);
 }
 
 // @brief 論理和を計算して代入する(キューブ版)．
@@ -309,18 +313,18 @@ SopCover::operator+=(
   const SopCube& right
 )
 {
-  ASSERT_COND( mVariableNum == right.variable_num() );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum + 1;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_sum(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_sum(block(), right.block());
 
-  mgr.delete_body(mBody, mCubeNum);
+  mgr.delete_cube(mBody);
 
-  mCubeNum = nc;
-  mCubeCap = cap;
-  mBody = body;
+  mCubeNum = dst_block.cube_num;
+  mCubeCap = mCubeNum;
+  mBody = dst_block.body;
 
   return *this;
 }
@@ -331,14 +335,14 @@ SopCover::operator-(
   const SopCover& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_diff(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_diff(block(), right.block());
 
-  return SopCover(mVariableNum, nc, cap, body);
+  return mgr.make_cover(dst_block);
 }
 
 // @brief 差分を計算して代入する．
@@ -347,11 +351,15 @@ SopCover::operator-=(
   const SopCover& right
 )
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
   // キューブ数は増えないのでブロックはそのまま
-  SopMgr mgr(mVariableNum);
-  mCubeNum = mgr.cover_diff(mBody, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = block();
+  mgr.cover_diff_int(dst_block, right.block());
+  mCubeNum = dst_block.cube_num;
 
   return *this;
 }
@@ -362,14 +370,14 @@ SopCover::operator-(
   const SopCube& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.variable_num() );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_diff(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_diff(block(), right.block());
 
-  return SopCover(mVariableNum, nc, cap, body);
+  return mgr.make_cover(dst_block);
 }
 
 // @brief 差分を計算して代入する(キューブ版)．
@@ -378,10 +386,14 @@ SopCover::operator-=(
   const SopCube& right
 )
 {
-  ASSERT_COND( mVariableNum == right.variable_num() );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  mCubeNum = mgr.cover_diff(mBody, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = block();
+  mgr.cover_diff_int(dst_block, right.block());
+  mCubeNum = dst_block.cube_num;
 
   return *this;
 }
@@ -392,14 +404,14 @@ SopCover::operator*(
   const SopCover& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum * right.mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_product(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_product(block(), right.block());
 
-  return SopCover(mVariableNum, nc, cap, body);
+  return mgr.make_cover(dst_block);
 }
 
 // @brief 論理積を計算して代入する．
@@ -408,18 +420,18 @@ SopCover::operator*=(
   const SopCover& right
 )
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum * right.mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_product(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_product(block(), right.block());
 
-  mgr.delete_body(mBody, mCubeNum);
+  mgr.delete_cube(mBody);
 
-  mCubeNum = nc;
-  mCubeCap = cap;
-  mBody = body;
+  mCubeNum = dst_block.cube_num;
+  mCubeCap = mCubeNum;
+  mBody = dst_block.body;
 
   return *this;
 }
@@ -430,14 +442,14 @@ SopCover::operator*(
   const SopCube& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.variable_num() );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_product(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_product(block(), right.block());
 
-  return SopCover(mVariableNum, nc, cap, body);
+  return mgr.make_cover(dst_block);
 }
 
 // @brief 論理積を計算して代入する(キューブ版)．
@@ -446,10 +458,14 @@ SopCover::operator*=(
   const SopCube& right
 )
 {
-  ASSERT_COND( mVariableNum == right.variable_num() );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  mCubeNum = mgr.cover_product(mBody, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = block();
+  mgr.cover_product_int(dst_block, right.block().body);
+  mCubeNum = dst_block.cube_num;
 
   return *this;
 }
@@ -460,12 +476,10 @@ SopCover::operator*(
   Literal right
 ) const
 {
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_product(body, block(), right);
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_product(block(), right);
 
-  return SopCover(mVariableNum, nc, cap, body);
+  return mgr.make_cover(dst_block);
 }
 
 // @brief 論理積を計算して代入する(リテラル版)．
@@ -474,8 +488,10 @@ SopCover::operator*=(
   Literal right
 )
 {
-  SopMgr mgr(mVariableNum);
-  mCubeNum = mgr.cover_product(mBody, block(), right);
+  SopMgr mgr{variable_num()};
+  auto dst_block = block();
+  mgr.cover_product_int(dst_block, right);
+  mCubeNum = dst_block.cube_num;
 
   return *this;
 }
@@ -486,14 +502,14 @@ SopCover::operator/(
   const SopCover& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_quotient(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_quotient(block(), right.block());
 
-  return SopCover(mVariableNum, nc, cap, body);
+  return mgr.make_cover(dst_block);
 }
 
 // @brief algebraic division を行って代入する．
@@ -502,10 +518,18 @@ SopCover::operator/=(
   const SopCover& right
 )
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  mCubeNum = mgr.cover_quotient(mBody, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_quotient(block(), right.block());
+
+  mgr.delete_cube(mBody);
+
+  mCubeNum = dst_block.cube_num;
+  mCubeCap = mCubeNum;
+  mBody = dst_block.body;
 
   return *this;
 }
@@ -516,14 +540,14 @@ SopCover::operator/(
   const SopCube& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.variable_num() );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_quotient(body, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_quotient(block(), right.block());
 
-  return SopCover(mVariableNum, nc, cap, body);
+  return mgr.make_cover(dst_block);
 }
 
 // @brief キューブによる商を計算する．
@@ -532,10 +556,14 @@ SopCover::operator/=(
   const SopCube& right
 )
 {
-  ASSERT_COND( mVariableNum == right.variable_num() );
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(mVariableNum);
-  mCubeNum = mgr.cover_quotient(mBody, block(), right.block());
+  SopMgr mgr{variable_num()};
+  auto dst_block = block();
+  mgr.cover_quotient_int(dst_block, right.block().body);
+  mCubeNum = dst_block.cube_num;
 
   return *this;
 }
@@ -546,12 +574,10 @@ SopCover::operator/(
   Literal lit
 ) const
 {
-  SopMgr mgr(mVariableNum);
-  SizeType cap = mCubeNum;
-  SopBitVect* body = mgr.new_body(cap);
-  SizeType nc = mgr.cover_quotient(body, block(), lit);
+  SopMgr mgr{variable_num()};
+  auto dst_block = mgr.cover_quotient(block(), lit);
 
-  return SopCover(mVariableNum, nc, cap, body);
+  return mgr.make_cover(dst_block);
 }
 
 // @brief リテラルによる商を計算して代入する．
@@ -560,8 +586,10 @@ SopCover::operator/=(
   Literal lit
 )
 {
-  SopMgr mgr(mVariableNum);
-  mCubeNum = mgr.cover_quotient(mBody, block(), lit);
+  SopMgr mgr{variable_num()};
+  auto dst_block = block();
+  mgr.cover_quotient_int(dst_block, lit);
+  mCubeNum = dst_block.cube_num;
 
   return *this;
 }
@@ -570,23 +598,24 @@ SopCover::operator/=(
 SopCube
 SopCover::common_cube() const
 {
-  SopMgr mgr(mVariableNum);
-  return mgr.common_cube(block());
+  SopMgr mgr{variable_num()};
+  auto bv = mgr.common_cube(block());
+  return mgr.make_cube(bv);
 }
 
 // @brief Expr に変換する．
 Expr
-SopCover::to_expr() const
+SopCover::expr() const
 {
   SopMgr mgr{mVariableNum};
-  return mgr.to_expr(mBody, mCubeNum);
+  return mgr.to_expr(block());
 }
 
 // @brief ハッシュ値を返す．
 SizeType
 SopCover::hash() const
 {
-  SopMgr mgr(mVariableNum);
+  SopMgr mgr{variable_num()};
   return mgr.hash(block());
 }
 
@@ -597,8 +626,18 @@ SopCover::print(
   const vector<string>& varname_list
 ) const
 {
-  SopMgr mgr(mVariableNum);
+  SopMgr mgr{variable_num()};
   mgr.print(s, mBody, 0, mCubeNum, varname_list);
+}
+
+// @brief 内容をデバッグ用に出力する．
+void
+SopCover::debug_print(
+  ostream& s
+) const
+{
+  SopMgr mgr{variable_num()};
+  mgr.debug_print(s, mBody, mCubeNum);
 }
 
 // @relates SopCover
@@ -608,11 +647,13 @@ compare(
   const SopCover& right
 )
 {
-  ASSERT_COND( left.mVariableNum == right.mVariableNum );
+  if ( left.variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
-  SopMgr mgr(left.mVariableNum);
+  SopMgr mgr{left.mVariableNum};
 
   return mgr.cover_compare(left.block(), right.block());
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP

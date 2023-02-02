@@ -11,7 +11,7 @@
 #include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 // クラス OneLevel0Kernel
@@ -52,8 +52,6 @@ find_literal(
 END_NONAMESPACE
 
 // @brief 除数を求める．
-// @param[in] f 対象の論理式
-// @return 除数を表す論理式を返す．
 SopCover
 OneLevel0Kernel::operator()(
   const SopCover& f
@@ -66,21 +64,21 @@ OneLevel0Kernel::operator()(
   }
 
   // f に2回以上現れるリテラルを求める．
-  Literal lit = find_literal(f);
+  auto lit = find_literal(f);
   if ( lit == Literal::x() ) {
     // f をこれ以上割ることはできない．
     // 空の論理式を返す．
     return SopCover{f.variable_num()};
   }
 
-  SopCover f1{f};
+  auto f1 = f;
   do {
     f1 /= lit;
-    SopCube cc = f1.common_cube();
+    auto cc = f1.common_cube();
     f1 /= cc;
     lit = find_literal(f1);
   } while ( lit != Literal::x() );
   return f1;
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP

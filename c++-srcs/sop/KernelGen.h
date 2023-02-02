@@ -5,16 +5,15 @@
 /// @brief KernelGen のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-
-#include "ym/Sop.h"
+#include "ym/sop_nsdef.h"
 #include "ym/SopCover.h"
 #include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 class LitSet;
 
@@ -39,16 +38,17 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief カーネルとコカーネルを列挙する．
-  /// @param[in] cover 対象のカバー
-  /// @param[out] kernel_list カーネルとコカーネルのペアのリスト
   void
-  all_kernel(const SopCover& cover,
-	     vector<pair<SopCover, SopCover>>& kernel_list);
+  all_kernel(
+    const SopCover& cover,                        ///< [in] 対象のカバー
+    vector<pair<SopCover, SopCover>>& kernel_list ///< [out] カーネルとコカーネルのペアのリスト
+  );
 
   /// @brief 価値の最も高いカーネルを求める．
-  /// @param[in] cover 対象のカバー
   SopCover
-  best_kernel(const SopCover& cover);
+  best_kernel(
+    const SopCover& cover ///< [in] 対象のカバー
+  );
 
 
 private:
@@ -57,21 +57,19 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief カーネルとコカーネルを列挙する．
-  /// @param[in] cover 対象のカバー
   void
-  generate(const SopCover& cover);
+  generate(
+    const SopCover& cover ///< [in] 対象のカバー
+  );
 
   /// @brief カーネルを求める下請け関数
-  /// @param[in] cover 対象のカバー
-  /// @param[in] all_kernel すべてのカーネルを求める．
-  /// @param[in] pos mLitList 上の位置
-  /// @param[in] ccube 今までに括りだされた共通のキューブ
-  /// @param[in] plits mLitList[0]〜mLitList[pos - 1] までをまとめたリテラル集合
   void
-  kern_sub(const SopCover& cover,
-	   vector<Literal>::const_iterator p,
-	   const SopCube& ccube,
-	   const LitSet& plits);
+  kern_sub(
+    const SopCover& cover,             ///< [in] 対象のカバー
+    vector<Literal>::const_iterator p, ///< [in] 次のリテラルの位置
+    const SopCube& ccube,              ///< [in] 今までに括りだされた共通のキューブ
+    const LitSet& plits                ///< [in] すでに括られたリテラルの集合
+  );
 
 
 private:
@@ -83,10 +81,11 @@ private:
   struct Cell
   {
     // コンストラクタ
-    Cell(SopCover&& kernel,
-	 const SopCube& cokernel) :
-      mKernel{kernel},
-      mCoKernels{cokernel}
+    Cell(
+      SopCover&& kernel,
+      const SopCube& cokernel
+    ) : mKernel{kernel},
+	mCoKernels{cokernel}
     {
     }
 
@@ -113,12 +112,16 @@ private:
 
   /// @brief ハッシュ表に登録する．
   void
-  hash_add(SopCover&& kernel,
-	   const SopCube& cokernel);
+  hash_add(
+    SopCover&& kernel,
+    const SopCube& cokernel
+  );
 
   /// @brief ハッシュ表をリサイズする．
   void
-  hash_resize(int size);
+  hash_resize(
+    SizeType size
+  );
 
 
 private:
@@ -133,16 +136,16 @@ private:
   vector<Cell*> mHashTable;
 
   // ハッシュ表のサイズ
-  int mHashSize;
+  SizeType mHashSize;
 
   // ハッシュ表を拡大する目安
-  int mNextLimit;
+  SizeType mNextLimit;
 
   // ハッシュ表のセルのリスト
   vector<Cell*> mCellList;
 
 };
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 #endif // KERNELGEN_H

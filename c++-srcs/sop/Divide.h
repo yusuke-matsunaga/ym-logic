@@ -5,13 +5,13 @@
 /// @brief Divide のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Sop.h"
+#include "ym/sop_nsdef.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class Divide Divide.h "Divide.h"
@@ -23,7 +23,7 @@ public:
 
   /// @brief デストラクタ
   virtual
-  ~Divide() { }
+  ~Divide() = default;
 
 
 public:
@@ -32,16 +32,16 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 除算を行う．
-  /// @param[in] f 被除数
-  /// @param[in] d 除数
   /// @return 商q と余りr の pair を返す．
   virtual
   pair<SopCover, SopCover>
-  operator()(const SopCover& f,
-	     const SopCover& d) const = 0;
+  operator()(
+    const SopCover& f, ///< [in] 被除数
+    const SopCover& d  ///< [in] 除数
+  ) const = 0;
 
 };
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 #endif // DIVIDE_H

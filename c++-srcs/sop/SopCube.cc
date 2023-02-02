@@ -3,27 +3,25 @@
 /// @brief SopCube の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018, 2022 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/SopCube.h"
+#include "ym/SopCover.h"
 #include "SopBlock.h"
 #include "SopMgr.h"
 #include "LitSet.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 // @brief コンストラクタ
-// @param[in] variable_num 変数の数
-//
-// * 空のキューブを作る．
 SopCube::SopCube(
   SizeType variable_num
 ) : mVariableNum{variable_num}
 {
   SopMgr mgr{mVariableNum};
-  mBody = mgr.new_body(1);
+  mBody = mgr.new_cube();
   mgr.cube_clear(mBody);
 }
 
@@ -33,10 +31,10 @@ SopCube::SopCube(
   Literal lit
 ) : mVariableNum{variable_num}
 {
-  SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(1);
+  SopMgr mgr{mVariableNum};
+  mBody = mgr.new_cube();
   mgr.cube_clear(mBody);
-  mgr.cube_set(mBody, vector<Literal>{lit});
+  mgr.cube_set_literal(mBody, lit);
 }
 
 // @brief コンストラクタ
@@ -45,10 +43,10 @@ SopCube::SopCube(
   const vector<Literal>& lit_list
 ) : mVariableNum{variable_num}
 {
-  SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(1);
+  SopMgr mgr{mVariableNum};
+  mBody = mgr.new_cube();
   mgr.cube_clear(mBody);
-  mgr.cube_set(mBody, lit_list);
+  mgr.cube_set_literals(mBody, lit_list);
 }
 
 // @brief コンストラクタ
@@ -57,10 +55,10 @@ SopCube::SopCube(
   std::initializer_list<Literal>& lit_list
 ) : mVariableNum{variable_num}
 {
-  SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(1);
+  SopMgr mgr{mVariableNum};
+  mBody = mgr.new_cube();
   mgr.cube_clear(mBody);
-  mgr.cube_set(mBody, lit_list);
+  mgr.cube_set_literals(mBody, lit_list);
 }
 
 // @brief コピーコンストラクタ
@@ -68,8 +66,8 @@ SopCube::SopCube(
   const SopCube& src
 ) : mVariableNum{src.mVariableNum}
 {
-  SopMgr mgr(mVariableNum);
-  mBody = mgr.new_body(1);
+  SopMgr mgr{mVariableNum};
+  mBody = mgr.new_cube();
   mgr.cube_copy(mBody, src.mBody);
 }
 
@@ -83,7 +81,7 @@ SopCube::operator=(
   if ( mVariableNum != src.mVariableNum ) {
     delete_body();
     mVariableNum = src.mVariableNum;
-    mBody = mgr.new_body(1);
+    mBody = mgr.new_cube();
   }
   mgr.cube_copy(mBody, src.mBody);
 
@@ -135,8 +133,7 @@ void
 SopCube::delete_body()
 {
   if ( mBody != nullptr ) {
-    SopMgr mgr(mVariableNum);
-    mgr.delete_body(mBody, 1);
+    SopMgr::delete_cube(mBody);
   }
 }
 
@@ -146,7 +143,7 @@ SopCube::get_pat(
   SizeType var
 ) const
 {
-  SopMgr mgr(mVariableNum);
+  SopMgr mgr{mVariableNum};
   return mgr.get_pat(mBody, 0, var);
 }
 
@@ -161,9 +158,20 @@ SopCube::literal_num() const
   return mgr.literal_num(block());
 }
 
+// @brief 空のキューブの時 true を返す．
+bool
+SopCube::is_tautology() const
+{
+  if ( mBody == nullptr ) {
+    return true;
+  }
+  SopMgr mgr{mVariableNum};
+  return mgr.cube_check_null(mBody);
+}
+
 // @brief 内容をリテラルのリストに変換する．
 vector<Literal>
-SopCube::to_literal_list() const
+SopCube::literal_list() const
 {
   SopMgr mgr(mVariableNum);
   SizeType nl = mgr.literal_num(block());
@@ -185,7 +193,7 @@ SopCube::to_literal_list() const
 
 // @brief 指定したリテラルを含んでいたら true を返す．
 bool
-SopCube::has_literal(
+SopCube::check_literal(
   Literal lit
 ) const
 {
@@ -217,6 +225,16 @@ SopCube::check_intersect(
   return mgr.cube_check_intersect(mBody, right.mBody);
 }
 
+// @brief キューブの否定を求める．
+SopCover
+SopCube::operator~() const
+{
+  SopMgr mgr{mVariableNum};
+  auto dst_block = mgr.cube_complement(mBody);
+  auto nc = dst_block.cube_num;
+  return mgr.make_cover(dst_block);
+}
+
 // @brief キューブの論理積を計算する
 SopCube
 SopCube::operator*(
@@ -226,13 +244,11 @@ SopCube::operator*(
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   SopMgr mgr(mVariableNum);
-  SopBitVect* body = mgr.new_body(1);
-  bool stat = mgr.cube_product(body, mBody, right.mBody);
-  if ( !stat ) {
-    mgr.cube_clear(body);
+  auto dst_body = mgr.new_cube();
+  if ( !mgr.cube_product(dst_body, mBody, right.mBody) ) {
+    mgr.cube_clear(dst_body);
   }
-
-  return SopCube(mVariableNum, body);
+  return SopCube{mVariableNum, dst_body};
 }
 
 // @brief 論理積を計算し自身に代入する．
@@ -244,8 +260,7 @@ SopCube::operator*=(
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   SopMgr mgr(mVariableNum);
-  bool stat = mgr.cube_product(mBody, mBody, right.mBody);
-  if ( !stat ) {
+  if ( !mgr.cube_product(mBody, mBody, right.mBody) ) {
     mgr.cube_clear(mBody);
   }
 
@@ -259,13 +274,12 @@ SopCube::operator*(
 ) const
 {
   SopMgr mgr(mVariableNum);
-  SopBitVect* body = mgr.new_body(1);
-  int nc = mgr.cover_product(body, block(), right);
-  if ( nc == 0 ) {
-    mgr.cube_clear(body);
+  auto dst_body = mgr.new_cube();
+  if ( !mgr.cube_product(dst_body, mBody, right) ) {
+    mgr.cube_clear(dst_body);
   }
 
-  return SopCube(mVariableNum, body);
+  return SopCube{mVariableNum, dst_body};
 }
 
 // @brief リテラルとの論理積を計算し自身に代入する．
@@ -275,8 +289,7 @@ SopCube::operator*=(
 )
 {
   SopMgr mgr(mVariableNum);
-  int nc = mgr.cover_product(mBody, block(), right);
-  if ( nc == 0 ) {
+  if ( !mgr.cube_product(mBody, mBody, right) ) {
     mgr.cube_clear(mBody);
   }
 
@@ -292,13 +305,12 @@ SopCube::operator/(
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   SopMgr mgr(mVariableNum);
-  SopBitVect* body = mgr.new_body(1);
-  bool stat = mgr.cube_quotient(body, mBody, right.mBody);
-  if ( !stat ) {
-    mgr.cube_clear(body);
+  auto dst_body = mgr.new_cube();
+  if ( !mgr.cube_quotient(dst_body, mBody, right.mBody) ) {
+    mgr.cube_clear(dst_body);
   }
 
-  return SopCube(mVariableNum, body);
+  return SopCube{mVariableNum, dst_body};
 }
 
 // @brief キューブによる商を計算し自身に代入する．
@@ -310,8 +322,7 @@ SopCube::operator/=(
   ASSERT_COND( mVariableNum == right.mVariableNum );
 
   SopMgr mgr(mVariableNum);
-  bool stat = mgr.cube_quotient(mBody, mBody, right.mBody);
-  if ( !stat ) {
+  if ( !mgr.cube_quotient(mBody, mBody, right.mBody) ) {
     mgr.cube_clear(mBody);
   }
 
@@ -325,13 +336,12 @@ SopCube::operator/(
 ) const
 {
   SopMgr mgr(mVariableNum);
-  SopBitVect* body = mgr.new_body(1);
-  int nc = mgr.cover_quotient(body, block(), right);
-  if ( nc == 0 ) {
-    mgr.cube_clear(body);
+  auto dst_body = mgr.new_cube();
+  if ( !mgr.cube_quotient(dst_body, mBody, right) ) {
+    mgr.cube_clear(dst_body);
   }
 
-  return SopCube(mVariableNum, body);
+  return SopCube{mVariableNum, dst_body};
 }
 
 // @brief リテラルによる商を計算し自身に代入する．
@@ -341,8 +351,7 @@ SopCube::operator/=(
 )
 {
   SopMgr mgr(mVariableNum);
-  int nc = mgr.cover_quotient(mBody, block(), right);
-  if ( nc == 0 ) {
+  if ( !mgr.cube_quotient(mBody, mBody, right) ) {
     mgr.cube_clear(mBody);
   }
 
@@ -364,17 +373,17 @@ compare(
 
 // @brief Expr に変換する．
 Expr
-SopCube::to_expr() const
+SopCube::expr() const
 {
   SopMgr mgr{mVariableNum};
-  return mgr.to_expr(mBody, 1);
+  return mgr.to_expr(block());
 }
 
-// @breif SopBlock を返す．
+// @breif SopBlock に変換する．
 SopBlock
 SopCube::block() const
 {
-  return SopBlock(1, mBody);
+  return SopBlock{1, mBody};
 }
 
 // @brief ハッシュ値を返す．
@@ -396,4 +405,4 @@ SopCube::print(
   mgr.print(s, mBody, 0, 1, varname_list);
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP

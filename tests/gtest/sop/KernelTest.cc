@@ -6,13 +6,12 @@
 /// Copyright (C) 2018 Yusuke Matsunaga
 /// All rights reserved.
 
-
 #include <gtest/gtest.h>
 #include "KernelGen.h"
 #include "ym/Range.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 TEST(KernelTest, test1)
 {
@@ -77,4 +76,4 @@ TEST(KernelTest, test1)
   }
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP

@@ -1,17 +1,28 @@
-#ifndef SOP_H
-#define SOP_H
+#ifndef SOP_NSDEF_H
+#define SOP_NSDEF_H
 
-/// @file Sop.h
-/// @brief Sop のヘッダファイル
+/// @file sop_nsdef.h
+/// @brief ym-sop の名前空間の定義
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018, 2021 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/logic.h"
+#include "ym_config.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+/// @brief ym-sop 用の名前空間の開始
+#define BEGIN_NAMESPACE_YM_SOP \
+BEGIN_NAMESPACE_YM \
+BEGIN_NAMESPACE(nsSop)
+
+/// @brief ym-sop 用の名前空間の終了
+#define END_NAMESPACE_YM_SOP \
+END_NAMESPACE(nsSop) \
+END_NAMESPACE_YM
+
+
+BEGIN_NAMESPACE_YM_SOP
 
 /// @brief SopPat をパックしたビットベクタ型
 using SopBitVect = ymuint64;
@@ -19,16 +30,18 @@ using SopBitVect = ymuint64;
 // クラス名の前方参照用宣言
 class SopBlock;
 class SopMgr;
+class SopCube;
+class SopCover;
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 BEGIN_NAMESPACE_YM
 
 /// @brief パタンを表す列挙型
 enum class SopPat {
-  _X = 0, //@< なし
-  _1 = 1, //@< 正極性
-  _0 = 2  //@< 負極性
+  _X = 0, ///< なし
+  _1 = 1, ///< 正極性
+  _0 = 2  ///< 負極性
 };
 
 /// @relates SopPat
@@ -50,6 +63,9 @@ operator<<(
   return s;
 }
 
+using nsSop::SopCube;
+using nsSop::SopCover;
+
 END_NAMESPACE_YM
 
-#endif // SOP_H
+#endif // SOP_NSDEF_H

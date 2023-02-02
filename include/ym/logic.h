@@ -33,8 +33,6 @@ BEGIN_NAMESPACE_YM_LOGIC
 // クラスの先行宣言
 //////////////////////////////////////////////////////////////////////
 
-class SopCover;
-class SopCube;
 class Expr;
 class ExprWriter;
 class NpnMap;
@@ -50,8 +48,6 @@ class Literal;
 class TvFunc;
 class TvFuncM;
 
-using nsLogic::SopCover;
-using nsLogic::SopCube;
 using nsLogic::Expr;
 using nsLogic::ExprWriter;
 using nsLogic::NpnMap;

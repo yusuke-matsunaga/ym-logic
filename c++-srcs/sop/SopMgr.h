@@ -5,14 +5,18 @@
 /// @brief SopMgr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Sop.h"
+#include "ym/sop_nsdef.h"
 #include "ym/SopCube.h"
+#include "ym/SopCover.h"
+#include "ym/Literal.h"
+#include "ym/Expr.h"
+#include "SopBlock.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class SopMgr SopMgr.h "ym/SopMgr.h"
@@ -45,22 +49,25 @@ public:
     return mVarNum;
   }
 
-  /// @brief キューブ/カバー用の領域を確保する．
-  ///
-  /// キューブの時は cube_num = 1 とする．
-  SopBitVect*
-  new_body(
-    SizeType cube_num = 1 ///< [in] キューブ数
-  );
+  /// @brief SopCube を作る．
+  SopCube
+  make_cube(
+    SopBitVect* bv ///< [in] 本体のビットベクタ
+  )
+  {
+    return SopCube{variable_num(), bv};
+  }
 
-  /// @brief キューブ/カバー用の領域を削除する．
-  ///
-  /// キューブの時は cube_num = 1 とする．
-  void
-  delete_body(
-    SopBitVect* p,        ///< [in] 領域を指すポインタ
-    SizeType cube_num = 1 ///< [in] キューブ数
-  );
+  /// @brief SopCover を作る．
+  SopCover
+  make_cover(
+    const SopBlock& block ///< [in] 本体のブロック
+  )
+  {
+    SizeType nc = block.cube_num;
+    auto body = block.body;
+    return SopCover{variable_num(), nc, nc, body};
+  }
 
 
 public:
@@ -87,6 +94,16 @@ public:
   SizeType
   literal_num(
     const SopBlock& block ///< [in] 対象のブロック
+  )
+  {
+    return literal_num(block.body, block.cube_num);
+  }
+
+  /// @brief ビットベクタ上のリテラル数を数える．
+  SizeType
+  literal_num(
+    const SopBitVect* bv, ///< [in] 対象のブロック
+    SizeType cube_num     ///< [in] キューブ数
   );
 
   /// @brief ビットベクタ上の特定のリテラルの出現頻度を数える．
@@ -105,8 +122,7 @@ public:
   /// @brief Expr に変換する．
   Expr
   to_expr(
-    const SopBitVect* bv, ///< [in] カバー/キューブを表すビットベクタ
-    SizeType cube_num     ///< [in] キューブ数
+    const SopBlock& block ///< [in] 対象のブロック
   );
 
   /// @brief カバー/キューブの内容を出力する．
@@ -116,195 +132,292 @@ public:
     const SopBitVect* bv, ///< [in] カバー/キューブを表すビットベクタ
     SizeType start,       ///< [in] キューブの開始位置
     SizeType end,         ///< [in] キューブの終了位置(実際の末尾 + 1)
-    const vector<string>& varname_list = vector<string>() ///< [in] 変数名のリスト
+    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
+  );
+
+  /// @brief 内容を出力する(デバッグ用)．
+  void
+  debug_print(
+    ostream& s,
+    const SopBitVect* bv,
+    SizeType num
   );
 
 
 public:
   //////////////////////////////////////////////////////////////////////
   // カバーを表すビットベクタに対する処理
-  // 基本的に最初に結果を格納するビットベクタのポインタを引数にとる．
-  // 結果のキューブ数は事前にはわからないので最大のキューブ数を計算し
-  // 領域を確保しておく必要がある．
-  // オペランドのカバーはビットベクタとキューブ数の組で表す．
-  // 結果のキューブ数を関数の戻り値として返す．
+  // カバーは入力，出力ともに SopBlock で表す．
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief カバー(を表すビットベクタ)のコピーを行う．
-  ///
-  /// * dst_bv には十分な容量があると仮定する．
-  /// * dst_bv と src_bv の領域が重なっていたら正しく動かない．
-  void
-  cover_copy(
-    SopBitVect* dst_bv,       ///< [in] コピー先のビットベクタ
-    const SopBitVect* src_bv, ///< [in] ソースのビットベクタ
-    SizeType cube_num         ///< [in] キューブ数
+  /// @brief カバーを確保する．
+  SopBlock
+  new_cover(
+    SizeType cube_num ///< [in] キューブ数
   )
   {
-    bcopy(src_bv, dst_bv, cube_num * _cube_size() * sizeof(SopBitVect));
+    auto bv = _new_body(cube_num);
+    return SopBlock{cube_num, bv};
   }
 
-  /// @brief カバー(を表すキューブのリスト)に内容をセットする．
-  ///
-  /// * dst_bv には十分な容量が確保されていると仮定する．
-  void
-  cover_set(
-    SopBitVect* dst_bv,              ///< [in] 対象のビットベクタ
+  /// @brief カバーのコピーを行う．
+  SopBlock
+  new_cover(
+    const SopBlock& src ///< [in] ソースのカバー
+  )
+  {
+    SizeType nc = src.cube_num;
+    auto dst_block = new_cover(nc);
+    auto dst_body = dst_block.body;
+    bcopy(src.body, dst_body, nc * _cube_size() * sizeof(SopBitVect));
+    return dst_block;
+  }
+
+  /// @brief キューブのリストからカバーを生成する．
+  SopBlock
+  new_cover(
     const vector<SopCube>& cube_list ///< [in] キューブのリスト
   )
   {
-    SopBitVect* dst_bv0 = dst_bv;
-    for ( const auto& cube: cube_list ) {
-      cube_copy(dst_bv, cube.mBody);
-      dst_bv += _cube_size();
+    SizeType nc = cube_list.size();
+    auto dst_block = new_cover(nc);
+    auto dst_body = dst_block.body;
+    for ( SizeType pos = 0; pos < nc; ++ pos ) {
+      auto& cube = cube_list[pos];
+      auto bv = cube.mBody;
+      cube_copy(_calc_offset(dst_body, pos), bv);
     }
+    _sort(dst_body, 0, nc);
+    return dst_block;
   }
 
-  /// @brief カバー(を表すビットベクタ)に内容をセットする．
-  ///
-  /// * リテラルのリストでキューブを表す．
-  /// * dst_bv には十分な容量が確保されていると仮定する．
-  void
-  cover_set(
-    SopBitVect* dst_bv,                ///< [in] 対象のビットベクタ
+  /// @brief ビットベクタのリストをカバーに変換する．
+  SopBlock
+  new_cover(
     const vector<SopBitVect*>& bv_list ///< [in] キューブを表すビットベクタのリスト
   )
   {
-    SopBitVect* dst_bv0 = dst_bv;
-    for ( auto bv: bv_list ) {
-      cube_copy(dst_bv, bv);
-      dst_bv += _cube_size();
+    SizeType nc = bv_list.size();
+    auto dst_block = new_cover(nc);
+    auto dst_body = dst_block.body;
+    for ( SizeType pos = 0; pos < nc; ++ pos ) {
+      auto bv = bv_list[pos];
+      cube_copy(_calc_offset(dst_body, pos), bv);
     }
-    _sort(dst_bv0, 0, bv_list.size());
+    _sort(dst_body, 0, nc);
+    return dst_block;
   }
 
-  /// @brief カバー(を表すビットベクタ)に内容をセットする．
-  ///
-  /// * リテラルのリストでキューブを表す．
-  /// * dst_bv には十分な容量が確保されていると仮定する．
-  void
-  cover_set(
-    SopBitVect* dst_bv,                      ///< [in] 対象のビットベクタ
+  /// @brief リテラルのリストのリストをカバーに変換する．
+  SopBlock
+  new_cover(
     const vector<vector<Literal>>& cube_list ///< [in] カバーを表すリテラルのリストのリスト
   )
   {
-    SopBitVect* dst_bv0 = dst_bv;
-    for ( auto& lit_list: cube_list ) {
-      cube_set(dst_bv, lit_list);
-      dst_bv += _cube_size();
+    SizeType nc = cube_list.size();
+    auto dst_block = new_cover(nc);
+    auto dst_body = dst_block.body;
+    for ( SizeType pos = 0; pos < nc; ++ pos ) {
+      auto& lit_list = cube_list[pos];
+      cube_set_literals(_calc_offset(dst_body, pos), lit_list);
     }
-    _sort(dst_bv0, 0, cube_list.size());
+    _sort(dst_body, 0, nc);
+    return dst_block;
   }
 
-  /// @brief カバー(を表すビットベクタ)に内容をセットする．
-  ///
-  /// * リテラルのリストでキューブを表す．
-  /// * dst_bv には十分な容量が確保されていると仮定する．
-  void
-  cover_set(
-    SopBitVect* dst_bv, ///< [in] 対象のビットベクタ
+  /// @brief リテラルのリストのリストをカバーに変換する．
+  SopBlock
+  new_cover(
     initializer_list<initializer_list<Literal>>& cube_list ///< [in] カバーを表すリテラルのリストのリスト
   )
   {
-    SopBitVect* dst_bv0 = dst_bv;
-    for ( auto lit_list: cube_list ) {
-      cube_set(dst_bv, lit_list);
-      dst_bv += _cube_size();
+    SizeType nc = cube_list.size();
+    auto dst_block = new_cover(nc);
+    auto dst_body = dst_block.body;
+    SizeType pos = 0;
+    for ( auto& lit_list: cube_list ) {
+      cube_set_literals(_calc_offset(dst_body, pos), lit_list);
+      ++ pos;
     }
-    _sort(dst_bv0, 0, cube_list.size());
+    _sort(dst_body, 0, nc);
+    return dst_block;
   }
 
+  /// @brief カバーの領域を開放する．
+  static
+  void
+  delete_cover(
+    const SopBlock& cover
+  )
+  {
+    _delete_body(cover.body);
+  }
+
+  /// @brief カバー中のキューブをクリアする．
+  void
+  cover_clear_cube(
+    SopBitVect* body, ///< [in] 先頭
+    SizeType cube_pos ///< [in] キューブ番号
+  )
+  {
+    cube_clear(_calc_offset(body, cube_pos));
+  }
+
+  /// @brief カバーの内容をコピーする．
+  void
+  cover_copy(
+    SopBlock& dst_block, ///< [in] コピー先のブロック
+    const SopBlock& src  ///< [in] コピー元のブロック
+  )
+  {
+    ASSERT_COND( dst_block.cube_num >= src.cube_num );
+    _copy(dst_block.body, src.body, src.cube_num);
+    dst_block.cube_num = src.cube_num;
+  }
+
+  /// @brief カバー中のキューブにリテラルをセットする．
+  void
+  cover_set_literal(
+    SopBitVect* body,  ///< [in] 先頭
+    SizeType cube_pos, ///< [in] キューブ番号
+    Literal lit        ///< [in] 設定するリテラル
+  )
+  {
+    cube_set_literal(_calc_offset(body, cube_pos), lit);
+  }
+
+  /// @brief 否定のカバーを求める．
+  SopBlock
+  cover_complement(
+    const SopBlock& src ///< [in] 元のカバーを表すブロック
+  );
+
   /// @brief 2つのカバーの論理和を計算する．
-  /// @return 結果のキューブ数を返す．
+  /// @return 結果のカバーを返す．
   ///
-  /// * dst_bv には十分な容量があると仮定する．
-  /// * dst_bv != src1.bitvect() を仮定する．
-  /// * dst_bv != src2.bitvect() を仮定する．
-  SizeType
+  /// カバーをキューブの集合とみなして和集合を計算する．
+  SopBlock
   cover_sum(
-    SopBitVect* dst_bv,   ///< [in] 結果を格納するビットベクタ
-    const SopBlock& src1, ///< [in] 1つめのブロック
-    const SopBlock& src2  ///< [in] 2つめのブロック
+    const SopBlock& src1, ///< [in] 1つめのカバー
+    const SopBlock& src2  ///< [in] 2つめのカバー
   );
 
   /// @brief 2つのカバーの差分を計算する．
-  /// @return 結果のキューブ数を返す．
+  /// @return 結果のカバーを返す．
   ///
-  /// * dst_bv には十分な容量があると仮定する．
-  /// * dst_bv != src2.bitvect() を仮定する．
-  /// * dst_bv == src1.bitvect() でも正しく動く
-  SizeType
+  /// カバーをキューブの集合とみなして集合差を計算する．
+  SopBlock
   cover_diff(
-    SopBitVect* dst_bv,   ///< [in] 結果を格納するビットベクタ
-    const SopBlock& src1, ///< [in] 1つめのブロック
-    const SopBlock& src2  ///< [in] 2つめのブロック
+    const SopBlock& src1, ///< [in] 1つめのカバー
+    const SopBlock& src2  ///< [in] 2つめのカバー
+  );
+
+  /// @brief 2つのカバーの差分を計算する．
+  ///
+  /// カバーをキューブの集合とみなして集合差を計算する．
+  /// 結果は src1 に格納される．
+  void
+  cover_diff_int(
+    SopBlock& src1,      ///< [in] 1つめのカバー
+    const SopBlock& src2 ///< [in] 2つめのカバー
   );
 
   /// @brief 2つのカバーの論理積を計算する．
-  /// @return 結果のキューブ数を返す．
-  ///
-  /// * dst_bv には十分な容量があると仮定する．
-  /// * dst_bv != src2.bitvect() を仮定する．
-  /// * src2.cubenum() > 1 の時は dst_bv != src1.bitvect()
-  ///   を仮定する．
-  /// * src2.cubenum() == 1 の時は dst_bv == src1.bitvect()
-  ///   でも正しく動く．
-  SizeType
+  /// @return 結果のカバーを返す．
+  SopBlock
   cover_product(
-    SopBitVect* dst_bv,   ///< [in] 結果を格納するビットベクタ
-    const SopBlock& src1, ///< [in] 1つめのブロック
-    const SopBlock& src2  ///< [in] 2つめのブロック
+    const SopBlock& src1, ///< [in] 1つめのカバー
+    const SopBlock& src2  ///< [in] 2つめのカバー
+  );
+
+  /// @brief カバーとキューブの論理積を計算する．
+  /// @return 結果のカバーを返す．
+  SopBlock
+  cover_product(
+    const SopBlock& src1,  ///< [in] 1つめのカバー
+    const SopBitVect* src2 ///< [in] 2つめのキューブ
+  );
+
+  /// @brief カバーとキューブの論理積を計算する．
+  /// @return 結果のカバーを返す．
+  void
+  cover_product_int(
+    SopBlock& src1,        ///< [in] 1つめのカバー
+    const SopBitVect* src2 ///< [in] 2つめのキューブ
   );
 
   /// @brief カバーとリテラルとの論理積を計算する．
-  /// @return 結果のキューブ数を返す．
-  ///
-  /// * dst_bv には十分な容量があると仮定する．
-  /// * dst_bv == src1.bitvect() でも正しく動く．
-  SizeType
+  /// @return 結果のカバーを返す．
+  SopBlock
   cover_product(
-    SopBitVect* dst_bv,   ///< [in] 結果を格納するビットベクタ
-    const SopBlock& src1, ///< [in] 1つめのブロック
+    const SopBlock& src1, ///< [in] 1つめのカバー
     Literal lit           ///< [in] 対象のリテラル
+  );
+
+  /// @brief カバーとリテラルとの論理積を計算する．
+  void
+  cover_product_int(
+    SopBlock& src1, ///< [in] 1つめのカバー
+    Literal lit     ///< [in] 対象のリテラル
   );
 
   /// @brief カバーの代数的除算を行う．
-  /// @return 結果のキューブ数を返す．
-  ///
-  /// * dst_bv には十分な容量があると仮定する．
-  /// * dst_bv == src1.bitvect() でも正しく動く．
-  /// * dst_bv == src2.bitvect() でも正しく動く．
-  SizeType
+  /// @return 結果のカバーを返す．
+  SopBlock
   cover_quotient(
-    SopBitVect* dst_bv,   ///< [in] 結果を格納するビットベクタ
-    const SopBlock& src1, ///< [in] 1つめのブロック
-    const SopBlock& src2  ///< [in] 2つめのブロック
+    const SopBlock& src1, ///< [in] 被除数
+    const SopBlock& src2  ///< [in] 除数
+  );
+
+  /// @brief カバーをキューブで割る．
+  /// @return 結果のカバーを返す．
+  SopBlock
+  cover_quotient(
+    const SopBlock& src1,  ///< [in] 1つめのカバー
+    const SopBitVect* src2 ///< [in] 対象のキューブ
+  );
+
+  /// @brief カバーをキューブで割る．
+  void
+  cover_quotient_int(
+    SopBlock& src1,        ///< [in] 1つめのカバー
+    const SopBitVect* src2 ///< [in] 対象のキューブ
   );
 
   /// @brief カバーをリテラルで割る．
-  /// @return 結果のキューブ数を返す．
-  ///
-  /// * dst_bv には十分な容量があると仮定する．
-  /// * dst_bv == src1.bitvect() でも正しく動く．
-  SizeType
+  /// @return 結果のカバーを返す．
+  SopBlock
   cover_quotient(
-    SopBitVect* dst_bv,   ///< [in] 結果を格納するビットベクタ
-    const SopBlock& src1, ///< [in] 1つめのブロック
+    const SopBlock& src1, ///< [in] 1つめのカバー
     Literal lit           ///< [in] 対象のリテラル
+  );
+
+  /// @brief カバーをリテラルで割る．
+  void
+  cover_quotient_int(
+    SopBlock& src1, ///< [in] 1つめのカバー
+    Literal lit     ///< [in] 対象のリテラル
+  );
+
+  /// @brief コファクターを求める．
+  SopBlock
+  cover_cofactor(
+    const SopBlock& src1, ///< [in] 対象のカバー
+    Literal lit           ///< [in] リテラル
   );
 
   /// @brief カバー中のすべてのキューブの共通部分を求める．
   ///
   /// * 共通部分がないときは空のキューブとなる．
-  SopCube
+  SopBitVect*
   common_cube(
-    const SopBlock& src1 ///< [in] 1つめのブロック
+    const SopBlock& src1 ///< [in] 対象のカバー
   );
 
-  /// @brief カバー(を表すビットベクタ)の比較を行う．
-  /// @retval -1 bv1 <  bv2
-  /// @retval  0 bv1 == bv2
-  /// @retval  1 bv1 >  bv2
+  /// @brief カバーの比較を行う．
+  /// @retval -1 src1 <  src2
+  /// @retval  0 src1 == src2
+  /// @retval  1 src1 >  src2
   ///
   /// 比較はキューブごとの辞書式順序で行う．
   int
@@ -320,6 +433,57 @@ public:
   // 基本的にはキューブはビットベクタの先頭アドレスで表す．
   // キューブのサイズ(変数の個数に依存)によってキューブの開始アドレスは変化する．
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief キューブを確保する．
+  SopBitVect*
+  new_cube()
+  {
+    return _new_body(1);
+  }
+
+  /// @brief コピーしたキューブを作る．
+  SopBitVect*
+  new_cube(
+    const SopBitVect* src_bv ///< [in] コピー元のビットベクタ
+  )
+  {
+    auto dst_body = new_cube();
+    cube_copy(dst_body, src_bv);
+    return dst_body;
+  }
+
+  /// @brief Literal のリストからキューブを作る．
+  SopBitVect*
+  new_cube(
+    const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
+  )
+  {
+    auto dst_body = new_cube();
+    for ( auto lit: lit_list ) {
+      cube_set_literal(dst_body, lit);
+    }
+    return dst_body;
+  }
+
+  /// @brief キューブ(を表すビットベクタ)をコピーする．
+  void
+  cube_copy(
+    SopBitVect* dst_bv,      ///< [in] 対象のビットベクタ
+    const SopBitVect* src_bv ///< [in] コピー元のビットベクタ
+  )
+  {
+    _copy(dst_bv, src_bv, 1);
+  }
+
+  /// @brief キューブの領域を開放する．
+  static
+  void
+  delete_cube(
+    SopBitVect* cube
+  )
+  {
+    _delete_body(cube);
+  }
 
   /// @brief キューブ(を表すビットベクタ)をクリアする．
   void
@@ -337,91 +501,120 @@ public:
     cube_clear(_calc_offset(dst_bv, dst_offset));
   }
 
-  /// @brief キューブをコピーする．
+  /// @brief キューブにリテラルをセットする．
   void
-  cube_copy(
-    SopBitVect* dst_bv,     ///< [in] 対象のビットベクタ
-    const SopCube& src_cube ///< [in] コピー元のキューブ
+  cube_set_literal(
+    SopBitVect* dst_bv, ///< [in] 対象のビットベクタ
+    Literal lit         ///< [in] リテラル
   )
   {
-    cover_copy(dst_bv, src_cube.mBody, 1);
+    auto var_id = lit.varid();
+    auto blk = _block_pos(var_id);
+    auto sft = _shift_num(var_id);
+    auto pat = lit2bv(lit);
+    auto mask = pat << sft;
+    dst_bv[blk] |= mask;
   }
 
-  /// @brief キューブ(を表すビットベクタ)をコピーする．
+  /// @brief キューブにリテラルをセットする．
   void
-  cube_copy(
-    SopBitVect* dst_bv,      ///< [in] 対象のビットベクタ
-    const SopBitVect* src_bv ///< [in] コピー元のビットベクタ
+  cube_set_literal(
+    SopBitVect* dst_bv,  ///< [in] 対象のビットベクタ
+    SizeType dst_offset, ///< [in] オフセット
+    Literal lit          ///< [in] リテラル
   )
   {
-    cover_copy(dst_bv, src_bv, 1);
-  }
-
-  /// @brief キューブ(を表すビットベクタ)をコピーする．
-  void
-  cube_copy(
-    SopBitVect* dst_bv,       ///< [in] 対象のビットベクタ
-    SizeType dst_offset,      ///< [in] dst_bv のオフセット
-    const SopBitVect* src_bv, ///< [in] コピー元のビットベクタ
-    SizeType src_offset       ///< [in] src_bv のオフセット
-  )
-  {
-    cube_copy(_calc_offset(dst_bv, dst_offset),
-	      _calc_offset(src_bv, src_offset));
-  }
-
-  /// @brief キューブをムーブする．
-  ///
-  /// 実際には SopCube のメンバにアクセスするだけ．
-  SopBitVect*
-  cube_move(
-    SopCube& src_cube ///< [in] ムーブ元のキューブ
-  )
-  {
-    SopBitVect* dst_bv = src_cube.mBody;
-    src_cube.mBody = nullptr;
-    return dst_bv;
+    cube_set_literal(_calc_offset(dst_bv, dst_offset), lit);
   }
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
   ///
   /// * dst_bv には十分な容量があると仮定する．
   void
-  cube_set(
+  cube_set_literals(
     SopBitVect* dst_bv,             ///< [in] 対象のビットベクタ
     const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
-  );
+  )
+  {
+    for ( auto lit: lit_list ) {
+      cube_set_literal(dst_bv, lit);
+    }
+  }
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
   ///
   /// * dst_bv には十分な容量があると仮定する．
   void
-  cube_set(
+  cube_set_literals(
     SopBitVect* dst_bv,             ///< [in] 対象のビットベクタ
     SizeType dst_offset,            ///< [in] オフセット
     const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
   )
   {
-    cube_set(_calc_offset(dst_bv, dst_offset), lit_list);
+    cube_set_literals(_calc_offset(dst_bv, dst_offset), lit_list);
   }
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
   ///
   /// * dst_bv には十分な容量があると仮定する．
   void
-  cube_set(
+  cube_set_literals(
     SopBitVect* dst_bv,                 ///< [in] 対象のビットベクタ
     initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト初期化子
-  );
+  )
+  {
+    for ( auto lit: lit_list ) {
+      cube_set_literal(dst_bv, lit);
+    }
+  }
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
   ///
   /// * dst_bv には十分な容量があると仮定する．
   void
-  cube_set(
+  cube_set_literals(
     SopBitVect* dst_bv,                 ///< [in] 対象のビットベクタ
     SizeType dst_offset,                ///< [in] オフセット
     initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト初期化子
+  )
+  {
+    cube_set_literals(_calc_offset(dst_bv, dst_offset), lit_list);
+  }
+
+  /// @brief キューブの内容を取り出す．
+  ///
+  /// 以後キューブは使用不可
+  static
+  SopBitVect*
+  cube_extract(
+    SopCube& cube
+  )
+  {
+    auto ans = cube.mBody;
+    cube.mBody = nullptr;
+    return ans;
+  }
+
+  /// @brief 空キューブかどうか調べる．
+  bool
+  cube_check_null(
+    const SopBitVect* bv ///< [in] 対象のビットベクタ
+  );
+
+  /// @brief 空キューブかどうか調べる．
+  bool
+  cube_check_null(
+    const SopBitVect* bv,   ///< [in] 対象のビットベクタ
+    SizeType cube_pos ///< [in] キューブ位置
+  )
+  {
+    return cube_check_null(_calc_offset(bv, cube_pos));
+  }
+
+  /// @brief キューブを否定する．
+  SopBlock
+  cube_complement(
+    const SopBitVect* bv
   );
 
   /// @brief キューブ(を表すビットベクタ)の比較を行う．
@@ -501,17 +694,6 @@ public:
   bool
   cube_check_intersect(
     const SopBitVect* bv1, ///< [in] 1つめのキューブを表すビットベクタ
-    const SopCube& cube2   ///< [in] 2つめのキューブ
-  )
-  {
-    return cube_check_intersect(bv1, cube2.mBody);
-  }
-
-  /// @brief ２つのキューブに共通なリテラルがあれば true を返す．
-  /// @return ２つのキューブに共通なリテラルがあれば true を返す．
-  bool
-  cube_check_intersect(
-    const SopBitVect* bv1, ///< [in] 1つめのキューブを表すビットベクタ
     const SopBitVect* bv2  ///< [in] 2つめのキューブを表すビットベクタ
   );
 
@@ -527,7 +709,7 @@ public:
   {
     return cube_check_intersect(_calc_offset(bv1, bv1_offset),
 				_calc_offset(bv2, bv2_offset));
-}
+  }
 
   /// @brief 2つのキューブの積を計算する．
   /// @retval true 積が空でなかった．
@@ -539,6 +721,25 @@ public:
     const SopBitVect* bv2  ///< [in] 2つめのキューブを表すビットベクタ
   );
 
+  /// @brief キューブとリテラルの積を計算する．
+  /// @retval true 積が空でなかった．
+  /// @retval false 積が空だった．
+  bool
+  cube_product(
+    SopBitVect* dst_bv,    ///< [in] コピー先のビットベクタ
+    const SopBitVect* bv1, ///< [in] 1つめのキューブを表すビットベクタ
+    Literal lit            ///< [in] リテラル
+  );
+
+  /// @brief キューブとリテラルの積を計算する．
+  /// @retval true 積が空でなかった．
+  /// @retval false 積が空だった．
+  bool
+  cube_product_int(
+    SopBitVect* dst_bv,    ///< [in] コピー先のビットベクタ
+    Literal lit            ///< [in] リテラル
+  );
+
   /// @brief キューブによる商を求める．
   /// @return 正しく割ることができたら true を返す．
   bool
@@ -548,22 +749,14 @@ public:
     const SopBitVect* bv2  ///< [in] 2つめのキューブを表すビットベクタ
   );
 
-  /// @brief キューブによる商を求める．
+  /// @brief リテラルによる商を求める．
   /// @return 正しく割ることができたら true を返す．
   bool
   cube_quotient(
     SopBitVect* dst_bv,    ///< [in] コピー先のビットベクタ
-    SizeType dst_offset,   ///< [in] オフセット
     const SopBitVect* bv1, ///< [in] 1つめのキューブを表すビットベクタ
-    SizeType bv1_offset,   ///< [in] bv1 のオフセット
-    const SopBitVect* bv2, ///< [in] 2つめのキューブを表すビットベクタ
-    SizeType bv2_offset	   ///< [in] bv2 のオフセット
-  )
-  {
-    return cube_quotient(_calc_offset(dst_bv, dst_offset),
-			 _calc_offset(bv1, bv1_offset),
-			 _calc_offset(bv2, bv2_offset));
-  }
+    Literal lit            ///< [in] リテラル
+  );
 
   /// @brief 2つのキューブ(を表すビットベクタ)を入れ替える．
   void
@@ -639,6 +832,42 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief MOST_BINATE variable を選ぶ．
+  SizeType
+  binate_select(
+    const SopBlock& src
+  );
+
+  /// @brief MERGE_WITH_IDENTITY を行う．
+  SopBlock
+  merge_with_identity(
+    SizeType var,
+    const SopBlock& f0,
+    const SopBlock& f1
+  );
+
+  /// @brief キューブ/カバー用の領域を確保する．
+  SopBitVect*
+  _new_body(
+    SizeType cube_num = 1 ///< [in] キューブ数
+  )
+  {
+    auto size = _cube_size() * cube_num;
+    auto body = new SopBitVect[size];
+    bzero(body, size * sizeof(SopBitVect));
+    return body;
+  }
+
+  /// @brief キューブ/カバー用の領域を削除する．
+  static
+  void
+  _delete_body(
+    SopBitVect* p ///< [in] 領域を指すポインタ
+  )
+  {
+    delete [] p;
+  }
+
   /// @brief マージソートを行う下請け関数
   ///
   /// bv[start] - bv[end - 1] の領域をソートする．
@@ -648,6 +877,18 @@ private:
     SizeType start, ///< [in] 開始位置
     SizeType end    ///< [in] 終了位置
   );
+
+  /// @brief 単純なコピーを行う．
+  void
+  _copy(
+    SopBitVect* dst_bv,       ///< [in] コピー先のアドレス
+    const SopBitVect* src_bv, ///< [in] コピー元のアドレス
+    SizeType cube_num         ///< [in] キューブ数
+  )
+  {
+    SizeType size = _cube_size() * cube_num * sizeof(SopBitVect);
+    bcopy(src_bv, dst_bv, size);
+  }
 
   /// @brief mTmpBuff を初期化する．
   void
@@ -722,7 +963,17 @@ private:
   SizeType
   _cube_size() const
   {
+    // SopBitVect は64 ビットだが1つの変数に2ビット使っている．
     return (variable_num() + 31) / 32;
+  }
+
+  static
+  SopBitVect
+  lit2bv(
+    Literal lit
+  )
+  {
+    return static_cast<SopBitVect>(lit.is_positive() ? SopPat::_1 : SopPat::_0);
   }
 
 
@@ -742,6 +993,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 #endif // SOPMGR_H

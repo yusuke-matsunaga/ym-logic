@@ -5,13 +5,13 @@
 /// @brief Divisor のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Sop.h"
+#include "ym/sop_nsdef.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class Divisor Divisor.h "Divisor.h"
@@ -23,7 +23,7 @@ public:
 
   /// @brief デストラクタ
   virtual
-  ~Divisor() { }
+  ~Divisor() = default;
 
 
 public:
@@ -32,14 +32,15 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 除数を求める．
-  /// @param[in] f 対象の論理式
   /// @return 除数を表す論理式を返す．
   virtual
   SopCover
-  operator()(const SopCover& f) const = 0;
+  operator()(
+    const SopCover& f ///< [in] 対象の論理式
+  ) const = 0;
 
 };
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 #endif // DIVISOR_H

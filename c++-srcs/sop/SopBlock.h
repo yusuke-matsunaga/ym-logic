@@ -8,65 +8,28 @@
 /// Copyright (C) 2018 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Sop.h"
+#include "ym/sop_nsdef.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class SopBlock SopBlock.h "SopBlock.h"
-/// @brief SopCover/SopCube に共通なデータ構造
+/// @brief SopCover の中身
+///
+/// ただし入力数の情報は持たない．
 //////////////////////////////////////////////////////////////////////
-class SopBlock
+struct SopBlock
 {
-public:
-
-  /// @brief コンストラクタ
-  SopBlock(
-    SizeType cube_num,        ///< [in] キューブ数
-    const SopBitVect* bitvect ///< [in] ビットベクタの先頭アドレス
-  ) : mCubeNum{cube_num},
-      mBitVect{bitvect}
-  {
-  }
-
-  /// @brief デストラクタ
-  ~SopBlock() = default;
-
-
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief キューブ数を返す．
-  SizeType
-  cube_num() const
-  {
-    return mCubeNum;
-  }
-
-  /// @brief ビットベクタの先頭アドレスを返す．
-  const SopBitVect*
-  bitvect() const
-  {
-    return mBitVect;
-  }
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // データメンバ
-  //////////////////////////////////////////////////////////////////////
 
   // キューブ数
-  SizeType mCubeNum;
+  SizeType cube_num;
 
   // ブロックの先頭
-  const SopBitVect* mBitVect;
+  SopBitVect* body;
 
 };
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 #endif // SOPBLOCK_H

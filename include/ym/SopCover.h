@@ -5,15 +5,15 @@
 /// @brief SopCover のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2021 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Sop.h"
+#include "ym/sop_nsdef.h"
 #include "ym/Expr.h"
 #include "ym/Literal.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class SopCover SopCover.h "ym/SopCover.h"
@@ -29,6 +29,8 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 class SopCover
 {
+  friend class SopMgr;
+
 public:
 
   /// @brief コンストラクタ
@@ -142,7 +144,7 @@ public:
 
   /// @brief 内容をリテラルのリストのリストに変換する．
   vector<vector<Literal>>
-  to_literal_list() const;
+  literal_list() const;
 
   /// @brief パタンを返す．
   /// @retval SopPat::_X その変数は現れない．
@@ -153,6 +155,10 @@ public:
     SizeType cube_id, ///< [in] キューブ番号 ( 0 <= cube_id < cube_num() )
     SizeType var_id   ///< [in] 変数( 0 <= var_id.val() < variable_num() )
   ) const;
+
+  /// @brief 否定を計算する．
+  SopCover
+  operator~() const;
 
   /// @brief 論理和を計算する．
   /// @return 計算結果を返す．
@@ -306,7 +312,7 @@ public:
 
   /// @brief Expr に変換する．
   Expr
-  to_expr() const;
+  expr() const;
 
   /// @brief ハッシュ値を返す．
   SizeType
@@ -315,8 +321,14 @@ public:
   /// @brief 内容をわかりやすい形で出力する．
   void
   print(
-    ostream& s, ///< [in] 出力先のストリーム
-    const vector<string>& varname_list = vector<string>{} ///< [in] 変数名のリスト
+    ostream& s,                             ///< [in] 出力先のストリーム
+    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
+  ) const;
+
+  /// @brief 内容をデバッグ用に出力する．
+  void
+  debug_print(
+    ostream& s ///< [in] 出力先のストリーム
   ) const;
 
 
@@ -409,7 +421,7 @@ operator-(
   const SopCover& right ///< [in] 第2オペランド
 )
 {
-  return SopCover(move(left)).operator-=(right);
+  return SopCover{move(left)}.operator-=(right);
 }
 
 /// @relates SopCover
@@ -422,7 +434,7 @@ operator-(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCover(move(left)).operator-=(right);
+  return SopCover{move(left)}.operator-=(right);
 }
 
 /// @relates SopCover, SopCube
@@ -435,7 +447,7 @@ operator*(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCover(move(left)).operator*=(right);
+  return SopCover{move(left)}.operator*=(right);
 }
 
 /// @relates SopCover, SopCube
@@ -463,7 +475,7 @@ operator*(
 )
 {
   // 交換則を用いる．
-  return SopCover(move(right)).operator*=(left);
+  return SopCover{move(right)}.operator*=(left);
 }
 
 /// @relates SopCover, Literal
@@ -476,7 +488,7 @@ operator*(
   Literal right	   ///< [in] 第2オペランド
 )
 {
-  return SopCover(move(left)).operator*=(right);
+  return SopCover{move(left)}.operator*=(right);
 }
 
 /// @relates SopCover, Literal
@@ -504,7 +516,7 @@ operator*(
 )
 {
   // 交換則を用いる．
-  return SopCover(move(right)).operator*=(left);
+  return SopCover{move(right)}.operator*=(left);
 }
 
 /// @relates SopCover
@@ -517,7 +529,7 @@ operator/(
   const SopCover& right ///< [in] 第2オペランド
 )
 {
-  return SopCover(move(left)).operator/=(right);
+  return SopCover{move(left)}.operator/=(right);
 }
 
 /// @relates SopCover, SopCube
@@ -530,7 +542,7 @@ operator/(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCover(move(left)).operator/=(right);
+  return SopCover{move(left)}.operator/=(right);
 }
 
 /// @relates SopCover, Literal
@@ -543,7 +555,7 @@ operator/(
   Literal right	   ///< [in] 第2オペランド
 )
 {
-  return SopCover(move(left)).operator/=(right);
+  return SopCover{move(left)}.operator/=(right);
 }
 
 /// @relates SopCover
@@ -650,7 +662,7 @@ operator<<(
   return s;
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 BEGIN_NAMESPACE_STD
 

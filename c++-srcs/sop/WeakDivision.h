@@ -5,13 +5,13 @@
 /// @brief WeakDivision のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "Divide.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class WeakDivision WeakDivision.h "WeakDivision.h"
@@ -35,28 +35,15 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 除算を行う．
-  /// @param[in] f 被除数
-  /// @param[in] d 除数
   /// @return 商q と余りr の pair を返す．
   pair<SopCover, SopCover>
-  operator()(const SopCover& f,
-	     const SopCover& d) const override;
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // データメンバ
-  //////////////////////////////////////////////////////////////////////
-
+  operator()(
+    const SopCover& f, ///< [in] 被除数
+    const SopCover& d  ///< [in] 除数
+  ) const override;
 
 };
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 #endif // WEAKDIVISION_H

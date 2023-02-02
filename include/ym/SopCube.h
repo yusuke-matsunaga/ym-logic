@@ -5,15 +5,15 @@
 /// @brief SopCube のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2021, 2022 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Sop.h"
+#include "ym/sop_nsdef.h"
 #include "ym/Expr.h"
 #include "ym/Literal.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @ingroup SopGroup
@@ -23,6 +23,7 @@ BEGIN_NAMESPACE_YM_LOGIC
 /// * 離散数学的には Literal の集合だが，相反するリテラル(x と x')は
 ///   同時には含まない．
 /// * 常に固定サイズのビット配列として実装する．
+/// * そのため初期化の際に変数の数が必要となる．
 /// * 1つの変数につき2ビットを使用する．
 //////////////////////////////////////////////////////////////////////
 class SopCube
@@ -103,6 +104,10 @@ public:
   SizeType
   literal_num() const;
 
+  /// @brief 空のキューブの時 true を返す．
+  bool
+  is_tautology() const;
+
   /// @brief 指定した変数のパタンを読み出す．
   /// @retval SopPat::_X その変数は現れない．
   /// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
@@ -114,13 +119,13 @@ public:
 
   /// @brief 指定したリテラルを含んでいたら true を返す．
   bool
-  has_literal(
+  check_literal(
     Literal lit ///< [in] 対象のリテラル
   ) const;
 
   /// @brief 内容をリテラルのリストに変換する．
   vector<Literal>
-  to_literal_list() const;
+  literal_list() const;
 
   /// @brief オペランドのキューブに含まれていたら true を返す．
   ///
@@ -136,6 +141,10 @@ public:
   check_intersect(
     const SopCube& right ///< [in] オペランドのキューブ
   ) const;
+
+  /// @brief キューブの否定を求める．
+  SopCover
+  operator~() const;
 
   /// @brief キューブの論理積を計算する
   ///
@@ -176,6 +185,9 @@ public:
   );
 
   /// @brief キューブによる商を計算する
+  ///
+  /// リテラル集合として考えると集合差を計算することになる<br>
+  /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
   SopCube
   operator/(
     const SopCube& right ///< [in] オペランド
@@ -192,6 +204,9 @@ public:
   );
 
   /// @brief リテラルによる商を計算する
+  ///
+  /// リテラル集合として考えると集合差を計算することになる<br>
+  /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
   SopCube
   operator/(
     Literal right ///< [in] オペランドのリテラル
@@ -209,9 +224,11 @@ public:
 
   /// @brief Expr に変換する．
   Expr
-  to_expr() const;
+  expr() const;
 
-  /// @breif SopBlock を返す．
+  /// @breif SopBlock に変換する．
+  ///
+  /// variable_num() の情報は失われる．
   SopBlock
   block() const;
 
@@ -222,9 +239,8 @@ public:
   /// @brief 内容をわかりやすい形で出力する．
   void
   print(
-    ostream& s, ///< [in] 出力先のストリーム
-    const vector<string>& varname_list ///< [in] 変数名のリスト
-    = vector<string>()
+    ostream& s,                             ///< [in] 出力先のストリーム
+    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
   ) const;
 
 
@@ -234,11 +250,15 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 内容を指定するコンストラクタ
-  ///
-  /// 危険なので普通は使わないように
   SopCube(
     SizeType variable_num, ///< [in] 変数の数
     SopBitVect* body       ///< [in] キューブのパタンを表す本体
+  );
+
+  /// @brief SopBlock からのムーブコンストラクタ
+  SopCube(
+    SizeType variable_num, ///< [in] 変数の数
+    SopBlock&& block       ///< [in] 変換元ののブロック
   );
 
   /// @brief mBody を削除する．
@@ -285,7 +305,7 @@ operator*(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCube(move(left)).operator*=(right);
+  return SopCube{move(left)}.operator*=(right);
 }
 
 /// @relates SopCube
@@ -300,7 +320,7 @@ operator*(
   SopCube&& right      ///< [in] 第2オペランド
 )
 {
-  return SopCube(move(right)).operator*=(left);
+  return SopCube{move(right)}.operator*=(left);
 }
 
 /// @relates SopCube
@@ -315,7 +335,7 @@ operator*(
   SopCube&& right ///< [in] 第2オペランド
 )
 {
-  return SopCube(move(left)).operator*=(right);
+  return SopCube{move(left)}.operator*=(right);
 }
 
 /// @relates SopCube
@@ -330,7 +350,7 @@ operator*(
   Literal right	  ///< [in] 第2オペランド
 )
 {
-  return SopCube(move(left)).operator*=(right);
+  return SopCube{move(left)}.operator*=(right);
 }
 
 /// @relates SopCube
@@ -358,7 +378,7 @@ operator*(
 )
 {
   // 交換則を用いる．
-  return SopCube(move(right)).operator*=(left);
+  return SopCube{move(right)}.operator*=(left);
 }
 
 /// @relates SopCube
@@ -372,7 +392,7 @@ operator/(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCube(move(left)).operator/=(right);
+  return SopCube{move(left)}.operator/=(right);
 }
 
 /// @relates SopCube
@@ -386,7 +406,7 @@ operator/(
   Literal right	  ///< [in] 第2オペランド
 )
 {
-  return SopCube(move(left)).operator/=(right);
+  return SopCube{move(left)}.operator/=(right);
 }
 
 /// @relates SopCube
@@ -499,7 +519,7 @@ operator<<(
   return s;
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_SOP
 
 BEGIN_NAMESPACE_STD
 

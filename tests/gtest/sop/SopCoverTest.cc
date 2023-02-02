@@ -98,7 +98,7 @@ TEST_F(SopTest, constructor2)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -149,7 +149,7 @@ TEST_F(SopTest, constructor3)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -200,7 +200,7 @@ TEST_F(SopTest, constructor4)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -253,7 +253,7 @@ TEST_F(SopTest, copy_constructor)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -306,7 +306,7 @@ TEST_F(SopTest, copy_assignment)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -361,7 +361,7 @@ TEST_F(SopTest, move_constructor)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -416,7 +416,7 @@ TEST_F(SopTest, move_assignment)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -468,7 +468,7 @@ TEST_F(SopTest, cube_constructor)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -519,7 +519,7 @@ TEST_F(SopTest, cube_move_constructor)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -559,7 +559,7 @@ TEST_F(SopTest, cover_cover_sum)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto tmp_list = cover1.to_literal_list();
+  auto tmp_list = cover1.literal_list();
   EXPECT_EQ( 2, tmp_list.size() );
   EXPECT_EQ( 2, tmp_list[0].size() );
   EXPECT_EQ( 2, tmp_list[1].size() );
@@ -612,7 +612,7 @@ TEST_F(SopTest, cover_cube_sum)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto tmp_list = cover1.to_literal_list();
+  auto tmp_list = cover1.literal_list();
   EXPECT_EQ( 2, tmp_list.size() );
   EXPECT_EQ( 2, tmp_list[0].size() );
   EXPECT_EQ( 2, tmp_list[1].size() );
@@ -665,7 +665,7 @@ TEST_F(SopTest, cube_cover_sum)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto tmp_list = cover1.to_literal_list();
+  auto tmp_list = cover1.literal_list();
   EXPECT_EQ( 2, tmp_list.size() );
   EXPECT_EQ( 2, tmp_list[0].size() );
   EXPECT_EQ( 2, tmp_list[1].size() );
@@ -718,7 +718,7 @@ TEST_F(SopTest, Scover_cover_sum)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto tmp_list = cover1.to_literal_list();
+  auto tmp_list = cover1.literal_list();
   EXPECT_EQ( 2, tmp_list.size() );
   EXPECT_EQ( 2, tmp_list[0].size() );
   EXPECT_EQ( 2, tmp_list[1].size() );
@@ -771,7 +771,7 @@ TEST_F(SopTest, Scover_cube_sum1)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto tmp_list = cover1.to_literal_list();
+  auto tmp_list = cover1.literal_list();
   EXPECT_EQ( 2, tmp_list.size() );
   EXPECT_EQ( 2, tmp_list[0].size() );
   EXPECT_EQ( 2, tmp_list[1].size() );
@@ -824,7 +824,7 @@ TEST_F(SopTest, cube_Scover_sum)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto tmp_list = cover1.to_literal_list();
+  auto tmp_list = cover1.literal_list();
   EXPECT_EQ( 2, tmp_list.size() );
   EXPECT_EQ( 2, tmp_list[0].size() );
   EXPECT_EQ( 2, tmp_list[1].size() );
@@ -877,7 +877,7 @@ TEST_F(SopTest, Icover_cover_sum)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto tmp_list = cover1.to_literal_list();
+  auto tmp_list = cover1.literal_list();
   EXPECT_EQ( 2, tmp_list.size() );
   EXPECT_EQ( 2, tmp_list[0].size() );
   EXPECT_EQ( 2, tmp_list[1].size() );
@@ -930,7 +930,7 @@ TEST_F(SopTest, Icover_cube_sum)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto tmp_list = cover1.to_literal_list();
+  auto tmp_list = cover1.literal_list();
   EXPECT_EQ( 2, tmp_list.size() );
   EXPECT_EQ( 2, tmp_list[0].size() );
   EXPECT_EQ( 2, tmp_list[1].size() );
@@ -983,7 +983,7 @@ TEST_F(SopTest, cover_cover_diff)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -1035,7 +1035,7 @@ TEST_F(SopTest, Rcover_cover_diff)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -1085,7 +1085,7 @@ TEST_F(SopTest, cover_cube_diff)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -1135,7 +1135,7 @@ TEST_F(SopTest, Scover_cover_diff)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -1185,7 +1185,7 @@ TEST_F(SopTest, Scover_cube_diff)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -1235,7 +1235,7 @@ TEST_F(SopTest, Icover_cover_diff)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -1285,7 +1285,7 @@ TEST_F(SopTest, Icover_cube_diff)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 1, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( lit0, cube_list1[0][0] );
@@ -1335,7 +1335,7 @@ TEST_F(SopTest, cover_cover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 4, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1394,7 +1394,7 @@ TEST_F(SopTest, cover_cube_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1449,7 +1449,7 @@ TEST_F(SopTest, Rcover_cube_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1502,7 +1502,7 @@ TEST_F(SopTest, cube_cover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1557,7 +1557,7 @@ TEST_F(SopTest, cube_Rcover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1609,7 +1609,7 @@ TEST_F(SopTest, cover_literal_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1663,7 +1663,7 @@ TEST_F(SopTest, Rcover_literal_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1715,7 +1715,7 @@ TEST_F(SopTest, literal_cover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1769,7 +1769,7 @@ TEST_F(SopTest, literal_Rcover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1822,7 +1822,7 @@ TEST_F(SopTest, Scover_cover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 4, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1881,7 +1881,7 @@ TEST_F(SopTest, cover_Scover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 4, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1940,7 +1940,7 @@ TEST_F(SopTest, Scover_cube_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -1993,7 +1993,7 @@ TEST_F(SopTest, cube_Scover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -2045,7 +2045,7 @@ TEST_F(SopTest, Scover_literal_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -2097,7 +2097,7 @@ TEST_F(SopTest, literal_Scover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -2150,7 +2150,7 @@ TEST_F(SopTest, Icover_cover_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 4, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -2209,7 +2209,7 @@ TEST_F(SopTest, Icover_cube_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -2261,7 +2261,7 @@ TEST_F(SopTest, Icover_literal_product)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 2, cube_list1[0].size() );
   EXPECT_EQ( 2, cube_list1[1].size() );
@@ -2314,7 +2314,7 @@ TEST_F(SopTest, cover_cover_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2365,7 +2365,7 @@ TEST_F(SopTest, cover_cube_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2415,7 +2415,7 @@ TEST_F(SopTest, cover_literal_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2468,7 +2468,7 @@ TEST_F(SopTest, Rcover_cover_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2521,7 +2521,7 @@ TEST_F(SopTest, Rcover_cube_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2573,7 +2573,7 @@ TEST_F(SopTest, Rcover_literal_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2624,7 +2624,7 @@ TEST_F(SopTest, Scover_cover_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2675,7 +2675,7 @@ TEST_F(SopTest, Scover_cube_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2725,7 +2725,7 @@ TEST_F(SopTest, Scover_literal_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2776,7 +2776,7 @@ TEST_F(SopTest, Icover_cover_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2827,7 +2827,7 @@ TEST_F(SopTest, Icover_cube_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2877,7 +2877,7 @@ TEST_F(SopTest, Icover_literal_quotient)
   EXPECT_EQ(  0, cover1.literal_num( lit9) );
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 
-  auto cube_list1 = cover1.to_literal_list();
+  auto cube_list1 = cover1.literal_list();
   EXPECT_EQ( 2, cube_list1.size() );
   EXPECT_EQ( 1, cube_list1[0].size() );
   EXPECT_EQ( 1, cube_list1[1].size() );
@@ -2905,26 +2905,26 @@ TEST_F(SopTest, common_cube)
 
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ(  1, cube1.literal_num() );
-  EXPECT_TRUE(  cube1.has_literal( lit0) );
-  EXPECT_FALSE( cube1.has_literal(~lit0) );
-  EXPECT_FALSE( cube1.has_literal( lit1) );
-  EXPECT_FALSE( cube1.has_literal(~lit1) );
-  EXPECT_FALSE( cube1.has_literal( lit2) );
-  EXPECT_FALSE( cube1.has_literal(~lit2) );
-  EXPECT_FALSE( cube1.has_literal( lit3) );
-  EXPECT_FALSE( cube1.has_literal(~lit3) );
-  EXPECT_FALSE( cube1.has_literal( lit4) );
-  EXPECT_FALSE( cube1.has_literal(~lit4) );
-  EXPECT_FALSE( cube1.has_literal( lit5) );
-  EXPECT_FALSE( cube1.has_literal(~lit5) );
-  EXPECT_FALSE( cube1.has_literal( lit6) );
-  EXPECT_FALSE( cube1.has_literal(~lit6) );
-  EXPECT_FALSE( cube1.has_literal( lit7) );
-  EXPECT_FALSE( cube1.has_literal(~lit7) );
-  EXPECT_FALSE( cube1.has_literal( lit8) );
-  EXPECT_FALSE( cube1.has_literal(~lit8) );
-  EXPECT_FALSE( cube1.has_literal( lit9) );
-  EXPECT_FALSE( cube1.has_literal(~lit9) );
+  EXPECT_TRUE(  cube1.check_literal( lit0) );
+  EXPECT_FALSE( cube1.check_literal(~lit0) );
+  EXPECT_FALSE( cube1.check_literal( lit1) );
+  EXPECT_FALSE( cube1.check_literal(~lit1) );
+  EXPECT_FALSE( cube1.check_literal( lit2) );
+  EXPECT_FALSE( cube1.check_literal(~lit2) );
+  EXPECT_FALSE( cube1.check_literal( lit3) );
+  EXPECT_FALSE( cube1.check_literal(~lit3) );
+  EXPECT_FALSE( cube1.check_literal( lit4) );
+  EXPECT_FALSE( cube1.check_literal(~lit4) );
+  EXPECT_FALSE( cube1.check_literal( lit5) );
+  EXPECT_FALSE( cube1.check_literal(~lit5) );
+  EXPECT_FALSE( cube1.check_literal( lit6) );
+  EXPECT_FALSE( cube1.check_literal(~lit6) );
+  EXPECT_FALSE( cube1.check_literal( lit7) );
+  EXPECT_FALSE( cube1.check_literal(~lit7) );
+  EXPECT_FALSE( cube1.check_literal( lit8) );
+  EXPECT_FALSE( cube1.check_literal(~lit8) );
+  EXPECT_FALSE( cube1.check_literal( lit9) );
+  EXPECT_FALSE( cube1.check_literal(~lit9) );
 };
 
 TEST_F(SopTest, to_expr1)
@@ -2937,7 +2937,7 @@ TEST_F(SopTest, to_expr1)
   SopCube cube2{3, {~lit2}};
   SopCover cover1{3, {cube1, cube2}};
 
-  auto expr = cover1.to_expr();
+  auto expr = cover1.expr();
   auto expr_str = expr.to_string();
   EXPECT_EQ( "( ( 0 & 1 ) | ~2 )", expr_str );
 }
