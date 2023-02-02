@@ -1220,7 +1220,7 @@ TEST(TvFuncTest, bcf2)
 
   ostringstream buf;
   cov.print(buf);
-  EXPECT_EQ( "v0 v1 + v0 v2+ v1 v2", buf.str() );
+  EXPECT_EQ( "v0 v1 + v0 v2 + v1 v2", buf.str() );
 }
 
 TEST(TvFuncTest, bcf3)
