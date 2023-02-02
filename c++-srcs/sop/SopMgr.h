@@ -310,7 +310,12 @@ public:
   cover_diff(
     const SopBlock& src1, ///< [in] 1つめのカバー
     const SopBlock& src2  ///< [in] 2つめのカバー
-  );
+  )
+  {
+    auto dst = new_cover(src1.cube_num);
+    _cover_diff_sub(dst, src1, src2);
+    return dst;
+  }
 
   /// @brief 2つのカバーの差分を計算する．
   ///
@@ -320,6 +325,20 @@ public:
   cover_diff_int(
     SopBlock& src1,      ///< [in] 1つめのカバー
     const SopBlock& src2 ///< [in] 2つめのカバー
+  )
+  {
+    _cover_diff_sub(src1, src1, src2);
+  }
+
+  /// @brief 2つのカバーの差分を計算する．
+  ///
+  /// カバーをキューブの集合とみなして集合差を計算する．
+  /// 結果は src1 に格納される．
+  void
+  _cover_diff_sub(
+    SopBlock& dst,        ///< [in] 結果を格納するブロック
+    const SopBlock& src1, ///< [in] 1つめのカバー
+    const SopBlock& src2  ///< [in] 2つめのカバー
   );
 
   /// @brief 2つのカバーの論理積を計算する．
@@ -336,13 +355,29 @@ public:
   cover_product(
     const SopBlock& src1,  ///< [in] 1つめのカバー
     const SopBitVect* src2 ///< [in] 2つめのキューブ
-  );
+  )
+  {
+    auto dst = new_cover(src1.cube_num);
+    _cover_product_sub(dst, src1, src2);
+    return dst;
+  }
+
+  /// @brief カバーとキューブの論理積を計算する．
+  void
+  cover_product_int(
+    SopBlock& src1,        ///< [in] 1つめのカバー
+    const SopBitVect* src2 ///< [in] 2つめのキューブ
+  )
+  {
+    _cover_product_sub(src1, src1, src2);
+  }
 
   /// @brief カバーとキューブの論理積を計算する．
   /// @return 結果のカバーを返す．
   void
-  cover_product_int(
-    SopBlock& src1,        ///< [in] 1つめのカバー
+  _cover_product_sub(
+    SopBlock& dst,         ///< [in] 結果を格納するブロック
+    const SopBlock& src1,  ///< [in] 1つめのカバー
     const SopBitVect* src2 ///< [in] 2つめのキューブ
   );
 
@@ -352,13 +387,29 @@ public:
   cover_product(
     const SopBlock& src1, ///< [in] 1つめのカバー
     Literal lit           ///< [in] 対象のリテラル
-  );
+  )
+  {
+    auto dst = new_cover(src1.cube_num);
+    _cover_product_sub(dst, src1, lit);
+    return dst;
+  }
 
   /// @brief カバーとリテラルとの論理積を計算する．
   void
   cover_product_int(
     SopBlock& src1, ///< [in] 1つめのカバー
     Literal lit     ///< [in] 対象のリテラル
+  )
+  {
+    _cover_product_sub(src1, src1, lit);
+  }
+
+  /// @brief カバーとリテラルとの論理積を計算する．
+  void
+  _cover_product_sub(
+    SopBlock& dst,        ///< [in] 結果を格納するブロック
+    const SopBlock& src1, ///< [in] 1つめのカバー
+    Literal lit           ///< [in] 対象のリテラル
   );
 
   /// @brief カバーの代数的除算を行う．
@@ -375,12 +426,28 @@ public:
   cover_quotient(
     const SopBlock& src1,  ///< [in] 1つめのカバー
     const SopBitVect* src2 ///< [in] 対象のキューブ
-  );
+  )
+  {
+    auto dst_block = new_cover(src1.cube_num);
+    _cover_quotient_sub(dst_block, src1, src2);
+    return dst_block;
+  }
 
   /// @brief カバーをキューブで割る．
   void
   cover_quotient_int(
     SopBlock& src1,        ///< [in] 1つめのカバー
+    const SopBitVect* src2 ///< [in] 対象のキューブ
+  )
+  {
+    _cover_quotient_sub(src1, src1, src2);
+  }
+
+  /// @brief カバーをキューブで割る．
+  void
+  _cover_quotient_sub(
+    SopBlock& dst,         ///< [in] 1つめのカバー
+    const SopBlock& src1,  ///< [in] 1つめのカバー
     const SopBitVect* src2 ///< [in] 対象のキューブ
   );
 
@@ -390,13 +457,29 @@ public:
   cover_quotient(
     const SopBlock& src1, ///< [in] 1つめのカバー
     Literal lit           ///< [in] 対象のリテラル
-  );
+  )
+  {
+    auto dst_block = new_cover(src1.cube_num);
+    _cover_quotient_sub(dst_block, src1, lit);
+    return dst_block;
+  }
 
   /// @brief カバーをリテラルで割る．
   void
   cover_quotient_int(
     SopBlock& src1, ///< [in] 1つめのカバー
     Literal lit     ///< [in] 対象のリテラル
+  )
+  {
+    _cover_quotient_sub(src1, src1, lit);
+  }
+
+  /// @brief カバーをリテラルで割る．
+  void
+  _cover_quotient_sub(
+    SopBlock& dst,        ///< [in] 結果を格納するブロック
+    const SopBlock& src1, ///< [in] 1つめのカバー
+    Literal lit           ///< [in] 対象のリテラル
   );
 
   /// @brief コファクターを求める．
@@ -489,7 +572,11 @@ public:
   void
   cube_clear(
     SopBitVect* dst_bv ///< [in] 対象のビットベクタ
-  );
+  )
+  {
+    SizeType size = _cube_size() * sizeof(SopBitVect);
+    bzero(dst_bv, size);
+  }
 
   /// @brief キューブ(を表すビットベクタ)をクリアする．
   void

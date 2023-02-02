@@ -120,8 +120,9 @@ SopMgr::cover_sum(
 }
 
 // @brief 2つのカバーの差分を計算する．
-SopBlock
-SopMgr::cover_diff(
+void
+SopMgr::_cover_diff_sub(
+  SopBlock& dst,
   const SopBlock& src1,
   const SopBlock& src2
 )
@@ -130,9 +131,7 @@ SopMgr::cover_diff(
   auto bv1_end = _calc_offset(bv1, src1.cube_num);
   auto bv2 = src2.body;
   auto bv2_end = _calc_offset(bv2, src2.cube_num);
-  SizeType cap = src1.cube_num;
-  auto dst_block = new_cover(cap);
-  auto dst_body = dst_block.body;
+  auto dst_body = dst.body;
   SizeType nc = 0;
   while ( bv1 != bv1_end && bv2 != bv2_end ) {
     int res = cube_compare(bv1, bv2);
@@ -154,44 +153,7 @@ SopMgr::cover_diff(
     bv1 += _cube_size();
     ++ nc;
   }
-  dst_block.cube_num = nc;
-  return dst_block;
-}
-
-// @brief 2つのカバーの差分を計算する．
-void
-SopMgr::cover_diff_int(
-  SopBlock& src1,
-  const SopBlock& src2
-)
-{
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-  auto bv2 = src2.body;
-  auto bv2_end = _calc_offset(bv2, src2.cube_num);
-  auto dst_body = src1.body;
-  SizeType nc = 0;
-  while ( bv1 != bv1_end && bv2 != bv2_end ) {
-    int res = cube_compare(bv1, bv2);
-    if ( res > 0 ) {
-      cube_copy(_calc_offset(dst_body, nc), bv1);
-      bv1 += _cube_size();
-      ++ nc;
-    }
-    else if ( res < 0 ) {
-      bv2 += _cube_size();
-    }
-    else {
-      bv1 += _cube_size();
-      bv2 += _cube_size();
-    }
-  }
-  while ( bv1 != bv1_end ) {
-    cube_copy(_calc_offset(dst_body, nc), bv1);
-    bv1 += _cube_size();
-    ++ nc;
-  }
-  src1.cube_num = nc;
+  dst.cube_num = nc;
 }
 
 // @brief 2つのカバーの論理積を計算する．
@@ -225,52 +187,18 @@ SopMgr::cover_product(
 }
 
 // @brief カバーとキューブの論理積を計算する．
-SopBlock
-SopMgr::cover_product(
+void
+SopMgr::_cover_product_sub(
+  SopBlock& dst,
   const SopBlock& src1,
   const SopBitVect* bv2
 )
 {
-  {
-    cout << "src1: ";
-    debug_print(cout, src1.body, src1.cube_num);
-  }
-
-  auto bv1 = src1.body;
-  SizeType cap = src1.cube_num;
-  auto dst_block = new_cover(cap);
-
-  // 相反するリテラルを含む積は数えない．
-  SizeType nc = 0;
-  auto dst_body = dst_block.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-  for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
-    if ( cube_product(_calc_offset(dst_body, nc), bv1, bv2) ) {
-      ++ nc;
-    }
-  }
-  {
-    cout << "dst_block: ";
-    debug_print(cout, dst_block.body, dst_block.cube_num);
-  }
-
-  _sort(dst_body, 0, nc);
-  dst_block.cube_num = nc;
-  return dst_block;
-}
-
-// @brief カバーとキューブの論理積を計算する．
-void
-SopMgr::cover_product_int(
-  SopBlock& src1,
-  const SopBitVect* bv2
-)
-{
   auto bv1 = src1.body;
 
   // 相反するリテラルを含む積は数えない．
   SizeType nc = 0;
-  auto dst_body = bv1;
+  auto dst_body = dst.body;
   auto bv1_end = _calc_offset(bv1, src1.cube_num);
   for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
     if ( cube_product(_calc_offset(dst_body, nc), bv1, bv2) ) {
@@ -278,12 +206,13 @@ SopMgr::cover_product_int(
     }
   }
   _sort(dst_body, 0, nc);
-  src1.cube_num = nc;
+  dst.cube_num = nc;
 }
 
 // @brief カバーとリテラルとの論理積を計算する．
-SopBlock
-SopMgr::cover_product(
+void
+SopMgr::_cover_product_sub(
+  SopBlock& dst,
   const SopBlock& src1,
   Literal lit
 )
@@ -300,9 +229,7 @@ SopMgr::cover_product(
   auto bv1_end = _calc_offset(bv1, src1.cube_num);
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  auto cap = src1.cube_num;
-  auto dst_block = new_cover(cap);
-  auto dst_body = dst_block.body;
+  auto dst_body = dst.body;
   SizeType nc = 0;
   for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
     if ( (bv1[blk] & npat1) == 0 ) {
@@ -312,40 +239,7 @@ SopMgr::cover_product(
       ++ nc;
     }
   }
-  dst_block.cube_num = nc;
-  return dst_block;
-}
-
-// @brief カバーとリテラルとの論理積を計算する．
-void
-SopMgr::cover_product_int(
-  SopBlock& src1,
-  Literal lit
-)
-{
-  auto var_id = lit.varid();
-  auto blk = _block_pos(var_id);
-  auto sft = _shift_num(var_id);
-  auto pat = lit2bv(lit);
-  auto npat = lit2bv(~lit);
-  auto pat1 = pat << sft;
-  auto npat1 = npat << sft;
-
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-  // 単純には答の積項数は2つの積項数の積だが
-  // 相反するリテラルを含む積は数えない．
-  auto dst_body = src1.body;
-  SizeType nc = 0;
-  for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
-    if ( (bv1[blk] & npat1) == 0 ) {
-      auto dst1 = _calc_offset(dst_body, nc);
-      cube_copy(dst1, bv1);
-      dst1[blk] |= pat1;
-      ++ nc;
-    }
-  }
-  src1.cube_num = nc;
+  dst.cube_num = nc;
 }
 
 // @brief カバーの代数的除算を行う．
@@ -422,16 +316,16 @@ SopMgr::cover_quotient(
 }
 
 // @brief カバーをキューブで割る．
-SopBlock
-SopMgr::cover_quotient(
+void
+SopMgr::_cover_quotient_sub(
+  SopBlock& dst,
   const SopBlock& src1,
   const SopBitVect* bv2
 )
 {
   SizeType nc1 = src1.cube_num;
   auto bv1 = src1.body;
-  auto dst_block = new_cover(nc1);
-  auto dst_body = dst_block.body;
+  auto dst_body = dst.body;
   SizeType nc = 0;
   for ( SizeType i = 0; i < nc1; ++ i ) {
     auto tmp1 = _calc_offset(bv1, i);
@@ -439,33 +333,13 @@ SopMgr::cover_quotient(
       ++ nc;
     }
   }
-  dst_block.cube_num = nc;
-  return dst_block;
-}
-
-// @brief カバーをキューブで割る．
-void
-SopMgr::cover_quotient_int(
-  SopBlock& src1,
-  const SopBitVect* src2
-)
-{
-  SizeType nc1 = src1.cube_num;
-  auto bv1 = src1.body;
-  auto dst_body = src1.body;
-  SizeType nc = 0;
-  for ( SizeType i = 0; i < nc1; ++ i ) {
-    auto tmp1 = _calc_offset(bv1, i);
-    if ( cube_quotient(_calc_offset(dst_body, nc), tmp1, src2) ) {
-      ++ nc;
-    }
-  }
-  src1.cube_num = nc;
+  dst.cube_num = nc;
 }
 
 // @brief カバーをリテラルで割る．
-SopBlock
-SopMgr::cover_quotient(
+void
+SopMgr::_cover_quotient_sub(
+  SopBlock& dst,
   const SopBlock& src1,
   Literal lit
 )
@@ -480,8 +354,7 @@ SopMgr::cover_quotient(
   auto nb = _cube_size();
   auto bv1 = src1.body;
   auto bv1_end = _calc_offset(bv1, src1.cube_num);
-  auto dst_block = new_cover(src1.cube_num);
-  auto dst_body = dst_block.body;
+  auto dst_body = dst.body;
   SizeType nc = 0;
   for ( ; bv1 != bv1_end; bv1 += nb ) {
     if ( (bv1[blk] & mask) == pat1 ) {
@@ -491,38 +364,7 @@ SopMgr::cover_quotient(
       ++ nc;
     }
   }
-  dst_block.cube_num = nc;
-  return dst_block;
-}
-
-// @brief カバーをリテラルで割る．
-void
-SopMgr::cover_quotient_int(
-  SopBlock& src1, ///< [in] 1つめのカバー
-  Literal lit     ///< [in] 対象のリテラル
-)
-{
-  auto var_id = lit.varid();
-  auto blk = _block_pos(var_id);
-  auto sft = _shift_num(var_id);
-  auto pat = lit2bv(lit);
-  auto pat1 = pat << sft;
-  auto mask = 3UL << sft;
-  auto nmask = ~mask;
-  auto nb = _cube_size();
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-  auto dst_body = src1.body;
-  SizeType nc = 0;
-  for ( ; bv1 != bv1_end; bv1 += nb ) {
-    if ( (bv1[blk] & mask) == pat1 ) {
-      auto dst1 = _calc_offset(dst_body, nc);
-      cube_copy(dst1, bv1);
-      dst1[blk] &= nmask;
-      ++ nc;
-    }
-  }
-  src1.cube_num = nc;
+  dst.cube_num = nc;
 }
 
 // @brief コファクターを求める．

@@ -84,11 +84,11 @@ SopMgr::cube_check_conflict(
   const SopBitVect* bv2
 )
 {
+  const SopBitVect mask1 = 0x5555555555555555ULL;
+  const SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
   auto bv1_end = _calc_offset(bv1, 1);
   while ( bv1 != bv1_end ) {
     auto tmp = *bv1 | *bv2;
-    const SopBitVect mask1 = 0x5555555555555555ULL;
-    const SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
     auto tmp1 = tmp & mask1;
     auto tmp2 = tmp & mask2;
     if ( (tmp1 & (tmp2 >> 1)) != 0ULL ) {
@@ -137,19 +137,6 @@ SopMgr::cube_check_intersect(
   return false;
 }
 
-// @brief キューブ(を表すビットベクタ)をクリアする．
-void
-SopMgr::cube_clear(
-  SopBitVect* dst_bv
-)
-{
-  auto dst_bv_end = _calc_offset(dst_bv, 1);
-  while ( dst_bv != dst_bv_end ) {
-    *dst_bv = 0ULL;
-    ++ dst_bv;
-  }
-}
-
 // @brief 2つのキューブの積を計算する．
 bool
 SopMgr::cube_product(
@@ -158,19 +145,12 @@ SopMgr::cube_product(
   const SopBitVect* bv2
 )
 {
+  const SopBitVect mask1 = 0x5555555555555555ULL;
+  const SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
   auto dst_bv0 = dst_bv;
-  if ( 0 ) {
-    cout << "cube_product" << endl
-	 << " bv1: ";
-    debug_print(cout, bv1, 1);
-    cout << " bv2: ";
-    debug_print(cout, bv2, 1);
-  }
   auto dst_bv_end = _calc_offset(dst_bv, 1);
   while ( dst_bv != dst_bv_end ) {
     auto tmp = *bv1 | *bv2;
-    const SopBitVect mask1 = 0x5555555555555555ULL;
-    const SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
     auto tmp1 = tmp & mask1;
     auto tmp2 = tmp & mask2;
     if ( (tmp1 & (tmp2 >> 1)) != 0ULL ) {
@@ -181,11 +161,6 @@ SopMgr::cube_product(
     ++ dst_bv;
     ++ bv1;
     ++ bv2;
-  }
-  if ( 0 ) {
-    cout << " =>" << endl;
-    cout << "      ";
-    debug_print(cout, dst_bv0, 1);
   }
   return true;
 }
