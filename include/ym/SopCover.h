@@ -156,10 +156,6 @@ public:
     SizeType var_id   ///< [in] 変数( 0 <= var_id.val() < variable_num() )
   ) const;
 
-  /// @brief 否定を計算する．
-  SopCover
-  operator~() const;
-
   /// @brief 論理和を計算する．
   /// @return 計算結果を返す．
   SopCover
@@ -347,23 +343,42 @@ private:
     SopBitVect* body       ///< [in] 内容のパタンを表す本体
   );
 
-  /// @brief キューブ容量を変更する．
-  ///
-  /// 現在のキューブ容量が大きければ変更しない．
+  /// @brief concate の共通処理
+  SopCover
+  concate_sub(
+    const SopBlock& src2
+  ) const;
+
+  /// @brief concate_int の共通処理
   void
-  resize(
-    SizeType req_cap ///< [in] 要求するキューブ容量
+  concate_int_sub(
+    const SopBlock& src2
   );
+
+  /// @brief diff の共通処理
+  SopCover
+  diff_sub(
+    const SopBlock& src2
+  ) const;
+
+  /// @brief diff_int の共通処理
+  void
+  diff_int_sub(
+    const SopBlock& src2
+  );
+
+  /// @brief mBody の領域を削除する．
+  void
+  delete_body();
 
   /// @brief 内容を表す SopBlock を返す．
   SopBlock
   block() const;
 
-  /// @brief キューブ容量を計算する．
-  static
-  SizeType
-  get_capacity(
-    SizeType cube_num ///< [in] キューブ数
+  /// @brief SopBlock の内容をセットする．
+  void
+  _set(
+    const SopBlock& src
   );
 
   /// @brief 比較演算子(rich compare)

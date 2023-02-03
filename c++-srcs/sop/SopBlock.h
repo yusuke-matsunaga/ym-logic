@@ -25,7 +25,10 @@ struct SopBlock
   // キューブ数
   SizeType cube_num;
 
-  // ブロックの先頭
+  // 容量
+  SizeType capacity;
+
+  // ブロックの先頭アドレス
   SopBitVect* body;
 
 };

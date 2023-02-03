@@ -38,7 +38,7 @@ END_NAMESPACE_YM_SOP
 BEGIN_NAMESPACE_YM
 
 /// @brief パタンを表す列挙型
-enum class SopPat {
+enum class SopPat : ymuint8 {
   _X = 0, ///< なし
   _1 = 1, ///< 正極性
   _0 = 2  ///< 負極性

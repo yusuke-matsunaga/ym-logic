@@ -7,10 +7,8 @@
 /// All rights reserved.
 
 #include "ym/SopCube.h"
-#include "ym/SopCover.h"
-#include "SopBlock.h"
 #include "SopMgr.h"
-#include "LitSet.h"
+#include "SopBlock.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
@@ -21,7 +19,7 @@ SopCube::SopCube(
 ) : mVariableNum{variable_num}
 {
   SopMgr mgr{mVariableNum};
-  mBody = mgr.new_cube();
+  mBody = mgr.new_bv();
   mgr.cube_clear(mBody);
 }
 
@@ -32,7 +30,7 @@ SopCube::SopCube(
 ) : mVariableNum{variable_num}
 {
   SopMgr mgr{mVariableNum};
-  mBody = mgr.new_cube();
+  mBody = mgr.new_bv();
   mgr.cube_clear(mBody);
   mgr.cube_set_literal(mBody, lit);
 }
@@ -44,7 +42,7 @@ SopCube::SopCube(
 ) : mVariableNum{variable_num}
 {
   SopMgr mgr{mVariableNum};
-  mBody = mgr.new_cube();
+  mBody = mgr.new_bv();
   mgr.cube_clear(mBody);
   mgr.cube_set_literals(mBody, lit_list);
 }
@@ -56,7 +54,7 @@ SopCube::SopCube(
 ) : mVariableNum{variable_num}
 {
   SopMgr mgr{mVariableNum};
-  mBody = mgr.new_cube();
+  mBody = mgr.new_bv();
   mgr.cube_clear(mBody);
   mgr.cube_set_literals(mBody, lit_list);
 }
@@ -67,7 +65,7 @@ SopCube::SopCube(
 ) : mVariableNum{src.mVariableNum}
 {
   SopMgr mgr{mVariableNum};
-  mBody = mgr.new_cube();
+  mBody = mgr.new_bv();
   mgr.cube_copy(mBody, src.mBody);
 }
 
@@ -81,7 +79,7 @@ SopCube::operator=(
   if ( mVariableNum != src.mVariableNum ) {
     delete_body();
     mVariableNum = src.mVariableNum;
-    mBody = mgr.new_cube();
+    mBody = mgr.new_bv();
   }
   mgr.cube_copy(mBody, src.mBody);
 
@@ -132,9 +130,7 @@ SopCube::~SopCube()
 void
 SopCube::delete_body()
 {
-  if ( mBody != nullptr ) {
-    SopMgr::delete_cube(mBody);
-  }
+  SopMgr::delete_bv(mBody);
 }
 
 // @brief 指定した変数のパタンを読み出す．
@@ -201,54 +197,21 @@ SopCube::check_literal(
   return mgr.literal_num(block(), lit) > 0;
 }
 
-// @brief オペランドのキューブに含まれていたら true を返す．
-bool
-SopCube::check_containment(
-  const SopCube& right
-) const
-{
-  ASSERT_COND( mVariableNum == right.mVariableNum );
-
-  SopMgr mgr(mVariableNum);
-  return mgr.cube_check_containment(mBody, right.mBody);
-}
-
-// @brief 2つのキューブに共通なリテラルがあれば true を返す．
-bool
-SopCube::check_intersect(
-  const SopCube& right
-) const
-{
-  ASSERT_COND( mVariableNum == right.mVariableNum );
-
-  SopMgr mgr(mVariableNum);
-  return mgr.cube_check_intersect(mBody, right.mBody);
-}
-
-// @brief キューブの否定を求める．
-SopCover
-SopCube::operator~() const
-{
-  SopMgr mgr{mVariableNum};
-  auto dst_block = mgr.cube_complement(mBody);
-  auto nc = dst_block.cube_num;
-  return mgr.make_cover(dst_block);
-}
-
 // @brief キューブの論理積を計算する
 SopCube
 SopCube::operator*(
   const SopCube& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
-
+  if ( mVariableNum != right.mVariableNum ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
   SopMgr mgr(mVariableNum);
-  auto dst_body = mgr.new_cube();
+  auto dst_body = mgr.new_bv();
   if ( !mgr.cube_product(dst_body, mBody, right.mBody) ) {
     mgr.cube_clear(dst_body);
   }
-  return SopCube{mVariableNum, dst_body};
+  return mgr.make_cube(dst_body);
 }
 
 // @brief 論理積を計算し自身に代入する．
@@ -257,8 +220,9 @@ SopCube::operator*=(
   const SopCube& right
 )
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
-
+  if ( mVariableNum != right.mVariableNum ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
   SopMgr mgr(mVariableNum);
   if ( !mgr.cube_product(mBody, mBody, right.mBody) ) {
     mgr.cube_clear(mBody);
@@ -274,12 +238,12 @@ SopCube::operator*(
 ) const
 {
   SopMgr mgr(mVariableNum);
-  auto dst_body = mgr.new_cube();
+  auto dst_body = mgr.new_bv();
   if ( !mgr.cube_product(dst_body, mBody, right) ) {
     mgr.cube_clear(dst_body);
   }
 
-  return SopCube{mVariableNum, dst_body};
+  return mgr.make_cube(dst_body);
 }
 
 // @brief リテラルとの論理積を計算し自身に代入する．
@@ -302,15 +266,17 @@ SopCube::operator/(
   const SopCube& right
 ) const
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( mVariableNum != right.mVariableNum ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
   SopMgr mgr(mVariableNum);
-  auto dst_body = mgr.new_cube();
+  auto dst_body = mgr.new_bv();
   if ( !mgr.cube_quotient(dst_body, mBody, right.mBody) ) {
     mgr.cube_clear(dst_body);
   }
 
-  return SopCube{mVariableNum, dst_body};
+  return mgr.make_cube(dst_body);
 }
 
 // @brief キューブによる商を計算し自身に代入する．
@@ -319,7 +285,9 @@ SopCube::operator/=(
   const SopCube& right
 )
 {
-  ASSERT_COND( mVariableNum == right.mVariableNum );
+  if ( mVariableNum != right.mVariableNum ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
   SopMgr mgr(mVariableNum);
   if ( !mgr.cube_quotient(mBody, mBody, right.mBody) ) {
@@ -336,12 +304,12 @@ SopCube::operator/(
 ) const
 {
   SopMgr mgr(mVariableNum);
-  auto dst_body = mgr.new_cube();
+  auto dst_body = mgr.new_bv();
   if ( !mgr.cube_quotient(dst_body, mBody, right) ) {
     mgr.cube_clear(dst_body);
   }
 
-  return SopCube{mVariableNum, dst_body};
+  return mgr.make_cube(dst_body);
 }
 
 // @brief リテラルによる商を計算し自身に代入する．
@@ -365,7 +333,9 @@ compare(
   const SopCube& right
 )
 {
-  ASSERT_COND( left.variable_num() == right.variable_num() );
+  if ( left.mVariableNum != right.mVariableNum ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
 
   SopMgr mgr(left.variable_num());
   return mgr.cube_compare(left.mBody, right.mBody);
@@ -383,7 +353,7 @@ SopCube::expr() const
 SopBlock
 SopCube::block() const
 {
-  return SopBlock{1, mBody};
+  return SopBlock{1, 1, mBody};
 }
 
 // @brief ハッシュ値を返す．

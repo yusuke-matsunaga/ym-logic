@@ -37,9 +37,20 @@ set (sop_SOURCES
   c++-srcs/sop/SopCube.cc
   c++-srcs/sop/SopMgr.cc
   c++-srcs/sop/SopMgr_cube.cc
-  c++-srcs/sop/SopMgr_cover.cc
+  c++-srcs/sop/SopMgr_sort.cc
+  c++-srcs/sop/ConcateOp.cc
+  c++-srcs/sop/DiffOp.cc
+  c++-srcs/sop/MulOp.cc
+  c++-srcs/sop/DivOp.cc
+  c++-srcs/sop/CompOp.cc
+  c++-srcs/sop/CommonCube.cc
+  c++-srcs/sop/CheckIntersect.cc
+  c++-srcs/sop/CheckContainment.cc
   c++-srcs/sop/KernelGen.cc
   c++-srcs/sop/LitSet.cc
+  c++-srcs/sop/LitSetCheck.cc
+  c++-srcs/sop/LitSetUnion.cc
+  c++-srcs/sop/LitSetIntersect.cc
   c++-srcs/sop/BestKernel.cc
   c++-srcs/sop/OneLevel0Kernel.cc
   c++-srcs/sop/WeakDivision.cc

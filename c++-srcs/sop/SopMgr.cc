@@ -1,6 +1,6 @@
 
-/// @file AlgMgr.cc
-/// @brief AlgMgr の実装ファイル
+/// @file SopMgr.cc
+/// @brief SopMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
@@ -16,20 +16,6 @@ BEGIN_NAMESPACE_YM_SOP
 //////////////////////////////////////////////////////////////////////
 // クラス SopMgr
 //////////////////////////////////////////////////////////////////////
-
-// @brief コンストラクタ
-SopMgr::SopMgr(
-  SizeType variable_num
-) : mVarNum{variable_num}
-{
-  _init_buff();
-}
-
-// @brief デストラクタ
-SopMgr::~SopMgr()
-{
-  delete [] mTmpBuff;
-}
 
 BEGIN_NONAMESPACE
 
@@ -229,15 +215,6 @@ SopMgr::debug_print(
   }
 }
 
-// @brief mTmpBuff を初期化する．
-void
-SopMgr::_init_buff()
-{
-  // とりあえず 128 を初期値とする．
-  mTmpBuffSize = 128;
-  mTmpBuff = _new_body(mTmpBuffSize);
-}
-
 // @brief mTmpBuff に必要な領域を確保する．
 // @param[in] req_size 要求するキューブ数
 void
@@ -246,6 +223,9 @@ SopMgr::_resize_buff(
 )
 {
   SizeType old_size = mTmpBuffSize;
+  if ( mTmpBuffSize == 0 ) {
+    mTmpBuffSize = 1;
+  }
   while ( mTmpBuffSize < req_size ) {
     mTmpBuffSize <<= 1;
   }
@@ -254,24 +234,6 @@ SopMgr::_resize_buff(
     _delete_body(mTmpBuff);
   }
   mTmpBuff = _new_body(mTmpBuffSize);
-}
-
-// @brief MOST_BINATE variable を選ぶ．
-SizeType
-SopMgr::binate_select(
-  const SopBlock& src
-)
-{
-}
-
-// @brief MERGE_WITH_IDENTITY を行う．
-SopBlock
-SopMgr::merge_with_identity(
-  SizeType var,
-  const SopBlock& f0,
-  const SopBlock& f1
-)
-{
 }
 
 END_NAMESPACE_YM_SOP

@@ -142,10 +142,6 @@ public:
     const SopCube& right ///< [in] オペランドのキューブ
   ) const;
 
-  /// @brief キューブの否定を求める．
-  SopCover
-  operator~() const;
-
   /// @brief キューブの論理積を計算する
   ///
   /// リテラル集合としてみると和集合となる<br>

@@ -24,7 +24,7 @@ LitSet::LitSet(
     mBody{nullptr}
 {
   SopMgr mgr{mVariableNum};
-  mBody = mgr.new_cube();
+  mBody = mgr.new_bv();
   mgr.cube_clear(mBody);
 }
 
@@ -76,9 +76,9 @@ LitSet::operator=(
   if ( &src != this ) {
     SopMgr mgr(src.mVariableNum);
     if ( mVariableNum != src.mVariableNum ) {
-      SopMgr::delete_cube(mBody);
+      delete_body();
       mVariableNum = src.mVariableNum;
-      mBody = mgr.new_cube();
+      mBody = mgr.new_bv();
     }
     mgr.cube_copy(mBody, src.mBody);
   }
@@ -101,7 +101,7 @@ LitSet::operator=(
   LitSet&& src
 )
 {
-  SopMgr::delete_cube(mBody);
+  delete_body();
 
   mVariableNum = src.mVariableNum;
   mBody = src.mBody;
@@ -114,29 +114,7 @@ LitSet::operator=(
 // @brief デストラクタ
 LitSet::~LitSet()
 {
-  SopMgr::delete_cube(mBody);
-}
-
-// @brief 該当するリテラルが含まれているか調べる．
-bool
-LitSet::is_in(
-  Literal lit
-) const
-{
-  SopMgr mgr(mVariableNum);
-  return mgr.litset_check(mBody, lit);
-}
-
-// @brief ユニオン演算付き代入
-LitSet&
-LitSet::operator+=(
-  const LitSet& right
-)
-{
-  SopMgr mgr(mVariableNum);
-  mgr.litset_union(mBody, right.mBody);
-
-  return *this;
+  delete_body();
 }
 
 // @brief 要素を足す．
@@ -151,19 +129,11 @@ LitSet::operator+=(
   return *this;
 }
 
-// @brief 引数のキューブ中のリテラルをひとつでも含んでいたら true を返す．
-bool
-LitSet::check_intersect(
-  const SopCube& right
-) const
+// @brief mBody の領域を削除する．
+void
+LitSet::delete_body()
 {
-  if ( mVariableNum != right.variable_num() ) {
-    throw std::invalid_argument{"variable_num() mismatch"};
-  }
-
-  SopMgr mgr(mVariableNum);
-  //return mgr.cube_check_intersect(mBody, right.mBody);
-  return false;
+  SopMgr::delete_bv(mBody);
 }
 
 END_NAMESPACE_YM_SOP

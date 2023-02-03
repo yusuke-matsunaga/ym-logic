@@ -7,9 +7,7 @@
 /// All rights reserved.
 
 #include "ym/SopCover.h"
-#include "ym/SopCube.h"
 #include "ym/Range.h"
-#include "SopBlock.h"
 #include "SopMgr.h"
 
 
@@ -33,55 +31,43 @@ SopCover::SopCover(
 SopCover::SopCover(
   SizeType variable_num,
   const vector<SopCube>& cube_list
-) : mVariableNum{variable_num},
-    mCubeNum{cube_list.size()},
-    mCubeCap{mCubeNum},
-    mBody{nullptr}
+) : mVariableNum{variable_num}
 {
   SopMgr mgr(mVariableNum);
-  auto dst_block = mgr.new_cover(cube_list);
-  mBody = dst_block.body;
+  auto dst = mgr.new_block(cube_list);
+  _set(dst);
 }
 
 // @brief コンストラクタ
 SopCover::SopCover(
   SizeType variable_num,
   const vector<vector<Literal>>& cube_list
-) : mVariableNum{variable_num},
-    mCubeNum{cube_list.size()},
-    mCubeCap{mCubeNum},
-    mBody{nullptr}
+) : mVariableNum{variable_num}
 {
   SopMgr mgr(mVariableNum);
-  auto dst_block = mgr.new_cover(cube_list);
-  mBody = dst_block.body;
+  auto dst = mgr.new_block(cube_list);
+  _set(dst);
 }
 
 // @brief コンストラクタ
 SopCover::SopCover(
   SizeType variable_num,
   std::initializer_list<std::initializer_list<Literal>>& cube_list
-) : mVariableNum{variable_num},
-    mCubeNum{cube_list.size()},
-    mCubeCap{mCubeNum},
-    mBody{nullptr}
+) : mVariableNum{variable_num}
 {
   SopMgr mgr(mVariableNum);
-  auto dst_block = mgr.new_cover(cube_list);
-  mBody = dst_block.body;
+  auto dst = mgr.new_block(cube_list);
+  _set(dst);
 }
 
 // @brief コピーコンストラクタ
 SopCover::SopCover(
   const SopCover& src
-) : mVariableNum{src.mVariableNum},
-    mCubeNum{src.mCubeNum},
-    mCubeCap{mCubeNum},
-    mBody{nullptr}
+) : mVariableNum{src.mVariableNum}
 {
   SopMgr mgr{mVariableNum};
-  auto dst_block = mgr.new_cover(src.block());
-  mBody = dst_block.body;
+  auto dst = mgr.new_block(src.block());
+  _set(dst);
 }
 
 // @brief コピー代入演算子
@@ -91,16 +77,20 @@ SopCover::operator=(
 )
 {
   if ( this != &src ) {
-    SizeType n = src.cube_num();
-    if ( mCubeCap < n ) {
-      SopMgr::delete_cube(mBody);
-    }
     mVariableNum = src.mVariableNum;
-    mCubeNum = src.mCubeNum;
-    mCubeCap = mCubeNum;;
     SopMgr mgr(mVariableNum);
-    auto dst_block = mgr.new_cover(src.block());
-    mBody = dst_block.body;
+    SizeType n = src.cube_num();
+    auto src_block = src.block();
+    if ( mCubeCap < n ) {
+      delete_body();
+      auto dst = mgr.new_block(src_block);
+      _set(dst);
+    }
+    else {
+      auto dst = block();
+      mgr.copy_block(dst, src_block);
+      _set(dst);
+    }
   }
 
   return *this;
@@ -126,7 +116,8 @@ SopCover::operator=(
 )
 {
   SopMgr mgr(mVariableNum);
-  SopMgr::delete_cube(mBody);
+
+  delete_body();
 
   mVariableNum = src.mVariableNum;
   mCubeNum = src.mCubeNum;
@@ -143,14 +134,11 @@ SopCover::operator=(
 // @brief キューブからのコピー変換コンストラクタ
 SopCover::SopCover(
   const SopCube& cube
-) : mVariableNum{cube.variable_num()},
-    mCubeNum{1},
-    mCubeCap{mCubeNum},
-    mBody{nullptr}
+) : mVariableNum{cube.variable_num()}
 {
   SopMgr mgr(mVariableNum);
-  auto dst_block = mgr.new_cover(cube.block());
-  mBody = dst_block.body;
+  auto dst = mgr.new_block(cube.block());
+  _set(dst);
 }
 
 // @brief キューブからのムーブ変換コンストラクタ
@@ -182,7 +170,7 @@ SopCover::SopCover(
 // ここに属しているすべてのキューブは削除される．
 SopCover::~SopCover()
 {
-  SopMgr::delete_cube(mBody);
+  delete_body();
 }
 
 // @brief リテラル数を返す．
@@ -214,7 +202,7 @@ SopCover::literal_list() const
     auto& tmp_list = cube_list[i];
     tmp_list.reserve(mVariableNum);
     for ( SizeType var: Range(mVariableNum) ) {
-      SopPat pat = mgr.get_pat(mBody, i, var);
+      auto pat = mgr.get_pat(mBody, i, var);
       if ( pat == SopPat::_1 ) {
 	tmp_list.push_back(Literal{var, false});
       }
@@ -238,369 +226,18 @@ SopCover::get_pat(
   return mgr.get_pat(mBody, cube_id, var);
 }
 
+// @brief mBody の領域を削除する．
+void
+SopCover::delete_body()
+{
+  SopMgr::delete_bv(mBody);
+}
+
 // @brief 内容を表す SopBlock を返す．
-inline
 SopBlock
 SopCover::block() const
 {
-  return SopBlock{mCubeNum, mBody};
-}
-
-// @brief 否定を計算する．
-SopCover
-SopCover::operator~() const
-{
-  SopMgr mgr{variable_num()};
-  auto ans_block = mgr.cover_complement(block());
-  return mgr.make_cover(ans_block);
-}
-
-// @brief 論理和を計算する．
-SopCover
-SopCover::operator+(
-  const SopCover& right
-) const
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto ans_block = mgr.cover_sum(block(), right.block());
-  return mgr.make_cover(ans_block);
-}
-
-// @brief 論理和を計算して代入する．
-SopCover&
-SopCover::operator+=(
-  const SopCover& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_sum(block(), right.block());
-
-  SopMgr::delete_cube(mBody);
-
-  mCubeNum = dst_block.cube_num;
-  mCubeCap = mCubeNum;
-  mBody = dst_block.body;
-
-  return *this;
-}
-
-// @brief 論理和を計算する(キューブ版)．
-SopCover
-SopCover::operator+(
-  const SopCube& right
-) const
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_sum(block(), right.block());
-  return mgr.make_cover(dst_block);
-}
-
-// @brief 論理和を計算して代入する(キューブ版)．
-SopCover&
-SopCover::operator+=(
-  const SopCube& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_sum(block(), right.block());
-
-  mgr.delete_cube(mBody);
-
-  mCubeNum = dst_block.cube_num;
-  mCubeCap = mCubeNum;
-  mBody = dst_block.body;
-
-  return *this;
-}
-
-// @brief 差分を計算する．
-SopCover
-SopCover::operator-(
-  const SopCover& right
-) const
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_diff(block(), right.block());
-
-  return mgr.make_cover(dst_block);
-}
-
-// @brief 差分を計算して代入する．
-SopCover&
-SopCover::operator-=(
-  const SopCover& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  // キューブ数は増えないのでブロックはそのまま
-  SopMgr mgr{variable_num()};
-  auto dst_block = block();
-  mgr.cover_diff_int(dst_block, right.block());
-  mCubeNum = dst_block.cube_num;
-
-  return *this;
-}
-
-// @brief 差分を計算する(キューブ版)．
-SopCover
-SopCover::operator-(
-  const SopCube& right
-) const
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_diff(block(), right.block());
-
-  return mgr.make_cover(dst_block);
-}
-
-// @brief 差分を計算して代入する(キューブ版)．
-SopCover&
-SopCover::operator-=(
-  const SopCube& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = block();
-  mgr.cover_diff_int(dst_block, right.block());
-  mCubeNum = dst_block.cube_num;
-
-  return *this;
-}
-
-// @brief 論理積を計算する．
-SopCover
-SopCover::operator*(
-  const SopCover& right
-) const
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_product(block(), right.block());
-
-  return mgr.make_cover(dst_block);
-}
-
-// @brief 論理積を計算して代入する．
-SopCover&
-SopCover::operator*=(
-  const SopCover& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_product(block(), right.block());
-
-  mgr.delete_cube(mBody);
-
-  mCubeNum = dst_block.cube_num;
-  mCubeCap = mCubeNum;
-  mBody = dst_block.body;
-
-  return *this;
-}
-
-// @brief 論理積を計算する(キューブ版)．
-SopCover
-SopCover::operator*(
-  const SopCube& right
-) const
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_product(block(), right.block());
-
-  return mgr.make_cover(dst_block);
-}
-
-// @brief 論理積を計算して代入する(キューブ版)．
-SopCover&
-SopCover::operator*=(
-  const SopCube& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = block();
-  mgr.cover_product_int(dst_block, right.block().body);
-  mCubeNum = dst_block.cube_num;
-
-  return *this;
-}
-
-// @brief 論理積を計算する(リテラル版)．
-SopCover
-SopCover::operator*(
-  Literal right
-) const
-{
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_product(block(), right);
-
-  return mgr.make_cover(dst_block);
-}
-
-// @brief 論理積を計算して代入する(リテラル版)．
-SopCover&
-SopCover::operator*=(
-  Literal right
-)
-{
-  SopMgr mgr{variable_num()};
-  auto dst_block = block();
-  mgr.cover_product_int(dst_block, right);
-  mCubeNum = dst_block.cube_num;
-
-  return *this;
-}
-
-// @brief algebraic division を計算する．
-SopCover
-SopCover::operator/(
-  const SopCover& right
-) const
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_quotient(block(), right.block());
-
-  return mgr.make_cover(dst_block);
-}
-
-// @brief algebraic division を行って代入する．
-SopCover&
-SopCover::operator/=(
-  const SopCover& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_quotient(block(), right.block());
-
-  mgr.delete_cube(mBody);
-
-  mCubeNum = dst_block.cube_num;
-  mCubeCap = mCubeNum;
-  mBody = dst_block.body;
-
-  return *this;
-}
-
-// @brief キューブによる商を計算する．
-SopCover
-SopCover::operator/(
-  const SopCube& right
-) const
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_quotient(block(), right.block());
-
-  return mgr.make_cover(dst_block);
-}
-
-// @brief キューブによる商を計算する．
-SopCover&
-SopCover::operator/=(
-  const SopCube& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{variable_num()};
-  auto dst_block = block();
-  mgr.cover_quotient_int(dst_block, right.block().body);
-  mCubeNum = dst_block.cube_num;
-
-  return *this;
-}
-
-// @brief リテラルによる商を計算する．
-SopCover
-SopCover::operator/(
-  Literal lit
-) const
-{
-  SopMgr mgr{variable_num()};
-  auto dst_block = mgr.cover_quotient(block(), lit);
-
-  return mgr.make_cover(dst_block);
-}
-
-// @brief リテラルによる商を計算して代入する．
-SopCover&
-SopCover::operator/=(
-  Literal lit
-)
-{
-  SopMgr mgr{variable_num()};
-  auto dst_block = block();
-  mgr.cover_quotient_int(dst_block, lit);
-  mCubeNum = dst_block.cube_num;
-
-  return *this;
-}
-
-// @brief 共通なキューブを返す．
-SopCube
-SopCover::common_cube() const
-{
-  SopMgr mgr{variable_num()};
-  auto bv = mgr.common_cube(block());
-  return mgr.make_cube(bv);
+  return SopBlock{mCubeNum, mCubeCap, mBody};
 }
 
 // @brief Expr に変換する．
@@ -640,20 +277,15 @@ SopCover::debug_print(
   mgr.debug_print(s, mBody, mCubeNum);
 }
 
-// @relates SopCover
-int
-compare(
-  const SopCover& left,
-  const SopCover& right
+// @brief SopBlock の内容をセットする．
+void
+SopCover::_set(
+  const SopBlock& src
 )
 {
-  if ( left.variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  SopMgr mgr{left.mVariableNum};
-
-  return mgr.cover_compare(left.block(), right.block());
+  mCubeNum = src.cube_num;
+  mCubeCap = src.capacity;
+  mBody = src.body;
 }
 
 END_NAMESPACE_YM_SOP

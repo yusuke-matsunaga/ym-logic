@@ -1,6 +1,6 @@
 
-/// @file AlgMgr_cube.cc
-/// @brief AlgMgr のキューブ関係の実装ファイル
+/// @file SopMgr_cube.cc
+/// @brief SopMgr のキューブ関係の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
@@ -31,110 +31,6 @@ SopMgr::cube_check_null(
     }
   }
   return true;
-}
-
-// @brief キューブを否定する．
-SopBlock
-SopMgr::cube_complement(
-  const SopBitVect* bv
-)
-{
-  SizeType nl = literal_num(bv, 1);
-  auto dst_block = new_cover(nl);
-  auto dst_body = dst_block.body;
-  for ( SizeType var = 0; var < variable_num(); ++ var ) {
-    auto pat = get_pat(bv, 0, var);
-    if ( pat == SopPat::_1 ) {
-      cube_set_literal(dst_body, var, Literal{var, false});
-    }
-    else if ( pat == SopPat::_0 ) {
-      cube_set_literal(dst_body, var, Literal{var, true});
-    }
-  }
-  return dst_block;
-}
-
-// @brief キューブ(を表すビットベクタ)の比較を行う．
-int
-SopMgr::cube_compare(
-  const SopBitVect* bv1,
-  const SopBitVect* bv2
-)
-{
-  auto bv1_end = _calc_offset(bv1, 1);
-  while ( bv1 != bv1_end ) {
-    auto pat1 = *bv1;
-    auto pat2 = *bv2;
-    if ( pat1 < pat2 ) {
-      return -1;
-    }
-    else if ( pat1 > pat2 ) {
-      return 1;
-    }
-    ++ bv1;
-    ++ bv2;
-  }
-  return 0;
-}
-
-// @brief 2つのキューブの積が空でない時 true を返す．
-bool
-SopMgr::cube_check_conflict(
-  const SopBitVect* bv1,
-  const SopBitVect* bv2
-)
-{
-  const SopBitVect mask1 = 0x5555555555555555ULL;
-  const SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
-  auto bv1_end = _calc_offset(bv1, 1);
-  while ( bv1 != bv1_end ) {
-    auto tmp = *bv1 | *bv2;
-    auto tmp1 = tmp & mask1;
-    auto tmp2 = tmp & mask2;
-    if ( (tmp1 & (tmp2 >> 1)) != 0ULL ) {
-      // 同じ変数の異なる極性のリテラルがあった．
-      return true;
-    }
-    ++ bv1;
-    ++ bv2;
-  }
-  return false;
-}
-
-// @brief 一方のキューブが他方のキューブに含まれているか調べる．
-bool
-SopMgr::cube_check_containment(
-  const SopBitVect* bv1,
-  const SopBitVect* bv2
-)
-{
-  auto bv1_end = _calc_offset(bv1, 1);
-  while ( bv1 != bv1_end ) {
-    if ( (~(*bv1) & *bv2) != 0ULL ) {
-      return false;
-    }
-    ++ bv1;
-    ++ bv2;
-  }
-  return true;
-}
-
-// @brief ２つのキューブに共通なリテラルがあれば true を返す．
-bool
-SopMgr::cube_check_intersect(
-  const SopBitVect* bv1,
-  const SopBitVect* bv2
-)
-{
-  auto bv1_end = _calc_offset(bv1, 1);
-  while ( bv1 != bv1_end ) {
-    if ( (*bv1 & *bv2) != 0ULL ) {
-      return true;
-    }
-    ++ bv1;
-    ++ bv2;
-  }
-  return false;
 }
 
 // @brief 2つのキューブの積を計算する．
@@ -264,37 +160,27 @@ SopMgr::cube_quotient(
   return false;
 }
 
-// @brief 要素のチェック
-bool
-SopMgr::litset_check(
-  SopBitVect* bv,
-  Literal lit
+// @brief キューブ(を表すビットベクタ)の比較を行う．
+int
+SopMgr::cube_compare(
+  const SopBitVect* bv1,
+  const SopBitVect* bv2
 )
 {
-  auto var_id = lit.varid();
-  auto blk = _block_pos(var_id);
-  auto sft = _shift_num(var_id);
-  auto pat = lit2bv(lit);
-  auto mask = pat << sft;
-  if ( bv[blk] & mask ) {
-    return true;
+  auto bv1_end = _calc_offset(bv1, 1);
+  while ( bv1 != bv1_end ) {
+    auto pat1 = *bv1;
+    auto pat2 = *bv2;
+    if ( pat1 < pat2 ) {
+      return -1;
+    }
+    else if ( pat1 > pat2 ) {
+      return 1;
+    }
+    ++ bv1;
+    ++ bv2;
   }
-  else {
-    return false;
-  }
-}
-
-// @brief ユニオン演算
-void
-SopMgr::litset_union(
-  SopBitVect* dst_bv,
-  const SopBitVect* src_bv
-)
-{
-  auto dst_bv_end = _calc_offset(dst_bv, 1);
-  for ( ; dst_bv != dst_bv_end; ++ dst_bv, ++ src_bv ) {
-    *dst_bv |= *src_bv;
-  }
+  return 0;
 }
 
 END_NAMESPACE_YM_SOP
