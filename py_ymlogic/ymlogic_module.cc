@@ -13,6 +13,10 @@
 #include "pym/PyNpnMap.h"
 #include "pym/PyTvFunc.h"
 #include "pym/PyExpr.h"
+#include "pym/PyBdd.h"
+#include "pym/PyBddMgr.h"
+#include "pym/PySopCover.h"
+#include "pym/PySopCube.h"
 #include "pym/PyModule.h"
 
 
@@ -54,6 +58,18 @@ PyInit_ymlogic()
     goto error;
   }
   if ( !PyExpr::init(m) ) {
+    goto error;
+  }
+  if ( !PyBdd::init(m) ) {
+    goto error;
+  }
+  if ( !PyBddMgr::init(m) ) {
+    goto error;
+  }
+  if ( !PySopCover::init(m) ) {
+    goto error;
+  }
+  if ( !PySopCube::init(m) ) {
     goto error;
   }
 

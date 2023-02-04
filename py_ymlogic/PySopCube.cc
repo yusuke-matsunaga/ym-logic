@@ -1,0 +1,465 @@
+
+/// @file PySopCube.cc
+/// @brief Python SopCube の実装ファイル
+/// @author Yusuke Matsunaga (松永 裕介)
+///
+/// Copyright (C) 2023 Yusuke Matsunaga
+/// All rights reserved.
+
+#include "pym/PySopCube.h"
+#include "pym/PyLiteral.h"
+#include "pym/PyExpr.h"
+#include "pym/PyModule.h"
+
+
+BEGIN_NAMESPACE_YM
+
+BEGIN_NONAMESPACE
+
+// Python 用のオブジェクト定義
+struct SopCubeObject
+{
+  PyObject_HEAD
+  SopCube* mVal;
+};
+
+// Python 用のタイプ定義
+PyTypeObject SopCubeType = {
+  PyVarObject_HEAD_INIT(nullptr, 0)
+};
+
+// 生成関数
+PyObject*
+SopCube_new(
+  PyTypeObject* type,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kw_list[] = {
+    "",
+    "",
+    nullptr
+  };
+  SizeType ni = -1;
+  PyObject* obj1 = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|O",
+				    const_cast<char**>(kw_list),
+				    &ni, &obj1) ) {
+    return nullptr;
+  }
+  vector<Literal> lit_list;
+  if ( obj1 != nullptr ) {
+    if ( PyLiteral::_check(obj1) ) {
+      auto lit = PyLiteral::_get(obj1);
+      lit_list.push_back(lit);
+    }
+    else if ( PyList_Check(obj1) ) {
+      SizeType n = PyList_Size(obj1);
+      lit_list.reserve(n);
+      for ( SizeType i = 0; i < n; ++ i ) {
+	auto obj2 = PyList_GetItem(obj1, i);
+	if ( !PyLiteral::_check(obj2) ) {
+	  PyErr_SetString(PyExc_TypeError, "argument 2 must be a 'Literal' or list of 'Literal'");
+	  return nullptr;
+	}
+	auto lit = PyLiteral::_get(obj2);
+	lit_list.push_back(lit);
+      }
+    }
+  }
+  auto self = type->tp_alloc(type, 0);
+  auto sopcube_obj = reinterpret_cast<SopCubeObject*>(self);
+  sopcube_obj->mVal = new SopCube{ni, lit_list};
+  return self;
+}
+
+// 終了関数
+void
+SopCube_dealloc(
+  PyObject* self
+)
+{
+  auto sopcube_obj = reinterpret_cast<SopCubeObject*>(self);
+  delete sopcube_obj->mVal;
+  Py_TYPE(self)->tp_free(self);
+}
+
+PyObject*
+SopCube_is_tautology(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& cube = PySopCube::_get(self);
+  auto ans = cube.is_tautology();
+  return PyBool_FromLong(ans);
+}
+
+PyObject*
+SopCube_get_pat(
+  PyObject* self,
+  PyObject* args
+)
+{
+  SizeType cpos = -1;
+  if ( !PyArg_ParseTuple(args, "k", &cpos) ) {
+    return nullptr;
+  }
+  auto& cube = PySopCube::_get(self);
+  auto pat = cube.get_pat(cpos);
+  const char* ans_str = nullptr;
+  if ( pat == SopPat::_X ) {
+    ans_str = "-";
+  }
+  else if ( pat == SopPat::_0 ) {
+    ans_str = "0";
+  }
+  else if ( pat == SopPat::_1 ) {
+    ans_str = "1";
+  }
+  return Py_BuildValue("s", ans_str);
+}
+
+PyObject*
+SopCube_check_literal(
+  PyObject* self,
+  PyObject* args
+)
+{
+  PyObject* lit_obj = nullptr;
+  if ( !PyArg_ParseTuple(args, "O!",
+			 PyLiteral::_typeobject(), &lit_obj) ) {
+    return nullptr;
+  }
+  auto& cube = PySopCube::_get(self);
+  auto lit = PyLiteral::_get(lit_obj);
+  auto ans = cube.check_literal(lit);
+  return PyBool_FromLong(ans);
+}
+
+PyObject*
+SopCube_literal_list(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& cube = PySopCube::_get(self);
+  auto lit_list = cube.literal_list();
+  SizeType n = lit_list.size();
+  auto ans_obj = PyList_New(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto lit = lit_list[i];
+    auto lit_obj = PyLiteral::ToPyObject(lit);
+    PyList_SetItem(ans_obj, i, lit_obj);
+  }
+  return ans_obj;
+}
+
+PyObject*
+SopCube_check_containment(
+  PyObject* self,
+  PyObject* args
+)
+{
+  PyObject* cube_obj = nullptr;
+  if ( !PyArg_ParseTuple(args, "O!",
+			 PySopCube::_typeobject(), &cube_obj) ) {
+    return nullptr;
+  }
+  auto& cube = PySopCube::_get(self);
+  auto& cube1 = PySopCube::_get(cube_obj);
+  auto ans = cube.check_containment(cube1);
+  return PyBool_FromLong(ans);
+}
+
+PyObject*
+SopCube_check_intersect(
+  PyObject* self,
+  PyObject* args
+)
+{
+  PyObject* cube_obj = nullptr;
+  if ( !PyArg_ParseTuple(args, "O!",
+			 PySopCube::_typeobject(), &cube_obj) ) {
+    return nullptr;
+  }
+  auto& cube = PySopCube::_get(self);
+  auto& cube1 = PySopCube::_get(cube_obj);
+  auto ans = cube.check_intersect(cube1);
+  return PyBool_FromLong(ans);
+}
+
+PyObject*
+SopCube_expr(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& cube = PySopCube::_get(self);
+  auto expr = cube.expr();
+  return PyExpr::ToPyObject(expr);
+}
+
+// メソッド定義
+PyMethodDef SopCube_methods[] = {
+  {"is_tautology", SopCube_is_tautology, METH_NOARGS,
+   PyDoc_STR("return True if tautology")},
+  {"get_pat", SopCube_get_pat, METH_VARARGS,
+   PyDoc_STR("get the pattern('-', '0', or '1') of the specified position")},
+  {"check_literal", SopCube_check_literal, METH_VARARGS,
+   PyDoc_STR("return True if containing the specified literal")},
+  {"literal_list", SopCube_literal_list, METH_NOARGS,
+   PyDoc_STR("convert to the list of 'Literal'")},
+  {"check_containment", SopCube_check_containment, METH_VARARGS,
+   PyDoc_STR("return True if being contained in the argument cube")},
+  {"check_intersect", SopCube_check_intersect, METH_VARARGS,
+   PyDoc_STR("return True if having intersection with the argument cube")},
+  {"expr", SopCube_expr, METH_NOARGS,
+   PyDoc_STR("convert to 'Expr'")},
+  {nullptr, nullptr, 0, nullptr}
+};
+
+PyObject*
+SopCube_variable_num(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto& cube = PySopCube::_get(self);
+  auto ans = cube.variable_num();
+  return PyLong_FromLong(ans);
+}
+
+PyObject*
+SopCube_literal_num(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto& cube = PySopCube::_get(self);
+  auto ans = cube.literal_num();
+  return PyLong_FromLong(ans);
+}
+
+// get/set 関数定義
+PyGetSetDef SopCube_getset[] = {
+  {"variable_num", SopCube_variable_num, nullptr,
+   PyDoc_STR("number of variables"), nullptr},
+  {"literal_num", SopCube_literal_num, nullptr,
+   PyDoc_STR("number of literals"), nullptr},
+  {nullptr, nullptr, nullptr, nullptr, nullptr},
+};
+
+// 比較関数
+PyObject*
+SopCube_richcmpfunc(
+  PyObject* self,
+  PyObject* other,
+  int op
+)
+{
+  if ( PySopCube::_check(self) &&
+       PySopCube::_check(other) ) {
+    auto val1 = PySopCube::_get(self);
+    auto val2 = PySopCube::_get(other);
+    Py_RETURN_RICHCOMPARE(val1, val2, op);
+  }
+  Py_RETURN_NOTIMPLEMENTED;
+}
+
+// 乗算
+PyObject*
+SopCube_mul(
+  PyObject* self,
+  PyObject* other
+)
+{
+  if ( PySopCube::_check(self) ) {
+    auto val1 = PySopCube::_get(self);
+    if ( PySopCube::_check(other) ) {
+      auto val2 = PySopCube::_get(other);
+      return PySopCube::ToPyObject(val1 * val2);
+    }
+    if ( PyLiteral::_check(other) ) {
+      auto val2 = PyLiteral::_get(other);
+      return PySopCube::ToPyObject(val1 * val2);
+    }
+  }
+  Py_RETURN_NOTIMPLEMENTED;
+}
+
+// 乗算つき代入
+PyObject*
+SopCube_imul(
+  PyObject* self,
+  PyObject* other
+)
+{
+  if ( PySopCube::_check(self) ) {
+    auto val1 = PySopCube::_get(self);
+    if ( PySopCube::_check(other) ) {
+      auto val2 = PySopCube::_get(other);
+      val1 *= val2;
+      Py_IncRef(self);
+      return self;
+    }
+    if ( PyLiteral::_check(other) ) {
+      auto val2 = PyLiteral::_get(other);
+      val1 *= val2;
+      Py_IncRef(self);
+      return self;
+    }
+  }
+  Py_RETURN_NOTIMPLEMENTED;
+}
+
+// 除算
+PyObject*
+SopCube_div(
+  PyObject* self,
+  PyObject* other
+)
+{
+  if ( PySopCube::_check(self) ) {
+    auto val1 = PySopCube::_get(self);
+    if ( PySopCube::_check(other) ) {
+      auto val2 = PySopCube::_get(other);
+      return PySopCube::ToPyObject(val1 / val2);
+    }
+    if ( PyLiteral::_check(other) ) {
+      auto val2 = PyLiteral::_get(other);
+      return PySopCube::ToPyObject(val1 / val2);
+    }
+  }
+  Py_RETURN_NOTIMPLEMENTED;
+}
+
+// 除算つき代入
+PyObject*
+SopCube_idiv(
+  PyObject* self,
+  PyObject* other
+)
+{
+  if ( PySopCube::_check(self) ) {
+    auto val1 = PySopCube::_get(self);
+    if ( PySopCube::_check(other) ) {
+      auto val2 = PySopCube::_get(other);
+      val1 /= val2;
+      Py_IncRef(self);
+      return self;
+    }
+    if ( PyLiteral::_check(other) ) {
+      auto val2 = PyLiteral::_get(other);
+      val1 /= val2;
+      Py_IncRef(self);
+      return self;
+    }
+  }
+  Py_RETURN_NOTIMPLEMENTED;
+}
+
+// 数値演算メソッド定義
+PyNumberMethods SopCube_number = {
+  .nb_multiply = SopCube_mul,
+  .nb_inplace_multiply = SopCube_imul,
+  .nb_true_divide = SopCube_div,
+  .nb_inplace_true_divide = SopCube_div
+};
+
+// ハッシュ関数
+Py_hash_t
+SopCube_hash(
+  PyObject* self
+)
+{
+  auto val = PySopCube::_get(self);
+  return val.hash();
+}
+
+END_NONAMESPACE
+
+
+// @brief 'SopCube' オブジェクトを使用可能にする．
+bool
+PySopCube::init(
+  PyObject* m
+)
+{
+  SopCubeType.tp_name = "SopCube";
+  SopCubeType.tp_basicsize = sizeof(SopCubeObject);
+  SopCubeType.tp_itemsize = 0;
+  SopCubeType.tp_dealloc = SopCube_dealloc;
+  SopCubeType.tp_flags = Py_TPFLAGS_DEFAULT;
+  SopCubeType.tp_doc = PyDoc_STR("SopCube object");
+  SopCubeType.tp_richcompare = SopCube_richcmpfunc;
+  SopCubeType.tp_methods = SopCube_methods;
+  SopCubeType.tp_getset = SopCube_getset;
+  SopCubeType.tp_new = SopCube_new;
+  SopCubeType.tp_as_number = &SopCube_number;
+  SopCubeType.tp_hash = SopCube_hash;
+
+  // 型オブジェクトの登録
+  if ( !PyModule::reg_type(m, "SopCube", &SopCubeType) ) {
+    goto error;
+  }
+
+  return true;
+
+ error:
+
+  return false;
+}
+
+// @brief SopCube を PyObject に変換する．
+PyObject*
+PySopCube::ToPyObject(
+  const SopCube& val
+)
+{
+  auto obj = SopCubeType.tp_alloc(&SopCubeType, 0);
+  auto sopcube_obj = reinterpret_cast<SopCubeObject*>(obj);
+  sopcube_obj->mVal = new SopCube{val};
+  return obj;
+}
+
+// @brief SopCube を PyObject に変換する．
+PyObject*
+PySopCube::ToPyObject(
+  const SopCube&& val
+)
+{
+  auto obj = SopCubeType.tp_alloc(&SopCubeType, 0);
+  auto sopcube_obj = reinterpret_cast<SopCubeObject*>(obj);
+  sopcube_obj->mVal = new SopCube{std::move(val)};
+  return obj;
+}
+
+// @brief PyObject が SopCube タイプか調べる．
+bool
+PySopCube::_check(
+  PyObject* obj
+)
+{
+  return Py_IS_TYPE(obj, _typeobject());
+}
+
+// @brief SopCube を表す PyObject から SopCube を取り出す．
+SopCube&
+PySopCube::_get(
+  PyObject* obj
+)
+{
+  auto sopcube_obj = reinterpret_cast<SopCubeObject*>(obj);
+  return *sopcube_obj->mVal;
+}
+
+// @brief SopCube を表すオブジェクトの型定義を返す．
+PyTypeObject*
+PySopCube::_typeobject()
+{
+  return &SopCubeType;
+}
+
+END_NAMESPACE_YM

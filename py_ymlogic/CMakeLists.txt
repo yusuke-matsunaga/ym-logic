@@ -29,6 +29,8 @@ set ( py_ymlogic_SOURCES
   PyBddMgr.cc
   PyBdd.cc
   PyBddVarSet.cc
+  PySopCover.cc
+  PySopCube.cc
   ymlogic_module.cc
   )
 
