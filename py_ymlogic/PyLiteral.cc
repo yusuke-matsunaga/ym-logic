@@ -6,8 +6,8 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/PyLiteral.h"
-#include "ym/PyModule.h"
+#include "pym/PyLiteral.h"
+#include "pym/PyModule.h"
 
 
 BEGIN_NAMESPACE_YM

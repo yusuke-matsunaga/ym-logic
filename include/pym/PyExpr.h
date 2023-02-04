@@ -1,28 +1,28 @@
-#ifndef PYNPNMAP_H
-#define PYNPNMAP_H
+#ifndef PYEXPR_H
+#define PYEXPR_H
 
-/// @file PyNpnMap.h
-/// @brief PyNpnMap のヘッダファイル
+/// @file PyExpr.h
+/// @brief PyExpr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-#include "NpnMap.h"
+#include "ym/Expr.h"
 
 
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PyNpnMap PyNpnMap.h "PyNpnMap.h"
-/// @brief Python 用の NpnMap 拡張
+/// @class PyExpr PyExpr.h "PyExpr.h"
+/// @brief Python 用の Expr 拡張
 ///
 /// 複数の関数をひとまとめにしているだけなので実は名前空間として用いている．
 //////////////////////////////////////////////////////////////////////
-class PyNpnMap
+class PyExpr
 {
 public:
   //////////////////////////////////////////////////////////////////////
@@ -37,34 +37,45 @@ public:
     PyObject* m ///< [in] 親のモジュールを表す PyObject
   );
 
-  /// @brief NpnMap を表す PyObject を作る．
+  /// @brief Expr を表す PyObject から Expr を取り出す．
+  /// @return 変換が成功したら true を返す．
+  ///
+  /// エラーの場合にはPython例外がセットされる．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj,  ///< [in] Expr を表す PyObject
+    Expr& val ///< [out] 変換された Expr を格納する変数
+  );
+
+  /// @brief Expr を表す PyObject を作る．
   /// @return 生成した PyObject を返す．
   ///
   /// 返り値は新しい参照が返される．
   static
   PyObject*
   ToPyObject(
-    const NpnMap& val ///< [in] 値
+    const Expr& val ///< [in] 値
   );
 
-  /// @brief PyObject が NpnMap タイプか調べる．
+  /// @brief PyObject が Expr タイプか調べる．
   static
   bool
   _check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
-  /// @brief NpnMap を表す PyObject から NpnMap を取り出す．
-  /// @return NpnMap を返す．
+  /// @brief Expr を表す PyObject から Expr を取り出す．
+  /// @return Expr を返す．
   ///
   /// _check(obj) == true であると仮定している．
   static
-  NpnMap&
+  Expr&
   _get(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 
-  /// @brief NpnMap を表すオブジェクトの型定義を返す．
+  /// @brief Expr を表すオブジェクトの型定義を返す．
   static
   PyTypeObject*
   _typeobject();
@@ -73,4 +84,4 @@ public:
 
 END_NAMESPACE_YM
 
-#endif // PYNPNMAP_H
+#endif // PYEXPR_H

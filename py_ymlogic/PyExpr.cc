@@ -6,10 +6,10 @@
 /// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/PyExpr.h"
-#include "ym/PyLiteral.h"
-#include "ym/PyTvFunc.h"
-#include "ym/PyModule.h"
+#include "pym/PyExpr.h"
+#include "pym/PyLiteral.h"
+#include "pym/PyTvFunc.h"
+#include "pym/PyModule.h"
 
 
 BEGIN_NAMESPACE_YM

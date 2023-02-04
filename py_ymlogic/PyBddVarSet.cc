@@ -6,10 +6,10 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/PyBddVarSet.h"
-#include "ym/PyBddMgr.h"
-#include "ym/PyBdd.h"
-#include "ym/PyModule.h"
+#include "pym/PyBddVarSet.h"
+#include "pym/PyBddMgr.h"
+#include "pym/PyBdd.h"
+#include "pym/PyModule.h"
 
 
 BEGIN_NAMESPACE_YM

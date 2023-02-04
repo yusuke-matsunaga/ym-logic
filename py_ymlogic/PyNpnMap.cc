@@ -6,8 +6,8 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/PyNpnMap.h"
-#include "ym/PyModule.h"
+#include "pym/PyNpnMap.h"
+#include "pym/PyModule.h"
 
 
 BEGIN_NAMESPACE_YM

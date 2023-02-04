@@ -9,12 +9,11 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-#include "ym_config.h"
-#include "ym/PyLiteral.h"
-#include "ym/PyNpnMap.h"
-#include "ym/PyTvFunc.h"
-#include "ym/PyExpr.h"
-#include "ym/PyModule.h"
+#include "pym/PyLiteral.h"
+#include "pym/PyNpnMap.h"
+#include "pym/PyTvFunc.h"
+#include "pym/PyExpr.h"
+#include "pym/PyModule.h"
 
 
 BEGIN_NAMESPACE_YM

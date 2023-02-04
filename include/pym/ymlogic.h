@@ -1,8 +1,8 @@
-#ifndef PY_YMLOGIC_H
-#define PY_YMLOGIC_H
+#ifndef PYM_YMLOGIC_H
+#define PYM_YMLOGIC_H
 
-/// @file py_ymlogic.h
-/// @brief py_ymlogic のヘッダファイル
+/// @file ymlogic.h
+/// @brief ymlogic の初期化関数のエクスポート
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2023 Yusuke Matsunaga
@@ -18,4 +18,4 @@ extern "C" PyObject* PyInit_ymlogic();
 
 END_NAMESPACE_YM
 
-#endif // PY_YMLOGIC_H
+#endif // PYM_YMLOGIC_H

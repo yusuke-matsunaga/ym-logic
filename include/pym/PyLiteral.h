@@ -11,7 +11,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-#include "Literal.h"
+#include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM
