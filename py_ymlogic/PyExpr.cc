@@ -804,6 +804,17 @@ Expr_operand_list(
 }
 
 PyObject*
+Expr_sop_cube_num(
+  PyObject* self,
+  void* Py_UNUSED(colsure)
+)
+{
+  auto expr = PyExpr::_get(self);
+  auto val = expr.sop_cube_num();
+  return PyLong_FromLong(val);
+}
+
+PyObject*
 Expr_input_size(
   PyObject* self,
   void* Py_UNUSED(closure)
@@ -815,10 +826,16 @@ Expr_input_size(
 }
 
 PyGetSetDef Expr_getsetters[] = {
-  {"varid", Expr_varid, nullptr, PyDoc_STR("Variable ID"), nullptr},
-  {"literal", Expr_literal, nullptr, PyDoc_STR("Literal"), nullptr},
-  {"operand_list", Expr_operand_list, nullptr, PyDoc_STR("operand list"), nullptr},
-  {"input_size", Expr_input_size, nullptr, PyDoc_STR("input size"), nullptr},
+  {"varid", Expr_varid, nullptr,
+   PyDoc_STR("Variable ID"), nullptr},
+  {"literal", Expr_literal, nullptr,
+   PyDoc_STR("Literal"), nullptr},
+  {"operand_list", Expr_operand_list, nullptr,
+   PyDoc_STR("operand list"), nullptr},
+  {"input_size", Expr_input_size, nullptr,
+   PyDoc_STR("input size"), nullptr},
+  {"sop_cube_num", Expr_sop_cube_num, nullptr,
+   PyDoc_STR("number of cubes in SOP form"), nullptr},
   {nullptr, nullptr, nullptr, nullptr}
 };
 
