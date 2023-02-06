@@ -31,7 +31,7 @@ Bnet2Bdd::make_global_func()
     auto bdd = mMgr.posi_literal(i);
     mBddMap.emplace(mNetwork.input_id(i), bdd);
   }
-  for ( auto& node: mNetwork.logic_list() ) {
+  for ( auto node: mNetwork.logic_list() ) {
     auto id = node.id();
     auto bdd = make_node_func(id);
     mBddMap.emplace(id, bdd);
@@ -39,7 +39,7 @@ Bnet2Bdd::make_global_func()
   SizeType no = mNetwork.output_num();
   vector<Bdd> output_func(no);
   for ( SizeType i = 0; i < no; ++ i ) {
-    auto id = mNetwork.output_node(i).output_src();
+    auto id = mNetwork.output_node(i).output_src().id();
     auto bdd = mBddMap.at(id);
     output_func[i] = bdd;
   }
