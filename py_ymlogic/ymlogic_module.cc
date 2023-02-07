@@ -9,6 +9,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
+#include "pym/PyPrimType.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyNpnMap.h"
 #include "pym/PyTvFunc.h"
@@ -48,6 +49,9 @@ PyInit_ymlogic()
     return nullptr;
   }
 
+  if ( !PyPrimType::init(m) ) {
+    goto error;
+  }
   if ( !PyLiteral::init(m) ) {
     goto error;
   }

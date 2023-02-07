@@ -9,6 +9,7 @@
 #include "pym/PyExpr.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyTvFunc.h"
+#include "pym/PyPrimType.h"
 #include "pym/PyModule.h"
 
 
@@ -686,6 +687,16 @@ Expr_sop_literal_num(
   return PyLong_FromLong(ans);
 }
 
+PyObject*
+Expr_analyze(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto expr = PyExpr::_get(self);
+  auto ptype = expr.analyze();
+  return PyPrimType::ToPyObject(ptype);
+}
 
 // メソッド定義
 PyMethodDef Expr_methods[] = {
@@ -761,6 +772,8 @@ PyMethodDef Expr_methods[] = {
   {"sop_literal_num", reinterpret_cast<PyCFunction>(Expr_sop_literal_num),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("count the literal number in SOP form")},
+  {"analyze", Expr_analyze, METH_NOARGS,
+   PyDoc_STR("check if this expression represents a primitive function")},
   {nullptr, nullptr, 0, nullptr}
 };
 

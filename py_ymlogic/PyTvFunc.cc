@@ -9,6 +9,7 @@
 #include "pym/PyTvFunc.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyNpnMap.h"
+#include "pym/PyPrimType.h"
 #include "pym/PyModule.h"
 
 
@@ -516,6 +517,17 @@ TvFunc_check_sym(
   return PyBool_FromLong(r);
 }
 
+PyObject*
+TvFunc_analyze(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& func = PyTvFunc::_get(self);
+  auto ptype = func.analyze();
+  return PyPrimType::ToPyObject(ptype);
+}
+
 // メソッド定義
 PyMethodDef TvFunc_methods[] = {
   {"make_invalid", TvFunc_make_invalid, METH_STATIC | METH_NOARGS,
@@ -572,6 +584,8 @@ PyMethodDef TvFunc_methods[] = {
   {"check_sym", reinterpret_cast<PyCFunction>(TvFunc_check_sym),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("check the symmetry between two inputs")},
+  {"analyze", TvFunc_analyze, METH_NOARGS,
+   PyDoc_STR("check if this function is a primitive function")},
   {nullptr, nullptr, 0, nullptr}
 };
 

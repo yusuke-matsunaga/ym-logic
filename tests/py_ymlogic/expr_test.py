@@ -8,7 +8,7 @@
 """
 
 import pytest
-from ymlogic import Expr, Literal
+from ymlogic import Expr, Literal, PrimType
 
 
 def test_empty_constr():
@@ -995,3 +995,52 @@ def test_bad_make_from_string1():
         _ = Expr.make_from_string(expr_str)
     assert e.type == ValueError
     assert str(e.value) == "invalid argument"
+
+    
+def test_analyze_c0():
+    expr = Expr.make_zero()
+
+    ptype = expr.analyze()
+    assert ptype == PrimType.C0
+
+    
+def test_analyze_c1():
+    expr = Expr.make_one()
+
+    ptype = expr.analyze()
+    assert ptype == PrimType.C1
+
+    
+def test_analyze_buff():
+    expr = Expr.make_from_string("0")
+
+    ptype = expr.analyze()
+    assert ptype == PrimType.Buff
+
+    
+def test_analyze_not():
+    expr = Expr.make_from_string("~0")
+
+    ptype = expr.analyze()
+    assert ptype == PrimType.Not
+
+    
+def test_analyze_and():
+    expr = Expr.make_from_string("0 & 1")
+
+    ptype = expr.analyze()
+    assert ptype == PrimType.And
+
+    
+def test_analyze_or():
+    expr = Expr.make_from_string("0 | 1")
+
+    ptype = expr.analyze()
+    assert ptype == PrimType.Or
+
+    
+def test_analyze_xor():
+    expr = Expr.make_from_string("0 ^ 1")
+
+    ptype = expr.analyze()
+    assert ptype == PrimType.Xor
