@@ -507,7 +507,9 @@ public:
   is_sop() const;
 
   /// @brief 組み込み型のチェック
-  BuiltinType
+  ///
+  /// 組み込み型出ない場合は PrimType::None を返す．
+  PrimType
   analyze() const;
 
   /// @}

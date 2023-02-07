@@ -14,24 +14,24 @@ BEGIN_NAMESPACE_YM
 
 // @brief 与えられた真理値表が組み込み型かどうか判定する．
 //
-// 組み込み型でない場合には BuiltinType::None が返される．
-BuiltinType
+// 組み込み型でない場合には PrimType::None が返される．
+PrimType
 TvFunc::analyze() const
 {
   auto map = shrink_map();
   auto func1 = xform(map);
 
   if ( func1 == TvFunc::make_zero(0) ) {
-    return BuiltinType::C0;
+    return PrimType::C0;
   }
   else if ( func1 == TvFunc::make_one(0) ) {
-    return BuiltinType::C1;
+    return PrimType::C1;
   }
   else if ( func1 == TvFunc::make_posi_literal(1, 0) ) {
-    return BuiltinType::Buff;
+    return PrimType::Buff;
   }
   else if ( func1 == TvFunc::make_nega_literal(1, 0) ) {
-    return BuiltinType::Not;
+    return PrimType::Not;
   }
   else {
     auto input_num = func1.input_num();
@@ -90,32 +90,32 @@ TvFunc::analyze() const
     if ( val_0 == 0 && val_1 == 1 ) {
       if ( !has_0 ) {
 	// 00...00 だけ 0 で残りが 1
-	return BuiltinType::Or;
+	return PrimType::Or;
       }
       else if ( !has_1 ) {
 	// 11...11 だけ 1 で残りが 0
-	return BuiltinType::And;
+	return PrimType::And;
       }
     }
     if ( val_0 == 1 && val_1 == 0 ) {
       if ( !has_0 ) {
 	// 11...11 だけ 0 で残りが 1
-	return BuiltinType::Nand;
+	return PrimType::Nand;
       }
       else if ( !has_1 ) {
 	// 00...00 だけ 1 で残りが 0
-	return BuiltinType::Nor;
+	return PrimType::Nor;
       }
     }
     if ( xor_match ) {
-      return BuiltinType::Xor;
+      return PrimType::Xor;
     }
     else if ( xnor_match ) {
-      return BuiltinType::Xnor;
+      return PrimType::Xnor;
     }
   }
 
-  return BuiltinType::None;
+  return PrimType::None;
 }
 
 END_NAMESPACE_YM

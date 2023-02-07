@@ -24,7 +24,7 @@ public:
   void
   do_test(
     const TvFunc& func,   ///< [in] 論理関数
-    BuiltinType node_type ///< [in] 期待値
+    PrimType node_type ///< [in] 期待値
   );
 
 
@@ -35,7 +35,7 @@ protected:
 void
 FuncAnalyzerTest::do_test(
   const TvFunc& func,
-  BuiltinType node_type
+  PrimType node_type
 )
 {
   auto act_node_type = func.analyze();
@@ -45,25 +45,25 @@ FuncAnalyzerTest::do_test(
 TEST_F(FuncAnalyzerTest, const0)
 {
   auto func = TvFunc::make_zero(10);
-  do_test(func, BuiltinType::C0);
+  do_test(func, PrimType::C0);
 }
 
 TEST_F(FuncAnalyzerTest, const1)
 {
   auto func = TvFunc::make_one(10);
-  do_test(func, BuiltinType::C1);
+  do_test(func, PrimType::C1);
 }
 
 TEST_F(FuncAnalyzerTest, plit)
 {
   auto func = TvFunc::make_posi_literal(10, 0);
-  do_test(func, BuiltinType::Buff);
+  do_test(func, PrimType::Buff);
 }
 
 TEST_F(FuncAnalyzerTest, nlit)
 {
   auto func = TvFunc::make_nega_literal(10, 0);
-  do_test(func, BuiltinType::Not);
+  do_test(func, PrimType::Not);
 }
 
 TEST_F(FuncAnalyzerTest, and2)
@@ -71,7 +71,7 @@ TEST_F(FuncAnalyzerTest, and2)
   auto lit0 = TvFunc::make_posi_literal(10, 0);
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto func = lit0 & lit1;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, and3)
@@ -80,7 +80,7 @@ TEST_F(FuncAnalyzerTest, and3)
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto func = lit0 & lit1 & lit2;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, and4)
@@ -90,7 +90,7 @@ TEST_F(FuncAnalyzerTest, and4)
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto func = lit0 & lit1 & lit2 & lit3;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, and5)
@@ -101,7 +101,7 @@ TEST_F(FuncAnalyzerTest, and5)
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto func = lit0 & lit1 & lit2 & lit3 & lit4;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, and6)
@@ -113,7 +113,7 @@ TEST_F(FuncAnalyzerTest, and6)
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto func = lit0 & lit1 & lit2 & lit3 & lit4 & lit5;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, and7)
@@ -126,7 +126,7 @@ TEST_F(FuncAnalyzerTest, and7)
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto func = lit0 & lit1 & lit2 & lit3 & lit4 & lit5 & lit6;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, and8)
@@ -140,7 +140,7 @@ TEST_F(FuncAnalyzerTest, and8)
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto func = lit0 & lit1 & lit2 & lit3 & lit4 & lit5 & lit6 & lit7;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, and9)
@@ -155,7 +155,7 @@ TEST_F(FuncAnalyzerTest, and9)
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto func = lit0 & lit1 & lit2 & lit3 & lit4 & lit5 & lit6 & lit7 & lit8;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, and10)
@@ -171,7 +171,7 @@ TEST_F(FuncAnalyzerTest, and10)
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto lit9 = TvFunc::make_posi_literal(10, 9);
   auto func = lit0 & lit1 & lit2 & lit3 & lit4 & lit5 & lit6 & lit7 & lit8 & lit9;
-  do_test(func, BuiltinType::And);
+  do_test(func, PrimType::And);
 }
 
 TEST_F(FuncAnalyzerTest, nand2)
@@ -179,7 +179,7 @@ TEST_F(FuncAnalyzerTest, nand2)
   auto lit0 = TvFunc::make_posi_literal(10, 0);
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto func = ~(lit0 & lit1);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, nand3)
@@ -188,7 +188,7 @@ TEST_F(FuncAnalyzerTest, nand3)
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto func = ~(lit0 & lit1 & lit2);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, nand4)
@@ -198,7 +198,7 @@ TEST_F(FuncAnalyzerTest, nand4)
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto func = ~(lit0 & lit1 & lit2 & lit3);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, nand5)
@@ -209,7 +209,7 @@ TEST_F(FuncAnalyzerTest, nand5)
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto func = ~(lit0 & lit1 & lit2 & lit3 & lit4);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, nand6)
@@ -221,7 +221,7 @@ TEST_F(FuncAnalyzerTest, nand6)
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto func = ~(lit0 & lit1 & lit2 & lit3 & lit4 & lit5);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, nand7)
@@ -234,7 +234,7 @@ TEST_F(FuncAnalyzerTest, nand7)
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto func = ~(lit0 & lit1 & lit2 & lit3 & lit4 & lit5 & lit6);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, nand8)
@@ -248,7 +248,7 @@ TEST_F(FuncAnalyzerTest, nand8)
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto func = ~(lit0 & lit1 & lit2 & lit3 & lit4 & lit5 & lit6 & lit7);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, nand9)
@@ -263,7 +263,7 @@ TEST_F(FuncAnalyzerTest, nand9)
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto func = ~(lit0 & lit1 & lit2 & lit3 & lit4 & lit5 & lit6 & lit7 & lit8);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, nand10)
@@ -279,7 +279,7 @@ TEST_F(FuncAnalyzerTest, nand10)
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto lit9 = TvFunc::make_posi_literal(10, 9);
   auto func = ~(lit0 & lit1 & lit2 & lit3 & lit4 & lit5 & lit6 & lit7 & lit8 & lit9);
-  do_test(func, BuiltinType::Nand);
+  do_test(func, PrimType::Nand);
 }
 
 TEST_F(FuncAnalyzerTest, or2)
@@ -287,7 +287,7 @@ TEST_F(FuncAnalyzerTest, or2)
   auto lit0 = TvFunc::make_posi_literal(10, 0);
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto func = lit0 | lit1;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, or3)
@@ -296,7 +296,7 @@ TEST_F(FuncAnalyzerTest, or3)
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto func = lit0 | lit1 | lit2;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, or4)
@@ -306,7 +306,7 @@ TEST_F(FuncAnalyzerTest, or4)
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto func = lit0 | lit1 | lit2 | lit3;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, or5)
@@ -317,7 +317,7 @@ TEST_F(FuncAnalyzerTest, or5)
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto func = lit0 | lit1 | lit2 | lit3 | lit4;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, or6)
@@ -329,7 +329,7 @@ TEST_F(FuncAnalyzerTest, or6)
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto func = lit0 | lit1 | lit2 | lit3 | lit4 | lit5;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, or7)
@@ -342,7 +342,7 @@ TEST_F(FuncAnalyzerTest, or7)
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto func = lit0 | lit1 | lit2 | lit3 | lit4 | lit5 | lit6;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, or8)
@@ -356,7 +356,7 @@ TEST_F(FuncAnalyzerTest, or8)
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto func = lit0 | lit1 | lit2 | lit3 | lit4 | lit5 | lit6 | lit7;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, or9)
@@ -371,7 +371,7 @@ TEST_F(FuncAnalyzerTest, or9)
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto func = lit0 | lit1 | lit2 | lit3 | lit4 | lit5 | lit6 | lit7 | lit8;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, or10)
@@ -387,7 +387,7 @@ TEST_F(FuncAnalyzerTest, or10)
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto lit9 = TvFunc::make_posi_literal(10, 9);
   auto func = lit0 | lit1 | lit2 | lit3 | lit4 | lit5 | lit6 | lit7 | lit8 | lit9;
-  do_test(func, BuiltinType::Or);
+  do_test(func, PrimType::Or);
 }
 
 TEST_F(FuncAnalyzerTest, nor2)
@@ -395,7 +395,7 @@ TEST_F(FuncAnalyzerTest, nor2)
   auto lit0 = TvFunc::make_posi_literal(10, 0);
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto func = ~(lit0 | lit1);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, nor3)
@@ -404,7 +404,7 @@ TEST_F(FuncAnalyzerTest, nor3)
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto func = ~(lit0 | lit1 | lit2);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, nor4)
@@ -414,7 +414,7 @@ TEST_F(FuncAnalyzerTest, nor4)
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto func = ~(lit0 | lit1 | lit2 | lit3);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, nor5)
@@ -425,7 +425,7 @@ TEST_F(FuncAnalyzerTest, nor5)
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto func = ~(lit0 | lit1 | lit2 | lit3 | lit4);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, nor6)
@@ -437,7 +437,7 @@ TEST_F(FuncAnalyzerTest, nor6)
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto func = ~(lit0 | lit1 | lit2 | lit3 | lit4 | lit5);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, nor7)
@@ -450,7 +450,7 @@ TEST_F(FuncAnalyzerTest, nor7)
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto func = ~(lit0 | lit1 | lit2 | lit3 | lit4 | lit5 | lit6);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, nor8)
@@ -464,7 +464,7 @@ TEST_F(FuncAnalyzerTest, nor8)
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto func = ~(lit0 | lit1 | lit2 | lit3 | lit4 | lit5 | lit6 | lit7);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, nor9)
@@ -479,7 +479,7 @@ TEST_F(FuncAnalyzerTest, nor9)
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto func = ~(lit0 | lit1 | lit2 | lit3 | lit4 | lit5 | lit6 | lit7 | lit8);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, nor10)
@@ -495,7 +495,7 @@ TEST_F(FuncAnalyzerTest, nor10)
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto lit9 = TvFunc::make_posi_literal(10, 9);
   auto func = ~(lit0 | lit1 | lit2 | lit3 | lit4 | lit5 | lit6 | lit7 | lit8 | lit9);
-  do_test(func, BuiltinType::Nor);
+  do_test(func, PrimType::Nor);
 }
 
 TEST_F(FuncAnalyzerTest, xor2)
@@ -503,7 +503,7 @@ TEST_F(FuncAnalyzerTest, xor2)
   auto lit0 = TvFunc::make_posi_literal(10, 0);
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto func = lit0 ^ lit1;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xor3)
@@ -512,7 +512,7 @@ TEST_F(FuncAnalyzerTest, xor3)
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto func = lit0 ^ lit1 ^ lit2;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xor4)
@@ -522,7 +522,7 @@ TEST_F(FuncAnalyzerTest, xor4)
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto func = lit0 ^ lit1 ^ lit2 ^ lit3;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xor5)
@@ -533,7 +533,7 @@ TEST_F(FuncAnalyzerTest, xor5)
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto func = lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xor6)
@@ -545,7 +545,7 @@ TEST_F(FuncAnalyzerTest, xor6)
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto func = lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xor7)
@@ -558,7 +558,7 @@ TEST_F(FuncAnalyzerTest, xor7)
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto func = lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5 ^ lit6;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xor8)
@@ -572,7 +572,7 @@ TEST_F(FuncAnalyzerTest, xor8)
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto func = lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5 ^ lit6 ^ lit7;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xor9)
@@ -587,7 +587,7 @@ TEST_F(FuncAnalyzerTest, xor9)
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto func = lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5 ^ lit6 ^ lit7 ^ lit8;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xor10)
@@ -603,7 +603,7 @@ TEST_F(FuncAnalyzerTest, xor10)
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto lit9 = TvFunc::make_posi_literal(10, 9);
   auto func = lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5 ^ lit6 ^ lit7 ^ lit8 ^ lit9;
-  do_test(func, BuiltinType::Xor);
+  do_test(func, PrimType::Xor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor2)
@@ -611,7 +611,7 @@ TEST_F(FuncAnalyzerTest, xnor2)
   auto lit0 = TvFunc::make_posi_literal(10, 0);
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto func = ~(lit0 ^ lit1);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor3)
@@ -620,7 +620,7 @@ TEST_F(FuncAnalyzerTest, xnor3)
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto func = ~(lit0 ^ lit1 ^ lit2);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor4)
@@ -630,7 +630,7 @@ TEST_F(FuncAnalyzerTest, xnor4)
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto func = ~(lit0 ^ lit1 ^ lit2 ^ lit3);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor5)
@@ -641,7 +641,7 @@ TEST_F(FuncAnalyzerTest, xnor5)
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto func = ~(lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor6)
@@ -653,7 +653,7 @@ TEST_F(FuncAnalyzerTest, xnor6)
   auto lit4 = TvFunc::make_posi_literal(10, 4);
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto func = ~(lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor7)
@@ -666,7 +666,7 @@ TEST_F(FuncAnalyzerTest, xnor7)
   auto lit5 = TvFunc::make_posi_literal(10, 5);
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto func = ~(lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5 ^ lit6);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor8)
@@ -680,7 +680,7 @@ TEST_F(FuncAnalyzerTest, xnor8)
   auto lit6 = TvFunc::make_posi_literal(10, 6);
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto func = ~(lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5 ^ lit6 ^ lit7);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor9)
@@ -695,7 +695,7 @@ TEST_F(FuncAnalyzerTest, xnor9)
   auto lit7 = TvFunc::make_posi_literal(10, 7);
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto func = ~(lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5 ^ lit6 ^ lit7 ^ lit8);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, xnor10)
@@ -711,7 +711,7 @@ TEST_F(FuncAnalyzerTest, xnor10)
   auto lit8 = TvFunc::make_posi_literal(10, 8);
   auto lit9 = TvFunc::make_posi_literal(10, 9);
   auto func = ~(lit0 ^ lit1 ^ lit2 ^ lit3 ^ lit4 ^ lit5 ^ lit6 ^ lit7 ^ lit8 ^ lit9);
-  do_test(func, BuiltinType::Xnor);
+  do_test(func, PrimType::Xnor);
 }
 
 TEST_F(FuncAnalyzerTest, func1)
@@ -720,7 +720,7 @@ TEST_F(FuncAnalyzerTest, func1)
   auto lit1 = TvFunc::make_posi_literal(10, 1);
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto func = (~lit0 & ~lit1 & ~lit2) | (lit0 & lit1 & lit2);
-  do_test(func, BuiltinType::None);
+  do_test(func, PrimType::None);
 }
 
 TEST_F(FuncAnalyzerTest, func2)
@@ -730,7 +730,7 @@ TEST_F(FuncAnalyzerTest, func2)
   auto lit2 = TvFunc::make_posi_literal(10, 2);
   auto lit3 = TvFunc::make_posi_literal(10, 3);
   auto func = (lit0 & lit1) | (lit2 & lit3);
-  do_test(func, BuiltinType::None);
+  do_test(func, PrimType::None);
 }
 
 END_NAMESPACE_YM_LOGIC

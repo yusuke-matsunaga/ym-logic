@@ -14,22 +14,22 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 // @brief 与えられた論理式が組み込み型かどうか判定する．
 //
-// 組み込み型でない場合には BuiltinType::None が返される．
-BuiltinType
+// 組み込み型でない場合には PrimType::None が返される．
+PrimType
 Expr::analyze() const
 {
   // 単純な場合のチェック
   if ( is_zero() ) {
-    return BuiltinType::C0;
+    return PrimType::C0;
   }
   if ( is_one() ) {
-    return BuiltinType::C1;
+    return PrimType::C1;
   }
   if ( is_posi_literal() ) {
-    return BuiltinType::Buff;
+    return PrimType::Buff;
   }
   if ( is_nega_literal() ) {
-    return BuiltinType::Not;
+    return PrimType::Not;
   }
   // 全てのオペランドが同じ曲性のリテラル
   // かどうか調べる．
@@ -53,25 +53,25 @@ Expr::analyze() const
     SizeType n = operand_num();
     if ( is_and() ) {
       if ( phase == n ) {
-	return BuiltinType::And;
+	return PrimType::And;
       }
       if ( phase == -n ) {
-	return BuiltinType::Nor;
+	return PrimType::Nor;
       }
     }
     else if ( is_or() ) {
       if ( phase == n ) {
-	return BuiltinType::Or;
+	return PrimType::Or;
       }
       else if ( phase == -n ) {
-	return BuiltinType::Nand;
+	return PrimType::Nand;
       }
     }
     else if ( is_xor() ) {
       if ( parity == 0 ) {
-	return BuiltinType::Xor;
+	return PrimType::Xor;
       }
-      return BuiltinType::Xnor;
+      return PrimType::Xnor;
     }
   }
 
@@ -83,7 +83,7 @@ Expr::analyze() const
     return tv.analyze();
   }
 
-  return BuiltinType::None;
+  return PrimType::None;
 }
 
 END_NAMESPACE_YM_LOGIC

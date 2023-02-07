@@ -32,7 +32,7 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 /// @brief 組み込みタイプ
 //////////////////////////////////////////////////////////////////////
-enum class BuiltinType : ymuint8 {
+enum class PrimType : ymuint8 {
   None, ///< 不正値
   C0,   ///< 定数0
   C1,   ///< 定数1
@@ -46,27 +46,27 @@ enum class BuiltinType : ymuint8 {
   Xnor  ///< XNOR
 };
 
-/// @relates BuiltinType
+/// @relates PrimType
 /// @brief ストリーム出力演算子
 inline
 ostream&
 operator<<(
   ostream& s,      ///< [in] 出力ストリーム
-  BuiltinType type ///< [in] 組み込み型
+  PrimType type ///< [in] 組み込み型
 )
 {
   switch ( type ) {
-  case BuiltinType::None: s << "None"; break;
-  case BuiltinType::C0:   s << "C0"; break;
-  case BuiltinType::C1:   s << "C1"; break;
-  case BuiltinType::Buff: s << "Buff"; break;
-  case BuiltinType::Not:  s << "Not"; break;
-  case BuiltinType::And:  s << "And"; break;
-  case BuiltinType::Nand: s << "Nand"; break;
-  case BuiltinType::Or:   s << "Or"; break;
-  case BuiltinType::Nor:  s << "Nor"; break;
-  case BuiltinType::Xor:  s << "Nor"; break;
-  case BuiltinType::Xnor: s << "Xnor"; break;
+  case PrimType::None: s << "None"; break;
+  case PrimType::C0:   s << "C0"; break;
+  case PrimType::C1:   s << "C1"; break;
+  case PrimType::Buff: s << "Buff"; break;
+  case PrimType::Not:  s << "Not"; break;
+  case PrimType::And:  s << "And"; break;
+  case PrimType::Nand: s << "Nand"; break;
+  case PrimType::Or:   s << "Or"; break;
+  case PrimType::Nor:  s << "Nor"; break;
+  case PrimType::Xor:  s << "Nor"; break;
+  case PrimType::Xnor: s << "Xnor"; break;
   }
   return s;
 }
@@ -96,7 +96,7 @@ using nsLogic::ExprWriter;
 using nsLogic::NpnMap;
 using nsLogic::NpnMapM;
 using nsLogic::NpnVmap;
-using nsLogic::BuiltinType;
+using nsLogic::PrimType;
 using nsLogic::FuncAnalyzer;
 
 /// @brief 不正な変数番号

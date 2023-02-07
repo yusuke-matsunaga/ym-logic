@@ -61,27 +61,27 @@ Bnet2Bdd::make_node_func(
   switch ( node.type() ) {
   case BnNodeType::Prim:
     switch ( node.primitive_type() ) {
-    case BuiltinType::C0:
+    case PrimType::C0:
       return mMgr.zero();
-    case BuiltinType::C1:
+    case PrimType::C1:
       return mMgr.one();
-    case BuiltinType::Buff:
+    case PrimType::Buff:
       return fanin_list[0];
-    case BuiltinType::Not:
+    case PrimType::Not:
       return ~fanin_list[0];
-    case BuiltinType::And:
+    case PrimType::And:
       return make_and(fanin_list);
-    case BuiltinType::Nand:
+    case PrimType::Nand:
       return ~make_and(fanin_list);
-    case BuiltinType::Or:
+    case PrimType::Or:
       return make_or(fanin_list);
-    case BuiltinType::Nor:
+    case PrimType::Nor:
       return ~make_or(fanin_list);
-    case BuiltinType::Xor:
+    case PrimType::Xor:
       return make_xor(fanin_list);
-    case BuiltinType::Xnor:
+    case PrimType::Xnor:
       return ~make_xor(fanin_list);
-    case BuiltinType::None:
+    case PrimType::None:
       break;
     }
     break;
