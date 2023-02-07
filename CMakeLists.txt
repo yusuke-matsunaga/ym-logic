@@ -58,6 +58,7 @@ set (sop_SOURCES
 
 set (expr_SOURCES
   c++-srcs/expr/Expr.cc
+  c++-srcs/expr/Expr_analyze.cc
   c++-srcs/expr/ExprMgr.cc
   c++-srcs/expr/ExprNode.cc
   c++-srcs/expr/ExprParser.cc
@@ -78,6 +79,7 @@ set (npn_SOURCES
 
 set (tvfunc_SOURCES
   c++-srcs/tvfunc/TvFunc.cc
+  c++-srcs/tvfunc/TvFunc_analyze.cc
   c++-srcs/tvfunc/TvFunc_bcf.cc
   c++-srcs/tvfunc/TvFunc_walsh.cc
   c++-srcs/tvfunc/TvFuncM.cc

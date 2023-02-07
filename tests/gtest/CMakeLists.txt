@@ -34,6 +34,12 @@ ym_add_gtest ( logic_Expr_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
+ym_add_gtest ( logic_ExprAnalyze_test
+  expr/ExprAnalyzeTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
 ym_add_gtest ( logic_TvFunc_test
   tvfunc/TvFuncTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
@@ -47,6 +53,12 @@ target_include_directories ( logic_TvFunc_test
 
 ym_add_gtest ( logic_TvFuncMove_test
   tvfunc/TvFuncMove.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+ym_add_gtest ( logic_TvFuncAnalyze_test
+  tvfunc/TvFuncAnalyzeTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )

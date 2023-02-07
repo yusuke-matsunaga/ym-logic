@@ -360,6 +360,10 @@ public:
   bool
   is_one() const;
 
+  /// @brief 組み込み型のチェック
+  BuiltinType
+  analyze() const;
+
   /// @brief 0 の数を数える．
   SizeType
   count_zero() const;
@@ -712,7 +716,7 @@ private:
 inline
 TvFunc
 operator~(
-  const TvFunc&& right ///< [in] オペランド
+  TvFunc&& right ///< [in] オペランド
 )
 {
   return TvFunc{right}.invert_int();
@@ -735,8 +739,8 @@ operator&(
 inline
 TvFunc
 operator&(
-  const TvFunc&& left, ///< [in] 第1オペランド
-  const TvFunc& right  ///< [in] 第2オペランド
+  TvFunc&& left,      ///< [in] 第1オペランド
+  const TvFunc& right ///< [in] 第2オペランド
 )
 {
   return TvFunc{left}.and_int(right);
@@ -747,8 +751,8 @@ operator&(
 inline
 TvFunc
 operator&(
-  const TvFunc& left,  ///< [in] 第1オペランド
-  const TvFunc&& right ///< [in] 第2オペランド
+  const TvFunc& left, ///< [in] 第1オペランド
+  TvFunc&& right      ///< [in] 第2オペランド
 )
 {
   return TvFunc{right}.and_int(left);
@@ -759,8 +763,8 @@ operator&(
 inline
 TvFunc
 operator&(
-  const TvFunc&& left, ///< [in] 第1オペランド
-  const TvFunc&& right ///< [in] 第2オペランド
+  TvFunc&& left, ///< [in] 第1オペランド
+  TvFunc&& right ///< [in] 第2オペランド
 )
 {
   return TvFunc{left}.and_int(right);
@@ -783,8 +787,8 @@ operator|(
 inline
 TvFunc
 operator|(
-  const TvFunc&& left, ///< [in] 第1オペランド
-  const TvFunc& right  ///< [in] 第2オペランド
+  TvFunc&& left,      ///< [in] 第1オペランド
+  const TvFunc& right ///< [in] 第2オペランド
 )
 {
   return TvFunc(left).or_int(right);
@@ -795,8 +799,8 @@ operator|(
 inline
 TvFunc
 operator|(
-  const TvFunc& left,  ///< [in] 第1オペランド
-  const TvFunc&& right ///< [in] 第2オペランド
+  const TvFunc& left, ///< [in] 第1オペランド
+  TvFunc&& right      ///< [in] 第2オペランド
 )
 {
   return TvFunc(right).or_int(left);
@@ -807,8 +811,8 @@ operator|(
 inline
 TvFunc
 operator|(
-  const TvFunc&& left, ///< [in] 第1オペランド
-  const TvFunc&& right ///< [in] 第2オペランド
+  TvFunc&& left, ///< [in] 第1オペランド
+  TvFunc&& right ///< [in] 第2オペランド
 )
 {
   return TvFunc(left).or_int(right);
@@ -831,8 +835,8 @@ operator^(
 inline
 TvFunc
 operator^(
-  const TvFunc&& left, ///< [in] 第1オペランド
-  const TvFunc& right  ///< [in] 第2オペランド
+  TvFunc&& left,      ///< [in] 第1オペランド
+  const TvFunc& right ///< [in] 第2オペランド
 )
 {
   return TvFunc(left).xor_int(right);
@@ -843,8 +847,8 @@ operator^(
 inline
 TvFunc
 operator^(
-  const TvFunc& left,  ///< [in] 第1オペランド
-  const TvFunc&& right ///< [in] 第2オペランド
+  const TvFunc& left, ///< [in] 第1オペランド
+  TvFunc&& right      ///< [in] 第2オペランド
 )
 {
   return TvFunc(right).xor_int(left);
@@ -855,8 +859,8 @@ operator^(
 inline
 TvFunc
 operator^(
-  const TvFunc&& left, ///< [in] 第1オペランド
-  const TvFunc&& right ///< [in] 第2オペランド
+  TvFunc&& left, ///< [in] 第1オペランド
+  TvFunc&& right ///< [in] 第2オペランド
 )
 {
   return TvFunc(left).xor_int(right);

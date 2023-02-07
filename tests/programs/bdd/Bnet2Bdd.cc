@@ -59,33 +59,40 @@ Bnet2Bdd::make_node_func(
     fanin_list[i] = mBddMap.at(node.fanin_id(i));
   }
   switch ( node.type() ) {
-  case BnNodeType::C0:
-    return mMgr.zero();
-  case BnNodeType::C1:
-    return mMgr.one();
-  case BnNodeType::Buff:
-    return fanin_list[0];
-  case BnNodeType::Not:
-    return ~fanin_list[0];
-  case BnNodeType::And:
-    return make_and(fanin_list);
-  case BnNodeType::Nand:
-    return ~make_and(fanin_list);
-  case BnNodeType::Or:
-    return make_or(fanin_list);
-  case BnNodeType::Nor:
-    return ~make_or(fanin_list);
-  case BnNodeType::Xor:
-    return make_xor(fanin_list);
-  case BnNodeType::Xnor:
-    return ~make_xor(fanin_list);
+  case BnNodeType::Prim:
+    switch ( node.primitive_type() ) {
+    case BuiltinType::C0:
+      return mMgr.zero();
+    case BuiltinType::C1:
+      return mMgr.one();
+    case BuiltinType::Buff:
+      return fanin_list[0];
+    case BuiltinType::Not:
+      return ~fanin_list[0];
+    case BuiltinType::And:
+      return make_and(fanin_list);
+    case BuiltinType::Nand:
+      return ~make_and(fanin_list);
+    case BuiltinType::Or:
+      return make_or(fanin_list);
+    case BuiltinType::Nor:
+      return ~make_or(fanin_list);
+    case BuiltinType::Xor:
+      return make_xor(fanin_list);
+    case BuiltinType::Xnor:
+      return ~make_xor(fanin_list);
+    case BuiltinType::None:
+      break;
+    }
+    break;
   case BnNodeType::Expr:
     return make_expr(mNetwork.expr(node.expr_id()), fanin_list);
   case BnNodeType::TvFunc:
     return make_func(mNetwork.func(node.func_id()), fanin_list);
   default:
-    ASSERT_NOT_REACHED;
+    break;
   }
+  ASSERT_NOT_REACHED;
   return Bdd::invalid();
 }
 
