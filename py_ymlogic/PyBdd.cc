@@ -92,28 +92,28 @@ Bdd_cofactor(
     return nullptr;
   }
 
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   if ( PyLong_Check(obj1) ) {
     SizeType varid = PyLong_AsLong(obj1);
     auto lit = Literal{varid, static_cast<bool>(inv)};
     auto ans_bdd = bdd.cofactor(varid, static_cast<bool>(inv));
     return PyBdd::ToPyObject(ans_bdd);
   }
-  if ( PyLiteral::_check(obj1) ) {
+  if ( PyLiteral::Check(obj1) ) {
     if ( inv ) {
       PyErr_SetString(PyExc_TypeError, "'inv' keyword is not allowed with 'Literal' type");
       return nullptr;
     }
-    auto lit = PyLiteral::_get(obj1);
+    auto lit = PyLiteral::Get(obj1);
     auto ans_bdd = bdd.cofactor(lit);
     return PyBdd::ToPyObject(ans_bdd);
   }
-  if ( PyBdd::_check(obj1) ) {
+  if ( PyBdd::Check(obj1) ) {
     if ( inv ) {
       PyErr_SetString(PyExc_TypeError, "'inv' keyword is not allowed with 'Bdd' type");
       return nullptr;
     }
-    auto bdd1 = PyBdd::_get(obj1);
+    auto bdd1 = PyBdd::Get(obj1);
     try {
       auto ans_bdd = bdd.cofactor(bdd1);
       return PyBdd::ToPyObject(ans_bdd);
@@ -143,9 +143,9 @@ Bdd_ite(
 			 PyBdd::_typeobject(), &obj3) ) {
     return nullptr;
   }
-  auto cond_bdd = PyBdd::_get(obj1);
-  auto then_bdd = PyBdd::_get(obj2);
-  auto else_bdd = PyBdd::_get(obj3);
+  auto cond_bdd = PyBdd::Get(obj1);
+  auto then_bdd = PyBdd::Get(obj2);
+  auto else_bdd = PyBdd::Get(obj3);
   try {
     auto ans_bdd = ite(cond_bdd, then_bdd, else_bdd);
     return PyBdd::ToPyObject(ans_bdd);
@@ -167,8 +167,8 @@ Bdd_compose(
   if ( PyArg_ParseTuple(args, "kO!", &index, PyBdd::_typeobject(), &obj1) ) {
     return nullptr;
   }
-  auto bdd1 = PyBdd::_get(obj1);
-  auto bdd = PyBdd::_get(self);
+  auto bdd1 = PyBdd::Get(obj1);
+  auto bdd = PyBdd::Get(self);
   try {
     auto ans_bdd = bdd.compose(index, bdd1);
     return PyBdd::ToPyObject(ans_bdd);
@@ -201,11 +201,11 @@ Bdd_multi_compose(
       Py_DecRef(values);
       return nullptr;
     }
-    auto bdd1 = PyBdd::_get(val_obj);
+    auto bdd1 = PyBdd::Get(val_obj);
     compose_map.emplace(index, bdd1);
   }
   Py_DecRef(values);
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto ans_bdd = bdd.multi_compose(compose_map);
     return PyBdd::ToPyObject(ans_bdd);
@@ -237,10 +237,10 @@ Bdd_remap_vars(
 			   PyLiteral::_typeobject(), &obj2) ) {
       return nullptr;
     }
-    auto lit = PyLiteral::_get(obj2);
+    auto lit = PyLiteral::Get(obj2);
     var_map.emplace(index, lit);
   }
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto ans_bdd = bdd.remap_vars(var_map);
     return PyBdd::ToPyObject(ans_bdd);
@@ -257,7 +257,7 @@ Bdd_is_valid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   auto r = bdd.is_valid();
   return PyBool_FromLong(r);
 }
@@ -268,7 +268,7 @@ Bdd_is_invalid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   auto r = bdd.is_invalid();
   return PyBool_FromLong(r);
 }
@@ -279,7 +279,7 @@ Bdd_is_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   auto r = bdd.is_zero();
   return PyBool_FromLong(r);
 }
@@ -290,7 +290,7 @@ Bdd_is_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   auto r = bdd.is_one();
   return PyBool_FromLong(r);
 }
@@ -301,7 +301,7 @@ Bdd_is_cube(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   auto r = bdd.is_cube();
   return PyBool_FromLong(r);
 }
@@ -312,7 +312,7 @@ Bdd_is_posicube(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   auto r = bdd.is_posicube();
   return PyBool_FromLong(r);
 }
@@ -327,7 +327,7 @@ Bdd_check_sup(
   if ( !PyArg_ParseTuple(args, "k", &var) ) {
     return nullptr;
   }
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto r = bdd.check_sup(var);
     return PyBool_FromLong(r);
@@ -359,7 +359,7 @@ Bdd_check_sym(
 				    &var1, &var2, &inv) ) {
     return nullptr;
   }
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto r = bdd.check_sym(var1, var2, inv);
     return PyBool_FromLong(r);
@@ -376,7 +376,7 @@ Bdd_get_support(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto ans_bdd = bdd.get_support();
     return PyBddVarSet::ToPyObject(ans_bdd);
@@ -393,7 +393,7 @@ Bdd_get_onepath(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto ans_bdd = bdd.get_onepath();
     return PyBdd::ToPyObject(ans_bdd);
@@ -410,7 +410,7 @@ Bdd_get_zeropath(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto ans_bdd = bdd.get_zeropath();
     return PyBdd::ToPyObject(ans_bdd);
@@ -427,7 +427,7 @@ Bdd_root_decomp(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     Bdd f0;
     Bdd f1;
@@ -448,7 +448,7 @@ Bdd_root_var(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto index = bdd.root_var();
     return PyLong_FromLong(index);
@@ -465,7 +465,7 @@ Bdd_root_cofactor0(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto ans_bdd = bdd.root_cofactor0();
     return PyBdd::ToPyObject(ans_bdd);
@@ -482,7 +482,7 @@ Bdd_root_cofactor1(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto ans_bdd = bdd.root_cofactor1();
     return PyBdd::ToPyObject(ans_bdd);
@@ -499,7 +499,7 @@ Bdd_to_litlist(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto litlist = bdd.to_litlist();
     SizeType n = litlist.size();
@@ -527,7 +527,7 @@ Bdd_to_truth(
   if ( !PyArg_ParseTuple(args, "k", &n) ) {
     return nullptr;
   }
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   try {
     auto str = bdd.to_truth(n);
     return Py_BuildValue("s", str.c_str());
@@ -597,7 +597,7 @@ Bdd_size(
   void* Py_UNUSED(closure)
 )
 {
-  auto bdd = PyBdd::_get(self);
+  auto bdd = PyBdd::Get(self);
   auto val = bdd.size();
   return PyLong_FromLong(val);
 }
@@ -616,10 +616,10 @@ Bdd_richcmpfunc(
   int op
 )
 {
-  if ( PyBdd::_check(self) &&
-       PyBdd::_check(other) ) {
-    auto val1 = PyBdd::_get(self);
-    auto val2 = PyBdd::_get(other);
+  if ( PyBdd::Check(self) &&
+       PyBdd::Check(other) ) {
+    auto val1 = PyBdd::Get(self);
+    auto val2 = PyBdd::Get(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong(val1 == val2);
     }
@@ -637,8 +637,8 @@ Bdd_invert(
   PyObject* self
 )
 {
-  if ( PyBdd::_check(self) ) {
-    auto val = PyBdd::_get(self);
+  if ( PyBdd::Check(self) ) {
+    auto val = PyBdd::Get(self);
     return PyBdd::ToPyObject(~val);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -651,9 +651,9 @@ Bdd_and(
   PyObject* other
 )
 {
-  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
-    auto val1 = PyBdd::_get(self);
-    auto val2 = PyBdd::_get(other);
+  if ( PyBdd::Check(self) && PyBdd::Check(other) ) {
+    auto val1 = PyBdd::Get(self);
+    auto val2 = PyBdd::Get(other);
     try {
       return PyBdd::ToPyObject(val1 & val2);
     }
@@ -672,9 +672,9 @@ Bdd_or(
   PyObject* other
 )
 {
-  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
-    auto val1 = PyBdd::_get(self);
-    auto val2 = PyBdd::_get(other);
+  if ( PyBdd::Check(self) && PyBdd::Check(other) ) {
+    auto val1 = PyBdd::Get(self);
+    auto val2 = PyBdd::Get(other);
     try {
       return PyBdd::ToPyObject(val1 | val2);
     }
@@ -693,9 +693,9 @@ Bdd_xor(
   PyObject* other
 )
 {
-  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
-    auto val1 = PyBdd::_get(self);
-    auto val2 = PyBdd::_get(other);
+  if ( PyBdd::Check(self) && PyBdd::Check(other) ) {
+    auto val1 = PyBdd::Get(self);
+    auto val2 = PyBdd::Get(other);
     try {
       return PyBdd::ToPyObject(val1 ^ val2);
     }
@@ -714,9 +714,9 @@ Bdd_div(
   PyObject* other
 )
 {
-  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
-    auto val1 = PyBdd::_get(self);
-    auto val2 = PyBdd::_get(other);
+  if ( PyBdd::Check(self) && PyBdd::Check(other) ) {
+    auto val1 = PyBdd::Get(self);
+    auto val2 = PyBdd::Get(other);
     try {
       return PyBdd::ToPyObject(val1 / val2);
     }
@@ -747,7 +747,7 @@ Bdd_hash(
   PyObject* self
 )
 {
-  auto val = PyBdd::_get(self);
+  auto val = PyBdd::Get(self);
   return val.hash();
 }
 
@@ -799,7 +799,7 @@ PyBdd::ToPyObject(
 
 // @brief PyObject が Bdd タイプか調べる．
 bool
-PyBdd::_check(
+PyBdd::Check(
   PyObject* obj
 )
 {
@@ -808,7 +808,7 @@ PyBdd::_check(
 
 // @brief Bdd を表す PyObject から Bdd を取り出す．
 Bdd
-PyBdd::_get(
+PyBdd::Get(
   PyObject* obj
 )
 {

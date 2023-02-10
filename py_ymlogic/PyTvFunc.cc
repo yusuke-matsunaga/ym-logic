@@ -100,7 +100,7 @@ TvFunc_repr(
   PyObject* self
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   // func から 文字列を作る．
   const char* tmp_str = nullptr;
   return Py_BuildValue("s", tmp_str);
@@ -167,8 +167,8 @@ TvFunc_make_literal(
     SizeType var = PyLong_AsLong(obj1);
     func = TvFunc::make_literal(ni, var, static_cast<bool>(inv));
   }
-  else if ( PyLiteral::_check(obj1) ) {
-    auto lit = PyLiteral::_get(obj1);
+  else if ( PyLiteral::Check(obj1) ) {
+    auto lit = PyLiteral::Get(obj1);
     func = TvFunc::make_literal(ni, lit);
   }
   else {
@@ -229,8 +229,8 @@ TvFunc_cofactor(
   if ( PyLong_Check(obj1) ) {
     var = PyLong_AsLong(obj1);
   }
-  else if ( PyLiteral::_check(obj1) ) {
-    auto lit = PyLiteral::_get(obj1);
+  else if ( PyLiteral::Check(obj1) ) {
+    auto lit = PyLiteral::Get(obj1);
     var = lit.varid();
     inv = lit.is_negative();
   }
@@ -238,7 +238,7 @@ TvFunc_cofactor(
     PyErr_SetString(PyExc_TypeError, "argument 1 must be an in or a Literal");
     return nullptr;
   }
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto ans = func.cofactor(var, static_cast<bool>(inv));
   return PyTvFunc::ToPyObject(std::move(ans));
 }
@@ -266,8 +266,8 @@ TvFunc_cofactor_int(
   if ( PyLong_Check(obj1) ) {
     var = PyLong_AsLong(obj1);
   }
-  else if ( PyLiteral::_check(obj1) ) {
-    auto lit = PyLiteral::_get(obj1);
+  else if ( PyLiteral::Check(obj1) ) {
+    auto lit = PyLiteral::Get(obj1);
     var = lit.varid();
     inv = lit.is_negative();
   }
@@ -275,7 +275,7 @@ TvFunc_cofactor_int(
     PyErr_SetString(PyExc_TypeError, "argument 1 must be an in or a Literal");
     return nullptr;
   }
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   func.cofactor_int(var, static_cast<bool>(inv));
   Py_INCREF(self);
   return self;
@@ -292,8 +292,8 @@ TvFunc_xform(
 			 PyNpnMap::_typeobject(), &npnmap_obj) ) {
     return nullptr;
   }
-  auto& npnmap = PyNpnMap::_get(npnmap_obj);
-  auto& func = PyTvFunc::_get(self);
+  auto& npnmap = PyNpnMap::Get(npnmap_obj);
+  auto& func = PyTvFunc::Get(self);
   auto ans = func.xform(npnmap);
   return PyTvFunc::ToPyObject(std::move(ans));
 }
@@ -304,7 +304,7 @@ TvFunc_shrink_map(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto npnmap = func.shrink_map();
   return PyNpnMap::ToPyObject(npnmap);
 }
@@ -315,7 +315,7 @@ TvFunc_npn_cannonical_map(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto npnmap = func.npn_cannonical_map();
   return PyNpnMap::ToPyObject(npnmap);
 }
@@ -326,7 +326,7 @@ TvFunc_npn_cannonical_all_map(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto npnmap_list = func.npn_cannonical_all_map();
   SizeType n = npnmap_list.size();
   auto ans_obj = PyList_New(n);
@@ -344,7 +344,7 @@ TvFunc_is_valid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.is_valid();
   return PyBool_FromLong(r);
 }
@@ -355,7 +355,7 @@ TvFunc_is_invalid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.is_invalid();
   return PyBool_FromLong(r);
 }
@@ -366,7 +366,7 @@ TvFunc_is_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.is_zero();
   return PyBool_FromLong(r);
 }
@@ -377,7 +377,7 @@ TvFunc_is_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.is_one();
   return PyBool_FromLong(r);
 }
@@ -392,7 +392,7 @@ TvFunc_value(
   if ( !PyArg_ParseTuple(args, "k", &pos) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.value(pos);
   return PyLong_FromLong(r);
 }
@@ -403,7 +403,7 @@ TvFunc_count_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.count_zero();
   return PyLong_FromLong(r);
 }
@@ -414,7 +414,7 @@ TvFunc_count_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.count_one();
   return PyLong_FromLong(r);
 }
@@ -425,7 +425,7 @@ TvFunc_walsh_0(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.walsh_0();
   return PyLong_FromLong(r);
 }
@@ -440,7 +440,7 @@ TvFunc_walsh_1(
   if ( !PyArg_ParseTuple(args, "k", &varid) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.walsh_1(varid);
   return PyLong_FromLong(r);
 }
@@ -456,7 +456,7 @@ TvFunc_walsh_2(
   if ( !PyArg_ParseTuple(args, "kk", &varid1, &varid2) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.walsh_2(varid1, varid2);
   return PyLong_FromLong(r);
 }
@@ -471,7 +471,7 @@ TvFunc_check_sup(
   if ( !PyArg_ParseTuple(args, "k", &varid) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.check_sup(varid);
   return PyBool_FromLong(r);
 }
@@ -486,7 +486,7 @@ TvFunc_check_unate(
   if ( !PyArg_ParseTuple(args, "k", &varid) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.check_unate(varid);
   return PyBool_FromLong(r);
 }
@@ -512,7 +512,7 @@ TvFunc_check_sym(
 				    &varid1, &varid2, &inv) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto r = func.check_sym(varid1, varid2, static_cast<bool>(inv));
   return PyBool_FromLong(r);
 }
@@ -523,7 +523,7 @@ TvFunc_analyze(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto ptype = func.analyze();
   return PyPrimType::ToPyObject(ptype);
 }
@@ -595,7 +595,7 @@ TvFunc_input_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& func = PyTvFunc::_get(self);
+  auto& func = PyTvFunc::Get(self);
   auto val = func.input_num();
   return PyLong_FromLong(val);
 }
@@ -614,10 +614,10 @@ TvFunc_richcmpfunc(
   int op
 )
 {
-  if ( PyTvFunc::_check(self) &&
-       PyTvFunc::_check(other) ) {
-    auto& val1 = PyTvFunc::_get(self);
-    auto& val2 = PyTvFunc::_get(other);
+  if ( PyTvFunc::Check(self) &&
+       PyTvFunc::Check(other) ) {
+    auto& val1 = PyTvFunc::Get(self);
+    auto& val2 = PyTvFunc::Get(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong(val1 == val2);
     }
@@ -635,8 +635,8 @@ TvFunc_invert(
   PyObject* self
 )
 {
-  if ( PyTvFunc::_check(self) ) {
-    auto& val = PyTvFunc::_get(self);
+  if ( PyTvFunc::Check(self) ) {
+    auto& val = PyTvFunc::Get(self);
     return PyTvFunc::ToPyObject(~val);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -649,9 +649,9 @@ TvFunc_and(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
-    auto& val1 = PyTvFunc::_get(self);
-    auto& val2 = PyTvFunc::_get(other);
+  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
+    auto& val1 = PyTvFunc::Get(self);
+    auto& val2 = PyTvFunc::Get(other);
     return PyTvFunc::ToPyObject(val1 & val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -664,9 +664,9 @@ TvFunc_or(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
-    auto& val1 = PyTvFunc::_get(self);
-    auto& val2 = PyTvFunc::_get(other);
+  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
+    auto& val1 = PyTvFunc::Get(self);
+    auto& val2 = PyTvFunc::Get(other);
     return PyTvFunc::ToPyObject(val1 | val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -679,9 +679,9 @@ TvFunc_xor(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
-    auto& val1 = PyTvFunc::_get(self);
-    auto& val2 = PyTvFunc::_get(other);
+  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
+    auto& val1 = PyTvFunc::Get(self);
+    auto& val2 = PyTvFunc::Get(other);
     return PyTvFunc::ToPyObject(val1 ^ val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -694,9 +694,9 @@ TvFunc_iand(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
-    auto& val1 = PyTvFunc::_get(self);
-    auto& val2 = PyTvFunc::_get(other);
+  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
+    auto& val1 = PyTvFunc::Get(self);
+    auto& val2 = PyTvFunc::Get(other);
     val1 &= val2;
     Py_INCREF(self);
     return self;
@@ -711,9 +711,9 @@ TvFunc_ior(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
-    auto& val1 = PyTvFunc::_get(self);
-    auto& val2 = PyTvFunc::_get(other);
+  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
+    auto& val1 = PyTvFunc::Get(self);
+    auto& val2 = PyTvFunc::Get(other);
     val1 |= val2;
     Py_INCREF(self);
     return self;
@@ -728,9 +728,9 @@ TvFunc_ixor(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
-    auto& val1 = PyTvFunc::_get(self);
-    auto& val2 = PyTvFunc::_get(other);
+  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
+    auto& val1 = PyTvFunc::Get(self);
+    auto& val2 = PyTvFunc::Get(other);
     val1 ^= val2;
     Py_INCREF(self);
     return self;
@@ -755,7 +755,7 @@ TvFunc_hash(
   PyObject* self
 )
 {
-  auto val = PyTvFunc::_get(self);
+  auto val = PyTvFunc::Get(self);
   return val.hash();
 }
 
@@ -822,7 +822,7 @@ PyTvFunc::ToPyObject(
 
 // @brief PyObject が TvFunc タイプか調べる．
 bool
-PyTvFunc::_check(
+PyTvFunc::Check(
   PyObject* obj
 )
 {
@@ -831,7 +831,7 @@ PyTvFunc::_check(
 
 // @brief TvFunc を表す PyObject から TvFunc を取り出す．
 TvFunc&
-PyTvFunc::_get(
+PyTvFunc::Get(
   PyObject* obj
 )
 {

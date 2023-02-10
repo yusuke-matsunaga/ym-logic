@@ -107,7 +107,7 @@ PrimType_repr(
   PyObject* self
 )
 {
-  auto val = PyPrimType::_get(self);
+  auto val = PyPrimType::Get(self);
   // val から 文字列を作る．
   const char* tmp_str = nullptr;
   switch ( val ) {
@@ -139,10 +139,10 @@ PrimType_richcmpfunc(
   int op
 )
 {
-  if ( PyPrimType::_check(self) &&
-       PyPrimType::_check(other) ) {
-    auto val1 = PyPrimType::_get(self);
-    auto val2 = PyPrimType::_get(other);
+  if ( PyPrimType::Check(self) &&
+       PyPrimType::Check(other) ) {
+    auto val1 = PyPrimType::Get(self);
+    auto val2 = PyPrimType::Get(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong( val1 == val2 );
     }
@@ -159,7 +159,7 @@ PrimType_hash(
   PyObject* self
 )
 {
-  auto val = PyPrimType::_get(self);
+  auto val = PyPrimType::Get(self);
   return static_cast<SizeType>(val);
 }
 
@@ -266,7 +266,7 @@ PyPrimType::ToPyObject(
 
 // @brief PyObject が PrimType タイプか調べる．
 bool
-PyPrimType::_check(
+PyPrimType::Check(
   PyObject* obj
 )
 {
@@ -275,7 +275,7 @@ PyPrimType::_check(
 
 // @brief PrimType を表す PyObject から PrimType を取り出す．
 PrimType
-PyPrimType::_get(
+PyPrimType::Get(
   PyObject* obj
 )
 {

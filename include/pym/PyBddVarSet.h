@@ -50,17 +50,17 @@ public:
   /// @brief PyObject が BddVarSet タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief BddVarSet を表す PyObject から BddVarSet を取り出す．
   /// @return BddVarSet を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
   BddVarSet&
-  _get(
+  Get(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 

@@ -56,8 +56,8 @@ SopCover_new(
     cube_list.reserve(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto obj2 = PyList_GetItem(obj1, i);
-      if ( PySopCube::_check(obj2) ) {
-	cube_list.push_back(PySopCube::_get(obj2));
+      if ( PySopCube::Check(obj2) ) {
+	cube_list.push_back(PySopCube::Get(obj2));
       }
       else if ( PyList_Check(obj2) ) {
 	SizeType m = PyList_Size(obj2);
@@ -66,10 +66,10 @@ SopCover_new(
 	  lit_list.reserve(m);
 	  for ( SizeType j = 0; j < m; ++ j ) {
 	    auto obj3 = PyList_GetItem(obj2, j);
-	    if ( !PyLiteral::_check(obj3) ) {
+	    if ( !PyLiteral::Check(obj3) ) {
 	      goto error;
 	    }
-	    lit_list.push_back(PyLiteral::_get(obj3));
+	    lit_list.push_back(PyLiteral::Get(obj3));
 	  }
 	}
 	cube_list.push_back(SopCube{ni, lit_list});
@@ -112,12 +112,12 @@ SopCover_literal_num(
 			 PyLiteral::_typeobject(), &lit_obj) ) {
     return nullptr;
   }
-  auto& cov = PySopCover::_get(self);
+  auto& cov = PySopCover::Get(self);
   if ( lit_obj == nullptr ) {
     return PyLong_FromLong(cov.literal_num());
   }
   else {
-    auto lit = PyLiteral::_get(lit_obj);
+    auto lit = PyLiteral::Get(lit_obj);
     return PyLong_FromLong(cov.literal_num(lit));
   }
 }
@@ -128,7 +128,7 @@ SopCover_literal_list(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& cov = PySopCover::_get(self);
+  auto& cov = PySopCover::Get(self);
   auto cube_list = cov.literal_list();
   SizeType n = cube_list.size();
   auto ans_obj = PyList_New(n);
@@ -157,7 +157,7 @@ SopCover_get_pat(
   if ( !PyArg_ParseTuple(args, "kk", &cpos, &vpos) ) {
     return nullptr;
   }
-  auto& cov = PySopCover::_get(self);
+  auto& cov = PySopCover::Get(self);
   auto pat = cov.get_pat(cpos, vpos);
   const char* ans_str = nullptr;
   if ( pat == SopPat::_X ) {
@@ -178,7 +178,7 @@ SopCover_common_cube(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& cov = PySopCover::_get(self);
+  auto& cov = PySopCover::Get(self);
   auto cc = cov.common_cube();
   return PySopCube::ToPyObject(cc);
 }
@@ -189,7 +189,7 @@ SopCover_expr(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& cov = PySopCover::_get(self);
+  auto& cov = PySopCover::Get(self);
   auto expr = cov.expr();
   return PyExpr::ToPyObject(expr);
 }
@@ -215,7 +215,7 @@ SopCover_variable_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& cov = PySopCover::_get(self);
+  auto& cov = PySopCover::Get(self);
   auto ans = cov.variable_num();
   return PyLong_FromLong(ans);
 }
@@ -226,7 +226,7 @@ SopCover_cube_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& cov = PySopCover::_get(self);
+  auto& cov = PySopCover::Get(self);
   auto ans = cov.cube_num();
   return PyLong_FromLong(ans);
 }
@@ -248,10 +248,10 @@ SopCover_richcmpfunc(
   int op
 )
 {
-  if ( PySopCover::_check(self) &&
-       PySopCover::_check(other) ) {
-    auto val1 = PySopCover::_get(self);
-    auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) &&
+       PySopCover::Check(other) ) {
+    auto val1 = PySopCover::Get(self);
+    auto val2 = PySopCover::Get(other);
     Py_RETURN_RICHCOMPARE(val1, val2, op);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -264,14 +264,14 @@ SopCover_add(
   PyObject* other
 )
 {
-  if ( PySopCover::_check(self) ) {
-    auto val1 = PySopCover::_get(self);
-    if ( PySopCover::_check(other) ) {
-      auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) ) {
+    auto val1 = PySopCover::Get(self);
+    if ( PySopCover::Check(other) ) {
+      auto val2 = PySopCover::Get(other);
       return PySopCover::ToPyObject(val1 + val2);
     }
-    if ( PySopCube::_check(other) ) {
-      auto val2 = PySopCube::_get(other);
+    if ( PySopCube::Check(other) ) {
+      auto val2 = PySopCube::Get(other);
       return PySopCover::ToPyObject(val1 + val2);
     }
   }
@@ -285,16 +285,16 @@ SopCover_iadd(
   PyObject* other
 )
 {
-  if ( PySopCover::_check(self) ) {
-    auto val1 = PySopCover::_get(self);
-    if ( PySopCover::_check(other) ) {
-      auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) ) {
+    auto val1 = PySopCover::Get(self);
+    if ( PySopCover::Check(other) ) {
+      auto val2 = PySopCover::Get(other);
       val1 += val2;
       Py_IncRef(self);
       return self;
     }
-    if ( PySopCube::_check(other) ) {
-      auto val2 = PySopCube::_get(other);
+    if ( PySopCube::Check(other) ) {
+      auto val2 = PySopCube::Get(other);
       val1 += val2;
       Py_IncRef(self);
       return self;
@@ -310,14 +310,14 @@ SopCover_sub(
   PyObject* other
 )
 {
-  if ( PySopCover::_check(self) ) {
-    auto val1 = PySopCover::_get(self);
-    if ( PySopCover::_check(other) ) {
-      auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) ) {
+    auto val1 = PySopCover::Get(self);
+    if ( PySopCover::Check(other) ) {
+      auto val2 = PySopCover::Get(other);
       return PySopCover::ToPyObject(val1 + val2);
     }
-    if ( PySopCube::_check(other) ) {
-      auto val2 = PySopCube::_get(other);
+    if ( PySopCube::Check(other) ) {
+      auto val2 = PySopCube::Get(other);
       return PySopCover::ToPyObject(val1 + val2);
     }
   }
@@ -331,16 +331,16 @@ SopCover_isub(
   PyObject* other
 )
 {
-  if ( PySopCover::_check(self) ) {
-    auto val1 = PySopCover::_get(self);
-    if ( PySopCover::_check(other) ) {
-      auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) ) {
+    auto val1 = PySopCover::Get(self);
+    if ( PySopCover::Check(other) ) {
+      auto val2 = PySopCover::Get(other);
       val1 -= val2;
       Py_IncRef(self);
       return self;
     }
-    if ( PySopCube::_check(other) ) {
-      auto val2 = PySopCube::_get(other);
+    if ( PySopCube::Check(other) ) {
+      auto val2 = PySopCube::Get(other);
       val1 -= val2;
       Py_IncRef(self);
       return self;
@@ -356,18 +356,18 @@ SopCover_mult(
   PyObject* other
 )
 {
-  if ( PySopCover::_check(self) ) {
-    auto val1 = PySopCover::_get(self);
-    if ( PySopCover::_check(other) ) {
-      auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) ) {
+    auto val1 = PySopCover::Get(self);
+    if ( PySopCover::Check(other) ) {
+      auto val2 = PySopCover::Get(other);
       return PySopCover::ToPyObject(val1 * val2);
     }
-    if ( PySopCube::_check(other) ) {
-      auto val2 = PySopCube::_get(other);
+    if ( PySopCube::Check(other) ) {
+      auto val2 = PySopCube::Get(other);
       return PySopCover::ToPyObject(val1 * val2);
     }
-    if ( PyLiteral::_check(other) ) {
-      auto val2 = PyLiteral::_get(other);
+    if ( PyLiteral::Check(other) ) {
+      auto val2 = PyLiteral::Get(other);
       return PySopCover::ToPyObject(val1 * val2);
     }
   }
@@ -381,22 +381,22 @@ SopCover_imult(
   PyObject* other
 )
 {
-  if ( PySopCover::_check(self) ) {
-    auto val1 = PySopCover::_get(self);
-    if ( PySopCover::_check(other) ) {
-      auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) ) {
+    auto val1 = PySopCover::Get(self);
+    if ( PySopCover::Check(other) ) {
+      auto val2 = PySopCover::Get(other);
       val1 *= val2;
       Py_IncRef(self);
       return self;
     }
-    if ( PySopCube::_check(other) ) {
-      auto val2 = PySopCube::_get(other);
+    if ( PySopCube::Check(other) ) {
+      auto val2 = PySopCube::Get(other);
       val1 *= val2;
       Py_IncRef(self);
       return self;
     }
-    if ( PyLiteral::_check(other) ) {
-      auto val2 = PyLiteral::_get(other);
+    if ( PyLiteral::Check(other) ) {
+      auto val2 = PyLiteral::Get(other);
       val1 *= val2;
       Py_IncRef(self);
       return self;
@@ -412,18 +412,18 @@ SopCover_div(
   PyObject* other
 )
 {
-  if ( PySopCover::_check(self) ) {
-    auto val1 = PySopCover::_get(self);
-    if ( PySopCover::_check(other) ) {
-      auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) ) {
+    auto val1 = PySopCover::Get(self);
+    if ( PySopCover::Check(other) ) {
+      auto val2 = PySopCover::Get(other);
       return PySopCover::ToPyObject(val1 / val2);
     }
-    if ( PySopCube::_check(other) ) {
-      auto val2 = PySopCube::_get(other);
+    if ( PySopCube::Check(other) ) {
+      auto val2 = PySopCube::Get(other);
       return PySopCover::ToPyObject(val1 / val2);
     }
-    if ( PyLiteral::_check(other) ) {
-      auto val2 = PyLiteral::_get(other);
+    if ( PyLiteral::Check(other) ) {
+      auto val2 = PyLiteral::Get(other);
       return PySopCover::ToPyObject(val1 / val2);
     }
   }
@@ -437,22 +437,22 @@ SopCover_idiv(
   PyObject* other
 )
 {
-  if ( PySopCover::_check(self) ) {
-    auto val1 = PySopCover::_get(self);
-    if ( PySopCover::_check(other) ) {
-      auto val2 = PySopCover::_get(other);
+  if ( PySopCover::Check(self) ) {
+    auto val1 = PySopCover::Get(self);
+    if ( PySopCover::Check(other) ) {
+      auto val2 = PySopCover::Get(other);
       val1 /= val2;
       Py_IncRef(self);
       return self;
     }
-    if ( PySopCube::_check(other) ) {
-      auto val2 = PySopCube::_get(other);
+    if ( PySopCube::Check(other) ) {
+      auto val2 = PySopCube::Get(other);
       val1 /= val2;
       Py_IncRef(self);
       return self;
     }
-    if ( PyLiteral::_check(other) ) {
-      auto val2 = PyLiteral::_get(other);
+    if ( PyLiteral::Check(other) ) {
+      auto val2 = PyLiteral::Get(other);
       val1 /= val2;
       Py_IncRef(self);
       return self;
@@ -479,7 +479,7 @@ SopCover_hash(
   PyObject* self
 )
 {
-  auto& val = PySopCover::_get(self);
+  auto& val = PySopCover::Get(self);
   return val.hash();
 }
 
@@ -543,7 +543,7 @@ PySopCover::ToPyObject(
 
 // @brief PyObject が SopCover タイプか調べる．
 bool
-PySopCover::_check(
+PySopCover::Check(
   PyObject* obj
 )
 {
@@ -552,7 +552,7 @@ PySopCover::_check(
 
 // @brief SopCover を表す PyObject から SopCover を取り出す．
 SopCover&
-PySopCover::_get(
+PySopCover::Get(
   PyObject* obj
 )
 {

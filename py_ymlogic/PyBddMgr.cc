@@ -72,8 +72,8 @@ BddMgr_copy(
   if ( !PyArg_ParseTuple(args, "O!", PyBdd::_typeobject(), !bdd_obj) ) {
     return nullptr;
   }
-  auto src_bdd = PyBdd::_get(bdd_obj);
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto src_bdd = PyBdd::Get(bdd_obj);
+  auto& bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.copy(src_bdd);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -84,7 +84,7 @@ BddMgr_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.zero();
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -95,7 +95,7 @@ BddMgr_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.one();
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -124,18 +124,18 @@ BddMgr_literal(
     SizeType varid = PyLong_AsLong(obj1);
     lit = Literal{varid, static_cast<bool>(inv)};
   }
-  else if ( PyLiteral::_check(obj1) ) {
+  else if ( PyLiteral::Check(obj1) ) {
     if ( inv ) {
       PyErr_SetString(PyExc_TypeError, "'inv' keyword is not allowed with 'Literal' type");
       return nullptr;
     }
-    lit = PyLiteral::_get(obj1);
+    lit = PyLiteral::Get(obj1);
   }
   else {
     PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal");
     return nullptr;
   }
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.literal(lit);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -150,7 +150,7 @@ BddMgr_posi_literal(
   if ( !PyArg_ParseTuple(args, "k", &varid) ) {
     return nullptr;
   }
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.posi_literal(varid);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -165,7 +165,7 @@ BddMgr_nega_literal(
   if ( !PyArg_ParseTuple(args, "k", &varid) ) {
     return nullptr;
   }
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.nega_literal(varid);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -180,7 +180,7 @@ BddMgr_from_truth(
   if ( PyArg_ParseTuple(args, "s", &str) ) {
     return nullptr;
   }
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   try {
     auto ans_bdd = bddmgr.from_truth(str);
     return PyBdd::ToPyObject(ans_bdd);
@@ -197,7 +197,7 @@ BddMgr_enable_gc(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   bddmgr.enable_gc();
   Py_RETURN_NONE;
 }
@@ -208,7 +208,7 @@ BddMgr_disable_gc(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   bddmgr.disable_gc();
   Py_RETURN_NONE;
 }
@@ -243,7 +243,7 @@ BddMgr_node_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   auto val = bddmgr.node_num();
   return PyLong_FromLong(val);
 }
@@ -254,7 +254,7 @@ BddMgr_gc_limit(
   void* Py_UNUSED(closure)
 )
 {
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   auto val = bddmgr.gc_limit();
   return PyLong_FromLong(val);
 }
@@ -270,7 +270,7 @@ BddMgr_set_gc_limit(
     PyErr_SetString(PyExc_TypeError, "int value is expected");
     return -1;
   }
-  auto& bddmgr = PyBddMgr::_get(self);
+  auto& bddmgr = PyBddMgr::Get(self);
   SizeType val = PyLong_AsLong(val_obj);
   bddmgr.set_gc_limit(val);
   return 0;
@@ -316,7 +316,7 @@ PyBddMgr::init(
 
 // @brief PyObject が BddMgr タイプか調べる．
 bool
-PyBddMgr::_check(
+PyBddMgr::Check(
   PyObject* obj
 )
 {
@@ -325,7 +325,7 @@ PyBddMgr::_check(
 
 // @brief BddMgr を表す PyObject から BddMgr を取り出す．
 BddMgr&
-PyBddMgr::_get(
+PyBddMgr::Get(
   PyObject* obj
 )
 {

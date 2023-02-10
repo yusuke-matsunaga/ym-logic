@@ -92,7 +92,7 @@ NpnMap_repr(
   PyObject* self
 )
 {
-  auto val = PyNpnMap::_get(self);
+  auto val = PyNpnMap::Get(self);
   // val から 文字列を作る．
   const char* tmp_str = nullptr;
   return Py_BuildValue("s", tmp_str);
@@ -126,7 +126,7 @@ NpnMap_clear(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   npnmap.clear();
   Py_RETURN_NONE;
 }
@@ -142,7 +142,7 @@ NpnMap_resize(
   if ( !PyArg_ParseTuple(args, "k|k", &ni1, &ni2) ) {
     return nullptr;
   }
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   if ( ni2 == -1 ) {
     npnmap.resize(ni1);
   }
@@ -171,7 +171,7 @@ NpnMap_set_identity(
 				    &ni, &oinv) ) {
     return nullptr;
   }
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   npnmap.set_identity(ni, oinv);
   Py_RETURN_NONE;
 }
@@ -188,7 +188,7 @@ NpnMap_set(
   if ( !PyArg_ParseTuple(args, "kkp", &src_var, &dst_var, &inv) ) {
     return nullptr;
   }
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   npnmap.set(src_var, dst_var, static_cast<bool>(inv));
   Py_RETURN_NONE;
 }
@@ -203,7 +203,7 @@ NpnMap_set_oinv(
   if ( !PyArg_ParseTuple(args, "p", &inv) ) {
     return nullptr;
   }
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   npnmap.set_oinv(static_cast<bool>(inv));
   Py_RETURN_NONE;
 }
@@ -218,7 +218,7 @@ NpnMap_imap(
   if ( !PyArg_ParseTuple(args, "k", &src_var) ) {
     return nullptr;
   }
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   auto vmap = npnmap.imap(src_var);
   auto dst_var = vmap.var();
   auto inv = vmap.inv();
@@ -252,7 +252,7 @@ NpnMap_input_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   auto val = npnmap.input_num();
   return PyLong_FromLong(val);
 }
@@ -263,7 +263,7 @@ NpnMap_input_num2(
   void* Py_UNUSED(closure)
 )
 {
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   auto val = npnmap.input_num2();
   return PyLong_FromLong(val);
 }
@@ -274,7 +274,7 @@ NpnMap_oinv(
   void* Py_UNUSED(closure)
 )
 {
-  auto& npnmap = PyNpnMap::_get(self);
+  auto& npnmap = PyNpnMap::Get(self);
   auto val = npnmap.oinv();
   return PyBool_FromLong(val);
 }
@@ -295,10 +295,10 @@ NpnMap_richcmpfunc(
   int op
 )
 {
-  if ( PyNpnMap::_check(self) &&
-       PyNpnMap::_check(other) ) {
-    auto& val1 = PyNpnMap::_get(self);
-    auto& val2 = PyNpnMap::_get(other);
+  if ( PyNpnMap::Check(self) &&
+       PyNpnMap::Check(other) ) {
+    auto& val1 = PyNpnMap::Get(self);
+    auto& val2 = PyNpnMap::Get(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong(val1 == val2);
     }
@@ -316,8 +316,8 @@ NpnMap_invert(
   PyObject* self
 )
 {
-  if ( PyNpnMap::_check(self) ) {
-    auto& val = PyNpnMap::_get(self);
+  if ( PyNpnMap::Check(self) ) {
+    auto& val = PyNpnMap::Get(self);
     return PyNpnMap::ToPyObject(inverse(val));
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -330,9 +330,9 @@ NpnMap_mul(
   PyObject* other
 )
 {
-  if ( PyNpnMap::_check(self) && PyNpnMap::_check(other) ) {
-    auto& val1 = PyNpnMap::_get(self);
-    auto& val2 = PyNpnMap::_get(other);
+  if ( PyNpnMap::Check(self) && PyNpnMap::Check(other) ) {
+    auto& val1 = PyNpnMap::Get(self);
+    auto& val2 = PyNpnMap::Get(other);
     return PyNpnMap::ToPyObject(val1 * val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -394,7 +394,7 @@ PyNpnMap::ToPyObject(
 
 // @brief PyObject が NpnMap タイプか調べる．
 bool
-PyNpnMap::_check(
+PyNpnMap::Check(
   PyObject* obj
 )
 {
@@ -403,7 +403,7 @@ PyNpnMap::_check(
 
 // @brief NpnMap を表す PyObject から NpnMap を取り出す．
 NpnMap&
-PyNpnMap::_get(
+PyNpnMap::Get(
   PyObject* obj
 )
 {

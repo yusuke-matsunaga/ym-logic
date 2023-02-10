@@ -40,17 +40,17 @@ public:
   /// @brief PyObject が BddMgr タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief BddMgr を表す PyObject から BddMgr を取り出す．
   /// @return BddMgr を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
   BddMgr&
-  _get(
+  Get(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 

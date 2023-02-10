@@ -80,7 +80,7 @@ Expr_repr(
   PyObject* self
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto tmp_str = expr.rep_string();
   return Py_BuildValue("s", tmp_str.c_str());
 }
@@ -91,7 +91,7 @@ Expr_str(
   PyObject* self
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto tmp_str = expr.to_string();
   return Py_BuildValue("s", tmp_str.c_str());
 }
@@ -151,8 +151,8 @@ Expr_make_literal(
     SizeType varid = PyLong_AsLong(obj1);
     expr = Expr::make_literal(varid, static_cast<bool>(inv));
   }
-  else if ( PyLiteral::_check(obj1) ) {
-    auto lit = PyLiteral::_get(obj1);
+  else if ( PyLiteral::Check(obj1) ) {
+    auto lit = PyLiteral::Get(obj1);
     expr = Expr::make_literal(lit);
   }
   else {
@@ -204,11 +204,11 @@ get_expr_list(
   expr_list.reserve(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto obj1 = PySequence_GetItem(arg_obj, i);
-    if ( !PyExpr::_check(obj1) ) {
+    if ( !PyExpr::Check(obj1) ) {
       Py_XDECREF(obj1);
       return false;
     }
-    expr_list.push_back(PyExpr::_get(obj1));
+    expr_list.push_back(PyExpr::Get(obj1));
     Py_XDECREF(obj1);
   }
   return true;
@@ -311,14 +311,14 @@ Expr_compose(
     if ( id == -1 && PyErr_Occurred() ) {
       return nullptr;
     }
-    if ( !PyExpr::_check(value) ) {
+    if ( !PyExpr::Check(value) ) {
       PyErr_SetString(PyExc_TypeError, "'Expr' expected in dictionary value");
       return nullptr;
     }
-    auto expr1 = PyExpr::_get(value);
+    auto expr1 = PyExpr::Get(value);
     comp_map.emplace(static_cast<SizeType>(id), expr1);
   }
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto ans_expr = expr.compose(comp_map);
   return PyExpr::ToPyObject(ans_expr);
 }
@@ -349,7 +349,7 @@ Expr_remap_var(
     }
     comp_map.emplace(static_cast<SizeType>(id), static_cast<SizeType>(val));
   }
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto ans_expr = expr.remap_var(comp_map);
   return PyExpr::ToPyObject(ans_expr);
 }
@@ -360,7 +360,7 @@ Expr_simplify(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& expr = PyExpr::_get(self);
+  auto& expr = PyExpr::Get(self);
   expr.simplify();
   Py_RETURN_NONE;
 }
@@ -400,7 +400,7 @@ Expr_eval(
     }
     vals[i] = val;
   }
-  auto& expr = PyExpr::_get(self);
+  auto& expr = PyExpr::Get(self);
   auto ans = expr.eval(vals, mask);
   return PyLong_FromLong(ans);
 }
@@ -415,7 +415,7 @@ Expr_make_tv(
   if ( !PyArg_ParseTuple(args, "|k", &ni) ) {
     return nullptr;
   }
-  auto& expr = PyExpr::_get(self);
+  auto& expr = PyExpr::Get(self);
   auto func = expr.make_tv(ni);
   return PyTvFunc::ToPyObject(std::move(func));
 }
@@ -426,7 +426,7 @@ Expr_is_valid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_valid();
   return PyBool_FromLong(r);
 }
@@ -437,7 +437,7 @@ Expr_is_invalid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_invalid();
   return PyBool_FromLong(r);
 }
@@ -448,7 +448,7 @@ Expr_is_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_zero();
   return PyBool_FromLong(r);
 }
@@ -459,7 +459,7 @@ Expr_is_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_one();
   return PyBool_FromLong(r);
 }
@@ -470,7 +470,7 @@ Expr_is_constant(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_constant();
   return PyBool_FromLong(r);
 }
@@ -481,7 +481,7 @@ Expr_is_posi_literal(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_posi_literal();
   return PyBool_FromLong(r);
 }
@@ -492,7 +492,7 @@ Expr_is_nega_literal(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_nega_literal();
   return PyBool_FromLong(r);
 }
@@ -503,7 +503,7 @@ Expr_is_literal(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_literal();
   return PyBool_FromLong(r);
 }
@@ -514,7 +514,7 @@ Expr_is_and(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_and();
   return PyBool_FromLong(r);
 }
@@ -525,7 +525,7 @@ Expr_is_or(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_or();
   return PyBool_FromLong(r);
 }
@@ -536,7 +536,7 @@ Expr_is_xor(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_xor();
   return PyBool_FromLong(r);
 }
@@ -547,7 +547,7 @@ Expr_is_op(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_op();
   return PyBool_FromLong(r);
 }
@@ -558,7 +558,7 @@ Expr_is_simple(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_simple();
   return PyBool_FromLong(r);
 }
@@ -569,7 +569,7 @@ Expr_is_simple_and(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_simple_and();
   return PyBool_FromLong(r);
 }
@@ -580,7 +580,7 @@ Expr_is_simple_or(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_simple_or();
   return PyBool_FromLong(r);
 }
@@ -591,7 +591,7 @@ Expr_is_simple_xor(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_simple_xor();
   return PyBool_FromLong(r);
 }
@@ -602,7 +602,7 @@ Expr_is_sop(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto r = expr.is_sop();
   return PyBool_FromLong(r);
 }
@@ -626,7 +626,7 @@ Expr_literal_num(
 				    &obj1, &inv_int) ) {
     return nullptr;
   }
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   int ans = 0;
   if ( obj1 == nullptr ) {
     ans = expr.literal_num();
@@ -636,8 +636,8 @@ Expr_literal_num(
     bool inv = static_cast<bool>(inv_int);
     ans = expr.literal_num(varid, inv);
   }
-  else if ( PyLiteral::_check(obj1) ) {
-    auto lit = PyLiteral::_get(obj1);
+  else if ( PyLiteral::Check(obj1) ) {
+    auto lit = PyLiteral::Get(obj1);
     ans = expr.literal_num(lit);
   }
   else {
@@ -666,7 +666,7 @@ Expr_sop_literal_num(
 				    &obj1, &inv_int) ) {
     return nullptr;
   }
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   int ans = 0;
   if ( obj1 == nullptr ) {
     ans = expr.sop_literal_num();
@@ -676,8 +676,8 @@ Expr_sop_literal_num(
     bool inv = static_cast<bool>(inv_int);
     ans = expr.sop_literal_num(varid, inv);
   }
-  else if ( PyLiteral::_check(obj1) ) {
-    auto lit = PyLiteral::_get(obj1);
+  else if ( PyLiteral::Check(obj1) ) {
+    auto lit = PyLiteral::Get(obj1);
     ans = expr.sop_literal_num(lit);
   }
   else {
@@ -693,7 +693,7 @@ Expr_analyze(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto ptype = expr.analyze();
   return PyPrimType::ToPyObject(ptype);
 }
@@ -783,7 +783,7 @@ Expr_varid(
   void* Py_UNUSED(closure)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto varid = expr.varid();
   return PyLong_FromLong(varid);
 }
@@ -794,7 +794,7 @@ Expr_literal(
   void* Py_UNUSED(closure)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto lit = expr.literal();
   return PyLiteral::ToPyObject(lit);
 }
@@ -805,7 +805,7 @@ Expr_operand_list(
   void* Py_UNUSED(closure)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   SizeType n = expr.operand_num();
   auto ans_obj = PyList_New(n);
   for ( SizeType i = 0; i < n; ++ i ) {
@@ -822,7 +822,7 @@ Expr_sop_cube_num(
   void* Py_UNUSED(colsure)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto val = expr.sop_cube_num();
   return PyLong_FromLong(val);
 }
@@ -833,7 +833,7 @@ Expr_input_size(
   void* Py_UNUSED(closure)
 )
 {
-  auto expr = PyExpr::_get(self);
+  auto expr = PyExpr::Get(self);
   auto ans = expr.input_size();
   return PyLong_FromLong(ans);
 }
@@ -860,13 +860,13 @@ Expr_richcmpfunc(
   int op
 )
 {
-  if ( !PyExpr::_check(self) ||
-       !PyExpr::_check(other) ) {
+  if ( !PyExpr::Check(self) ||
+       !PyExpr::Check(other) ) {
     goto not_implemented;
   }
   {
-    auto expr1 = PyExpr::_get(self);
-    auto expr2 = PyExpr::_get(other);
+    auto expr1 = PyExpr::Get(self);
+    auto expr2 = PyExpr::Get(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong(expr1 == expr2);
     }
@@ -884,8 +884,8 @@ Expr_invert(
   PyObject* self
 )
 {
-  if ( PyExpr::_check(self) ) {
-    auto val = PyExpr::_get(self);
+  if ( PyExpr::Check(self) ) {
+    auto val = PyExpr::Get(self);
     return PyExpr::ToPyObject(~val);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -898,9 +898,9 @@ Expr_and(
   PyObject* other
 )
 {
-  if ( PyExpr::_check(self) && PyExpr::_check(other) ) {
-    auto val1 = PyExpr::_get(self);
-    auto val2 = PyExpr::_get(other);
+  if ( PyExpr::Check(self) && PyExpr::Check(other) ) {
+    auto val1 = PyExpr::Get(self);
+    auto val2 = PyExpr::Get(other);
     return PyExpr::ToPyObject(val1 & val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -913,9 +913,9 @@ Expr_or(
   PyObject* other
 )
 {
-  if ( PyExpr::_check(self) && PyExpr::_check(other) ) {
-    auto val1 = PyExpr::_get(self);
-    auto val2 = PyExpr::_get(other);
+  if ( PyExpr::Check(self) && PyExpr::Check(other) ) {
+    auto val1 = PyExpr::Get(self);
+    auto val2 = PyExpr::Get(other);
     return PyExpr::ToPyObject(val1 | val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -928,9 +928,9 @@ Expr_xor(
   PyObject* other
 )
 {
-  if ( PyExpr::_check(self) && PyExpr::_check(other) ) {
-    auto val1 = PyExpr::_get(self);
-    auto val2 = PyExpr::_get(other);
+  if ( PyExpr::Check(self) && PyExpr::Check(other) ) {
+    auto val1 = PyExpr::Get(self);
+    auto val2 = PyExpr::Get(other);
     return PyExpr::ToPyObject(val1 ^ val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -982,21 +982,6 @@ PyExpr::init(
   return false;
 }
 
-// @brief PyObject から Expr を取り出す．
-bool
-PyExpr::FromPyObject(
-  PyObject* obj,
-  Expr& val
-)
-{
-  if ( !_check(obj) ) {
-    PyErr_SetString(PyExc_TypeError, "object is not a Expr type");
-    return false;
-  }
-  val = _get(obj);
-  return true;
-}
-
 // @brief Expr を PyObject に変換する．
 PyObject*
 PyExpr::ToPyObject(
@@ -1011,7 +996,7 @@ PyExpr::ToPyObject(
 
 // @brief PyObject が Expr タイプか調べる．
 bool
-PyExpr::_check(
+PyExpr::Check(
   PyObject* obj
 )
 {
@@ -1020,7 +1005,7 @@ PyExpr::_check(
 
 // @brief Expr を表す PyObject から Expr を取り出す．
 Expr&
-PyExpr::_get(
+PyExpr::Get(
   PyObject* obj
 )
 {

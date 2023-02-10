@@ -50,17 +50,17 @@ public:
   /// @brief PyObject が NpnMap タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief NpnMap を表す PyObject から NpnMap を取り出す．
   /// @return NpnMap を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
   NpnMap&
-  _get(
+  Get(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 

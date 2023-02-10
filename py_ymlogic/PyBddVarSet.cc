@@ -63,7 +63,7 @@ BddVarSet_new(
 	var_set.push_back(PyLong_AsLong(obj1));
       }
     }
-    auto& mgr = PyBddMgr::_get(mgr_obj);
+    auto& mgr = PyBddMgr::Get(mgr_obj);
     auto self = type->tp_alloc(type, 0);
     auto bdd_obj = reinterpret_cast<BddVarSetObject*>(self);
     bdd_obj->mVal = new BddVarSet{mgr, var_set};
@@ -94,7 +94,7 @@ BddVarSet_to_varlist(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBddVarSet::_get(self);
+  auto bdd = PyBddVarSet::Get(self);
   try {
     auto varlist = bdd.to_varlist();
     SizeType n = varlist.size();
@@ -118,7 +118,7 @@ BddVarSet_bdd(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBddVarSet::_get(self);
+  auto bdd = PyBddVarSet::Get(self);
   auto ans_bdd = bdd.bdd();
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -138,7 +138,7 @@ BddVarSet_size(
   void* Py_UNUSED(closure)
 )
 {
-  auto bdd = PyBddVarSet::_get(self);
+  auto bdd = PyBddVarSet::Get(self);
   auto val = bdd.size();
   return PyLong_FromLong(val);
 }
@@ -157,10 +157,10 @@ BddVarSet_richcmpfunc(
   int op
 )
 {
-  if ( PyBddVarSet::_check(self) &&
-       PyBddVarSet::_check(other) ) {
-    auto val1 = PyBddVarSet::_get(self);
-    auto val2 = PyBddVarSet::_get(other);
+  if ( PyBddVarSet::Check(self) &&
+       PyBddVarSet::Check(other) ) {
+    auto val1 = PyBddVarSet::Get(self);
+    auto val2 = PyBddVarSet::Get(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong(val1 == val2);
     }
@@ -179,9 +179,9 @@ BddVarSet_add(
   PyObject* other
 )
 {
-  if ( PyBddVarSet::_check(self) && PyBddVarSet::_check(other) ) {
-    auto val1 = PyBddVarSet::_get(self);
-    auto val2 = PyBddVarSet::_get(other);
+  if ( PyBddVarSet::Check(self) && PyBddVarSet::Check(other) ) {
+    auto val1 = PyBddVarSet::Get(self);
+    auto val2 = PyBddVarSet::Get(other);
     try {
       return PyBddVarSet::ToPyObject(val1 + val2);
     }
@@ -200,9 +200,9 @@ BddVarSet_sub(
   PyObject* other
 )
 {
-  if ( PyBddVarSet::_check(self) && PyBddVarSet::_check(other) ) {
-    auto val1 = PyBddVarSet::_get(self);
-    auto val2 = PyBddVarSet::_get(other);
+  if ( PyBddVarSet::Check(self) && PyBddVarSet::Check(other) ) {
+    auto val1 = PyBddVarSet::Get(self);
+    auto val2 = PyBddVarSet::Get(other);
     try {
       return PyBddVarSet::ToPyObject(val1 - val2);
     }
@@ -221,9 +221,9 @@ BddVarSet_and(
   PyObject* other
 )
 {
-  if ( PyBddVarSet::_check(self) && PyBddVarSet::_check(other) ) {
-    auto val1 = PyBddVarSet::_get(self);
-    auto val2 = PyBddVarSet::_get(other);
+  if ( PyBddVarSet::Check(self) && PyBddVarSet::Check(other) ) {
+    auto val1 = PyBddVarSet::Get(self);
+    auto val2 = PyBddVarSet::Get(other);
     try {
       return PyBddVarSet::ToPyObject(val1 & val2);
     }
@@ -292,7 +292,7 @@ PyBddVarSet::ToPyObject(
 
 // @brief PyObject が BddVarSet タイプか調べる．
 bool
-PyBddVarSet::_check(
+PyBddVarSet::Check(
   PyObject* obj
 )
 {
@@ -301,7 +301,7 @@ PyBddVarSet::_check(
 
 // @brief BddVarSet を表す PyObject から BddVarSet を取り出す．
 BddVarSet&
-PyBddVarSet::_get(
+PyBddVarSet::Get(
   PyObject* obj
 )
 {

@@ -60,7 +60,7 @@ public:
   /// @brief PyObject が SopCube タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -70,7 +70,7 @@ public:
   /// _check(obj) == true であると仮定している．
   static
   SopCube&
-  _get(
+  Get(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 
