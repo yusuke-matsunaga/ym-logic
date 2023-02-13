@@ -59,6 +59,7 @@ set_target_properties( py_ymlogiclib
 
 target_link_libraries( py_ymlogiclib
   ${YM_LIB_DEPENDS}
+  ${Python3_LIBRARIES}
   )
 
 # ===================================================================
