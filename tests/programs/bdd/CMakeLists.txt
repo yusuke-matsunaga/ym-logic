@@ -130,6 +130,7 @@ target_link_libraries ( dot_test_d
   )
 
 
+if ( 0 )
 # ===================================================================
 #  blif2bdd
 # ===================================================================
@@ -183,3 +184,5 @@ target_compile_options ( blif2bdd_d
 target_link_libraries ( blif2bdd_d
   ${YM_LIB_DEPENDS}
   )
+
+endif ()
