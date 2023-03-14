@@ -65,7 +65,7 @@ operator<<(
   case PrimType::Nand: s << "Nand"; break;
   case PrimType::Or:   s << "Or"; break;
   case PrimType::Nor:  s << "Nor"; break;
-  case PrimType::Xor:  s << "Nor"; break;
+  case PrimType::Xor:  s << "Xor"; break;
   case PrimType::Xnor: s << "Xnor"; break;
   }
   return s;
