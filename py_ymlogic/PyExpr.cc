@@ -811,7 +811,7 @@ Expr_operand_list(
   for ( SizeType i = 0; i < n; ++ i ) {
     auto expr1 = expr.operand(i);
     auto expr1_obj = PyExpr::ToPyObject(expr1);
-    PyList_SetItem(ans_obj, i, expr1_obj);
+    PyList_SET_ITEM(ans_obj, i, expr1_obj);
   }
   return ans_obj;
 }

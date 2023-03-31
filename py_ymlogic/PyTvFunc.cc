@@ -333,7 +333,7 @@ TvFunc_npn_cannonical_all_map(
   for ( SizeType i = 0; i < n; ++ i ) {
     auto& npnmap = npnmap_list[i];
     auto obj1 = PyNpnMap::ToPyObject(npnmap);
-    PyList_SetItem(ans_obj, i, obj1);
+    PyList_SET_ITEM(ans_obj, i, obj1);
   }
   return ans_obj;
 }

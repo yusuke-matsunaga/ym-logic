@@ -102,7 +102,7 @@ BddVarSet_to_varlist(
     for ( SizeType i = 0; i < n; ++ i ) {
       auto var = varlist[i];
       auto var_obj = PyLong_FromLong(var);
-      PyList_SetItem(ans_obj, i, var_obj);
+      PyList_SET_ITEM(ans_obj, i, var_obj);
     }
     return ans_obj;
   }

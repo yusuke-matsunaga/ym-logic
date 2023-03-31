@@ -507,7 +507,7 @@ Bdd_to_litlist(
     for ( SizeType i = 0; i < n; ++ i ) {
       auto lit = litlist[i];
       auto lit_obj = PyLiteral::ToPyObject(lit);
-      PyList_SetItem(ans_obj, i, lit_obj);
+      PyList_SET_ITEM(ans_obj, i, lit_obj);
     }
     return ans_obj;
   }

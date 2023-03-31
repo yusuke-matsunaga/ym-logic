@@ -139,9 +139,9 @@ SopCover_literal_list(
     for ( SizeType j = 0; j < m; ++ j ) {
       auto lit = lit_list[j];
       auto lit_obj = PyLiteral::ToPyObject(lit);
-      PyList_SetItem(obj1, j, lit_obj);
+      PyList_SET_ITEM(obj1, j, lit_obj);
     }
-    PyList_SetItem(ans_obj, i, obj1);
+    PyList_SET_ITEM(ans_obj, i, obj1);
   }
   return ans_obj;
 }
