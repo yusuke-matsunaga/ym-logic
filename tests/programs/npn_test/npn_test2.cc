@@ -33,16 +33,16 @@ npn_test2(
 
   Timer timer;
 
-  ymuint tvcount = 0;
-  ymuint tvmax = 0;
-  ymuint redmax = 0;
+  SizeType tvcount = 0;
+  SizeType tvmax = 0;
+  SizeType redmax = 0;
 
   string line;
   while ( getline(fs, line) ) {
     string ni_str;
     string func_str;
     bool head = true;
-    for (ymuint i = 0; i < line.size(); ++ i) {
+    for ( int i = 0; i < line.size(); ++ i) {
       char c = line[i];
       if ( head ) {
 	if ( c == ':' ) {
@@ -56,15 +56,15 @@ npn_test2(
 	func_str += c;
       }
     }
-    ymuint ni = atoi(ni_str.c_str());
-    ymuint ni_exp = 1U << ni;
+    int ni = atoi(ni_str.c_str());
+    SizeType ni_exp = 1U << ni;
     if ( func_str.size() != ni_exp ) {
       cerr << "illegal func_str: " << func_str << endl
 	   << "expected size = " << ni_exp << endl;
       continue;
     }
     vector<int> values(ni_exp);
-    for (ymuint i = 0; i < ni_exp; ++ i) {
+    for (int i = 0; i < ni_exp; ++ i) {
       if ( func_str[i] == '0' ) {
 	values[i] = 0;
       }
@@ -82,8 +82,8 @@ npn_test2(
     npnmgr.all_cmap(cmap_list);
     timer.stop();
     cout << "cmap_list size: " << cmap_list.size() << endl;
-    ymuint tv = npnmgr.tvmax_count();
-    ymuint red_num = tv > 0 ? tv - cmap_list.size() : 0;
+    auto tv = npnmgr.tvmax_count();
+    auto red_num = tv > 0 ? tv - cmap_list.size() : 0;
     if ( tvmax < tv ) {
       tvmax = tv;
     }

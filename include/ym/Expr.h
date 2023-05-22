@@ -44,7 +44,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief eval() で用いられるビットベクタの型
-  using BitVectType = ymuint64;
+  using BitVectType = std::uint64_t;
 
 
 public:

@@ -52,7 +52,7 @@ public:
   /// @brief w2max_recur の起動回数を返す．
   /// 直前の cannonical の呼び出しにおける
   /// w2max_recur の起動回数を返す．
-  ymulong
+  std::uint64_t
   tvmax_count() const;
 
 
@@ -86,7 +86,7 @@ private:
   vector<NpnMap> mMaxList;
 
   // 1回の cannonical あたりの tvmax_recur の起動回数
-  ymuint64 mTvmax_count;
+  std::uint64_t mTvmax_count;
 
 };
 

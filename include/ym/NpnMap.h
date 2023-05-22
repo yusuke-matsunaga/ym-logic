@@ -250,7 +250,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数(8bit x 2) + 出力の極性
-  ymuint mNiPol{0};
+  std::uint32_t mNiPol{0};
 
   // 入力のマッピング情報
   NpnVmap mImap[TvFunc::kMaxNi];

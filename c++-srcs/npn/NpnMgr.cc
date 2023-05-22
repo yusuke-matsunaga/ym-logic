@@ -367,7 +367,7 @@ NpnMgr::all_cmap(vector<NpnMap>& map_list) const
 }
 
 // @brief 直前の cannonical の呼び出しにおける w2max_recur の起動回数を返す．
-ymulong
+std::uint64_t
 NpnMgr::tvmax_count() const
 {
   return mTvmax_count;

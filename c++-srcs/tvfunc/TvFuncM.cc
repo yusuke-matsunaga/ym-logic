@@ -720,7 +720,7 @@ TvFuncM::dump(
 ) const
 {
   s << mInputNum << mOutputNum;
-  s.write_block(reinterpret_cast<const ymuint8*>(mVector), mBlockNum * sizeof(WordType));
+  s.write_block(reinterpret_cast<const std::uint8_t*>(mVector), mBlockNum * sizeof(WordType));
 }
 
 // @brief バイナリファイルの読み込み
@@ -738,7 +738,7 @@ TvFuncM::restore(
     mBlockNum = nblk;
     mVector = new TvFuncM::WordType[mBlockNum];
   }
-  s.read_block(reinterpret_cast<ymuint8*>(mVector), mBlockNum * sizeof(WordType));
+  s.read_block(reinterpret_cast<std::uint8_t*>(mVector), mBlockNum * sizeof(WordType));
 }
 
 END_NAMESPACE_YM

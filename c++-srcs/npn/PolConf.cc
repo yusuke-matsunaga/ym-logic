@@ -34,7 +34,7 @@ print_polconf(
   int ni
 )
 {
-  ymuint32 inv_bits = polconf.iinv_bits();
+  std::uint32_t inv_bits = polconf.iinv_bits();
   for (int i = 0; i < ni; ++ i) {
     if ( inv_bits & (1U << i) ) {
       s << "N";

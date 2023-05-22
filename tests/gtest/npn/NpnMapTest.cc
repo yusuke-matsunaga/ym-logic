@@ -14,12 +14,12 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 TEST(NpnMapTest, identity)
 {
-  ymuint ni = 5;
+  int ni = 5;
   auto map = NpnMap::identity(ni);
   EXPECT_EQ( ni, map.input_num() );
   EXPECT_EQ( ni, map.input_num2() );
   EXPECT_EQ( false, map.oinv() );
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     auto imap = map.imap(i);
     EXPECT_EQ( i, imap.var() );
     EXPECT_FALSE( imap.inv() );
@@ -28,12 +28,12 @@ TEST(NpnMapTest, identity)
 
 TEST(NpnMapTest, identity2)
 {
-  ymuint ni = 10;
+  int ni = 10;
   auto map = NpnMap::identity(ni, true);
   EXPECT_EQ( ni, map.input_num() );
   EXPECT_EQ( ni, map.input_num2() );
   EXPECT_EQ( true, map.oinv() );
-  for (ymuint i = 0; i < ni; ++ i) {
+  for (int i = 0; i < ni; ++ i) {
     auto imap = map.imap(i);
     EXPECT_EQ( i, imap.var() );
     EXPECT_FALSE( imap.inv() );

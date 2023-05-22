@@ -27,7 +27,7 @@ public:
 
   /// @brief コンストラクタ
   BddEdge(
-    ympuint body = 0UL
+    PtrIntType body = 0UL
   ) : mBody{body}
   {
   }
@@ -36,7 +36,7 @@ public:
   BddEdge(
     BddNode* node,   ///< [in] ノード
     bool inv = false ///< [in] 反転フラグ
-  ) : mBody{reinterpret_cast<ympuint>(node) | static_cast<ympuint>(inv)}
+  ) : mBody{reinterpret_cast<PtrIntType>(node) | static_cast<PtrIntType>(inv)}
   {
   }
 
@@ -113,7 +113,7 @@ public:
   }
 
   /// @brief 本体の値を返す．
-  ympuint
+  PtrIntType
   body() const
   {
     return mBody;
@@ -171,7 +171,7 @@ public:
     bool inv ///< [in] 反転フラグ
   ) const
   {
-    return BddEdge{mBody ^ static_cast<ympuint>(inv)};
+    return BddEdge{mBody ^ static_cast<PtrIntType>(inv)};
   }
 
   /// @brief 極性と掛け合わせて代入する．
@@ -180,7 +180,7 @@ public:
     bool inv ///< [in] 反転フラグ
   )
   {
-    mBody ^= static_cast<ympuint>(inv);
+    mBody ^= static_cast<PtrIntType>(inv);
     return *this;
   }
 
@@ -209,7 +209,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 実体
-  ympuint mBody{0UL};
+  PtrIntType mBody{0UL};
 
 };
 

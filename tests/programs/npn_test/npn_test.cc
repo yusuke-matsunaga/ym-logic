@@ -58,11 +58,11 @@ npn_test(
       TvFunc f(ni, values);
       NpnMgr npnmgr;
       TvFunc cf = npnmgr.cannonical(f);
-      ymuint tv = npnmgr.tvmax_count();
+      auto tv = npnmgr.tvmax_count();
       vector<NpnMap> cmap_list;
       npnmgr.all_cmap(cmap_list);
       tvcount += tv;
-      ymuint red_num = tv > 0 ? tv - cmap_list.size() : 0;
+      auto red_num = tv > 0 ? tv - cmap_list.size() : 0;
       if ( tvmax < tv ) {
 	tvmax = tv;
       }
@@ -87,11 +87,11 @@ npn_test(
       TvFunc f(ni, values);
       NpnMgr npnmgr;
       TvFunc cf = npnmgr.cannonical(f);
-      ymuint tv = npnmgr.tvmax_count();
+      auto tv = npnmgr.tvmax_count();
       vector<NpnMap> cmap_list;
       npnmgr.all_cmap(cmap_list);
       tvcount += tv;
-      ymuint red_num = tv > 0 ? tv - cmap_list.size() : 0;
+      auto red_num = tv > 0 ? tv - cmap_list.size() : 0;
       if ( tvmax < tv ) {
 	tvmax = tv;
       }

@@ -720,7 +720,7 @@ private:
   BddMgrImpl* mMgr{nullptr};
 
   // 根の枝
-  ympuint mRoot;
+  PtrIntType mRoot;
 
 };
 

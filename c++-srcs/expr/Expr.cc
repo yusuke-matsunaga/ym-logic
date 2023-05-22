@@ -757,7 +757,7 @@ Expr::restore(
   BinDec& s
 )
 {
-  ymuint8 type;
+  std::uint8_t type;
   s >> type;
   switch ( type ) {
   case 255:
@@ -825,30 +825,30 @@ Expr::dump(
 ) const
 {
   if ( is_invalid() ) {
-    s << static_cast<ymuint8>(255);
+    s << static_cast<std::uint8_t>(255);
     return;
   }
   if ( is_zero() ) {
-    s << static_cast<ymuint8>(0);
+    s << static_cast<std::uint8_t>(0);
     return;
   }
   if ( is_one() ) {
-    s << static_cast<ymuint8>(1);
+    s << static_cast<std::uint8_t>(1);
     return;
   }
   if ( is_posi_literal() ) {
-    s << static_cast<ymuint8>(2)
+    s << static_cast<std::uint8_t>(2)
       << varid();
     return;
   }
   if ( is_nega_literal() ) {
-    s << static_cast<ymuint8>(3)
+    s << static_cast<std::uint8_t>(3)
       << varid();
     return;
   }
 
   // 残りは論理演算ノード
-  ymuint8 type = 0;
+  std::uint8_t type = 0;
   if ( is_and() ) {
     type = 4;
   }

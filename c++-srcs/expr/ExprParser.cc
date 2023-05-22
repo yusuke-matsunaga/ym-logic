@@ -39,7 +39,7 @@ ExprParser::str_to_literal(
   SizeType id = 0;
   for ( char c: str ) {
     id *= 10;
-    id += static_cast<ymuint>(c - '0');
+    id += static_cast<SizeType>(c - '0');
   }
   return id;
 }

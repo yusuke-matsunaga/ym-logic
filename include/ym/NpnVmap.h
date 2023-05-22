@@ -40,7 +40,7 @@ public:
     bool inv = false ///< [in] 反転属性
                      ///        - false: 反転なし (正極性)
                      ///        - true:  反転あり (負極性)
-  ) : mPosPol((var << 1) | static_cast<ymuint8>(inv))
+  ) : mPosPol((var << 1) | static_cast<std::uint8_t>(inv))
   {
   }
 
@@ -135,7 +135,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数番号と極性をパックしたもの
-  ymuint8 mPosPol;
+  std::uint8_t mPosPol;
 
 };
 

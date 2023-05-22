@@ -40,7 +40,7 @@ class TvFunc
   friend class TvFuncM;
 
 public:
-  using WordType = ymuint64;
+  using WordType = std::uint64_t;
 
 public:
 

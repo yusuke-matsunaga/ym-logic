@@ -34,7 +34,7 @@ public:
   /// @param[in] oinv 出力を反転させる時 true にするフラグ
   /// @param[in] iinv_bits 入力の反転フラグを表すビットベクタ
   PolConf(bool oinv,
-	  ymuint32 iinv_bits);
+	  std::uint32_t iinv_bits);
 
   /// @brief デストラクタ
   ~PolConf();
@@ -50,7 +50,7 @@ public:
   oinv() const;
 
   /// @brief 入力の反転ビットベクタを返す．
-  ymuint32
+  std::uint32_t
   iinv_bits() const;
 
   /// @brief 入力の反転フラグを返す．
@@ -77,7 +77,7 @@ private:
 
   // 本体
   // 最下位ビットが oinv，残りが iinv_bits となる．
-  ymuint32 mBits;
+  std::uint32_t mBits;
 
 };
 
@@ -120,9 +120,9 @@ PolConf::PolConf()
 // @param[in] iinv_bits 入力の反転フラグを表すビットベクタ
 inline
 PolConf::PolConf(bool oinv,
-		 ymuint32 iinv_bits)
+		 std::uint32_t iinv_bits)
 {
-  mBits = static_cast<ymuint32>(oinv) | (iinv_bits << 1);
+  mBits = static_cast<std::uint32_t>(oinv) | (iinv_bits << 1);
 }
 
 // @brief デストラクタ
@@ -141,7 +141,7 @@ PolConf::oinv() const
 
 // @brief 入力の反転ビットベクタを返す．
 inline
-ymuint32
+std::uint32_t
 PolConf::iinv_bits() const
 {
   return mBits >> 1;

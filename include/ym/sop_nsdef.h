@@ -25,7 +25,7 @@ END_NAMESPACE_YM
 BEGIN_NAMESPACE_YM_SOP
 
 /// @brief SopPat をパックしたビットベクタ型
-using SopBitVect = ymuint64;
+using SopBitVect = std::uint64_t;
 
 // クラス名の前方参照用宣言
 class SopBlock;
@@ -38,7 +38,7 @@ END_NAMESPACE_YM_SOP
 BEGIN_NAMESPACE_YM
 
 /// @brief パタンを表す列挙型
-enum class SopPat : ymuint8 {
+enum class SopPat : std::uint8_t {
   _X = 0, ///< なし
   _1 = 1, ///< 正極性
   _0 = 2  ///< 負極性
