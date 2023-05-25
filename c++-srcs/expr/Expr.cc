@@ -740,8 +740,7 @@ restore_operand_list(
   BinDec& s
 )
 {
-  SizeType nc;
-  s >> nc;
+  SizeType nc = s.read_64();
   vector<Expr> opr_list(nc);
   for ( SizeType i = 0; i < nc; ++ i ) {
     opr_list[i] = Expr::restore(s);
@@ -757,8 +756,7 @@ Expr::restore(
   BinDec& s
 )
 {
-  std::uint8_t type;
-  s >> type;
+  auto type = s.read_8();
   switch ( type ) {
   case 255:
     return Expr::make_invalid();
@@ -771,15 +769,13 @@ Expr::restore(
 
   case 2:
     {
-      SizeType var;
-      s >> var;
+      SizeType var = s.read_64();
       return Expr::make_posi_literal(var);
     }
 
   case 3:
     {
-      SizeType var;
-      s >> var;
+      SizeType var = s.read_64();
       return Expr::make_nega_literal(var);
     }
 
@@ -825,25 +821,25 @@ Expr::dump(
 ) const
 {
   if ( is_invalid() ) {
-    s << static_cast<std::uint8_t>(255);
+    s.write_8(255);
     return;
   }
   if ( is_zero() ) {
-    s << static_cast<std::uint8_t>(0);
+    s.write_8(0);
     return;
   }
   if ( is_one() ) {
-    s << static_cast<std::uint8_t>(1);
+    s.write_8(1);
     return;
   }
   if ( is_posi_literal() ) {
-    s << static_cast<std::uint8_t>(2)
-      << varid();
+    s.write_8(2);
+    s.write_64(varid());
     return;
   }
   if ( is_nega_literal() ) {
-    s << static_cast<std::uint8_t>(3)
-      << varid();
+    s.write_8(3);
+    s.write_64(varid());
     return;
   }
 
@@ -861,10 +857,9 @@ Expr::dump(
   else {
     ASSERT_NOT_REACHED;
   }
+  s.write_8(type);
 
-  SizeType no = operand_num();
-  s << type
-    << no;
+  s.write_64(operand_num());
   for ( auto& opr: operand_list() ) {
     opr.dump(s);
   }

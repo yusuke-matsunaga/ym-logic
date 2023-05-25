@@ -880,10 +880,10 @@ TvFunc::dump(
 {
   if ( is_invalid() ) {
     // 不正値
-    s << static_cast<SizeType>(-1);
+    s.write_64(-1);
   }
   else {
-    s << mInputNum;
+    s.write_64(mInputNum);
     s.write_block(reinterpret_cast<const std::uint8_t*>(mVector), mBlockNum * sizeof(WordType));
   }
 }
@@ -894,7 +894,7 @@ TvFunc::restore(
   BinDec& s
 )
 {
-  s >> mInputNum;
+  mInputNum = s.read_64();
   if ( mInputNum == - 1 ) {
     // 不正値
     mInputNum = 0;

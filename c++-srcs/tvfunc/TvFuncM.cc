@@ -719,7 +719,8 @@ TvFuncM::dump(
   BinEnc& s
 ) const
 {
-  s << mInputNum << mOutputNum;
+  s.write_64(mInputNum);
+  s.write_64(mOutputNum);
   s.write_block(reinterpret_cast<const std::uint8_t*>(mVector), mBlockNum * sizeof(WordType));
 }
 
@@ -730,7 +731,8 @@ TvFuncM::restore(
   BinDec& s
 )
 {
-  s >> mInputNum >> mOutputNum;
+  mInputNum = s.read_64();
+  mOutputNum = s.read_64();
   mBlockNum1 = nblock(mInputNum);
   int nblk = mBlockNum1 * mOutputNum;
   if ( mBlockNum != nblk ) {
