@@ -71,6 +71,6 @@ target_link_libraries ( py_ymlogic_d
 # テストターゲット
 # ===================================================================
 
-add_test( py_ymlogic_test
+add_test( logic_py_ymlogic_test
   py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
   )
