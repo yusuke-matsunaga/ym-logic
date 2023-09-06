@@ -40,7 +40,7 @@
 add_subdirectory( gtest )
 add_subdirectory( programs )
 if ( Python3_FOUND )
-  add_subdirectory( py_ymlogic )
+  add_subdirectory( pytest )
 endif ( Python3_FOUND )
 
 
