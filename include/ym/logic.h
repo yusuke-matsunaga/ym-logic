@@ -5,7 +5,7 @@
 /// @brief ym-logic パッケージの基本ヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 /// @defgroup LogicGroup 論理式と論理関数を扱うクラス
@@ -14,7 +14,6 @@
 /// C++ の機能を活かして論理演算子のオーバーロードを使っている．
 
 #include "ym_config.h"
-
 
 /// @brief ym-logic 用の名前空間の開始
 #define BEGIN_NAMESPACE_YM_LOGIC \
@@ -84,6 +83,29 @@ class FuncAnalyzer;
 
 END_NAMESPACE_YM_LOGIC
 
+/// @brief BDD 用の名前空間の開始
+#define BEGIN_NAMESPACE_YM_BDD \
+BEGIN_NAMESPACE_YM \
+BEGIN_NAMESPACE(nsBdd)
+
+/// @brief BDD 用の名前空間の終了
+#define END_NAMESPACE_YM_BDD \
+END_NAMESPACE(nsBdd) \
+END_NAMESPACE_YM
+
+BEGIN_NAMESPACE_YM_BDD
+
+//////////////////////////////////////////////////////////////////////
+// クラスの先行宣言
+//////////////////////////////////////////////////////////////////////
+
+class Bdd;
+class BddVarSet;
+class BddMgr;
+struct BddInfo;
+
+END_NAMESPACE_YM_BDD
+
 
 BEGIN_NAMESPACE_YM
 
@@ -98,6 +120,11 @@ using nsLogic::NpnMapM;
 using nsLogic::NpnVmap;
 using nsLogic::PrimType;
 using nsLogic::FuncAnalyzer;
+
+using nsBdd::Bdd;
+using nsBdd::BddVarSet;
+using nsBdd::BddMgr;
+using nsBdd::BddInfo;
 
 /// @brief 不正な変数番号
 const SizeType BAD_VARID = static_cast<SizeType>(-1);

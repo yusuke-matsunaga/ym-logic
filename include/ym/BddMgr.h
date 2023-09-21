@@ -8,7 +8,7 @@
 /// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/bdd_nsdef.h"
+#include "ym/logic.h"
 #include "ym/Literal.h"
 #include "ym/BinDec.h"
 

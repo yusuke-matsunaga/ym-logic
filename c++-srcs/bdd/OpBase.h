@@ -8,7 +8,7 @@
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/bdd_nsdef.h"
+#include "ym/logic.h"
 #include "BddMgrImpl.h"
 
 

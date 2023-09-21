@@ -8,7 +8,7 @@
 /// Copyright (C) 2022, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/bdd_nsdef.h"
+#include "ym/logic.h"
 #include "BddNode.h"
 #include "BddEdge.h"
 #include "Apply3Key.h"
