@@ -143,8 +143,7 @@ TvFunc::TvFunc(
     mBlockNum{nblock(ni)},
     mVector{new TvFunc::WordType[mBlockNum]}
 {
-  ASSERT_COND( varid != BAD_VARID );
-  ASSERT_COND( varid < ni );
+  check_varid(varid);
 
   for ( SizeType b: Range(mBlockNum) ) {
     TvFunc::WordType pat = lit_pat(varid, b);
@@ -165,7 +164,10 @@ TvFunc::TvFunc(
     mVector{new TvFunc::WordType[mBlockNum]}
 {
   SizeType ni_pow = 1 << ni;
-  ASSERT_COND( values.size() == ni_pow );
+  if ( values.size() != ni_pow ) {
+    throw std::invalid_argument{"the size of 'values' should be 2 to the power of 'ni'"};
+  }
+
   SizeType base = 0;
   TvFunc::WordType bitpat = 0ULL;
   TvFunc::WordType bitmask = 1ULL;
@@ -192,13 +194,22 @@ TvFunc::TvFunc(
   const string& str
 )
 {
+  // str が適切な文字列か確認する．
+  for ( char c: str ) {
+    if ( c != '0' && c != '1' ) {
+      throw std::invalid_argument("only '0' or '1' are expected");
+    }
+  }
+  // 長さが2のべき乗になっているか確認する．
   SizeType ni;
   SizeType n = str.size();
   ni = 0;
   while ( (1 << ni) < n ) {
     ++ ni;
   }
-  ASSERT_COND( (1 << ni) == n );
+  if ( (1 << ni) != n ) {
+    throw std::invalid_argument("the data length is expected to be the power of 2");
+  }
 
   mInputNum = ni;
   mBlockNum = nblock(ni);
@@ -208,14 +219,8 @@ TvFunc::TvFunc(
   TvFunc::WordType bitmask = 1ULL;
   for ( SizeType i = 0; i < n; ++ i ) {
     char c = str[n - i - 1];
-    if ( c == '0' ) {
-      ;
-    }
-    else if ( c == '1' ) {
+    if ( c == '1' ) {
       bitpat |= bitmask;
-    }
-    else {
-      ASSERT_NOT_REACHED;
     }
     bitmask <<= 1;
     if ( bitmask == 0UL ) {
@@ -245,7 +250,6 @@ TvFunc::TvFunc(
 }
 
 // @brief ムーブコンストラクタ
-// @param[in] src ムーブ元のソースオブジェクト
 TvFunc::TvFunc(
   TvFunc&& src
 ) : mInputNum{src.mInputNum},
@@ -278,7 +282,6 @@ TvFunc::operator=(
 }
 
 // @brief ムーブ代入演算子
-// @return 自分自身への参照を返す．
 TvFunc&
 TvFunc::operator=(
   TvFunc&& src
@@ -309,9 +312,11 @@ TvFunc::~TvFunc()
 TvFunc&
 TvFunc::invert_int()
 {
-  TvFunc::WordType neg_mask = vec_mask(mInputNum);
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] ^= neg_mask;
+  if ( is_valid() ) {
+    TvFunc::WordType neg_mask = vec_mask(mInputNum);
+    for ( SizeType b: Range(mBlockNum) ) {
+      mVector[b] ^= neg_mask;
+    }
   }
   return *this;
 }
@@ -322,8 +327,10 @@ TvFunc::and_int(
   const TvFunc& src1
 )
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] &= src1.mVector[b];
+  if ( is_valid() ) {
+    for ( SizeType b: Range(mBlockNum) ) {
+      mVector[b] &= src1.mVector[b];
+    }
   }
   return *this;
 }
@@ -334,8 +341,10 @@ TvFunc::or_int(
   const TvFunc& src1
 )
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] |= src1.mVector[b];
+  if ( is_valid() ) {
+    for ( SizeType b: Range(mBlockNum) ) {
+      mVector[b] |= src1.mVector[b];
+    }
   }
   return *this;
 }
@@ -346,8 +355,10 @@ TvFunc::xor_int(
   const TvFunc& src1
 )
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] ^= src1.mVector[b];
+  if ( is_valid() ) {
+    for ( SizeType b: Range(mBlockNum) ) {
+      mVector[b] ^= src1.mVector[b];
+    }
   }
   return *this;
 }
@@ -359,37 +370,40 @@ TvFunc::cofactor_int(
   bool inv
 )
 {
-  ASSERT_COND( varid != BAD_VARID );
-  SizeType pos = varid;
-  if ( pos < NIPW ) {
-    TvFunc::WordType mask = c_masks[pos];
-    if ( inv ) {
-      mask = ~mask;
-    }
-    SizeType shift = 1 << pos;
-    for ( SizeType b: Range(mBlockNum) ) {
-      TvFunc::WordType pat = mVector[b] & mask;
+  if ( is_valid() ) {
+    check_varid(varid);
+
+    SizeType pos = varid;
+    if ( pos < NIPW ) {
+      TvFunc::WordType mask = c_masks[pos];
       if ( inv ) {
-	pat |= (pat << shift);
+	mask = ~mask;
       }
-      else {
-	pat |= (pat >> shift);
-      }
-      mVector[b] = pat;
-    }
-  }
-  else {
-    pos -= NIPW;
-    SizeType bit = 1U << pos;
-    for ( SizeType b: Range(mBlockNum) ) {
-      if ( inv ) {
-	if ( (b & bit) == bit ) {
-	  mVector[b] = mVector[b ^ bit];
+      SizeType shift = 1 << pos;
+      for ( SizeType b: Range(mBlockNum) ) {
+	TvFunc::WordType pat = mVector[b] & mask;
+	if ( inv ) {
+	  pat |= (pat << shift);
 	}
+	else {
+	  pat |= (pat >> shift);
+	}
+	mVector[b] = pat;
       }
-      else {
-	if ( (b & bit) == 0U ) {
-	  mVector[b] = mVector[b ^ bit];
+    }
+    else {
+      pos -= NIPW;
+      SizeType bit = 1U << pos;
+      for ( SizeType b: Range(mBlockNum) ) {
+	if ( inv ) {
+	  if ( (b & bit) == bit ) {
+	    mVector[b] = mVector[b ^ bit];
+	  }
+	}
+	else {
+	  if ( (b & bit) == 0U ) {
+	    mVector[b] = mVector[b ^ bit];
+	  }
 	}
       }
     }
@@ -401,6 +415,11 @@ TvFunc::cofactor_int(
 bool
 TvFunc::is_zero() const
 {
+  if ( is_invalid() ) {
+    // 不正な関数なら定数ではない．
+    return false;
+  }
+
   for ( SizeType b: Range(mBlockNum) ) {
     TvFunc::WordType word = mVector[b];
     if ( word != 0UL ) {
@@ -414,6 +433,11 @@ TvFunc::is_zero() const
 bool
 TvFunc::is_one() const
 {
+  if ( is_invalid() ) {
+    // 不正な関数なら定数ではない．
+    return false;
+  }
+
   TvFunc::WordType mask = vec_mask(mInputNum);
   if ( mInputNum < NIPW ) {
     return (mVector[0] & mask) == mask;
@@ -435,7 +459,13 @@ TvFunc::check_sup(
   SizeType var
 ) const
 {
-  ASSERT_COND( var != BAD_VARID );
+  if ( is_invalid() ) {
+    // 不正な関数ならサポートではない．
+    return false;
+  }
+
+  check_varid(var);
+
   SizeType i = var;
   if ( i < NIPW ) {
     // ブロックごとにチェック
@@ -467,7 +497,13 @@ TvFunc::check_unate(
   SizeType varid
 ) const
 {
-  ASSERT_COND( varid != BAD_VARID );
+  if ( is_invalid() ) {
+    // 不正な関数なら true ?
+    return 3;
+  }
+
+  check_varid(varid);
+
   SizeType i = varid;
   bool positive_unate = true;
   bool negative_unate = true;
@@ -538,8 +574,14 @@ TvFunc::check_sym(
   bool inv
 ) const
 {
-  ASSERT_COND( var1 != BAD_VARID );
-  ASSERT_COND( var2 != BAD_VARID );
+  if ( is_invalid() ) {
+    // 不正な関数なら区別できない．
+    return true;
+  }
+
+  check_varid(var1, "var1");
+  check_varid(var2, "var2");
+
   SizeType i = var1;
   SizeType j = var2;
 
@@ -868,7 +910,7 @@ TvFunc::print(
     }
   }
   else {
-    ASSERT_NOT_REACHED;
+    throw std::invalid_argument{"'mode' should be 2 or 16"};
   }
 }
 

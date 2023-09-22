@@ -691,6 +691,21 @@ private:
     return pos % wsize;
   }
 
+  /// @brief varid が適切かチェックする．
+  void
+  check_varid(
+    SizeType varid,
+    const string& varname = "varid"
+  ) const
+  {
+    if ( varid == BAD_VARID || varid >= mInputNum ) {
+      abort();
+      ostringstream buf;
+      buf << "'" << varname << "' is out of range";
+      throw std::invalid_argument{buf.str()};
+    }
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////

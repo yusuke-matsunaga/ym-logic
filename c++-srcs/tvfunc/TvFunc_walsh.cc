@@ -269,6 +269,8 @@ TvFunc::walsh_1(
     return 0;
   }
 
+  check_varid(varid);
+
   switch ( input_num() ) {
   case 0: ASSERT_NOT_REACHED;
   case 1: return (1 << 1) - count_onebits_1(mVector[0] ^ c_mask(varid)) * 2;
@@ -303,13 +305,16 @@ TvFunc::walsh_2(
     return 0;
   }
 
+  check_varid(var1, "var1");
+  check_varid(var2, "var2");
+
   if ( var1 == var2 ) {
     return 0;
   }
 
   switch ( input_num() ) {
   case 0:
-  case 1: ASSERT_NOT_REACHED; return 0;
+  case 1: ASSERT_NOT_REACHED;
   case 2: return (1 << 2) - count_onebits_2(mVector[0] ^ c_mask(var1) ^ c_mask(var2)) * 2;
   case 3: return (1 << 3) - count_onebits_3(mVector[0] ^ c_mask(var1) ^ c_mask(var2)) * 2;
   case 4: return (1 << 4) - count_onebits_4(mVector[0] ^ c_mask(var1) ^ c_mask(var2)) * 2;

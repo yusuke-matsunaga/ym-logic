@@ -8,7 +8,7 @@
 /// Copyright (C) 2018 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/sop_nsdef.h"
+#include "ym/logic.h"
 
 
 BEGIN_NAMESPACE_YM_SOP

@@ -8,7 +8,7 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/sop_nsdef.h"
+#include "ym/logic.h"
 #include "ym/Expr.h"
 #include "ym/Literal.h"
 
