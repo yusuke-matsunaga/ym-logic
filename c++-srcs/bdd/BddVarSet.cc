@@ -12,6 +12,13 @@
 
 BEGIN_NAMESPACE_YM_BDD
 
+// @brief サポート変数のサイズを返す．
+SizeType
+Bdd::support_size() const
+{
+  return get_support().size();
+}
+
 // @brief 要素のリストを指定したコンストラクタ
 BddVarSet::BddVarSet(
   BddMgr& mgr,

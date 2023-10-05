@@ -435,6 +435,10 @@ public:
   bool
   is_posicube() const;
 
+  /// @brief サポート変数のサイズを返す．
+  SizeType
+  support_size() const;
+
   /// @brief 与えられた変数がサポートの時 true を返す．
   bool
   check_sup(
