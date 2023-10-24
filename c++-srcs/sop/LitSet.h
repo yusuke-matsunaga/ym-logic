@@ -164,7 +164,7 @@ operator+(
   const LitSet& right ///< [in] オペランド2
 )
 {
-  return LitSet{move(left)}.operator+=(right);
+  return LitSet{std::move(left)}.operator+=(right);
 }
 
 /// @brief LitSet 同士の加算(ユニオン演算)
@@ -176,7 +176,7 @@ operator+(
   LitSet&& right      ///< [in] オペランド2
 )
 {
-  return LitSet{move(right)}.operator+=(left);
+  return LitSet{std::move(right)}.operator+=(left);
 }
 
 /// @brief LitSet 同士の加算(ユニオン演算)
@@ -188,7 +188,7 @@ operator+(
   LitSet&& right ///< [in] オペランド2
 )
 {
-  return LitSet{move(left)}.operator+=(right);
+  return LitSet{std::move(left)}.operator+=(right);
 }
 
 /// @brief 要素を足す．
@@ -212,7 +212,7 @@ operator+(
   Literal lit             ///< [in] 追加するリテラル
 )
 {
-  return LitSet{move(lit_set)}.operator+=(lit);
+  return LitSet{std::move(lit_set)}.operator+=(lit);
 }
 
 END_NAMESPACE_YM_SOP

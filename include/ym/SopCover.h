@@ -436,7 +436,7 @@ operator-(
   const SopCover& right ///< [in] 第2オペランド
 )
 {
-  return SopCover{move(left)}.operator-=(right);
+  return SopCover{std::move(left)}.operator-=(right);
 }
 
 /// @relates SopCover
@@ -449,7 +449,7 @@ operator-(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCover{move(left)}.operator-=(right);
+  return SopCover{std::move(left)}.operator-=(right);
 }
 
 /// @relates SopCover, SopCube
@@ -462,7 +462,7 @@ operator*(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCover{move(left)}.operator*=(right);
+  return SopCover{std::move(left)}.operator*=(right);
 }
 
 /// @relates SopCover, SopCube
@@ -490,7 +490,7 @@ operator*(
 )
 {
   // 交換則を用いる．
-  return SopCover{move(right)}.operator*=(left);
+  return SopCover{std::move(right)}.operator*=(left);
 }
 
 /// @relates SopCover, Literal
@@ -503,7 +503,7 @@ operator*(
   Literal right	   ///< [in] 第2オペランド
 )
 {
-  return SopCover{move(left)}.operator*=(right);
+  return SopCover{std::move(left)}.operator*=(right);
 }
 
 /// @relates SopCover, Literal
@@ -531,7 +531,7 @@ operator*(
 )
 {
   // 交換則を用いる．
-  return SopCover{move(right)}.operator*=(left);
+  return SopCover{std::move(right)}.operator*=(left);
 }
 
 /// @relates SopCover
@@ -544,7 +544,7 @@ operator/(
   const SopCover& right ///< [in] 第2オペランド
 )
 {
-  return SopCover{move(left)}.operator/=(right);
+  return SopCover{std::move(left)}.operator/=(right);
 }
 
 /// @relates SopCover, SopCube
@@ -557,7 +557,7 @@ operator/(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCover{move(left)}.operator/=(right);
+  return SopCover{std::move(left)}.operator/=(right);
 }
 
 /// @relates SopCover, Literal
@@ -570,7 +570,7 @@ operator/(
   Literal right	   ///< [in] 第2オペランド
 )
 {
-  return SopCover{move(left)}.operator/=(right);
+  return SopCover{std::move(left)}.operator/=(right);
 }
 
 /// @relates SopCover
