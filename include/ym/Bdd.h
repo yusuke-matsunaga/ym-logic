@@ -453,10 +453,13 @@ public:
     bool inv = false ///< [in] 反転フラグ
   ) const;
 
-  /// @brief サポート変数のリストを得る．
-  /// @return サポート変数の表すBDD(BddVarSet)を返す．
+  /// @brief サポート変数を表すBDD(BddVarSet)を返す．
   BddVarSet
   get_support() const;
+
+  /// @brief サポート変数のリスト(vector)を得る．
+  vector<SizeType>
+  get_support_list() const;
 
   /// @brief 1となるパスを求める．
   /// @return 論理積を表すBDDを返す．

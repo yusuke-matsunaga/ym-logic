@@ -145,7 +145,7 @@ Bdd::is_posicube() const
   return true;
 }
 
-// @brief サポート変数のリストを得る．
+// @brief サポートを表すBDDを返す．
 BddVarSet
 Bdd::get_support() const
 {
@@ -154,6 +154,13 @@ Bdd::get_support() const
   SupOp op{mMgr};
   auto e = op.get_step(mRoot);
   return BddVarSet{Bdd{mMgr, e}};
+}
+
+// @brief サポート変数のリスト(vector)を得る．
+vector<SizeType>
+Bdd::get_support_list() const
+{
+  return get_support().to_varlist();
 }
 
 // @brief 変数のリストに変換する．
