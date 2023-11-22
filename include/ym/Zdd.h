@@ -381,6 +381,10 @@ public:
     const vector<Zdd>& bdd_list ///< [in] ZDDのリスト
   );
 
+  /// @brief 集合の要素数を数える．
+  SizeType
+  count() const;
+
   /// @brief 同じ構造を持つか調べる．
   ///
   /// 同じマネージャに属するZDDなら同じノードだが

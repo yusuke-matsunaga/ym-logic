@@ -33,6 +33,7 @@ TEST(ZddTest, zero)
   EXPECT_FALSE( zdd.is_invalid() );
   EXPECT_TRUE( zdd.is_zero() );
   EXPECT_FALSE( zdd.is_one() );
+  EXPECT_EQ( 0, zdd.count() );
 
   Zdd f0;
   Zdd f1;
@@ -52,6 +53,7 @@ TEST(ZddTest, one)
   EXPECT_FALSE( zdd.is_invalid() );
   EXPECT_FALSE( zdd.is_zero() );
   EXPECT_TRUE( zdd.is_one() );
+  EXPECT_EQ( 1, zdd.count() );
 
   Zdd f0;
   Zdd f1;
@@ -71,6 +73,7 @@ TEST(ZddTest, make_set1)
   EXPECT_FALSE( zdd.is_invalid() );
   EXPECT_FALSE( zdd.is_zero() );
   EXPECT_FALSE( zdd.is_one() );
+  EXPECT_EQ( 1, zdd.count() );
 
   Zdd f0;
   Zdd f1;
@@ -92,6 +95,7 @@ TEST(ZddTest, make_set2)
   EXPECT_FALSE( zdd.is_invalid() );
   EXPECT_FALSE( zdd.is_zero() );
   EXPECT_FALSE( zdd.is_one() );
+  EXPECT_EQ( 1, zdd.count() );
 
   Zdd f0;
   Zdd f1;
@@ -112,6 +116,7 @@ TEST(ZddTest, make_set3)
   ZddMgr mgr;
 
   auto zdd = mgr.make_set({});
+  EXPECT_EQ( 1, zdd.count() );
 
   EXPECT_TRUE( zdd.is_valid() );
   EXPECT_FALSE( zdd.is_invalid() );
@@ -131,6 +136,7 @@ TEST(ZddTest, cup1)
   EXPECT_FALSE( zdd.is_invalid() );
   EXPECT_FALSE( zdd.is_zero() );
   EXPECT_FALSE( zdd.is_one() );
+  EXPECT_EQ( 2, zdd.count() );
 
   Zdd f0;
   Zdd f1;
@@ -159,6 +165,7 @@ TEST(ZddTest, cup2)
   EXPECT_FALSE( zdd.is_invalid() );
   EXPECT_FALSE( zdd.is_zero() );
   EXPECT_FALSE( zdd.is_one() );
+  EXPECT_EQ( 2, zdd.count() );
 
   Zdd f0;
   Zdd f1;
@@ -193,6 +200,7 @@ TEST(ZddTest, cup3)
   EXPECT_FALSE( zdd.is_invalid() );
   EXPECT_FALSE( zdd.is_zero() );
   EXPECT_FALSE( zdd.is_one() );
+  EXPECT_EQ( 2, zdd.count() );
 
   Zdd f0;
   Zdd f1;
@@ -229,6 +237,8 @@ TEST(ZddTest, cup4)
 
   auto zdd = zdd2 | zdd3;
 
+  EXPECT_EQ( 2, zdd.count() );
+
   Zdd f0;
   Zdd f1;
   auto index = zdd.root_decomp(f0, f1);
@@ -264,6 +274,8 @@ TEST(ZddTest, cup5)
 
   auto zdd = zdd1 | zdd2;
 
+  EXPECT_EQ( 2, zdd.count() );
+
   Zdd f0;
   Zdd f1;
   auto index = zdd.root_decomp(f0, f1);
@@ -288,6 +300,8 @@ TEST(ZddTest, cap1)
 
   auto zdd = zdd4 & zdd6;
 
+  EXPECT_EQ( 1, zdd.count() );
+
   EXPECT_EQ( zdd2, zdd );
 }
 
@@ -306,6 +320,8 @@ TEST(ZddTest, cap2)
   auto zdd6 = zdd2 | zdd5 | zdd3;
 
   auto zdd = zdd4 & zdd6;
+
+  EXPECT_EQ( 2, zdd.count() );
 
   auto ref_zdd = zdd2 | zdd3;
 
@@ -327,6 +343,8 @@ TEST(ZddTest, cap3)
   auto zdd6 = zdd2 | zdd5 | zdd3;
 
   auto zdd = zdd4 & zdd6;
+
+  EXPECT_EQ( 2, zdd.count() );
 
   auto ref_zdd = zdd2 | zdd3;
 
@@ -350,6 +368,8 @@ TEST(ZddTest, cap4)
 
   auto zdd = zdd4 & zdd6;
 
+  EXPECT_EQ( 3, zdd.count() );
+
   auto ref_zdd = zdd2 | zdd3 | uzdd;
 
   EXPECT_EQ( ref_zdd, zdd );
@@ -366,6 +386,8 @@ TEST(ZddTest, diff1)
   auto zdd4 = zdd1 | zdd2 | zdd3;
 
   auto zdd = zdd4 - zdd3;
+
+  EXPECT_EQ( 2, zdd.count() );
 
   auto ref_zdd = zdd1 | zdd2;
 
@@ -384,6 +406,8 @@ TEST(ZddTest, diff2)
   auto zdd5 = zdd1 | zdd2;
   auto zdd = zdd4 - zdd5;
 
+  EXPECT_EQ( 1, zdd.count() );
+
   auto ref_zdd = zdd3;
 
   EXPECT_EQ( ref_zdd, zdd );
@@ -397,6 +421,8 @@ TEST(ZddTest, product1)
   auto zdd2 = mgr.make_set({1});
 
   auto zdd = zdd1 * zdd2;
+
+  EXPECT_EQ( 1, zdd.count() );
 
   Zdd f0;
   Zdd f1;
@@ -424,6 +450,8 @@ TEST(ZddTest, product2)
   auto zdd2 = zdd20 | zdd21;
 
   auto zdd = zdd1 * zdd2;
+
+  EXPECT_EQ( 4, zdd.count() );
 
   Zdd f0;
   Zdd f1;

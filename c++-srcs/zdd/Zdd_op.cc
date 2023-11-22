@@ -12,6 +12,7 @@
 #include "ZddNode.h"
 #include "ProductOp.h"
 #include "RootHolder.h"
+#include "CountOp.h"
 
 
 BEGIN_NAMESPACE_YM_ZDD
@@ -198,6 +199,42 @@ ProductOp::op_step(
   }
   auto result = new_node(top_index, e00, sum);
   mTable.emplace(key, result);
+  return result;
+}
+
+// @brief 集合の要素数を数える．
+SizeType
+Zdd::count() const
+{
+  _check_valid();
+
+  CountOp op;
+  return op.op_step(ZddEdge{mRoot});
+}
+
+SizeType
+CountOp::op_step(
+  ZddEdge edge
+)
+{
+  if ( edge.is_zero() ) {
+    return 0;
+  }
+  if ( edge.is_one() ) {
+    return 1;
+  }
+
+  if ( mTable.count(edge) > 0 ) {
+    return mTable.at(edge);
+  }
+
+  auto node = edge.node();
+  auto edge0 = node->edge0();
+  auto edge1 = node->edge1();
+  auto c0 = op_step(edge0);
+  auto c1 = op_step(edge1);
+  auto result = c0 + c1;
+  mTable.emplace(edge, result);
   return result;
 }
 
