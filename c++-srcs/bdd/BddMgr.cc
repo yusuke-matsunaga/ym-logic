@@ -33,11 +33,11 @@ BddMgr::copy(
 )
 {
   if ( src.mMgr == impl() ) {
-    return Bdd{impl(), src.mRoot};
+    return Bdd{impl(), BddEdge{src.mRoot}};
   }
   else {
     CopyOp op{impl()};
-    auto e = op.copy_step(src.mRoot);
+    auto e = op.copy_step(BddEdge{src.mRoot});
     return Bdd{impl(), e};
   }
 }

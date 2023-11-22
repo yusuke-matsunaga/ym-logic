@@ -106,6 +106,29 @@ struct BddInfo;
 
 END_NAMESPACE_YM_BDD
 
+/// @brief ZDD 用の名前空間の開始
+#define BEGIN_NAMESPACE_YM_ZDD \
+BEGIN_NAMESPACE_YM \
+BEGIN_NAMESPACE(nsZdd)
+
+/// @brief ZDD 用の名前空間の終了
+#define END_NAMESPACE_YM_ZDD \
+END_NAMESPACE(nsZdd) \
+END_NAMESPACE_YM
+
+BEGIN_NAMESPACE_YM_ZDD
+
+//////////////////////////////////////////////////////////////////////
+// クラスの先行宣言
+//////////////////////////////////////////////////////////////////////
+
+class Zdd;
+class ZddVarSet;
+class ZddMgr;
+struct ZddInfo;
+
+END_NAMESPACE_YM_ZDD
+
 /// @brief SOP 用の名前空間の開始
 #define BEGIN_NAMESPACE_YM_SOP \
 BEGIN_NAMESPACE_YM \
@@ -149,6 +172,11 @@ using nsBdd::Bdd;
 using nsBdd::BddVarSet;
 using nsBdd::BddMgr;
 using nsBdd::BddInfo;
+
+using nsZdd::Zdd;
+using nsZdd::ZddVarSet;
+using nsZdd::ZddMgr;
+using nsZdd::ZddInfo;
 
 /// @brief 不正な変数番号
 const SizeType BAD_VARID = static_cast<SizeType>(-1);

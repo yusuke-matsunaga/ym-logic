@@ -1,22 +1,22 @@
 
-/// @file Bdd_ident.cc
-/// @brief Bdd::is_identical() の実装ファイル
+/// @file Zdd_ident.cc
+/// @brief Zdd::is_identical() の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Bdd.h"
-#include "BddNode.h"
+#include "ym/Zdd.h"
+#include "ZddNode.h"
 #include "IdentOp.h"
 
 
-BEGIN_NAMESPACE_YM_BDD
+BEGIN_NAMESPACE_YM_ZDD
 
 // @brief 同じ構造を持つか調べる．
 bool
-Bdd::is_identical(
-  const Bdd& right
+Zdd::is_identical(
+  const Zdd& right
 ) const
 {
   if ( mMgr == nullptr || right.mMgr == nullptr ) {
@@ -26,7 +26,7 @@ Bdd::is_identical(
     return mRoot == right.mRoot;
   }
   IdentOp op;
-  return op.ident_step(BddEdge{mRoot}, BddEdge{right.mRoot});
+  return op.ident_step(ZddEdge{mRoot}, ZddEdge{right.mRoot});
 }
 
 
@@ -37,8 +37,8 @@ Bdd::is_identical(
 // @brief 同じ構造かチェックする．
 bool
 IdentOp::ident_step(
-  BddEdge left,
-  BddEdge right
+  ZddEdge left,
+  ZddEdge right
 )
 {
   if ( left.is_const() ) {
@@ -47,17 +47,14 @@ IdentOp::ident_step(
   if ( right.is_const() ) {
     return false;
   }
-  if ( left.inv() != right.inv() ) {
-    return false;
-  }
 
   Apply2Key key{left, right};
   if ( mTable.count(key) > 0 ) {
     return mTable.at(key);
   }
 
-  BddEdge left0, left1;
-  BddEdge right0, right1;
+  ZddEdge left0, left1;
+  ZddEdge right0, right1;
   auto top = decomp(left, right,
 		    left0, left1,
 		    right0, right1);
@@ -69,4 +66,4 @@ IdentOp::ident_step(
   return ans;
 }
 
-END_NAMESPACE_YM_BDD
+END_NAMESPACE_YM_ZDD

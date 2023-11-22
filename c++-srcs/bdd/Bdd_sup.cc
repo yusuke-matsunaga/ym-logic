@@ -25,7 +25,7 @@ Bdd::support_cup_int(
   right._check_posicube();
 
   SupOp op{mMgr};
-  auto e = op.cup_step(mRoot, right.mRoot);
+  auto e = op.cup_step(BddEdge{mRoot}, BddEdge{right.mRoot});
   change_root(e);
   return *this;
 }
@@ -40,7 +40,7 @@ Bdd::support_cap_int(
   right._check_posicube();
 
   SupOp op{mMgr};
-  auto e = op.cap_step(mRoot, right.mRoot);
+  auto e = op.cap_step(BddEdge{mRoot}, BddEdge{right.mRoot});
   change_root(e);
   return *this;
 }
@@ -55,7 +55,7 @@ Bdd::support_diff_int(
   right._check_posicube();
 
   SupOp op{mMgr};
-  auto e = op.diff_step(mRoot, right.mRoot);
+  auto e = op.diff_step(BddEdge{mRoot}, BddEdge{right.mRoot});
   change_root(e);
   return *this;
 }
@@ -152,7 +152,7 @@ Bdd::get_support() const
   _check_valid();
 
   SupOp op{mMgr};
-  auto e = op.get_step(mRoot);
+  auto e = op.get_step(BddEdge{mRoot});
   return BddVarSet{Bdd{mMgr, e}};
 }
 

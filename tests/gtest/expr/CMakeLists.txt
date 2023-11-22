@@ -12,14 +12,6 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory( common )
-add_subdirectory( expr )
-add_subdirectory( tvfunc )
-add_subdirectory( npn )
-add_subdirectory( sop )
-add_subdirectory( bdd )
-add_subdirectory( zdd )
-
 
 # ===================================================================
 #  ソースファイルの設定
@@ -29,6 +21,18 @@ add_subdirectory( zdd )
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
+
+ym_add_gtest ( logic_Expr_test
+  ExprTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+ym_add_gtest ( logic_ExprAnalyze_test
+  ExprAnalyzeTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
 
 
 # ===================================================================

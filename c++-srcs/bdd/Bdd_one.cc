@@ -24,7 +24,7 @@ Bdd::get_onepath() const
     return Bdd{mMgr, BddEdge::zero()};
   }
   OneOp op{mMgr};
-  auto e = op.op_step(mRoot);
+  auto e = op.op_step(BddEdge{mRoot});
   return Bdd{mMgr, e};
 }
 

@@ -1,8 +1,8 @@
-#ifndef BDDEDGE_H
-#define BDDEDGE_H
+#ifndef ZDDEDGE_H
+#define ZDDEDGE_H
 
-/// @file BddEdge.h
-/// @brief BddEdge のヘッダファイル
+/// @file ZddEdge.h
+/// @brief ZddEdge のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2022 Yusuke Matsunaga
@@ -11,59 +11,58 @@
 #include "ym/logic.h"
 
 
-BEGIN_NAMESPACE_YM_BDD
+BEGIN_NAMESPACE_YM_ZDD
 
-class BddNode;
+class ZddNode;
 
 //////////////////////////////////////////////////////////////////////
-/// @class BddEdge BddEdge.h "BddEdge.h"
-/// @brief BDD の枝を表すクラス
+/// @class ZddEdge ZddEdge.h "ZddEdge.h"
+/// @brief ZDD の枝を表すクラス
 ///
 /// 実体はポインタの下位ビットにフラグを埋め込んでいる．
 //////////////////////////////////////////////////////////////////////
-class BddEdge
+class ZddEdge
 {
 public:
 
   /// @brief コンストラクタ
   explicit
-  BddEdge(
+  ZddEdge(
     PtrIntType body = 0UL
   ) : mBody{body}
   {
   }
 
-  /// @brief ノードと極性を指定したコンストラクタ
+  /// @brief ノード性を指定したコンストラクタ
   explicit
-  BddEdge(
-    BddNode* node,   ///< [in] ノード
-    bool inv = false ///< [in] 反転フラグ
-  ) : mBody{reinterpret_cast<PtrIntType>(node) | static_cast<PtrIntType>(inv)}
+  ZddEdge(
+    ZddNode* node ///< [in] ノード
+  ) : mBody{reinterpret_cast<PtrIntType>(node)}
   {
   }
 
   /// @brief 定数0を表す枝を返す．
   static
-  BddEdge
+  ZddEdge
   zero()
   {
-    return BddEdge{0UL};
+    return ZddEdge{0UL};
   }
 
   /// @brief 定数1を表す枝を返す．
   static
-  BddEdge
+  ZddEdge
   one()
   {
-    return BddEdge{1UL};
+    return ZddEdge{1UL};
   }
 
   /// @brief 不正値を表す枝を返す．
   static
-  BddEdge
+  ZddEdge
   invalid()
   {
-    return BddEdge{4UL};
+    return ZddEdge{4UL};
   }
 
 
@@ -101,17 +100,10 @@ public:
   }
 
   /// @brief ノードを取り出す．
-  BddNode*
+  ZddNode*
   node() const
   {
-    return reinterpret_cast<BddNode*>(mBody & ~1UL);
-  }
-
-  /// @brief 反転フラグを得る．
-  bool
-  inv() const
-  {
-    return static_cast<bool>(mBody & 1UL);
+    return reinterpret_cast<ZddNode*>(mBody & ~1UL);
   }
 
   /// @brief 本体の値を返す．
@@ -128,68 +120,10 @@ public:
     return static_cast<SizeType>((mBody * mBody) >> 20);
   }
 
-  /// @brief 極性を反転させた枝を返す．
-  BddEdge
-  operator~() const
-  {
-    return BddEdge{mBody ^ 1UL};
-  }
-
-  /// @brief 正極性の枝を返す．
-  BddEdge
-  posi_edge() const
-  {
-    return BddEdge{mBody & ~1UL};
-  }
-
-  /// @brief 負極性の枝を返す．
-  BddEdge
-  nega_edge() const
-  {
-    return BddEdge{mBody | 1UL};
-  }
-
-  /// @brief 自身を正極性にする．
-  /// @return 自身の参照を返す．
-  BddEdge&
-  make_positive()
-  {
-    mBody &= ~1UL;
-    return *this;
-  }
-
-  /// @brief 自身を負極性にする．
-  /// @return 自身の参照を返す．
-  BddEdge&
-  make_negative()
-  {
-    mBody |= 1UL;
-    return *this;
-  }
-
-  /// @brief 極性と掛け合わせる．
-  BddEdge
-  operator^(
-    bool inv ///< [in] 反転フラグ
-  ) const
-  {
-    return BddEdge{mBody ^ static_cast<PtrIntType>(inv)};
-  }
-
-  /// @brief 極性と掛け合わせて代入する．
-  BddEdge&
-  operator^=(
-    bool inv ///< [in] 反転フラグ
-  )
-  {
-    mBody ^= static_cast<PtrIntType>(inv);
-    return *this;
-  }
-
   /// @brief 等価比較
   bool
   operator==(
-    BddEdge right
+    ZddEdge right
   ) const
   {
     return mBody == right.mBody;
@@ -198,7 +132,7 @@ public:
   /// @brief 非等価比較
   bool
   operator!=(
-    BddEdge right
+    ZddEdge right
   )
   {
     return !operator==(right);
@@ -215,6 +149,23 @@ private:
 
 };
 
-END_NAMESPACE_YM_BDD
+END_NAMESPACE_YM_ZDD
 
-#endif // BDDEDGE_H
+BEGIN_NAMESPACE_STD
+
+/// @brief ハッシュ用の関数オブジェクト
+template<>
+struct hash<nsYm::nsZdd::ZddEdge>
+{
+  SizeType
+  operator()(
+    const nsYm::nsZdd::ZddEdge& key
+  ) const
+  {
+    return key.hash();
+  }
+};
+
+END_NAMESPACE_STD
+
+#endif // ZDDEDGE_H

@@ -25,7 +25,7 @@ Bdd::and_op(
   right._check_valid();
 
   BddEdge redge = copy_edge(right);
-  auto e = mMgr->and_op(mRoot, redge);
+  auto e = mMgr->and_op(BddEdge{mRoot}, redge);
   return Bdd{mMgr, e};
 }
 
@@ -39,7 +39,7 @@ Bdd::or_op(
   right._check_valid();
 
   BddEdge redge = copy_edge(right);
-  auto e = mMgr->or_op(mRoot, redge);
+  auto e = mMgr->or_op(BddEdge{mRoot}, redge);
   return Bdd{mMgr, e};
 }
 
@@ -53,7 +53,7 @@ Bdd::xor_op(
   right._check_valid();
 
   BddEdge redge = copy_edge(right);
-  auto e = mMgr->xor_op(mRoot, redge);
+  auto e = mMgr->xor_op(BddEdge{mRoot}, redge);
   return Bdd{mMgr, e};
 }
 
@@ -67,7 +67,7 @@ Bdd::and_int(
   right._check_valid();
 
   BddEdge redge = copy_edge(right);
-  auto e = mMgr->and_op(mRoot, redge);
+  auto e = mMgr->and_op(BddEdge{mRoot}, redge);
   change_root(e);
   return *this;
 }
@@ -82,7 +82,7 @@ Bdd::or_int(
   right._check_valid();
 
   BddEdge redge = copy_edge(right);
-  auto e = mMgr->or_op(mRoot, redge);
+  auto e = mMgr->or_op(BddEdge{mRoot}, redge);
   change_root(e);
   return *this;
 }
@@ -97,7 +97,7 @@ Bdd::xor_int(
   right._check_valid();
 
   BddEdge redge = copy_edge(right);
-  auto e = mMgr->xor_op(mRoot, redge);
+  auto e = mMgr->xor_op(BddEdge{mRoot}, redge);
   change_root(e);
   return *this;
 }
@@ -117,7 +117,7 @@ ite(
   auto mgr = cond.mMgr;
   auto then_edge = cond.copy_edge(then_f);
   auto else_edge = cond.copy_edge(else_f);
-  auto e = mgr->ite_op(cond.mRoot, then_edge, else_edge);
+  auto e = mgr->ite_op(BddEdge{cond.mRoot}, then_edge, else_edge);
   return Bdd{mgr, e};
 }
 
@@ -159,7 +159,7 @@ Bdd::mcomp_sub(
     cmap.emplace(var, cedge);
   }
   MultiCompOp op{mMgr, cmap};
-  auto e = op.mcomp_op(mRoot);
+  auto e = op.mcomp_op(BddEdge{mRoot});
   return e;
 }
 

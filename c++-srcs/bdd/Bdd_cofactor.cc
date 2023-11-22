@@ -26,7 +26,7 @@ Bdd::cofactor(
   auto cedge = mMgr->make_literal(var) ^ inv;
   Bdd cube{mMgr, cedge}; // GC 用にロックする必要がある．
   CofactorOp op{mMgr};
-  auto e = op.op_step(mRoot, cedge);
+  auto e = op.op_step(BddEdge{mRoot}, cedge);
   return Bdd{mMgr, e};
 }
 
@@ -51,7 +51,7 @@ Bdd::cofactor(
 
   auto redge = copy_edge(cube);
   CofactorOp op{mMgr};
-  auto e = op.op_step(mRoot, redge);
+  auto e = op.op_step(BddEdge{mRoot}, redge);
   return Bdd{mMgr, e};
 }
 
@@ -67,7 +67,7 @@ Bdd::cofactor_int(
   auto cedge = mMgr->make_literal(var) ^ inv;
   Bdd cbdd{mMgr, cedge}; // GC 用にロックする必要がある．
   CofactorOp op{mMgr};
-  auto e = op.op_step(mRoot, cedge);
+  auto e = op.op_step(BddEdge{mRoot}, cedge);
   change_root(e);
   return *this;
 }
@@ -93,7 +93,7 @@ Bdd::cofactor_int(
 
   BddEdge redge = copy_edge(cube);
   CofactorOp op{mMgr};
-  auto e = op.op_step(mRoot, redge);
+  auto e = op.op_step(BddEdge{mRoot}, redge);
   change_root(e);
   return *this;
 }

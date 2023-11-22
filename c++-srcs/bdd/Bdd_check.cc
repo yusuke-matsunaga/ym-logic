@@ -21,7 +21,7 @@ Bdd::check_sup(
 ) const
 {
   CheckSupOp op{var};
-  return op.op_step(mRoot);
+  return op.op_step(BddEdge{mRoot});
 }
 
 // @brief 与えられた変数に対して対称の時 true を返す．
@@ -33,7 +33,7 @@ Bdd::check_sym(
 ) const
 {
   CheckSymOp op{var1, var2, inv};
-  return op.op_step(mRoot);
+  return op.op_step(BddEdge{mRoot});
 }
 
 

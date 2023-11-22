@@ -12,14 +12,6 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory( common )
-add_subdirectory( expr )
-add_subdirectory( tvfunc )
-add_subdirectory( npn )
-add_subdirectory( sop )
-add_subdirectory( bdd )
-add_subdirectory( zdd )
-
 
 # ===================================================================
 #  ソースファイルの設定
@@ -29,6 +21,51 @@ add_subdirectory( zdd )
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
+
+ym_add_gtest ( logic_SopMgr_test
+  SopMgrTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_SopMgr_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
+  )
+
+ym_add_gtest ( logic_SopCube_test
+  SopCubeTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+ym_add_gtest ( logic_SopCover_test
+  SopCoverTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+ym_add_gtest ( logic_Kernel_test
+  KernelTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_Kernel_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
+  )
+
+ym_add_gtest ( logic_GenFactor_test
+  GenFactorTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_GenFactor_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/sop
+  )
 
 
 # ===================================================================

@@ -12,14 +12,6 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory( common )
-add_subdirectory( expr )
-add_subdirectory( tvfunc )
-add_subdirectory( npn )
-add_subdirectory( sop )
-add_subdirectory( bdd )
-add_subdirectory( zdd )
-
 
 # ===================================================================
 #  ソースファイルの設定
@@ -29,6 +21,29 @@ add_subdirectory( zdd )
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
+
+ym_add_gtest ( logic_TvFunc_test
+  TvFuncTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories ( logic_TvFunc_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-base/include
+  )
+
+ym_add_gtest ( logic_TvFuncMove_test
+  TvFuncMove.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+ym_add_gtest ( logic_TvFuncAnalyze_test
+  TvFuncAnalyzeTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
 
 
 # ===================================================================

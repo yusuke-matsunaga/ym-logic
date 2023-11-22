@@ -1,22 +1,24 @@
 
-/// @file Bdd.cc
-/// @brief Bdd の実装ファイル
+/// @file Zdd.cc
+/// @brief Zdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Bdd.h"
-#include "BddEdge.h"
-#include "BddMgrImpl.h"
-#include "BddNode.h"
+#include "ym/Zdd.h"
+#include "ZddEdge.h"
+#include "ZddMgrImpl.h"
+#include "ZddNode.h"
 #include "CopyOp.h"
+#include "InvOp.h"
+#include "RootHolder.h"
 
 
-BEGIN_NAMESPACE_YM_BDD
+BEGIN_NAMESPACE_YM_ZDD
 
 // @brief 空のコンストラクタ
-Bdd::Bdd(
+Zdd::Zdd(
 ) : mMgr{nullptr},
     mRoot{0}
 {
@@ -24,37 +26,37 @@ Bdd::Bdd(
 }
 
 // @brief 内容を指定したコンストラクタ
-Bdd::Bdd(
-  BddMgrImpl* mgr,
-  BddEdge root
+Zdd::Zdd(
+  ZddMgrImpl* mgr,
+  ZddEdge root
 ) : mMgr{mgr},
     mRoot{root.body()}
 {
   if ( mMgr != nullptr ) {
-    mMgr->activate(BddEdge{mRoot});
+    mMgr->activate(ZddEdge{mRoot});
   }
 }
 
 // @brief コピーコンストラクタ
-Bdd::Bdd(
-  const Bdd& src
-) : Bdd{src.mMgr, BddEdge{src.mRoot}}
+Zdd::Zdd(
+  const Zdd& src
+) : Zdd{src.mMgr, ZddEdge{src.mRoot}}
 {
   // いわゆる delegate constructor
 }
 
 // @brief コピー代入演算子
-Bdd&
-Bdd::operator=(
-  const Bdd& src
+Zdd&
+Zdd::operator=(
+  const Zdd& src
 )
 {
   // この順序なら自分自身に代入しても正しく動作する．
   if ( src.mMgr != nullptr ) {
-    src.mMgr->activate(BddEdge{src.mRoot});
+    src.mMgr->activate(ZddEdge{src.mRoot});
   }
   if ( mMgr != nullptr ) {
-    mMgr->deactivate(BddEdge{mRoot});
+    mMgr->deactivate(ZddEdge{mRoot});
   }
   mMgr = src.mMgr;
   mRoot = src.mRoot;
@@ -62,101 +64,80 @@ Bdd::operator=(
 }
 
 // @brief デストラクタ
-Bdd::~Bdd()
+Zdd::~Zdd()
 {
   if ( mMgr != nullptr ) {
-    mMgr->deactivate(BddEdge{mRoot});
+    mMgr->deactivate(ZddEdge{mRoot});
   }
 }
 
 // @brief マネージャが異なる場合コピーする．
-BddEdge
-Bdd::copy_edge(
-  const Bdd& src
+ZddEdge
+Zdd::copy_edge(
+  const Zdd& src
 ) const
 {
   if ( src.mMgr == mMgr ) {
-    return BddEdge{src.mRoot};
+    return ZddEdge{src.mRoot};
   }
   else {
     CopyOp op{mMgr};
-    return op.copy_step(BddEdge{src.mRoot});
+    return op.copy_step(ZddEdge{src.mRoot});
   }
 }
 
 // @brief 否定した関数を返す．
-Bdd
-Bdd::invert() const
+Zdd
+Zdd::invert() const
 {
-  return Bdd{mMgr, ~BddEdge{mRoot}};
-}
-
-// @brief 極性をかけ合わせる．
-Bdd
-Bdd::operator^(
-  bool inv
-) const
-{
-  return Bdd{mMgr, BddEdge{mRoot} ^ inv};
+  InvOp op{mMgr};
+  auto e = op.inv_step(ZddEdge{mRoot});
+  return Zdd{mMgr, e};
 }
 
 // @brief 自分自身を否定する．
-Bdd&
-Bdd::invert_int()
+Zdd&
+Zdd::invert_int()
 {
   if ( mMgr != nullptr ) {
-    // 実はこれは BddMgr を介さない．
-    // ただ不正値の時には演算を行わない．
-    mRoot = (~BddEdge{mRoot}).body();
-  }
-  return *this;
-}
-
-// @brief 極性をかけ合わせて代入する．
-Bdd&
-Bdd::operator^=(
-  bool inv
-)
-{
-  if ( mMgr != nullptr ) {
-    // 実はこれは BddMgr を介さない．
-    // ただ不正値の時には演算を行わない．
-    mRoot = (BddEdge{mRoot} ^ inv).body();
+    // 不正値の時には演算を行わない．
+    InvOp op{mMgr};
+    change_root(op.inv_step(ZddEdge{mRoot}));
   }
   return *this;
 }
 
 // @brief 定数0の時 true を返す．
 bool
-Bdd::is_zero() const
+Zdd::is_zero() const
 {
-  return is_valid() && BddEdge{mRoot}.is_zero();
+  return is_valid() && ZddEdge{mRoot}.is_zero();
 }
 
 // @brief 定数1の時 true を返す．
 bool
-Bdd::is_one() const
+Zdd::is_one() const
 {
-  return is_valid() && BddEdge{mRoot}.is_one();
+  return is_valid() && ZddEdge{mRoot}.is_one();
 }
 
 // @brief 定数の時 true を返す．
 bool
-Bdd::is_const() const
+Zdd::is_const() const
 {
-  return is_valid() && BddEdge{mRoot}.is_const();
+  return is_valid() && ZddEdge{mRoot}.is_const();
 }
 
 // @brief 根の変数とコファクターを求める．
 SizeType
-Bdd::root_decomp(
-  Bdd& f0,
-  Bdd& f1
+Zdd::root_decomp(
+  Zdd& f0,
+  Zdd& f1
 ) const
 {
   _check_valid();
 
-  auto root = BddEdge{mRoot};
+  auto root = ZddEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
     f0 = *this;
@@ -164,20 +145,19 @@ Bdd::root_decomp(
     return BAD_VARID;
   }
   else {
-    auto oinv = root.inv();
-    f0 = Bdd{mMgr, node->edge0() ^ oinv};
-    f1 = Bdd{mMgr, node->edge1() ^ oinv};
+    f0 = Zdd{mMgr, node->edge0()};
+    f1 = Zdd{mMgr, node->edge1()};
     return node->index();
   }
 }
 
 // @brief 根の変数を得る．
 SizeType
-Bdd::root_var() const
+Zdd::root_var() const
 {
   _check_valid();
 
-  auto root = BddEdge{mRoot};
+  auto root = ZddEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
     return BAD_VARID;
@@ -188,57 +168,47 @@ Bdd::root_var() const
 }
 
 // @brief 負のコファクターを返す．
-Bdd
-Bdd::root_cofactor0() const
+Zdd
+Zdd::root_cofactor0() const
 {
   _check_valid();
 
-  auto root = BddEdge{mRoot};
+  auto root = ZddEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
     return *this;
   }
   else {
-    auto oinv = root.inv();
-    return Bdd{mMgr, node->edge0() ^ oinv};
+    return Zdd{mMgr, node->edge0()};
   }
 }
 
 // @brief 正のコファクターを返す．
-Bdd
-Bdd::root_cofactor1() const
+Zdd
+Zdd::root_cofactor1() const
 {
   _check_valid();
 
-  auto root = BddEdge{mRoot};
+  auto root = ZddEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
     return *this;
   }
   else {
-    auto oinv = root.inv();
-    return Bdd{mMgr, node->edge1() ^ oinv};
+    return Zdd{mMgr, node->edge1()};
   }
 }
 
-// @brief 根が否定されている時 true を返す．
-bool
-Bdd::root_inv() const
-{
-  _check_valid();
-
-  return static_cast<bool>(mRoot & 1UL);
-}
-
+#if 0
 // @brief 評価を行う．
 bool
-Bdd::eval(
+Zdd::eval(
   const vector<bool>& inputs ///< [in] 入力値ベクタ
 ) const
 {
   _check_valid();
 
-  auto edge = BddEdge{mRoot};
+  auto edge = ZddEdge{mRoot};
   for ( ; ; ) {
     if ( edge.is_zero() ) {
       return false;
@@ -258,11 +228,12 @@ Bdd::eval(
     edge ^= inv;
   }
 }
+#endif
 
 // @brief 等価比較演算
 bool
-Bdd::operator==(
-  const Bdd& right ///< [in] オペランド
+Zdd::operator==(
+  const Zdd& right ///< [in] オペランド
 ) const
 {
   return mMgr == right.mMgr && mRoot == right.mRoot;
@@ -270,18 +241,18 @@ Bdd::operator==(
 
 // @brief ハッシュ値を返す．
 SizeType
-Bdd::hash() const
+Zdd::hash() const
 {
   _check_valid();
 
-  auto root = BddEdge{mRoot};
+  auto root = ZddEdge{mRoot};
   return root.hash();
 }
 
 // @brief 根の枝を変更する．
 void
-Bdd::change_root(
-  BddEdge new_root
+Zdd::change_root(
+  ZddEdge new_root
 )
 {
   _check_valid();
@@ -289,15 +260,15 @@ Bdd::change_root(
   // この順序なら new_root と mRoot が等しくても
   // 正しく動く
   mMgr->activate(new_root);
-  mMgr->deactivate(BddEdge{mRoot});
+  mMgr->deactivate(ZddEdge{mRoot});
   mRoot = new_root.body();
 }
 
-// @brief BDDの根の枝のリストを作る．
-BddMgrImpl*
-Bdd::root_list(
-  const vector<Bdd>& bdd_list,
-  vector<BddEdge>& edge_list
+// @brief ZDDの根の枝のリストを作る．
+ZddMgrImpl*
+Zdd::root_list(
+  const vector<Zdd>& bdd_list,
+  vector<ZddEdge>& edge_list
 )
 {
   if ( bdd_list.empty() ) {
@@ -309,10 +280,31 @@ Bdd::root_list(
   edge_list.reserve(n);
   for ( auto& bdd: bdd_list ) {
     bdd._check_valid();
-    edge_list.push_back(BddEdge{bdd.mRoot});
+    edge_list.push_back(ZddEdge{bdd.mRoot});
   }
   auto mgr = bdd_list[0].mMgr;
   return mgr;
 }
 
-END_NAMESPACE_YM_BDD
+
+//////////////////////////////////////////////////////////////////////
+// RootHolder
+//////////////////////////////////////////////////////////////////////
+
+// @brief コンストラクタ
+RootHolder::RootHolder(
+  ZddMgrImpl* mgr,
+  ZddEdge edge
+) : mMgr{mgr},
+    mEdge{edge}
+{
+  mMgr->activate(edge);
+}
+
+// @brief デストラクタ
+RootHolder::~RootHolder()
+{
+  mMgr->deactivate(mEdge);
+}
+
+END_NAMESPACE_YM_ZDD

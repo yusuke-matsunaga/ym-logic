@@ -105,12 +105,29 @@ set (bdd_SOURCES
   c++-srcs/bdd/NodeCollector.cc
   )
 
+set (zdd_SOURCES
+  c++-srcs/zdd/Zdd.cc
+  c++-srcs/zdd/Zdd_display.cc
+  c++-srcs/zdd/Zdd_dump.cc
+  c++-srcs/zdd/Zdd_gen_dot.cc
+  c++-srcs/zdd/Zdd_ident.cc
+  c++-srcs/zdd/Zdd_op.cc
+  c++-srcs/zdd/Zdd_cofactor.cc
+  #c++-srcs/zdd/Zdd_size.cc
+  #c++-srcs/zdd/Zdd_sup.cc
+  c++-srcs/zdd/ZddMgr.cc
+  c++-srcs/zdd/ZddMgrImpl.cc
+  c++-srcs/zdd/DotWriter.cc
+  c++-srcs/zdd/NodeCollector.cc
+  )
+
 set (ym_logic_SOURCES
   ${sop_SOURCES}
   ${expr_SOURCES}
   ${npn_SOURCES}
   ${tvfunc_SOURCES}
   ${bdd_SOURCES}
+  ${zdd_SOURCES}
   )
 
 

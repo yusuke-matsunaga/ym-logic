@@ -12,14 +12,6 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory( common )
-add_subdirectory( expr )
-add_subdirectory( tvfunc )
-add_subdirectory( npn )
-add_subdirectory( sop )
-add_subdirectory( bdd )
-add_subdirectory( zdd )
-
 
 # ===================================================================
 #  ソースファイルの設定
@@ -30,6 +22,30 @@ add_subdirectory( zdd )
 #  ターゲットの設定
 # ===================================================================
 
+ym_add_gtest( logic_BddMgr_test
+  BddMgr_test.cc
+  BddTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+ym_add_gtest( logic_Bdd_test
+  Bdd_test.cc
+  BddTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+ym_add_gtest( logic_BddEdge_test
+  BddEdge_test.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories ( logic_BddEdge_test
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/ym-logic/c++-srcs/bdd
+  )
 
 # ===================================================================
 #  インストールターゲットの設定

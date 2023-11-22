@@ -64,7 +64,7 @@ Bdd::to_truth(
     // 不正値の場合には空文字列を返す．
     return string{};
   }
-  return truth_step(mRoot, 0, input_num);
+  return truth_step(BddEdge{mRoot}, 0, input_num);
 }
 
 END_NAMESPACE_YM_BDD

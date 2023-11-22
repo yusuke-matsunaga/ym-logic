@@ -5,7 +5,7 @@
 /// @brief Bdd のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
@@ -426,6 +426,10 @@ public:
   /// @brief 定数1の時 true を返す．
   bool
   is_one() const;
+
+  /// @brief 定数の時 true を返す．
+  bool
+  is_const() const;
 
   /// @brief 積項の時 true を返す．
   bool
