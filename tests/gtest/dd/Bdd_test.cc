@@ -1830,7 +1830,7 @@ TEST_F(BddTest, size4)
   EXPECT_EQ( 1, bdd1.size() );
   EXPECT_EQ( 1, bdd2.size() );
   EXPECT_EQ( 2, bdd3.size() );
-  EXPECT_EQ( 3, Bdd::size({bdd1, bdd2, bdd3}) );
+  EXPECT_EQ( 3, mMgr.bdd_size({bdd1, bdd2, bdd3}) );
 }
 
 TEST_F(BddTest, size_invalid1)
@@ -1888,7 +1888,7 @@ TEST_F(BddTest, dump_restore)
 
   ostringstream obuf;
   BinEnc enc{obuf};
-  Bdd::dump(enc, {bdd1, bdd2, bdd3});
+  mMgr.dump(enc, {bdd1, bdd2, bdd3});
   string tmp = obuf.str();
 
   istringstream ibuf{tmp};

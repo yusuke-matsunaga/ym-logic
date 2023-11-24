@@ -5,7 +5,7 @@
 /// @brief BddMgr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
@@ -13,7 +13,7 @@
 #include "ym/BinDec.h"
 
 
-BEGIN_NAMESPACE_YM_BDD
+BEGIN_NAMESPACE_YM_DD
 
 class Bdd;
 class BddMgrImpl;
@@ -35,7 +35,7 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
+  // BDD を生成する関数
   //////////////////////////////////////////////////////////////////////
 
   /// @brief BDD をコピーする．
@@ -59,7 +59,7 @@ public:
   Bdd
   literal(
     SizeType var,    ///< [in] 変数
-    bool inv = false ///< [in] 反転フラグ
+    bool inv = false ///< [in] 反転フラグ(false で反転なし = 肯定)
   );
 
   /// @brief リテラル関数を作る．
@@ -93,6 +93,82 @@ public:
     const string& str ///< [in] 01の文字列
   );
 
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // BDD の内容を出力する関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief BDDのノード数を数える．
+  SizeType
+  bdd_size(
+    const Bdd& bdd ///< [in] BDDのリスト
+  )
+  {
+    return bdd_size({bdd});
+  }
+
+  /// @brief 複数のBDDのノード数を数える．
+  SizeType
+  bdd_size(
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
+  /// @brief BDDの内容を出力する．
+  void
+  display(
+    ostream& s,    ///< [in] 出力ストリーム
+    const Bdd& bdd ///< [in] BDDのリスト
+  )
+  {
+    display(s, {bdd});
+  }
+
+  /// @brief 複数のBDDの内容を出力する．
+  void
+  display(
+    ostream& s,                 ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
+  /// @brief BDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                                    ///< [in] 出力ストリーム
+    const Bdd& bdd,                                ///< [in] BDDのリスト
+    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
+    = {}
+  )
+  {
+    gen_dot(s, {bdd}, attr_dict);
+  }
+
+  /// @brief 複数のBDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                                    ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list,                   ///< [in] BDDのリスト
+    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
+    = {}
+  );
+
+  /// @brief BDD の内容をバイナリダンプする．
+  void
+  dump(
+    BinEnc& s,     ///< [in] 出力ストリーム
+    const Bdd& bdd ///< [in] 対象の BDD
+  )
+  {
+    dump(s, {bdd});
+  }
+
+  /// @brief BDD の内容をバイナリダンプする．
+  void
+  dump(
+    BinEnc& s,                  ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list ///< [in] 対象の BDDのリスト
+  );
+
   /// @brief バイナリダンプから復元する．
   /// @return 生成されたBDDのリストを返す．
   ///
@@ -101,6 +177,16 @@ public:
   restore(
     BinDec& s ///< [in] 入力ストリーム
   );
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // マネージャの諸元に関する関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ガーベージコレクションを行う．
+  void
+  garbage_collection();
 
   /// @brief ノード数を返す．
   SizeType
@@ -150,6 +236,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_BDD
+END_NAMESPACE_YM_DD
 
 #endif // BDDMGR_H

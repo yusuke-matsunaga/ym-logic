@@ -1,11 +1,11 @@
-#ifndef BDDINFO_H
-#define BDDINFO_H
+#ifndef DDINFO_H
+#define DDINFO_H
 
 /// @file BddInfo.h
 /// @brief BddInfo のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
@@ -14,12 +14,12 @@
 BEGIN_NAMESPACE_YM_DD
 
 //////////////////////////////////////////////////////////////////////
-/// @class BddInfo BddInfo.h "BddInfo.h"
+/// @class DdInfo DdInfo.h "DdInfo.h"
 /// @grief ノードの情報を表す構造体
 ///
 /// 内容の出力のために用いられる．
 //////////////////////////////////////////////////////////////////////
-class BddInfo
+class DdInfo
 {
 public:
   //////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief コンストラクタ
-  BddInfo(
+  DdInfo(
     SizeType index, ///< [in] インデックス
     SizeType edge0, ///< [in] 0枝の情報
     SizeType edge1  ///< [in] 1枝の情報
@@ -38,7 +38,7 @@ public:
   }
 
   /// @brief デストラクタ
-  ~BddInfo() = default;
+  ~DdInfo() = default;
 
 
 public:
@@ -140,4 +140,4 @@ private:
 
 END_NAMESPACE_YM_DD
 
-#endif // BDDINFO_H
+#endif // DDINFO_H

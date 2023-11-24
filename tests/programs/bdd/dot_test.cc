@@ -60,7 +60,7 @@ dot_test(
     attr_dict["terminal:style"] = "filled";
     attr_dict["terminal0:color"] = "blue";
     attr_dict["terminal1:color"] = "red";
-    Bdd::gen_dot(cout, func_list, attr_dict);
+    mgr.gen_dot(cout, func_list, attr_dict);
   }
   return 0;
 }

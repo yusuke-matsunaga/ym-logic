@@ -10,14 +10,13 @@
 
 #include "ym/logic.h"
 #include "ym/Literal.h"
-#include "ym/BddInfo.h"
 #include "ym/BinEnc.h"
 
 
-BEGIN_NAMESPACE_YM_BDD
+BEGIN_NAMESPACE_YM_DD
 
 class BddVarSet;
-class BddEdge;
+class DdEdge;
 class BddMgrImpl;
 
 //////////////////////////////////////////////////////////////////////
@@ -26,7 +25,7 @@ class BddMgrImpl;
 //////////////////////////////////////////////////////////////////////
 class Bdd
 {
-  friend class BddMgr;
+  friend class BddMgrImpl;
 
 public:
 
@@ -549,13 +548,6 @@ public:
   SizeType
   size() const;
 
-  /// @brief 複数のBDDのノード数を数える．
-  static
-  SizeType
-  size(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
-
   /// @brief リテラルのリストの変換する．
   ///
   /// 変換できない時は例外を送出する．
@@ -579,37 +571,11 @@ public:
     const Bdd& right ///< [in] 比較対象のBDD
   ) const;
 
-  /// @brief ハッシュ値を返す．
-  SizeType
-  hash() const;
-
-  /// @brief ノードの情報を取り出す．
-  vector<BddInfo>
-  node_info(
-    SizeType& root_edge ///< [out] 根の情報を格納する変数
-  ) const;
-
-  /// @brief 複数のBDDのノードの情報を取り出す．
-  static
-  vector<BddInfo>
-  node_info(
-    const vector<Bdd>& bdd_list,     ///< [in] BDDのリスト
-    vector<SizeType>& root_edge_list ///< [out] 根の情報を格納するリスト
-  );
-
   /// @brief 内容を出力する．
   void
   display(
     ostream& s ///< [in] 出力ストリーム
   ) const;
-
-  /// @brief 複数のBDDの内容を出力する．
-  static
-  void
-  display(
-    ostream& s,                 ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
 
   /// @brief dot 形式で出力する．
   void
@@ -619,16 +585,6 @@ public:
     = {}
   ) const;
 
-  /// @brief 複数のBDDを dot 形式で出力する．
-  static
-  void
-  gen_dot(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list,                   ///< [in] BDDのリスト
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-    = {}
-  );
-
   /// @brief 独自形式でバイナリダンプする．
   ///
   /// 復元には BddMgr::restore() を用いる．
@@ -637,15 +593,9 @@ public:
     BinEnc& s ///< [in] 出力ストリーム
   ) const;
 
-  /// @brief 複数のBDDを独自形式でバイナリダンプする．
-  ///
-  /// 復元には BddMgr::restore() を用いる．
-  static
-  void
-  dump(
-    BinEnc& s,                  ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
+  /// @brief ハッシュ値を返す．
+  SizeType
+  hash() const;
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -659,34 +609,14 @@ private:
   /// @brief 内容を指定したコンストラクタ
   Bdd(
     BddMgrImpl* mgr,
-    BddEdge root
+    DdEdge root
   );
-
-  /// @brief マネージャが異なる場合コピーする．
-  BddEdge
-  copy_edge(
-    const Bdd& src
-  ) const;
 
   /// @brief 根の枝を変更する．
   void
   change_root(
-    BddEdge new_root ///< [in] 変更する枝
+    DdEdge new_root ///< [in] 変更する枝
   );
-
-  /// @brief BDDの根の枝のリストを作る．
-  static
-  BddMgrImpl*
-  root_list(
-    const vector<Bdd>& bdd_list, ///< [in] BDDのリスト
-    vector<BddEdge>& edge_list   ///< [out] 根の枝を格納するのリスト
-  );
-
-  /// @brief multi_compose() の共通関数
-  BddEdge
-  mcomp_sub(
-    const unordered_map<SizeType, Bdd>& compose_map ///< [in] 変換マップ
-  ) const;
 
   /// @brief 適正な状態か調べる．
   ///
@@ -735,7 +665,7 @@ private:
 
 };
 
-END_NAMESPACE_YM_BDD
+END_NAMESPACE_YM_DD
 
 BEGIN_NAMESPACE_STD
 

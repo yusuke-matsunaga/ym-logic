@@ -11,7 +11,7 @@
 #include "ym/Bdd.h"
 
 
-BEGIN_NAMESPACE_YM_BDD
+BEGIN_NAMESPACE_YM_DD
 
 //////////////////////////////////////////////////////////////////////
 /// @class BddVarSet BddVarSet.h "BddVarSet.h"
@@ -138,6 +138,6 @@ public:
 
 };
 
-END_NAMESPACE_YM_BDD
+END_NAMESPACE_YM_DD
 
 #endif // BDDVARSET_H

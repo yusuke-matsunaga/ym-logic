@@ -1,20 +1,20 @@
 
-/// @file BddEdge_test.cc
-/// @brief BddEdge_test の実装ファイル
+/// @file DdEdge_test.cc
+/// @brief DdEdge_test の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2022 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "gtest/gtest.h"
-#include "BddEdge.h"
+#include "DdEdge.h"
 
 
-BEGIN_NAMESPACE_YM_BDD
+BEGIN_NAMESPACE_YM_DD
 
-TEST(BddEdgeTest, zero)
+TEST(DdEdgeTest, zero)
 {
-  auto e = BddEdge::zero();
+  auto e = DdEdge::zero();
 
   EXPECT_TRUE( e.is_zero() );
   EXPECT_FALSE( e.is_one() );
@@ -22,9 +22,9 @@ TEST(BddEdgeTest, zero)
   EXPECT_FALSE( e.is_invalid() );
 }
 
-TEST(BddEdgeTest, one)
+TEST(DdEdgeTest, one)
 {
-  auto e = BddEdge::one();
+  auto e = DdEdge::one();
 
   EXPECT_FALSE( e.is_zero() );
   EXPECT_TRUE( e.is_one() );
@@ -32,9 +32,9 @@ TEST(BddEdgeTest, one)
   EXPECT_FALSE( e.is_invalid() );
 }
 
-TEST(BddEdgeTest, invalid)
+TEST(DdEdgeTest, invalid)
 {
-  auto e = BddEdge::invalid();
+  auto e = DdEdge::invalid();
 
   EXPECT_FALSE( e.is_zero() );
   EXPECT_FALSE( e.is_one() );
@@ -42,4 +42,4 @@ TEST(BddEdgeTest, invalid)
   EXPECT_TRUE( e.is_invalid() );
 }
 
-END_NAMESPACE_YM_BDD
+END_NAMESPACE_YM_DD

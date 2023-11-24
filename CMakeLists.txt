@@ -85,40 +85,38 @@ set (tvfunc_SOURCES
   c++-srcs/tvfunc/TvFuncM.cc
   )
 
-set (bdd_SOURCES
-  c++-srcs/bdd/Bdd.cc
-  c++-srcs/bdd/Bdd_check.cc
-  c++-srcs/bdd/Bdd_cofactor.cc
-  c++-srcs/bdd/Bdd_display.cc
-  c++-srcs/bdd/Bdd_dump.cc
-  c++-srcs/bdd/Bdd_gen_dot.cc
-  c++-srcs/bdd/Bdd_ident.cc
-  c++-srcs/bdd/Bdd_one.cc
-  c++-srcs/bdd/Bdd_op.cc
-  c++-srcs/bdd/Bdd_size.cc
-  c++-srcs/bdd/Bdd_sup.cc
-  c++-srcs/bdd/Bdd_truth.cc
-  c++-srcs/bdd/BddMgr.cc
-  c++-srcs/bdd/BddMgrImpl.cc
-  c++-srcs/bdd/BddVarSet.cc
-  c++-srcs/bdd/DotWriter.cc
-  c++-srcs/bdd/NodeCollector.cc
-  )
+set (dd_SOURCES
+  c++-srcs/dd/DdNodeMgr.cc
+  c++-srcs/dd/CopyOp.cc
+  c++-srcs/dd/IdentOp.cc
+  c++-srcs/dd/DotGen.cc
+  c++-srcs/dd/DotWriter.cc
+  c++-srcs/dd/NodeCollector.cc
 
-set (zdd_SOURCES
-  c++-srcs/zdd/Zdd.cc
-  c++-srcs/zdd/Zdd_display.cc
-  c++-srcs/zdd/Zdd_dump.cc
-  c++-srcs/zdd/Zdd_gen_dot.cc
-  c++-srcs/zdd/Zdd_ident.cc
-  c++-srcs/zdd/Zdd_op.cc
-  c++-srcs/zdd/Zdd_cofactor.cc
-  #c++-srcs/zdd/Zdd_size.cc
-  #c++-srcs/zdd/Zdd_sup.cc
-  c++-srcs/zdd/ZddMgr.cc
-  c++-srcs/zdd/ZddMgrImpl.cc
-  c++-srcs/zdd/DotWriter.cc
-  c++-srcs/zdd/NodeCollector.cc
+  c++-srcs/dd/Bdd.cc
+  c++-srcs/dd/Bdd_truth.cc
+  c++-srcs/dd/BddMgr.cc
+  c++-srcs/dd/BddMgrImpl.cc
+  c++-srcs/dd/BddCheckSupOp.cc
+  c++-srcs/dd/BddCheckSymOp.cc
+  c++-srcs/dd/BddCofactorOp.cc
+  c++-srcs/dd/BddIteOp.cc
+  c++-srcs/dd/BddMultiCompOp.cc
+  c++-srcs/dd/BddOneOp.cc
+  c++-srcs/dd/BddSupOp.cc
+  c++-srcs/dd/BddTruthOp.cc
+  c++-srcs/dd/BddVarSet.cc
+
+  c++-srcs/dd/Zdd.cc
+  c++-srcs/dd/ZddMgr.cc
+  c++-srcs/dd/ZddMgrImpl.cc
+  c++-srcs/dd/ZddInvOp.cc
+  c++-srcs/dd/ZddCapOp.cc
+  c++-srcs/dd/ZddCupOp.cc
+  c++-srcs/dd/ZddDiffOp.cc
+  c++-srcs/dd/ZddCofactorOp.cc
+  c++-srcs/dd/ZddCountOp.cc
+  c++-srcs/dd/ZddProductOp.cc
   )
 
 set (ym_logic_SOURCES
@@ -126,8 +124,7 @@ set (ym_logic_SOURCES
   ${expr_SOURCES}
   ${npn_SOURCES}
   ${tvfunc_SOURCES}
-  ${bdd_SOURCES}
-  ${zdd_SOURCES}
+  ${dd_SOURCES}
   )
 
 

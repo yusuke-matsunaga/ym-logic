@@ -11,7 +11,7 @@
 #include "ym/logic.h"
 
 
-BEGIN_NAMESPACE_YM_ZDD
+BEGIN_NAMESPACE_YM_DD
 
 //////////////////////////////////////////////////////////////////////
 /// @class ZddInfo ZddInfo.h "ZddInfo.h"
@@ -138,6 +138,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_ZDD
+END_NAMESPACE_YM_DD
 
 #endif // ZDDINFO_H

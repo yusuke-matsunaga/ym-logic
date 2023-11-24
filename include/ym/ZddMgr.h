@@ -9,10 +9,11 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 
 
-BEGIN_NAMESPACE_YM_ZDD
+BEGIN_NAMESPACE_YM_DD
 
 class Zdd;
 class ZddMgrImpl;
@@ -34,7 +35,7 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
+  // ZDD を生成する関数
   //////////////////////////////////////////////////////////////////////
 
   /// @brief ZDD をコピーする．
@@ -43,12 +44,6 @@ public:
   /// 同じ構造のコピーを作る．
   Zdd
   copy(
-    const Zdd& src
-  );
-
-  /// @brief ZDD を反転する．
-  Zdd
-  invert(
     const Zdd& src
   );
 
@@ -66,12 +61,84 @@ public:
     const vector<SizeType> elem_list ///< [in] 要素番号のリスト
   );
 
-  /// @brief 新しいノードを作る．
-  Zdd
-  new_node(
-    SizeType index,   ///< [in] インデックス
-    const Zdd& edge0, ///< [in] 0枝の ZDD
-    const Zdd& edge1  ///< [in] 1枝の ZDD
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // ZDD の内容を出力する関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ZDDのノード数を数える．
+  SizeType
+  zdd_size(
+    const Zdd& zdd ///< [in] ZDD
+  )
+  {
+    return zdd_size({zdd});
+  }
+
+  /// @brief 複数のZDDのノード数を数える．
+  SizeType
+  zdd_size(
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+  );
+
+  /// @brief ZDDの内容を出力する．
+  void
+  display(
+    ostream& s, ///< [in] 出力ストリーム
+    Zdd& zdd    ///< [in] ZDD
+  )
+  {
+    display(s, {zdd});
+  }
+
+  /// @brief 複数のZDDの内容を出力する．
+  void
+  display(
+    ostream& s,                 ///< [in] 出力ストリーム
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+  );
+
+  /// @brief ZDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                                    ///< [in] 出力ストリーム
+    const Zdd& zdd,                                ///< [in] ZDDのリスト
+    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
+    = {}
+  )
+  {
+    gen_dot(s, {zdd}, attr_dict);
+  }
+
+  /// @brief 複数のZDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                                    ///< [in] 出力ストリーム
+    const vector<Zdd>& zdd_list,                   ///< [in] ZDDのリスト
+    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
+    = {}
+  );
+
+  /// @brief ZDDを独自形式でバイナリダンプする．
+  ///
+  /// 復元には ZddMgr::restore() を用いる．
+  void
+  dump(
+    BinEnc& s,     ///< [in] 出力ストリーム
+    const Zdd& zdd ///< [in] ZDDのリスト
+  )
+  {
+    dump(s, {zdd});
+  }
+
+  /// @brief 複数のZDDを独自形式でバイナリダンプする．
+  ///
+  /// 復元には ZddMgr::restore() を用いる．
+  void
+  dump(
+    BinEnc& s,                  ///< [in] 出力ストリーム
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
   /// @brief バイナリダンプから復元する．
@@ -82,6 +149,16 @@ public:
   restore(
     BinDec& s ///< [in] 入力ストリーム
   );
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // マネージャの諸元に関する関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ガーベージコレクションを行う．
+  void
+  garbage_collection();
 
   /// @brief ノード数を返す．
   SizeType
@@ -131,6 +208,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_ZDD
+END_NAMESPACE_YM_DD
 
 #endif // ZDDMGR_H

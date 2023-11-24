@@ -83,17 +83,17 @@ class FuncAnalyzer;
 
 END_NAMESPACE_YM_LOGIC
 
-/// @brief BDD 用の名前空間の開始
-#define BEGIN_NAMESPACE_YM_BDD \
+/// @brief DD 用の名前空間の開始
+#define BEGIN_NAMESPACE_YM_DD \
 BEGIN_NAMESPACE_YM \
-BEGIN_NAMESPACE(nsBdd)
+BEGIN_NAMESPACE(nsDd)
 
-/// @brief BDD 用の名前空間の終了
-#define END_NAMESPACE_YM_BDD \
-END_NAMESPACE(nsBdd) \
+/// @brief DD 用の名前空間の終了
+#define END_NAMESPACE_YM_DD \
+END_NAMESPACE(nsDd) \
 END_NAMESPACE_YM
 
-BEGIN_NAMESPACE_YM_BDD
+BEGIN_NAMESPACE_YM_DD
 
 //////////////////////////////////////////////////////////////////////
 // クラスの先行宣言
@@ -102,32 +102,11 @@ BEGIN_NAMESPACE_YM_BDD
 class Bdd;
 class BddVarSet;
 class BddMgr;
-struct BddInfo;
-
-END_NAMESPACE_YM_BDD
-
-/// @brief ZDD 用の名前空間の開始
-#define BEGIN_NAMESPACE_YM_ZDD \
-BEGIN_NAMESPACE_YM \
-BEGIN_NAMESPACE(nsZdd)
-
-/// @brief ZDD 用の名前空間の終了
-#define END_NAMESPACE_YM_ZDD \
-END_NAMESPACE(nsZdd) \
-END_NAMESPACE_YM
-
-BEGIN_NAMESPACE_YM_ZDD
-
-//////////////////////////////////////////////////////////////////////
-// クラスの先行宣言
-//////////////////////////////////////////////////////////////////////
 
 class Zdd;
-class ZddVarSet;
 class ZddMgr;
-struct ZddInfo;
 
-END_NAMESPACE_YM_ZDD
+END_NAMESPACE_YM_DD
 
 /// @brief SOP 用の名前空間の開始
 #define BEGIN_NAMESPACE_YM_SOP \
@@ -168,15 +147,12 @@ using nsLogic::NpnVmap;
 using nsLogic::PrimType;
 using nsLogic::FuncAnalyzer;
 
-using nsBdd::Bdd;
-using nsBdd::BddVarSet;
-using nsBdd::BddMgr;
-using nsBdd::BddInfo;
+using nsDd::Bdd;
+using nsDd::BddVarSet;
+using nsDd::BddMgr;
 
-using nsZdd::Zdd;
-using nsZdd::ZddVarSet;
-using nsZdd::ZddMgr;
-using nsZdd::ZddInfo;
+using nsDd::Zdd;
+using nsDd::ZddMgr;
 
 /// @brief 不正な変数番号
 const SizeType BAD_VARID = static_cast<SizeType>(-1);

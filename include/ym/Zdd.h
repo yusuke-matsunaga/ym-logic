@@ -9,15 +9,12 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/Literal.h"
-#include "ym/ZddInfo.h"
 #include "ym/BinEnc.h"
 
 
-BEGIN_NAMESPACE_YM_ZDD
+BEGIN_NAMESPACE_YM_DD
 
-class ZddVarSet;
-class ZddEdge;
+class DdEdge;
 class ZddMgrImpl;
 
 //////////////////////////////////////////////////////////////////////
@@ -26,7 +23,7 @@ class ZddMgrImpl;
 //////////////////////////////////////////////////////////////////////
 class Zdd
 {
-  friend class ZddMgr;
+  friend class ZddMgrImpl;
 
 public:
 
@@ -90,7 +87,7 @@ public:
   /// @brief 共通集合演算
   /// @return 結果を返す．
   Zdd
-  cap_op(
+  cap(
     const Zdd& right ///< [in] オペランド
   ) const;
 
@@ -101,58 +98,58 @@ public:
     const Zdd& right ///< [in] オペランド
   ) const
   {
-    return cap_op(right);
+    return cap(right);
   }
 
   /// @brief ユニオン演算
   /// @return 結果を返す．
   Zdd
-  cup_op(
+  cup(
     const Zdd& right ///< [in] オペランド
   ) const;
 
-  /// @brief cup_op の別名
+  /// @brief cup の別名
   /// @return 結果を返す．
   Zdd
   operator|(
     const Zdd& right ///< [in] オペランド
   ) const
   {
-    return cup_op(right);
+    return cup(right);
   }
 
   /// @brief 集合差演算
   /// @return 結果を返す．
   Zdd
-  diff_op(
+  diff(
     const Zdd& right ///< [in] オペランド
   ) const;
 
-  /// @brief diff_op の別名
+  /// @brief diff の別名
   /// @return 結果を返す．
   Zdd
   operator-(
     const Zdd& right ///< [in] オペランド
   ) const
   {
-    return diff_op(right);
+    return diff(right);
   }
 
   /// @brief 直積演算
   /// @return 結果を返す．
   Zdd
-  product_op(
+  product(
     const Zdd& right ///< [in] オペランド
   ) const;
 
-  /// @brief product_op の別名
+  /// @brief product の別名
   /// @return 結果を返す．
   Zdd
   operator*(
     const Zdd& right ///< [in] オペランド
   ) const
   {
-    return product_op(right);
+    return product(right);
   }
 
   /// @brief 変数を含む集合を求める．
@@ -335,14 +332,6 @@ public:
   bool
   root_inv() const;
 
-#if 0
-  /// @brief 評価を行う．
-  bool
-  eval(
-    const vector<bool>& inputs ///< [in] 入力値ベクタ
-  ) const;
-#endif
-
   /// @brief 等価比較演算
   ///
   /// 構造が同じで異なるZDDとの等価比較は
@@ -374,13 +363,6 @@ public:
   SizeType
   size() const;
 
-  /// @brief 複数のZDDのノード数を数える．
-  static
-  SizeType
-  size(
-    const vector<Zdd>& bdd_list ///< [in] ZDDのリスト
-  );
-
   /// @brief 集合の要素数を数える．
   SizeType
   count() const;
@@ -398,33 +380,11 @@ public:
   SizeType
   hash() const;
 
-  /// @brief ノードの情報を取り出す．
-  vector<ZddInfo>
-  node_info(
-    SizeType& root_edge ///< [out] 根の情報を格納する変数
-  ) const;
-
-  /// @brief 複数のZDDのノードの情報を取り出す．
-  static
-  vector<ZddInfo>
-  node_info(
-    const vector<Zdd>& bdd_list,     ///< [in] ZDDのリスト
-    vector<SizeType>& root_edge_list ///< [out] 根の情報を格納するリスト
-  );
-
   /// @brief 内容を出力する．
   void
   display(
     ostream& s ///< [in] 出力ストリーム
   ) const;
-
-  /// @brief 複数のZDDの内容を出力する．
-  static
-  void
-  display(
-    ostream& s,                 ///< [in] 出力ストリーム
-    const vector<Zdd>& bdd_list ///< [in] ZDDのリスト
-  );
 
   /// @brief dot 形式で出力する．
   void
@@ -434,16 +394,6 @@ public:
     = {}
   ) const;
 
-  /// @brief 複数のZDDを dot 形式で出力する．
-  static
-  void
-  gen_dot(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const vector<Zdd>& bdd_list,                   ///< [in] ZDDのリスト
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-    = {}
-  );
-
   /// @brief 独自形式でバイナリダンプする．
   ///
   /// 復元には ZddMgr::restore() を用いる．
@@ -451,16 +401,6 @@ public:
   dump(
     BinEnc& s ///< [in] 出力ストリーム
   ) const;
-
-  /// @brief 複数のZDDを独自形式でバイナリダンプする．
-  ///
-  /// 復元には ZddMgr::restore() を用いる．
-  static
-  void
-  dump(
-    BinEnc& s,                  ///< [in] 出力ストリーム
-    const vector<Zdd>& bdd_list ///< [in] ZDDのリスト
-  );
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -474,35 +414,13 @@ private:
   /// @brief 内容を指定したコンストラクタ
   Zdd(
     ZddMgrImpl* mgr,
-    ZddEdge root
-  );
-
-  /// @brief マネージャが異なる場合コピーする．
-  ZddEdge
-  copy_edge(
-    const Zdd& src
-  ) const;
-
-  /// @brief product_op の下請け関数
-  static
-  ZddEdge
-  product_step(
-    ZddEdge left,
-    ZddEdge right
+    DdEdge root
   );
 
   /// @brief 根の枝を変更する．
   void
   change_root(
-    ZddEdge new_root ///< [in] 変更する枝
-  );
-
-  /// @brief ZDDの根の枝のリストを作る．
-  static
-  ZddMgrImpl*
-  root_list(
-    const vector<Zdd>& bdd_list, ///< [in] ZDDのリスト
-    vector<ZddEdge>& edge_list   ///< [out] 根の枝を格納するのリスト
+    DdEdge new_root ///< [in] 変更する枝
   );
 
   /// @brief 適正な状態か調べる．
@@ -530,7 +448,7 @@ private:
 
 };
 
-END_NAMESPACE_YM_ZDD
+END_NAMESPACE_YM_DD
 
 BEGIN_NAMESPACE_STD
 

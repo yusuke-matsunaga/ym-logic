@@ -17,8 +17,7 @@ add_subdirectory( expr )
 add_subdirectory( tvfunc )
 add_subdirectory( npn )
 add_subdirectory( sop )
-add_subdirectory( bdd )
-add_subdirectory( zdd )
+add_subdirectory( dd )
 
 
 # ===================================================================
