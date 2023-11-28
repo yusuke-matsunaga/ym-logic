@@ -447,16 +447,6 @@ Bdd::change_root(
   mRoot = new_root.body();
 }
 
-// @brief 独自形式でバイナリダンプする．
-void
-Bdd::dump(
-  BinEnc& s
-) const
-{
-  _check_valid();
-  mMgr->dump(s, {*this});
-}
-
 // @brief 内容を出力する．
 void
 Bdd::display(
@@ -465,6 +455,35 @@ Bdd::display(
 {
   _check_valid();
   mMgr->display(s, {*this});
+}
+
+// @brief dot 形式で出力する．
+void
+Bdd::gen_dot(
+  ostream& s,
+  const unordered_map<string, string>& attr_dict
+) const
+{
+  _check_valid();
+  mMgr->gen_dot(s, {*this}, attr_dict);
+}
+
+// @brief 構造を表す整数配列を作る．
+vector<SizeType>
+Bdd::rep_data() const
+{
+  _check_valid();
+  return mMgr->rep_data({*this});
+}
+
+// @brief 独自形式でバイナリダンプする．
+void
+Bdd::dump(
+  BinEnc& s
+) const
+{
+  _check_valid();
+  mMgr->dump(s, {*this});
 }
 
 // @brief ノード数を返す．

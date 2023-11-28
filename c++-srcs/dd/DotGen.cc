@@ -17,17 +17,6 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-// @brief dot 形式で出力する．
-void
-Bdd::gen_dot(
-  ostream& s,
-  const unordered_map<string, string>& attr_dict
-) const
-{
-  _check_valid();
-  mMgr->gen_dot(s, {*this}, attr_dict);
-}
-
 // @brief 複数のBDDを dot 形式で出力する．
 void
 BddMgrImpl::gen_dot(
@@ -40,18 +29,6 @@ BddMgrImpl::gen_dot(
   vector<SizeType> redge_list;
   auto node_list = node_info(bdd_list, redge_list);
   dg.write(node_list, redge_list);
-}
-
-
-// @brief dot 形式で出力する．
-void
-Zdd::gen_dot(
-  ostream& s,
-  const unordered_map<string, string>& attr_dict
-) const
-{
-  _check_valid();
-  mMgr->gen_dot(s, {*this}, attr_dict);
 }
 
 // @brief 複数のZDDを dot 形式で出力する．

@@ -195,55 +195,6 @@ ZddMgrImpl::node_info(
   return node_list;
 }
 
-BEGIN_NONAMESPACE
-
-// @brief 枝の内容を出力する．
-void
-write_edge(
-  ostream& s,
-  SizeType edge
-)
-{
-  if ( edge == 0 ) {
-    s << "   ZERO";
-  }
-  else if ( edge == 1 ) {
-    s << "    ONE";
-  }
-  else {
-    SizeType node = edge >> 1;
-    bool inv = static_cast<bool>(edge & 1);
-    s << setw(6) << node;
-    if ( inv ) {
-      s << "~";
-    }
-    else {
-      s << " ";
-    }
-  }
-}
-
-// @brief ノードの内容を出力する．
-void
-write_node_list(
-  ostream& s,
-  const vector<DdInfo>& node_list
-)
-{
-  SizeType id = 1;
-  for ( auto& node: node_list ) {
-    s << setw(6) << id << ": "
-      << setw(4) << node.index();
-    write_edge(s, node.edge0());
-    s << ": ";
-    write_edge(s, node.edge1());
-    s << endl;
-    ++ id;
-  }
-}
-
-END_NONAMESPACE
-
 // @brief 複数のZDDの内容を出力する．
 void
 ZddMgrImpl::display(
@@ -253,11 +204,18 @@ ZddMgrImpl::display(
 {
   vector<SizeType> root_edge_list;
   auto node_list = node_info(bdd_list, root_edge_list);
-  for ( auto root: root_edge_list ) {
-    write_edge(s, root);
-  }
-  s << endl;
-  write_node_list(s, node_list);
+  DdInfo::display(s, root_edge_list, node_list);
+}
+
+// @brief 構造を表す整数配列を作る．
+vector<SizeType>
+ZddMgrImpl::rep_data(
+  const vector<Zdd>& bdd_list
+)
+{
+  vector<SizeType> root_edge_list;
+  auto node_list = node_info(bdd_list, root_edge_list);
+  return DdInfo::rep_data(root_edge_list, node_list);
 }
 
 BEGIN_NONAMESPACE

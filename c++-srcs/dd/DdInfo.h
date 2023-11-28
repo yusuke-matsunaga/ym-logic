@@ -95,6 +95,23 @@ public:
     return edge2inv(mEdge1);
   }
 
+  /// @brief 内容を見やすい形式で出力する．
+  static
+  void
+  display(
+    ostream& s,                             ///< [in] 出力ストリーム
+    const vector<SizeType>& root_edge_list, ///< [in] 根の枝のリスト
+    const vector<DdInfo>& node_list         ///< [in] ノード情報のリスト
+  );
+
+  // @brief 構造を表す整数配列を作る．
+  static
+  vector<SizeType>
+  rep_data(
+    const vector<SizeType>& root_edge_list, ///< [in] 根の枝のリスト
+    const vector<DdInfo>& node_list	    ///< [in] ノード情報のリスト
+  );
+
 
 public:
   //////////////////////////////////////////////////////////////////////

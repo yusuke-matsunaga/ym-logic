@@ -217,6 +217,12 @@ public:
     = {}
   );
 
+  /// @brief 構造を表す整数配列を作る．
+  vector<SizeType>
+  rep_data(
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
   /// @brief BDD の内容をバイナリダンプする．
   void
   dump(

@@ -92,6 +92,7 @@ set (dd_SOURCES
   c++-srcs/dd/DotGen.cc
   c++-srcs/dd/DotWriter.cc
   c++-srcs/dd/NodeCollector.cc
+  c++-srcs/dd/display.cc
 
   c++-srcs/dd/Bdd.cc
   c++-srcs/dd/Bdd_truth.cc

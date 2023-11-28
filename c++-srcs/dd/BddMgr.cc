@@ -124,6 +124,15 @@ BddMgr::gen_dot(
   impl()->gen_dot(s, bdd_list, attr_dict);
 }
 
+// @brief 構造を表す整数配列を作る．
+vector<SizeType>
+BddMgr::rep_data(
+  const vector<Bdd>& bdd_list
+)
+{
+  return impl()->rep_data(bdd_list);
+}
+
 // @brief BDD の内容をバイナリダンプする．
 void
 BddMgr::dump(

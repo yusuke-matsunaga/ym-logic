@@ -353,6 +353,25 @@ Zdd::display(
   mMgr->display(s, {*this});
 }
 
+// @brief dot 形式で出力する．
+void
+Zdd::gen_dot(
+  ostream& s,
+  const unordered_map<string, string>& attr_dict
+) const
+{
+  _check_valid();
+  mMgr->gen_dot(s, {*this}, attr_dict);
+}
+
+// @brief 構造を表す整数配列を作る．
+vector<SizeType>
+Zdd::rep_data() const
+{
+  _check_valid();
+  return mMgr->rep_data({*this});
+}
+
 // @brief 独自形式でバイナリダンプする．
 void
 Zdd::dump(

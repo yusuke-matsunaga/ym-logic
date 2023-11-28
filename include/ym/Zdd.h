@@ -394,6 +394,10 @@ public:
     = {}
   ) const;
 
+  /// @brief 構造を表す整数配列を作る．
+  vector<SizeType>
+  rep_data() const;
+
   /// @brief 独自形式でバイナリダンプする．
   ///
   /// 復元には ZddMgr::restore() を用いる．

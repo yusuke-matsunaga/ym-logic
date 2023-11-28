@@ -138,6 +138,12 @@ public:
     = {}
   );
 
+  /// @brief 構造を表す整数配列を作る．
+  vector<SizeType>
+  rep_data(
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+  );
+
   /// @brief 複数のZDDを独自形式でバイナリダンプする．
   ///
   /// 復元には ZddMgr::restore() を用いる．
