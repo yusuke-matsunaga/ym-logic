@@ -83,6 +83,7 @@ set (tvfunc_SOURCES
   c++-srcs/tvfunc/TvFunc_bcf.cc
   c++-srcs/tvfunc/TvFunc_walsh.cc
   c++-srcs/tvfunc/TvFuncM.cc
+  c++-srcs/tvfunc/Tv2Bdd.cc
   )
 
 set (dd_SOURCES

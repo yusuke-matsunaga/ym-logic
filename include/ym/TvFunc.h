@@ -11,6 +11,8 @@
 #include "ym/logic.h"
 #include "ym/Literal.h"
 #include "ym/SopCover.h"
+#include "ym/BddMgr.h"
+#include "ym/Bdd.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 
@@ -466,6 +468,21 @@ public:
   Expr
   MWC_expr() const;
 
+  /// @brief BDD に変換する．
+  Bdd
+  bdd(
+    BddMgr& mgr ///< [in] BDDマネージャ
+  ) const;
+
+  /// @brief BDD に変換する．
+  ///
+  /// order[i] = j の時 i 番目の変数を BDD の j 番目の変数にする．
+  Bdd
+  bdd(
+    BddMgr& mgr,                  ///< [in] BDDマネージャ
+    const vector<SizeType>& order ///< [in] 変数順
+  ) const;
+
   /// @brief 内容を表す文字列を返す．
   ///
   /// この値はコンストラクタで用いることができる．
@@ -643,6 +660,15 @@ private:
                     ///< - true:  反転あり (負極性)
   );
 
+  /// @brief bdd() の下請け関数
+  Bdd
+  bdd_sub(
+    SizeType top,                 ///< [in] 変数
+    SizeType start,               ///< [in] 開始位置
+    SizeType end,                 ///< [in] 終了位置
+    const vector<SizeType>& order ///< [in] 変数順
+  ) const;
+
   /// @brief コファクターマスクを得る．
   static
   WordType
@@ -699,7 +725,6 @@ private:
   ) const
   {
     if ( varid == BAD_VARID || varid >= mInputNum ) {
-      abort();
       ostringstream buf;
       buf << "'" << varname << "' is out of range";
       throw std::invalid_argument{buf.str()};
