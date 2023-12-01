@@ -13,7 +13,6 @@
 #include "DdNode.h"
 #include "DdEdge.h"
 #include "DdNodeMgr.h"
-#include "Apply3Key.h"
 
 
 BEGIN_NAMESPACE_YM_DD
@@ -144,6 +143,13 @@ public:
     const Bdd& e0,
     const Bdd& e1,
     const Bdd& e2
+  );
+
+  /// @brief ドントケアを利用した簡単化を行う．
+  Bdd
+  simplify(
+    const Bdd& on,  ///< [in] オンセット
+    const Bdd& dc   ///< [in] ドントケアセット
   );
 
   /// @brief コファクターを計算する．

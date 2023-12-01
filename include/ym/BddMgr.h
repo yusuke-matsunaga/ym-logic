@@ -93,6 +93,21 @@ public:
     const string& str ///< [in] 01の文字列
   );
 
+  /// @brief ITE 演算を行う．
+  Bdd
+  ite(
+    const Bdd& e0,
+    const Bdd& e1,
+    const Bdd& e2
+  );
+
+  /// @brief ドントケアを利用した簡単化を行う．
+  Bdd
+  simplify(
+    const Bdd& on,  ///< [in] オンセット
+    const Bdd& dc   ///< [in] ドントケアセット
+  );
+
 
 public:
   //////////////////////////////////////////////////////////////////////

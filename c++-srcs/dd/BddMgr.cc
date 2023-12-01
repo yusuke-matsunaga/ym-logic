@@ -94,6 +94,27 @@ BddMgr::from_truth(
   return impl()->from_truth(str);
 }
 
+// @brief ITE 演算を行う．
+Bdd
+BddMgr::ite(
+  const Bdd& e0,
+  const Bdd& e1,
+  const Bdd& e2
+)
+{
+  return impl()->ite(e0, e1, e2);
+}
+
+// @brief ドントケアを利用した簡単化を行う．
+Bdd
+BddMgr::simplify(
+  const Bdd& on,  ///< [in] オンセット
+  const Bdd& dc   ///< [in] ドントケアセット
+)
+{
+  return impl()->simplify(on, dc);
+}
+
 // @brief 複数のBDDのノード数を数える．
 SizeType
 BddMgr::bdd_size(

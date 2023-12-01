@@ -215,6 +215,14 @@ private:
 
 };
 
+/// @brief root を根とするDDの内容を出力する(デバッグ用)．
+extern
+void
+print(
+  ostream& s, ///< [in] 出力ストリーム
+  DdEdge root ///< [in] 根の枝
+);
+
 END_NAMESPACE_YM_DD
 
 BEGIN_NAMESPACE_STD

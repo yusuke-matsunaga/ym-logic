@@ -102,6 +102,7 @@ set (dd_SOURCES
   c++-srcs/dd/BddCheckSymOp.cc
   c++-srcs/dd/BddCofactorOp.cc
   c++-srcs/dd/BddIteOp.cc
+  c++-srcs/dd/BddSimp.cc
   c++-srcs/dd/BddMultiCompOp.cc
   c++-srcs/dd/BddOneOp.cc
   c++-srcs/dd/BddSupOp.cc

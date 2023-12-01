@@ -54,15 +54,17 @@ DdInfo::display(
     display_edge(s, root);
   }
   s << endl;
-  SizeType id = 1;
-  for ( auto& node: node_list ) {
+  SizeType n = node_list.size();
+  for ( SizeType i = 0; i < n; ++ i ) {
+    SizeType id = n - i;
+    auto& node = node_list[id - 1];
     s << setw(6) << id << ": "
       << setw(4) << node.index();
     display_edge(s, node.edge0());
     s << ": ";
     display_edge(s, node.edge1());
     s << endl;
-    ++ id;
+    -- id;
   }
 }
 

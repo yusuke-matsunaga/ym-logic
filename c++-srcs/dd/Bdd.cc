@@ -184,7 +184,19 @@ ite(
 {
   cond._check_valid();
   auto mgr = cond.mMgr;
-  return cond.mMgr->ite(cond, then_f, else_f);
+  return mgr->ite(cond, then_f, else_f);
+}
+
+// @brief ドントケアを利用した簡単化を行う．
+Bdd
+simplify(
+  const Bdd& on,
+  const Bdd& dc
+)
+{
+  on._check_valid();
+  auto mgr = on.mMgr;
+  return mgr->simplify(on, dc);
 }
 
 // @brief コファクターを計算する．

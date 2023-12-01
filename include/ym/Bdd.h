@@ -318,6 +318,14 @@ public:
     const Bdd& else_f  ///< [in] 条件が成り立たなかった時選ばれる関数
   );
 
+  /// @brief ドントケアを利用した簡単化を行う．
+  friend
+  Bdd
+  simplify(
+    const Bdd& on,  ///< [in] オンセット
+    const Bdd& dc   ///< [in] ドントケアセット
+  );
+
   /// @brief (単一)compose演算
   Bdd
   compose(
