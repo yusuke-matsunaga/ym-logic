@@ -21,6 +21,12 @@ class ZddMgrImpl;
 //////////////////////////////////////////////////////////////////////
 /// @class ZddMgr ZddMgr.h "ym/ZddMgr.h"
 /// @brief ZDD を管理するためのクラス
+///
+/// 実体は ZddMgrImpl でこのクラスはただの shared pointer となっている．
+/// コピーしても同一の BddMgrImpl を持つインスタンスが生成される．
+///
+/// ZddMgrImpl は内部で参照回数を持っており，参照回数がゼロになると
+/// 自動的に開放される．
 //////////////////////////////////////////////////////////////////////
 class ZddMgr
 {
@@ -28,6 +34,16 @@ public:
 
   /// @brief コンストラクタ
   ZddMgr();
+
+  /// @brief ZddMgrImpl を指定したコンストラクタ
+  ZddMgr(
+    ZddMgrImpl* impl
+  );
+
+  /// @brief コピーコンストラクタ
+  ZddMgr(
+    const ZddMgr& src
+  );
 
   /// @brief デストラクタ
   ~ZddMgr();
@@ -199,6 +215,24 @@ public:
   void
   disable_gc();
 
+  /// @brief 等価比較演算子
+  bool
+  operator==(
+    const ZddMgr& right
+  ) const
+  {
+    return mImpl == right.mImpl;
+  }
+
+  /// @brief 非等価比較演算子
+  bool
+  operator!=(
+    const ZddMgr& right
+  ) const
+  {
+    return !operator==(right);
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -209,7 +243,7 @@ private:
   ZddMgrImpl*
   impl() const
   {
-    return mImpl.get();
+    return mImpl;
   }
 
 
@@ -219,7 +253,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 本体
-  unique_ptr<ZddMgrImpl> mImpl;
+  ZddMgrImpl* mImpl;
 
 };
 

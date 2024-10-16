@@ -17,13 +17,29 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief コンストラクタ
 ZddMgr::ZddMgr(
-) : mImpl{new ZddMgrImpl}
+) : ZddMgr{new ZddMgrImpl}
+{
+}
+
+// @brief ZddMgrImpl を指定したコンストラクタ
+ZddMgr::ZddMgr(
+  ZddMgrImpl* impl
+) : mImpl{impl}
+{
+  mImpl->inc();
+}
+
+// @brief コピーコンストラクタ
+ZddMgr::ZddMgr(
+  const ZddMgr& src
+) : ZddMgr{src.mImpl}
 {
 }
 
 // @brief デストラクタ
 ZddMgr::~ZddMgr()
 {
+  mImpl->dec();
 }
 
 // @brief ZDD をコピーする．

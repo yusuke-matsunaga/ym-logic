@@ -171,4 +171,27 @@ TEST_F(BddTest, copy)
   EXPECT_EQ( bdd, bdd2 );
 }
 
+TEST_F(BddTest, mgr_copy)
+{
+  BddMgr mgr1;
+
+  auto bdd = mgr1.posi_literal(0);
+
+  auto mgr2 = bdd.mgr();
+
+  EXPECT_EQ( mgr1, mgr2 );
+}
+
+TEST_F(BddTest, mgr_lifetime)
+{
+  Bdd bdd;
+  {
+    BddMgr mgr;
+    bdd = mgr.posi_literal(0);
+  }
+
+  EXPECT_TRUE( bdd.is_valid() );
+  check(bdd, "10");
+}
+
 END_NAMESPACE_YM

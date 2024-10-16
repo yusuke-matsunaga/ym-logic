@@ -16,13 +16,29 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief コンストラクタ
 BddMgr::BddMgr(
-) : mImpl{new BddMgrImpl}
+) : BddMgr{new BddMgrImpl}
+{
+}
+
+// @brief BddMgrImpl を指定したコンストラクタ
+BddMgr::BddMgr(
+  BddMgrImpl* impl
+) : mImpl{impl}
+{
+  mImpl->inc();
+}
+
+// @brief コピーコンストラクタ
+BddMgr::BddMgr(
+  const BddMgr& src
+) : BddMgr{src.mImpl}
 {
 }
 
 // @brief デストラクタ
 BddMgr::~BddMgr()
 {
+  mImpl->dec();
 }
 
 // @brief BDD をコピーする．

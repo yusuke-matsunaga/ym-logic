@@ -497,4 +497,15 @@ TEST(ZddTest, product2)
   EXPECT_TRUE( f101.is_one() );
 }
 
+TEST(ZddTest, mgr_copy)
+{
+  ZddMgr mgr1;
+
+  auto zdd = mgr1.make_set({0});
+
+  auto mgr2 = zdd.mgr();
+
+  EXPECT_EQ( mgr1, mgr2 );
+}
+
 END_NAMESPACE_YM

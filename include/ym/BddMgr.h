@@ -21,6 +21,12 @@ class BddMgrImpl;
 //////////////////////////////////////////////////////////////////////
 /// @class BddMgr BddMgr.h "ym/BddMgr.h"
 /// @brief BDD を管理するためのクラス
+///
+/// 実体は BddMgrImpl でこのクラスはただの shared pointer となっている．
+/// コピーしても同一の BddMgrImpl を持つインスタンスが生成される．
+///
+/// BddMgrImpl は内部で参照回数を持っており，参照回数がゼロになると
+/// 自動的に開放される．
 //////////////////////////////////////////////////////////////////////
 class BddMgr
 {
@@ -28,6 +34,16 @@ public:
 
   /// @brief コンストラクタ
   BddMgr();
+
+  /// @brief BddMgrImpl を指定したコンストラクタ
+  BddMgr(
+    BddMgrImpl* impl
+  );
+
+  /// @brief コピーコンストラクタ
+  BddMgr(
+    const BddMgr& src
+  );
 
   /// @brief デストラクタ
   ~BddMgr();
@@ -242,6 +258,24 @@ public:
   void
   disable_gc();
 
+  /// @brief 等価比較演算子
+  bool
+  operator==(
+    const BddMgr& right
+  ) const
+  {
+    return mImpl == right.mImpl;
+  }
+
+  /// @brief 非等価比較演算子
+  bool
+  operator!=(
+    const BddMgr& right
+  ) const
+  {
+    return !operator==(right);
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -252,7 +286,7 @@ private:
   BddMgrImpl*
   impl() const
   {
-    return mImpl.get();
+    return mImpl;
   }
 
 
@@ -262,7 +296,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 本体
-  unique_ptr<BddMgrImpl> mImpl;
+  BddMgrImpl* mImpl;
 
 };
 

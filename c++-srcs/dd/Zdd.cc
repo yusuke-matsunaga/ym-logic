@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
+#include "ym/ZddMgr.h"
 #include "DdEdge.h"
 #include "ZddMgrImpl.h"
 #include "DdNode.h"
@@ -31,6 +32,7 @@ Zdd::Zdd(
     mRoot{root.body()}
 {
   if ( mMgr != nullptr ) {
+    mMgr->inc();
     mMgr->activate(DdEdge{mRoot});
   }
 }
@@ -51,10 +53,12 @@ Zdd::operator=(
 {
   // この順序なら自分自身に代入しても正しく動作する．
   if ( src.mMgr != nullptr ) {
+    src.mMgr->inc();
     src.mMgr->activate(DdEdge{src.mRoot});
   }
   if ( mMgr != nullptr ) {
     mMgr->deactivate(DdEdge{mRoot});
+    mMgr->dec();
   }
   mMgr = src.mMgr;
   mRoot = src.mRoot;
@@ -66,7 +70,15 @@ Zdd::~Zdd()
 {
   if ( mMgr != nullptr ) {
     mMgr->deactivate(DdEdge{mRoot});
+    mMgr->dec();
   }
+}
+
+// @brief 親のマネージャを返す．
+ZddMgr
+Zdd::mgr() const
+{
+  return ZddMgr{mMgr};
 }
 
 // @brief 否定した関数を返す．
