@@ -37,6 +37,16 @@ public:
     PyObject* m ///< [in] 親のモジュールを表す PyObject
   );
 
+  /// @brief BddMgr を表す PyObject を作る．
+  /// @return 生成した PyObject を返す．
+  ///
+  /// 返り値は新しい参照が返される．
+  static
+  PyObject*
+  ToPyObject(
+    const BddMgr& val ///< [in] 値
+  );
+
   /// @brief PyObject が BddMgr タイプか調べる．
   static
   bool

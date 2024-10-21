@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "pym/PyBdd.h"
+#include "pym/PyBddMgr.h"
 #include "pym/PyBddVarSet.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyModule.h"
@@ -602,9 +603,21 @@ Bdd_size(
   return PyLong_FromLong(val);
 }
 
+PyObject*
+Bdd_mgr(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto bdd = PyBdd::Get(self);
+  auto mgr = bdd.mgr();
+  return PyBddMgr::ToPyObject(mgr);
+}
+
 // get/set 関数定義
 PyGetSetDef Bdd_getset[] = {
   {"size", Bdd_size, nullptr, PyDoc_STR("size(node count)"), nullptr},
+  {"mgr", Bdd_mgr, nullptr, PyDoc_STR("BddMgr"), nullptr},
   {nullptr, nullptr, nullptr, nullptr, nullptr},
 };
 

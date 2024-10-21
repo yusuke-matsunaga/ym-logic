@@ -24,7 +24,7 @@ include_directories (
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(py_ymlogic)
+add_subdirectory(py_capi)
 add_subdirectory(tests)
 
 

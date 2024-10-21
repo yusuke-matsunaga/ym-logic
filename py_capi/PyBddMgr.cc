@@ -65,11 +65,18 @@ BddMgr_dealloc(
 PyObject*
 BddMgr_copy(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "src",
+    nullptr
+  };
   PyObject* bdd_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!", PyBdd::_typeobject(), !bdd_obj) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
+				    const_cast<char**>(kw_list),
+				    PyBdd::_typeobject(), !bdd_obj) ) {
     return nullptr;
   }
   auto src_bdd = PyBdd::Get(bdd_obj);
@@ -114,7 +121,7 @@ BddMgr_literal(
   };
   PyObject* obj1 = nullptr;
   int inv = 0;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!$p",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
 				    const_cast<char**>(kwlist),
 				    &obj1, &inv) ) {
     return nullptr;
@@ -215,11 +222,12 @@ BddMgr_disable_gc(
 
 // メソッド定義
 PyMethodDef BddMgr_methods[] = {
-  {"copy", BddMgr_copy, METH_VARARGS,
+  {"copy", reinterpret_cast<PyCFunction>(BddMgr_copy),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("copy BDD")},
-  {"zero", BddMgr_copy, METH_NOARGS,
+  {"zero", BddMgr_zero, METH_NOARGS,
    PyDoc_STR("generate Zero")},
-  {"one", BddMgr_copy, METH_NOARGS,
+  {"one", BddMgr_one, METH_NOARGS,
    PyDoc_STR("generate One")},
   {"literal", reinterpret_cast<PyCFunction>(BddMgr_literal),
    METH_VARARGS | METH_KEYWORDS,
@@ -312,6 +320,18 @@ PyBddMgr::init(
  error:
 
   return false;
+}
+
+// @brief BddMgr を表す PyObject を作る．
+PyObject*
+PyBddMgr::ToPyObject(
+  const BddMgr& val
+)
+{
+  auto obj = BddMgrType.tp_alloc(&BddMgrType, 0);
+  auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
+  bddmgr_obj->mVal = new BddMgr{val};
+  return obj;
 }
 
 // @brief PyObject が BddMgr タイプか調べる．
