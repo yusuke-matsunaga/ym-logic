@@ -8,11 +8,11 @@
 
 #include "ym/Bdd.h"
 #include "ym/Zdd.h"
-#include "BddMgrImpl.h"
-#include "ZddMgrImpl.h"
+#include "dd/BddMgrImpl.h"
+#include "dd/ZddMgrImpl.h"
 #include "DotGen.h"
-#include "DdEdge.h"
-#include "DdInfo.h"
+#include "dd/DdEdge.h"
+#include "dd/DdInfo.h"
 
 
 BEGIN_NAMESPACE_YM_DD

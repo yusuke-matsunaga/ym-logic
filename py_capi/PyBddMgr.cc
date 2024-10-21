@@ -10,6 +10,7 @@
 #include "pym/PyBdd.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyModule.h"
+#include "dd/BddMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -20,7 +21,7 @@ BEGIN_NONAMESPACE
 struct BddMgrObject
 {
   PyObject_HEAD
-  BddMgr* mVal;
+  nsDd::BddMgrImpl* mVal;
 };
 
 // Python 用のタイプ定義
@@ -47,7 +48,9 @@ BddMgr_new(
 
   auto self = type->tp_alloc(type, 0);
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
-  bddmgr_obj->mVal = new BddMgr{};
+  auto impl = new nsDd::BddMgrImpl{};
+  bddmgr_obj->mVal = impl;
+  impl->inc();
   return self;
 }
 
@@ -58,7 +61,9 @@ BddMgr_dealloc(
 )
 {
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
-  delete bddmgr_obj->mVal;
+  auto impl = bddmgr_obj->mVal;
+  impl->dec();
+  delete impl;
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -80,7 +85,7 @@ BddMgr_copy(
     return nullptr;
   }
   auto src_bdd = PyBdd::Get(bdd_obj);
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.copy(src_bdd);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -91,7 +96,7 @@ BddMgr_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.zero();
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -102,7 +107,7 @@ BddMgr_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.one();
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -142,7 +147,7 @@ BddMgr_literal(
     PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal");
     return nullptr;
   }
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.literal(lit);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -157,7 +162,7 @@ BddMgr_posi_literal(
   if ( !PyArg_ParseTuple(args, "k", &varid) ) {
     return nullptr;
   }
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.posi_literal(varid);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -172,7 +177,7 @@ BddMgr_nega_literal(
   if ( !PyArg_ParseTuple(args, "k", &varid) ) {
     return nullptr;
   }
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.nega_literal(varid);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -184,10 +189,10 @@ BddMgr_from_truth(
 )
 {
   const char* str = nullptr;
-  if ( PyArg_ParseTuple(args, "s", &str) ) {
+  if ( !PyArg_ParseTuple(args, "s", &str) ) {
     return nullptr;
   }
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   try {
     auto ans_bdd = bddmgr.from_truth(str);
     return PyBdd::ToPyObject(ans_bdd);
@@ -204,7 +209,7 @@ BddMgr_enable_gc(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   bddmgr.enable_gc();
   Py_RETURN_NONE;
 }
@@ -215,7 +220,7 @@ BddMgr_disable_gc(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   bddmgr.disable_gc();
   Py_RETURN_NONE;
 }
@@ -232,9 +237,11 @@ PyMethodDef BddMgr_methods[] = {
   {"literal", reinterpret_cast<PyCFunction>(BddMgr_literal),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("generate literal")},
-  {"posi_literal", BddMgr_posi_literal, METH_NOARGS,
+  {"posi_literal", BddMgr_posi_literal,
+   METH_VARARGS,
    PyDoc_STR("generate positive literal")},
-  {"nega_literal", BddMgr_nega_literal, METH_NOARGS,
+  {"nega_literal", BddMgr_nega_literal,
+   METH_VARARGS,
    PyDoc_STR("generate positive literal")},
   {"from_truth", BddMgr_from_truth, METH_VARARGS,
    PyDoc_STR("generate BDD from truth-table string")},
@@ -251,7 +258,7 @@ BddMgr_node_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   auto val = bddmgr.node_num();
   return PyLong_FromLong(val);
 }
@@ -262,7 +269,7 @@ BddMgr_gc_limit(
   void* Py_UNUSED(closure)
 )
 {
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   auto val = bddmgr.gc_limit();
   return PyLong_FromLong(val);
 }
@@ -278,7 +285,7 @@ BddMgr_set_gc_limit(
     PyErr_SetString(PyExc_TypeError, "int value is expected");
     return -1;
   }
-  auto& bddmgr = PyBddMgr::Get(self);
+  auto bddmgr = PyBddMgr::Get(self);
   SizeType val = PyLong_AsLong(val_obj);
   bddmgr.set_gc_limit(val);
   return 0;
@@ -330,7 +337,9 @@ PyBddMgr::ToPyObject(
 {
   auto obj = BddMgrType.tp_alloc(&BddMgrType, 0);
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
-  bddmgr_obj->mVal = new BddMgr{val};
+  auto impl = val.impl();
+  bddmgr_obj->mVal = impl;
+  impl->inc();
   return obj;
 }
 
@@ -344,13 +353,13 @@ PyBddMgr::Check(
 }
 
 // @brief BddMgr を表す PyObject から BddMgr を取り出す．
-BddMgr&
+BddMgr
 PyBddMgr::Get(
   PyObject* obj
 )
 {
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
-  return *bddmgr_obj->mVal;
+  return BddMgr{bddmgr_obj->mVal};
 }
 
 // @brief BddMgr を表すオブジェクトの型定義を返す．

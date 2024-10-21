@@ -7,8 +7,8 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "DdEdge.h"
-#include "BddMgrImpl.h"
+#include "dd/DdEdge.h"
+#include "dd/BddMgrImpl.h"
 #include "BddCofactorOp.h"
 
 

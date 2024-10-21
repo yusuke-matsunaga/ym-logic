@@ -59,7 +59,7 @@ public:
   ///
   /// Check(obj) == true であると仮定している．
   static
-  BddMgr&
+  BddMgr
   Get(
     PyObject* obj ///< [in] 変換元の PyObject
   );

@@ -7,9 +7,9 @@
 /// All rights reserved.
 
 #include "CopyOp.h"
-#include "DdEdge.h"
-#include "DdNode.h"
-#include "DdNodeMgr.h"
+#include "dd/DdEdge.h"
+#include "dd/DdNode.h"
+#include "dd/DdNodeMgr.h"
 
 
 BEGIN_NAMESPACE_YM_DD

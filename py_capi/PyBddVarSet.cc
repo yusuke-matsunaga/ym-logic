@@ -63,7 +63,7 @@ BddVarSet_new(
 	var_set.push_back(PyLong_AsLong(obj1));
       }
     }
-    auto& mgr = PyBddMgr::Get(mgr_obj);
+    auto mgr = PyBddMgr::Get(mgr_obj);
     auto self = type->tp_alloc(type, 0);
     auto bdd_obj = reinterpret_cast<BddVarSetObject*>(self);
     bdd_obj->mVal = new BddVarSet{mgr, var_set};

@@ -7,9 +7,9 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "DdEdge.h"
-#include "BddMgrImpl.h"
-#include "DdNode.h"
+#include "dd/DdEdge.h"
+#include "dd/BddMgrImpl.h"
+#include "dd/DdNode.h"
 #include "BddMultiCompOp.h"
 
 

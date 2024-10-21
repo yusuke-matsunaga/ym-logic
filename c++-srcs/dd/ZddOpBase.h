@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ZddMgrImpl.h"
+#include "dd/ZddMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_DD

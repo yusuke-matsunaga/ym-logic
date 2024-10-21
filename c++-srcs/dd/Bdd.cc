@@ -8,9 +8,9 @@
 
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
-#include "DdEdge.h"
-#include "DdNode.h"
-#include "BddMgrImpl.h"
+#include "dd/DdEdge.h"
+#include "dd/DdNode.h"
+#include "dd/BddMgrImpl.h"
 #include "CopyOp.h"
 
 

@@ -8,7 +8,7 @@
 
 #include "ym/BddMgr.h"
 #include "ym/Bdd.h"
-#include "BddMgrImpl.h"
+#include "dd/BddMgrImpl.h"
 #include "CopyOp.h"
 
 

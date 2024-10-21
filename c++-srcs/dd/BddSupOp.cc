@@ -8,8 +8,8 @@
 
 #include "ym/Bdd.h"
 #include "ym/BddVarSet.h"
-#include "DdEdge.h"
-#include "DdNode.h"
+#include "dd/DdEdge.h"
+#include "dd/DdNode.h"
 #include "BddSupOp.h"
 
 

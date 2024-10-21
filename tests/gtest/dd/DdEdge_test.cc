@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "gtest/gtest.h"
-#include "DdEdge.h"
+#include "dd/DdEdge.h"
 
 
 BEGIN_NAMESPACE_YM_DD

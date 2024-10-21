@@ -7,10 +7,10 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "BddMgrImpl.h"
+#include "dd/BddMgrImpl.h"
 #include "CopyOp.h"
 #include "NodeCollector.h"
-#include "DdInfo.h"
+#include "dd/DdInfo.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 

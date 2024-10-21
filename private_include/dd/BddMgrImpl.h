@@ -10,9 +10,9 @@
 
 #include "ym/logic.h"
 #include "ym/Bdd.h"
-#include "DdNode.h"
-#include "DdEdge.h"
-#include "DdNodeMgr.h"
+#include "dd/DdNode.h"
+#include "dd/DdEdge.h"
+#include "dd/DdNodeMgr.h"
 
 
 BEGIN_NAMESPACE_YM_DD

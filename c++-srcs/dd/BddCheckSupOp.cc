@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "DdNode.h"
+#include "dd/DdNode.h"
 #include "BddCheckSupOp.h"
 
 

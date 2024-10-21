@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "BddMgrImpl.h"
+#include "dd/BddMgrImpl.h"
 #include "BddTruthOp.h"
 
 

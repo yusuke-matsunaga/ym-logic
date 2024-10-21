@@ -7,10 +7,10 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ZddMgrImpl.h"
+#include "dd/ZddMgrImpl.h"
 #include "CopyOp.h"
 #include "NodeCollector.h"
-#include "DdInfo.h"
+#include "dd/DdInfo.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 

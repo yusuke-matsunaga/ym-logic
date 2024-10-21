@@ -3,7 +3,7 @@
 /// @brief Python Bdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2024 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "pym/PyBdd.h"
@@ -87,7 +87,7 @@ Bdd_cofactor(
   };
   PyObject* obj1 = nullptr;
   int inv = 0;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!$p",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
 				    const_cast<char**>(kwlist),
 				    &obj1, &inv) ) {
     return nullptr;
@@ -495,6 +495,41 @@ Bdd_root_cofactor1(
 }
 
 PyObject*
+Bdd_eval(
+  PyObject* self,
+  PyObject* args
+)
+{
+  PyObject* inputs_obj = nullptr;
+  if ( !PyArg_ParseTuple(args, "O", &inputs_obj) ) {
+    return nullptr;
+  }
+  if ( !PyList_Check(inputs_obj) ) {
+    PyErr_SetString(PyExc_TypeError, "1st argument should be a list of bool");
+    return nullptr;
+  }
+  auto n = PyList_Size(inputs_obj);
+  vector<bool> inputs(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto obj = PyList_GetItem(inputs_obj, i);
+    if ( obj == Py_True ) {
+      inputs[i] = true;
+    }
+    else if ( obj == Py_False ) {
+      inputs[i] = false;
+    }
+    else {
+      PyErr_SetString(PyExc_TypeError, "1st argument should be a list of bool");
+      return nullptr;
+    }
+  }
+
+  auto bdd = PyBdd::Get(self);
+  auto val = bdd.eval(inputs);
+  return PyBool_FromLong(val);
+}
+
+PyObject*
 Bdd_to_litlist(
   PyObject* self,
   PyObject* Py_UNUSED(args)
@@ -585,6 +620,8 @@ PyMethodDef Bdd_methods[] = {
    PyDoc_STR("return the 0's cofactor of the root index")},
   {"root_cofactor1", Bdd_root_cofactor1, METH_NOARGS,
    PyDoc_STR("return the 1's cofactor of the root index")},
+  {"eval", Bdd_eval, METH_VARARGS,
+   PyDoc_STR("evaluate")},
   {"to_litlist", Bdd_to_litlist, METH_NOARGS,
    PyDoc_STR("convert to the list of Literals")},
   {"to_truth", Bdd_to_truth, METH_VARARGS,

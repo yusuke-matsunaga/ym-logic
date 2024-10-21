@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "DdEdge.h"
+#include "dd/DdEdge.h"
 
 
 BEGIN_NAMESPACE_YM_DD
