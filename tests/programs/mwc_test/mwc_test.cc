@@ -33,7 +33,7 @@ mwc_test(
       TvFunc f{buf};
       func_list.push_back(f);
       auto expr = f.MWC_expr();
-      auto f_expr = expr.make_tv(f.input_num());
+      auto f_expr = expr.to_tv(f.input_num());
       if ( f != f_expr ) {
 	bad_outputs.push_back(func_list.size() - 1);
       }

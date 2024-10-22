@@ -21,16 +21,16 @@ TvFunc::analyze() const
   auto map = shrink_map();
   auto func1 = xform(map);
 
-  if ( func1 == TvFunc::make_zero(0) ) {
+  if ( func1 == TvFunc::zero(0) ) {
     return PrimType::C0;
   }
-  else if ( func1 == TvFunc::make_one(0) ) {
+  else if ( func1 == TvFunc::one(0) ) {
     return PrimType::C1;
   }
-  else if ( func1 == TvFunc::make_posi_literal(1, 0) ) {
+  else if ( func1 == TvFunc::posi_literal(1, 0) ) {
     return PrimType::Buff;
   }
-  else if ( func1 == TvFunc::make_nega_literal(1, 0) ) {
+  else if ( func1 == TvFunc::nega_literal(1, 0) ) {
     return PrimType::Not;
   }
   else {

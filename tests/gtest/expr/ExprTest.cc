@@ -86,9 +86,9 @@ TEST_F(ExprTest, empty_constr)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_invalid)
+TEST_F(ExprTest, invalid)
 {
-  auto expr = Expr::make_invalid();
+  auto expr = Expr::invalid();
 
   EXPECT_FALSE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -124,9 +124,9 @@ TEST_F(ExprTest, make_invalid)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_zero)
+TEST_F(ExprTest, zero)
 {
-  auto expr = Expr::make_zero();
+  auto expr = Expr::zero();
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_TRUE( expr.is_zero() );
@@ -163,9 +163,9 @@ TEST_F(ExprTest, make_zero)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_one)
+TEST_F(ExprTest, one)
 {
-  auto expr = Expr::make_one();
+  auto expr = Expr::one();
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -202,9 +202,9 @@ TEST_F(ExprTest, make_one)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_literal1)
+TEST_F(ExprTest, literal1)
 {
-  auto expr = Expr::make_literal(var0, false);
+  auto expr = Expr::literal(var0, false);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -244,9 +244,9 @@ TEST_F(ExprTest, make_literal1)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_literal2)
+TEST_F(ExprTest, literal2)
 {
-  auto expr = Expr::make_literal(var0, true);
+  auto expr = Expr::literal(var0, true);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -277,9 +277,9 @@ TEST_F(ExprTest, make_literal2)
   // 式自体は上と同一なので dump/restore はテストは不要
 }
 
-TEST_F(ExprTest, make_posi_literal)
+TEST_F(ExprTest, posi_literal)
 {
-  auto expr = Expr::make_posi_literal(var0);
+  auto expr = Expr::posi_literal(var0);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -308,10 +308,10 @@ TEST_F(ExprTest, make_posi_literal)
   EXPECT_EQ( 1, expr.sop_literal_num() );
 }
 
-TEST_F(ExprTest, make_nega_literal)
+TEST_F(ExprTest, nega_literal)
 {
   auto var = var0;
-  auto expr = Expr::make_nega_literal(var);
+  auto expr = Expr::nega_literal(var);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -342,8 +342,8 @@ TEST_F(ExprTest, make_nega_literal)
 
 TEST_F(ExprTest, and_op1)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = Expr::and_op(lit0p, lit1n);
 
   EXPECT_TRUE( expr.is_valid() );
@@ -402,8 +402,8 @@ TEST_F(ExprTest, and_op1)
 
 TEST_F(ExprTest, and_op2)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = lit0p & lit1n;
 
   EXPECT_TRUE( expr.is_valid() );
@@ -456,10 +456,10 @@ TEST_F(ExprTest, and_op2)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_and0)
+TEST_F(ExprTest, and_op3)
 {
   vector<Expr> lit_list{};
-  auto expr = Expr::make_and(lit_list);
+  auto expr = Expr::and_op(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -476,12 +476,12 @@ TEST_F(ExprTest, make_and0)
   EXPECT_EQ( 0, expr.operand_num() );
 }
 
-TEST_F(ExprTest, make_and1)
+TEST_F(ExprTest, and_op4)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
-  auto expr = Expr::make_and(lit_list);
+  auto expr = Expr::and_op(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -533,12 +533,12 @@ TEST_F(ExprTest, make_and1)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_and2)
+TEST_F(ExprTest, and_op5)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
-  auto expr = Expr::make_and(lit_list);
+  auto expr = Expr::and_op(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -592,8 +592,8 @@ TEST_F(ExprTest, make_and2)
 
 TEST_F(ExprTest, and_int)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = lit0p;
   expr &= lit1n;
 
@@ -649,8 +649,8 @@ TEST_F(ExprTest, and_int)
 
 TEST_F(ExprTest, or_op1)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = Expr::or_op(lit0p, lit1n);
 
   EXPECT_TRUE( expr.is_valid() );
@@ -705,8 +705,8 @@ TEST_F(ExprTest, or_op1)
 
 TEST_F(ExprTest, or_op2)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = lit0p | lit1n;
 
   EXPECT_TRUE( expr.is_valid() );
@@ -759,10 +759,10 @@ TEST_F(ExprTest, or_op2)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_or0)
+TEST_F(ExprTest, or_op3)
 {
   vector<Expr> lit_list{};
-  auto expr = Expr::make_or(lit_list);
+  auto expr = Expr::or_op(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_TRUE( expr.is_zero() );
@@ -779,12 +779,12 @@ TEST_F(ExprTest, make_or0)
   EXPECT_EQ( 0, expr.operand_num() );
 }
 
-TEST_F(ExprTest, make_or1)
+TEST_F(ExprTest, or_op4)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
-  auto expr = Expr::make_or(lit_list);
+  auto expr = Expr::or_op(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -836,12 +836,12 @@ TEST_F(ExprTest, make_or1)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_or2)
+TEST_F(ExprTest, or_op5)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
-  auto expr = Expr::make_or(lit_list);
+  auto expr = Expr::or_op(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -895,8 +895,8 @@ TEST_F(ExprTest, make_or2)
 
 TEST_F(ExprTest, or_int)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = lit0p;
   expr |= lit1n;
 
@@ -952,8 +952,8 @@ TEST_F(ExprTest, or_int)
 
 TEST_F(ExprTest, xor_op1)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = Expr::xor_op(lit0p, lit1n);
 
   EXPECT_TRUE( expr.is_valid() );
@@ -1008,8 +1008,8 @@ TEST_F(ExprTest, xor_op1)
 
 TEST_F(ExprTest, xor_op2)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = lit0p ^ lit1n;
 
   EXPECT_TRUE( expr.is_valid() );
@@ -1062,12 +1062,12 @@ TEST_F(ExprTest, xor_op2)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_xor1)
+TEST_F(ExprTest, xor_op3)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
-  auto expr = Expr::make_xor(lit_list);
+  auto expr = Expr::xor_op(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -1119,12 +1119,12 @@ TEST_F(ExprTest, make_xor1)
   EXPECT_EQ( expr2, expr );
 }
 
-TEST_F(ExprTest, make_xor2)
+TEST_F(ExprTest, xor_op4)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   vector<Expr> lit_list{lit0p, lit1n};
-  auto expr = Expr::make_xor(lit_list);
+  auto expr = Expr::xor_op(lit_list);
 
   EXPECT_TRUE( expr.is_valid() );
   EXPECT_FALSE( expr.is_zero() );
@@ -1178,8 +1178,8 @@ TEST_F(ExprTest, make_xor2)
 
 TEST_F(ExprTest, xor_int)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
   auto expr = lit0p;
   expr ^= lit1n;
 
@@ -1235,8 +1235,8 @@ TEST_F(ExprTest, xor_int)
 
 TEST_F(ExprTest, inv1)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1n = Expr::make_nega_literal(var1);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1n = Expr::nega_literal(var1);
 
   auto lit0n = ~lit0p;
   {
@@ -1262,11 +1262,11 @@ TEST_F(ExprTest, inv1)
 
 TEST_F(ExprTest, compose1)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1p = Expr::make_posi_literal(var1);
-  auto lit1n = Expr::make_nega_literal(var1);
-  auto lit2p = Expr::make_posi_literal(var2);
-  auto lit3p = Expr::make_posi_literal(var3);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1p = Expr::posi_literal(var1);
+  auto lit1n = Expr::nega_literal(var1);
+  auto lit2p = Expr::posi_literal(var2);
+  auto lit3p = Expr::posi_literal(var3);
 
   auto expr0 = lit0p | (lit1n & lit2p);
   auto expr1 = lit1p & lit3p;
@@ -1290,12 +1290,12 @@ TEST_F(ExprTest, compose1)
 
 TEST_F(ExprTest, compose2)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1p = Expr::make_posi_literal(var1);
-  auto lit1n = Expr::make_nega_literal(var1);
-  auto lit2p = Expr::make_posi_literal(var2);
-  auto lit3p = Expr::make_posi_literal(var3);
-  auto lit4n = Expr::make_nega_literal(var4);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1p = Expr::posi_literal(var1);
+  auto lit1n = Expr::nega_literal(var1);
+  auto lit2p = Expr::posi_literal(var2);
+  auto lit3p = Expr::posi_literal(var3);
+  auto lit4n = Expr::nega_literal(var4);
 
   auto expr0 = lit0p | lit4n;
   auto opr1 = lit1p & lit3p;
@@ -1323,12 +1323,12 @@ TEST_F(ExprTest, compose2)
 
 TEST_F(ExprTest, compose3)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1p = Expr::make_posi_literal(var1);
-  auto lit1n = Expr::make_nega_literal(var1);
-  auto lit2p = Expr::make_posi_literal(var2);
-  auto lit3p = Expr::make_posi_literal(var3);
-  auto lit4n = Expr::make_nega_literal(var4);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1p = Expr::posi_literal(var1);
+  auto lit1n = Expr::nega_literal(var1);
+  auto lit2p = Expr::posi_literal(var2);
+  auto lit3p = Expr::posi_literal(var3);
+  auto lit4n = Expr::nega_literal(var4);
 
   auto expr0 = lit0p | lit4n;
   auto opr1 = lit1p & lit3p;
@@ -1356,11 +1356,11 @@ TEST_F(ExprTest, compose3)
 
 TEST_F(ExprTest, remap_var1)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1p = Expr::make_posi_literal(var1);
-  auto lit1n = Expr::make_nega_literal(var1);
-  auto lit2p = Expr::make_posi_literal(var2);
-  auto lit3p = Expr::make_posi_literal(var3);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1p = Expr::posi_literal(var1);
+  auto lit1n = Expr::nega_literal(var1);
+  auto lit2p = Expr::posi_literal(var2);
+  auto lit3p = Expr::posi_literal(var3);
 
   auto expr0 = (lit0p & lit3p) | (lit1n & lit2p);
   unordered_map<SizeType, SizeType> varmap;
@@ -1385,11 +1385,11 @@ TEST_F(ExprTest, remap_var1)
 
 TEST_F(ExprTest, remap_var2)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1p = Expr::make_posi_literal(var1);
-  auto lit1n = Expr::make_nega_literal(var1);
-  auto lit2p = Expr::make_posi_literal(var2);
-  auto lit3p = Expr::make_posi_literal(var3);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1p = Expr::posi_literal(var1);
+  auto lit1n = Expr::nega_literal(var1);
+  auto lit2p = Expr::posi_literal(var2);
+  auto lit3p = Expr::posi_literal(var3);
 
   auto expr0 = (lit0p & lit3p) | (lit1n & lit2p);
   vector<pair<SizeType, SizeType>> varlist;
@@ -1414,11 +1414,11 @@ TEST_F(ExprTest, remap_var2)
 
 TEST_F(ExprTest, eval1)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1p = Expr::make_posi_literal(var1);
-  auto lit1n = Expr::make_nega_literal(var1);
-  auto lit2p = Expr::make_posi_literal(var2);
-  auto lit3p = Expr::make_posi_literal(var3);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1p = Expr::posi_literal(var1);
+  auto lit1n = Expr::nega_literal(var1);
+  auto lit2p = Expr::posi_literal(var2);
+  auto lit3p = Expr::posi_literal(var3);
 
   auto expr = (lit0p & lit3p) | (lit1n & lit2p);
   vector<Expr::BitVectType> vals(4, 0);
@@ -1445,16 +1445,16 @@ TEST_F(ExprTest, eval1)
   EXPECT_EQ( exp_val, val );
 }
 
-TEST_F(ExprTest, make_tv1)
+TEST_F(ExprTest, to_tv1)
 {
-  auto lit0p = Expr::make_posi_literal(var0);
-  auto lit1p = Expr::make_posi_literal(var1);
-  auto lit1n = Expr::make_nega_literal(var1);
-  auto lit2p = Expr::make_posi_literal(var2);
-  auto lit3p = Expr::make_posi_literal(var3);
+  auto lit0p = Expr::posi_literal(var0);
+  auto lit1p = Expr::posi_literal(var1);
+  auto lit1n = Expr::nega_literal(var1);
+  auto lit2p = Expr::posi_literal(var2);
+  auto lit3p = Expr::posi_literal(var3);
 
   auto expr = (lit0p & lit3p) | (lit1n & lit2p);
-  auto f = expr.make_tv();
+  auto f = expr.to_tv();
 
   for ( int p = 0; p < 16; ++ p ) {
     bool val[4];

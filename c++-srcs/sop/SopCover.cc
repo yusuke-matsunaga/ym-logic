@@ -191,6 +191,17 @@ SopCover::literal_num(
   return mgr.literal_num(block(), lit);
 }
 
+// @brief 指定されたリテラルの出現回数を返す．
+SizeType
+SopCover::literal_num(
+  SizeType varid,
+  bool inv
+) const
+{
+  SopMgr mgr{variable_num()};
+  return mgr.literal_num(block(), varid, inv);
+}
+
 // @brief 内容をリテラルのリストのリストに変換する．
 vector<vector<Literal>>
 SopCover::literal_list() const

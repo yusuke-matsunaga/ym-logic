@@ -79,7 +79,7 @@ Expr::analyze() const
   auto input_num = input_size();
   if ( input_num <= 10 ) {
     // 10入力以下の場合は一旦 TvFunc に変換する．
-    auto tv = make_tv(input_num);
+    auto tv = to_tv(input_num);
     return tv.analyze();
   }
 

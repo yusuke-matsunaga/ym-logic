@@ -69,10 +69,11 @@ SopMgr::cube_product(
   Literal lit
 )
 {
-  auto var_id = lit.varid();
-  auto blk = _block_pos(var_id);
-  auto sft = _shift_num(var_id);
-  auto pat = lit2bv(lit);
+  auto varid = lit.varid();
+  auto inv = lit.is_negative();
+  auto blk = _block_pos(varid);
+  auto sft = _shift_num(varid);
+  auto pat = bitvect(inv);
   auto pat1 = pat << sft;
   auto mask = 3UL << sft;
 
@@ -95,10 +96,11 @@ SopMgr::cube_product_int(
   Literal lit
 )
 {
-  auto var_id = lit.varid();
-  auto blk = _block_pos(var_id);
-  auto sft = _shift_num(var_id);
-  auto pat = lit2bv(lit);
+  auto varid = lit.varid();
+  auto inv = lit.is_negative();
+  auto blk = _block_pos(varid);
+  auto sft = _shift_num(varid);
+  auto pat = bitvect(inv);
   auto pat1 = pat << sft;
   auto mask = 3UL << sft;
 
@@ -145,10 +147,11 @@ SopMgr::cube_quotient(
   Literal lit
 )
 {
-  auto var_id = lit.varid();
-  auto blk = _block_pos(var_id);
-  auto sft = _shift_num(var_id);
-  auto pat = lit2bv(lit);
+  auto varid = lit.varid();
+  auto inv = lit.is_negative();
+  auto blk = _block_pos(varid);
+  auto sft = _shift_num(varid);
+  auto pat = bitvect(inv);
   auto pat1 = pat << sft;
   auto mask = 3UL << sft;
   auto nmask = ~mask;

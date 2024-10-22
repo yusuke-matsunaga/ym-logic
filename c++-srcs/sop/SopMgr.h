@@ -122,6 +122,19 @@ public:
   literal_num(
     const SopBlock& block, ///< [in] 対象のブロック
     Literal lit            ///< [in] 対象のリテラル
+  )
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    return literal_num(block, varid, inv);
+  }
+
+  /// @brief ビットベクタ上の特定のリテラルの出現頻度を数える．
+  SizeType
+  literal_num(
+    const SopBlock& block, ///< [in] 対象のブロック
+    SizeType varid,        ///< [in] 変数番号
+    bool inv               ///< [in] 反転属性
   );
 
   /// @brief ビットベクタからハッシュ値を計算する．
@@ -354,10 +367,22 @@ public:
     Literal lit         ///< [in] リテラル
   )
   {
-    auto var_id = lit.varid();
-    auto blk = _block_pos(var_id);
-    auto sft = _shift_num(var_id);
-    auto pat = lit2bv(lit);
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    cube_set_literal(dst_bv, varid, inv);
+  }
+
+  /// @brief キューブにリテラルをセットする．
+  void
+  cube_set_literal(
+    SopBitVect* dst_bv, ///< [in] 対象のビットベクタ
+    SizeType varid,     ///< [in] 変数番号
+    bool inv            ///< [in] 反転属性
+  )
+  {
+    auto blk = _block_pos(varid);
+    auto sft = _shift_num(varid);
+    auto pat = bitvect(inv);
     auto mask = pat << sft;
     dst_bv[blk] |= mask;
   }
@@ -647,11 +672,11 @@ protected:
 
   static
   SopBitVect
-  lit2bv(
-    Literal lit
+  bitvect(
+    bool inv ///< [in] 反転属性
   )
   {
-    return static_cast<SopBitVect>(lit.is_positive() ? SopPat::_1 : SopPat::_0);
+    return static_cast<SopBitVect>(inv ? SopPat::_0 : SopPat::_1);
   }
 
 

@@ -19,7 +19,7 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 TEST(NpnMgrTest, cannonical_const0)
 {
-  TvFunc func = TvFunc::make_zero(0);
+  TvFunc func = TvFunc::zero(0);
 
   NpnMgr npnmgr;
   npnmgr.cannonical(func);
@@ -37,7 +37,7 @@ TEST(NpnMgrTest, cannonical_const0)
 
 TEST(NpnMgrTest, cannonical_const1)
 {
-  TvFunc func = TvFunc::make_one(0);
+  TvFunc func = TvFunc::one(0);
 
   NpnMgr npnmgr;
   npnmgr.cannonical(func);

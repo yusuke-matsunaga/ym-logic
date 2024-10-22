@@ -30,13 +30,31 @@ PyTypeObject LiteralType = {
 PyObject*
 Literal_new(
   PyTypeObject* type,
-  PyObject* Py_UNUSED(args),
-  PyObject* Py_UNUSED(kwds)
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "var",
+    "inv",
+    nullptr
+  };
+  SizeType id = -1;
+  int inv_int = false;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|k$p",
+				    const_cast<char**>(kw_list),
+				    &id, &inv_int) ) {
+    return nullptr;
+  }
   auto self = type->tp_alloc(type, 0);
-  // auto literal_obj = reinterpret_cast<LiteralObject*>(self);
-  // 必要なら literal_obj->mVal の初期化を行う．
+  auto lit_obj = reinterpret_cast<LiteralObject*>(self);
+  if ( id == -1 ) {
+    lit_obj->mVal = Literal::x();
+  }
+  else {
+    bool inv = static_cast<bool>(inv_int);
+    lit_obj->mVal = Literal{id, inv};
+  }
   return self;
 }
 
@@ -51,37 +69,6 @@ Literal_dealloc(
   Py_TYPE(self)->tp_free(self);
 }
 
-// 初期化関数(__init__()相当)
-int
-Literal_init(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kwlist[] = {
-    "",
-    "inv",
-    nullptr
-  };
-  SizeType id = -1;
-  int inv_int = false;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|k$p",
-				    const_cast<char**>(kwlist),
-				    &id, &inv_int) ) {
-    return -1;
-  }
-  auto lit_obj = reinterpret_cast<LiteralObject*>(self);
-  if ( id == -1 ) {
-    lit_obj->mVal = Literal::x();
-  }
-  else {
-    bool inv = inv_int;
-    lit_obj->mVal = Literal{id, inv};
-  }
-  return 0;
-}
-
 // repr() 関数
 PyObject*
 Literal_repr(
@@ -90,8 +77,9 @@ Literal_repr(
 {
   auto val = PyLiteral::Get(self);
   // val から 文字列を作る．
-  const char* tmp_str = nullptr;
-  return Py_BuildValue("s", tmp_str);
+  ostringstream buf;
+  buf << val;
+  return Py_BuildValue("s", buf.str().c_str());
 }
 
 PyObject*
@@ -101,25 +89,20 @@ Literal_set(
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
-    "",
+  static const char* kw_list[] = {
+    "var",
     "inv",
     nullptr
   };
   SizeType id = -1;
   int inv = false;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|$p",
-				    const_cast<char**>(kwlist),
+				    const_cast<char**>(kw_list),
 				    &id, &inv) ) {
     return nullptr;
   }
   auto lit_obj = reinterpret_cast<LiteralObject*>(self);
-  if ( id == -1 ) {
-    lit_obj->mVal = Literal::x();
-  }
-  else {
-    lit_obj->mVal.set(id, inv);
-  }
+  lit_obj->mVal.set(id, inv);
   Py_RETURN_NONE;
 }
 
@@ -183,15 +166,20 @@ PyMethodDef Literal_methods[] = {
   {"set", reinterpret_cast<PyCFunction>(Literal_set),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("set the contents")},
-  {"is_valid", Literal_is_valid, METH_NOARGS,
+  {"is_valid", Literal_is_valid,
+   METH_NOARGS,
    PyDoc_STR("True if valid")},
-  {"is_positive", Literal_is_positive, METH_NOARGS,
+  {"is_positive", Literal_is_positive,
+   METH_NOARGS,
    PyDoc_STR("True if positive")},
-  {"is_negative", Literal_is_negative, METH_NOARGS,
+  {"is_negative", Literal_is_negative,
+   METH_NOARGS,
    PyDoc_STR("True if negative")},
-  {"make_positive", Literal_make_positive, METH_NOARGS,
+  {"make_positive", Literal_make_positive,
+   METH_NOARGS,
    PyDoc_STR("return positive literal with the same variable")},
-  {"make_negative", Literal_make_negative, METH_NOARGS,
+  {"make_negative", Literal_make_negative,
+   METH_NOARGS,
    PyDoc_STR("return negative literal with the same variable")},
   {nullptr, nullptr, 0, nullptr}
 };
@@ -287,7 +275,6 @@ PyLiteral::init(
   LiteralType.tp_richcompare = Literal_richcmpfunc;
   LiteralType.tp_methods = Literal_methods;
   LiteralType.tp_getset = Literal_getsetters;
-  LiteralType.tp_init = Literal_init;
   LiteralType.tp_new = Literal_new;
   LiteralType.tp_repr = Literal_repr;
   LiteralType.tp_as_number = &Literal_number;
@@ -323,6 +310,10 @@ PyLiteral::Check(
   PyObject* obj
 )
 {
+  if ( PyLong_Check(obj) ) {
+    // 特例: 整数タイプは Literal に変換可能
+    return true;
+  }
   return Py_IS_TYPE(obj, _typeobject());
 }
 
@@ -332,6 +323,11 @@ PyLiteral::Get(
   PyObject* obj
 )
 {
+  if ( PyLong_Check(obj) ) {
+    // 特例: 整数タイプは Literal に変換可能
+    auto var = static_cast<SizeType>(PyLong_AsLong(obj));
+    return Literal(var);
+  }
   auto literal_obj = reinterpret_cast<LiteralObject*>(obj);
   return literal_obj->mVal;
 }

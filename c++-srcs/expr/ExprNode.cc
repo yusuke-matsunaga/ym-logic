@@ -173,16 +173,16 @@ ExprNode::make_tv(
 ) const
 {
   if ( is_zero() ) {
-    return TvFunc::make_zero(ni);
+    return TvFunc::zero(ni);
   }
   if ( is_one() ) {
-    return TvFunc::make_one(ni);
+    return TvFunc::one(ni);
   }
   if ( is_posiliteral() ) {
-    return TvFunc::make_posi_literal(ni, varid());
+    return TvFunc::posi_literal(ni, varid());
   }
   if ( is_negaliteral() ) {
-    return TvFunc::make_nega_literal(ni, varid());
+    return TvFunc::nega_literal(ni, varid());
   }
 
   // あとは AND/OR/XOR のみ

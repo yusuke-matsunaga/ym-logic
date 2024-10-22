@@ -24,14 +24,14 @@ make_func(
   const SopCube& cube
 )
 {
-  TvFunc f_cube = TvFunc::make_one(ni);
+  TvFunc f_cube = TvFunc::one(ni);
   for ( SizeType var = 0; var < ni; ++ var ) {
     auto pat = cube.get_pat(var);
     if ( pat == SopPat::_1 ) {
-      f_cube &= TvFunc::make_posi_literal(ni, var);
+      f_cube &= TvFunc::posi_literal(ni, var);
     }
     else if ( pat == SopPat::_0 ) {
-      f_cube &= TvFunc::make_nega_literal(ni, var);
+      f_cube &= TvFunc::nega_literal(ni, var);
     }
   }
   return f_cube;

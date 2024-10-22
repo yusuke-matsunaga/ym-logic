@@ -42,7 +42,7 @@ public:
   explicit
   Literal(
     SizeType varid,  ///< [in] 変数番号
-    bool inv         ///< [in] 極性
+    bool inv = false ///< [in] 極性
                      ///   - false: 反転なし (正極性)
                      ///   - true:  反転あり (負極性)
   )
@@ -57,7 +57,9 @@ public:
     SizeType index ///< [in] 変数番号と極性をエンコードしたもの
   )
   {
-    return Literal{index};
+    Literal lit;
+    lit.mBody = index;
+    return lit;
   }
 
   // コピーコンストラクタ,代入演算子,デストラクタはデフォルト
@@ -139,7 +141,9 @@ public:
   invert() const
   {
     if ( is_valid() ) {
-      return Literal(mBody ^ 1U);
+      Literal lit;
+      lit.mBody = mBody ^ 1U;
+      return lit;
     }
     else {
       return *this;
@@ -151,7 +155,9 @@ public:
   make_positive() const
   {
     if ( is_valid() ) {
-      return Literal(mBody & ~1U);
+      Literal lit;
+      lit.mBody = mBody & ~1U;
+      return lit;
     }
     else {
       return *this;
@@ -163,7 +169,9 @@ public:
   make_negative() const
   {
     if ( is_valid() ) {
-      return Literal(mBody | 1U);
+      Literal lit;
+      lit.mBody = mBody | 1U;
+      return lit;
     }
     else {
       return *this;
@@ -206,20 +214,6 @@ public:
   )
   {
     mBody = s.read_vint();
-  }
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部でのみ用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief 内部でのみ用いるコンストラクタ
-  explicit
-  Literal(
-    SizeType body
-  ) : mBody{body}
-  {
   }
 
 
@@ -343,13 +337,16 @@ operator<<(
 )
 {
   if ( lit.is_valid() ) {
-    s << lit.varid();
-    if ( lit.is_negative() ) {
-      s << "'";
+    if ( lit.is_positive() ) {
+      s << "P";
     }
+    else {
+      s << "N";
+    }
+    s << "<" << lit.varid() << ">";
   }
   else {
-    s << "-X-";
+    s << "U<>";
   }
   return s;
 }

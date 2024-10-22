@@ -37,13 +37,13 @@ SopCube_new(
 )
 {
   static const char* kw_list[] = {
-    "",
-    "",
+    "input_num",
+    "literal_list",
     nullptr
   };
   SizeType ni = -1;
   PyObject* obj1 = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|O",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|$O",
 				    const_cast<char**>(kw_list),
 				    &ni, &obj1) ) {
     return nullptr;
@@ -60,7 +60,8 @@ SopCube_new(
       for ( SizeType i = 0; i < n; ++ i ) {
 	auto obj2 = PyList_GetItem(obj1, i);
 	if ( !PyLiteral::Check(obj2) ) {
-	  PyErr_SetString(PyExc_TypeError, "argument 2 must be a 'Literal' or list of 'Literal'");
+	  PyErr_SetString(PyExc_TypeError,
+			  "argument 2 must be a 'Literal' or list of 'Literal'");
 	  return nullptr;
 	}
 	auto lit = PyLiteral::Get(obj2);
@@ -86,6 +87,16 @@ SopCube_dealloc(
 }
 
 PyObject*
+SopCube_copy(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& cube = PySopCube::Get(self);
+  return PySopCube::ToPyObject(cube);
+}
+
+PyObject*
 SopCube_is_tautology(
   PyObject* self,
   PyObject* Py_UNUSED(args)
@@ -99,15 +110,22 @@ SopCube_is_tautology(
 PyObject*
 SopCube_get_pat(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  SizeType cpos = -1;
-  if ( !PyArg_ParseTuple(args, "k", &cpos) ) {
+  static const char* kw_list[] = {
+    "var_pos",
+    nullptr
+  };
+  SizeType vpos = -1;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &vpos) ) {
     return nullptr;
   }
   auto& cube = PySopCube::Get(self);
-  auto pat = cube.get_pat(cpos);
+  auto pat = cube.get_pat(vpos);
   const char* ans_str = nullptr;
   if ( pat == SopPat::_X ) {
     ans_str = "-";
@@ -124,12 +142,18 @@ SopCube_get_pat(
 PyObject*
 SopCube_check_literal(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "literal",
+    nullptr
+  };
   PyObject* lit_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!",
-			 PyLiteral::_typeobject(), &lit_obj) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
+				    const_cast<char**>(kw_list),
+				    PyLiteral::_typeobject(), &lit_obj) ) {
     return nullptr;
   }
   auto& cube = PySopCube::Get(self);
@@ -159,12 +183,18 @@ SopCube_literal_list(
 PyObject*
 SopCube_check_containment(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "cube",
+    nullptr
+  };
   PyObject* cube_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!",
-			 PySopCube::_typeobject(), &cube_obj) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
+				    const_cast<char**>(kw_list),
+				    PySopCube::_typeobject(), &cube_obj) ) {
     return nullptr;
   }
   auto& cube = PySopCube::Get(self);
@@ -176,12 +206,18 @@ SopCube_check_containment(
 PyObject*
 SopCube_check_intersect(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "cube",
+    nullptr
+  };
   PyObject* cube_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!",
-			 PySopCube::_typeobject(), &cube_obj) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
+				    const_cast<char**>(kw_list),
+				    PySopCube::_typeobject(), &cube_obj) ) {
     return nullptr;
   }
   auto& cube = PySopCube::Get(self);
@@ -203,19 +239,29 @@ SopCube_expr(
 
 // メソッド定義
 PyMethodDef SopCube_methods[] = {
-  {"is_tautology", SopCube_is_tautology, METH_NOARGS,
+  {"copy", SopCube_copy,
+   METH_NOARGS,
+   PyDoc_STR("return copy of this object")},
+  {"is_tautology", SopCube_is_tautology,
+   METH_NOARGS,
    PyDoc_STR("return True if tautology")},
-  {"get_pat", SopCube_get_pat, METH_VARARGS,
+  {"get_pat", reinterpret_cast<PyCFunction>(SopCube_get_pat),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("get the pattern('-', '0', or '1') of the specified position")},
-  {"check_literal", SopCube_check_literal, METH_VARARGS,
+  {"check_literal", reinterpret_cast<PyCFunction>(SopCube_check_literal),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return True if containing the specified literal")},
-  {"literal_list", SopCube_literal_list, METH_NOARGS,
+  {"literal_list", SopCube_literal_list,
+   METH_NOARGS,
    PyDoc_STR("convert to the list of 'Literal'")},
-  {"check_containment", SopCube_check_containment, METH_VARARGS,
+  {"check_containment", reinterpret_cast<PyCFunction>(SopCube_check_containment),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return True if being contained in the argument cube")},
-  {"check_intersect", SopCube_check_intersect, METH_VARARGS,
+  {"check_intersect", reinterpret_cast<PyCFunction>(SopCube_check_intersect),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return True if having intersection with the argument cube")},
-  {"expr", SopCube_expr, METH_NOARGS,
+  {"expr", SopCube_expr,
+   METH_NOARGS,
    PyDoc_STR("convert to 'Expr'")},
   {nullptr, nullptr, 0, nullptr}
 };
@@ -279,12 +325,20 @@ SopCube_mul(
     auto val1 = PySopCube::Get(self);
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      return PySopCube::ToPyObject(val1 * val2);
+      auto val3 = val1 * val2;
+      return PySopCube::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      return PySopCube::ToPyObject(val1 * val2);
+      auto val3 = val1 * val2;
+      return PySopCube::ToPyObject(val3);
     }
+  }
+  else if ( PyLiteral::Check(self) && PySopCube::Check(other) ) {
+    auto val1 = PyLiteral::Get(self);
+    auto val2 = PySopCube::Get(other);
+    auto val3 = val1 * val2;
+    return PySopCube::ToPyObject(val3);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -297,16 +351,16 @@ SopCube_imul(
 )
 {
   if ( PySopCube::Check(self) ) {
-    auto val1 = PySopCube::Get(self);
+    auto sopcube_obj = reinterpret_cast<SopCubeObject*>(self);
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      val1 *= val2;
+      (*sopcube_obj->mVal) *= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      val1 *= val2;
+      (*sopcube_obj->mVal) *= val2;
       Py_IncRef(self);
       return self;
     }
@@ -343,16 +397,16 @@ SopCube_idiv(
 )
 {
   if ( PySopCube::Check(self) ) {
-    auto val1 = PySopCube::Get(self);
+    auto sopcube_obj = reinterpret_cast<SopCubeObject*>(self);
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      val1 /= val2;
+      (*sopcube_obj->mVal) /= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      val1 /= val2;
+      (*sopcube_obj->mVal) /= val2;
       Py_IncRef(self);
       return self;
     }

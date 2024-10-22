@@ -71,6 +71,18 @@ target_link_libraries ( py_ymlogic_d
 # テストターゲット
 # ===================================================================
 
-add_test( logic_py_ymlogic_test
-  py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
+add_test( logic_py_bddmgr_test
+  py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/bddmgr_test.py
+  )
+
+add_test( logic_py_expr_test
+  py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/expr_test.py
+  )
+
+add_test( logic_py_literal_test
+  py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/literal_test.py
+  )
+
+add_test( logic_py_primtype_test
+  py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/primtype_test.py
   )

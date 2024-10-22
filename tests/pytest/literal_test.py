@@ -16,6 +16,7 @@ def test_constructor1():
 
     assert not lit.is_valid()
 
+    assert str(lit) == "U<>"
 
 def test_constructor2():
     var0 = 0
@@ -26,6 +27,8 @@ def test_constructor2():
     assert not lit.is_negative()
     assert lit.varid == var0
 
+    assert str(lit) == "P<0>"
+    
     lit_p = lit.make_positive()
     assert lit_p == lit
 
@@ -35,12 +38,14 @@ def test_constructor2():
 
 def test_constructor3():
     var0 = 1
-    lit = Literal(var0, inv=False)
+    lit = Literal(var=var0, inv=False)
 
     assert lit.is_valid()
     assert lit.is_positive()
     assert not lit.is_negative()
     assert lit.varid == var0
+
+    assert str(lit) == "P<1>"
 
     lit_p = lit.make_positive()
     assert lit_p == lit
@@ -57,6 +62,8 @@ def test_constructor4():
     assert not lit.is_positive()
     assert lit.is_negative()
     assert lit.varid == var0
+
+    assert str(lit) == "N<2>"
 
     lit_p = lit.make_positive()
     assert lit_p == ~lit

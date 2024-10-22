@@ -108,7 +108,7 @@ public:
   /// @brief 不正な値を作る．
   static
   TvFunc
-  make_invalid()
+  invalid()
   {
     return TvFunc{};
   }
@@ -117,7 +117,7 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  make_zero(
+  zero(
     SizeType ni ///< [in] 入力数
   )
   {
@@ -128,7 +128,7 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  make_one(
+  one(
     SizeType ni ///< [in] 入力数
   )
   {
@@ -140,7 +140,7 @@ public:
   /// @return 生成したオブジェクト
   static
   TvFunc
-  make_literal(
+  literal(
     SizeType ni,    ///< [in] 入力数
     SizeType varid, ///< [in] リテラルの変数番号
     bool inv        ///< [in] 反転属性
@@ -155,7 +155,7 @@ public:
   /// @return 生成したオブジェクト
   static
   TvFunc
-  make_literal(
+  literal(
     SizeType ni, ///< [in] 入力数
     Literal lit  ///< [in] リテラル
   )
@@ -167,7 +167,7 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  make_posi_literal(
+  posi_literal(
     SizeType ni,   ///< [in] 入力数
     SizeType varid ///< [in] リテラルの変数番号
   )
@@ -179,7 +179,7 @@ public:
   /// @return 生成したオブジェクトを返す．
   static
   TvFunc
-  make_nega_literal(
+  nega_literal(
     SizeType ni,   ///< [in] 入力数
     SizeType varid ///< [in] リテラルの変数番号
   )
@@ -266,6 +266,18 @@ public:
   xor_int(
     const TvFunc& src1 ///< [in] オペランド
   );
+
+  /// @brief コファクターを計算し自分に代入する．
+  /// @return 自身への参照を返す．
+  TvFunc&
+  cofactor_int(
+    Literal lit     ///< [in] リテラル
+  )
+  {
+    auto var = lit.varid();
+    auto inv = lit.is_negative();
+    return cofactor_int(var, inv);
+  }
 
   /// @brief コファクターを計算し自分に代入する．
   /// @return 自身への参照を返す．
@@ -541,6 +553,15 @@ public:
   // 演算
   // 多くは演算子のオーバーロードになっているのでここは少ない．
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief コファクターを返す．
+  TvFunc
+  cofactor(
+    Literal lit    ///< [in] リテラル
+  ) const
+  {
+    return TvFunc{*this}.cofactor_int(lit);
+  }
 
   /// @brief コファクターを返す．
   TvFunc

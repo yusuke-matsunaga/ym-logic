@@ -57,28 +57,28 @@ Tv2BddTest::check_func(
 
 TEST_F(Tv2BddTest, const0)
 {
-  auto func = TvFunc::make_zero(10);
+  auto func = TvFunc::zero(10);
 
   check_func(func);
 }
 
 TEST_F(Tv2BddTest, const1)
 {
-  auto func = TvFunc::make_one(10);
+  auto func = TvFunc::one(10);
 
   check_func(func);
 }
 
 TEST_F(Tv2BddTest, literal1)
 {
-  auto func = TvFunc::make_literal(10, 5, false);
+  auto func = TvFunc::literal(10, 5, false);
 
   check_func(func);
 }
 
 TEST_F(Tv2BddTest, literal2)
 {
-  auto func = TvFunc::make_literal(10, 3, true);
+  auto func = TvFunc::literal(10, 3, true);
 
   check_func(func);
 }

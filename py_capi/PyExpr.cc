@@ -37,13 +37,13 @@ Expr_new(
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
+  static const char* kw_list[] = {
     "",
     nullptr
   };
   const char* expr_str = nullptr;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|s",
-				    const_cast<char**>(kwlist),
+				    const_cast<char**>(kw_list),
 				    &expr_str) ) {
     return nullptr;
   }
@@ -97,96 +97,111 @@ Expr_str(
 }
 
 PyObject*
-Expr_make_invalid(
+Expr_invalid(
   PyObject* Py_UNUSED(self),
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = Expr::make_invalid();
+  auto expr = Expr::invalid();
   return PyExpr::ToPyObject(expr);
 }
 
 PyObject*
-Expr_make_zero(
+Expr_zero(
   PyObject* Py_UNUSED(self),
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = Expr::make_zero();
+  auto expr = Expr::zero();
   return PyExpr::ToPyObject(expr);
 }
 
 PyObject*
-Expr_make_one(
+Expr_one(
   PyObject* Py_UNUSED(self),
   PyObject* Py_UNUSED(args)
 )
 {
-  auto expr = Expr::make_one();
+  auto expr = Expr::one();
   return PyExpr::ToPyObject(expr);
 }
 
 PyObject*
-Expr_make_literal(
+Expr_literal(
   PyObject* Py_UNUSED(self),
   PyObject* args,
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
-    "",
+  static const char* kw_list[] = {
+    "var",
     "inv",
     nullptr
   };
-  PyObject* obj1 = nullptr;
-  int inv = 0;
+  PyObject* var_obj = nullptr;
+  int inv_int = 0;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
-				    const_cast<char**>(kwlist),
-				    &obj1, &inv) ) {
+				    const_cast<char**>(kw_list),
+				    &var_obj, &inv_int) ) {
     return nullptr;
   }
 
   Expr expr;
-  if ( PyLong_Check(obj1) ) {
-    SizeType varid = PyLong_AsLong(obj1);
-    expr = Expr::make_literal(varid, static_cast<bool>(inv));
-  }
-  else if ( PyLiteral::Check(obj1) ) {
-    auto lit = PyLiteral::Get(obj1);
-    expr = Expr::make_literal(lit);
+  bool inv = static_cast<bool>(inv_int);
+  if ( PyLiteral::Check(var_obj) ) {
+    auto lit = PyLiteral::Get(var_obj);
+    if ( inv ) {
+      lit = ~lit;
+    }
+    expr = Expr::literal(lit);
   }
   else {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or a Literal");
+    PyErr_SetString(PyExc_TypeError,
+		    "'var' must be an int or a Literal");
     return nullptr;
   }
   return PyExpr::ToPyObject(expr);
 }
 
 PyObject*
-Expr_make_posi_literal(
+Expr_posi_literal(
   PyObject* Py_UNUSED(self),
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "var",
+    nullptr
+  };
   SizeType id = -1;
-  if ( !PyArg_ParseTuple(args, "k", &id) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &id) ) {
     return nullptr;
   }
-  auto expr = Expr::make_posi_literal(static_cast<SizeType>(id));
+  auto expr = Expr::posi_literal(static_cast<SizeType>(id));
   return PyExpr::ToPyObject(expr);
 }
 
 PyObject*
-Expr_make_nega_literal(
+Expr_nega_literal(
   PyObject* Py_UNUSED(self),
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "var",
+    nullptr
+  };
   SizeType id = -1;
-  if ( !PyArg_ParseTuple(args, "k", &id) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &id) ) {
     return nullptr;
   }
-  auto expr = Expr::make_nega_literal(static_cast<SizeType>(id));
+  auto expr = Expr::nega_literal(static_cast<SizeType>(id));
   return PyExpr::ToPyObject(expr);
 }
 
@@ -215,7 +230,7 @@ get_expr_list(
 }
 
 PyObject*
-Expr_make_and(
+Expr_and_op(
   PyObject* Py_UNUSED(self),
   PyObject* args
 )
@@ -226,15 +241,16 @@ Expr_make_and(
   }
   vector<Expr> expr_list;
   if ( !get_expr_list(list_obj, expr_list) ) {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'Expr's");
+    PyErr_SetString(PyExc_TypeError,
+		    "argument 1 must be a list of 'Expr's");
     return nullptr;
   }
-  auto expr = Expr::make_and(expr_list);
+  auto expr = Expr::and_op(expr_list);
   return PyExpr::ToPyObject(expr);
 }
 
 PyObject*
-Expr_make_or(
+Expr_or_op(
   PyObject* Py_UNUSED(self),
   PyObject* args
 )
@@ -245,15 +261,16 @@ Expr_make_or(
   }
   vector<Expr> expr_list;
   if ( !get_expr_list(list_obj, expr_list) ) {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'Expr's");
+    PyErr_SetString(PyExc_TypeError,
+		    "argument 1 must be a list of 'Expr's");
     return nullptr;
   }
-  auto expr = Expr::make_or(expr_list);
+  auto expr = Expr::or_op(expr_list);
   return PyExpr::ToPyObject(expr);
 }
 
 PyObject*
-Expr_make_xor(
+Expr_xor_op(
   PyObject* Py_UNUSED(self),
   PyObject* args
 )
@@ -264,15 +281,16 @@ Expr_make_xor(
   }
   vector<Expr> expr_list;
   if ( !get_expr_list(list_obj, expr_list) ) {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'Expr's");
+    PyErr_SetString(PyExc_TypeError,
+		    "argument 1 must be a list of 'Expr's");
     return nullptr;
   }
-  auto expr = Expr::make_xor(expr_list);
+  auto expr = Expr::xor_op(expr_list);
   return PyExpr::ToPyObject(expr);
 }
 
 PyObject*
-Expr_make_from_string(
+Expr_from_string(
   PyObject* Py_UNUSED(self),
   PyObject* args
 )
@@ -286,7 +304,8 @@ Expr_make_from_string(
     return PyExpr::ToPyObject(expr);
   }
   catch ( std::invalid_argument ) {
-    PyErr_SetString(PyExc_ValueError, "invalid argument");
+    PyErr_SetString(PyExc_ValueError,
+		    "invalid argument");
     return nullptr;
   }
 }
@@ -312,7 +331,8 @@ Expr_compose(
       return nullptr;
     }
     if ( !PyExpr::Check(value) ) {
-      PyErr_SetString(PyExc_TypeError, "'Expr' expected in dictionary value");
+      PyErr_SetString(PyExc_TypeError,
+		      "'Expr' expected in dictionary value");
       return nullptr;
     }
     auto expr1 = PyExpr::Get(value);
@@ -372,20 +392,21 @@ Expr_eval(
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
-    "",
+  static const char* kw_list[] = {
+    "inputs",
     "mask",
     nullptr
   };
   PyObject* vect_obj = nullptr;
   Expr::BitVectType mask = ~0UL;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$k",
-				    const_cast<char**>(kwlist),
+				    const_cast<char**>(kw_list),
 				    &vect_obj, &mask) ) {
     return nullptr;
   }
   if ( !PySequence_Check(vect_obj) ) {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be a vector of int");
+    PyErr_SetString(PyExc_TypeError,
+		    "argument 1 must be a vector of int");
     return nullptr;
   }
   SizeType n = PySequence_Size(vect_obj);
@@ -395,7 +416,8 @@ Expr_eval(
     auto val = PyLong_AsLong(obj1);
     Py_XDECREF(obj1);
     if ( val == -1 && PyErr_Occurred() ) {
-      PyErr_SetString(PyExc_TypeError, "argument 1 must be a vector of int");
+      PyErr_SetString(PyExc_TypeError,
+		      "argument 1 must be a vector of int");
       return nullptr;
     }
     vals[i] = val;
@@ -406,7 +428,7 @@ Expr_eval(
 }
 
 PyObject*
-Expr_make_tv(
+Expr_to_tv(
   PyObject* self,
   PyObject* args
 )
@@ -416,7 +438,7 @@ Expr_make_tv(
     return nullptr;
   }
   auto& expr = PyExpr::Get(self);
-  auto func = expr.make_tv(ni);
+  auto func = expr.to_tv(ni);
   return PyTvFunc::ToPyObject(std::move(func));
 }
 
@@ -608,86 +630,6 @@ Expr_is_sop(
 }
 
 PyObject*
-Expr_literal_num(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kwlist[] = {
-    "",
-    "inv",
-    nullptr
-  };
-  PyObject* obj1 = nullptr;
-  int inv_int = false;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O$p",
-				    const_cast<char**>(kwlist),
-				    &obj1, &inv_int) ) {
-    return nullptr;
-  }
-  auto expr = PyExpr::Get(self);
-  int ans = 0;
-  if ( obj1 == nullptr ) {
-    ans = expr.literal_num();
-  }
-  else if ( PyLong_Check(obj1) ) {
-    SizeType varid = PyLong_AsLong(obj1);
-    bool inv = static_cast<bool>(inv_int);
-    ans = expr.literal_num(varid, inv);
-  }
-  else if ( PyLiteral::Check(obj1) ) {
-    auto lit = PyLiteral::Get(obj1);
-    ans = expr.literal_num(lit);
-  }
-  else {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or a Literal");
-    return nullptr;
-  }
-  return PyLong_FromLong(ans);
-}
-
-PyObject*
-Expr_sop_literal_num(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kwlist[] = {
-    "",
-    "inv",
-    nullptr
-  };
-  PyObject* obj1 = nullptr;
-  int inv_int = false;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O$p",
-				    const_cast<char**>(kwlist),
-				    &obj1, &inv_int) ) {
-    return nullptr;
-  }
-  auto expr = PyExpr::Get(self);
-  int ans = 0;
-  if ( obj1 == nullptr ) {
-    ans = expr.sop_literal_num();
-  }
-  else if ( PyLong_Check(obj1) ) {
-    SizeType varid = PyLong_AsLong(obj1);
-    bool inv = static_cast<bool>(inv_int);
-    ans = expr.sop_literal_num(varid, inv);
-  }
-  else if ( PyLiteral::Check(obj1) ) {
-    auto lit = PyLiteral::Get(obj1);
-    ans = expr.sop_literal_num(lit);
-  }
-  else {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or a Literal");
-    return nullptr;
-  }
-  return PyLong_FromLong(ans);
-}
-
-PyObject*
 Expr_analyze(
   PyObject* self,
   PyObject* Py_UNUSED(args)
@@ -698,89 +640,10 @@ Expr_analyze(
   return PyPrimType::ToPyObject(ptype);
 }
 
-// メソッド定義
-PyMethodDef Expr_methods[] = {
-  {"make_invalid", Expr_make_invalid, METH_STATIC | METH_NOARGS,
-   PyDoc_STR("make an invalid object")},
-  {"make_zero", Expr_make_zero, METH_STATIC | METH_NOARGS,
-   PyDoc_STR("make a ZERO object")},
-  {"make_one", Expr_make_one, METH_STATIC | METH_NOARGS,
-   PyDoc_STR("make a ONE object")},
-  {"make_literal", reinterpret_cast<PyCFunction>(Expr_make_literal),
-   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("make a LITERAL object")},
-  {"make_posi_literal", Expr_make_posi_literal, METH_STATIC | METH_VARARGS,
-   PyDoc_STR("make a positive LITERAL object")},
-  {"make_nega_literal", Expr_make_nega_literal, METH_STATIC | METH_VARARGS,
-   PyDoc_STR("make a negative LITERAL object")},
-  {"make_and", Expr_make_and, METH_STATIC | METH_VARARGS,
-   PyDoc_STR("make an AND object")},
-  {"make_or", Expr_make_or, METH_STATIC | METH_VARARGS,
-   PyDoc_STR("make an OR object")},
-  {"make_xor", Expr_make_xor, METH_STATIC | METH_VARARGS,
-   PyDoc_STR("make an XOR object")},
-  {"make_from_string", Expr_make_from_string, METH_STATIC | METH_VARARGS,
-   PyDoc_STR("make Expr from string")},
-  {"compose", Expr_compose, METH_VARARGS,
-   PyDoc_STR("'compose' operation")},
-  {"remap_var", Expr_remap_var, METH_VARARGS,
-   PyDoc_STR("remap variable")},
-  {"simplify", Expr_simplify, METH_NOARGS,
-   PyDoc_STR("simplify")},
-  {"eval", reinterpret_cast<PyCFunction>(Expr_eval),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("evaluate")},
-  {"make_tv", Expr_make_tv, METH_VARARGS,
-   PyDoc_STR("convert to TvFunc")},
-  {"is_valid", Expr_is_valid, METH_NOARGS,
-   PyDoc_STR("True if valid")},
-  {"is_invalid", Expr_is_invalid, METH_NOARGS,
-   PyDoc_STR("True if invalid")},
-  {"is_zero", Expr_is_zero, METH_NOARGS,
-   PyDoc_STR("True if ZERO")},
-  {"is_one", Expr_is_one, METH_NOARGS,
-   PyDoc_STR("True if ONE")},
-  {"is_constant", Expr_is_constant, METH_NOARGS,
-   PyDoc_STR("True if constant(ONE/ZERO)")},
-  {"is_posi_literal", Expr_is_posi_literal, METH_NOARGS,
-   PyDoc_STR("True if positive literal")},
-  {"is_nega_literal", Expr_is_nega_literal, METH_NOARGS,
-   PyDoc_STR("True if negative literal")},
-  {"is_literal", Expr_is_literal, METH_NOARGS,
-   PyDoc_STR("True if literal")},
-  {"is_and", Expr_is_and, METH_NOARGS,
-   PyDoc_STR("True if the root operator is AND")},
-  {"is_or", Expr_is_or, METH_NOARGS,
-   PyDoc_STR("True if the root operator is OR")},
-  {"is_xor", Expr_is_xor, METH_NOARGS,
-   PyDoc_STR("True if the root operator is XOR")},
-  {"is_op", Expr_is_op, METH_NOARGS,
-   PyDoc_STR("True if operator type")},
-  {"is_simple", Expr_is_simple, METH_NOARGS,
-   PyDoc_STR("True if simple expression")},
-  {"is_simple_and", Expr_is_simple_and, METH_NOARGS,
-   PyDoc_STR("True if simple AND expression")},
-  {"is_simple_or", Expr_is_simple_or, METH_NOARGS,
-   PyDoc_STR("True if simple OR expression")},
-  {"is_simple_xor", Expr_is_simple_xor, METH_NOARGS,
-   PyDoc_STR("True if simple XOR expression")},
-  {"is_sop", Expr_is_sop, METH_NOARGS,
-   PyDoc_STR("True if SOP expression")},
-  {"literal_num", reinterpret_cast<PyCFunction>(Expr_literal_num),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("count the literal number")},
-  {"sop_literal_num", reinterpret_cast<PyCFunction>(Expr_sop_literal_num),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("count the literal number in SOP form")},
-  {"analyze", Expr_analyze, METH_NOARGS,
-   PyDoc_STR("check if this expression represents a primitive function")},
-  {nullptr, nullptr, 0, nullptr}
-};
-
 PyObject*
-Expr_varid(
+Expr_get_varid(
   PyObject* self,
-  void* Py_UNUSED(closure)
+  PyObject* Py_UNUSED(args)
 )
 {
   auto expr = PyExpr::Get(self);
@@ -789,9 +652,9 @@ Expr_varid(
 }
 
 PyObject*
-Expr_literal(
+Expr_get_literal(
   PyObject* self,
-  void* Py_UNUSED(closure)
+  PyObject* Py_UNUSED(args)
 )
 {
   auto expr = PyExpr::Get(self);
@@ -800,9 +663,9 @@ Expr_literal(
 }
 
 PyObject*
-Expr_operand_list(
+Expr_get_operand_list(
   PyObject* self,
-  void* Py_UNUSED(closure)
+  PyObject* Py_UNUSED(args)
 )
 {
   auto expr = PyExpr::Get(self);
@@ -815,6 +678,214 @@ Expr_operand_list(
   }
   return ans_obj;
 }
+
+PyObject*
+Expr_literal_num(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kw_list[] = {
+    "var",
+    "inv",
+    nullptr
+  };
+  PyObject* var_obj = nullptr;
+  int inv_int = 0;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O$p",
+				    const_cast<char**>(kw_list),
+				    &var_obj, &inv_int) ) {
+    return nullptr;
+  }
+  auto expr = PyExpr::Get(self);
+  bool inv = static_cast<bool>(inv_int);
+  int ans = 0;
+  if ( var_obj == nullptr ) {
+    if ( inv ) {
+      PyErr_SetString(PyExc_TypeError,
+		      "'inv' should be specified with 'var'");
+      return nullptr;
+    }
+    ans = expr.literal_num();
+  }
+  else if ( PyLiteral::Check(var_obj) ) {
+    auto lit = PyLiteral::Get(var_obj);
+    if ( inv ) {
+      lit = ~lit;
+    }
+    ans = expr.literal_num(lit);
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError,
+		    "'var' must be an int or a Literal");
+    return nullptr;
+  }
+  return PyLong_FromLong(ans);
+}
+
+PyObject*
+Expr_sop_literal_num(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kw_list[] = {
+    "var",
+    "inv",
+    nullptr
+  };
+  PyObject* var_obj = nullptr;
+  int inv_int = false;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O$p",
+				    const_cast<char**>(kw_list),
+				    &var_obj, &inv_int) ) {
+    return nullptr;
+  }
+  auto expr = PyExpr::Get(self);
+  bool inv = static_cast<bool>(inv_int);
+  int ans = 0;
+  if ( var_obj == nullptr ) {
+    if ( inv ) {
+      PyErr_SetString(PyExc_TypeError,
+		      "'inv' should be specified with 'var'");
+      return nullptr;
+    }
+    ans = expr.sop_literal_num();
+  }
+  else if ( PyLiteral::Check(var_obj) ) {
+    auto lit = PyLiteral::Get(var_obj);
+    if ( inv_int ) {
+      lit = ~lit;
+    }
+    ans = expr.sop_literal_num(lit);
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError,
+		    "'var' must be an int or a Literal");
+    return nullptr;
+  }
+  return PyLong_FromLong(ans);
+}
+
+// メソッド定義
+PyMethodDef Expr_methods[] = {
+  {"invalid", Expr_invalid,
+   METH_STATIC | METH_NOARGS,
+   PyDoc_STR("make an invalid object")},
+  {"zero", Expr_zero,
+   METH_STATIC | METH_NOARGS,
+   PyDoc_STR("make a ZERO object")},
+  {"one", Expr_one,
+   METH_STATIC | METH_NOARGS,
+   PyDoc_STR("make a ONE object")},
+  {"literal", reinterpret_cast<PyCFunction>(Expr_literal),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("make a LITERAL object")},
+  {"posi_literal", reinterpret_cast<PyCFunction>(Expr_posi_literal),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("make a positive LITERAL object")},
+  {"nega_literal", reinterpret_cast<PyCFunction>(Expr_nega_literal),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("make a negative LITERAL object")},
+  {"and_op", Expr_and_op,
+   METH_STATIC | METH_VARARGS,
+   PyDoc_STR("make an AND object")},
+  {"or_op", Expr_or_op,
+   METH_STATIC | METH_VARARGS,
+   PyDoc_STR("make an OR object")},
+  {"xor_op", Expr_xor_op,
+   METH_STATIC | METH_VARARGS,
+   PyDoc_STR("make an XOR object")},
+  {"from_string", Expr_from_string,
+   METH_STATIC | METH_VARARGS,
+   PyDoc_STR("make Expr from string")},
+  {"compose", Expr_compose,
+   METH_VARARGS,
+   PyDoc_STR("'compose' operation")},
+  {"remap_var", Expr_remap_var,
+   METH_VARARGS,
+   PyDoc_STR("remap variable")},
+  {"simplify", Expr_simplify,
+   METH_NOARGS,
+   PyDoc_STR("simplify")},
+  {"eval", reinterpret_cast<PyCFunction>(Expr_eval),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("evaluate")},
+  {"to_tv", Expr_to_tv,
+   METH_VARARGS,
+   PyDoc_STR("convert to TvFunc")},
+  {"is_valid", Expr_is_valid,
+   METH_NOARGS,
+   PyDoc_STR("True if valid")},
+  {"is_invalid", Expr_is_invalid,
+   METH_NOARGS,
+   PyDoc_STR("True if invalid")},
+  {"is_zero", Expr_is_zero,
+   METH_NOARGS,
+   PyDoc_STR("True if ZERO")},
+  {"is_one", Expr_is_one,
+   METH_NOARGS,
+   PyDoc_STR("True if ONE")},
+  {"is_constant", Expr_is_constant,
+   METH_NOARGS,
+   PyDoc_STR("True if constant(ONE/ZERO)")},
+  {"is_posi_literal", Expr_is_posi_literal,
+   METH_NOARGS,
+   PyDoc_STR("True if positive literal")},
+  {"is_nega_literal", Expr_is_nega_literal,
+   METH_NOARGS,
+   PyDoc_STR("True if negative literal")},
+  {"is_literal", Expr_is_literal,
+   METH_NOARGS,
+   PyDoc_STR("True if literal")},
+  {"is_and", Expr_is_and,
+   METH_NOARGS,
+   PyDoc_STR("True if the root operator is AND")},
+  {"is_or", Expr_is_or,
+   METH_NOARGS,
+   PyDoc_STR("True if the root operator is OR")},
+  {"is_xor", Expr_is_xor,
+   METH_NOARGS,
+   PyDoc_STR("True if the root operator is XOR")},
+  {"is_op", Expr_is_op,
+   METH_NOARGS,
+   PyDoc_STR("True if operator type")},
+  {"is_simple", Expr_is_simple,
+   METH_NOARGS,
+   PyDoc_STR("True if simple expression")},
+  {"is_simple_and", Expr_is_simple_and,
+   METH_NOARGS,
+   PyDoc_STR("True if simple AND expression")},
+  {"is_simple_or", Expr_is_simple_or,
+   METH_NOARGS,
+   PyDoc_STR("True if simple OR expression")},
+  {"is_simple_xor", Expr_is_simple_xor,
+   METH_NOARGS,
+   PyDoc_STR("True if simple XOR expression")},
+  {"is_sop", Expr_is_sop,
+   METH_NOARGS,
+   PyDoc_STR("True if SOP expression")},
+  {"analyze", Expr_analyze, METH_NOARGS,
+   PyDoc_STR("check if this expression represents a primitive function")},
+  {"literal_num", reinterpret_cast<PyCFunction>(Expr_literal_num),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("count the literal number")},
+  {"get_varid", Expr_get_varid,
+   METH_NOARGS,
+   PyDoc_STR("get var-id (literal type only)")},
+  {"get_literal", Expr_get_literal,
+   METH_NOARGS,
+   PyDoc_STR("get literal (literal type only)")},
+  {"get_operand_list", Expr_get_operand_list,
+   METH_NOARGS,
+   PyDoc_STR("get operand list (OP type only)")},
+  {"sop_literal_num", reinterpret_cast<PyCFunction>(Expr_sop_literal_num),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("count the literal number in SOP form")},
+  {nullptr, nullptr, 0, nullptr}
+};
 
 PyObject*
 Expr_sop_cube_num(
@@ -839,12 +910,6 @@ Expr_input_size(
 }
 
 PyGetSetDef Expr_getsetters[] = {
-  {"varid", Expr_varid, nullptr,
-   PyDoc_STR("Variable ID"), nullptr},
-  {"literal", Expr_literal, nullptr,
-   PyDoc_STR("Literal"), nullptr},
-  {"operand_list", Expr_operand_list, nullptr,
-   PyDoc_STR("operand list"), nullptr},
   {"input_size", Expr_input_size, nullptr,
    PyDoc_STR("input size"), nullptr},
   {"sop_cube_num", Expr_sop_cube_num, nullptr,

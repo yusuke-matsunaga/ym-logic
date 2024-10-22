@@ -38,13 +38,13 @@ TvFunc_new(
 )
 {
   static const char* kwlist[] = {
-    "",
-    "",
+    "input_num",
+    "val_list",
     nullptr
   };
   SizeType ni = -1;
   PyObject* vect_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|kO",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|$kO",
 				    const_cast<char**>(kwlist),
 				    &ni, &vect_obj) ) {
     return nullptr;
@@ -52,10 +52,10 @@ TvFunc_new(
 
   TvFunc func;
   if ( ni == -1 ) {
-    func = TvFunc::make_invalid();
+    func = TvFunc::invalid();
   }
   else if ( vect_obj == nullptr ) {
-    func = TvFunc::make_zero(ni);
+    func = TvFunc::zero(ni);
   }
   else if ( PySequence_Check(vect_obj) ) {
     SizeType n = PySequence_Size(vect_obj);
@@ -102,108 +102,150 @@ TvFunc_repr(
 {
   auto& func = PyTvFunc::Get(self);
   // func から 文字列を作る．
-  const char* tmp_str = nullptr;
-  return Py_BuildValue("s", tmp_str);
+  auto tmp_str = func.str();
+  return Py_BuildValue("s", tmp_str.c_str());
 }
 
 PyObject*
-TvFunc_make_invalid(
+TvFunc_invalid(
   PyObject* Py_UNUSED(self),
   PyObject* Py_UNUSED(args)
 )
 {
-  return PyTvFunc::ToPyObject(TvFunc::make_invalid());
+  return PyTvFunc::ToPyObject(TvFunc::invalid());
 }
 
 PyObject*
-TvFunc_make_zero(
+TvFunc_zero(
   PyObject* Py_UNUSED(self),
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "input_num",
+    nullptr
+  };
   SizeType ni = 0;
-  if ( !PyArg_ParseTuple(args, "k", &ni) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &ni) ) {
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(TvFunc::make_zero(ni));
+  return PyTvFunc::ToPyObject(TvFunc::zero(ni));
 }
 
 PyObject*
-TvFunc_make_one(
+TvFunc_one(
   PyObject* Py_UNUSED(self),
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "input_num",
+    nullptr
+  };
   SizeType ni = 0;
-  if ( !PyArg_ParseTuple(args, "k", &ni) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &ni) ) {
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(TvFunc::make_one(ni));
+  return PyTvFunc::ToPyObject(TvFunc::one(ni));
 }
 
 PyObject*
-TvFunc_make_literal(
+TvFunc_literal(
   PyObject* Py_UNUSED(self),
   PyObject* args,
   PyObject* kwds
 )
 {
   static const char* kwlist[] = {
-    "",
-    "",
+    "input_num",
+    "var",
     "inv",
+    "literal",
     nullptr
   };
   SizeType ni = 0;
-  PyObject* obj1 = nullptr;
-  int inv = 0;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kO|$p",
+  SizeType var = -1;
+  int inv_int = 0;
+  PyObject* lit_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|$kpO!",
 				    const_cast<char**>(kwlist),
-				    &ni, &obj1, &inv) ) {
+				    &ni, &var, &inv_int,
+				    PyLiteral::_typeobject(), &lit_obj) ) {
     return nullptr;
   }
   TvFunc func;
-  if ( PyLong_Check(obj1) ) {
-    SizeType var = PyLong_AsLong(obj1);
-    func = TvFunc::make_literal(ni, var, static_cast<bool>(inv));
+  if ( var != -1 ) {
+    if ( lit_obj != nullptr ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "'var' and 'literal' are mutually exclusive.");
+      return nullptr;
+    }
+    bool inv = static_cast<bool>(inv_int);
+    func = TvFunc::literal(ni, var, inv);
   }
-  else if ( PyLiteral::Check(obj1) ) {
-    auto lit = PyLiteral::Get(obj1);
-    func = TvFunc::make_literal(ni, lit);
+  else if ( lit_obj != nullptr ) {
+    auto lit = PyLiteral::Get(lit_obj);
+    if ( inv_int ) {
+      lit = ~lit;
+    }
+    func = TvFunc::literal(ni, lit);
   }
   else {
-    PyErr_SetString(PyExc_TypeError, "argument 2 must be an int or a Literal");
+    PyErr_SetString(PyExc_ValueError,
+		    "either 'var' or 'literal' must be specified.");
     return nullptr;
   }
   return PyTvFunc::ToPyObject(std::move(func));
 }
 
 PyObject*
-TvFunc_make_posi_literal(
+TvFunc_posi_literal(
   PyObject* Py_UNUSED(self),
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "input_num",
+    "var",
+    nullptr
+  };
   SizeType ni = -1;
   SizeType varid = -1;
-  if ( !PyArg_ParseTuple(args, "kk", &ni, &varid) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk",
+				    const_cast<char**>(kw_list),
+				    &ni, &varid) ) {
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(TvFunc::make_posi_literal(ni, varid));
+  return PyTvFunc::ToPyObject(TvFunc::posi_literal(ni, varid));
 }
 
 PyObject*
-TvFunc_make_nega_literal(
+TvFunc_nega_literal(
   PyObject* Py_UNUSED(self),
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "input_num",
+    "var",
+    nullptr
+  };
   SizeType ni = -1;
   SizeType varid = -1;
-  if ( !PyArg_ParseTuple(args, "kk", &ni, &varid) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk",
+				    const_cast<char**>(kw_list),
+				    &ni, &varid) ) {
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(TvFunc::make_nega_literal(ni, varid));
+  return PyTvFunc::ToPyObject(TvFunc::nega_literal(ni, varid));
 }
 
 PyObject*
@@ -214,32 +256,39 @@ TvFunc_cofactor(
 )
 {
   static const char* kwlist[] = {
-    "",
+    "var",
     "inv",
+    "literal",
     nullptr
   };
-  PyObject* obj1 = nullptr;
-  int inv = false;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
+  SizeType var = -1;
+  int inv_int = 0;
+  PyObject* lit_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|$kpO!",
 				    const_cast<char**>(kwlist),
-				    &obj1, &inv) ) {
-    return nullptr;
-  }
-  SizeType var;
-  if ( PyLong_Check(obj1) ) {
-    var = PyLong_AsLong(obj1);
-  }
-  else if ( PyLiteral::Check(obj1) ) {
-    auto lit = PyLiteral::Get(obj1);
-    var = lit.varid();
-    inv = lit.is_negative();
-  }
-  else {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be an in or a Literal");
+				    &var, &inv_int,
+				    PyLiteral::_typeobject(), &lit_obj) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
-  auto ans = func.cofactor(var, static_cast<bool>(inv));
+  TvFunc ans;
+  if ( var != -1 ) {
+    if ( lit_obj != nullptr ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "'var' and 'literal' are mutually exclusive.");
+      return nullptr;
+    }
+    ans = func.cofactor(var, static_cast<bool>(inv_int));
+  }
+  else if ( lit_obj != nullptr ) {
+    auto lit = PyLiteral::Get(lit_obj);
+    ans = func.cofactor(lit);
+  }
+  else {
+    PyErr_SetString(PyExc_ValueError,
+		    "either 'var' or 'literal' must be specified.");
+    return nullptr;
+  }
   return PyTvFunc::ToPyObject(std::move(ans));
 }
 
@@ -251,32 +300,38 @@ TvFunc_cofactor_int(
 )
 {
   static const char* kwlist[] = {
-    "",
+    "var",
     "inv",
+    "literal",
     nullptr
   };
-  PyObject* obj1 = nullptr;
-  int inv = false;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
+  SizeType var = -1;
+  int inv_int = 0;
+  PyObject* lit_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|$kpO!",
 				    const_cast<char**>(kwlist),
-				    &obj1, &inv) ) {
-    return nullptr;
-  }
-  SizeType var;
-  if ( PyLong_Check(obj1) ) {
-    var = PyLong_AsLong(obj1);
-  }
-  else if ( PyLiteral::Check(obj1) ) {
-    auto lit = PyLiteral::Get(obj1);
-    var = lit.varid();
-    inv = lit.is_negative();
-  }
-  else {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be an in or a Literal");
+				    &var, &inv_int,
+				    PyLiteral::_typeobject(), &lit_obj) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
-  func.cofactor_int(var, static_cast<bool>(inv));
+  if ( var != -1 ) {
+    if ( lit_obj != nullptr ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "'var' and 'literal' are mutually exclusive.");
+      return nullptr;
+    }
+    func.cofactor_int(var, static_cast<bool>(inv_int));
+  }
+  else if ( lit_obj != nullptr ) {
+    auto lit = PyLiteral::Get(lit_obj);
+    func.cofactor_int(lit);
+  }
+  else {
+    PyErr_SetString(PyExc_ValueError,
+		    "either 'var' or 'literal' must be specified.");
+    return nullptr;
+  }
   Py_INCREF(self);
   return self;
 }
@@ -284,12 +339,18 @@ TvFunc_cofactor_int(
 PyObject*
 TvFunc_xform(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "map",
+    nullptr
+  };
   PyObject* npnmap_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "O!",
-			 PyNpnMap::_typeobject(), &npnmap_obj) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
+				    const_cast<char**>(kw_list),
+				    PyNpnMap::_typeobject(), &npnmap_obj) ) {
     return nullptr;
   }
   auto& npnmap = PyNpnMap::Get(npnmap_obj);
@@ -385,11 +446,18 @@ TvFunc_is_one(
 PyObject*
 TvFunc_value(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "pos",
+    nullptr
+  };
   SizeType pos = -1;
-  if ( !PyArg_ParseTuple(args, "k", &pos) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &pos) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
@@ -433,11 +501,18 @@ TvFunc_walsh_0(
 PyObject*
 TvFunc_walsh_1(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "var",
+    nullptr
+  };
   SizeType varid = -1;
-  if ( !PyArg_ParseTuple(args, "k", &varid) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &varid) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
@@ -448,12 +523,20 @@ TvFunc_walsh_1(
 PyObject*
 TvFunc_walsh_2(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "var1",
+    "var2",
+    nullptr
+  };
   SizeType varid1 = -1;
   SizeType varid2 = -1;
-  if ( !PyArg_ParseTuple(args, "kk", &varid1, &varid2) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk",
+				    const_cast<char**>(kw_list),
+				    &varid1, &varid2) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
@@ -464,11 +547,18 @@ TvFunc_walsh_2(
 PyObject*
 TvFunc_check_sup(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "var",
+    nullptr
+  };
   SizeType varid = -1;
-  if ( !PyArg_ParseTuple(args, "k", &varid) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &varid) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
@@ -479,11 +569,18 @@ TvFunc_check_sup(
 PyObject*
 TvFunc_check_unate(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "var",
+    nullptr
+  };
   SizeType varid = -1;
-  if ( !PyArg_ParseTuple(args, "k", &varid) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &varid) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
@@ -499,8 +596,8 @@ TvFunc_check_sym(
 )
 {
   static const char* kwlist[] = {
-    "",
-    ""
+    "var1",
+    "var2"
     "inv",
     nullptr
   };
@@ -530,18 +627,23 @@ TvFunc_analyze(
 
 // メソッド定義
 PyMethodDef TvFunc_methods[] = {
-  {"make_invalid", TvFunc_make_invalid, METH_STATIC | METH_NOARGS,
+  {"invalid", TvFunc_invalid,
+   METH_STATIC | METH_NOARGS,
    PyDoc_STR("make invalid function")},
-  {"make_zero", TvFunc_make_zero, METH_STATIC | METH_VARARGS,
+  {"zero", reinterpret_cast<PyCFunction>(TvFunc_zero),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make ZERO function")},
-  {"make_one", TvFunc_make_zero, METH_STATIC | METH_VARARGS,
+  {"one", reinterpret_cast<PyCFunction>(TvFunc_zero),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make ONE function")},
-  {"make_literal", reinterpret_cast<PyCFunction>(TvFunc_make_literal),
+  {"literal", reinterpret_cast<PyCFunction>(TvFunc_literal),
    METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make literal function")},
-  {"make_posi_literal", TvFunc_make_posi_literal, METH_STATIC | METH_VARARGS,
+  {"posi_literal", reinterpret_cast<PyCFunction>(TvFunc_posi_literal),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make positive literal function")},
-  {"make_nega_literal", TvFunc_make_nega_literal, METH_STATIC | METH_VARARGS,
+  {"nega_literal", reinterpret_cast<PyCFunction>(TvFunc_nega_literal),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make positive literal function")},
   {"cofactor", reinterpret_cast<PyCFunction>(TvFunc_cofactor),
    METH_VARARGS | METH_KEYWORDS,
@@ -549,37 +651,53 @@ PyMethodDef TvFunc_methods[] = {
   {"cofactor_int", reinterpret_cast<PyCFunction>(TvFunc_cofactor_int),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return the cofactor(inplace version)")},
-  {"xform", TvFunc_xform, METH_VARARGS,
+  {"xform", reinterpret_cast<PyCFunction>(TvFunc_xform),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("transform")},
-  {"shrink_map", TvFunc_shrink_map, METH_NOARGS,
+  {"shrink_map", TvFunc_shrink_map,
+   METH_NOARGS,
    PyDoc_STR("make the shrink map")},
-  {"npn_cannonical_map", TvFunc_npn_cannonical_map, METH_NOARGS,
+  {"npn_cannonical_map", TvFunc_npn_cannonical_map,
+   METH_NOARGS,
    PyDoc_STR("make the cannonical map for NPN-equivalence")},
-  {"npn_cannonical_all_map", TvFunc_npn_cannonical_all_map, METH_NOARGS,
+  {"npn_cannonical_all_map", TvFunc_npn_cannonical_all_map,
+   METH_NOARGS,
    PyDoc_STR("make the list of all cannonical maps for NPN-equivalence")},
-  {"is_valid", TvFunc_is_valid, METH_NOARGS,
+  {"is_valid", TvFunc_is_valid,
+   METH_NOARGS,
    PyDoc_STR("True if valid")},
-  {"is_invalid", TvFunc_is_valid, METH_NOARGS,
+  {"is_invalid", TvFunc_is_valid,
+   METH_NOARGS,
    PyDoc_STR("True if not valid")},
-  {"is_zero", TvFunc_is_zero, METH_NOARGS,
+  {"is_zero", TvFunc_is_zero,
+   METH_NOARGS,
    PyDoc_STR("True if ZERO function")},
-  {"is_one", TvFunc_is_one, METH_NOARGS,
+  {"is_one", TvFunc_is_one,
+   METH_NOARGS,
    PyDoc_STR("True if ONE function")},
-  {"value", TvFunc_value, METH_VARARGS,
+  {"value", reinterpret_cast<PyCFunction>(TvFunc_value),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return the value for the specified input")},
-  {"count_zero", TvFunc_count_zero, METH_NOARGS,
+  {"count_zero", TvFunc_count_zero,
+   METH_NOARGS,
    PyDoc_STR("return the 0's count")},
-  {"count_one", TvFunc_count_one, METH_NOARGS,
+  {"count_one", TvFunc_count_one,
+   METH_NOARGS,
    PyDoc_STR("return the 1's count")},
-  {"walsh_0", TvFunc_walsh_0, METH_NOARGS,
+  {"walsh_0", TvFunc_walsh_0,
+   METH_NOARGS,
    PyDoc_STR("return the Walsh 0th coefficient")},
-  {"walsh_1", TvFunc_walsh_1, METH_VARARGS,
+  {"walsh_1", reinterpret_cast<PyCFunction>(TvFunc_walsh_1),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return the Walsh 1st coefficient")},
-  {"walsh_2", TvFunc_walsh_2, METH_VARARGS,
+  {"walsh_2", reinterpret_cast<PyCFunction>(TvFunc_walsh_2),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return the Walsh 2nd coefficient")},
-  {"check_sup", TvFunc_check_sup, METH_VARARGS,
+  {"check_sup", reinterpret_cast<PyCFunction>(TvFunc_check_sup),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("check if the specified input is a support")},
-  {"check_unate", TvFunc_check_unate, METH_VARARGS,
+  {"check_unate", reinterpret_cast<PyCFunction>(TvFunc_check_unate),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("check the unateness on the specified input")},
   {"check_sym", reinterpret_cast<PyCFunction>(TvFunc_check_sym),
    METH_VARARGS | METH_KEYWORDS,

@@ -86,17 +86,17 @@ SopMgr::literal_num(
 // @brief ビットベクタ上の特定のリテラルの出現頻度を数える．
 SizeType
 SopMgr::literal_num(
-  const SopBlock& src,
-  Literal lit
+  const SopBlock& block,
+  SizeType varid,
+  bool inv
 )
 {
-  auto var_id = lit.varid();
-  auto blk = _block_pos(var_id);
-  auto sft = _shift_num(var_id);
-  auto pat = lit2bv(lit);
+  auto blk = _block_pos(varid);
+  auto sft = _shift_num(varid);
+  auto pat = bitvect(inv);
   auto mask = pat << sft;
-  auto bv = src.body;
-  auto bv_end = _calc_offset(bv, src.cube_num);
+  auto bv = block.body;
+  auto bv_end = _calc_offset(bv, block.cube_num);
   SizeType ans = 0;
   for ( ; bv != bv_end; bv += _cube_size() ) {
     if ( (bv[blk] & mask) == mask ) {
@@ -137,16 +137,16 @@ SopMgr::to_expr(
 )
 {
   auto bv = block.body;
-  auto ans = Expr::make_zero();
+  auto ans = Expr::zero();
   for ( SizeType c = 0; c < block.cube_num; ++ c ) {
-    auto prod = Expr::make_one();
+    auto prod = Expr::one();
     for ( SizeType var = 0; var < variable_num(); ++ var ) {
       auto pat = get_pat(bv, c, var);
       if ( pat == SopPat::_1 ) {
-	prod &= Expr::make_posi_literal(var);
+	prod &= Expr::posi_literal(var);
       }
       else if ( pat == SopPat::_0 ) {
-	prod &= Expr::make_nega_literal(var);
+	prod &= Expr::nega_literal(var);
       }
     }
     ans |= prod;

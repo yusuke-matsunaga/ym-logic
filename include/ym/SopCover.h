@@ -142,6 +142,13 @@ public:
     Literal lit ///< [in] 対象のリテラル
   ) const;
 
+  /// @brief 指定されたリテラルの出現回数を返す．
+  SizeType
+  literal_num(
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 反転属性
+  ) const;
+
   /// @brief 内容をリテラルのリストのリストに変換する．
   vector<vector<Literal>>
   literal_list() const;

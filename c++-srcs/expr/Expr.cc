@@ -84,41 +84,41 @@ Expr::set_root(
 //
 // 返されたオブジェクトは is_valid() == false となる．
 Expr
-Expr::make_invalid()
+Expr::invalid()
 {
   return Expr{nullptr};
 }
 
 // 定数 0 の論理式を作る
 Expr
-Expr::make_zero()
+Expr::zero()
 {
-  return Expr{ExprMgr::the_obj().make_zero()};
+  return Expr{ExprMgr::the_obj().zero()};
 }
 
 // 定数 1 の論理式を作る
 Expr
-Expr::make_one()
+Expr::one()
 {
-  return Expr{ExprMgr::the_obj().make_one()};
+  return Expr{ExprMgr::the_obj().one()};
 }
 
 // 肯定のリテラルを作る．
 Expr
-Expr::make_posi_literal(
+Expr::posi_literal(
   SizeType varid
 )
 {
-  return Expr{ExprMgr::the_obj().make_posi_literal(varid)};
+  return Expr{ExprMgr::the_obj().posi_literal(varid)};
 }
 
 // 否定のリテラルを作る．
 Expr
-Expr::make_nega_literal(
+Expr::nega_literal(
   SizeType varid
 )
 {
-  return Expr{ExprMgr::the_obj().make_nega_literal(varid)};
+  return Expr{ExprMgr::the_obj().nega_literal(varid)};
 }
 
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
@@ -132,17 +132,17 @@ Expr::and_op(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
-  return Expr{mgr.make_and(begin)};
+  return Expr{mgr.and_op(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ n 入力ANDの論理式を作るクラス・メソッド
 Expr
-Expr::make_and(
+Expr::and_op(
   const vector<Expr>& chd_list
 )
 {
   if ( chd_list.size() == 0 ) {
-    return make_one();
+    return one();
   }
 
   auto& mgr = ExprMgr::the_obj();
@@ -150,7 +150,7 @@ Expr::make_and(
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
-  return Expr{mgr.make_and(begin)};
+  return Expr{mgr.and_op(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ 2 入力ORの論理式を作るクラス・メソッド
@@ -164,17 +164,17 @@ Expr::or_op(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
-  return Expr{mgr.make_or(begin)};
+  return Expr{mgr.or_op(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ n 入力ORの論理式を作るクラス・メソッド
 Expr
-Expr::make_or(
+Expr::or_op(
   const vector<Expr>& chd_list
 )
 {
   if ( chd_list.size() == 0 ) {
-    return make_zero();
+    return zero();
   }
 
   auto& mgr = ExprMgr::the_obj();
@@ -182,7 +182,7 @@ Expr::make_or(
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
-  return Expr{mgr.make_or(begin)};
+  return Expr{mgr.or_op(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
@@ -196,12 +196,12 @@ Expr::xor_op(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
-  return Expr{mgr.make_xor(begin)};
+  return Expr{mgr.xor_op(begin)};
 }
 
 // 与えられた論理式を部分論理式に持つ n 入力XORの論理式を作るクラス・メソッド
 Expr
-Expr::make_xor(
+Expr::xor_op(
   const vector<Expr>& chd_list
 )
 {
@@ -212,7 +212,7 @@ Expr::make_xor(
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
-  return Expr{mgr.make_xor(begin)};
+  return Expr{mgr.xor_op(begin)};
 }
 
 // 論理式をパーズしてファクタードフォームを作る．
@@ -271,7 +271,7 @@ Expr::operator&=(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
-  set_root(mgr.make_and(begin));
+  set_root(mgr.and_op(begin));
   return *this;
 }
 
@@ -285,7 +285,7 @@ Expr::operator|=(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
-  set_root(mgr.make_or(begin));
+  set_root(mgr.or_op(begin));
   return *this;
 }
 
@@ -299,7 +299,7 @@ Expr::operator^=(
   SizeType begin{mgr.nodestack_top()};
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
-  set_root(mgr.make_xor(begin));
+  set_root(mgr.xor_op(begin));
   return *this;
 }
 
@@ -391,12 +391,12 @@ Expr::eval(
 
 // @brief 真理値表の作成
 TvFunc
-Expr::make_tv(
+Expr::to_tv(
   SizeType ni
 ) const
 {
   if ( is_invalid() ) {
-    return TvFunc::make_invalid();
+    return TvFunc::invalid();
   }
   SizeType ni2{input_size()};
   if ( ni < ni2 ) {
@@ -759,41 +759,41 @@ Expr::restore(
   auto type = s.read_8();
   switch ( type ) {
   case 255:
-    return Expr::make_invalid();
+    return Expr::invalid();
 
   case 0:
-    return Expr::make_zero();
+    return Expr::zero();
 
   case 1:
-    return Expr::make_one();
+    return Expr::one();
 
   case 2:
     {
       SizeType var = s.read_64();
-      return Expr::make_posi_literal(var);
+      return Expr::posi_literal(var);
     }
 
   case 3:
     {
       SizeType var = s.read_64();
-      return Expr::make_nega_literal(var);
+      return Expr::nega_literal(var);
     }
 
   case 4:
-    return Expr::make_and(restore_operand_list(s));
+    return Expr::and_op(restore_operand_list(s));
 
   case 5:
-    return Expr::make_or(restore_operand_list(s));
+    return Expr::or_op(restore_operand_list(s));
 
   case 6:
-    return Expr::make_xor(restore_operand_list(s));
+    return Expr::xor_op(restore_operand_list(s));
 
   default:
     ASSERT_NOT_REACHED;
   }
 
   // ダミー
-  return Expr::make_invalid();
+  return Expr::invalid();
 }
 
 string

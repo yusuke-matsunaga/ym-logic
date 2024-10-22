@@ -24,8 +24,8 @@ walsh_01_normalize(
 
 TEST(w01test, walsh_01_normalize_and2)
 {
-  auto lit0 = TvFunc::make_literal(2, 0, false);
-  auto lit1 = TvFunc::make_literal(2, 1, false);
+  auto lit0 = TvFunc::literal(2, 0, false);
+  auto lit1 = TvFunc::literal(2, 1, false);
 
   auto and2 = lit0 & lit1;
 
@@ -57,8 +57,8 @@ TEST(w01test, walsh_01_normalize_and2)
 
 TEST(w01test, walsh_01_normalize_xor2)
 {
-  auto lit0 = TvFunc::make_literal(2, Literal{0, false});
-  auto lit1 = TvFunc::make_literal(2, Literal{1, false});
+  auto lit0 = TvFunc::literal(2, Literal{0, false});
+  auto lit1 = TvFunc::literal(2, Literal{1, false});
 
   auto xor2 = (lit0 & ~lit1) | (~lit0 & lit1);
 
@@ -90,11 +90,11 @@ TEST(w01test, walsh_01_normalize_xor2)
 
 TEST(w01test, walsh_01_normalize_ao221)
 {
-  auto lit0 = TvFunc::make_literal(5, Literal(0, false));
-  auto lit1 = TvFunc::make_literal(5, Literal(1, false));
-  auto lit2 = TvFunc::make_literal(5, Literal(2, false));
-  auto lit3 = TvFunc::make_literal(5, Literal(3, false));
-  auto lit4 = TvFunc::make_literal(5, Literal(4, false));
+  auto lit0 = TvFunc::literal(5, Literal(0, false));
+  auto lit1 = TvFunc::literal(5, Literal(1, false));
+  auto lit2 = TvFunc::literal(5, Literal(2, false));
+  auto lit3 = TvFunc::literal(5, Literal(3, false));
+  auto lit4 = TvFunc::literal(5, Literal(4, false));
 
   auto ao221 = (lit0 & lit1) | (~lit2 & ~lit3) | lit4;
 

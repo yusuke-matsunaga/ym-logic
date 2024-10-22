@@ -53,7 +53,7 @@ ExprMgr::clear_memory()
 
 // 恒偽関数を作る．
 ExprNodePtr
-ExprMgr::make_zero()
+ExprMgr::zero()
 {
   if ( !mConst0 ) {
     mConst0 = alloc_node(ExprNode::Const0);
@@ -64,7 +64,7 @@ ExprMgr::make_zero()
 
 // 恒真関数を作る．
 ExprNodePtr
-ExprMgr::make_one()
+ExprMgr::one()
 {
   if ( !mConst1 ) {
     mConst1 = alloc_node(ExprNode::Const1);
@@ -75,7 +75,7 @@ ExprMgr::make_one()
 
 // 肯定のリテラルを作る．
 ExprNodePtr
-ExprMgr::make_posi_literal(
+ExprMgr::posi_literal(
   SizeType id
 )
 {
@@ -87,7 +87,7 @@ ExprMgr::make_posi_literal(
 
 // 否定のリテラルを作る．
 ExprNodePtr
-ExprMgr::make_nega_literal(
+ExprMgr::nega_literal(
   SizeType id
 )
 {
@@ -101,7 +101,7 @@ ExprMgr::make_nega_literal(
 // 子供も AND ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
 ExprNodePtr
-ExprMgr::make_and(
+ExprMgr::and_op(
   SizeType begin
 )
 {
@@ -148,10 +148,10 @@ ExprMgr::make_and(
   SizeType n{mTmpNodeList.size()};
   ExprNodePtr node;
   if ( const0 ) {
-    node = make_zero();
+    node = zero();
   }
   else if ( n == 0 ) {
-    node = make_one();
+    node = one();
   }
   else if ( n == 1 ) {
     node = mTmpNodeList.front();
@@ -166,7 +166,7 @@ ExprMgr::make_and(
 // 子供も OR ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
 ExprNodePtr
-ExprMgr::make_or(
+ExprMgr::or_op(
   SizeType begin
 )
 {
@@ -213,10 +213,10 @@ ExprMgr::make_or(
   ExprNodePtr node;
   SizeType n{mTmpNodeList.size()};
   if ( const1 ) {
-    node = make_one();
+    node = one();
   }
   else if ( n == 0 ) {
-    node = make_zero();
+    node = zero();
   }
   else if ( n == 1 ) {
     node = mTmpNodeList.front();
@@ -231,7 +231,7 @@ ExprMgr::make_or(
 // 子供も XOR ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
 ExprNodePtr
-ExprMgr::make_xor(
+ExprMgr::xor_op(
   SizeType begin
 )
 {
@@ -269,7 +269,7 @@ ExprMgr::make_xor(
   ExprNodePtr node;
   SizeType n{mTmpNodeList.size()};
   if ( n == 0 ) {
-    node = make_zero();
+    node = zero();
   }
   else {
     if ( n == 1 ) {
@@ -299,19 +299,19 @@ ExprMgr::from_rep_string(
   case 'C':
     c = parser.read_char();
     if ( c == '0' ) {
-      return make_zero();
+      return zero();
     }
     if ( c == '1' ) {
-      return make_one();
+      return one();
     }
     // エラー
     break;
   case 'P':
     val = parser.read_int();
-    return make_posi_literal(val);
+    return posi_literal(val);
   case 'N':
     val = parser.read_int();
-    return make_nega_literal(val);
+    return nega_literal(val);
   case 'A':
     {
       SizeType n = parser.read_int();
@@ -320,7 +320,7 @@ ExprMgr::from_rep_string(
 	auto child_expr = from_rep_string(parser);
 	nodestack_push(child_expr);
       }
-      return make_and(begin);
+      return and_op(begin);
     }
     break;
   case 'O':
@@ -331,7 +331,7 @@ ExprMgr::from_rep_string(
 	auto child_expr = from_rep_string(parser);
 	nodestack_push(child_expr);
       }
-      return make_or(begin);
+      return or_op(begin);
     }
     break;
   case 'X':
@@ -342,7 +342,7 @@ ExprMgr::from_rep_string(
 	auto child_expr = from_rep_string(parser);
 	nodestack_push(child_expr);
       }
-      return make_xor(begin);
+      return xor_op(begin);
     }
     break;
   default:
@@ -442,10 +442,10 @@ ExprMgr::complement(
 )
 {
   switch ( node->type() ) {
-  case ExprNode::Const0:      return make_one();
-  case ExprNode::Const1:      return make_zero();
-  case ExprNode::PosiLiteral: return make_nega_literal(node->varid());
-  case ExprNode::NegaLiteral: return make_posi_literal(node->varid());
+  case ExprNode::Const0:      return one();
+  case ExprNode::Const1:      return zero();
+  case ExprNode::PosiLiteral: return nega_literal(node->varid());
+  case ExprNode::NegaLiteral: return posi_literal(node->varid());
   default: break;
   }
 
@@ -461,9 +461,9 @@ ExprMgr::complement(
   }
 
   switch ( node->type() ) {
-  case ExprNode::And: return make_or(begin);
-  case ExprNode::Or:  return make_and(begin);
-  case ExprNode::Xor: return make_xor(begin);
+  case ExprNode::And: return or_op(begin);
+  case ExprNode::Or:  return and_op(begin);
+  case ExprNode::Xor: return xor_op(begin);
   default: break;
   }
 
@@ -517,9 +517,9 @@ ExprMgr::compose(
   }
 
   switch ( node->type() ) {
-  case ExprNode::And: return make_and(begin);
-  case ExprNode::Or:  return make_or(begin);
-  case ExprNode::Xor: return make_xor(begin);
+  case ExprNode::And: return and_op(begin);
+  case ExprNode::Or:  return or_op(begin);
+  case ExprNode::Xor: return xor_op(begin);
   default: break;
   }
 
@@ -573,9 +573,9 @@ ExprMgr::compose(
   }
 
   switch ( node->type() ) {
-  case ExprNode::And: return make_and(begin);
-  case ExprNode::Or:  return make_or(begin);
-  case ExprNode::Xor: return make_xor(begin);
+  case ExprNode::And: return and_op(begin);
+  case ExprNode::Or:  return or_op(begin);
+  case ExprNode::Xor: return xor_op(begin);
   default:   break;
   }
 
@@ -598,14 +598,14 @@ ExprMgr::remap_var(
   case ExprNode::PosiLiteral:
     if ( varmap.count(node->varid()) > 0 ) {
       auto ans = varmap.at(node->varid());
-      return make_posi_literal(ans);
+      return posi_literal(ans);
     }
     return node;
 
   case ExprNode::NegaLiteral:
     if ( varmap.count(node->varid()) > 0 ) {
       auto ans = varmap.at(node->varid());
-      return make_nega_literal(ans);
+      return nega_literal(ans);
     }
     return node;
 
@@ -628,9 +628,9 @@ ExprMgr::remap_var(
   }
 
   switch ( node->type() ) {
-  case ExprNode::And: return make_and(begin);
-  case ExprNode::Or:  return make_or(begin);
-  case ExprNode::Xor: return make_xor(begin);
+  case ExprNode::And: return and_op(begin);
+  case ExprNode::Or:  return or_op(begin);
+  case ExprNode::Xor: return xor_op(begin);
   default:   break;
   }
 
@@ -671,9 +671,9 @@ ExprMgr::simplify(
   }
 
   switch ( node->type() ) {
-  case ExprNode::And: return make_and(begin);
-  case ExprNode::Or:  return make_or(begin);
-  case ExprNode::Xor: return make_xor(begin);
+  case ExprNode::And: return and_op(begin);
+  case ExprNode::Or:  return or_op(begin);
+  case ExprNode::Xor: return xor_op(begin);
   default:   break;
   }
 

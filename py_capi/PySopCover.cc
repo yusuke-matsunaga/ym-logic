@@ -38,21 +38,21 @@ SopCover_new(
 )
 {
   static const char* kw_list[] = {
-    "",
-    "",
+    "input_num",
+    "cube_list",
     nullptr
   };
   SizeType ni = 0;
   PyObject* obj1 = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|O!",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|$O!",
 				    const_cast<char**>(kw_list),
 				    &ni,
 				    &PyList_Type, &obj1) ) {
     return nullptr;
   }
-  SizeType n = PyList_Size(obj1);
   vector<SopCube> cube_list;
-  if ( n > 0 ) {
+  if ( obj1 != nullptr ) {
+    SizeType n = PyList_Size(obj1);
     cube_list.reserve(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto obj2 = PyList_GetItem(obj1, i);
@@ -86,7 +86,8 @@ SopCover_new(
     return self;
   }
  error:
-  PyErr_SetString(PyExc_TypeError, "argument 2 must a list of 'SopCube' or list of list of 'Literal'");
+  PyErr_SetString(PyExc_TypeError,
+		  "argument 2 must a list of 'SopCube' or list of list of 'Literal'");
   return nullptr;
 }
 
@@ -102,24 +103,58 @@ SopCover_dealloc(
 }
 
 PyObject*
-SopCover_literal_num(
+SopCover_copy(
   PyObject* self,
-  PyObject* args
+  PyObject* Py_UNUSED(args)
 )
 {
-  PyObject* lit_obj = nullptr;
-  if ( !PyArg_ParseTuple(args, "|O!",
-			 PyLiteral::_typeobject(), &lit_obj) ) {
+  auto& cov = PySopCover::Get(self);
+  return PySopCover::ToPyObject(cov);
+}
+
+PyObject*
+SopCover_literal_num(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kw_list[] = {
+    "var",
+    "inv",
+    nullptr
+  };
+  PyObject* var_obj = nullptr;
+  int inv_int = 0;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O$p",
+				    const_cast<char**>(kw_list),
+				    &var_obj, &inv_int) ) {
     return nullptr;
   }
   auto& cov = PySopCover::Get(self);
-  if ( lit_obj == nullptr ) {
-    return PyLong_FromLong(cov.literal_num());
+  bool inv = static_cast<bool>(inv_int);
+  int ans = 0;
+  if ( var_obj == nullptr ) {
+    if ( inv ) {
+      PyErr_SetString(PyExc_TypeError,
+		      "'inv' should be specified with 'var'");
+      return nullptr;
+    }
+    ans = cov.literal_num();
+  }
+  else if ( PyLiteral::Check(var_obj) ) {
+    auto lit = PyLiteral::Get(var_obj);
+    if ( inv ) {
+      lit = ~lit;
+    }
+    ans = cov.literal_num(lit);
   }
   else {
-    auto lit = PyLiteral::Get(lit_obj);
-    return PyLong_FromLong(cov.literal_num(lit));
+    PyErr_SetString(PyExc_TypeError,
+		    "'var' must be an int or a Literal");
+    return nullptr;
   }
+  return PyLong_FromLong(ans);
 }
 
 PyObject*
@@ -149,12 +184,20 @@ SopCover_literal_list(
 PyObject*
 SopCover_get_pat(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "cube_pos",
+    "var_pos",
+    nullptr
+  };
   SizeType cpos = -1;
   SizeType vpos = -1;
-  if ( !PyArg_ParseTuple(args, "kk", &cpos, &vpos) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk",
+				    const_cast<char**>(kw_list),
+				    &cpos, &vpos) ) {
     return nullptr;
   }
   auto& cov = PySopCover::Get(self);
@@ -196,15 +239,23 @@ SopCover_expr(
 
 // メソッド定義
 PyMethodDef SopCover_methods[] = {
-  {"literal_num", SopCover_literal_num, METH_VARARGS,
+  {"copy", SopCover_copy,
+   METH_NOARGS,
+   PyDoc_STR("return copy of this object.")},
+  {"literal_num", reinterpret_cast<PyCFunction>(SopCover_literal_num),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("count the number of literals")},
-  {"literal_list", SopCover_literal_list, METH_NOARGS,
+  {"literal_list", SopCover_literal_list,
+   METH_NOARGS,
    PyDoc_STR("convert to the list of list of literals")},
-  {"get_pat", SopCover_get_pat, METH_VARARGS,
+  {"get_pat", reinterpret_cast<PyCFunction>(SopCover_get_pat),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("get the pattern('-', '0', or '1') of the specified position")},
-  {"common_cube", SopCover_common_cube, METH_NOARGS,
+  {"common_cube", SopCover_common_cube,
+   METH_NOARGS,
    PyDoc_STR("return the common cube")},
-  {"expr", SopCover_expr, METH_NOARGS,
+  {"expr", SopCover_expr,
+   METH_NOARGS,
    PyDoc_STR("convert to 'Expr'")},
   {nullptr, nullptr, 0, nullptr}
 };
@@ -268,12 +319,20 @@ SopCover_add(
     auto val1 = PySopCover::Get(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
-      return PySopCover::ToPyObject(val1 + val2);
+      auto val3 = val1 + val2;
+      return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      return PySopCover::ToPyObject(val1 + val2);
+      auto val3 = val1 + val2;
+      return PySopCover::ToPyObject(val3);
     }
+  }
+  else if ( PySopCube::Check(self) && PySopCover::Check(other) ) {
+    auto val1 = PySopCube::Get(self);
+    auto val2 = PySopCover::Get(other);
+    auto val3 = val1 + val2;
+    return PySopCover::ToPyObject(val3);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -286,16 +345,16 @@ SopCover_iadd(
 )
 {
   if ( PySopCover::Check(self) ) {
-    auto val1 = PySopCover::Get(self);
+    auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
-      val1 += val2;
+      (*sopcover_obj->mVal) += val2;
       Py_IncRef(self);
       return self;
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      val1 += val2;
+      (*sopcover_obj->mVal) += val2;
       Py_IncRef(self);
       return self;
     }
@@ -314,11 +373,13 @@ SopCover_sub(
     auto val1 = PySopCover::Get(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
-      return PySopCover::ToPyObject(val1 + val2);
+      auto val3 = val1 - val2;
+      return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      return PySopCover::ToPyObject(val1 + val2);
+      auto val3 = val1 - val2;
+      return PySopCover::ToPyObject(val3);
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -332,16 +393,16 @@ SopCover_isub(
 )
 {
   if ( PySopCover::Check(self) ) {
-    auto val1 = PySopCover::Get(self);
+    auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
-      val1 -= val2;
+      (*sopcover_obj->mVal) -= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      val1 -= val2;
+      (*sopcover_obj->mVal) -= val2;
       Py_IncRef(self);
       return self;
     }
@@ -360,15 +421,31 @@ SopCover_mult(
     auto val1 = PySopCover::Get(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
-      return PySopCover::ToPyObject(val1 * val2);
+      auto val3 = val1 * val2;
+      return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      return PySopCover::ToPyObject(val1 * val2);
+      auto val3 = val1 * val2;
+      return PySopCover::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      return PySopCover::ToPyObject(val1 * val2);
+      auto val3 = val1 * val2;
+      return PySopCover::ToPyObject(val3);
+    }
+  }
+  else if ( PySopCover::Check(other) ) {
+    auto val2 = PySopCover::Get(other);
+    if ( PySopCube::Check(self) ) {
+      auto val1 = PySopCube::Get(self);
+      auto val3 = val1 * val2;
+      return PySopCover::ToPyObject(val3);
+    }
+    if ( PyLiteral::Check(self) ) {
+      auto val1 = PyLiteral::Get(self);
+      auto val3 = val1 * val2;
+      return PySopCover::ToPyObject(val3);
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -382,22 +459,22 @@ SopCover_imult(
 )
 {
   if ( PySopCover::Check(self) ) {
-    auto val1 = PySopCover::Get(self);
+    auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
-      val1 *= val2;
+      (*sopcover_obj->mVal) *= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      val1 *= val2;
+      (*sopcover_obj->mVal) *= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      val1 *= val2;
+      (*sopcover_obj->mVal) *= val2;
       Py_IncRef(self);
       return self;
     }
@@ -438,22 +515,22 @@ SopCover_idiv(
 )
 {
   if ( PySopCover::Check(self) ) {
-    auto val1 = PySopCover::Get(self);
+    auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
-      val1 /= val2;
+      (*sopcover_obj->mVal) /= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      val1 /= val2;
+      (*sopcover_obj->mVal) /= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      val1 /= val2;
+      (*sopcover_obj->mVal) /= val2;
       Py_IncRef(self);
       return self;
     }

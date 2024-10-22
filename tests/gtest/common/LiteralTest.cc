@@ -21,7 +21,7 @@ TEST(LiteralTest, empty_constr)
 
   ostringstream oss;
   oss << lit;
-  EXPECT_EQ( string("-X-"), oss.str() );
+  EXPECT_EQ( string("U<>"), oss.str() );
 }
 
 TEST(LiteralTest, simple_constr)
@@ -53,12 +53,12 @@ TEST(LiteralTest, simple_constr)
   {
     ostringstream oss;
     oss << lit;
-    EXPECT_EQ( string("3"), oss.str() );
+    EXPECT_EQ( string("P<3>"), oss.str() );
   }
   {
     ostringstream oss;
     oss << lit_n;
-    EXPECT_EQ( string("3'"), oss.str() );
+    EXPECT_EQ( string("N<3>"), oss.str() );
   }
 }
 

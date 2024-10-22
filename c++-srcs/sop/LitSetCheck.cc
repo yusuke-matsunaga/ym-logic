@@ -39,10 +39,11 @@ LitSetCheck::operator()(
   Literal lit
 )
 {
-  auto var_id = lit.varid();
-  auto blk = _block_pos(var_id);
-  auto sft = _shift_num(var_id);
-  auto pat = lit2bv(lit);
+  auto varid = lit.varid();
+  auto inv = lit.is_negative();
+  auto blk = _block_pos(varid);
+  auto sft = _shift_num(varid);
+  auto pat = bitvect(inv);
   auto mask = pat << sft;
   if ( bv[blk] & mask ) {
     return true;

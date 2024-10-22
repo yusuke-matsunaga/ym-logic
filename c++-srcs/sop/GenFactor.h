@@ -104,7 +104,7 @@ private:
     auto q = f / l;
     auto r = f - q * l;
     auto q_expr = operator()(q);
-    auto d_expr = Expr::make_literal(l);
+    auto d_expr = Expr::literal(l);
     auto r_expr = operator()(r);
     return (q_expr & d_expr) | r_expr;
   }
@@ -119,7 +119,7 @@ private:
 
     SizeType nc = cube_list.size();
     if ( nc == 0 ) {
-      return Expr::make_zero();
+      return Expr::zero();
     }
     vector<Expr> and_list(nc);
     for ( SizeType i = 0; i < nc; ++ i ) {
@@ -127,11 +127,11 @@ private:
       SizeType nl = cube.size();
       vector<Expr> lit_list(nl);
       for ( SizeType j = 0; j < nl; ++ j ) {
-	lit_list[j] = Expr::make_literal(cube[j]);
+	lit_list[j] = Expr::literal(cube[j]);
       }
-      and_list[i] = Expr::make_and(lit_list);
+      and_list[i] = Expr::and_op(lit_list);
     }
-    return Expr::make_or(and_list);
+    return Expr::or_op(and_list);
   }
 
 

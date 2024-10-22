@@ -58,21 +58,21 @@ public:
 
   /// @brief 恒偽関数を作る．
   ExprNodePtr
-  make_zero();
+  zero();
 
   /// @brief 恒真関数を作る．
   ExprNodePtr
-  make_one();
+  one();
 
   /// @brief 肯定のリテラルを作る．
   ExprNodePtr
-  make_posi_literal(
+  posi_literal(
     SizeType varid ///< [in] 変数番号
   );
 
   /// @brief 否定のリテラルを作る．
   ExprNodePtr
-  make_nega_literal(
+  nega_literal(
     SizeType varid ///< [in] 変数番号
   );
 
@@ -82,7 +82,7 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には重複を取り除く
   ExprNodePtr
-  make_and(
+  and_op(
     SizeType begin ///< [in] ノードスタック中の開始位置
   );
 
@@ -92,7 +92,7 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には重複を取り除く
   ExprNodePtr
-  make_or(
+  or_op(
     SizeType begin ///< [in] ノードスタック中の開始位置
   );
 
@@ -102,7 +102,7 @@ public:
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には個数の偶奇に応じた処理を行う．
   ExprNodePtr
-  make_xor(
+  xor_op(
     SizeType begin ///< [in] ノードスタック中の開始位置
   );
 
@@ -119,7 +119,7 @@ public:
   /// @brief ノードスタックの先頭位置を戻す．
   ///
   /// この関数を明示的に使う必要があるののはノードを
-  /// プッシュしておきながら make_XXX を呼ばないとき
+  /// プッシュしておきながら XXX_op を呼ばないとき
   void
   nodestack_pop(
     SizeType oldtop
@@ -226,7 +226,7 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  // make_and()/make_or() 用のサブルーティン
+  // and_op()/or_op() 用のサブルーティン
   // node が mTmpNodeList の中に含まれていないか調べる．
   // 同相で同じものがふくまれていたらなにもせず false を返す．
   // 逆相で同じものがふくまれていたらなにもせず true を返す．
@@ -237,7 +237,7 @@ private:
     const ExprNode* node ///< [in] ノード
   );
 
-  // make_xor() 用のサブルーティン
+  // xor_op() 用のサブルーティン
   // node が mTmpNodeList の中に含まれていないか調べる(XOR用)．
   // 同相で同じものが含まれていたら重複したものを mTmpNodeList から削除して
   // false を返す．

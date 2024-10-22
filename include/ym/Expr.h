@@ -78,50 +78,50 @@ public:
   /// 返されたオブジェクトは is_valid() == false となる．
   static
   Expr
-  make_invalid();
+  invalid();
 
   /// @brief 恒偽関数の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  make_zero();
+  zero();
 
   /// @brief 恒真関数の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  make_one();
+  one();
 
   /// @brief リテラル式の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  make_literal(
+  literal(
     SizeType varid,  ///< [in] 変数番号
     bool inv = false ///< [in] 極性
                      ///<      - false: 反転なし (正極性)
                      ///<      - true:  反転あり (負極性)
   )
   {
-    return inv ? make_nega_literal(varid) : make_posi_literal(varid);
+    return inv ? nega_literal(varid) : posi_literal(varid);
   }
 
   /// @brief リテラル式の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  make_literal(
+  literal(
     Literal lit ///< [in] リテラル
   )
   {
-    return make_literal(lit.varid(), lit.is_negative());
+    return literal(lit.varid(), lit.is_negative());
   }
 
   /// @brief 正(肯定)リテラル式の生成
   /// @return 生成したオブジェクト
   static
   Expr
-  make_posi_literal(
+  posi_literal(
     SizeType varid ///< [in] 変数番号
   );
 
@@ -129,7 +129,7 @@ public:
   /// @return 生成したオブジェクト
   static
   Expr
-  make_nega_literal(
+  nega_literal(
     SizeType varid ///< [in] 変数番号
   );
 
@@ -146,7 +146,7 @@ public:
   /// @return chd_list を部分論理式に持つ AND 式を生成し，返す．
   static
   Expr
-  make_and(
+  and_op(
     const vector<Expr>& chd_list ///< [in] オペランドのベクタ
   );
 
@@ -163,7 +163,7 @@ public:
   /// @return chd_list を部分論理式に持つ OR 式を生成し，返す．
   static
   Expr
-  make_or(
+  or_op(
     const vector<Expr>& chd_list ///< [in] オペランドのベクタ
   );
 
@@ -180,7 +180,7 @@ public:
   /// @return chd_list を部分論理式に持つ XOR 式を生成し，返す．
   static
   Expr
-  make_xor(
+  xor_op(
     const vector<Expr>& chd_list ///< [in] オペランドのベクタ
   );
 
@@ -365,7 +365,7 @@ public:
   ///
   /// ni が省略された場合には input_size() が用いられる．
   TvFunc
-  make_tv(
+  to_tv(
     SizeType ni = 0 ///< [in] 入力数
   ) const;
 
