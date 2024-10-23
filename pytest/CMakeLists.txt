@@ -86,3 +86,11 @@ add_test( logic_py_literal_test
 add_test( logic_py_primtype_test
   py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/primtype_test.py
   )
+
+add_test( logic_py_sopcube_test
+  py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/sopcube_test.py
+  )
+
+add_test( logic_py_sopcover_test
+  py_ymlogic -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/sopcover_test.py
+  )
