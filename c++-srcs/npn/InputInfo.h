@@ -8,7 +8,6 @@
 /// Copyright (C) 2017 Yusuke Matsunaga
 /// All rights reserved.
 
-
 #include "ym/logic.h"
 #include "ym/TvFunc.h"
 
@@ -31,13 +30,17 @@ class InputInfo
 public:
 
   /// @brief コンストラクタ
-  /// @param[in] input_num 入力数
   ///
   /// 空の状態で初期化される．
-  InputInfo(int input_num = 0);
+  InputInfo(
+    SizeType input_num = 0 ///< [in] 入力数
+  ) : mInputNum{input_num}
+  {
+    clear();
+  }
 
   /// @brief デストラクタ
-  ~InputInfo();
+  ~InputInfo() = default;
 
 
 public:
@@ -47,33 +50,70 @@ public:
 
   /// @brief クリアする．
   void
-  clear();
+  clear()
+  {
+    mGroupNum = 0;
+    for ( SizeType i = 0; i < TvFunc::kMaxNi; ++ i ) {
+      mElemListArray[i].clear();
+    }
+    mPolUndetNum = 0;
+    mBiSymmBits = 0U;
+  }
 
   /// @brief 入力数を設定する．
-  /// @param[in] input_num 入力数
   void
-  set_input_num(int input_num);
+  set_input_num(
+    SizeType input_num ///< [in] 入力数
+  )
+  {
+    mInputNum = input_num;
+  }
 
   /// @brief 新しい等価グループを作る．
-  /// @param[in] id 変数番号
-  /// @param[in] w1 Walsh の1次係数
   ///
   /// id だけを要素として持つ新しいグループを作る．
   void
-  new_group(int id,
-	    int w1);
+  new_group(
+    SizeType id, ///< [in] 変数番号
+    SizeType w1  ///< [in] Walsh の1次係数
+  )
+  {
+    auto gid = mGroupNum;
+    ++ mGroupNum;
+    mW1[gid] = w1;
+    mElemListArray[gid].clear();
+    if ( w1 == 0 ) {
+      mPolUndetArray[mPolUndetNum] = gid;
+      ++ mPolUndetNum;
+      mInvBitsArray[gid] = (1U << id);
+    }
+    add_elem(gid, id);
+  }
 
   /// @brief 既存のグループに要素を追加する．
-  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-  /// @param[in] id 変数番号
   void
-  add_elem(int gid,
-	   int id);
+  add_elem(
+    SizeType gid, ///< [in] グループ番号 ( 0 <= gid < group_num() )
+    SizeType id   ///< [in] 変数番号
+  )
+  {
+    _check_gid(gid);
+    mElemListArray[gid].push_back(id);
+    mGroupIdArray[id] = gid;
+    if ( !bisym(gid) ) {
+      mInvBitsArray[gid] |= (1U << id);
+    }
+  }
 
   /// @brief 既存のグループに bi-symmetry フラグをつける．
-  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   void
-  set_bisym(int gid);
+  set_bisym(
+    SizeType gid ///< [in] グループ番号 ( 0 <= gid < group_num() )
+  )
+  {
+    _check_gid(gid);
+    mBiSymmBits |= (1U << gid);
+  }
 
 
 public:
@@ -82,72 +122,175 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 入力数を返す．
-  int
-  input_num() const;
+  SizeType
+  input_num() const
+  {
+    return mInputNum;
+  }
 
   /// @brief 等価グループ数を返す．
-  int
-  group_num() const;
+  SizeType
+  group_num() const
+  {
+    return mGroupNum;
+  }
 
   /// @brief 極性の決まっていないグループ数を返す．
-  int
-  polundet_num() const;
+  SizeType
+  polundet_num() const
+  {
+    return mPolUndetNum;
+  }
 
   /// @brief 極性の決まっていないグループ番号を返す．
-  /// @param[in] pos 位置番号 ( 0 <= pos < polundet_num() )
-  int
-  polundet_gid(int pos) const;
+  SizeType
+  polundet_gid(
+    SizeType pos ///< [in] 位置番号 ( 0 <= pos < polundet_num() )
+  ) const
+  {
+    if ( pos < 0 || polundet_num() <= pos ) {
+      throw std::out_of_range("pos is out of range");
+    }
+    return mPolUndetArray[pos];
+  }
 
   /// @brief Walsh の 1次係数を返す．
-  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   int
-  w1(int gid) const;
+  w1(
+    SizeType gid ///< [in] グループ番号 ( 0 <= gid < group_num() )
+  ) const
+  {
+    _check_gid(gid);
+    return mW1[gid];
+  }
 
   /// @brief 等価グループの要素数を返す．
-  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-  int
-  elem_num(int gid) const;
+  SizeType
+  elem_num(
+    SizeType gid ///< [in] グループ番号 ( 0 <= gid < group_num() )
+  ) const
+  {
+    _check_gid(gid);
+    return mElemListArray[gid].size();
+  }
 
   /// @brief 等価グループの要素を返す．
-  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-  /// @param[in] pos 位置番号 ( 0 <= pos < elem_num(gid) )
-  int
-  elem(int gid,
-       int pos) const;
+  SizeType
+  elem(
+    SizeType gid, ///< [in] グループ番号 ( 0 <= gid < group_num() )
+    SizeType pos  ///< [in] 位置番号 ( 0 <= pos < elem_num(gid) )
+  ) const
+  {
+    _check_gid(gid);
+    if ( pos < 0 || elem_num(gid) <= pos ) {
+      throw std::out_of_range("pos is out of range");
+    }
+    return mElemListArray[gid][pos];
+  }
 
   /// @brief 等価グループの bi-symmetry フラグを返す．
-  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   bool
-  bisym(int gid) const;
+  bisym(
+    SizeType gid ///< [in] グループ番号 ( 0 <= gid < group_num() )
+  ) const
+  {
+    _check_gid(gid);
+    return static_cast<bool>((mBiSymmBits >> gid) & 1U);
+  }
 
   /// @brief 等価グループの反転ビットパタンを求める．
-  /// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
   ///
   /// 普通の等価グループは全要素のビットを反転させる．
   /// bi-symmetry の等価グループは先頭のビットのみ反転させる．
-  int
-  inv_bits(int gid) const;
+  std::uint32_t
+  inv_bits(
+    SizeType gid ///< [in] グループ番号 ( 0 <= gid < group_num() )
+  ) const
+  {
+    _check_gid(gid);
+    return mInvBitsArray[gid];
+  }
 
   /// @brief w1:elem_num:bisym を用いた比較関数
   bool
-  w1gt(int gid1,
-       int gid2) const;
+  w1gt(
+    SizeType gid1,
+    SizeType gid2
+  ) const
+  {
+    int diff1 = w1(gid1) - w1(gid2);
+    if ( diff1 > 0 ) {
+      return true;
+    }
+    else if ( diff1 < 0 ) {
+      return false;
+    }
+
+    int diff2 = elem_num(gid1) - elem_num(gid2);
+    if ( diff2 > 0 ) {
+      return true;
+    }
+    else if ( diff2 < 0 ) {
+      return false;
+    }
+    if ( bisym(gid1) && !bisym(gid2) ) {
+      return true;
+    }
+    return false;
+  }
 
   /// @brief w1:elem_num:bisym を用いた等価関数
   bool
-  w1eq(int gid1,
-       int gid2) const;
+  w1eq(
+    SizeType gid1,
+    SizeType gid2
+  ) const
+  {
+    if ( w1(gid1) != w1(gid2) ) {
+      return false;
+    }
+    if ( elem_num(gid1) != elem_num(gid2) ) {
+      return false;
+    }
+    return bisym(gid1) == bisym(gid2);
+  }
 
   /// @brief 内容を出力する．
-  /// @param[in] s 出力先のストリーム
   void
-  display(ostream& s) const;
+  display(
+    ostream& s ///< [in] 出力先のストリーム
+  ) const
+  {
+    for ( SizeType gid = 0; gid < group_num(); ++ gid ) {
+      s << "G#" << gid << ": " << w1(gid) << ": ";
+      if ( bisym(gid) ) {
+	s << "*: ";
+      }
+      s << "{";
+      for ( SizeType i = 0; i < elem_num(gid); ++ i ) {
+	s << " " << elem(gid, i);
+      }
+      s << "}" << endl;
+    }
+    s << endl;
+  }
 
 
 private:
   //////////////////////////////////////////////////////////////////////
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief gid のチェックを行う．
+  void
+  _check_gid(
+    SizeType gid
+  ) const
+  {
+    if ( gid < 0 || mGroupNum <= gid ) {
+      throw std::out_of_range("gid is out of range");
+    }
+  }
 
 
 private:
@@ -156,278 +299,34 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 入力数
-  int mInputNum;
+  SizeType mInputNum;
 
   // 等価グループ数
-  int mGroupNum;
+  SizeType mGroupNum;
 
   // Walsh の1次係数
   // キーはグループ番号
   int mW1[TvFunc::kMaxNi];
 
   // 等価グループの要素のリストの配列
-  vector<int> mElemListArray[TvFunc::kMaxNi];
+  vector<SizeType> mElemListArray[TvFunc::kMaxNi];
 
   // 極性の決まっていないグループ数
-  int mPolUndetNum;
+  SizeType mPolUndetNum;
 
   // 極性が決まっていないグループ番号のリスト
-  int mPolUndetArray[TvFunc::kMaxNi];
+  SizeType mPolUndetArray[TvFunc::kMaxNi];
 
   // 反転ビットパタンの配列
-  int mInvBitsArray[TvFunc::kMaxNi];
+  std::uint32_t mInvBitsArray[TvFunc::kMaxNi];
 
   // 等価グループの bi-symmetry フラグのビットベクタ
-  int mBiSymmBits;
+  SizeType mBiSymmBits;
 
   // 各入力変数のグループ番号
-  int mGroupIdArray[TvFunc::kMaxNi];
+  SizeType mGroupIdArray[TvFunc::kMaxNi];
 
 };
-
-
-//////////////////////////////////////////////////////////////////////
-// インライン関数の定義
-//////////////////////////////////////////////////////////////////////
-
-// @brief コンストラクタ
-// @param[in] input_num 入力数
-//
-// 空の状態で初期化される．
-// 空の状態で初期化される．
-inline
-InputInfo::InputInfo(int input_num) :
-  mInputNum(input_num)
-{
-  clear();
-}
-
-// @brief デストラクタ
-inline
-InputInfo::~InputInfo()
-{
-}
-
-// @brief クリアする．
-inline
-void
-InputInfo::clear()
-{
-  mGroupNum = 0;
-  for (int i = 0; i < TvFunc::kMaxNi; ++ i) {
-    mElemListArray[i].clear();
-  }
-  mPolUndetNum = 0;
-  mBiSymmBits = 0U;
-}
-
-// @brief 入力数を設定する．
-inline
-void
-InputInfo::set_input_num(int input_num)
-{
-  mInputNum = input_num;
-}
-
-// @brief 新しい等価グループを作る．
-// @param[in] id 変数番号
-// @param[in] w1 Walsh の1次係数
-//
-// id だけを要素として持つ新しいグループを作る．
-inline
-void
-InputInfo::new_group(int id,
-		     int w1)
-{
-  int gid = mGroupNum;
-  ++ mGroupNum;
-  mW1[gid] = w1;
-  mElemListArray[gid].clear();
-  if ( w1 == 0 ) {
-    mPolUndetArray[mPolUndetNum] = gid;
-    ++ mPolUndetNum;
-    mInvBitsArray[gid] = (1U << id);
-  }
-  add_elem(gid, id);
-}
-
-// @brief 既存のグループに要素を追加する．
-// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-// @param[in] id 変数番号
-inline
-void
-InputInfo::add_elem(int gid,
-		    int id)
-{
-  ASSERT_COND( gid < mGroupNum );
-  mElemListArray[gid].push_back(id);
-  mGroupIdArray[id] = gid;
-  if ( !bisym(gid) ) {
-    mInvBitsArray[gid] |= (1U << id);
-  }
-}
-
-// @brief 既存のグループに bi-symmetry フラグをつける．
-// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-inline
-void
-InputInfo::set_bisym(int gid)
-{
-  ASSERT_COND( gid < mGroupNum );
-  mBiSymmBits |= (1U << gid);
-}
-
-// @brief 入力数を返す．
-inline
-int
-InputInfo::input_num() const
-{
-  return mInputNum;
-}
-
-// @brief 等価グループ数を返す．
-inline
-int
-InputInfo::group_num() const
-{
-  return mGroupNum;
-}
-
-// @brief 等価グループの要素数を返す．
-// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-inline
-int
-InputInfo::elem_num(int gid) const
-{
-  ASSERT_COND( gid < mGroupNum );
-  return mElemListArray[gid].size();
-}
-
-// @brief 等価グループの要素を返す．
-// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-// @param[in] pos 位置番号 ( 0 <= pos < elem_num(gid) )
-inline
-int
-InputInfo::elem(int gid,
-		int pos) const
-{
-  ASSERT_COND( gid < mGroupNum );
-  ASSERT_COND( pos < elem_num(gid) );
-  return mElemListArray[gid][pos];
-}
-
-// @brief 極性の決まっていないグループ数を返す．
-inline
-int
-InputInfo::polundet_num() const
-{
-  return mPolUndetNum;
-}
-
-// @brief 極性の決まっていないグループ番号を返す．
-// @param[in] pos 位置番号 ( 0 <= pos < polundet_num() )
-inline
-int
-InputInfo::polundet_gid(int pos) const
-{
-  ASSERT_COND( pos < polundet_num() );
-  return mPolUndetArray[pos];
-}
-
-// @brief Walsh の 1次係数を返す．
-// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-inline
-int
-InputInfo::w1(int gid) const
-{
-  ASSERT_COND( gid < mGroupNum );
-  return mW1[gid];
-}
-
-// @brief 等価グループの bi-symmetry フラグを返す．
-// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-inline
-bool
-InputInfo::bisym(int gid) const
-{
-  ASSERT_COND( gid < mGroupNum );
-  return static_cast<bool>((mBiSymmBits >> gid) & 1U);
-}
-
-// @brief 等価グループの反転ビットパタンを求める．
-// @param[in] gid グループ番号 ( 0 <= gid < group_num() )
-//
-// 普通の等価グループは全要素のビットを反転させる．
-// bi-symmetry の等価グループは先頭のビットのみ反転させる．
-inline
-int
-InputInfo::inv_bits(int gid) const
-{
-  ASSERT_COND( gid < mGroupNum );
-  return mInvBitsArray[gid];
-}
-
-// @brief w1:elem_num:bisym を用いた比較関数
-inline
-bool
-InputInfo::w1gt(int gid1,
-		int gid2) const
-{
-  int diff1 = w1(gid1) - w1(gid2);
-  if ( diff1 > 0 ) {
-    return true;
-  }
-  else if ( diff1 < 0 ) {
-    return false;
-  }
-
-  int diff2 = elem_num(gid1) - elem_num(gid2);
-  if ( diff2 > 0 ) {
-    return true;
-  }
-  else if ( diff2 < 0 ) {
-    return false;
-  }
-  if ( bisym(gid1) && !bisym(gid2) ) {
-    return true;
-  }
-  return false;
-}
-
-// @brief w1:elem_num:bisym を用いた等価関数
-inline
-bool
-InputInfo::w1eq(int gid1,
-		int gid2) const
-{
-  if ( w1(gid1) != w1(gid2) ) {
-    return false;
-  }
-  if ( elem_num(gid1) != elem_num(gid2) ) {
-    return false;
-  }
-  return bisym(gid1) == bisym(gid2);
-}
-
-// @brief 内容を出力する．
-// @param[in] s 出力先のストリーム
-inline
-void
-InputInfo::display(ostream& s) const
-{
-  for (int gid = 0; gid < group_num(); ++ gid) {
-    s << "G#" << gid << ": " << w1(gid) << ": ";
-    if ( bisym(gid) ) {
-      s << "*: ";
-    }
-    s << "{";
-    for (int i = 0; i < elem_num(gid); ++ i) {
-      s << " " << elem(gid, i);
-    }
-    s << "}" << endl;
-  }
-  s << endl;
-}
 
 END_NAMESPACE_YM_LOGIC
 

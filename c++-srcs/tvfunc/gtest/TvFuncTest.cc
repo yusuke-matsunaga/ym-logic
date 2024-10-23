@@ -12,7 +12,7 @@
 #include "ym/RandPermGen.h"
 #include "ym/Range.h"
 #include "ym/SopCube.h"
-//#include <random>
+#include <random>
 
 
 BEGIN_NAMESPACE_YM
@@ -561,6 +561,52 @@ TEST_P(TvFuncTestWithParam, random_func)
   }
 }
 
+TEST(TvFuncTest, constructor_bad1)
+{
+  // ベクタの長さが 2^3 ではない．
+  ASSERT_THROW((TvFunc{3, vector<int>{0, 1, 1, 0}}),
+	       std::invalid_argument);
+}
+
+TEST(TvFuncTest, constructor_bad2)
+{
+  // '0', '1' 以外の文字を含んでいる．
+  ASSERT_THROW((TvFunc{"01--"}),
+	       std::invalid_argument);
+}
+
+TEST(TvFuncTest, constructor_bad3)
+{
+  // ベクタの長さが2のべき乗になっていない．
+  ASSERT_THROW((TvFunc{"01000"}),
+	       std::invalid_argument);
+}
+
+TEST(TvFuncTest, literal_bad1)
+{
+  ASSERT_THROW( TvFunc::literal(2, 3, false),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, literal_bad2)
+{
+  auto lit = Literal(3, true);
+  ASSERT_THROW( TvFunc::literal(2, lit),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, posi_literal_bad)
+{
+  ASSERT_THROW( TvFunc::posi_literal(2, 3),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, nega_literal_bad)
+{
+  ASSERT_THROW( TvFunc::nega_literal(2, 3),
+		std::out_of_range );
+}
+
 TEST(TvFuncTest, check_op1)
 {
   vector<int> values1(4);
@@ -588,6 +634,114 @@ TEST(TvFuncTest, check_op1)
       check_op(func1, func2);
     }
   }
+}
+
+TEST(TvFuncTest, and_int_bad)
+{
+  TvFunc func1{"0110"};
+  TvFunc func2{"01"};
+
+  ASSERT_THROW( func1.and_int(func2),
+		std::invalid_argument );
+}
+
+TEST(TvFuncTest, or_int_bad)
+{
+  TvFunc func1{"0110"};
+  TvFunc func2{"01"};
+
+  ASSERT_THROW( func1.or_int(func2),
+		std::invalid_argument );
+}
+
+TEST(TvFuncTest, xor_int_bad)
+{
+  TvFunc func1{"0110"};
+  TvFunc func2{"01"};
+
+  ASSERT_THROW( func1.xor_int(func2),
+		std::invalid_argument );
+}
+
+TEST(TvFuncTest, cofactor_int_bad1)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.cofactor_int(3),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, cofactor_int_bad2)
+{
+  TvFunc func1{"0110"};
+  Literal lit{3, true};
+
+  ASSERT_THROW( func1.cofactor_int(lit),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, value_bad)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.value(10),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, walsh_1_bad)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.walsh_1(2),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, walsh_2_bad1)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.walsh_2(2, 1),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, walsh_2_bad2)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.walsh_2(1, 2),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, check_sup_bad)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.check_sup(2),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, check_unate_bad)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.check_unate(2),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, check_sym_bad1)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.check_sym(2, 1),
+		std::out_of_range );
+}
+
+TEST(TvFuncTest, check_sym_bad2)
+{
+  TvFunc func1{"0110"};
+
+  ASSERT_THROW( func1.check_sym(1, 2),
+		std::out_of_range );
 }
 
 TEST_P(TvFuncTestWithParam, check_op2)

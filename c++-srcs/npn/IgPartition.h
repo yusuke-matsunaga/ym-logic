@@ -8,7 +8,6 @@
 /// Copyright (C) 2017 Yusuke Matsunaga
 /// All rights reserved.
 
-
 #include "ym/logic.h"
 #include "ym/TvFunc.h"
 #include "InputInfo.h"
@@ -26,14 +25,16 @@ class IgPartition
 public:
 
   /// @brief コンストラクタ
-  /// @param[in] iinfo 等価入力グループの情報
   ///
   /// w1:group_num:bisym の情報で初期分割を行う．
-  IgPartition(const InputInfo& iinfo);
+  IgPartition(
+    const InputInfo& iinfo ///< [in] 等価入力グループの情報
+  );
 
   /// @brief コピーコンストラクタ
-  /// @param[in] src コピー元のソース
-  IgPartition(const IgPartition& src);
+  IgPartition(
+    const IgPartition& src ///< [in] コピー元のソース
+  );
 
   /// @brief デストラクタ
   ~IgPartition();
@@ -45,86 +46,172 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief グループ数を返す．
-  int
-  group_num() const;
+  SizeType
+  group_num() const
+  {
+    return mGroupNum;
+  }
 
   /// @brief グループ番号を返す．
-  /// @param[in] pos 位置番号 ( 0 <= pos < group_num() )
-  int
-  group_id(int pos) const;
+  SizeType
+  group_id(
+    SizeType pos ///< [in] 位置番号 ( 0 <= pos < group_num() )
+  ) const
+  {
+    if ( pos < 0 || group_num() <= pos ) {
+      throw std::out_of_range("pos is out of range");
+    }
+    return mGidArray[pos];
+  }
 
   /// @brief グループの先頭の入力番号を返す．
-  /// @param[in] gid グループ番号
-  int
-  input_id(int gid) const;
+  SizeType
+  input_id(
+    SizeType gid///< [in] グループ番号
+  ) const
+  {
+    return mInputInfo.elem(gid, 0);
+  }
 
   /// @brief 分割数を返す．
-  int
-  partition_num() const;
+  SizeType
+  partition_num() const
+  {
+    return mPartitionNum;
+  }
 
   /// @brief 分割のサイズを返す．
-  /// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
-  int
-  partition_size(int pid) const;
+  SizeType
+  partition_size(
+    SizeType pid ///< [in] 分割番号 ( 0 <= pid < partition_num() )
+  ) const
+  {
+    return partition_end(pid) - partition_begin(pid);
+  }
 
   /// @brief 分割の開始位置を返す．
-  /// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
-  int
-  partition_begin(int pid) const;
+  SizeType
+  partition_begin(
+    SizeType pid ///< [in] 分割番号 ( 0 <= pid < partition_num() )
+  ) const
+  {
+    if ( pid < 0 || partition_num() <= pid ) {
+      throw std::out_of_range("pid is out of range");
+    }
+    return mBeginArray[pid];
+  }
 
   /// @brief 分割の終了位置を返す．
-  /// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
   ///
   /// この位置は分割には含まれない．
-  int
-  partition_end(int pid) const;
+  SizeType
+  partition_end(
+    SizeType pid ///< [in] 分割番号 ( 0 <= pid < partition_num() )
+  ) const
+  {
+    if ( pid < 0 || partition_num() <= pid ) {
+      throw std::out_of_range("pid is out of range");
+    }
+    return mBeginArray[pid + 1];
+  }
 
   /// @brief すべての分割の要素数が1の時 true を返す．
   bool
   is_resolved() const;
 
   /// @brief 指定した分割の要素数が1の時 true を返す．
-  /// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
   bool
-  is_resolved(int pid) const;
+  is_resolved(
+    SizeType pid ///< [in] 分割番号 ( 0 <= pid < partition_num() )
+  ) const
+  {
+    return partition_size(pid) == 1;
+  }
 
   /// @brief 現在の状態を NpnMap に変換する．
-  /// @param[in] polconf 極性情報
   ///
   /// polconf が省略された時は極性の反転はなしとみなす．
   NpnMap
-  to_npnmap(const PolConf& polconf = PolConf()) const;
+  to_npnmap(
+    const PolConf& polconf = PolConf() ///< [in] 極性情報
+  ) const;
 
   /// @brief 分割の細分化を行う．
-  /// @param[in] pid0 対象の分割番号
-  /// @param[in] cmp 2つの入力グループの大小比較関数オブジェクト
   /// @return 増えたグループ数を返す．
   template <typename T>
-  int
-  refine(int pid0,
-	 T cmp);
+  SizeType
+  refine(
+    int pid0, ///< [in] 対象の分割番号
+    T cmp     ///< [in] 2つの入力グループの大小比較関数オブジェクト
+  )
+  {
+    auto old_size = partition_num();
+    auto s = partition_begin(pid0);
+    auto e = partition_end(pid0);
+    // mGidArray[s] 〜 mGidArray[e - 1] までを
+    // cmp の降順に整列させる．
+    // つまり
+    // forall i, cmp.gt(mGidArray[i], mGidArray[i + 1]) == true
+    // が成り立つ．
+    // 要素数は多くないので単純なバブルソートを用いる．
+    for ( auto i = s; i < e - 1; ++ i ) {
+      auto max_gid = mGidArray[i];
+      auto max_pos = i;
+      for ( auto j = i + 1; j < e; ++ j ) {
+	auto gid1 = mGidArray[j];
+	if ( cmp.gt(gid1, max_gid) ) {
+	  max_gid = gid1;
+	  max_pos = j;
+	}
+      }
+      if ( max_pos != i ) {
+	// i + 1 から max_pos までを1つずらす．
+	for ( auto j = max_pos; j > i; -- j ) {
+	  mGidArray[j] = mGidArray[j - 1];
+	}
+	mGidArray[i] = max_gid;
+      }
+    }
+
+    // 等価なグループをまとめる．
+    auto prev_gid = mGidArray[s];
+    for ( auto i = s + 1; i < e; ++ i ) {
+      auto cur_gid = mGidArray[i];
+      if ( !cmp.eq(prev_gid, cur_gid) ) {
+	// 新しい分割を作る．
+	// pid0 以降の分割の情報を一つ右にずらす．
+	for ( auto pid = mPartitionNum; pid > pid0; -- pid ) {
+	  mBeginArray[pid + 1] = mBeginArray[pid];
+	}
+	++ mPartitionNum;
+	++ pid0;
+	mBeginArray[pid0] = i;
+	prev_gid = cur_gid;
+      }
+    }
+
+    return mPartitionNum - old_size;
+  }
 
   /// @brief 分割の要素数が1の分割を前に持ってくる．
   void
   reorder();
 
   /// @brief 分割の要素を一つ取り出して独立した分割とする．
-  /// @param[in] pid 分轄番号 ( 0 <= pid << partition_num() )
-  /// @param[in] pos 要素の位置番号 ( partition_begin(pid) <= pos < partition_end(pid) )
+  /// @param[in] pid
+  /// @param[in] pos
   void
-  _refine(int pid,
-	  int pos);
+  _refine(
+    SizeType pid, ///< [in] 分轄番号 ( 0 <= pid << partition_num() )
+    SizeType pos  ///< [in] 要素の位置番号
+                  ///<    ( partition_begin(pid) <= pos < partition_end(pid) )
+  );
 
   /// @brief 内容を出力する．
-  /// @param[in] s 出力先のストリーム
   void
-  display(ostream& s) const;
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
+  display(
+    ostream& s ///< [in] 出力先のストリーム
+  ) const;
 
 
 private:
@@ -136,160 +223,29 @@ private:
   InputInfo mInputInfo;
 
   /// @brief グループ数
-  int mGroupNum;
+  SizeType mGroupNum;
 
   /// @brief 分割数
-  int mPartitionNum;
+  SizeType mPartitionNum;
 
   /// @brief グループ番号の配列
-  int mGidArray[TvFunc::kMaxNi];
+  SizeType mGidArray[TvFunc::kMaxNi];
 
   /// @brief 分割の開始位置
-  int mBeginArray[TvFunc::kMaxNi];
+  SizeType mBeginArray[TvFunc::kMaxNi];
 
 };
 
 /// @brief IgPart のストリーム出力演算子
+inline
 ostream&
-operator<<(ostream& s,
-	   const IgPartition& igpart);
-
-
-//////////////////////////////////////////////////////////////////////
-// インライン関数の定義
-//////////////////////////////////////////////////////////////////////
-
-// @brief グループ数を返す．
-inline
-int
-IgPartition::group_num() const
+operator<<(
+  ostream& s,
+  const IgPartition& igpart
+)
 {
-  return mGroupNum;
-}
-
-// @brief グループ番号を返す．
-// @param[in] pos 位置番号 ( 0 <= pos < group_num() )
-inline
-int
-IgPartition::group_id(int pos) const
-{
-  ASSERT_COND( pos < group_num() );
-  return mGidArray[pos];
-}
-
-// @brief グループの先頭の入力番号を返す．
-// @param[in] gid グループ番号
-inline
-int
-IgPartition::input_id(int gid) const
-{
-  return mInputInfo.elem(gid, 0);
-}
-
-// @brief 分割数を返す．
-inline
-int
-IgPartition::partition_num() const
-{
-  return mPartitionNum;
-}
-
-// @brief 分割のサイズを返す．
-// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
-inline
-int
-IgPartition::partition_size(int pid) const
-{
-  return partition_end(pid) - partition_begin(pid);
-}
-
-// @brief 分割の開始位置を返す．
-// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
-inline
-int
-IgPartition::partition_begin(int pid) const
-{
-  ASSERT_COND( pid < partition_num() );
-  return mBeginArray[pid];
-}
-
-// @brief 分割の終了位置を返す．
-// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
-//
-// この位置は分割には含まれない．
-inline
-int
-IgPartition::partition_end(int pid) const
-{
-  ASSERT_COND( pid < partition_num() );
-  return mBeginArray[pid + 1];
-}
-
-// @brief 指定した分割の要素数が1の時 true を返す．
-// @param[in] pid 分割番号 ( 0 <= pid < partition_num() )
-inline
-bool
-IgPartition::is_resolved(int pid) const
-{
-  return partition_size(pid) == 1;
-}
-
-// @brief 分割の細分化を行う．
-// @param[in] pid0 対象の分割番号
-// @param[in] cmp 2つの入力クラスの大小比較関数オブジェクト
-// @return 増えたグループ数を返す．
-template <typename T>
-inline
-int
-IgPartition::refine(int pid0,
-		    T cmp)
-{
-  int old_size = partition_num();
-  int s = partition_begin(pid0);
-  int e = partition_end(pid0);
-  // mGidArray[s] 〜 mGidArray[e - 1] までを
-  // cmp の降順に整列させる．
-  // つまり
-  // forall i, cmp.gt(mGidArray[i], mGidArray[i + 1]) == true
-  // が成り立つ．
-  // 要素数は多くないので単純なバブルソートを用いる．
-  for (int i = s; i < e - 1; ++ i) {
-    int max_gid = mGidArray[i];
-    int max_pos = i;
-    for (int j = i + 1; j < e; ++ j) {
-      int gid1 = mGidArray[j];
-      if ( cmp.gt(gid1, max_gid) ) {
-	max_gid = gid1;
-	max_pos = j;
-      }
-    }
-    if ( max_pos != i ) {
-      // i + 1 から max_pos までを1つずらす．
-      for (int j = max_pos; j > i; -- j) {
-	mGidArray[j] = mGidArray[j - 1];
-      }
-      mGidArray[i] = max_gid;
-    }
-  }
-
-  // 等価なグループをまとめる．
-  int prev_gid = mGidArray[s];
-  for (int i = s + 1; i < e; ++ i) {
-    int cur_gid = mGidArray[i];
-    if ( !cmp.eq(prev_gid, cur_gid) ) {
-      // 新しい分割を作る．
-      // pid0 以降の分割の情報を一つ右にずらす．
-      for (int pid = mPartitionNum; pid > pid0; -- pid) {
-	mBeginArray[pid + 1] = mBeginArray[pid];
-      }
-      ++ mPartitionNum;
-      ++ pid0;
-      mBeginArray[pid0] = i;
-      prev_gid = cur_gid;
-    }
-  }
-
-  return mPartitionNum - old_size;
+  igpart.display(s);
+  return s;
 }
 
 END_NAMESPACE_YM_LOGIC

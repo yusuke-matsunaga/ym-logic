@@ -35,7 +35,11 @@ class W2Cmp
 {
 public:
 
-  W2Cmp(int n);
+  W2Cmp(
+    SizeType n
+  ) : mW2Array(n)
+  {
+  }
 
 
 public:
@@ -45,18 +49,33 @@ public:
 
   /// @brief w2 を設定する．
   void
-  set_w2(int gid,
-	 int w2);
+  set_w2(
+    SizeType gid,
+    int w2
+  )
+  {
+    mW2Array[gid] = w2;
+  }
 
   /// @brief 等価比較演算子
   bool
-  eq(int gid1,
-     int gid2) const;
+  eq(
+    SizeType gid1,
+    SizeType gid2
+  ) const
+  {
+    return mW2Array[gid1] == mW2Array[gid2];
+  }
 
   /// @brief 大小比較演算子
   bool
-  gt(int gid1,
-     int gid2) const;
+  gt(
+    SizeType gid1,
+    SizeType gid2
+  ) const
+  {
+    return mW2Array[gid1] > mW2Array[gid2];
+  }
 
 
 private:
@@ -67,35 +86,6 @@ private:
   vector<int> mW2Array;
 
 };
-
-W2Cmp::W2Cmp(int n) :
-  mW2Array(n)
-{
-}
-
-// @brief w2 を設定する．
-void
-W2Cmp::set_w2(int gid,
-	      int w2)
-{
-  mW2Array[gid] = w2;
-}
-
-/// @brief 等価比較演算子
-bool
-W2Cmp::eq(int gid1,
-	  int gid2) const
-{
-  return mW2Array[gid1] == mW2Array[gid2];
-}
-
-// @brief 大小比較演算子
-bool
-W2Cmp::gt(int gid1,
-	   int gid2) const
-{
-  return mW2Array[gid1] > mW2Array[gid2];
-}
 
 END_NONAMESPACE
 
@@ -108,7 +98,7 @@ walsh_2_refine(
   IgPartition& igpart
 )
 {
-  int ni = func.input_num();
+  SizeType ni = func.input_num();
 
   if ( debug ) {
     cout << "before walsh_w2_refine(" << var << ")" << endl;
@@ -116,19 +106,19 @@ walsh_2_refine(
   }
 
   // walsh_2 係数を用いて極性の決定を行う．
-  for (int pid = 0; pid < igpart.partition_num(); ++ pid) {
+  for ( SizeType pid = 0; pid < igpart.partition_num(); ++ pid ) {
     if ( igpart.is_resolved(pid) ) {
       continue;
     }
     W2Cmp w2_cmp(igpart.group_num());
-    for (int pos = igpart.partition_begin(pid);
-	 pos < igpart.partition_end(pid); ++ pos) {
-      int gid = igpart.group_id(pos);
-      int iid = igpart.input_id(gid);
+    for ( SizeType pos = igpart.partition_begin(pid);
+	  pos < igpart.partition_end(pid); ++ pos ) {
+      auto gid = igpart.group_id(pos);
+      auto iid = igpart.input_id(gid);
       int w2 = func.walsh_2(var, iid);
       w2_cmp.set_w2(gid, w2);
     }
-    int delta = igpart.refine(pid, w2_cmp);
+    auto delta = igpart.refine(pid, w2_cmp);
     pid += delta;
   }
 

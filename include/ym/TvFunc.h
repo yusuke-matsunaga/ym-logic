@@ -59,7 +59,8 @@ public:
 
   /// @brief 入力数と真理値を指定したコンストラクタ
   ///
-  /// values のサイズは 2^ni に等しくなければならない．
+  /// - values のサイズは 2^ni に等しくなければならない．
+  /// - 違反時には std::invalid_argument 例外が送出される．
   TvFunc(
     SizeType ni,              ///< [in] 入力数
     const vector<int>& values ///< [in] 真理値のベクタ
@@ -67,7 +68,9 @@ public:
 
   /// @brief 文字列からの変換コンストラクタ
   ///
-  /// str の長さは 2^n でなければならない．
+  /// - str の長さは 2^n でなければならない．
+  /// - str は '0' と '1' 以外の文字を含んではいけない．
+  /// - 違反時には std::invalid_argument 例外が送出される．
   TvFunc(
     const string& str ///< [in] 0と1からなる文字列
   );
@@ -141,11 +144,11 @@ public:
   static
   TvFunc
   literal(
-    SizeType ni,    ///< [in] 入力数
-    SizeType varid, ///< [in] リテラルの変数番号
-    bool inv        ///< [in] 反転属性
-                    ///<   - false: 反転なし (正極性)
-                    ///<   - true:  反転あり (負極性)
+    SizeType ni,     ///< [in] 入力数
+    SizeType varid,  ///< [in] リテラルの変数番号 ( 0 <= varid < ni )
+    bool inv = false ///< [in] 反転属性
+                     ///<   - false: 反転なし (正極性)
+                     ///<   - true:  反転あり (負極性)
   )
   {
     return TvFunc{ni, varid, inv};
@@ -208,6 +211,8 @@ public:
   }
 
   /// @brief 論理積を返す．
+  ///
+  /// right と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc
   and_op(
     const TvFunc& right ///< [in] オペランド
@@ -217,6 +222,8 @@ public:
   }
 
   /// @brief 論理和を返す．
+  ///
+  /// right と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc
   or_op(
     const TvFunc& right ///< [in] オペランド
@@ -226,6 +233,8 @@ public:
   }
 
   /// @brief 排他的論理和を返す．
+  ///
+  /// right と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc
   xor_op(
     const TvFunc& right ///< [in] オペランド
@@ -248,6 +257,8 @@ public:
 
   /// @brief src1 との論理積を計算し自分に代入する．
   /// @return 自身への参照を返す．
+  ///
+  /// src1 と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc&
   and_int(
     const TvFunc& src1 ///< [in] オペランド
@@ -255,6 +266,8 @@ public:
 
   /// @brief src1 との論理和を計算し自分に代入する．
   /// @return 自身への参照を返す．
+  ///
+  /// src1 と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc&
   or_int(
     const TvFunc& src1 ///< [in] オペランド
@@ -262,6 +275,8 @@ public:
 
   /// @brief src1 との排他的論理和を計算し自分に代入する．
   /// @return 自身への参照を返す．
+  ///
+  /// src1 と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc&
   xor_int(
     const TvFunc& src1 ///< [in] オペランド
@@ -283,10 +298,10 @@ public:
   /// @return 自身への参照を返す．
   TvFunc&
   cofactor_int(
-    SizeType varid, ///< [in] 変数番号
-    bool inv        ///< [in] 反転属性
-                    ///<  - false: 反転なし (正極性)
-                    ///<  - true:  反転あり (負極性)
+    SizeType varid,  ///< [in] 変数番号
+    bool inv = false ///< [in] 反転属性
+                     ///<  - false: 反転なし (正極性)
+                     ///<  - true:  反転あり (負極性)
   );
 
 
@@ -297,6 +312,8 @@ public:
 
   /// @brief src1 との論理積を計算し自分に代入する．
   /// @return 自身への参照を返す．
+  ///
+  /// src1 と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc&
   operator&=(
     const TvFunc& src1 ///< [in] オペランド
@@ -307,6 +324,8 @@ public:
 
   /// @brief src1 との論理和を計算し自分に代入する．
   /// @return 自身への参照を返す．
+  ///
+  /// src1 と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc&
   operator|=(
     const TvFunc& src1 ///< [in] オペランド
@@ -317,6 +336,8 @@ public:
 
   /// @brief src1 との排他的論理和を計算し自分に代入する．
   /// @return 自身への参照を返す．
+  ///
+  /// src1 と入力数が異なるときは std::invalid_argument 例外が送出される．
   TvFunc&
   operator^=(
     const TvFunc& src1 ///< [in] オペランド
@@ -354,6 +375,8 @@ public:
 
   /// @brief 入力値を2進数と見なしたときの pos 番目の値を得る．
   /// 答は 0 か 1 だが int 型
+  ///
+  /// pos が範囲外の時は std::out_of_range 例外が送出される．
   int
   value(
     SizeType pos ///< [in] 位置番号 ( 0 <= pos < 2^(input_num()) )
@@ -362,6 +385,9 @@ public:
     if ( is_invalid() ) {
       // 例外処理
       return 0;
+    }
+    if ( pos < 0 || (1U << input_num()) <= pos ) {
+      throw std::out_of_range{"pos is out of range"};
     }
     return (mVector[block(pos)] >> shift(pos)) & 1;
   }
@@ -396,20 +422,26 @@ public:
   walsh_0() const;
 
   /// @brief 1次の Walsh 係数を求める．
+  ///
+  /// varid が範囲外の時は std::out_of_range 例外が送出される．
   int
   walsh_1(
-    SizeType varid ///< [in] 変数
+    SizeType varid ///< [in] 変数 ( 0 <= varid < input_num() )
   ) const;
 
   /// @brief 2次の Walsh 係数を求める．
+  ///
+  /// var1, var2 が範囲外の時は std::out_of_range 例外が送出される．
   int
   walsh_2(
-    SizeType var1, ///< [in] 第1変数
-    SizeType var2  ///< [in] 第2変数
+    SizeType var1, ///< [in] 第1変数 ( 0 <= var1 < input_num() )
+    SizeType var2  ///< [in] 第2変数 ( 0 <= var2 < input_num() )
   ) const;
 
   /// @brief 0次と 1次の Walsh 係数を求める．
   /// @return 0次の Walsh 係数
+  ///
+  /// vec は input_num() の容量を持つと仮定している．
   int
   walsh_01(
     int vec[] ///< [out] 1次の Walsh 係数を格納する配列
@@ -417,6 +449,9 @@ public:
 
   /// @brief 0次と 1次と 2次の Walsh 係数を求める．
   /// @return 0次の Walsh 係数
+  ///
+  /// - vec1 は input_num() の容量を持つと仮定している．
+  /// - vec2 は input_num()^2 の容量を持つと仮定している．
   int
   walsh_012(
     int vec1[], ///< [out] 1次の Walsh 係数を格納する配列
@@ -441,9 +476,11 @@ public:
   ) const;
 
   /// @brief var がサポートの時 true を返す．
+  ///
+  /// var が範囲外の時は std::out_of_range 例外が送出される．
   bool
   check_sup(
-    SizeType var ///< [in] 変数
+    SizeType var ///< [in] 変数 ( 0 <= var < input_num() )
   ) const;
 
   /// @brief unateness を調べる．
@@ -451,16 +488,20 @@ public:
   /// @retval 1 positive unate
   /// @retval 2 negative unate
   /// @retval 3 independent
+  ///
+  /// var が範囲外の時は std::out_of_range 例外が送出される．
   int
   check_unate(
-    SizeType varid ///< [in] 変数
+    SizeType var ///< [in] 変数 ( 0 <= var < input_num() )
   ) const;
 
   /// @brief var1 と var2 が対称のとき true を返す．
+  ///
+  /// var1, var2 が範囲外の時は std::out_of_range 例外が送出される．
   bool
   check_sym(
-    SizeType var1,   ///< [in] 第1変数
-    SizeType var2,   ///< [in] 第2変数
+    SizeType var1,   ///< [in] 第1変数 ( 0 <= var1 < input_num() )
+    SizeType var2,   ///< [in] 第2変数 ( 0 <= var2 < input_num() )
     bool inv = false ///< [in] 反転属性
   ) const;
 
@@ -555,6 +596,8 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief コファクターを返す．
+  ///
+  /// lit.varid() が範囲外の時は std::out_of_range 例外が送出される．
   TvFunc
   cofactor(
     Literal lit    ///< [in] リテラル
@@ -564,15 +607,17 @@ public:
   }
 
   /// @brief コファクターを返す．
+  ///
+  /// var が範囲外の時は std::out_of_range 例外が送出される．
   TvFunc
   cofactor(
-    SizeType varid, ///< [in] 変数番号
-    bool inv        ///< [in] 極性
-                    ///<  - false: 反転なし (正極性)
-                    ///<  - true:  反転あり (負極性)
+    SizeType var, ///< [in] 変数番号 ( 0 <= var < input_num() )
+    bool inv      ///< [in] 極性
+                  ///<  - false: 反転なし (正極性)
+                  ///<  - true:  反転あり (負極性)
   ) const
   {
-    return TvFunc{*this}.cofactor_int(varid, inv);
+    return TvFunc{*this}.cofactor_int(var, inv);
   }
 
   /// @brief npnmap に従った変換を行う．
@@ -738,6 +783,17 @@ private:
     return pos % wsize;
   }
 
+  /// @brief 同じサイズの関数かチェックする．
+  void
+  check_size(
+    const TvFunc& src
+  )
+  {
+    if ( src.input_num() != input_num() ) {
+      throw std::invalid_argument{"input_num() mismatch"};
+    }
+  }
+
   /// @brief varid が適切かチェックする．
   void
   check_varid(
@@ -748,7 +804,7 @@ private:
     if ( varid == BAD_VARID || varid >= mInputNum ) {
       ostringstream buf;
       buf << "'" << varname << "' is out of range";
-      throw std::invalid_argument{buf.str()};
+      throw std::out_of_range{buf.str()};
     }
   }
 

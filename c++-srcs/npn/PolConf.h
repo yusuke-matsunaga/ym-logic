@@ -28,16 +28,22 @@ public:
   /// @brief 空のコンストラクタ
   ///
   /// 反転なしの割当を表す．
-  PolConf();
+  PolConf()
+  {
+    mBits = 0U;
+  }
 
   /// @brief 内容を指定したコンストラクタ
-  /// @param[in] oinv 出力を反転させる時 true にするフラグ
-  /// @param[in] iinv_bits 入力の反転フラグを表すビットベクタ
-  PolConf(bool oinv,
-	  std::uint32_t iinv_bits);
+  PolConf(
+    bool oinv,              ///< [in] 出力を反転させる時 true にするフラグ
+    std::uint32_t iinv_bits ///< [in] 入力の反転フラグを表すビットベクタ
+  )
+  {
+    mBits = static_cast<std::uint32_t>(oinv) | (iinv_bits << 1);
+  }
 
   /// @brief デストラクタ
-  ~PolConf();
+  ~PolConf() = default;
 
 
 public:
@@ -47,21 +53,32 @@ public:
 
   /// @brief 出力の反転フラグを返す．
   bool
-  oinv() const;
+  oinv() const
+  {
+    return static_cast<bool>(mBits & 1U);
+  }
 
   /// @brief 入力の反転ビットベクタを返す．
   std::uint32_t
-  iinv_bits() const;
+  iinv_bits() const
+  {
+    return mBits >> 1;
+  }
 
   /// @brief 入力の反転フラグを返す．
-  /// @param[in] pos
   bool
-  iinv(int pos) const;
+  iinv(
+    SizeType pos ///< [in] 入力番号
+  ) const
+  {
+    return static_cast<bool>((mBits >> (pos + 1)) & 1U);
+  }
 
   /// @brief NpnMap に変換する．
-  /// @param[in] ni 入力数
   NpnMap
-  to_npnmap(int ni) const;
+  to_npnmap(
+    SizeType ni ///< [in] 入力数
+  ) const;
 
 
 private:
@@ -83,78 +100,21 @@ private:
 
 /// @relates PolConf
 /// @brief PolConf の内容を出力する．
-/// @param[in] s 出力先のストリーム
-/// @param[in] polconf PolConf
-/// @param[in] ni 入力数
 void
-print_polconf(ostream& s,
-	      const PolConf& polconf,
-	      int ni);
+print_polconf(
+  ostream& s,             ///< [in] 出力先のストリーム
+  const PolConf& polconf, ///< [in] PolConf
+  SizeType ni             ///< [in] 入力数
+);
 
 /// @relates PolConf
 /// @brief PolConf リストのの内容を出力する．
-/// @param[in] s 出力先のストリーム
-/// @param[in] polconf_list PolConf のリスト
-/// @param[in] ni 入力数
 void
-print_polconf_list(ostream& s,
-		   const vector<PolConf>& polconf_list,
-		   int ni);
-
-
-//////////////////////////////////////////////////////////////////////
-// インライン関数の定義
-//////////////////////////////////////////////////////////////////////
-
-// @brief 空のコンストラクタ
-//
-// 反転なしの割当を表す．
-inline
-PolConf::PolConf()
-{
-  mBits = 0U;
-}
-
-// @brief 内容を指定したコンストラクタ
-// @param[in] oinv 出力を反転させる時 true にするフラグ
-// @param[in] iinv_bits 入力の反転フラグを表すビットベクタ
-inline
-PolConf::PolConf(bool oinv,
-		 std::uint32_t iinv_bits)
-{
-  mBits = static_cast<std::uint32_t>(oinv) | (iinv_bits << 1);
-}
-
-// @brief デストラクタ
-inline
-PolConf::~PolConf()
-{
-}
-
-// @brief 出力の反転フラグを返す．
-inline
-bool
-PolConf::oinv() const
-{
-  return static_cast<bool>(mBits & 1U);
-}
-
-// @brief 入力の反転ビットベクタを返す．
-inline
-std::uint32_t
-PolConf::iinv_bits() const
-{
-  return mBits >> 1;
-}
-
-// @brief 入力の反転フラグを返す．
-// @param[in] pos
-inline
-bool
-PolConf::iinv(int pos) const
-{
-  return static_cast<bool>((mBits >> (pos + 1)) & 1U);
-}
+print_polconf_list(
+  ostream& s,                          ///< [in] 出力先のストリーム
+  const vector<PolConf>& polconf_list, ///< [in] PolConf のリスト
+  SizeType ni                          ///< [in] 入力数
+);
 
 END_NAMESPACE_YM_LOGIC
 

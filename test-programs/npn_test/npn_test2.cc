@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/TvFunc.h"
-#include "NpnMgr.h"
+#include "npn/NpnMgr.h"
 #include "ym/Timer.h"
 
 

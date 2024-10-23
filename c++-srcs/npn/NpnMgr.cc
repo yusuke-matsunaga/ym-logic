@@ -6,7 +6,7 @@
 /// Copyright (C) 2005-2011, 2014, 2017, 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "NpnMgr.h"
+#include "npn/NpnMgr.h"
 #include "ym/TvFunc.h"
 #include "IgPartition.h"
 #include "PolConf.h"

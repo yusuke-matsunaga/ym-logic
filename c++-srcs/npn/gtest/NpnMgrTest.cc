@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "gtest/gtest.h"
-#include "NpnMgr.h"
+#include "npn/NpnMgr.h"
 #include "ym/TvFunc.h"
 #include "ym/PermGen.h"
 #include "ym/RandPermGen.h"

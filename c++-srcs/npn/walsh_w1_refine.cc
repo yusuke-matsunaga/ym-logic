@@ -37,7 +37,7 @@ walsh_w1_refine(
   vector<PolConf>& polconf_list
 )
 {
-  int ni = func.input_num();
+  SizeType ni = func.input_num();
 
   if ( debug ) {
     cout << "before walsh_w1_refine" << endl;
@@ -46,11 +46,11 @@ walsh_w1_refine(
   }
 
   // 重み別 w1 係数を用いて極性の決定を行う．
-  for (int w = 0; w <= ni; ++ w) {
+  for ( SizeType w = 0; w <= ni; ++ w ) {
     bool first = true;
     int max_d0 = 0;
-    int wpos = 0;
-    for (int i = 0; i < polconf_list.size(); ++ i) {
+    SizeType wpos = 0;
+    for ( SizeType i = 0; i < polconf_list.size(); ++ i ) {
       PolConf polconf = polconf_list[i];
       int d0 = func.walsh_w1(var, w, polconf.oinv(), polconf.iinv_bits());
       if ( debug ) {
@@ -86,7 +86,11 @@ class W1Cmp
 {
 public:
 
-  W1Cmp(int n);
+  W1Cmp(
+    SizeType n
+  ): mW1Array(n)
+  {
+  }
 
 
 public:
@@ -96,18 +100,33 @@ public:
 
   /// @brief w1 を設定する．
   void
-  set_w1(int gid,
-	 int w1);
+  set_w1(
+    SizeType gid,
+    int w1
+  )
+  {
+    mW1Array[gid] = w1;
+  }
 
   /// @brief 等価比較演算子
   bool
-  eq(int gid1,
-     int gid2) const;
+  eq(
+    SizeType gid1,
+    SizeType gid2
+  ) const
+  {
+    return mW1Array[gid1] == mW1Array[gid2];
+  }
 
   /// @brief 大小比較演算子
   bool
-  gt(int gid1,
-     int gid2) const;
+  gt(
+    SizeType gid1,
+    SizeType gid2
+  ) const
+  {
+    return mW1Array[gid1] > mW1Array[gid2];
+  }
 
 
 private:
@@ -119,44 +138,17 @@ private:
 
 };
 
-W1Cmp::W1Cmp(int n) :
-  mW1Array(n)
-{
-}
-
-// @brief w1 を設定する．
-void
-W1Cmp::set_w1(int gid,
-	      int w1)
-{
-  mW1Array[gid] = w1;
-}
-
-/// @brief 等価比較演算子
-bool
-W1Cmp::eq(int gid1,
-	  int gid2) const
-{
-  return mW1Array[gid1] == mW1Array[gid2];
-}
-
-// @brief 大小比較演算子
-bool
-W1Cmp::gt(int gid1,
-	   int gid2) const
-{
-  return mW1Array[gid1] > mW1Array[gid2];
-}
-
 END_NONAMESPACE
 
 // @brief 重み別 w1 を用いて変数順序を確定させる．
 // @param[in] var_list 対象の変数リスト
 void
-walsh_w1_refine(const TvFunc& func,
-		IgPartition& igpart)
+walsh_w1_refine(
+  const TvFunc& func,
+  IgPartition& igpart
+)
 {
-  int ni = func.input_num();
+  SizeType ni = func.input_num();
 
   if ( debug ) {
     cout << "before walsh_w1_refine" << endl;
@@ -164,20 +156,20 @@ walsh_w1_refine(const TvFunc& func,
   }
 
   // 重み別 w1 係数を用いて極性の決定を行う．
-  for (int w = 0; w <= ni; ++ w) {
-    for (int pid = 0; pid < igpart.partition_num(); ++ pid) {
+  for ( SizeType w = 0; w <= ni; ++ w ) {
+    for ( SizeType pid = 0; pid < igpart.partition_num(); ++ pid ) {
       if ( igpart.is_resolved(pid) ) {
 	continue;
       }
       W1Cmp w1_cmp(igpart.group_num());
-      for (int pos = igpart.partition_begin(pid);
-	   pos < igpart.partition_end(pid); ++ pos) {
-	int gid = igpart.group_id(pos);
-	int iid = igpart.input_id(gid);
+      for ( SizeType pos = igpart.partition_begin(pid);
+	    pos < igpart.partition_end(pid); ++ pos ) {
+	auto gid = igpart.group_id(pos);
+	auto iid = igpart.input_id(gid);
 	int ww1 = func.walsh_w1(iid, w, false, 0U);
 	w1_cmp.set_w1(gid, ww1);
       }
-      int delta = igpart.refine(pid, w1_cmp);
+      auto delta = igpart.refine(pid, w1_cmp);
       pid += delta;
     }
   }

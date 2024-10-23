@@ -44,7 +44,7 @@ TvFunc_new(
   };
   SizeType ni = -1;
   PyObject* vect_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|$kO",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|k$O",
 				    const_cast<char**>(kwlist),
 				    &ni, &vect_obj) ) {
     return nullptr;
@@ -166,31 +166,24 @@ TvFunc_literal(
     "input_num",
     "var",
     "inv",
-    "literal",
     nullptr
   };
   SizeType ni = 0;
-  SizeType var = -1;
+  PyObject* var_obj = nullptr;
   int inv_int = 0;
-  PyObject* lit_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|$kpO!",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kO|$p",
 				    const_cast<char**>(kwlist),
-				    &ni, &var, &inv_int,
-				    PyLiteral::_typeobject(), &lit_obj) ) {
+				    &ni, &var_obj, &inv_int) ) {
     return nullptr;
   }
   TvFunc func;
-  if ( var != -1 ) {
-    if ( lit_obj != nullptr ) {
+  if ( PyLiteral::Check(var_obj) ) {
+    auto lit = PyLiteral::Get(var_obj);
+    if ( lit.varid() >= ni ) {
       PyErr_SetString(PyExc_ValueError,
-		      "'var' and 'literal' are mutually exclusive.");
+		      "'var' is out of range.");
       return nullptr;
     }
-    bool inv = static_cast<bool>(inv_int);
-    func = TvFunc::literal(ni, var, inv);
-  }
-  else if ( lit_obj != nullptr ) {
-    auto lit = PyLiteral::Get(lit_obj);
     if ( inv_int ) {
       lit = ~lit;
     }
@@ -198,7 +191,7 @@ TvFunc_literal(
   }
   else {
     PyErr_SetString(PyExc_ValueError,
-		    "either 'var' or 'literal' must be specified.");
+		    "'var' must be an int or a Literal.");
     return nullptr;
   }
   return PyTvFunc::ToPyObject(std::move(func));
@@ -217,13 +210,18 @@ TvFunc_posi_literal(
     nullptr
   };
   SizeType ni = -1;
-  SizeType varid = -1;
+  SizeType var = -1;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk",
 				    const_cast<char**>(kw_list),
-				    &ni, &varid) ) {
+				    &ni, &var) ) {
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(TvFunc::posi_literal(ni, varid));
+  if ( var >= ni ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var' is out of range.");
+    return nullptr;
+  }
+  return PyTvFunc::ToPyObject(TvFunc::posi_literal(ni, var));
 }
 
 PyObject*
@@ -239,13 +237,18 @@ TvFunc_nega_literal(
     nullptr
   };
   SizeType ni = -1;
-  SizeType varid = -1;
+  SizeType var = -1;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk",
 				    const_cast<char**>(kw_list),
-				    &ni, &varid) ) {
+				    &ni, &var) ) {
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(TvFunc::nega_literal(ni, varid));
+  if ( var >= ni ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var' is out of range.");
+    return nullptr;
+  }
+  return PyTvFunc::ToPyObject(TvFunc::nega_literal(ni, var));
 }
 
 PyObject*
@@ -258,35 +261,32 @@ TvFunc_cofactor(
   static const char* kwlist[] = {
     "var",
     "inv",
-    "literal",
     nullptr
   };
-  SizeType var = -1;
+  PyObject* var_obj = nullptr;
   int inv_int = 0;
-  PyObject* lit_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|$kpO!",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
 				    const_cast<char**>(kwlist),
-				    &var, &inv_int,
-				    PyLiteral::_typeobject(), &lit_obj) ) {
+				    &var_obj, &inv_int) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
   TvFunc ans;
-  if ( var != -1 ) {
-    if ( lit_obj != nullptr ) {
+  if ( PyLiteral::Check(var_obj) ) {
+    auto lit = PyLiteral::Get(var_obj);
+    if ( lit.varid() >= func.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
-		      "'var' and 'literal' are mutually exclusive.");
+		      "'var' is out of range.");
       return nullptr;
     }
-    ans = func.cofactor(var, static_cast<bool>(inv_int));
-  }
-  else if ( lit_obj != nullptr ) {
-    auto lit = PyLiteral::Get(lit_obj);
+    if ( inv_int ) {
+      lit = ~lit;
+    }
     ans = func.cofactor(lit);
   }
   else {
     PyErr_SetString(PyExc_ValueError,
-		    "either 'var' or 'literal' must be specified.");
+		    "'var' must be an int or Literal");
     return nullptr;
   }
   return PyTvFunc::ToPyObject(std::move(ans));
@@ -302,34 +302,31 @@ TvFunc_cofactor_int(
   static const char* kwlist[] = {
     "var",
     "inv",
-    "literal",
     nullptr
   };
-  SizeType var = -1;
+  PyObject* var_obj = nullptr;
   int inv_int = 0;
-  PyObject* lit_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|$kpO!",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
 				    const_cast<char**>(kwlist),
-				    &var, &inv_int,
-				    PyLiteral::_typeobject(), &lit_obj) ) {
+				    &var_obj, &inv_int) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
-  if ( var != -1 ) {
-    if ( lit_obj != nullptr ) {
+  if ( PyLiteral::Check(var_obj) ) {
+    auto lit = PyLiteral::Get(var_obj);
+    if ( lit.varid() >= func.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
-		      "'var' and 'literal' are mutually exclusive.");
+		      "'var' is out of range.");
       return nullptr;
     }
-    func.cofactor_int(var, static_cast<bool>(inv_int));
-  }
-  else if ( lit_obj != nullptr ) {
-    auto lit = PyLiteral::Get(lit_obj);
+    if ( inv_int ) {
+      lit = ~lit;
+    }
     func.cofactor_int(lit);
   }
   else {
     PyErr_SetString(PyExc_ValueError,
-		    "either 'var' or 'literal' must be specified.");
+		    "'var' must be an int or Literal");
     return nullptr;
   }
   Py_INCREF(self);
@@ -461,6 +458,12 @@ TvFunc_value(
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
+  auto nexp = 1U << func.input_num();
+  if ( pos >= nexp ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'pos' is out of range.");
+    return nullptr;
+  }
   auto r = func.value(pos);
   return PyLong_FromLong(r);
 }
@@ -509,14 +512,19 @@ TvFunc_walsh_1(
     "var",
     nullptr
   };
-  SizeType varid = -1;
+  SizeType var = -1;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
 				    const_cast<char**>(kw_list),
-				    &varid) ) {
+				    &var) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
-  auto r = func.walsh_1(varid);
+  if ( var >= func.input_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var' is out of range.");
+    return nullptr;
+  }
+  auto r = func.walsh_1(var);
   return PyLong_FromLong(r);
 }
 
@@ -532,15 +540,25 @@ TvFunc_walsh_2(
     "var2",
     nullptr
   };
-  SizeType varid1 = -1;
-  SizeType varid2 = -1;
+  SizeType var1 = -1;
+  SizeType var2 = -1;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk",
 				    const_cast<char**>(kw_list),
-				    &varid1, &varid2) ) {
+				    &var1, &var2) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
-  auto r = func.walsh_2(varid1, varid2);
+  if ( var1 >= func.input_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var1' is out of range.");
+    return nullptr;
+  }
+  if ( var2 >= func.input_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var2' is out of range.");
+    return nullptr;
+  }
+  auto r = func.walsh_2(var1, var2);
   return PyLong_FromLong(r);
 }
 
@@ -555,14 +573,19 @@ TvFunc_check_sup(
     "var",
     nullptr
   };
-  SizeType varid = -1;
+  SizeType var = -1;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
 				    const_cast<char**>(kw_list),
-				    &varid) ) {
+				    &var) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
-  auto r = func.check_sup(varid);
+  if ( var >= func.input_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var' is out of range.");
+    return nullptr;
+  }
+  auto r = func.check_sup(var);
   return PyBool_FromLong(r);
 }
 
@@ -577,14 +600,19 @@ TvFunc_check_unate(
     "var",
     nullptr
   };
-  SizeType varid = -1;
+  SizeType var = -1;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
 				    const_cast<char**>(kw_list),
-				    &varid) ) {
+				    &var) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
-  auto r = func.check_unate(varid);
+  if ( var >= func.input_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var' is out of range.");
+    return nullptr;
+  }
+  auto r = func.check_unate(var);
   return PyBool_FromLong(r);
 }
 
@@ -601,16 +629,26 @@ TvFunc_check_sym(
     "inv",
     nullptr
   };
-  SizeType varid1 = -1;
-  SizeType varid2 = -1;
+  SizeType var1 = -1;
+  SizeType var2 = -1;
   int inv = false;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk|$p",
 				    const_cast<char**>(kwlist),
-				    &varid1, &varid2, &inv) ) {
+				    &var1, &var2, &inv) ) {
     return nullptr;
   }
   auto& func = PyTvFunc::Get(self);
-  auto r = func.check_sym(varid1, varid2, static_cast<bool>(inv));
+  if ( var1 >= func.input_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var1' is out of range.");
+    return nullptr;
+  }
+  if ( var2 >= func.input_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "'var2' is out of range.");
+    return nullptr;
+  }
+  auto r = func.check_sym(var1, var2, static_cast<bool>(inv));
   return PyBool_FromLong(r);
 }
 
@@ -770,7 +808,13 @@ TvFunc_and(
   if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::Get(self);
     auto& val2 = PyTvFunc::Get(other);
-    return PyTvFunc::ToPyObject(val1 & val2);
+    if ( val1.input_num() != val2.input_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "input_num() mismatch");
+      return nullptr;
+    }
+    auto val3 = val1 & val2;
+    return PyTvFunc::ToPyObject(val3);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -785,7 +829,13 @@ TvFunc_or(
   if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::Get(self);
     auto& val2 = PyTvFunc::Get(other);
-    return PyTvFunc::ToPyObject(val1 | val2);
+    if ( val1.input_num() != val2.input_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "input_num() mismatch");
+      return nullptr;
+    }
+    auto val3 = val1 | val2;
+    return PyTvFunc::ToPyObject(val3);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -800,7 +850,13 @@ TvFunc_xor(
   if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::Get(self);
     auto& val2 = PyTvFunc::Get(other);
-    return PyTvFunc::ToPyObject(val1 ^ val2);
+    if ( val1.input_num() != val2.input_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "input_num() mismatch");
+      return nullptr;
+    }
+    auto val3 = val1 ^ val2;
+    return PyTvFunc::ToPyObject(val3);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -815,6 +871,11 @@ TvFunc_iand(
   if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::Get(self);
     auto& val2 = PyTvFunc::Get(other);
+    if ( val1.input_num() != val2.input_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "input_num() mismatch");
+      return nullptr;
+    }
     val1 &= val2;
     Py_INCREF(self);
     return self;
@@ -832,6 +893,11 @@ TvFunc_ior(
   if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::Get(self);
     auto& val2 = PyTvFunc::Get(other);
+    if ( val1.input_num() != val2.input_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "input_num() mismatch");
+      return nullptr;
+    }
     val1 |= val2;
     Py_INCREF(self);
     return self;
@@ -849,6 +915,11 @@ TvFunc_ixor(
   if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::Get(self);
     auto& val2 = PyTvFunc::Get(other);
+    if ( val1.input_num() != val2.input_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "input_num() mismatch");
+      return nullptr;
+    }
     val1 ^= val2;
     Py_INCREF(self);
     return self;

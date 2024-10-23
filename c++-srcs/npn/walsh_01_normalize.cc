@@ -26,7 +26,7 @@ walsh_01_normalize(
   int w1[TvFunc::kMaxNi];
   w0 = func.walsh_01(w1);
 
-  int ni = func.input_num();
+  SizeType ni = func.input_num();
 
   xmap.clear();
   xmap.resize(ni);
@@ -54,7 +54,7 @@ walsh_01_normalize(
   }
 
   // w1 に従って入力極性の調整を行う．
-  for (int var = 0; var < ni; ++ var) {
+  for ( SizeType var = 0; var < ni; ++ var ) {
     if ( w1[var] < 0 ) {
       // 反転させる．
       xmap.set(var, var, true);
@@ -78,15 +78,15 @@ walsh_01_normalize(
   }
 
   // xmap に従って関数を変換する．
-  TvFunc func0 = func.xform(xmap);
+  auto func0 = func.xform(xmap);
 
   // 等価な入力グループを探す．
   // 副産物として入力の極性が決まる場合がある．
   input_info.clear();
   input_info.set_input_num(ni);
-  for (int var = 0; var < ni; ++ var) {
+  for ( SizeType var = 0; var < ni; ++ var ) {
     bool found = false;
-    for (int gid = 0; gid < input_info.group_num(); ++ gid) {
+    for ( SizeType gid = 0; gid < input_info.group_num(); ++ gid ) {
       if ( w1[var] != input_info.w1(gid) ) {
 	// w1 の値が異なる．
 	continue;

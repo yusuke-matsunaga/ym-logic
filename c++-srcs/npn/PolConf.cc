@@ -16,12 +16,12 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @param[in] ni 入力数
 NpnMap
 PolConf::to_npnmap(
-  int ni
+  SizeType ni
 ) const
 {
   NpnMap map(ni);
   map.set_oinv(oinv());
-  for (int i = 0; i < ni; ++ i) {
+  for ( SizeType i = 0; i < ni; ++ i ) {
     map.set(i, i, iinv(i));
   }
   return map;
@@ -31,11 +31,11 @@ void
 print_polconf(
   ostream& s,
   const PolConf& polconf,
-  int ni
+  SizeType ni
 )
 {
   std::uint32_t inv_bits = polconf.iinv_bits();
-  for (int i = 0; i < ni; ++ i) {
+  for ( SizeType i = 0; i < ni; ++ i ) {
     if ( inv_bits & (1U << i) ) {
       s << "N";
     }
@@ -57,11 +57,11 @@ void
 print_polconf_list(
   ostream& s,
   const vector<PolConf>& polconf_list,
-  int ni
+  SizeType ni
 )
 {
-  for (vector<PolConf>::const_iterator p = polconf_list.begin();
-       p != polconf_list.end(); ++ p) {
+  for ( auto p = polconf_list.begin();
+	p != polconf_list.end(); ++ p ) {
     print_polconf(s, *p, ni);
   }
 }

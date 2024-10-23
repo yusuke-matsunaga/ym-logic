@@ -6,8 +6,7 @@
 /// Copyright (C) 2005-2011, 2014, 2017 Yusuke Matsunaga
 /// All rights reserved.
 
-
-#include "NpnMgr.h"
+#include "npn/NpnMgr.h"
 #include "ym/TvFunc.h"
 #include "IgPartition.h"
 #include "PolConf.h"
@@ -35,10 +34,12 @@ BEGIN_NAMESPACE_YM_LOGIC
 // @param[in] func 対象の関数
 // @param[in] polconf_list 極性割当候補のリスト
 void
-walsh_w0_refine(const TvFunc& func,
-		vector<PolConf>& polconf_list)
+walsh_w0_refine(
+  const TvFunc& func,
+  vector<PolConf>& polconf_list
+)
 {
-  int ni = func.input_num();
+  SizeType ni = func.input_num();
 
   if ( debug ) {
     cout << "before walsh_w0_refine()" << endl;
@@ -47,11 +48,11 @@ walsh_w0_refine(const TvFunc& func,
 
   // 重み別 w0 係数を用いて極性の決定を行う．
   int w = 0;
-  for (w = 0; w <= ni && polconf_list.size() > 1; ++ w) {
+  for ( w = 0; w <= ni && polconf_list.size() > 1; ++ w ) {
     bool first = true;
     int max_d0 = 0;
-    int wpos = 0;
-    for (int i = 0; i < polconf_list.size(); ++ i) {
+    SizeType wpos = 0;
+    for ( SizeType i = 0; i < polconf_list.size(); ++ i ) {
       PolConf polconf = polconf_list[i];
       int d0 = func.walsh_w0(w, polconf.oinv(), polconf.iinv_bits());
 

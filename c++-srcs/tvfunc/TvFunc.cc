@@ -9,7 +9,7 @@
 #include "ym/TvFunc.h"
 #include "ym/NpnMap.h"
 #include "ym/Range.h"
-#include "NpnMgr.h"
+#include "npn/NpnMgr.h"
 
 
 // 1 ワード当たりの入力数
@@ -165,7 +165,8 @@ TvFunc::TvFunc(
 {
   SizeType ni_pow = 1 << ni;
   if ( values.size() != ni_pow ) {
-    throw std::invalid_argument{"the size of 'values' should be 2 to the power of 'ni'"};
+    auto emsg = "the size of 'values' should be 2 to the power of 'ni'";
+    throw std::invalid_argument{emsg};
   }
 
   SizeType base = 0;
@@ -208,7 +209,8 @@ TvFunc::TvFunc(
     ++ ni;
   }
   if ( (1 << ni) != n ) {
-    throw std::invalid_argument("the data length is expected to be the power of 2");
+    auto emsg = "the data length is expected to be the power of 2";
+    throw std::invalid_argument(emsg);
   }
 
   mInputNum = ni;
@@ -328,6 +330,7 @@ TvFunc::and_int(
 )
 {
   if ( is_valid() ) {
+    check_size(src1);
     for ( SizeType b: Range(mBlockNum) ) {
       mVector[b] &= src1.mVector[b];
     }
@@ -342,6 +345,7 @@ TvFunc::or_int(
 )
 {
   if ( is_valid() ) {
+    check_size(src1);
     for ( SizeType b: Range(mBlockNum) ) {
       mVector[b] |= src1.mVector[b];
     }
@@ -356,6 +360,7 @@ TvFunc::xor_int(
 )
 {
   if ( is_valid() ) {
+    check_size(src1);
     for ( SizeType b: Range(mBlockNum) ) {
       mVector[b] ^= src1.mVector[b];
     }
@@ -926,7 +931,9 @@ TvFunc::dump(
   }
   else {
     s.write_64(mInputNum);
-    s.write_block(reinterpret_cast<const std::uint8_t*>(mVector), mBlockNum * sizeof(WordType));
+    auto ptr = reinterpret_cast<const std::uint8_t*>(mVector);
+    auto n = mBlockNum * sizeof(WordType);
+    s.write_block(ptr, n);
   }
 }
 
@@ -953,7 +960,8 @@ TvFunc::restore(
       mBlockNum = nblk;
       mVector = new TvFunc::WordType[mBlockNum];
     }
-    s.read_block(reinterpret_cast<std::uint8_t*>(mVector), mBlockNum * sizeof(WordType));
+    auto n = mBlockNum * sizeof(WordType);
+    s.read_block(reinterpret_cast<std::uint8_t*>(mVector), n);
   }
 }
 
