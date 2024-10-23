@@ -57,7 +57,13 @@ SopCover_new(
     for ( SizeType i = 0; i < n; ++ i ) {
       auto obj2 = PyList_GetItem(obj1, i);
       if ( PySopCube::Check(obj2) ) {
-	cube_list.push_back(PySopCube::Get(obj2));
+	auto cube = PySopCube::Get(obj2);
+	if ( cube.variable_num() != ni ) {
+	  PyErr_SetString(PyExc_ValueError,
+			  "variable_num of cube mismatch");
+	  return nullptr;
+	}
+	cube_list.push_back(cube);
       }
       else if ( PyList_Check(obj2) ) {
 	SizeType m = PyList_Size(obj2);
@@ -303,6 +309,11 @@ SopCover_richcmpfunc(
        PySopCover::Check(other) ) {
     auto val1 = PySopCover::Get(self);
     auto val2 = PySopCover::Get(other);
+    if ( val1.variable_num() != val2.variable_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "variable_num() is different from each other");
+      return nullptr;
+    }
     Py_RETURN_RICHCOMPARE(val1, val2, op);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -319,11 +330,21 @@ SopCover_add(
     auto val1 = PySopCover::Get(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       auto val3 = val1 + val2;
       return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       auto val3 = val1 + val2;
       return PySopCover::ToPyObject(val3);
     }
@@ -331,6 +352,11 @@ SopCover_add(
   else if ( PySopCube::Check(self) && PySopCover::Check(other) ) {
     auto val1 = PySopCube::Get(self);
     auto val2 = PySopCover::Get(other);
+    if ( val1.variable_num() != val2.variable_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "variable_num() is different from each other");
+      return nullptr;
+    }
     auto val3 = val1 + val2;
     return PySopCover::ToPyObject(val3);
   }
@@ -348,12 +374,22 @@ SopCover_iadd(
     auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
+      if ( sopcover_obj->mVal->variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       (*sopcover_obj->mVal) += val2;
       Py_IncRef(self);
       return self;
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
+      if ( sopcover_obj->mVal->variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       (*sopcover_obj->mVal) += val2;
       Py_IncRef(self);
       return self;
@@ -373,11 +409,21 @@ SopCover_sub(
     auto val1 = PySopCover::Get(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       auto val3 = val1 - val2;
       return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       auto val3 = val1 - val2;
       return PySopCover::ToPyObject(val3);
     }
@@ -396,12 +442,22 @@ SopCover_isub(
     auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
+      if ( sopcover_obj->mVal->variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       (*sopcover_obj->mVal) -= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
+      if ( sopcover_obj->mVal->variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       (*sopcover_obj->mVal) -= val2;
       Py_IncRef(self);
       return self;
@@ -421,11 +477,21 @@ SopCover_mult(
     auto val1 = PySopCover::Get(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       auto val3 = val1 * val2;
       return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       auto val3 = val1 * val2;
       return PySopCover::ToPyObject(val3);
     }
@@ -439,6 +505,11 @@ SopCover_mult(
     auto val2 = PySopCover::Get(other);
     if ( PySopCube::Check(self) ) {
       auto val1 = PySopCube::Get(self);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       auto val3 = val1 * val2;
       return PySopCover::ToPyObject(val3);
     }
@@ -462,12 +533,22 @@ SopCover_imult(
     auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
+      if ( sopcover_obj->mVal->variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       (*sopcover_obj->mVal) *= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
+      if ( sopcover_obj->mVal->variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       (*sopcover_obj->mVal) *= val2;
       Py_IncRef(self);
       return self;
@@ -493,15 +574,28 @@ SopCover_div(
     auto val1 = PySopCover::Get(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
-      return PySopCover::ToPyObject(val1 / val2);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
+      auto val3 = val1 / val2;
+      return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
-      return PySopCover::ToPyObject(val1 / val2);
+      if ( val1.variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
+      auto val3 = val1 / val2;
+      return PySopCover::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      return PySopCover::ToPyObject(val1 / val2);
+      auto val3 = val1 / val2;
+      return PySopCover::ToPyObject(val3);
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -518,12 +612,22 @@ SopCover_idiv(
     auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
     if ( PySopCover::Check(other) ) {
       auto val2 = PySopCover::Get(other);
+      if ( sopcover_obj->mVal->variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       (*sopcover_obj->mVal) /= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PySopCube::Check(other) ) {
       auto val2 = PySopCube::Get(other);
+      if ( sopcover_obj->mVal->variable_num() != val2.variable_num() ) {
+	PyErr_SetString(PyExc_ValueError,
+			"variable_num() is different from each other");
+	return nullptr;
+      }
       (*sopcover_obj->mVal) /= val2;
       Py_IncRef(self);
       return self;

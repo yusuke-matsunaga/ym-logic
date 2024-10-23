@@ -102,6 +102,21 @@ def test_check_containment():
     assert not cube2.check_containment(cube3)
     assert not cube3.check_containment(cube2)
 
+def test_check_containment_bad():
+    ni = 10
+    lit1 = Literal(5, inv=True)
+    lit2 = Literal(0, inv=False)
+    src_lit_list = [lit1, lit2]
+
+    cube1 = SopCube(ni, literal_list=src_lit_list)
+
+    cube2 = SopCube(ni + 1, literal_list=[lit1])
+
+    with pytest.raises(ValueError) as e:
+        cube1.check_containment(cube2)
+    with pytest.raises(ValueError) as e:
+        cube2.check_containment(cube1)
+
 def test_check_intersect():
     ni = 10
     lit1 = Literal(0, inv=False)
@@ -442,6 +457,28 @@ def test_compare1():
     assert not cube3 <= cube2
     assert cube3 >= cube2
 
+def test_compare_bad():
+    ni = 100
+
+    lit0 = Literal(0)
+    lit1 = Literal(80)
+
+    cube1 = SopCube(ni, literal_list=[ lit0,  lit1])
+    cube2 = SopCube(ni + 1, literal_list=[ lit0, ~lit1])
+
+    with pytest.raises(ValueError) as e:
+        cube1 == cube2
+    with pytest.raises(ValueError) as e:
+        cube1 != cube2
+    with pytest.raises(ValueError) as e:
+        cube1 < cube2
+    with pytest.raises(ValueError) as e:
+        cube1 > cube2
+    with pytest.raises(ValueError) as e:
+        cube1 <= cube2
+    with pytest.raises(ValueError) as e:
+        cube1 >= cube2
+        
 def test_to_expr():
     ni = 3
 

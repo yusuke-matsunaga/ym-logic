@@ -33,6 +33,12 @@ SopCover::SopCover(
   const vector<SopCube>& cube_list
 ) : mVariableNum{variable_num}
 {
+  // cube_list のキューブのサイズが正しいかチェック
+  for ( auto& cube: cube_list ) {
+    if ( cube.variable_num() != mVariableNum ) {
+      throw std::invalid_argument{"variable_num of cube mismatch"};
+    }
+  }
   SopMgr mgr(mVariableNum);
   auto dst = mgr.new_block(cube_list);
   _set(dst);

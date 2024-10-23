@@ -199,6 +199,11 @@ SopCube_check_containment(
   }
   auto& cube = PySopCube::Get(self);
   auto& cube1 = PySopCube::Get(cube_obj);
+  if ( cube.variable_num() != cube1.variable_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "variable_num() is differenct from each other");
+    return nullptr;
+  }
   auto ans = cube.check_containment(cube1);
   return PyBool_FromLong(ans);
 }
@@ -222,6 +227,11 @@ SopCube_check_intersect(
   }
   auto& cube = PySopCube::Get(self);
   auto& cube1 = PySopCube::Get(cube_obj);
+  if ( cube.variable_num() != cube1.variable_num() ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "variable_num() is differenct from each other");
+    return nullptr;
+  }
   auto ans = cube.check_intersect(cube1);
   return PyBool_FromLong(ans);
 }
@@ -309,6 +319,11 @@ SopCube_richcmpfunc(
        PySopCube::Check(other) ) {
     auto val1 = PySopCube::Get(self);
     auto val2 = PySopCube::Get(other);
+    if ( val1.variable_num() != val2.variable_num() ) {
+      PyErr_SetString(PyExc_ValueError,
+		      "variable_num() is differenct from each other");
+      return nullptr;
+    }
     Py_RETURN_RICHCOMPARE(val1, val2, op);
   }
   Py_RETURN_NOTIMPLEMENTED;

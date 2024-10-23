@@ -345,6 +345,19 @@ TEST_F(SopCubeTest, check_containment)
   EXPECT_FALSE( cube3.check_containment(cube2) );
 };
 
+TEST_F(SopCubeTest, check_containment_bad)
+{
+  Literal lit1{var5, true};
+  Literal lit2{var0, false};
+  std::initializer_list<Literal> lit_list{lit1, lit2};
+  SopCube cube1{nv, lit_list};
+
+  SopCube cube2{nv + 1, {lit1}};
+
+  ASSERT_THROW( cube1.check_containment(cube2), std::invalid_argument );
+  ASSERT_THROW( cube2.check_containment(cube1), std::invalid_argument );
+};
+
 TEST_F(SopCubeTest, check_intersect)
 {
   Literal lit0{var0, false};
@@ -363,6 +376,19 @@ TEST_F(SopCubeTest, check_intersect)
   EXPECT_FALSE( cube2.check_containment(cube3) );
   EXPECT_FALSE( cube3.check_containment(cube1) );
   EXPECT_FALSE( cube3.check_containment(cube2) );
+};
+
+TEST_F(SopCubeTest, check_intersect_bad)
+{
+  Literal lit0{var0, false};
+  Literal lit1{var5, true};
+  Literal lit2{var7, true};
+  SopCube cube1{nv, {lit1, lit2}};
+
+  SopCube cube2{nv + 1, {lit0, lit1}};
+
+  ASSERT_THROW( cube1.check_intersect(cube2), std::invalid_argument );
+  ASSERT_THROW( cube2.check_intersect(cube1), std::invalid_argument );
 };
 
 TEST_F(SopCubeTest, cube_cube_product1)
@@ -429,6 +455,18 @@ TEST_F(SopCubeTest, cube_cube_product2)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
+
+TEST_F(SopCubeTest, cube_cube_product_bad)
+{
+  Literal lit0{var0, false};
+  Literal lit1{var5, true};
+  Literal lit2{var7, true};
+
+  SopCube cube1{nv, {lit1, lit2}};
+  SopCube cube2{nv + 1, {lit0, lit1}};
+
+  ASSERT_THROW( cube1 * cube2, std::invalid_argument );
+}
 
 TEST_F(SopCubeTest, Rcube_cube_product1)
 {
@@ -1136,6 +1174,17 @@ TEST_F(SopCubeTest, cube_cube_quotient2)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
+TEST_F(SopCubeTest, cube_cube_quotient_bad)
+{
+  Literal lit0{var0, false};
+  Literal lit1{var5, true};
+  Literal lit2{var7, true};
+  SopCube cube1{nv, {lit0, lit1, lit2}};
+  SopCube cube2{nv + 1, {lit0, lit2}};
+
+  ASSERT_THROW( cube1 / cube2, std::invalid_argument );
+}
+
 TEST_F(SopCubeTest, cube_lit_quotient1)
 {
   Literal lit0{var0, false};
@@ -1573,6 +1622,24 @@ TEST_F(SopCubeTest, compare2)
   EXPECT_TRUE(  cube3 >= cube3 );
 
 };
+
+TEST_F(SopCubeTest, compare_bad)
+{
+  const int nv1 = 100;
+  SizeType var80{80};
+
+  Literal lit0{var0, false};
+  Literal lit1{var80, false};
+
+  SopCube cube1{nv1, { lit0,  lit1}};
+  SopCube cube2{nv, { lit0, ~lit1}};
+
+  ASSERT_THROW( auto r = (cube1 == cube2), std::invalid_argument );
+  ASSERT_THROW( auto r = (cube1 < cube2), std::invalid_argument );
+  ASSERT_THROW( auto r = (cube1 > cube2), std::invalid_argument );
+  ASSERT_THROW( auto r = (cube1 <= cube2), std::invalid_argument );
+  ASSERT_THROW( auto r = (cube1 >= cube2), std::invalid_argument );
+}
 
 TEST_F(SopCubeTest, to_expr1)
 {

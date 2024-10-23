@@ -63,7 +63,7 @@ def test_construct2():
     assert lit2 == cube_list[1][0]
     assert ~lit3 == cube_list[1][1]
 
-def test_construct2():
+def test_construct2_bad():
     ni = 10
 
     lit0 = Literal(0)
@@ -72,8 +72,19 @@ def test_construct2():
     lit3 = Literal(3)
     
     cube1 = SopCube(ni, literal_list=[lit0, ~lit1])
-    cube2 = SopCube(ni, literal_list=[lit2, ~lit3])
+    cube2 = SopCube(ni + 1, literal_list=[lit2, ~lit3])
 
+    with pytest.raises(ValueError) as e:
+        cover1 = SopCover(ni, cube_list=[cube1, cube2])
+
+def test_construct3():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+    
     cover1 = SopCover(ni, cube_list=[[lit0, ~lit1], [lit2, ~lit3]])
 
     assert cover1.variable_num == ni
@@ -187,7 +198,20 @@ def test_cover_cover_sum():
     assert ~lit1 == cube_list[0][1]
     assert lit2 == cube_list[1][0]
     assert ~lit3 == cube_list[1][1]
-    
+
+def test_cover_cover_sum_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    cover1 = SopCover(ni, cube_list=[[lit0, ~lit1]])
+    cover2 = SopCover(ni + 1, cube_list=[[lit2, ~lit3]])
+
+    with pytest.raises(ValueError) as e:
+        cover3 = cover1 + cover2
 
 def test_cover_cube_sum():
     ni = 10
@@ -230,7 +254,22 @@ def test_cover_cube_sum():
     assert ~lit1 == cube_list[0][1]
     assert lit2 == cube_list[1][0]
     assert ~lit3 == cube_list[1][1]
+
+def test_cover_cube_sum_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
     
+    cube1 = SopCube(ni, literal_list=[lit0, ~lit1])
+    cube2 = SopCube(ni + 1, literal_list=[lit2, ~lit3])
+
+    cover1 = SopCover(ni, cube_list=[cube1])
+
+    with pytest.raises(ValueError) as e:
+        cover3 = cover1 + cube2
 
 def test_cube_cover_sum():
     ni = 10
@@ -273,6 +312,22 @@ def test_cube_cover_sum():
     assert ~lit1 == cube_list[0][1]
     assert lit2 == cube_list[1][0]
     assert ~lit3 == cube_list[1][1]
+
+def test_cube_cover_sum_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+    
+    cube1 = SopCube(ni + 1, literal_list=[lit0, ~lit1])
+    cube2 = SopCube(ni, literal_list=[lit2, ~lit3])
+
+    cover2 = SopCover(ni, cube_list=[cube2])
+
+    with pytest.raises(ValueError) as e:
+        cover3 = cube1 + cover2
 
 def test_cover_cover_sum_int():
     ni = 10
@@ -317,6 +372,20 @@ def test_cover_cover_sum_int():
     assert lit2 == cube_list[1][0]
     assert ~lit3 == cube_list[1][1]
 
+def test_cover_cover_sum_int_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    cover1 = SopCover(ni, cube_list=[[lit0, ~lit1]])
+    cover2 = SopCover(ni + 1, cube_list=[[lit2, ~lit3]])
+
+    with pytest.raises(ValueError) as e:
+        cover1 += cover2
+
 def test_cover_cube_sum_int():
     ni = 10
 
@@ -359,6 +428,22 @@ def test_cover_cube_sum_int():
     assert lit2 == cube_list[1][0]
     assert ~lit3 == cube_list[1][1]
 
+def test_cover_cube_sum_int_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+    
+    cube1 = SopCube(ni, literal_list=[lit0, ~lit1])
+    cube2 = SopCube(ni + 1, literal_list=[lit2, ~lit3])
+
+    cover1 = SopCover(ni, cube_list=[cube1])
+
+    with pytest.raises(ValueError) as e:
+        cover1 += cube2
+
 def test_cover_cover_diff():
     ni = 10
 
@@ -391,6 +476,20 @@ def test_cover_cover_diff():
     assert len(cube_list[0]) == 2
     assert lit0 == cube_list[0][0]
     assert lit1 == cube_list[0][1]
+
+def test_cover_cover_diff_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    src1 = SopCover(ni, cube_list=[[lit0, lit1], [lit2, lit3]])
+    src2 = SopCover(ni + 1, cube_list=[[lit3, lit2], [lit0, ~lit1]])
+
+    with pytest.raises(ValueError) as e:
+        cover1 = src1 - src2
 
 def test_cover_cube_diff():
     ni = 10
@@ -425,6 +524,20 @@ def test_cover_cube_diff():
     assert lit0 == cube_list[0][0]
     assert lit1 == cube_list[0][1]
 
+def test_cover_cube_diff_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    src1 = SopCover(ni, cube_list=[[lit0, lit1], [lit2, lit3]])
+    src2 = SopCube(ni + 1, literal_list=[lit3, lit2])
+
+    with pytest.raises(ValueError) as e:
+        cover1 = src1 - src2
+
 def test_cover_cover_diff_int():
     ni = 10
 
@@ -457,6 +570,20 @@ def test_cover_cover_diff_int():
     assert len(cube_list[0]) == 2
     assert lit0 == cube_list[0][0]
     assert lit1 == cube_list[0][1]
+
+def test_cover_cover_diff_int_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    cover1 = SopCover(ni, cube_list=[[lit0, lit1], [lit2, lit3]])
+    src2 = SopCover(ni + 1, cube_list=[[lit3, lit2], [lit0, ~lit1]])
+
+    with pytest.raises(ValueError) as e:
+        cover1 -= src2
 
 def test_cover_cube_diff_int():
     ni = 10
@@ -491,6 +618,20 @@ def test_cover_cube_diff_int():
     assert lit0 == cube_list[0][0]
     assert lit1 == cube_list[0][1]
 
+def test_cover_cube_diff_int_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    cover1 = SopCover(ni, cube_list=[[lit0, lit1], [lit2, lit3]])
+    src2 = SopCube(ni + 1, literal_list=[lit3, lit2])
+
+    with pytest.raises(ValueError) as e:
+        cover1 -= src2
+
 def test_cover_cover_product():
     ni = 10
 
@@ -523,6 +664,20 @@ def test_cover_cover_product():
     assert lit1 == cube_list[3][0]
     assert lit3 == cube_list[3][1]
 
+def test_cover_cover_product_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    src1 = SopCover(ni, cube_list=[[lit0], [lit1]])
+    src2 = SopCover(ni + 1, cube_list=[[lit2], [lit3]])
+
+    with pytest.raises(ValueError) as e:
+        cover1 = src1 * src2
+
 def test_cover_cube_product():
     ni = 10
 
@@ -547,6 +702,19 @@ def test_cover_cube_product():
     assert len(cube_list[1]) == 2
     assert lit1 == cube_list[1][0]
     assert lit2 == cube_list[1][1]
+
+def test_cover_cube_product_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+
+    src1 = SopCover(ni, cube_list=[[lit0], [lit1]])
+    src2 = SopCube(ni + 1, literal_list=[lit2])
+
+    with pytest.raises(ValueError) as e:
+        cover1 = src1 * src2
 
 def test_cover_literal_product():
     ni = 10
@@ -597,6 +765,19 @@ def test_cube_cover_product():
     assert len(cube_list[1]) == 2
     assert lit1 == cube_list[1][0]
     assert lit2 == cube_list[1][1]
+                                
+def test_cube_cover_product_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+
+    src1 = SopCover(ni, cube_list=[[lit0], [lit1]])
+    src2 = SopCube(ni + 1, literal_list=[lit2])
+
+    with pytest.raises(ValueError) as e:
+        cover1 = src2 * src1
 
 def test_literal_cover_product():
     ni = 10
@@ -654,6 +835,20 @@ def test_cover_cover_product_int():
     assert len(cube_list[3]) == 2
     assert lit1 == cube_list[3][0]
     assert lit3 == cube_list[3][1]
+                                
+def test_cover_cover_product_int_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    cover1 = SopCover(ni, cube_list=[[lit0], [lit1]])
+    src2 = SopCover(ni + 1, cube_list=[[lit2], [lit3]])
+
+    with pytest.raises(ValueError) as e:
+        cover1 *= src2
 
 def test_cover_cube_product_int():
     ni = 10
@@ -679,6 +874,19 @@ def test_cover_cube_product_int():
     assert len(cube_list[1]) == 2
     assert lit1 == cube_list[1][0]
     assert lit2 == cube_list[1][1]
+
+def test_cover_cube_product_int_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+
+    cover1 = SopCover(ni, cube_list=[[lit0], [lit1]])
+    src2 = SopCube(ni + 1, literal_list=[lit2])
+
+    with pytest.raises(ValueError) as e:
+        cover1 *= src2
 
 def test_cover_literal_product_int():
     ni = 10
@@ -733,6 +941,24 @@ def test_cover_cover_quotient():
     assert len(cube_list[1]) == 1
     assert lit3 == cube_list[1][0]
 
+def test_cover_cover_quotient_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    src1 = SopCover(ni, cube_list=[[lit0, lit2],
+                                   [lit0, lit3],
+                                   [lit1, lit2],
+                                   [lit1, lit3]])
+    src2 = SopCover(ni + 1, cube_list=[[lit0],
+                                   [lit1]])
+
+    with pytest.raises(ValueError) as e:
+        cover1 = src1 / src2
+
 def test_cover_cover_quotient_int():
     ni = 10
 
@@ -761,6 +987,24 @@ def test_cover_cover_quotient_int():
     assert len(cube_list[1]) == 1
     assert lit3 == cube_list[1][0]
 
+def test_cover_cover_quotient_int_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    cover1 = SopCover(ni, cube_list=[[lit0, lit2],
+                                     [lit0, lit3],
+                                     [lit1, lit2],
+                                     [lit1, lit3]])
+    src2 = SopCover(ni + 1, cube_list=[[lit0],
+                                   [lit1]])
+
+    with pytest.raises(ValueError) as e:
+        cover1 /= src2
+
 def test_cover_cube_quotient():
     ni = 10
 
@@ -788,6 +1032,23 @@ def test_cover_cube_quotient():
     assert len(cube_list[1]) == 1
     assert lit3 == cube_list[1][0]
 
+def test_cover_cube_quotient_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    src1 = SopCover(ni, cube_list=[[lit0, lit2],
+                                   [lit0, lit3],
+                                   [lit1, lit2],
+                                   [lit1, lit3]])
+    src2 = SopCube(ni + 1, literal_list=[lit0])
+
+    with pytest.raises(ValueError) as e:
+        cover1 = src1 / src2
+
 def test_cover_cube_quotient_int():
     ni = 10
 
@@ -814,6 +1075,23 @@ def test_cover_cube_quotient_int():
     assert lit2 == cube_list[0][0]
     assert len(cube_list[1]) == 1
     assert lit3 == cube_list[1][0]
+
+def test_cover_cube_quotient_int_bad():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+    lit3 = Literal(3)
+
+    cover1 = SopCover(ni, cube_list=[[lit0, lit2],
+                                     [lit0, lit3],
+                                     [lit1, lit2],
+                                     [lit1, lit3]])
+    src2 = SopCube(ni + 1, literal_list=[lit0])
+
+    with pytest.raises(ValueError) as e:
+        cover1 /= src2
 
 def test_cover_literal_quotient():
     ni = 10

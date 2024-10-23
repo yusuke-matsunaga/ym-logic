@@ -109,6 +109,27 @@ TEST_F(SopTest, constructor2)
 
 };
 
+TEST_F(SopTest, constructor2_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCube cube1{nv + 1, {lit0, lit1}};
+  SopCube cube2{nv, {lit2, lit3}};
+
+  vector<SopCube> cube_list{cube1, cube2};
+
+  ASSERT_THROW( (SopCover{nv, cube_list}), std::invalid_argument );
+}
+
 TEST_F(SopTest, constructor3)
 {
   Literal lit0(var0, false);
@@ -570,6 +591,15 @@ TEST_F(SopTest, cover_cover_sum)
 
 };
 
+TEST_F(SopTest, cover_cover_sum_bad)
+{
+
+  SopCover src1{nv, { {lit0, lit1} } };
+  SopCover src2{nv + 1, { {lit2, lit3} } };
+
+  ASSERT_THROW( src1 + src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, cover_cube_sum)
 {
   Literal lit0(var0, false);
@@ -623,6 +653,25 @@ TEST_F(SopTest, cover_cube_sum)
 
 };
 
+TEST_F(SopTest, cover_cube_sum_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover src1{nv, { {lit0, lit1} } };
+  SopCube src2{nv + 1, {lit2, lit3} };
+
+  ASSERT_THROW( src1 + src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, cube_cover_sum)
 {
   Literal lit0(var0, false);
@@ -675,6 +724,25 @@ TEST_F(SopTest, cube_cover_sum)
   EXPECT_EQ( lit3, tmp_list[1][1] );
 
 };
+
+TEST_F(SopTest, cube_cover_sum_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCube src1{nv, {lit0, lit1} };
+  SopCover src2{nv + 1, { {lit2, lit3} } };
+
+  ASSERT_THROW( src1 + src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, Scover_cover_sum)
 {
@@ -888,6 +956,25 @@ TEST_F(SopTest, Icover_cover_sum)
 
 };
 
+TEST_F(SopTest, Icover_cover_sum_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover cover1{nv, { {lit0, lit1} } };
+  SopCover src2{nv + 1, { {lit2, lit3} } };
+
+  ASSERT_THROW( cover1 += src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, Icover_cube_sum)
 {
   Literal lit0(var0, false);
@@ -941,6 +1028,25 @@ TEST_F(SopTest, Icover_cube_sum)
 
 };
 
+TEST_F(SopTest, Icover_cube_sum_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover cover1{nv, { {lit0, lit1} }};
+  SopCube src2{nv + 1, {lit2, lit3}};
+
+  ASSERT_THROW( cover1 += src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, cover_cover_diff)
 {
   Literal lit0(var0, false);
@@ -990,6 +1096,25 @@ TEST_F(SopTest, cover_cover_diff)
   EXPECT_EQ( lit1, cube_list1[0][1] );
 
 };
+
+TEST_F(SopTest, cover_cover_diff_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover src1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCover src2{nv + 1, { {lit3, lit2}, {lit0, ~lit1} } };
+
+  ASSERT_THROW( src1 - src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, Rcover_cover_diff)
 {
@@ -1092,6 +1217,25 @@ TEST_F(SopTest, cover_cube_diff)
   EXPECT_EQ( lit1, cube_list1[0][1] );
 
 };
+
+TEST_F(SopTest, cover_cube_diff_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover src1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCube src2{nv + 1, {lit3, lit2} };
+
+  ASSERT_THROW( src1 - src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, Scover_cover_diff)
 {
@@ -1243,6 +1387,25 @@ TEST_F(SopTest, Icover_cover_diff)
 
 };
 
+TEST_F(SopTest, Icover_cover_diff_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCover src2{nv + 1, { {lit3, lit2}, {lit0, ~lit1} } };
+
+  ASSERT_THROW( cover1 -= src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, Icover_cube_diff)
 {
   Literal lit0(var0, false);
@@ -1292,6 +1455,25 @@ TEST_F(SopTest, Icover_cube_diff)
   EXPECT_EQ( lit1, cube_list1[0][1] );
 
 };
+
+TEST_F(SopTest, Icover_cube_diff_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover cover1{nv, { {lit0, lit1}, {lit2, lit3} } };
+  SopCube src2{nv + 1, {lit3, lit2} };
+
+  ASSERT_THROW( cover1 -= src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, cover_cover_product)
 {
@@ -1352,6 +1534,25 @@ TEST_F(SopTest, cover_cover_product)
 
 };
 
+TEST_F(SopTest, cover_cover_product_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover src1{nv, { {lit0}, {lit1} } };
+  SopCover src2{nv + 1, { {lit2}, {lit3} } };
+
+  ASSERT_THROW( src1 * src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, cover_cube_product)
 {
   Literal lit0(var0, false);
@@ -1404,6 +1605,25 @@ TEST_F(SopTest, cover_cube_product)
   EXPECT_EQ( lit2, cube_list1[1][1] );
 
 };
+
+TEST_F(SopTest, cover_cube_product_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover src1{nv, { {lit0}, {lit1} } };
+  SopCube src2{nv + 1,  {lit2} };
+
+  ASSERT_THROW( src1 * src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, Rcover_cube_product)
 {
@@ -1512,6 +1732,25 @@ TEST_F(SopTest, cube_cover_product)
   EXPECT_EQ( lit2, cube_list1[1][1] );
 
 };
+
+TEST_F(SopTest, cube_cover_product_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCube src1{nv,  {lit2} };
+  SopCover src2{nv + 1, { {lit0}, {lit1} } };
+
+  ASSERT_THROW( src1 * src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, cube_Rcover_product)
 {
@@ -2167,6 +2406,25 @@ TEST_F(SopTest, Icover_cover_product)
 
 };
 
+TEST_F(SopTest, Icover_cover_product_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover cover1{nv, { {lit0}, {lit1} } };
+  SopCover src2{nv + 1, { {lit2}, {lit3} } };
+
+  ASSERT_THROW( cover1 *= src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, Icover_cube_product)
 {
   Literal lit0(var0, false);
@@ -2219,6 +2477,25 @@ TEST_F(SopTest, Icover_cube_product)
   EXPECT_EQ( lit2, cube_list1[1][1] );
 
 };
+
+TEST_F(SopTest, Icover_cube_product_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover cover1{nv, { {lit0}, {lit1} } };
+  SopCube src2{nv + 1,  {lit2} };
+
+  ASSERT_THROW( cover1 *= src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, Icover_literal_product)
 {
@@ -2323,6 +2600,25 @@ TEST_F(SopTest, cover_cover_quotient)
 
 };
 
+TEST_F(SopTest, cover_cover_quotient_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover src2{nv + 1, { {lit0}, {lit1} } };
+
+  ASSERT_THROW( src1 / src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, cover_cube_quotient)
 {
   Literal lit0(var0, false);
@@ -2373,6 +2669,25 @@ TEST_F(SopTest, cover_cube_quotient)
   EXPECT_EQ( lit3, cube_list1[1][0] );
 
 };
+
+TEST_F(SopTest, cover_cube_quotient_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover src1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCube src2{nv + 1, {lit0} };
+
+  ASSERT_THROW( src1 / src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, cover_literal_quotient)
 {
@@ -2785,6 +3100,25 @@ TEST_F(SopTest, Icover_cover_quotient)
 
 };
 
+TEST_F(SopTest, Icover_cover_quotient_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCover src2{nv + 1, { {lit0}, {lit1} } };
+
+  ASSERT_THROW( cover1 /= src2, std::invalid_argument );
+}
+
 TEST_F(SopTest, Icover_cube_quotient)
 {
   Literal lit0(var0, false);
@@ -2835,6 +3169,25 @@ TEST_F(SopTest, Icover_cube_quotient)
   EXPECT_EQ( lit3, cube_list1[1][0] );
 
 };
+
+TEST_F(SopTest, Icover_cube_quotient_bad)
+{
+  Literal lit0(var0, false);
+  Literal lit1(var1, false);
+  Literal lit2(var2, false);
+  Literal lit3(var3, false);
+  Literal lit4(var4, false);
+  Literal lit5(var5, false);
+  Literal lit6(var6, false);
+  Literal lit7(var7, false);
+  Literal lit8(var8, false);
+  Literal lit9(var9, false);
+
+  SopCover cover1{nv, { {lit0, lit2}, {lit0, lit3}, {lit1, lit2}, {lit1, lit3} } };
+  SopCube src2{nv + 1, {lit0} };
+
+  ASSERT_THROW( cover1 /= src2, std::invalid_argument );
+}
 
 TEST_F(SopTest, Icover_literal_quotient)
 {
