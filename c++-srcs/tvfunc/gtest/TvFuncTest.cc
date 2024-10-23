@@ -405,7 +405,6 @@ TEST_P(TvFuncTestWithParam, empty_constr)
   int ni = GetParam();
   TvFunc f0(ni);
   ostringstream buf;
-  buf << "TvFunc(" << ni << ")";
   check_func(f0, mValues, false, buf.str());
 }
 
@@ -415,7 +414,6 @@ TEST_P(TvFuncTestWithParam, const_zero)
   int ni = GetParam();
   TvFunc f0 = TvFunc::zero(ni);
   ostringstream buf;
-  buf << "TvFunc::zero(" << ni << ")";
   check_func(f0, mValues, false, buf.str());
 }
 
@@ -429,7 +427,6 @@ TEST_P(TvFuncTestWithParam, const_one)
   }
   TvFunc f0 = TvFunc::one(ni);
   ostringstream buf;
-  buf << "TvFunc::one(" << ni << ")";
   check_func(f0, mValues, false, buf.str());
 }
 

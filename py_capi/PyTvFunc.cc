@@ -10,6 +10,7 @@
 #include "pym/PyLiteral.h"
 #include "pym/PyNpnMap.h"
 #include "pym/PyPrimType.h"
+#include "pym/PySopCover.h"
 #include "pym/PyModule.h"
 
 
@@ -37,7 +38,7 @@ TvFunc_new(
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
+  static const char* kw_list[] = {
     "input_num",
     "val_list",
     nullptr
@@ -45,7 +46,7 @@ TvFunc_new(
   SizeType ni = -1;
   PyObject* vect_obj = nullptr;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|k$O",
-				    const_cast<char**>(kwlist),
+				    const_cast<char**>(kw_list),
 				    &ni, &vect_obj) ) {
     return nullptr;
   }
@@ -107,6 +108,34 @@ TvFunc_repr(
 }
 
 PyObject*
+TvFunc_from_string(
+  PyObject* Py_UNUSED(self),
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kw_list[] = {
+    "str",
+    nullptr
+  };
+  char* s = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s",
+				    const_cast<char**>(kw_list),
+				    &s) ) {
+    return nullptr;
+  }
+  try {
+    auto func = TvFunc{s};
+    return PyTvFunc::ToPyObject(std::move(func));
+  }
+  catch ( std::invalid_argument e ) {
+    PyErr_SetString(PyExc_ValueError,
+		    "invalid string");
+    return nullptr;
+  }
+}
+
+PyObject*
 TvFunc_invalid(
   PyObject* Py_UNUSED(self),
   PyObject* Py_UNUSED(args)
@@ -162,7 +191,7 @@ TvFunc_literal(
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
+  static const char* kw_list[] = {
     "input_num",
     "var",
     "inv",
@@ -172,7 +201,7 @@ TvFunc_literal(
   PyObject* var_obj = nullptr;
   int inv_int = 0;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kO|$p",
-				    const_cast<char**>(kwlist),
+				    const_cast<char**>(kw_list),
 				    &ni, &var_obj, &inv_int) ) {
     return nullptr;
   }
@@ -258,7 +287,7 @@ TvFunc_cofactor(
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
+  static const char* kw_list[] = {
     "var",
     "inv",
     nullptr
@@ -266,7 +295,7 @@ TvFunc_cofactor(
   PyObject* var_obj = nullptr;
   int inv_int = 0;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
-				    const_cast<char**>(kwlist),
+				    const_cast<char**>(kw_list),
 				    &var_obj, &inv_int) ) {
     return nullptr;
   }
@@ -299,7 +328,7 @@ TvFunc_cofactor_int(
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
+  static const char* kw_list[] = {
     "var",
     "inv",
     nullptr
@@ -307,7 +336,7 @@ TvFunc_cofactor_int(
   PyObject* var_obj = nullptr;
   int inv_int = 0;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
-				    const_cast<char**>(kwlist),
+				    const_cast<char**>(kw_list),
 				    &var_obj, &inv_int) ) {
     return nullptr;
   }
@@ -623,7 +652,7 @@ TvFunc_check_sym(
   PyObject* kwds
 )
 {
-  static const char* kwlist[] = {
+  static const char* kw_list[] = {
     "var1",
     "var2"
     "inv",
@@ -633,7 +662,7 @@ TvFunc_check_sym(
   SizeType var2 = -1;
   int inv = false;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk|$p",
-				    const_cast<char**>(kwlist),
+				    const_cast<char**>(kw_list),
 				    &var1, &var2, &inv) ) {
     return nullptr;
   }
@@ -663,15 +692,40 @@ TvFunc_analyze(
   return PyPrimType::ToPyObject(ptype);
 }
 
+PyObject*
+TvFunc_bcf(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& func = PyTvFunc::Get(self);
+  auto cov = func.BCF();
+  return PySopCover::ToPyObject(cov);
+}
+
+PyObject*
+TvFunc_mwc(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& func = PyTvFunc::Get(self);
+  auto cov = func.MWC();
+  return PySopCover::ToPyObject(cov);
+}
+
 // メソッド定義
 PyMethodDef TvFunc_methods[] = {
+  {"from_string", reinterpret_cast<PyCFunction>(TvFunc_from_string),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("make TvFunc from string")},
   {"invalid", TvFunc_invalid,
    METH_STATIC | METH_NOARGS,
    PyDoc_STR("make invalid function")},
   {"zero", reinterpret_cast<PyCFunction>(TvFunc_zero),
    METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make ZERO function")},
-  {"one", reinterpret_cast<PyCFunction>(TvFunc_zero),
+  {"one", reinterpret_cast<PyCFunction>(TvFunc_one),
    METH_STATIC | METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("make ONE function")},
   {"literal", reinterpret_cast<PyCFunction>(TvFunc_literal),
@@ -704,7 +758,7 @@ PyMethodDef TvFunc_methods[] = {
   {"is_valid", TvFunc_is_valid,
    METH_NOARGS,
    PyDoc_STR("True if valid")},
-  {"is_invalid", TvFunc_is_valid,
+  {"is_invalid", TvFunc_is_invalid,
    METH_NOARGS,
    PyDoc_STR("True if not valid")},
   {"is_zero", TvFunc_is_zero,
@@ -740,8 +794,15 @@ PyMethodDef TvFunc_methods[] = {
   {"check_sym", reinterpret_cast<PyCFunction>(TvFunc_check_sym),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("check the symmetry between two inputs")},
-  {"analyze", TvFunc_analyze, METH_NOARGS,
+  {"analyze", TvFunc_analyze,
+   METH_NOARGS,
    PyDoc_STR("check if this function is a primitive function")},
+  {"bcf", TvFunc_bcf,
+   METH_NOARGS,
+   PyDoc_STR("get Blake's Cannonical Form")},
+  {"mwc", TvFunc_mwc,
+   METH_NOARGS,
+   PyDoc_STR("get minimal cover using Merge With Containment")},
   {nullptr, nullptr, 0, nullptr}
 };
 
