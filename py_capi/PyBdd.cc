@@ -81,7 +81,7 @@ Bdd_cofactor(
 )
 {
   static const char* kwlist[] = {
-    "",
+    "var",
     "inv",
     nullptr
   };
@@ -94,27 +94,19 @@ Bdd_cofactor(
   }
 
   auto bdd = PyBdd::Get(self);
-  if ( PyLong_Check(obj1) ) {
-    SizeType varid = PyLong_AsLong(obj1);
-    auto lit = Literal{varid, static_cast<bool>(inv)};
-    auto ans_bdd = bdd.cofactor(varid, static_cast<bool>(inv));
-    return PyBdd::ToPyObject(ans_bdd);
-  }
   if ( PyLiteral::Check(obj1) ) {
-    if ( inv ) {
-      PyErr_SetString(PyExc_TypeError, "'inv' keyword is not allowed with 'Literal' type");
-      return nullptr;
-    }
     auto lit = PyLiteral::Get(obj1);
+    if ( inv ) {
+      lit = ~lit;
+    }
     auto ans_bdd = bdd.cofactor(lit);
     return PyBdd::ToPyObject(ans_bdd);
   }
   if ( PyBdd::Check(obj1) ) {
-    if ( inv ) {
-      PyErr_SetString(PyExc_TypeError, "'inv' keyword is not allowed with 'Bdd' type");
-      return nullptr;
-    }
     auto bdd1 = PyBdd::Get(obj1);
+    if ( inv ) {
+      bdd1 = ~bdd1;
+    }
     try {
       auto ans_bdd = bdd.cofactor(bdd1);
       return PyBdd::ToPyObject(ans_bdd);
@@ -125,7 +117,7 @@ Bdd_cofactor(
     }
   }
 
-  PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal");
+  PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal or Cube");
   return nullptr;
 }
 

@@ -63,7 +63,6 @@ BddMgr_dealloc(
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
   auto impl = bddmgr_obj->mVal;
   impl->dec();
-  delete impl;
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -120,7 +119,7 @@ BddMgr_literal(
 )
 {
   static const char* kwlist[] = {
-    "",
+    "var",
     "inv",
     nullptr
   };
@@ -131,21 +130,14 @@ BddMgr_literal(
 				    &obj1, &inv) ) {
     return nullptr;
   }
-  Literal lit;
-  if ( PyLong_Check(obj1) ) {
-    SizeType varid = PyLong_AsLong(obj1);
-    lit = Literal{varid, static_cast<bool>(inv)};
-  }
-  else if ( PyLiteral::Check(obj1) ) {
-    if ( inv ) {
-      PyErr_SetString(PyExc_TypeError, "'inv' keyword is not allowed with 'Literal' type");
-      return nullptr;
-    }
-    lit = PyLiteral::Get(obj1);
-  }
-  else {
+  if ( !PyLiteral::Check(obj1) ) {
     PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal");
     return nullptr;
+  }
+
+  auto lit = PyLiteral::Get(obj1);
+  if ( inv ) {
+    lit = ~lit;
   }
   auto bddmgr = PyBddMgr::Get(self);
   auto ans_bdd = bddmgr.literal(lit);
@@ -192,8 +184,8 @@ BddMgr_from_truth(
   if ( !PyArg_ParseTuple(args, "s", &str) ) {
     return nullptr;
   }
-  auto bddmgr = PyBddMgr::Get(self);
   try {
+    auto bddmgr = PyBddMgr::Get(self);
     auto ans_bdd = bddmgr.from_truth(str);
     return PyBdd::ToPyObject(ans_bdd);
   }
