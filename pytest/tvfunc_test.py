@@ -8,7 +8,7 @@
 """
 
 import pytest
-from ymlogic import TvFunc, Literal
+from ymlogic import TvFunc, Literal, NpnMap
 
 
 def count(f):
@@ -636,3 +636,50 @@ def test_mwc():
     cov = f.mwc()
 
     assert str(cov.expr()) == "( ( ~0 & ~1 & 2 ) | ( ~0 & 1 & ~2 ) | ( 0 & ~1 & ~2 ) | ( 0 & 1 & 2 ) )"
+
+def test_xform():
+    f = TvFunc.from_string("10000000")
+
+    xmap = NpnMap.identity(3)
+    xmap.set(0, 0, True)
+
+    f1 = f.xform(xmap)
+
+    assert str(f1) == "01000000"
+
+def test_shrink():
+    f = TvFunc.from_string("10001000")
+
+    xmap = f.shrink_map()
+    f1 = f.xform(xmap)
+
+    assert str(f1) == "1000"
+
+def test_npn_cannonical_map():
+    f = TvFunc.from_string("00100000")
+
+    xmap = f.npn_cannonical_map()
+    f1 = f.xform(xmap)
+
+    assert str(f1) == "10000000"
+
+def test_npn_cannonical_map2():
+    f = TvFunc.from_string("11101111")
+
+    xmap = f.npn_cannonical_map()
+    f1 = f.xform(xmap)
+
+    assert str(f1) == "10000000"
+
+def test_npn_cannonical_all_map():
+    f = TvFunc.from_string("11001010")
+
+    xmap_list = f.npn_cannonical_all_map()
+
+    assert len(xmap_list) == 4
+
+    f0 = f.xform(xmap_list[0])
+
+    for xmap in xmap_list:
+        f1 = f.xform(xmap)
+        assert f1 == f0
