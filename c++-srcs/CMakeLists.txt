@@ -102,6 +102,7 @@ set (dd_SOURCES
   dd/BddSimp.cc
   dd/BddMultiCompOp.cc
   dd/BddOneOp.cc
+  dd/BddShiftOp.cc
   dd/BddSupOp.cc
   dd/BddTruthOp.cc
   dd/BddVarSet.cc

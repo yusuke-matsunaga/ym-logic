@@ -304,6 +304,16 @@ Bdd::remap_vars(
   return mMgr->remap_vars(*this, varmap);
 }
 
+// @brief 変数シフト演算
+Bdd
+Bdd::shift_var(
+  SizeType var
+) const
+{
+  _check_valid();
+  return mMgr->shift_var(*this, var);
+}
+
 // @brief 定数0の時 true を返す．
 bool
 Bdd::is_zero() const

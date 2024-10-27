@@ -195,6 +195,15 @@ public:
     const unordered_map<SizeType, Literal>& varmap ///< [in] 変数の対応表
   );
 
+  /// @brief 変数シフト演算
+  ///
+  /// var をひとつ下にずらす．
+  Bdd
+  shift_var(
+    const Bdd& bdd, ///< [in] 対象の BDD
+    SizeType var    ///< [in] 移動元の変数
+  );
+
 
 public:
   //////////////////////////////////////////////////////////////////////
