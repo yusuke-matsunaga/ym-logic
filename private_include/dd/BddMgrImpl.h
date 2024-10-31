@@ -10,6 +10,8 @@
 
 #include "ym/logic.h"
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
+#include "ym/BddLit.h"
 #include "dd/DdNode.h"
 #include "dd/DdEdge.h"
 #include "dd/DdNodeMgr.h"
@@ -68,23 +70,23 @@ public:
   /// @brief リテラル関数を作る．
   Bdd
   literal(
-    SizeType var,    ///< [in] 変数
-    bool inv = false ///< [in] 反転フラグ
+    const BddVar& var, ///< [in] 変数
+    bool inv = false   ///< [in] 反転フラグ
   );
 
   /// @brief リテラル関数を作る．
   Bdd
   literal(
-    Literal lit ///< [in] リテラル
+    const BddLit& lit ///< [in] リテラル
   )
   {
-    return literal(lit.varid(), lit.is_negative());
+    return literal(lit.var(), lit.is_negative());
   }
 
   /// @brief 肯定のリテラル関数を作る．
   Bdd
   posi_literal(
-    SizeType var ///< [in] 変数
+    const BddVar& var ///< [in] 変数
   )
   {
     return literal(var, false);
@@ -93,7 +95,7 @@ public:
   /// @brief 否定のリテラル関数を作る．
   Bdd
   nega_literal(
-    SizeType var ///< [in] 変数
+    const BddVar& var ///< [in] 変数
   )
   {
     return literal(var, true);

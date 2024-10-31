@@ -85,7 +85,7 @@ set (tvfunc_SOURCES
 set (dd_SOURCES
   dd/DdNodeMgr.cc
   dd/CopyOp.cc
-  dd/IdentOp.cc
+  #dd/IdentOp.cc
   dd/DotGen.cc
   dd/DotWriter.cc
   dd/NodeCollector.cc

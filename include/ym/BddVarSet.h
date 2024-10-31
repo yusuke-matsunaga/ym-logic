@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
 
 
 BEGIN_NAMESPACE_YM_DD
@@ -31,9 +32,9 @@ public:
   ///
   /// var_set を省略した場合には空集合となる．
   BddVarSet(
-    BddMgr& mgr,                    ///< [in] BDDマネージャ
-    const vector<SizeType>& var_set ///< [in] 変数のリスト
-    = vector<SizeType>{}
+    BddMgr& mgr,                  ///< [in] BDDマネージャ
+    const vector<BddVar>& var_set ///< [in] 変数のリスト
+    = vector<BddVar>{}
   );
 
   /// @brief デストラクタ

@@ -5,25 +5,31 @@
 /// @brief Bdd のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2023, 2024 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/Literal.h"
+#include "ym/BddObj.h"
 #include "ym/BinEnc.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
-class BddVarSet;
 class DdEdge;
 class BddMgrImpl;
 
 //////////////////////////////////////////////////////////////////////
 /// @class Bdd Bdd.h "ym/Bdd.h"
 /// @brief BDD を表すクラス
+///
+/// - 基本的に個々の Bdd は一つの BddMgr に属す．
+/// - 例外は invalid な Bdd で関連する BddMgr を持たない．
+/// - Bdd 間の演算は同じ BddMgr に属するもののみ可とする．
+/// - 異なる BddMgr に属する Bdd の演算は std::invalid_argument 例外を
+///   送出する．
 //////////////////////////////////////////////////////////////////////
-class Bdd
+class Bdd :
+  public BddObj
 {
   friend class BddMgrImpl;
 
@@ -147,23 +153,23 @@ public:
   /// @return 結果を返す．
   Bdd
   cofactor(
-    SizeType var, ///< [in] 変数
-    bool inv      ///< [in] 反転フラグ
-                  ///<  - false: 反転なし (正極性)
-                  ///<  - true:  反転あり (負極性)
+    const BddVar& var, ///< [in] 変数
+    bool inv           ///< [in] 反転フラグ
+                       ///<      - false: 反転なし (正極性)
+                       ///<      - true:  反転あり (負極性)
   ) const;
 
   /// @brief コファクターを計算する．
   /// @return 結果を返す．
   Bdd
   cofactor(
-    Literal lit ///< [in] リテラル
+    const BddLit& lit ///< [in] リテラル
   ) const;
 
   /// @brief cofactor の別名
   Bdd
   operator/(
-    Literal lit ///< [in] リテラル
+    const BddLit& lit ///< [in] リテラル
   ) const
   {
     return cofactor(lit);
@@ -263,24 +269,24 @@ public:
   /// @return 自分自身への参照を返す．
   Bdd&
   cofactor_int(
-    SizeType var, ///< [in] 変数
-    bool inv      ///< [in] 反転フラグ
-                  ///<  - false: 反転なし (正極性)
-                  ///<  - true:  反転あり (負極性)
+    const BddVar& var, ///< [in] 変数
+    bool inv           ///< [in] 反転フラグ
+                       ///<      - false: 反転なし (正極性)
+                       ///<      - true:  反転あり (負極性)
   );
 
   /// @brief コファクターを計算して代入する．
   /// @return 自分自身への参照を返す．
   Bdd&
   cofactor_int(
-    Literal lit ///< [in] リテラル
+    const BddLit& lit ///< [in] リテラル
   );
 
   /// @brief cofactor_int の別名
   /// @return 自分自身への参照を返す．
   Bdd&
   operator/=(
-    Literal lit ///< [in] リテラル
+    const BddLit& lit ///< [in] リテラル
   )
   {
     return cofactor_int(lit);
@@ -329,33 +335,37 @@ public:
   /// @brief (単一)compose演算
   Bdd
   compose(
-    SizeType index,  ///< [in] 対象のインデックス
-    const Bdd& cfunc ///< [in] 置き換える関数
-  ) const
+    const BddVar& var, ///< [in] 対象の変数
+    const Bdd& cfunc   ///< [in] 置き換える関数
+  ) const;
+#if 0
   {
-    return multi_compose({{index, cfunc}});
+    return multi_compose({{var, cfunc}});
   }
+#endif
 
   /// @brief (単一)compose演算を行って代入する．
   Bdd&
   compose_int(
-    SizeType index,  ///< [in] 対象のインデックス
-    const Bdd& cfunc ///< [in] 置き換える関数
-  )
+    const BddVar& var, ///< [in] 対象の変数
+    const Bdd& cfunc   ///< [in] 置き換える関数
+  );
+#if 0
   {
-    return multi_compose_int({{index, cfunc}});
+    return multi_compose_int({{var, cfunc}});
   }
+#endif
 
   /// @brief 複合compose演算
   Bdd
   multi_compose(
-    const unordered_map<SizeType, Bdd>& compose_map ///< [in] 変換マップ
+    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
   ) const;
 
   /// @brief 複合compose演算を行って代入する．
   Bdd&
   multi_compose_int(
-    const unordered_map<SizeType, Bdd>& compose_map ///< [in] 変換マップ
+    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
   );
 
   /// @brief 変数順を入れ替える演算
@@ -363,15 +373,7 @@ public:
   /// 極性も入れ替え可能
   Bdd
   remap_vars(
-    const unordered_map<SizeType, Literal>& varmap ///< [in] 変数の対応表
-  ) const;
-
-  /// @brief 変数シフト演算
-  ///
-  /// var をひとつ下にずらす．
-  Bdd
-  shift_var(
-    SizeType var ///< [in] 移動元の変数
+    const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
   ) const;
 
   /// @}
@@ -409,8 +411,9 @@ protected:
 
   /// @brief 変数のリストに変換する．
   ///
-  /// 変換できない時は例外を送出する．
-  vector<SizeType>
+  /// - is_posicube() == true が成り立つと仮定している．
+  /// - そうでない時は std::invalid_argument 例外を送出する．
+  vector<BddVar>
   to_varlist() const;
 
 
@@ -419,20 +422,6 @@ public:
   /// @name 内容を取得する関数
   /// @{
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief 適正な値を持っている時に true を返す．
-  bool
-  is_valid() const
-  {
-    return mMgr != nullptr;
-  }
-
-  /// @brief 不正値の時に true を返す．
-  bool
-  is_invalid() const
-  {
-    return !is_valid();
-  }
 
   /// @brief 定数0の時 true を返す．
   bool
@@ -461,14 +450,14 @@ public:
   /// @brief 与えられた変数がサポートの時 true を返す．
   bool
   check_sup(
-    SizeType var ///< [in] 変数
+    BddVar var ///< [in] 変数
   ) const;
 
   /// @brief 与えられた変数に対して対称の時 true を返す．
   bool
   check_sym(
-    SizeType var1,   ///< [in] 変数1
-    SizeType var2,   ///< [in] 変数2
+    BddVar var1,     ///< [in] 変数1
+    BddVar var2,     ///< [in] 変数2
     bool inv = false ///< [in] 反転フラグ
   ) const;
 
@@ -477,7 +466,7 @@ public:
   get_support() const;
 
   /// @brief サポート変数のリスト(vector)を得る．
-  vector<SizeType>
+  vector<BddVar>
   get_support_list() const;
 
   /// @brief 1となるパスを求める．
@@ -496,9 +485,9 @@ public:
 
   /// @brief 根の変数とコファクターを求める．
   ///
-  /// 自身が葉のノードの場合，BAD_VARID を返す．
+  /// 自身が葉のノードの場合，invalid な BddVar を返す．
   /// f0, f1 には自分自身が入る．
-  SizeType
+  BddVar
   root_decomp(
     Bdd& f0, ///< [out] 負のコファクター
     Bdd& f1  ///< [out] 正のコファクター
@@ -506,8 +495,8 @@ public:
 
   /// @brief 根の変数を得る．
   ///
-  /// 自身が葉のノードの場合，BAD_VARID を返す．
-  SizeType
+  /// 自身が葉のノードの場合，invalid な BddVar を返す．
+  BddVar
   root_var() const;
 
   /// @brief 負のコファクターを返す．
@@ -560,35 +549,25 @@ public:
   /// @name その他の関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 親のマネージャを返す．
-  BddMgr
-  mgr() const;
-
   /// @brief ノード数を返す．
   SizeType
   size() const;
 
   /// @brief リテラルのリストの変換する．
   ///
-  /// 変換できない時は例外を送出する．
-  vector<Literal>
+  /// - is_cube() == true が成り立っていると仮定している．
+  /// - そうでない時は std::invalid_argument 例外を送出する．
+  vector<BddLit>
   to_litlist() const;
 
   /// @brief 内容を真理値表の文字列に変換する．
   ///
-  /// 実際の変数が input_num を超えた時は例外を送出する．
+  /// - var_list の先頭がMSBとなる．
+  /// - var_list に含まれていない変数があった場合には
+  ///   std::invalid_argument 例外を送出する．
   string
   to_truth(
-    SizeType input_num ///< [in] 入力変数の数
-  ) const;
-
-  /// @brief 同じ構造を持つか調べる．
-  ///
-  /// 同じマネージャに属するBDDなら同じノードだが
-  /// マネージャが異なる場合には構造を調べる必要がある．
-  bool
-  is_identical(
-    const Bdd& right ///< [in] 比較対象のBDD
+    const vector<BddVar> var_list ///< [in] 入力変数のリスト
   ) const;
 
   /// @brief 内容を出力する．
@@ -680,9 +659,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
-
-  // マネージャ
-  BddMgrImpl* mMgr{nullptr};
 
   // 根の枝
   PtrIntType mRoot;

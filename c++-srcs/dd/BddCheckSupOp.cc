@@ -16,10 +16,11 @@ BEGIN_NAMESPACE_YM_DD
 // @brief 与えられた変数がサポートの時 true を返す．
 bool
 Bdd::check_sup(
-  SizeType var
+  const BddVar& var
 ) const
 {
-  BddCheckSupOp op{var};
+  auto index = _mgr()->index(var);
+  BddCheckSupOp op{index};
   return op.op_step(DdEdge{mRoot});
 }
 

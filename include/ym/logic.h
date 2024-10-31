@@ -100,7 +100,9 @@ BEGIN_NAMESPACE_YM_DD
 //////////////////////////////////////////////////////////////////////
 
 class Bdd;
+class BddVar;
 class BddVarSet;
+class BddLit;
 class BddMgr;
 
 class Zdd;
@@ -148,7 +150,9 @@ using nsLogic::PrimType;
 using nsLogic::FuncAnalyzer;
 
 using nsDd::Bdd;
+using nsDd::BddVar;
 using nsDd::BddVarSet;
+using nsDd::BddLit;
 using nsDd::BddMgr;
 
 using nsDd::Zdd;

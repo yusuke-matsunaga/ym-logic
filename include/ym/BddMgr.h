@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/Literal.h"
 #include "ym/BinDec.h"
 
 BEGIN_NAMESPACE_YM
@@ -18,18 +17,23 @@ END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_YM_DD
 
-class Bdd;
 class BddMgrImpl;
 
 //////////////////////////////////////////////////////////////////////
 /// @class BddMgr BddMgr.h "ym/BddMgr.h"
 /// @brief BDD を管理するためのクラス
 ///
-/// 実体は BddMgrImpl でこのクラスはただの shared pointer となっている．
-/// コピーしても同一の BddMgrImpl を持つインスタンスが生成される．
+/// - Bdd の演算は同一の BddMgr に属している Bdd の間でのみ有効
+/// - 異なる BddMgr に属する Bdd の演算は std::invalid_argument
+///   例外を送出する．
+/// - BddMgr は変数順を保持しており，異なる BddMgr 間では変数順が
+///   異なる可能性がある．
 ///
-/// BddMgrImpl は内部で参照回数を持っており，参照回数がゼロになると
-/// 自動的に開放される．
+/// - 実体は BddMgrImpl でこのクラスはただの shared pointer となっている．
+///   コピーしても同一の BddMgrImpl を持つインスタンスが生成される．
+///
+/// - BddMgrImpl は内部で参照回数を持っており，参照回数がゼロになると
+///   自動的に開放される．
 //////////////////////////////////////////////////////////////////////
 class BddMgr
 {
@@ -56,6 +60,16 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
+  // 変数を生成する関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 新しい変数を割り当てる．
+  BddVar
+  new_variable();
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
   // BDD を生成する関数
   //////////////////////////////////////////////////////////////////////
 
@@ -63,6 +77,7 @@ public:
   ///
   /// 通常は同じものを返すが，src のマネージャが異なる場合には
   /// 同じ構造のコピーを作る．
+  /// ただし，変数順が異なる場合には効率の悪い処理となる．
   Bdd
   copy(
     const Bdd& src
@@ -79,39 +94,40 @@ public:
   /// @brief リテラル関数を作る．
   Bdd
   literal(
-    SizeType var,    ///< [in] 変数
-    bool inv = false ///< [in] 反転フラグ(false で反転なし = 肯定)
+    const BddVar& var, ///< [in] 変数
+    bool inv = false   ///< [in] 反転フラグ(false で反転なし = 肯定)
   );
 
   /// @brief リテラル関数を作る．
   Bdd
   literal(
-    Literal lit ///< [in] リテラル
+    const BddLit& lit ///< [in] リテラル
   );
 
   /// @brief 肯定のリテラル関数を作る．
   Bdd
   posi_literal(
-    SizeType var ///< [in] 変数
+    const BddVar& var ///< [in] 変数
   );
 
   /// @brief 否定のリテラル関数を作る．
   Bdd
   nega_literal(
-    SizeType var ///< [in] 変数
+    const BddVar& var ///< [in] 変数
   );
 
   /// @brief 真理値表形式の文字列からBDDを作る．
   ///
-  /// str は '0' か '1' の文字列．
-  /// ただし，長さは2のべき乗である必要がある．
-  /// for some reason, この文字列は big endian となっている．
-  /// 0文字目が(1, 1, 1, 1)に対応する
+  /// - str は '0' か '1' の文字列．
+  /// - ただし，長さはvar_listのサイズのべき乗である必要がある．
+  /// - for some reason, この文字列は big endian となっている．
+  /// - 0文字目が(1, 1, 1, 1)に対応する
   ///
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
   Bdd
   from_truth(
-    const string& str ///< [in] 01の文字列
+    const vector<BddVar>& var_list, ///< [in] 変数のリスト
+    const string& str               ///< [in] 01の文字列
   );
 
   /// @brief ITE 演算を行う．
