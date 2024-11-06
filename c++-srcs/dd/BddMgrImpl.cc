@@ -43,9 +43,9 @@ BddMgrImpl::variable(
   while ( mVarList.size() <= varid ) {
     auto index = mVarIdList.size();
     auto var = index_to_var(index);
-    auto varid = mVarList.size();
+    auto id = mVarList.size();
     mVarList.push_back(var);
-    mVarIdList.push_back(varid);
+    mVarIdList.push_back(id);
   }
   return mVarList[varid];
 }

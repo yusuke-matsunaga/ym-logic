@@ -16,6 +16,30 @@ include_directories(
 # ===================================================================
 
 
+
+# ===================================================================
+#  copy_test
+# ===================================================================
+
+set ( copy_test_SOURCES
+  copy_test.cc
+  )
+
+add_executable ( copy_test
+  ${copy_test_SOURCES}
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  )
+
+target_compile_options ( copy_test
+  PRIVATE "-g"
+  )
+
+target_link_libraries ( copy_test
+  ${YM_LIB_DEPENDS}
+  )
+
+
 # ===================================================================
 #  truth_test
 # ===================================================================

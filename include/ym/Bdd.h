@@ -638,7 +638,7 @@ protected:
   void
   _check_valid() const
   {
-    if ( !is_valid() ) {
+    if ( is_invalid() ) {
       throw std::invalid_argument{"invalid BDD"};
     }
   }

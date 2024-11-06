@@ -43,18 +43,6 @@ END_NONAMESPACE
 class BddLit :
   public Bdd
 {
-#if 0
-  friend class BddMgrImpl;
-private:
-
-  /// @brief コンストラクタ
-  BddLit(
-    BddMgrImpl* mgr, ///< [in] BDDマネージャ
-    DdEdge root      ///< [in] 根の枝
-  ) : Bdd{mgr, root}
-  {
-  }
-#endif
 
 public:
 
@@ -71,13 +59,6 @@ public:
                        ///<      - false: 肯定(反転なし)
                        ///<      - true:  否定(反転あり)
   ) : Bdd{var_to_lit(var, inv)}
-  {
-  }
-
-  /// @brief コピーコンストラクタ
-  BddLit(
-    const BddLit& src ///< [in] コピー元のオブジェクト
-  ) : Bdd{src}
   {
   }
 
@@ -155,14 +136,14 @@ public:
   bool
   is_positive() const
   {
-    return root_inv();
+    return !is_negative();
   }
 
   /// @brief 否定のリテラルのとき true を返す．
   bool
   is_negative() const
   {
-    return !is_positive();
+    return root_inv();
   }
 
   /// @brief 反転演算子(complementの別名)

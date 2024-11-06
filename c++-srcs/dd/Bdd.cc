@@ -53,6 +53,7 @@ Bdd::operator=(
     mMgr->deactivate(root());
     mMgr->dec();
   }
+  mMgr = src.mMgr;
   mRoot = src.mRoot;
   return *this;
 }
@@ -527,6 +528,7 @@ BddVar::BddVar(
   DdEdge root
 ) : Bdd{mgr, root}
 {
+  _check_valid();
 }
 
 // @brief 変数番号を返す．
@@ -557,6 +559,22 @@ BddLit
 BddVar::negalit() const
 {
   return BddLit{*this, true};
+}
+
+// @brief 正しいBDDかチェックする．
+void
+BddVar::_check_valid() const
+{
+  Bdd::_check_valid();
+  auto node = root().node();
+  auto e0 = node->edge0();
+  auto e1 = node->edge1();
+  if ( !root().inv() &&
+       e0 == DdEdge::zero() &&
+       e1 == DdEdge::one() ) {
+    return;
+  }
+  throw std::invalid_argument{"invalid BDD for BddVar"};
 }
 
 END_NAMESPACE_YM_DD

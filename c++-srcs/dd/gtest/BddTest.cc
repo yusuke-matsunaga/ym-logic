@@ -63,7 +63,6 @@ BddTest::check(
     buf << ")";
     EXPECT_EQ( exp_val, val ) << buf.str();
   }
-
   vector<BddVar> var_list(ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
     var_list[i] = mMgr.variable(i);

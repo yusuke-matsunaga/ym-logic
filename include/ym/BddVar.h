@@ -44,6 +44,7 @@ private:
     const Bdd& src   ///< [in] コピー元のオブジェクト
   ) : Bdd{src}
   {
+    _check_valid();
   }
 
 
@@ -57,22 +58,7 @@ public:
   /// 不正な値となる．
   BddVar() = default;
 
-  /// @brief コピーコンストラクタ
-  BddVar(
-    const BddVar& src ///< [in] コピー元のオブジェクト
-  ) : Bdd{src}
-  {
-  }
-
-  /// @brief コピー代入演算子
-  BddVar&
-  operator=(
-    const BddVar& src ///< [in] コピー元のオブジェクト
-  )
-  {
-    Bdd::operator=(src);
-    return *this;
-  }
+  // コピーコンストラクタとコピー代入演算子はデフォルト実装でOK
 
   /// @brief デストラクタ
   ~BddVar() = default;
@@ -124,6 +110,16 @@ public:
   {
     return !operator==(right);
   }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 正しいBDDかチェックする．
+  void
+  _check_valid() const;
 
 };
 
