@@ -9,6 +9,7 @@
 #include <libgen.h>
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
+#include "ym/BddVar.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -47,8 +48,9 @@ dot_test(
     string buf;
     SizeType ni = 0;
     vector<Bdd> func_list;
+    vector<BddVar> var_list;
     while ( getline(s, buf) ) {
-      auto f = mgr.from_truth(buf);
+      auto f = mgr.from_truth(var_list, buf);
       func_list.push_back(f);
     }
     unordered_map<string, string> attr_dict;

@@ -10,6 +10,8 @@
 
 #include "ym/logic.h"
 #include "ym/BinDec.h"
+#include "ym/BinEnc.h"
+
 
 BEGIN_NAMESPACE_YM
 class PyBddMgr;
@@ -60,12 +62,25 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // 変数を生成する関数
+  // 変数に関する関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 新しい変数を割り当てる．
+  /// @breif 変数の数を返す．
+  SizeType
+  variable_num() const;
+
+  /// @brief 変数を返す．
+  ///
+  /// - varid >= variable_num() の場合には新しい変数が確保される．
+  /// - auto var = variable(id); var.id() == id; が成り立つ．
   BddVar
-  new_variable();
+  variable(
+    SizeType varid ///< [in] 変数番号
+  );
+
+  /// @brief 変数のリストを返す．
+  vector<BddVar>
+  variable_list() const;
 
 
 public:
@@ -90,31 +105,6 @@ public:
   /// @brief 恒真関数を作る．
   Bdd
   one();
-
-  /// @brief リテラル関数を作る．
-  Bdd
-  literal(
-    const BddVar& var, ///< [in] 変数
-    bool inv = false   ///< [in] 反転フラグ(false で反転なし = 肯定)
-  );
-
-  /// @brief リテラル関数を作る．
-  Bdd
-  literal(
-    const BddLit& lit ///< [in] リテラル
-  );
-
-  /// @brief 肯定のリテラル関数を作る．
-  Bdd
-  posi_literal(
-    const BddVar& var ///< [in] 変数
-  );
-
-  /// @brief 否定のリテラル関数を作る．
-  Bdd
-  nega_literal(
-    const BddVar& var ///< [in] 変数
-  );
 
   /// @brief 真理値表形式の文字列からBDDを作る．
   ///

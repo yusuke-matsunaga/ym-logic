@@ -26,11 +26,12 @@ public:
 
   /// @brief コンストラクタ
   Tv2Bdd(
-    BddMgr& mgr,       ///< [in] BDD マネージャ
-    const TvFunc& func ///< [in] 対象の関数
+    BddMgr& mgr,                   ///< [in] BDD マネージャ
+    const TvFunc& func,            ///< [in] 対象の関数
+    const vector<BddVar>& var_list ///< [in] 変数リスト
   ) : mMgr{mgr},
       mFunc{func},
-      mOrder(func.input_num())
+      mVarList{var_list}
   {
   }
 
@@ -45,9 +46,7 @@ public:
 
   /// @brief BDD を作る．
   Bdd
-  run(
-    const vector<SizeType>& order ///< [in] 変数順
-  );
+  run();
 
 
 private:
@@ -75,8 +74,8 @@ private:
   // 対象の関数
   const TvFunc& mFunc;
 
-  // 変数順
-  vector<SizeType> mOrder;
+  // 変数のリスト
+  vector<BddVar> mVarList;
 
 };
 

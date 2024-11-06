@@ -13,6 +13,7 @@
 #include "ym/SopCover.h"
 #include "ym/BddMgr.h"
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 
@@ -529,11 +530,12 @@ public:
 
   /// @brief BDD に変換する．
   ///
-  /// order[i] = j の時 i 番目の変数を BDD の j 番目の変数にする．
+  /// - var_list.size() >= input_num() でなければ
+  ///   std::invalid_argument 例外を送出する．
   Bdd
   bdd(
-    BddMgr& mgr,                  ///< [in] BDDマネージャ
-    const vector<SizeType>& order ///< [in] 変数順
+    BddMgr& mgr,                   ///< [in] BDDマネージャ
+    const vector<BddVar>& var_list ///< [in] 変数リスト
   ) const;
 
   /// @brief 内容を表す文字列を返す．

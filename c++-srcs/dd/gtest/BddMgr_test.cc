@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
+#include "ym/BddVar.h"
 #include "BddTest.h"
 
 
@@ -40,71 +41,28 @@ TEST_F(BddTest, one)
 
 TEST_F(BddTest, literal1)
 {
-  SizeType var{0};
-  Bdd bdd = mMgr.literal(var);
+  auto var = mMgr.variable(0);
 
-  EXPECT_FALSE( bdd.is_invalid() );
-  EXPECT_TRUE( bdd.is_valid() );
-  EXPECT_FALSE( bdd.is_zero() );
-  EXPECT_FALSE( bdd.is_one() );
+  EXPECT_FALSE( var.is_invalid() );
+  EXPECT_TRUE( var.is_valid() );
+  EXPECT_FALSE( var.is_zero() );
+  EXPECT_FALSE( var.is_one() );
 
-  check(bdd, "10");
+  check(var, "10");
 
   Bdd f0;
   Bdd f1;
-  auto var1 = bdd.root_decomp(f0, f1);
+  auto var1 = var.root_decomp(f0, f1);
 
   EXPECT_EQ( var1, var );
   EXPECT_TRUE( f0.is_zero() );
   EXPECT_TRUE( f1.is_one() );
-}
-
-TEST_F(BddTest, literal2)
-{
-  SizeType var{0};
-  Bdd bdd = mMgr.literal(var, false);
-
-  EXPECT_FALSE( bdd.is_invalid() );
-  EXPECT_TRUE( bdd.is_valid() );
-  EXPECT_FALSE( bdd.is_zero() );
-  EXPECT_FALSE( bdd.is_one() );
-
-  check(bdd, "10");
-
-  Bdd f0;
-  Bdd f1;
-  auto var1 = bdd.root_decomp(f0, f1);
-
-  EXPECT_EQ( var1, var );
-  EXPECT_TRUE( f0.is_zero() );
-  EXPECT_TRUE( f1.is_one() );
-}
-
-TEST_F(BddTest, literal3)
-{
-  SizeType var{0};
-  Bdd bdd = mMgr.literal(var, true);
-
-  EXPECT_FALSE( bdd.is_invalid() );
-  EXPECT_TRUE( bdd.is_valid() );
-  EXPECT_FALSE( bdd.is_zero() );
-  EXPECT_FALSE( bdd.is_one() );
-
-  check(bdd, "01");
-
-  Bdd f0;
-  Bdd f1;
-  auto var1 = bdd.root_decomp(f0, f1);
-
-  EXPECT_EQ( var1, var );
-  EXPECT_TRUE( f0.is_one() );
-  EXPECT_TRUE( f1.is_zero() );
 }
 
 TEST_F(BddTest, posi_literal)
 {
-  SizeType var{0};
-  Bdd bdd = mMgr.posi_literal(var);
+  auto var = mMgr.variable(0);
+  Bdd bdd = var.posilit();
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -124,8 +82,8 @@ TEST_F(BddTest, posi_literal)
 
 TEST_F(BddTest, nega_literal)
 {
-  SizeType var{0};
-  Bdd bdd = mMgr.nega_literal(var);
+  auto var = mMgr.variable(0);
+  Bdd bdd = var.negalit();
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -145,22 +103,28 @@ TEST_F(BddTest, nega_literal)
 
 TEST_F(BddTest, from_truth1)
 {
+  mMgr.variable(2);
+  auto var_list = mMgr.variable_list();
   const char* exp_str = "10010110";
-  Bdd bdd = mMgr.from_truth(exp_str);
+  Bdd bdd = mMgr.from_truth(var_list, exp_str);
   check(bdd, exp_str);
 }
 
 TEST_F(BddTest, from_truth2)
 {
+  mMgr.variable(2);
+  auto var_list = mMgr.variable_list();
   const char* exp_str = "10010101";
-  Bdd bdd = mMgr.from_truth(exp_str);
+  Bdd bdd = mMgr.from_truth(var_list, exp_str);
   check(bdd, exp_str);
 }
 
 TEST_F(BddTest, copy)
 {
+  mMgr.variable(3);
+  auto var_list = mMgr.variable_list();
   const char* exp_str = "1001010110111010";
-  Bdd bdd = mMgr.from_truth(exp_str);
+  Bdd bdd = mMgr.from_truth(var_list, exp_str);
 
   BddMgr mgr1;
   Bdd bdd1 = mgr1.copy(bdd);
@@ -174,8 +138,9 @@ TEST_F(BddTest, copy)
 TEST_F(BddTest, mgr_copy)
 {
   BddMgr mgr1;
+  auto var = mgr1.variable(0);
 
-  auto bdd = mgr1.posi_literal(0);
+  auto bdd = var.posilit();
 
   auto mgr2 = bdd.mgr();
 
@@ -187,7 +152,8 @@ TEST_F(BddTest, mgr_lifetime)
   Bdd bdd;
   {
     BddMgr mgr;
-    bdd = mgr.posi_literal(0);
+    auto var = mgr.variable(0);
+    bdd = var.posilit();
   }
 
   EXPECT_TRUE( bdd.is_valid() );

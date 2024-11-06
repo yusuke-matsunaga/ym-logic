@@ -17,12 +17,16 @@ BEGIN_NAMESPACE_YM_DD
 // @brief 与えられた変数に対して対称の時 true を返す．
 bool
 Bdd::check_sym(
-  SizeType var1,
-  SizeType var2,
+  const BddVar& var1,
+  const BddVar& var2,
   bool inv
 ) const
 {
-  BddCheckSymOp op{var1, var2, inv};
+  _check_mgr(var1);
+  _check_mgr(var2);
+  auto idx1 = var1.index();
+  auto idx2 = var2.index();
+  BddCheckSymOp op{idx1, idx2, inv};
   return op.op_step(DdEdge{mRoot});
 }
 

@@ -64,7 +64,11 @@ BddTest::check(
     EXPECT_EQ( exp_val, val ) << buf.str();
   }
 
-  auto str = bdd.to_truth(ni);
+  vector<BddVar> var_list(ni);
+  for ( SizeType i = 0; i < ni; ++ i ) {
+    var_list[i] = mMgr.variable(i);
+  }
+  auto str = bdd.to_truth(var_list);
   EXPECT_EQ( exp_str, str );
 }
 
@@ -75,8 +79,8 @@ BddTest::test_check_sym(
   SizeType var2
 )
 {
-  auto lit1 = mMgr.literal(var1);
-  auto lit2 = mMgr.literal(var2);
+  auto lit1 = literal(var1);
+  auto lit2 = literal(var2);
 
   auto cube00 = ~lit1 & ~lit2;
   auto bdd00 = bdd / cube00;
@@ -87,10 +91,12 @@ BddTest::test_check_sym(
   ostringstream buf;
   buf << ", where var1 = " << var1 << ", var2 = " << var2;
   bool exp1 = bdd01 == bdd10;
-  EXPECT_EQ( exp1, bdd.check_sym(var1, var2, false) ) << buf.str();
+  auto v1 = mMgr.variable(var1);
+  auto v2 = mMgr.variable(var2);
+  EXPECT_EQ( exp1, bdd.check_sym(v1, v2, false) ) << buf.str();
 
   bool exp2 = bdd00 == bdd11;
-  EXPECT_EQ( exp2, bdd.check_sym(var1, var2, true) ) << buf.str();
+  EXPECT_EQ( exp2, bdd.check_sym(v1, v2, true) ) << buf.str();
 }
 
 void
@@ -99,14 +105,15 @@ BddTest::test_check_sup(
   SizeType var
 )
 {
-  auto lit1 = mMgr.literal(var);
+  auto lit1 = literal(var);
   auto bdd0 = bdd / ~lit1;
   auto bdd1 = bdd / lit1;
 
   ostringstream buf;
   buf << ", where var = " << var;
   bool exp = bdd0 != bdd1;
-  EXPECT_EQ( exp, bdd.check_sup(var) ) << buf.str();
+  auto v = mMgr.variable(var);
+  EXPECT_EQ( exp, bdd.check_sup(v) ) << buf.str();
 }
 
 /// @brief サポートのテストを行う．
@@ -118,15 +125,17 @@ BddTest::test_support(
 )
 {
   auto var_list = sup.to_varlist();
-  vector<bool> sup_mark(max_v, false);
+  std::unordered_set<BddVar> sup_mark;
   for ( auto var: var_list ) {
-    sup_mark[var] = true;
+    sup_mark.emplace(var);
   }
 
-  for ( SizeType var = 0; var < max_v; ++ var ) {
+  for ( SizeType i = 0; i < max_v; ++ i ) {
+    auto var = mMgr.variable(i);
     ostringstream buf;
     buf << ", where var = " << var;
-    EXPECT_EQ( sup_mark[var], bdd.check_sup(var) ) << buf.str();
+    auto exp_result = sup_mark.count(var) > 0;
+    EXPECT_EQ( exp_result, bdd.check_sup(var) ) << buf.str();
   }
 }
 

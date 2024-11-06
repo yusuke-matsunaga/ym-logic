@@ -15,40 +15,57 @@
 
 BEGIN_NAMESPACE_YM_DD
 
+// @brief (単一)compose演算
+Bdd
+Bdd::compose(
+  const BddVar& var, ///< [in] 対象の変数
+  const Bdd& cfunc   ///< [in] 置き換える関数
+) const
+{
+  return multi_compose({{var, cfunc}});
+}
+
+// @brief (単一)compose演算を行って代入する．
+Bdd&
+Bdd::compose_int(
+  const BddVar& var, ///< [in] 対象の変数
+  const Bdd& cfunc   ///< [in] 置き換える関数
+)
+{
+  return multi_compose_int({{var, cfunc}});
+}
+
 // @brief compose 演算を行う．
 Bdd
 BddMgrImpl::compose(
-  const Bdd& edge,
-  SizeType index,
+  const Bdd& bdd,
+  const BddVar& var,
   const Bdd& cedge
 )
 {
-  unordered_map<SizeType, Bdd> cmap{{index, cedge}};
-  return multi_compose(edge, cmap);
+  unordered_map<BddVar, Bdd> cmap{{var, cedge}};
+  return multi_compose(bdd, cmap);
 }
 
 // @brief 複合compose演算
 Bdd
 BddMgrImpl::multi_compose(
   const Bdd& bdd,
-  const unordered_map<SizeType, Bdd>& compose_map
+  const unordered_map<BddVar, Bdd>& compose_map
 )
 {
   bdd._check_valid();
-  auto edge0 = copy(bdd);
   unordered_map<SizeType, DdEdge> cmap;
-  vector<Bdd> tmp_list;
   for ( auto& p: compose_map ) {
     auto var = p.first;
+    auto index = var.index();
     auto& bdd = p.second;
     bdd._check_valid();
-    auto tmp = copy(bdd);
-    tmp_list.push_back(tmp);
-    auto cedge = _edge(tmp);
-    cmap.emplace(var, cedge);
+    auto cedge = _edge(bdd);
+    cmap.emplace(index, cedge);
   }
   BddMultiCompOp op{*this, cmap};
-  auto e = op.mcomp_op(_edge(edge0));
+  auto e = op.mcomp_op(_edge(bdd));
   return _bdd(e);
 }
 
@@ -56,23 +73,20 @@ BddMgrImpl::multi_compose(
 Bdd
 BddMgrImpl::remap_vars(
   const Bdd& bdd,
-  const unordered_map<SizeType, Literal>& varmap
+  const unordered_map<BddVar, BddLit>& varmap
 )
 {
   bdd._check_valid();
-  auto edge0 = copy(bdd);
   unordered_map<SizeType, DdEdge> cmap;
-  vector<Bdd> tmp_list;
   for ( auto& p: varmap ) {
     auto var = p.first;
+    auto index = var.index();
     auto lit = p.second;
-    auto tmp = literal(lit);
-    tmp_list.push_back(tmp);
-    auto cedge = _edge(tmp);
-    cmap.emplace(var, cedge);
+    DdEdge cedge = lit.root();
+    cmap.emplace(index, cedge);
   }
   BddMultiCompOp op{*this, cmap};
-  auto e = op.mcomp_op(_edge(edge0));
+  auto e = op.mcomp_op(_edge(bdd));
   return _bdd(e);
 }
 

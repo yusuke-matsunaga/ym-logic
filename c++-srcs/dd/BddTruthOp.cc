@@ -16,6 +16,7 @@ BEGIN_NAMESPACE_YM_DD
 // @brief 真理値表形式の文字列からBDDを作る．
 Bdd
 BddMgrImpl::from_truth(
+  const vector<BddVar>& var_list,
   const string& str
 )
 {
@@ -31,7 +32,7 @@ BddMgrImpl::from_truth(
     }
   }
 
-  BddTruthOp op{*this};
+  BddTruthOp op{*this, index_list(var_list)};
   auto e = op.op_step(str, 0);
   return _bdd(e);
 }

@@ -18,7 +18,7 @@ BEGIN_NAMESPACE_YM_DD
 Bdd
 BddMgrImpl::cofactor(
   const Bdd& bdd,
-  SizeType var,
+  const BddVar& var,
   bool inv
 )
 {

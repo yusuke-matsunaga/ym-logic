@@ -23,22 +23,22 @@ TvFunc::bdd(
 ) const
 {
   auto ni = input_num();
-  vector<SizeType> order(ni);
+  vector<BddVar> var_list(ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
-    order[i] = i;
+    //var_list[i] = i;
   }
-  return bdd(mgr, order);
+  return bdd(mgr, var_list);
 }
 
 // @brief BDD に変換する．
 Bdd
 TvFunc::bdd(
   BddMgr& mgr,
-  const vector<SizeType>& order
+  const vector<BddVar>& var_list
 ) const
 {
-  Tv2Bdd tv2bdd{mgr, *this};
-  auto r = tv2bdd.run(order);
+  Tv2Bdd tv2bdd{mgr, *this, var_list};
+  auto r = tv2bdd.run();
   return r;
 }
 
@@ -49,15 +49,15 @@ TvFunc::bdd(
 
 // @brief BDD を作る．
 Bdd
-Tv2Bdd::run(
-  const vector<SizeType>& order
-)
+Tv2Bdd::run()
 {
   SizeType ni = mFunc.input_num();
+#if 0
   // TvFunc の内部構造の都合上逆順になる．
   for ( SizeType i = 0; i < ni; ++ i ) {
     mOrder[i] = order[ni - i - 1];
   }
+#endif
   SizeType nexp = 1UL << ni;
   return decomp_step(0, 0, nexp);
 }
@@ -83,8 +83,8 @@ Tv2Bdd::decomp_step(
   SizeType mid = (start + end) / 2;
   auto r0 = decomp_step(var + 1, start, mid);
   auto r1 = decomp_step(var + 1, mid, end);
-  auto c = mMgr.literal(mOrder[var]);
-  auto r = ite(c, r1, r0);
+  auto v = mVarList[var];
+  auto r = ite(v, r1, r0);
   return r;
 }
 

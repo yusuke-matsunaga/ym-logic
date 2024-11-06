@@ -8,6 +8,8 @@
 
 #include <gtest/gtest.h>
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
+#include "ym/BddLit.h"
 #include "ym/BddMgr.h"
 
 
@@ -17,6 +19,22 @@ class BddTest :
 public ::testing::Test
 {
 public:
+
+  /// BddMgr を返す．
+  BddMgr&
+  mgr()
+  {
+    return mMgr;
+  }
+
+  /// @brief 変数を返す．
+  BddVar
+  variable(
+    SizeType varid
+  )
+  {
+    return mMgr.variable(varid);
+  }
 
   /// @brief BDDの内容を調べる．
   void
@@ -63,12 +81,13 @@ public:
   );
 
   /// @brief リテラル関数を返す．
-  Bdd
+  BddLit
   literal(
-    SizeType index ///< [in] インデックス
+    SizeType varid ///< [in] 変数番号
   )
   {
-    return mMgr.literal(index);
+    auto var = mMgr.variable(varid);
+    return var.posilit();
   }
 
   /// @brief 真理値表形式の文字列からBDDを作る．
@@ -77,7 +96,16 @@ public:
     const char* str
   )
   {
-    return mMgr.from_truth(str);
+    auto len = strlen(str);
+    SizeType ni = 0;
+    while ( (1 << ni) < len ) {
+      ++ ni;
+    }
+    if ( ni > 0 ) {
+      mMgr.variable(ni - 1);
+    }
+    auto var_list = mMgr.variable_list();
+    return mMgr.from_truth(var_list, str);
   }
 
 

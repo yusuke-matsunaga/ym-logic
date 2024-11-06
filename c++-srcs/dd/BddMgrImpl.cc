@@ -27,6 +27,36 @@ BddMgrImpl::~BddMgrImpl()
 {
 }
 
+// @breif 変数の数を返す．
+SizeType
+BddMgrImpl::variable_num() const
+{
+  return mVarList.size();
+}
+
+// @brief 変数を返す．
+BddVar
+BddMgrImpl::variable(
+  SizeType varid
+)
+{
+  while ( mVarList.size() <= varid ) {
+    auto index = mVarIdList.size();
+    auto var = index_to_var(index);
+    auto varid = mVarList.size();
+    mVarList.push_back(var);
+    mVarIdList.push_back(varid);
+  }
+  return mVarList[varid];
+}
+
+// @brief 変数のリストを返す．
+vector<BddVar>
+BddMgrImpl::variable_list() const
+{
+  return mVarList;
+}
+
 // @brief 恒偽関数を作る．
 Bdd
 BddMgrImpl::zero()
@@ -76,14 +106,40 @@ BddMgrImpl::copy(
   return _bdd(e);
 }
 
-// @brief リテラル関数を作る．
-Bdd
-BddMgrImpl::literal(
-  SizeType var,
-  bool inv
+// @brief 変数リストをインデックスリストに変換する．
+vector<SizeType>
+BddMgrImpl::index_list(
+  const vector<BddVar>& var_list
+) const
+{
+  vector<SizeType> ans;
+  ans.reserve(var_list.size());
+  for ( auto var: var_list ) {
+    ans.push_back(var.index());
+  }
+  return ans;
+}
+
+// @brief インデックスを変数に変換する．
+BddVar
+BddMgrImpl::index_to_var(
+  SizeType index
 )
 {
-  return bdd(var, zero(), one()) ^ inv;
+  auto e = new_node(index, DdEdge::zero(), DdEdge::one());
+  return BddVar{this, e};
+}
+
+// @brief インデックスを変数番号に変換する．
+SizeType
+BddMgrImpl::index_to_varid(
+  SizeType index
+) const
+{
+  if ( index >= mVarIdList.size() ) {
+    throw std::out_of_range{"index is out of range"};
+  }
+  return mVarIdList[index];
 }
 
 // @brief 複数のBDDのノード数を数える．

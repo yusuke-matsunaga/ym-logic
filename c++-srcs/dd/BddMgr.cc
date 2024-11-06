@@ -41,6 +41,29 @@ BddMgr::~BddMgr()
   mImpl->dec();
 }
 
+// @breif 変数の数を返す．
+SizeType
+BddMgr::variable_num() const
+{
+  return mImpl->variable_num();
+}
+
+// @brief 変数を返す．
+BddVar
+BddMgr::variable(
+  SizeType varid
+)
+{
+  return mImpl->variable(varid);
+}
+
+// @brief 変数のリストを返す．
+vector<BddVar>
+BddMgr::variable_list() const
+{
+  return mImpl->variable_list();
+}
+
 // @brief BDD をコピーする．
 Bdd
 BddMgr::copy(
@@ -64,50 +87,14 @@ BddMgr::one()
   return impl()->one();
 }
 
-// @brief リテラル関数を作る．
-Bdd
-BddMgr::literal(
-  SizeType var,
-  bool inv
-)
-{
-  return impl()->literal(var, inv);
-}
-
-// @brief リテラル関数を作る．
-Bdd
-BddMgr::literal(
-  Literal lit
-)
-{
-  return impl()->literal(lit);
-}
-
-// @brief 肯定のリテラル関数を作る．
-Bdd
-BddMgr::posi_literal(
-  SizeType var
-)
-{
-  return impl()->posi_literal(var);
-}
-
-// @brief 否定のリテラル関数を作る．
-Bdd
-BddMgr::nega_literal(
-  SizeType var
-)
-{
-  return impl()->nega_literal(var);
-}
-
 // @brief 真理値表形式の文字列からBDDを作る．
 Bdd
 BddMgr::from_truth(
+  const vector<BddVar>& var_list,
   const string& str
 )
 {
-  return impl()->from_truth(str);
+  return impl()->from_truth(var_list, str);
 }
 
 // @brief ITE 演算を行う．

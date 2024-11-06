@@ -25,8 +25,10 @@ public:
 
   /// @brief コンストラクタ
   BddTruthOp(
-    BddMgrImpl& mgr ///< [in] マネージャ
-  ) : BddOpBase{mgr}
+    BddMgrImpl& mgr,                   ///< [in] マネージャ
+    const vector<SizeType>& index_list ///< [in] インデックスリスト
+  ) : BddOpBase{mgr},
+      mIndexList{index_list}
   {
   }
 
@@ -54,6 +56,9 @@ private:
 
   // 演算結果テーブル
   unordered_map<string, DdEdge> mTable;
+
+  // インデックスリスト
+  vector<SizeType> mIndexList;
 
 };
 

@@ -9,6 +9,7 @@
 #include <libgen.h>
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
+#include "ym/BddVar.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -50,12 +51,13 @@ truth_test(
     SizeType nsingle = 0;
     SizeType nall = 0;
     vector<Bdd> func_list;
+    vector<BddVar> var_list;
     while ( getline(s, buf) ) {
       SizeType n = buf.size();
       ni = log2(n);
       ASSERT_COND( (1 << ni) == n );
-      auto f = mgr.from_truth(buf);
-      ASSERT_COND( f.to_truth(ni) == buf );
+      auto f = mgr.from_truth(var_list, buf);
+      ASSERT_COND( f.to_truth(var_list) == buf );
       func_list.push_back(f);
       nsingle += f.size();
     }

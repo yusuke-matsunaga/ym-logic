@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
 #include "ym/BddMgr.h"
 #include "dd/DdEdge.h"
 #include "dd/DdNode.h"
@@ -16,14 +17,6 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-// @brief 空のコンストラクタ
-Bdd::Bdd(
-) : mMgr{nullptr},
-    mRoot{0}
-{
-  // 不正値となる．
-}
-
 // @brief 内容を指定したコンストラクタ
 Bdd::Bdd(
   BddMgrImpl* mgr,
@@ -31,9 +24,9 @@ Bdd::Bdd(
 ) : mMgr{mgr},
     mRoot{root.body()}
 {
-  if ( mMgr != nullptr ) {
+  if ( is_valid() ) {
     mMgr->inc();
-    mMgr->activate(DdEdge{mRoot});
+    mMgr->activate(root);
   }
 }
 
@@ -52,15 +45,14 @@ Bdd::operator=(
 )
 {
   // この順序なら自分自身に代入しても正しく動作する．
-  if ( src.mMgr != nullptr ) {
+  if ( src.is_valid() ) {
     src.mMgr->inc();
     src.mMgr->activate(DdEdge{src.mRoot});
   }
-  if ( mMgr != nullptr ) {
-    mMgr->deactivate(DdEdge{mRoot});
+  if ( is_valid() ) {
+    mMgr->deactivate(root());
     mMgr->dec();
   }
-  mMgr = src.mMgr;
   mRoot = src.mRoot;
   return *this;
 }
@@ -68,24 +60,17 @@ Bdd::operator=(
 // @brief デストラクタ
 Bdd::~Bdd()
 {
-  if ( mMgr != nullptr ) {
-    mMgr->deactivate(DdEdge{mRoot});
+  if ( is_valid() ) {
+    mMgr->deactivate(root());
     mMgr->dec();
   }
-}
-
-// @brief 親のマネージャを返す．
-BddMgr
-Bdd::mgr() const
-{
-  return BddMgr{mMgr};
 }
 
 // @brief 否定した関数を返す．
 Bdd
 Bdd::invert() const
 {
-  return Bdd{mMgr, ~DdEdge{mRoot}};
+  return Bdd{mMgr, ~root()};
 }
 
 // @brief 極性をかけ合わせる．
@@ -94,17 +79,17 @@ Bdd::operator^(
   bool inv
 ) const
 {
-  return Bdd{mMgr, DdEdge{mRoot} ^ inv};
+  return Bdd{mMgr, root() ^ inv};
 }
 
 // @brief 自分自身を否定する．
 Bdd&
 Bdd::invert_int()
 {
-  if ( mMgr != nullptr ) {
+  if ( is_valid() ) {
     // 実はこれは BddMgr を介さない．
     // ただ不正値の時には演算を行わない．
-    mRoot = (~DdEdge{mRoot}).body();
+    mRoot = (~root()).body();
   }
   return *this;
 }
@@ -115,10 +100,10 @@ Bdd::operator^=(
   bool inv
 )
 {
-  if ( mMgr != nullptr ) {
+  if ( is_valid() ) {
     // 実はこれは BddMgr を介さない．
     // ただ不正値の時には演算を行わない．
-    mRoot = (DdEdge{mRoot} ^ inv).body();
+    mRoot = (root() ^ inv).body();
   }
   return *this;
 }
@@ -214,7 +199,7 @@ simplify(
 // @brief コファクターを計算する．
 Bdd
 Bdd::cofactor(
-  SizeType var,
+  const BddVar& var,
   bool inv
 ) const
 {
@@ -225,10 +210,10 @@ Bdd::cofactor(
 // @brief コファクターを計算する．
 Bdd
 Bdd::cofactor(
-  Literal lit
+  const BddLit& lit
 ) const
 {
-  return cofactor(lit.varid(), lit.is_negative());
+  return cofactor(lit.var(), lit.is_negative());
 }
 
 // @brief コファクターを計算する．
@@ -244,7 +229,7 @@ Bdd::cofactor(
 // @brief コファクターを計算して代入する．
 Bdd&
 Bdd::cofactor_int(
-  SizeType var,
+  const BddVar& var,
   bool inv
 )
 {
@@ -256,10 +241,10 @@ Bdd::cofactor_int(
 // @brief コファクターを計算して代入する．
 Bdd&
 Bdd::cofactor_int(
-  Literal lit
+  const BddLit& lit
 )
 {
-  return cofactor_int(lit.varid(), lit.is_negative());
+  return cofactor_int(lit.var(), lit.is_negative());
 }
 
 /// @brief コファクターを計算して代入する．
@@ -276,7 +261,7 @@ Bdd::cofactor_int(
 // @brief 複合compose演算
 Bdd
 Bdd::multi_compose(
-  const unordered_map<SizeType, Bdd>& compose_map
+  const unordered_map<BddVar, Bdd>& compose_map
 ) const
 {
   _check_valid();
@@ -286,7 +271,7 @@ Bdd::multi_compose(
 // @brief 複合compose演算を行って代入する．
 Bdd&
 Bdd::multi_compose_int(
-  const unordered_map<SizeType, Bdd>& compose_map
+  const unordered_map<BddVar, Bdd>& compose_map
 )
 {
   _check_valid();
@@ -297,46 +282,43 @@ Bdd::multi_compose_int(
 // @brief 変数順を入れ替える演算
 Bdd
 Bdd::remap_vars(
-  const unordered_map<SizeType, Literal>& varmap
+  const unordered_map<BddVar, BddLit>& varmap
 ) const
 {
   _check_valid();
   return mMgr->remap_vars(*this, varmap);
 }
 
-// @brief 変数シフト演算
-Bdd
-Bdd::shift_var(
-  SizeType var
-) const
+// @brief 親のマネージャを返す．
+BddMgr
+Bdd::mgr() const
 {
-  _check_valid();
-  return mMgr->shift_var(*this, var);
+  return BddMgr{mMgr};
 }
 
 // @brief 定数0の時 true を返す．
 bool
 Bdd::is_zero() const
 {
-  return is_valid() && DdEdge{mRoot}.is_zero();
+  return is_valid() && root().is_zero();
 }
 
 // @brief 定数1の時 true を返す．
 bool
 Bdd::is_one() const
 {
-  return is_valid() && DdEdge{mRoot}.is_one();
+  return is_valid() && root().is_one();
 }
 
 // @brief 定数の時 true を返す．
 bool
 Bdd::is_const() const
 {
-  return is_valid() && DdEdge{mRoot}.is_const();
+  return is_valid() && root().is_const();
 }
 
 // @brief 根の変数とコファクターを求める．
-SizeType
+BddVar
 Bdd::root_decomp(
   Bdd& f0,
   Bdd& f1
@@ -344,34 +326,34 @@ Bdd::root_decomp(
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  auto node = root.node();
+  auto node = root().node();
   if ( node == nullptr ) {
     f0 = *this;
     f1 = *this;
-    return BAD_VARID;
+    return BddVar::invalid();
   }
   else {
-    auto oinv = root.inv();
+    auto oinv = root().inv();
     f0 = Bdd{mMgr, node->edge0() ^ oinv};
     f1 = Bdd{mMgr, node->edge1() ^ oinv};
-    return node->index();
+    auto var = mMgr->index_to_var(node->index());
+    return var;
   }
 }
 
 // @brief 根の変数を得る．
-SizeType
+BddVar
 Bdd::root_var() const
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  auto node = root.node();
+  auto node = root().node();
   if ( node == nullptr ) {
-    return BAD_VARID;
+    return BddVar::invalid();
   }
   else {
-    return node->index();
+    auto var = mMgr->index_to_var(node->index());
+    return var;
   }
 }
 
@@ -381,13 +363,12 @@ Bdd::root_cofactor0() const
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  auto node = root.node();
+  auto node = root().node();
   if ( node == nullptr ) {
     return *this;
   }
   else {
-    auto oinv = root.inv();
+    auto oinv = root().inv();
     return Bdd{mMgr, node->edge0() ^ oinv};
   }
 }
@@ -398,13 +379,12 @@ Bdd::root_cofactor1() const
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  auto node = root.node();
+  auto node = root().node();
   if ( node == nullptr ) {
     return *this;
   }
   else {
-    auto oinv = root.inv();
+    auto oinv = root().inv();
     return Bdd{mMgr, node->edge1() ^ oinv};
   }
 }
@@ -426,7 +406,7 @@ Bdd::eval(
 {
   _check_valid();
 
-  auto edge = DdEdge{mRoot};
+  auto edge = root();
   for ( ; ; ) {
     if ( edge.is_zero() ) {
       return false;
@@ -462,8 +442,7 @@ Bdd::hash() const
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  return root.hash();
+  return root().hash();
 }
 
 // @brief 根の枝を変更する．
@@ -477,7 +456,7 @@ Bdd::change_root(
   // この順序なら new_root と mRoot が等しくても
   // 正しく動く
   mMgr->activate(new_root);
-  mMgr->deactivate(DdEdge{mRoot});
+  mMgr->deactivate(root());
   mRoot = new_root.body();
 }
 
@@ -524,10 +503,60 @@ Bdd::dump(
 SizeType
 Bdd::size() const
 {
-  if ( mMgr == nullptr ) {
+  if ( is_invalid() ) {
     return 0;
   }
   return mMgr->bdd_size({*this});
+}
+
+// @brief 根の枝を返す．
+DdEdge
+Bdd::root() const
+{
+  return DdEdge{mRoot};
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// クラス BddVar
+//////////////////////////////////////////////////////////////////////
+
+// @brief 内容を指定したコンストラクタ
+BddVar::BddVar(
+  BddMgrImpl* mgr,
+  DdEdge root
+) : Bdd{mgr, root}
+{
+}
+
+// @brief 変数番号を返す．
+SizeType
+BddVar::id() const
+{
+  return _mgr()->index_to_varid(index());
+}
+
+// @brief インデックスを返す．
+SizeType
+BddVar::index() const
+{
+  _check_valid();
+  auto node = root().node();
+  return node->index();
+}
+
+// @brief 肯定のリテラルを返す．
+BddLit
+BddVar::posilit() const
+{
+  return BddLit{*this, false};
+}
+
+// @brief 否定のリテラルを返す．
+BddLit
+BddVar::negalit() const
+{
+  return BddLit{*this, true};
 }
 
 END_NAMESPACE_YM_DD

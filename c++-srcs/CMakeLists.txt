@@ -85,7 +85,6 @@ set (tvfunc_SOURCES
 set (dd_SOURCES
   dd/DdNodeMgr.cc
   dd/CopyOp.cc
-  #dd/IdentOp.cc
   dd/DotGen.cc
   dd/DotWriter.cc
   dd/NodeCollector.cc
@@ -102,7 +101,6 @@ set (dd_SOURCES
   dd/BddSimp.cc
   dd/BddMultiCompOp.cc
   dd/BddOneOp.cc
-  dd/BddShiftOp.cc
   dd/BddSupOp.cc
   dd/BddTruthOp.cc
   dd/BddVarSet.cc

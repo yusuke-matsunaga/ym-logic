@@ -9,6 +9,7 @@
 #include "pym/PyBddVarSet.h"
 #include "pym/PyBddMgr.h"
 #include "pym/PyBdd.h"
+#include "pym/PyBddVar.h"
 #include "pym/PyModule.h"
 
 
@@ -50,17 +51,17 @@ BddVarSet_new(
     return nullptr;
   }
   if ( mgr_obj != nullptr ) {
-    vector<SizeType> var_set;
+    vector<BddVar> var_set;
     if ( varset_obj != nullptr ) {
       SizeType n = PyList_Size(varset_obj);
       var_set.reserve(n);
       for ( SizeType i = 0; i < n; ++ i ) {
 	auto obj1 = PyList_GetItem(varset_obj, i);
-	if ( !PyLong_Check(obj1) ) {
-	  PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'int'");
+	if ( !PyBddVar::Check(obj1) ) {
+	  PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'BddVar'");
 	  return nullptr;
 	}
-	var_set.push_back(PyLong_AsLong(obj1));
+	var_set.push_back(PyBddVar::Get(obj1));
       }
     }
     auto mgr = PyBddMgr::Get(mgr_obj);
@@ -101,7 +102,7 @@ BddVarSet_to_varlist(
     auto ans_obj = PyList_New(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto var = varlist[i];
-      auto var_obj = PyLong_FromLong(var);
+      auto var_obj = PyBddVar::ToPyObject(var);
       PyList_SET_ITEM(ans_obj, i, var_obj);
     }
     return ans_obj;

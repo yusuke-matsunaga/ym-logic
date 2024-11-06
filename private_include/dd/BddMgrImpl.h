@@ -12,6 +12,8 @@
 #include "ym/Bdd.h"
 #include "ym/BddVar.h"
 #include "ym/BddLit.h"
+#include "ym/BinDec.h"
+#include "ym/BinEnc.h"
 #include "dd/DdNode.h"
 #include "dd/DdEdge.h"
 #include "dd/DdNodeMgr.h"
@@ -42,6 +44,21 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
+  /// @breif 変数の数を返す．
+  SizeType
+  variable_num() const;
+
+  /// @brief 変数を返す．
+  BddVar
+  variable(
+    SizeType varid ///< [in] 変数番号
+  );
+
+  /// @brief 変数のリストを返す．
+  vector<BddVar>
+  variable_list() const;
+
+  /// @brief インデックス
   /// @brief 恒偽関数を作る．
   Bdd
   zero();
@@ -67,24 +84,19 @@ public:
     const Bdd& src
   );
 
-  /// @brief リテラル関数を作る．
-  Bdd
+  /// @brief リテラル関数を表すBDDを作る．
+  BddLit
   literal(
     const BddVar& var, ///< [in] 変数
     bool inv = false   ///< [in] 反転フラグ
-  );
-
-  /// @brief リテラル関数を作る．
-  Bdd
-  literal(
-    const BddLit& lit ///< [in] リテラル
   )
   {
-    return literal(lit.var(), lit.is_negative());
+    _check_mgr(var);
+    return BddLit{var, inv};
   }
 
   /// @brief 肯定のリテラル関数を作る．
-  Bdd
+  BddLit
   posi_literal(
     const BddVar& var ///< [in] 変数
   )
@@ -93,7 +105,7 @@ public:
   }
 
   /// @brief 否定のリテラル関数を作る．
-  Bdd
+  BddLit
   nega_literal(
     const BddVar& var ///< [in] 変数
   )
@@ -104,14 +116,15 @@ public:
   /// @brief 真理値表形式の文字列からBDDを作る．
   ///
   /// str は '0' か '1' の文字列．
-  /// ただし，長さは2のべき乗である必要がある．
+  /// ただし，長さは var_list の長さのべき乗である必要がある．
   /// for some reason, この文字列は big endian となっている．
   /// 0文字目が(1, 1, 1, 1)に対応する
   ///
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
   Bdd
   from_truth(
-    const string& str ///< [in] 01の文字列
+    const vector<BddVar>& var_list, ///< [in] 変数のリスト
+    const string& str               ///< [in] 01の文字列
   );
 
   /// @brief AND 演算を行う．
@@ -158,11 +171,11 @@ public:
   /// @return 結果を返す．
   Bdd
   cofactor(
-    const Bdd& bdd, ///< [in] 対象の BDD
-    SizeType var,   ///< [in] 変数
-    bool inv        ///< [in] 反転フラグ
-                    ///<  - false: 反転なし (正極性)
-                    ///<  - true:  反転あり (負極性)
+    const Bdd& bdd,    ///< [in] 対象の BDD
+    const BddVar& var, ///< [in] 変数
+    bool inv           ///< [in] 反転フラグ
+                       ///<  - false: 反転なし (正極性)
+                       ///<  - true:  反転あり (負極性)
   );
 
   /// @brief コファクターを計算する．
@@ -177,15 +190,15 @@ public:
   Bdd
   compose(
     const Bdd& edge,
-    SizeType index,
+    const BddVar& var,
     const Bdd& cedge
   );
 
   /// @brief 複合compose演算
   Bdd
   multi_compose(
-    const Bdd& bdd,                                 ///< [in] 対象の BDD
-    const unordered_map<SizeType, Bdd>& compose_map ///< [in] 変換マップ
+    const Bdd& bdd,                               ///< [in] 対象の BDD
+    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
   );
 
   /// @brief 変数順を入れ替える演算
@@ -193,18 +206,27 @@ public:
   /// 極性も入れ替え可能
   Bdd
   remap_vars(
-    const Bdd& bdd,                                ///< [in] 対象の BDD
-    const unordered_map<SizeType, Literal>& varmap ///< [in] 変数の対応表
+    const Bdd& bdd,                             ///< [in] 対象の BDD
+    const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
   );
 
-  /// @brief 変数シフト演算
-  ///
-  /// var をひとつ下にずらす．
-  Bdd
-  shift_var(
-    const Bdd& bdd, ///< [in] 対象の BDD
-    SizeType var    ///< [in] 移動元の変数
+  /// @brief 変数リストをインデックスリストに変換する．
+  vector<SizeType>
+  index_list(
+    const vector<BddVar>& var_list ///< [in] 変数リスト
+  ) const;
+
+  /// @brief インデックスを変数に変換する．
+  BddVar
+  index_to_var(
+    SizeType index ///< [in] インデックス
   );
+
+  /// @brief インデックスを変数番号に変換する．
+  SizeType
+  index_to_varid(
+    SizeType index ///< [in] インデックス
+  ) const;
 
 
 public:
@@ -342,6 +364,35 @@ private:
   /// @brief garbage_collection() が呼ばれた後に呼び出される関数
   void
   after_gc() override;
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief このマネージャに属しているオブジェクトかチェックする．
+  void
+  _check_mgr(
+    const Bdd& bdd ///< [in] 対象のオブジェクト
+  ) const
+  {
+    if ( bdd.mMgr != this ) {
+      throw std::invalid_argument{"BddMgr mismatch"};
+    }
+  }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // 変数のリスト
+  vector<BddVar> mVarList;
+
+  // index をキーにして変数番号を格納するリスト
+  vector<SizeType> mVarIdList;
 
 };
 

@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/BddObj.h"
 #include "ym/BinEnc.h"
 
 
@@ -28,8 +27,7 @@ class BddMgrImpl;
 /// - 異なる BddMgr に属する Bdd の演算は std::invalid_argument 例外を
 ///   送出する．
 //////////////////////////////////////////////////////////////////////
-class Bdd :
-  public BddObj
+class Bdd
 {
   friend class BddMgrImpl;
 
@@ -38,7 +36,7 @@ public:
   /// @brief 空のコンストラクタ
   ///
   /// 不正な値となる．
-  Bdd();
+  Bdd() = default;
 
   /// @brief コピーコンストラクタ
   Bdd(
@@ -338,11 +336,6 @@ public:
     const BddVar& var, ///< [in] 対象の変数
     const Bdd& cfunc   ///< [in] 置き換える関数
   ) const;
-#if 0
-  {
-    return multi_compose({{var, cfunc}});
-  }
-#endif
 
   /// @brief (単一)compose演算を行って代入する．
   Bdd&
@@ -350,11 +343,6 @@ public:
     const BddVar& var, ///< [in] 対象の変数
     const Bdd& cfunc   ///< [in] 置き換える関数
   );
-#if 0
-  {
-    return multi_compose_int({{var, cfunc}});
-  }
-#endif
 
   /// @brief 複合compose演算
   Bdd
@@ -423,6 +411,24 @@ public:
   /// @{
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 親のマネージャを返す．
+  BddMgr
+  mgr() const;
+
+  /// @brief 適正な値を持っている時に true を返す．
+  bool
+  is_valid() const
+  {
+    return mMgr != nullptr;
+  }
+
+  /// @brief 不正値の時に true を返す．
+  bool
+  is_invalid() const
+  {
+    return !is_valid();
+  }
+
   /// @brief 定数0の時 true を返す．
   bool
   is_zero() const;
@@ -450,15 +456,15 @@ public:
   /// @brief 与えられた変数がサポートの時 true を返す．
   bool
   check_sup(
-    BddVar var ///< [in] 変数
+    const BddVar& var ///< [in] 変数
   ) const;
 
   /// @brief 与えられた変数に対して対称の時 true を返す．
   bool
   check_sym(
-    BddVar var1,     ///< [in] 変数1
-    BddVar var2,     ///< [in] 変数2
-    bool inv = false ///< [in] 反転フラグ
+    const BddVar& var1, ///< [in] 変数1
+    const BddVar& var2, ///< [in] 変数2
+    bool inv = false    ///< [in] 反転フラグ
   ) const;
 
   /// @brief サポート変数を表すBDD(BddVarSet)を返す．
@@ -604,9 +610,9 @@ public:
   //////////////////////////////////////////////////////////////////////
 
 
-private:
+protected:
   //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
+  // 継承クラスで用いられる関数
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 内容を指定したコンストラクタ
@@ -615,11 +621,16 @@ private:
     DdEdge root
   );
 
-  /// @brief 根の枝を変更する．
-  void
-  change_root(
-    DdEdge new_root ///< [in] 変更する枝
-  );
+  /// @brief マネージャ(の実体)を返す．
+  BddMgrImpl*
+  _mgr() const
+  {
+    return mMgr;
+  }
+
+  /// @brief 根の枝を返す．
+  DdEdge
+  root() const;
 
   /// @brief 適正な状態か調べる．
   ///
@@ -628,7 +639,7 @@ private:
   _check_valid() const
   {
     if ( !is_valid() ) {
-      throw std::invalid_argument("invalid BDD");
+      throw std::invalid_argument{"invalid BDD"};
     }
   }
 
@@ -639,7 +650,7 @@ private:
   _check_cube() const
   {
     if ( !is_cube() ) {
-      throw std::invalid_argument("not a cube");
+      throw std::invalid_argument{"not a cube"};
     }
   }
 
@@ -650,9 +661,34 @@ private:
   _check_posicube() const
   {
     if ( !is_posicube() ) {
-      throw std::invalid_argument("not a positive cube");
+      throw std::invalid_argument{"not a positive cube"};
     }
   }
+
+  /// @brief オペランドが同じマネージャに属しているかチェックする．
+  ///
+  /// 異なるマネージャに属している場合には std::invalid_argument 例外を送出する．
+  void
+  _check_mgr(
+    const Bdd& obj ///< [in] 対象のオブジェクト
+  ) const
+  {
+    if ( mMgr != obj.mMgr ) {
+      throw std::invalid_argument{"BddMgr mismatch"};
+    }
+  }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 根の枝を変更する．
+  void
+  change_root(
+    DdEdge new_root ///< [in] 変更する枝
+  );
 
 
 private:
@@ -660,8 +696,11 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 根の枝
-  PtrIntType mRoot;
+  // マネージャ
+  BddMgrImpl* mMgr{nullptr};
+
+  // 根の枝(ポインタ+反転属性)
+  PtrIntType mRoot{0};
 
 };
 

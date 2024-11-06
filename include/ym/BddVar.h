@@ -9,33 +9,40 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/BddObj.h"
+#include "ym/Bdd.h"
 
 
 BEGIN_NAMESPACE_YM_DD
+
+class DdEdge;
 
 //////////////////////////////////////////////////////////////////////
 /// @class BddVar BddVar.h "BddVar.h"
 /// @brief BDD の変数を表すクラス
 ///
-/// - 実際には整数で表されるが順序は意味を持たない．加算などの算術
-///   演算も定義されない．
-/// - 同一性のチェックのみが意味をもつ演算となる．
-/// - 特定の BddMgr に属する．
+/// - 実際にはリテラル関数を表す BDD
 //////////////////////////////////////////////////////////////////////
 class BddVar :
-  public BddObj
+  public Bdd
 {
   friend class BddMgrImpl;
   friend class BddLit;
 private:
 
-  /// @brief コンストラクタ
+  /// @brief 内容を指定したコンストラクタ
+  ///
+  /// root は正のリテラル関数だけが正しい値
   BddVar(
-    BddMgrImpl* mgr, ///< [in] BDDマネージャ
-    SizeType varid  ///< [in] 変数番号
-  ) : BddObj{mgr},
-      mVarId{varid}
+    BddMgrImpl* mgr,
+    DdEdge root
+  );
+
+  /// @brief Bdd からのコピーコンストラクタ
+  ///
+  /// src は正のリテラル関数だけが正しい値
+  BddVar(
+    const Bdd& src   ///< [in] コピー元のオブジェクト
+  ) : Bdd{src}
   {
   }
 
@@ -53,13 +60,30 @@ public:
   /// @brief コピーコンストラクタ
   BddVar(
     const BddVar& src ///< [in] コピー元のオブジェクト
-  ) : BddObj{src},
-      mVarId{src.mVarId}
+  ) : Bdd{src}
   {
+  }
+
+  /// @brief コピー代入演算子
+  BddVar&
+  operator=(
+    const BddVar& src ///< [in] コピー元のオブジェクト
+  )
+  {
+    Bdd::operator=(src);
+    return *this;
   }
 
   /// @brief デストラクタ
   ~BddVar() = default;
+
+  /// @brief 不正な値を作るクラスメソッド
+  static
+  BddVar
+  invalid()
+  {
+    return BddVar{};
+  }
 
 
 public:
@@ -67,13 +91,21 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 変数番号を返す．
+  SizeType
+  id() const;
+
+  /// @brief インデックスを返す．
+  SizeType
+  index() const;
+
   /// @brief 肯定のリテラルを返す．
   BddLit
-  to_posilit() const;
+  posilit() const;
 
   /// @brief 否定のリテラルを返す．
   BddLit
-  to_negalit() const;
+  negalit() const;
 
   /// @brief 等価比較演算子
   bool
@@ -81,10 +113,7 @@ public:
     const BddVar& right
   ) const
   {
-    if ( mVarId == right.mVarId && _mgr() == right._mgr() ) {
-      return true;
-    }
-    return false;
+    return Bdd::operator==(right);
   }
 
   /// @brief 非等価比較演算子
@@ -96,30 +125,37 @@ public:
     return !operator==(right);
   }
 
-  /// @brief ハッシュ関数
-  SizeType
-  hash() const
-  {
-    return mVarId;
-  }
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // データメンバ
-  //////////////////////////////////////////////////////////////////////
-
-  // 変数番号
-  SizeType mVarId;
-
 };
 
+/// @brief ストリーム出力演算子
+inline
+ostream&
+operator<<(
+  ostream& s,
+  const BddVar& var
+)
+{
+  s << "v" << var.id();
+  return s;
+}
+
 END_NAMESPACE_YM_DD
+
+BEGIN_NAMESPACE_STD
+
+// BddVar をキーにしたハッシュ関数クラスの定義
+template <>
+struct hash<YM_NAMESPACE::BddVar>
+{
+  SizeType
+  operator()(
+    const YM_NAMESPACE::BddVar& var
+  ) const
+  {
+    return var.hash();
+  }
+};
+
+END_NAMESPACE_STD
 
 #endif // BDDVAR_H

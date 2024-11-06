@@ -22,12 +22,11 @@ Bdd::support_size() const
 // @brief 要素のリストを指定したコンストラクタ
 BddVarSet::BddVarSet(
   BddMgr& mgr,
-  const vector<SizeType>& var_set
+  const vector<BddVar>& var_set
 ) : Bdd{mgr.one()}
 {
   for ( auto var: var_set ) {
-    auto lit = mgr.literal(var);
-    and_int(lit);
+    and_int(var);
   }
 }
 
@@ -114,14 +113,14 @@ BddVarSet::size() const
 }
 
 // @brief 変数のリストに変換する．
-vector<SizeType>
+vector<BddVar>
 BddVarSet::to_varlist() const
 {
   return Bdd::to_varlist();
 }
 
 // @brief 先頭の変数を返す．
-SizeType
+BddVar
 BddVarSet::top_var() const
 {
   return Bdd::root_var();

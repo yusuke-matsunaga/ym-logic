@@ -32,7 +32,7 @@ protected:
   /// @brief 空のコンストラクタ
   ///
   /// 不正な値となる．
-  BddObj();
+  BddObj() = default;
 
   /// @brief マネージャを指定したコンストラクタ
   explicit
@@ -44,6 +44,16 @@ protected:
   BddObj(
     const BddObj& src ///< [in] コピー元のオブジェクト
   );
+
+  /// @brief コピー代入演算子
+  BddObj&
+  operator==(
+    const BddObj& src ///< [in] コピー元のオブジェクト
+  )
+  {
+    set_mgr(src.mMgr);
+    return *this;
+  }
 
   /// @brief デストラクタ
   ~BddObj();
@@ -84,6 +94,12 @@ protected:
   {
     return mMgr;
   }
+
+  /// @brief マネージャをセットする．
+  void
+  set_mgr(
+    BddMgrImpl* mgr
+  );
 
   /// @brief 同じマネージャの要素かチェックする．
   ///

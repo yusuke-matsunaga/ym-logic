@@ -110,11 +110,11 @@ public:
   /// @brief 変数のリストに変換する．
   ///
   /// 変換できない時は例外を送出する．
-  vector<SizeType>
+  vector<BddVar>
   to_varlist() const;
 
   /// @brief 先頭の変数を返す．
-  SizeType
+  BddVar
   top_var() const;
 
   /// @brief 内容を表すBDDを返す．

@@ -8,6 +8,7 @@
 
 #include "ym/Bdd.h"
 #include "dd/DdNode.h"
+#include "dd/BddMgrImpl.h"
 #include "BddCheckSupOp.h"
 
 
@@ -19,7 +20,7 @@ Bdd::check_sup(
   const BddVar& var
 ) const
 {
-  auto index = _mgr()->index(var);
+  auto index = var.index();
   BddCheckSupOp op{index};
   return op.op_step(DdEdge{mRoot});
 }

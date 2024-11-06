@@ -307,7 +307,7 @@ TEST_F(BddTest, and_op3)
 
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1.and_op(var2);
 
   check(bdd, "1000");
@@ -318,7 +318,7 @@ TEST_F(BddTest, and_int3)
 
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1.and_int(var2);
 
   check(var1, "1000");
@@ -330,7 +330,7 @@ TEST_F(BddTest, and_op4)
 
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1 & var2;
 
   check(bdd, "1000");
@@ -341,7 +341,7 @@ TEST_F(BddTest, and_int4)
 
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1 &= var2;
 
   check(var1, "1000");
@@ -462,7 +462,7 @@ TEST_F(BddTest, or_op3)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1.or_op(var2);
 
   check(bdd, "1110");
@@ -472,7 +472,7 @@ TEST_F(BddTest, or_int3)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1.or_int(var2);
 
   check(var1, "1110");
@@ -483,7 +483,7 @@ TEST_F(BddTest, or_op4)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1 | var2;
 
   check(bdd, "1110");
@@ -493,7 +493,7 @@ TEST_F(BddTest, or_int4)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1 |= var2;
 
   check(var1, "1110");
@@ -614,7 +614,7 @@ TEST_F(BddTest, xor_op3)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1.xor_op(var2);
 
   check(bdd, "0110");
@@ -624,7 +624,7 @@ TEST_F(BddTest, xor_int3)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1.xor_int(var2);
 
   check(var1, "0110");
@@ -635,7 +635,7 @@ TEST_F(BddTest, xor_op4)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1 ^ var2;
 
   check(bdd, "0110");
@@ -645,7 +645,7 @@ TEST_F(BddTest, xor_int4)
 {
   Bdd var1 = literal(0);
   BddMgr mgr2;
-  Bdd var2 = mgr2.literal(1);
+  auto var2 = mgr2.variable(1);
   Bdd bdd = var1 ^= var2;
 
   check(var1, "0110");
@@ -678,7 +678,7 @@ TEST_F(BddTest, complex_expr2)
   Bdd var2 = literal(1);
   Bdd var3 = literal(2);
   BddMgr mgr2;
-  Bdd var4 = mgr2.literal(1);
+  auto var4 = mgr2.variable(1);
   Bdd bdd = (var1 & ~var2) | (var3 & ~var4);
 
   check(bdd, "00110010");
@@ -734,7 +734,8 @@ TEST_F(BddTest, cofactor1)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Bdd bdd1 = bdd.cofactor(0, false);
+  auto var = variable(0);
+  Bdd bdd1 = bdd.cofactor(var, false);
 
   const char* exp_str = "10011001";
   check(bdd1, exp_str);
@@ -744,8 +745,9 @@ TEST_F(BddTest, cofactor1_invalid1)
 {
   Bdd bdd; // 不正値
 
+  auto var = variable(0);
   EXPECT_THROW( {
-      Bdd bdd1 = bdd.cofactor(0, false);
+      Bdd bdd1 = bdd.cofactor(var, false);
     }, std::invalid_argument );
 }
 
@@ -754,7 +756,8 @@ TEST_F(BddTest, cofactor_int1)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Bdd bdd1 = bdd.cofactor_int(0, false);
+  auto var = variable(0);
+  Bdd bdd1 = bdd.cofactor_int(var, false);
 
   const char* exp_str = "10011001";
   check(bdd, exp_str);
@@ -765,8 +768,9 @@ TEST_F(BddTest, cofactor_int1_invalid1)
 {
   Bdd bdd; // 不正値
 
+  auto var = variable(0);
   EXPECT_THROW( {
-      Bdd bdd1 = bdd.cofactor_int(0, false);
+      Bdd bdd1 = bdd.cofactor_int(var, false);
     }, std::invalid_argument );
 }
 
@@ -775,7 +779,8 @@ TEST_F(BddTest, cofactor2)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Literal lit{0, true};
+  auto var = variable(0);
+  auto lit = var.negalit();
   Bdd bdd1 = bdd.cofactor(lit);
 
   const char* exp_str = "01110111";
@@ -786,7 +791,8 @@ TEST_F(BddTest, cofactor2_invalid)
 {
   Bdd bdd; // 不正値
 
-  Literal lit{0, true};
+  auto var = variable(0);
+  auto lit = var.negalit();
   EXPECT_THROW({
       Bdd bdd1 = bdd.cofactor(lit);
     }, std::invalid_argument );
@@ -797,7 +803,8 @@ TEST_F(BddTest, cofactor_int2)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Literal lit{0, true};
+  auto var = variable(0);
+  auto lit = var.negalit();
   Bdd bdd1 = bdd.cofactor_int(lit);
 
   const char* exp_str = "01110111";
@@ -809,7 +816,8 @@ TEST_F(BddTest, cofactor_int2_invalid)
 {
   Bdd bdd; // 不正値
 
-  Literal lit{0, true};
+  auto var = variable(0);
+  auto lit = var.negalit();
   EXPECT_THROW({
       Bdd bdd1 = bdd.cofactor_int(lit);
     }, std::invalid_argument );
@@ -820,7 +828,8 @@ TEST_F(BddTest, cofactor3)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Literal lit{0, true};
+  auto var = variable(0);
+  auto lit = var.negalit();
 
   Bdd bdd1 = bdd / lit;
 
@@ -832,7 +841,8 @@ TEST_F(BddTest, cofactor3_invalid)
 {
   Bdd bdd; // 不正値
 
-  Literal lit{0, true};
+  auto var = variable(0);
+  auto lit = var.negalit();
   EXPECT_THROW({
       Bdd bdd1 = bdd / lit;
     }, std::invalid_argument );
@@ -843,7 +853,8 @@ TEST_F(BddTest, cofactor_int3)
   const char* src_str = "10010111";
   Bdd bdd = from_truth(src_str);
 
-  Literal lit{0, true};
+  auto var = variable(0);
+  auto lit = var.negalit();
   Bdd bdd1 = bdd /= lit;
 
   const char* exp_str = "01110111";
@@ -855,7 +866,8 @@ TEST_F(BddTest, cofactor_int3_invalid)
 {
   Bdd bdd; // 不正値
 
-  Literal lit{0, true};
+  auto var = variable(0);
+  auto lit = var.negalit();
   EXPECT_THROW({
       Bdd bdd1 = bdd /= lit;
     }, std::invalid_argument );
@@ -968,9 +980,9 @@ TEST_F(BddTest, cofactor5)
   Bdd bdd = from_truth(src_str);
 
   BddMgr mgr2;
-  Bdd lit1 = mgr2.literal(0);
-  Bdd lit2 = mgr2.literal(2);
-  Bdd cube = ~lit1 & lit2;
+  auto var1 = mgr2.variable(0);
+  auto var2 = mgr2.variable(2);
+  Bdd cube = ~var1 & var2;
 
   Bdd bdd1 = bdd.cofactor(cube);
 
@@ -984,9 +996,9 @@ TEST_F(BddTest, cofactor_int5)
   Bdd bdd = from_truth(src_str);
 
   BddMgr mgr2;
-  Bdd lit1 = mgr2.literal(0);
-  Bdd lit2 = mgr2.literal(2);
-  Bdd cube = ~lit1 & lit2;
+  auto var1 = mgr2.variable(0);
+  auto var2 = mgr2.variable(2);
+  Bdd cube = ~var1 & var2;
 
   Bdd bdd1 = bdd.cofactor_int(cube);
 
@@ -1030,9 +1042,9 @@ TEST_F(BddTest, cofactor8)
   Bdd bdd = from_truth(src_str);
 
   BddMgr mgr2;
-  Bdd lit1 = mgr2.literal(0);
-  Bdd lit2 = mgr2.literal(2);
-  Bdd cube = ~lit1 & lit2;
+  auto var1 = mgr2.variable(0);
+  auto var2 = mgr2.variable(2);
+  Bdd cube = ~var1 & var2;
   Bdd bdd1 = bdd / cube;
   const char* exp_str = "00110011";
   check(bdd1, exp_str);
@@ -1044,9 +1056,9 @@ TEST_F(BddTest, cofactor_int8)
   Bdd bdd = from_truth(src_str);
 
   BddMgr mgr2;
-  Bdd lit1 = mgr2.literal(0);
-  Bdd lit2 = mgr2.literal(2);
-  Bdd cube = ~lit1 & lit2;
+  auto var1 = mgr2.variable(0);
+  auto var2 = mgr2.variable(2);
+  Bdd cube = ~var1 & var2;
 
   Bdd bdd1 = bdd /= cube;
 
@@ -1068,12 +1080,12 @@ TEST_F(BddTest, support_cup1)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2 = bdd2.get_support();
   BddVarSet sup = sup1 + sup2;
-  vector<SizeType> var_list = sup.to_varlist();
+  auto var_list = sup.to_varlist();
   EXPECT_EQ( 4, var_list.size() );
-  EXPECT_EQ( 0, var_list[0] );
-  EXPECT_EQ( 1, var_list[1] );
-  EXPECT_EQ( 2, var_list[2] );
-  EXPECT_EQ( 3, var_list[3] );
+  EXPECT_EQ( 0, var_list[0].index() );
+  EXPECT_EQ( 1, var_list[1].index() );
+  EXPECT_EQ( 2, var_list[2].index() );
+  EXPECT_EQ( 3, var_list[3].index() );
 }
 
 TEST_F(BddTest, support_cup1_invalid1)
@@ -1089,7 +1101,7 @@ TEST_F(BddTest, support_cup1_invalid1)
   BddVarSet sup1; // 不正値
   BddVarSet sup2 = bdd2.get_support();
   EXPECT_THROW({
-      BddVarSet sup = sup1 + sup2;
+      auto sup = sup1 + sup2;
     }, std::invalid_argument );
 }
 
@@ -1106,315 +1118,315 @@ TEST_F(BddTest, support_cup1_invalid2)
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2; // 不正値
   EXPECT_THROW({
-      BddVarSet sup = sup1 + sup2;
+      auto sup = sup1 + sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_cup_int1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
-  BddVarSet sup1 = bdd1.get_support();
-  BddVarSet sup2 = bdd2.get_support();
-  BddVarSet sup = sup1 += sup2;
-  vector<SizeType> var_list = sup1.to_varlist();
+  auto sup1 = bdd1.get_support();
+  auto sup2 = bdd2.get_support();
+  auto sup = sup1 += sup2;
+  auto var_list = sup1.to_varlist();
   EXPECT_EQ( 4, var_list.size() );
-  EXPECT_EQ( 0, var_list[0] );
-  EXPECT_EQ( 1, var_list[1] );
-  EXPECT_EQ( 2, var_list[2] );
-  EXPECT_EQ( 3, var_list[3] );
+  EXPECT_EQ( 0, var_list[0].index() );
+  EXPECT_EQ( 1, var_list[1].index() );
+  EXPECT_EQ( 2, var_list[2].index() );
+  EXPECT_EQ( 3, var_list[3].index() );
 
   EXPECT_EQ( sup1, sup );
 }
 
 TEST_F(BddTest, support_cup_int1_invalid1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1; // 不正値
   BddVarSet sup2 = bdd2.get_support();
   EXPECT_THROW({
-      BddVarSet sup = sup1 += sup2;
+      auto sup = sup1 += sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_cup_int1_invalid2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2; // 不正値
   EXPECT_THROW({
-      BddVarSet sup = sup1 += sup2;
+      auto sup = sup1 += sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_cap1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
-  BddVarSet sup1 = bdd1.get_support();
-  BddVarSet sup2 = bdd2.get_support();
-  BddVarSet sup = sup1 & sup2;
-  vector<SizeType> var_list = sup.to_varlist();
+  auto sup1 = bdd1.get_support();
+  auto sup2 = bdd2.get_support();
+  auto sup = sup1 & sup2;
+  auto var_list = sup.to_varlist();
 
   EXPECT_EQ( 1, var_list.size() );
-  EXPECT_EQ( 1, var_list[0] );
+  EXPECT_EQ( 1, var_list[0].index() );
 }
 
 TEST_F(BddTest, support_cap1_invalid1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1; // 不正値
   BddVarSet sup2 = bdd2.get_support();
   EXPECT_THROW({
-      BddVarSet sup = sup1 & sup2;
+      auto sup = sup1 & sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_cap1_invalid2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2; // 不正値
   EXPECT_THROW({
-      BddVarSet sup = sup1 & sup2;
+      auto sup = sup1 & sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_cap_int1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
-  BddVarSet sup1 = bdd1.get_support();
-  BddVarSet sup2 = bdd2.get_support();
-  BddVarSet sup = sup1 &= sup2;
-  vector<SizeType> var_list = sup1.to_varlist();
+  auto sup1 = bdd1.get_support();
+  auto sup2 = bdd2.get_support();
+  auto sup = sup1 &= sup2;
+  auto var_list = sup1.to_varlist();
 
   EXPECT_EQ( 1, var_list.size() );
-  EXPECT_EQ( 1, var_list[0] );
+  EXPECT_EQ( 1, var_list[0].index() );
 
   EXPECT_EQ( sup1, sup );
 }
 
 TEST_F(BddTest, support_cap_int1_invalid1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1; // 不正値
   BddVarSet sup2 = bdd2.get_support();
   EXPECT_THROW({
-      BddVarSet sup = sup1 &= sup2;
+      auto sup = sup1 &= sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_cap_int1_invalid2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2; // 不正値
   EXPECT_THROW({
-      BddVarSet sup = sup1 &= sup2;
+      auto sup = sup1 &= sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_diff1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
-  BddVarSet sup1 = bdd1.get_support();
-  BddVarSet sup2 = bdd2.get_support();
-  BddVarSet sup = sup1 - sup2;
-  vector<SizeType> var_list = sup.to_varlist();
+  auto sup1 = bdd1.get_support();
+  auto sup2 = bdd2.get_support();
+  auto sup = sup1 - sup2;
+  auto var_list = sup.to_varlist();
 
   EXPECT_EQ( 2, var_list.size() );
-  EXPECT_EQ( 0, var_list[0] );
-  EXPECT_EQ( 2, var_list[1] );
+  EXPECT_EQ( 0, var_list[0].index() );
+  EXPECT_EQ( 2, var_list[1].index() );
 }
 
 TEST_F(BddTest, support_diff1_invalid1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1; // 不正値
   BddVarSet sup2 = bdd2.get_support();
   EXPECT_THROW({
-      BddVarSet sup = sup1 - sup2;
+      auto sup = sup1 - sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_diff1_invalid2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2; // 不正値
   EXPECT_THROW({
-      BddVarSet sup = sup1 - sup2;
+      auto sup = sup1 - sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_diff_int1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
-  BddVarSet sup1 = bdd1.get_support();
-  BddVarSet sup2 = bdd2.get_support();
-  BddVarSet sup = sup1 -= sup2;
-  vector<SizeType> var_list = sup.to_varlist();
+  auto sup1 = bdd1.get_support();
+  auto sup2 = bdd2.get_support();
+  auto sup = sup1 -= sup2;
+  auto var_list = sup.to_varlist();
 
   EXPECT_EQ( 2, var_list.size() );
-  EXPECT_EQ( 0, var_list[0] );
-  EXPECT_EQ( 2, var_list[1] );
+  EXPECT_EQ( 0, var_list[0].index() );
+  EXPECT_EQ( 2, var_list[1].index() );
 
   EXPECT_EQ( sup1, sup );
 }
 
 TEST_F(BddTest, support_diff_int1_invalid1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1; // 不正値
   BddVarSet sup2 = bdd2.get_support();
   EXPECT_THROW({
-      BddVarSet sup = sup1 -= sup2;
+      auto sup = sup1 -= sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_diff_int1_invalid2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2; // 不正値
   EXPECT_THROW({
-      BddVarSet sup = sup1 -= sup2;
+      auto sup = sup1 -= sup2;
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, support_diff2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit2 & lit3 & lit4;
-  Bdd bdd2 = lit1 & lit2 & lit3 & lit4;
+  auto bdd1 = lit2 & lit3 & lit4;
+  auto bdd2 = lit1 & lit2 & lit3 & lit4;
 
-  BddVarSet sup1 = bdd1.get_support();
-  BddVarSet sup2 = bdd2.get_support();
-  BddVarSet sup = sup1 - sup2;
-  vector<SizeType> var_list = sup.to_varlist();
+  auto sup1 = bdd1.get_support();
+  auto sup2 = bdd2.get_support();
+  auto sup = sup1 - sup2;
+  auto var_list = sup.to_varlist();
 
   EXPECT_EQ( 0, var_list.size() );
 }
 
 TEST_F(BddTest, support_check_intersect1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit2 & lit3 & lit4;
-  Bdd bdd2 = lit1 & lit2 & lit3 & lit4;
+  auto bdd1 = lit2 & lit3 & lit4;
+  auto bdd2 = lit1 & lit2 & lit3 & lit4;
 
-  BddVarSet sup1 = bdd1.get_support();
-  BddVarSet sup2 = bdd2.get_support();
+  auto sup1 = bdd1.get_support();
+  auto sup2 = bdd2.get_support();
   bool result = sup1 && sup2;
 
   EXPECT_TRUE( result );
@@ -1422,13 +1434,13 @@ TEST_F(BddTest, support_check_intersect1)
 
 TEST_F(BddTest, support_check_intersect1_invalid1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1; // 不正値
   BddVarSet sup2 = bdd2.get_support();
@@ -1439,13 +1451,13 @@ TEST_F(BddTest, support_check_intersect1_invalid1)
 
 TEST_F(BddTest, support_check_intersect1_invalid2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit2 & lit3;
+  auto bdd2 = lit2 & lit4;
 
   BddVarSet sup1 = bdd1.get_support();
   BddVarSet sup2; // 不正値
@@ -1456,79 +1468,79 @@ TEST_F(BddTest, support_check_intersect1_invalid2)
 
 TEST_F(BddTest, support_check_intersect2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
-  Bdd lit4 = literal(3);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
+  auto lit4 = literal(3);
 
-  Bdd bdd1 = lit1 & lit3;
-  Bdd bdd2 = lit2 & lit4;
+  auto bdd1 = lit1 & lit3;
+  auto bdd2 = lit2 & lit4;
 
-  BddVarSet sup1 = bdd1.get_support();
-  BddVarSet sup2 = bdd2.get_support();
-  bool result = sup1 && sup2;
+  auto sup1 = bdd1.get_support();
+  auto sup2 = bdd2.get_support();
+  auto result = sup1 && sup2;
 
   EXPECT_FALSE( result );
 }
 
 TEST_F(BddTest, is_cube1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
+  auto bdd1 = lit1 & lit2 & lit3;
 
   EXPECT_TRUE( bdd1.is_cube() );
 }
 
 TEST_F(BddTest, is_cube2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd1 = lit1 & lit2 | lit3;
+  auto bdd1 = lit1 & lit2 | lit3;
 
   EXPECT_FALSE( bdd1.is_cube() );
 }
 
 TEST_F(BddTest, is_posicube1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd1 = lit1 & lit2 & lit3;
+  auto bdd1 = lit1 & lit2 & lit3;
 
   EXPECT_TRUE( bdd1.is_posicube() );
 }
 
 TEST_F(BddTest, is_posicube2)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd1 = lit1 & lit2 & ~lit3;
+  auto bdd1 = lit1 & lit2 & ~lit3;
 
   EXPECT_FALSE( bdd1.is_posicube() );
 }
 
 TEST_F(BddTest, is_posicube3)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd1 = lit1 & lit2 | lit3;
+  auto bdd1 = lit1 & lit2 | lit3;
 
   EXPECT_FALSE( bdd1.is_posicube() );
 }
 
 TEST_F(BddTest, check_sup1)
 {
-  Bdd bdd = from_truth("1100");
+  auto bdd = from_truth("1100");
 
   test_check_sup(bdd, 0);
   test_check_sup(bdd, 1);
@@ -1536,7 +1548,7 @@ TEST_F(BddTest, check_sup1)
 
 TEST_F(BddTest, check_sym1)
 {
-  Bdd bdd = from_truth("11101010");
+  auto bdd = from_truth("11101010");
 
   test_check_sym(bdd, 0, 1);
   test_check_sym(bdd, 0, 2);
@@ -1545,7 +1557,7 @@ TEST_F(BddTest, check_sym1)
 
 TEST_F(BddTest, check_sym2)
 {
-  Bdd bdd = from_truth("01001011");
+  auto bdd = from_truth("01001011");
 
   test_check_sym(bdd, 0, 1);
   test_check_sym(bdd, 0, 2);
@@ -1554,14 +1566,14 @@ TEST_F(BddTest, check_sym2)
 
 TEST_F(BddTest, check_sym3)
 {
-  Bdd bdd = from_truth("0110");
+  auto bdd = from_truth("0110");
 
   test_check_sym(bdd, 0, 1);
 }
 
 TEST_F(BddTest, check_sym4)
 {
-  Bdd bdd = from_truth("01100101");
+  auto bdd = from_truth("01100101");
 
   test_check_sym(bdd, 0, 1);
   test_check_sym(bdd, 0, 2);
@@ -1570,21 +1582,21 @@ TEST_F(BddTest, check_sym4)
 
 TEST_F(BddTest, check_sym5)
 {
-  Bdd bdd = from_truth("0100");
+  auto bdd = from_truth("0100");
 
   test_check_sym(bdd, 0, 1);
 }
 
 TEST_F(BddTest, get_support1)
 {
-  Bdd lit1 = literal(1);
-  Bdd lit3 = literal(3);
-  Bdd lit5 = literal(5);
-  Bdd lit7 = literal(7);
+  auto lit1 = literal(1);
+  auto lit3 = literal(3);
+  auto lit5 = literal(5);
+  auto lit7 = literal(7);
 
-  Bdd bdd = (lit1 & lit3) | (~lit1 & lit5) | (lit3 & ~lit7);
+  auto bdd = (lit1 & lit3) | (~lit1 & lit5) | (lit3 & ~lit7);
 
-  BddVarSet sup = bdd.get_support();
+  auto sup = bdd.get_support();
 
   test_support(bdd, sup, 8);
 }
@@ -1594,32 +1606,32 @@ TEST_F(BddTest, get_support_invalid1)
   Bdd bdd1; // 不正値
 
   EXPECT_THROW({
-      BddVarSet sup1 = bdd1.get_support();
+      auto sup1 = bdd1.get_support();
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, get_support2)
 {
-  Bdd lit1 = literal(1);
-  Bdd lit2 = literal(2);
-  Bdd lit3 = literal(3);
+  auto lit1 = literal(1);
+  auto lit2 = literal(2);
+  auto lit3 = literal(3);
 
-  Bdd bdd = (lit1 & lit2) | (~lit1 & lit2) | lit3;
+  auto bdd = (lit1 & lit2) | (~lit1 & lit2) | lit3;
 
-  BddVarSet sup = bdd.get_support();
+  auto sup = bdd.get_support();
 
   test_support(bdd, sup, 4);
 }
 
 TEST_F(BddTest, get_onepath1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd = lit1 & ~lit2 & lit3;
+  auto bdd = lit1 & ~lit2 & lit3;
 
-  Bdd bdd1 = bdd.get_onepath();
+  auto bdd1 = bdd.get_onepath();
 
   EXPECT_EQ( bdd, bdd1 );
 }
@@ -1628,43 +1640,44 @@ TEST_F(BddTest, get_onepath_invalid1)
 {
   Bdd bdd; // 不正値
   EXPECT_THROW({
-      Bdd bdd1 = bdd.get_onepath();
+      auto bdd1 = bdd.get_onepath();
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, get_onepath2)
 {
-  Bdd bdd = mMgr.zero();
+  auto bdd = mMgr.zero();
 
-  Bdd bdd1 = bdd.get_onepath();
+  auto bdd1 = bdd.get_onepath();
 
   EXPECT_EQ( bdd, bdd1 );
 }
 
 TEST_F(BddTest, get_onepath3)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd = lit1 & ~lit2 | lit3;
+  auto bdd = lit1 & ~lit2 | lit3;
 
-  Bdd bdd1 = bdd.get_onepath();
+  auto bdd1 = bdd.get_onepath();
 
   test_onepath(bdd, bdd1);
 }
 
 TEST_F(BddTest, get_zeropath1)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd = lit1 | ~lit2 | lit3;
+  auto bdd = lit1 | ~lit2 | lit3;
 
-  Bdd bdd1 = bdd.get_zeropath();
+  auto bdd1 = bdd.get_zeropath();
 
-  Bdd exp_bdd = ~lit1 & lit2 & ~lit3;
+  auto exp_bdd = ~lit1 & lit2 & ~lit3;
+
   EXPECT_EQ( exp_bdd, bdd1 );
 }
 
@@ -1672,48 +1685,49 @@ TEST_F(BddTest, get_zeropath_invalid1)
 {
   Bdd bdd; // 不正値
   EXPECT_THROW({
-      Bdd bdd1 = bdd.get_zeropath();
+      auto bdd1 = bdd.get_zeropath();
     }, std::invalid_argument );
 }
 
 TEST_F(BddTest, get_zeropath2)
 {
-  Bdd bdd = mMgr.one();
+  auto bdd = mMgr.one();
 
-  Bdd bdd1 = bdd.get_zeropath();
+  auto bdd1 = bdd.get_zeropath();
 
-  Bdd exp_bdd = mMgr.zero();
+  auto exp_bdd = mMgr.zero();
+
   EXPECT_EQ( exp_bdd, bdd1 );
 }
 
 TEST_F(BddTest, get_zeropath3)
 {
-  Bdd lit1 = literal(0);
-  Bdd lit2 = literal(1);
-  Bdd lit3 = literal(2);
+  auto lit1 = literal(0);
+  auto lit2 = literal(1);
+  auto lit3 = literal(2);
 
-  Bdd bdd = lit1 & ~lit2 | lit3;
+  auto bdd = lit1 & ~lit2 | lit3;
 
-  Bdd bdd1 = bdd.get_zeropath();
+  auto bdd1 = bdd.get_zeropath();
 
   test_zeropath(bdd, bdd1);
 }
 
 TEST_F(BddTest, root_decomp1)
 {
-  Bdd bdd = from_truth("1000");
+  auto bdd = from_truth("1000");
 
   Bdd bdd0;
   Bdd bdd1;
   auto top = bdd.root_decomp(bdd0, bdd1);
 
-  EXPECT_EQ( 0, top );
+  EXPECT_EQ( 0, top.index() );
   EXPECT_TRUE( bdd0.is_zero() );
 
   Bdd bdd00;
   Bdd bdd01;
   auto dummy = bdd0.root_decomp(bdd00, bdd01);
-  EXPECT_EQ( BAD_VARID, dummy );
+  EXPECT_TRUE( dummy.is_invalid() );
   EXPECT_EQ( bdd0, bdd00 );
   EXPECT_EQ( bdd0, bdd01 );
 
@@ -1721,7 +1735,7 @@ TEST_F(BddTest, root_decomp1)
   Bdd bdd11;
   auto second = bdd1.root_decomp(bdd10, bdd11);
 
-  EXPECT_EQ( 1, second );
+  EXPECT_EQ( 1, second.index() );
   EXPECT_TRUE( bdd10.is_zero() );
   EXPECT_TRUE( bdd11.is_one() );
 }
@@ -1739,56 +1753,56 @@ TEST_F(BddTest, root_decomp_invalid1)
 
 TEST_F(BddTest, root_decomp2)
 {
-  Bdd bdd = from_truth("1000");
+  auto bdd = from_truth("1000");
 
   auto top = bdd.root_var();
-  Bdd bdd0 = bdd.root_cofactor0();
-  Bdd bdd1 = bdd.root_cofactor1();
+  auto bdd0 = bdd.root_cofactor0();
+  auto bdd1 = bdd.root_cofactor1();
 
-  EXPECT_EQ( 0, top );
+  EXPECT_EQ( 0, top.index() );
   EXPECT_TRUE( bdd0.is_zero() );
 
   auto dummy = bdd0.root_var();
-  Bdd bdd00 = bdd0.root_cofactor0();
-  Bdd bdd01 = bdd0.root_cofactor1();
+  auto bdd00 = bdd0.root_cofactor0();
+  auto bdd01 = bdd0.root_cofactor1();
 
-  EXPECT_EQ( BAD_VARID, dummy );
+  EXPECT_TRUE( dummy.is_invalid() );
   EXPECT_EQ( bdd0, bdd00 );
   EXPECT_EQ( bdd0, bdd01 );
 
   auto second = bdd1.root_var();
-  Bdd bdd10 = bdd1.root_cofactor0();
-  Bdd bdd11 = bdd1.root_cofactor1();
+  auto bdd10 = bdd1.root_cofactor0();
+  auto bdd11 = bdd1.root_cofactor1();
 
-  EXPECT_EQ( 1, second );
+  EXPECT_EQ( 1, second.index() );
   EXPECT_TRUE( bdd10.is_zero() );
   EXPECT_TRUE( bdd11.is_one() );
 }
 
 TEST_F(BddTest, root_inv1)
 {
-  Bdd bdd = mMgr.zero();
+  auto bdd = mMgr.zero();
 
   EXPECT_FALSE( bdd.root_inv() );
 }
 
 TEST_F(BddTest, root_inv2)
 {
-  Bdd bdd = mMgr.one();
+  auto bdd = mMgr.one();
 
   EXPECT_TRUE( bdd.root_inv() );
 }
 
 TEST_F(BddTest, root_inv3)
 {
-  Bdd bdd = from_truth("1110");
+  auto bdd = from_truth("1110");
 
   EXPECT_FALSE( bdd.root_inv() );
 }
 
 TEST_F(BddTest, root_inv4)
 {
-  Bdd bdd = from_truth("0001");
+  auto bdd = from_truth("0001");
 
   EXPECT_TRUE( bdd.root_inv() );
 }
@@ -1802,30 +1816,30 @@ TEST_F(BddTest, root_inv_invalid1)
 
 TEST_F(BddTest, size1)
 {
-  Bdd bdd = mMgr.zero();
+  auto bdd = mMgr.zero();
 
   EXPECT_EQ( 0, bdd.size() );
 }
 
 TEST_F(BddTest, size2)
 {
-  Bdd bdd = mMgr.one();
+  auto bdd = mMgr.one();
 
   EXPECT_EQ( 0, bdd.size() );
 }
 
 TEST_F(BddTest, size3)
 {
-  Bdd bdd = from_truth("1000");
+  auto bdd = from_truth("1000");
 
   EXPECT_EQ( 2, bdd.size() );
 }
 
 TEST_F(BddTest, size4)
 {
-  Bdd bdd1 = from_truth("1100");
-  Bdd bdd2 = from_truth("1010");
-  Bdd bdd3 = from_truth("1000");
+  auto bdd1 = from_truth("1100");
+  auto bdd2 = from_truth("1010");
+  auto bdd3 = from_truth("1000");
 
   EXPECT_EQ( 1, bdd1.size() );
   EXPECT_EQ( 1, bdd2.size() );
@@ -1840,6 +1854,7 @@ TEST_F(BddTest, size_invalid1)
   EXPECT_EQ( 0, bdd.size() );
 }
 
+#if 0
 TEST_F(BddTest, is_identical1)
 {
   Bdd bdd1 = from_truth("1011");
@@ -1848,6 +1863,7 @@ TEST_F(BddTest, is_identical1)
   EXPECT_TRUE( bdd1.is_identical(bdd2) );
 
   BddMgr mgr2;
+
   Bdd bdd3 = mgr2.from_truth("1011");
   EXPECT_TRUE( bdd1.is_identical(bdd3) );
 }
@@ -1879,12 +1895,13 @@ TEST_F(BddTest, is_identical_invalid2)
 
   EXPECT_FALSE( bdd1.is_identical(bdd2) );
 }
+#endif
 
 TEST_F(BddTest, dump_restore)
 {
-  Bdd bdd1 = from_truth("1100");
-  Bdd bdd2 = from_truth("1010");
-  Bdd bdd3 = from_truth("1000");
+  auto bdd1 = from_truth("1100");
+  auto bdd2 = from_truth("1010");
+  auto bdd3 = from_truth("1000");
 
   ostringstream obuf;
   BinEnc enc{obuf};

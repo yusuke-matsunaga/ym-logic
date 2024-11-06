@@ -93,7 +93,7 @@ Bdd::support_check_intersect(
 bool
 Bdd::is_cube() const
 {
-  if ( mMgr == nullptr ) {
+  if ( is_invalid() ) {
     return false;
   }
 
@@ -123,7 +123,7 @@ Bdd::is_cube() const
 bool
 Bdd::is_posicube() const
 {
-  if ( mMgr == nullptr ) {
+  if ( is_invalid() ) {
     return false;
   }
 
@@ -157,50 +157,51 @@ Bdd::get_support() const
 }
 
 // @brief サポート変数のリスト(vector)を得る．
-vector<SizeType>
+vector<BddVar>
 Bdd::get_support_list() const
 {
   return get_support().to_varlist();
 }
 
 // @brief 変数のリストに変換する．
-vector<SizeType>
+vector<BddVar>
 Bdd::to_varlist() const
 {
   _check_valid();
   _check_posicube();
 
   auto edge = DdEdge{mRoot};
-  vector<SizeType> var_list;
+  vector<BddVar> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
-    var_list.push_back(node->index());
+    auto var = mMgr->index_to_var(node->index());
+    var_list.push_back(var);
     edge = node->edge1();
   }
   return var_list;
 }
 
 // @brief リテラルのリストの変換する．
-vector<Literal>
+vector<BddLit>
 Bdd::to_litlist() const
 {
   _check_valid();
   _check_cube();
 
   auto edge = DdEdge{mRoot};
-  vector<Literal> lit_list;
+  vector<BddLit> lit_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
     auto inv = edge.inv();
     auto e0 = node->edge0() ^ inv;
     auto e1 = node->edge1() ^ inv;
-    SizeType var = node->index();
+    auto var = mMgr->index_to_var(node->index());
     if ( e0.is_zero() ) {
-      lit_list.push_back(Literal{var, false});
+      lit_list.push_back(BddLit{var, false});
       edge = e1;
     }
     else if ( e1.is_zero() ) {
-      lit_list.push_back(Literal{var, true});
+      lit_list.push_back(BddLit{var, true});
       edge = e0;
     }
   }

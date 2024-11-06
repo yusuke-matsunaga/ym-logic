@@ -8,8 +8,9 @@
 
 #include "pym/PyBdd.h"
 #include "pym/PyBddMgr.h"
+#include "pym/PyBddVar.h"
 #include "pym/PyBddVarSet.h"
-#include "pym/PyLiteral.h"
+#include "pym/PyBddLit.h"
 #include "pym/PyModule.h"
 
 
@@ -81,44 +82,51 @@ Bdd_cofactor(
 )
 {
   static const char* kwlist[] = {
-    "var",
+    "",
     "inv",
     nullptr
   };
   PyObject* obj1 = nullptr;
-  int inv = 0;
+  int inv_int = 0;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
 				    const_cast<char**>(kwlist),
-				    &obj1, &inv) ) {
+				    &obj1, &inv_int) ) {
     return nullptr;
   }
 
+  auto inv = static_cast<bool>(inv_int);
   auto bdd = PyBdd::Get(self);
-  if ( PyLiteral::Check(obj1) ) {
-    auto lit = PyLiteral::Get(obj1);
+  Bdd ans_bdd;
+  if ( PyBddVar::Check(obj1) ) {
+    auto& var = PyBddVar::_get(obj1);
+    ans_bdd = bdd.cofactor(var, inv);
+  }
+  else if ( PyBddLit::Check(obj1) ) {
+    auto lit = PyBddLit::Get(obj1);
     if ( inv ) {
       lit = ~lit;
     }
-    auto ans_bdd = bdd.cofactor(lit);
+    ans_bdd = bdd.cofactor(lit);
     return PyBdd::ToPyObject(ans_bdd);
   }
-  if ( PyBdd::Check(obj1) ) {
+  else if ( PyBdd::Check(obj1) ) {
     auto bdd1 = PyBdd::Get(obj1);
     if ( inv ) {
       bdd1 = ~bdd1;
     }
     try {
-      auto ans_bdd = bdd.cofactor(bdd1);
-      return PyBdd::ToPyObject(ans_bdd);
+      ans_bdd = bdd.cofactor(bdd1);
     }
     catch ( std::invalid_argument ) {
       PyErr_SetString(PyExc_ValueError, "argument 1 must be a cube type BDD");
       return nullptr;
     }
   }
-
-  PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal or Cube");
-  return nullptr;
+  else {
+    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal or Cube");
+    return nullptr;
+  }
+  return PyBdd::ToPyObject(ans_bdd);
 }
 
 PyObject*
@@ -152,18 +160,28 @@ Bdd_ite(
 PyObject*
 Bdd_compose(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  SizeType index = 0;
-  PyObject* obj1 = nullptr;
-  if ( PyArg_ParseTuple(args, "kO!", &index, PyBdd::_typeobject(), &obj1) ) {
+  static const char* kw_list[] = {
+    "var",
+    "opr",
+    nullptr
+  };
+  PyObject* var_obj = nullptr;
+  PyObject* opr_obj = nullptr;
+  if ( PyArg_ParseTupleAndKeywords(args, kwds, "O!O!",
+				   const_cast<char**>(kw_list),
+				   PyBddVar::_typeobject(), &var_obj,
+				   PyBdd::_typeobject(), &opr_obj) ) {
     return nullptr;
   }
-  auto bdd1 = PyBdd::Get(obj1);
+  auto var = PyBddVar::Get(var_obj);
+  auto opr = PyBdd::Get(opr_obj);
   auto bdd = PyBdd::Get(self);
   try {
-    auto ans_bdd = bdd.compose(index, bdd1);
+    auto ans_bdd = bdd.compose(var, opr);
     return PyBdd::ToPyObject(ans_bdd);
   }
   catch ( std::invalid_argument ) {
@@ -184,18 +202,20 @@ Bdd_multi_compose(
   }
   auto values = PyDict_Values(obj1);
   SizeType n = PyList_Size(values);
-  unordered_map<SizeType, Bdd> compose_map;
+  unordered_map<BddVar, Bdd> compose_map;
   for ( SizeType i = 0; i < n; ++ i ) {
     auto obj1 = PyList_GetItem(values, i);
-    SizeType index = 0;
-    PyObject* val_obj = nullptr;
-    if ( !PyArg_ParseTuple(obj1, "kO!", &index,
-			   PyBdd::_typeobject(), &val_obj) ) {
+    PyObject* var_obj = nullptr;
+    PyObject* opr_obj = nullptr;
+    if ( !PyArg_ParseTuple(obj1, "O!O!",
+			   PyBddVar::_typeobject(), &var_obj,
+			   PyBdd::_typeobject(), &opr_obj) ) {
       Py_DecRef(values);
       return nullptr;
     }
-    auto bdd1 = PyBdd::Get(val_obj);
-    compose_map.emplace(index, bdd1);
+    auto var = PyBddVar::Get(var_obj);
+    auto opr = PyBdd::Get(opr_obj);
+    compose_map.emplace(var, opr);
   }
   Py_DecRef(values);
   auto bdd = PyBdd::Get(self);
@@ -221,17 +241,19 @@ Bdd_remap_vars(
   }
   auto values = PyDict_Values(obj1);
   SizeType n = PyList_Size(values);
-  unordered_map<SizeType, Literal> var_map;
+  unordered_map<BddVar, BddLit> var_map;
   for ( SizeType i = 0; i < n; ++ i ) {
     auto obj1 = PyList_GetItem(values, i);
-    SizeType index = 0;
-    PyObject* obj2 = nullptr;
-    if ( !PyArg_ParseTuple(obj1, "kO!", &index,
-			   PyLiteral::_typeobject(), &obj2) ) {
+    PyObject* var_obj = nullptr;
+    PyObject* lit_obj = nullptr;
+    if ( !PyArg_ParseTuple(obj1, "O!O!",
+			   PyBddVar::_typeobject(), &var_obj,
+			   PyBddLit::_typeobject(), &lit_obj) ) {
       return nullptr;
     }
-    auto lit = PyLiteral::Get(obj2);
-    var_map.emplace(index, lit);
+    auto var = PyBddVar::Get(var_obj);
+    auto lit = PyBddLit::Get(lit_obj);
+    var_map.emplace(var, lit);
   }
   auto bdd = PyBdd::Get(self);
   try {
@@ -313,13 +335,21 @@ Bdd_is_posicube(
 PyObject*
 Bdd_check_sup(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  SizeType var = 0;
-  if ( !PyArg_ParseTuple(args, "k", &var) ) {
+  static const char* kw_list[] = {
+    "var",
+    nullptr
+  };
+  PyObject* var_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
+				    const_cast<char**>(kw_list),
+				    PyBddVar::_typeobject(), &var_obj) ) {
     return nullptr;
   }
+  auto var = PyBddVar::Get(var_obj);
   auto bdd = PyBdd::Get(self);
   try {
     auto r = bdd.check_sup(var);
@@ -344,14 +374,19 @@ Bdd_check_sym(
     "inv",
     nullptr
   };
-  SizeType var1 = 0;
-  SizeType var2 = 0;
-  int inv = 0;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "kk|$p",
+  PyObject* var1_obj = nullptr;
+  PyObject* var2_obj = nullptr;
+  int inv_int = 0;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!O!|$p",
 				    const_cast<char**>(kw_list),
-				    &var1, &var2, &inv) ) {
+				    PyBddVar::_typeobject(), &var1_obj,
+				    PyBddVar::_typeobject(), &var2_obj,
+				    &inv_int) ) {
     return nullptr;
   }
+  auto var1 = PyBddVar::Get(var1_obj);
+  auto var2 = PyBddVar::Get(var2_obj);
+  auto inv = static_cast<bool>(inv_int);
   auto bdd = PyBdd::Get(self);
   try {
     auto r = bdd.check_sym(var1, var2, inv);
@@ -424,10 +459,11 @@ Bdd_root_decomp(
   try {
     Bdd f0;
     Bdd f1;
-    auto index = bdd.root_decomp(f0, f1);
-    auto obj1 = PyBdd::ToPyObject(f0);
-    auto obj2 = PyBdd::ToPyObject(f1);
-    return Py_BuildValue("kOO", index, obj1, obj2);
+    auto var = bdd.root_decomp(f0, f1);
+    auto var_obj = PyBddVar::ToPyObject(var);
+    auto f0_obj = PyBdd::ToPyObject(f0);
+    auto f1_obj = PyBdd::ToPyObject(f1);
+    return Py_BuildValue("OOO", var_obj, f0_obj, f1_obj);
   }
   catch ( std::invalid_argument ) {
     PyErr_SetString(PyExc_ValueError, "invalid_argument");
@@ -443,8 +479,8 @@ Bdd_root_var(
 {
   auto bdd = PyBdd::Get(self);
   try {
-    auto index = bdd.root_var();
-    return PyLong_FromLong(index);
+    auto var = bdd.root_var();
+    return PyBddVar::ToPyObject(var);
   }
   catch ( std::invalid_argument ) {
     PyErr_SetString(PyExc_ValueError, "invalid_argument");
@@ -534,7 +570,7 @@ Bdd_to_litlist(
     auto ans_obj = PyList_New(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto lit = litlist[i];
-      auto lit_obj = PyLiteral::ToPyObject(lit);
+      auto lit_obj = PyBddLit::ToPyObject(lit);
       PyList_SET_ITEM(ans_obj, i, lit_obj);
     }
     return ans_obj;
@@ -548,16 +584,39 @@ Bdd_to_litlist(
 PyObject*
 Bdd_to_truth(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  SizeType n = 0;
-  if ( !PyArg_ParseTuple(args, "k", &n) ) {
+  static const char* kw_list[] = {
+    "var_list",
+    nullptr
+  };
+  PyObject* list_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O",
+				    const_cast<char**>(kw_list),
+				    &list_obj) ) {
     return nullptr;
+  }
+  if ( !PySequence_Check(list_obj) ) {
+    PyErr_SetString(PyExc_TypeError, "'var_list' should be a list of 'BddVar'");
+    return nullptr;
+  }
+  auto n = PySequence_Size(list_obj);
+  vector<BddVar> var_list(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto var_obj = PySequence_GetItem(list_obj, i);
+    if ( !PyBddVar::Check(var_obj) ) {
+      PyErr_SetString(PyExc_TypeError, "'var_list' should be a list of 'BddVar'");
+      return nullptr;
+    }
+    auto var = PyBddVar::Get(var_obj);
+    var_list[i] = var;
+    Py_DECREF(var_obj);
   }
   auto bdd = PyBdd::Get(self);
   try {
-    auto str = bdd.to_truth(n);
+    auto str = bdd.to_truth(var_list);
     return Py_BuildValue("s", str.c_str());
   }
   catch ( std::invalid_argument ) {
@@ -568,55 +627,77 @@ Bdd_to_truth(
 
 // メソッド定義
 PyMethodDef Bdd_methods[] = {
-  {"invalid", Bdd_invalid, METH_STATIC | METH_NOARGS,
+  {"invalid", Bdd_invalid,
+   METH_STATIC | METH_NOARGS,
    PyDoc_STR("make an invalid BDD")},
   {"cofactor", reinterpret_cast<PyCFunction>(Bdd_cofactor),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return a cofactor BDD")},
-  {"ite", Bdd_ite, METH_STATIC | METH_VARARGS,
+  {"ite", Bdd_ite,
+   METH_STATIC | METH_VARARGS,
    PyDoc_STR("ITE operation")},
-  {"compose", Bdd_compose, METH_VARARGS,
+  {"compose", reinterpret_cast<PyCFunction>(Bdd_compose),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("compose operation")},
-  {"multi_compose", Bdd_multi_compose, METH_VARARGS,
+  {"multi_compose", Bdd_multi_compose,
+   METH_VARARGS,
    PyDoc_STR("multiway compose operation")},
-  {"remap_vars", Bdd_remap_vars, METH_VARARGS,
+  {"remap_vars", Bdd_remap_vars,
+   METH_VARARGS,
    PyDoc_STR("variable index remapping")},
-  {"is_valid", Bdd_is_valid, METH_NOARGS,
+  {"is_valid", Bdd_is_valid,
+   METH_NOARGS,
    PyDoc_STR("True if valid BDD")},
-  {"is_invalid", Bdd_is_invalid, METH_NOARGS,
+  {"is_invalid", Bdd_is_invalid,
+   METH_NOARGS,
    PyDoc_STR("True if invalid BDD")},
-  {"is_zero", Bdd_is_zero, METH_NOARGS,
+  {"is_zero", Bdd_is_zero,
+   METH_NOARGS,
    PyDoc_STR("True if Zero BDD")},
-  {"is_one", Bdd_is_one, METH_NOARGS,
+  {"is_one", Bdd_is_one,
+   METH_NOARGS,
    PyDoc_STR("True if One BDD")},
-  {"is_cube", Bdd_is_cube, METH_NOARGS,
+  {"is_cube", Bdd_is_cube,
+   METH_NOARGS,
    PyDoc_STR("True if cube BDD")},
-  {"is_posicube", Bdd_is_posicube, METH_NOARGS,
+  {"is_posicube", Bdd_is_posicube,
+   METH_NOARGS,
    PyDoc_STR("True if positive cube BDD")},
-  {"check_sup", Bdd_check_sup, METH_VARARGS,
+  {"check_sup", reinterpret_cast<PyCFunction>(Bdd_check_sup),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("check if the specified variable is a true support")},
   {"check_sym", reinterpret_cast<PyCFunction>(Bdd_check_sym),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("check if the specified variables are symmetric")},
-  {"get_support", Bdd_get_support, METH_NOARGS,
+  {"get_support", Bdd_get_support,
+   METH_NOARGS,
    PyDoc_STR("return the support")},
-  {"get_onepath", Bdd_get_onepath, METH_NOARGS,
+  {"get_onepath", Bdd_get_onepath,
+   METH_NOARGS,
    PyDoc_STR("return a BDD representing a One path")},
-  {"get_zeropath", Bdd_get_zeropath, METH_NOARGS,
+  {"get_zeropath", Bdd_get_zeropath,
+   METH_NOARGS,
    PyDoc_STR("return a BDD representing a Zero path")},
-  {"root_decomp", Bdd_root_decomp, METH_NOARGS,
+  {"root_decomp", Bdd_root_decomp,
+   METH_NOARGS,
    PyDoc_STR("return the root index, 0's cofactor, and 1'cofactor")},
-  {"root_var", Bdd_root_var, METH_NOARGS,
+  {"root_var", Bdd_root_var,
+   METH_NOARGS,
    PyDoc_STR("return the root index")},
-  {"root_cofactor0", Bdd_root_cofactor0, METH_NOARGS,
+  {"root_cofactor0", Bdd_root_cofactor0,
+   METH_NOARGS,
    PyDoc_STR("return the 0's cofactor of the root index")},
-  {"root_cofactor1", Bdd_root_cofactor1, METH_NOARGS,
+  {"root_cofactor1", Bdd_root_cofactor1,
+   METH_NOARGS,
    PyDoc_STR("return the 1's cofactor of the root index")},
-  {"eval", Bdd_eval, METH_VARARGS,
+  {"eval", Bdd_eval,
+   METH_VARARGS,
    PyDoc_STR("evaluate")},
-  {"to_litlist", Bdd_to_litlist, METH_NOARGS,
+  {"to_litlist", Bdd_to_litlist,
+   METH_NOARGS,
    PyDoc_STR("convert to the list of Literals")},
-  {"to_truth", Bdd_to_truth, METH_VARARGS,
+  {"to_truth", reinterpret_cast<PyCFunction>(Bdd_to_truth),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("convert to the truth-table string")},
   {nullptr, nullptr, 0, nullptr}
 };

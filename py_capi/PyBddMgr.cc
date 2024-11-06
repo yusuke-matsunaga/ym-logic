@@ -8,7 +8,8 @@
 
 #include "pym/PyBddMgr.h"
 #include "pym/PyBdd.h"
-#include "pym/PyLiteral.h"
+#include "pym/PyBddVar.h"
+#include "pym/PyBddLit.h"
 #include "pym/PyModule.h"
 #include "dd/BddMgrImpl.h"
 
@@ -38,11 +39,11 @@ BddMgr_new(
 )
 {
   // 引数を受け取らないことをチェックする．
-  static const char* kwlist[] = {
+  static const char* kw_list[] = {
     nullptr
   };
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "",
-				    const_cast<char**>(kwlist)) ) {
+				    const_cast<char**>(kw_list)) ) {
     return nullptr;
   }
 
@@ -112,69 +113,6 @@ BddMgr_one(
 }
 
 PyObject*
-BddMgr_literal(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kwlist[] = {
-    "var",
-    "inv",
-    nullptr
-  };
-  PyObject* obj1 = nullptr;
-  int inv = 0;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
-				    const_cast<char**>(kwlist),
-				    &obj1, &inv) ) {
-    return nullptr;
-  }
-  if ( !PyLiteral::Check(obj1) ) {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal");
-    return nullptr;
-  }
-
-  auto lit = PyLiteral::Get(obj1);
-  if ( inv ) {
-    lit = ~lit;
-  }
-  auto bddmgr = PyBddMgr::Get(self);
-  auto ans_bdd = bddmgr.literal(lit);
-  return PyBdd::ToPyObject(ans_bdd);
-}
-
-PyObject*
-BddMgr_posi_literal(
-  PyObject* self,
-  PyObject* args
-)
-{
-  SizeType varid = 0;
-  if ( !PyArg_ParseTuple(args, "k", &varid) ) {
-    return nullptr;
-  }
-  auto bddmgr = PyBddMgr::Get(self);
-  auto ans_bdd = bddmgr.posi_literal(varid);
-  return PyBdd::ToPyObject(ans_bdd);
-}
-
-PyObject*
-BddMgr_nega_literal(
-  PyObject* self,
-  PyObject* args
-)
-{
-  SizeType varid = 0;
-  if ( !PyArg_ParseTuple(args, "k", &varid) ) {
-    return nullptr;
-  }
-  auto bddmgr = PyBddMgr::Get(self);
-  auto ans_bdd = bddmgr.nega_literal(varid);
-  return PyBdd::ToPyObject(ans_bdd);
-}
-
-PyObject*
 BddMgr_from_truth(
   PyObject* self,
   PyObject* args
@@ -186,7 +124,8 @@ BddMgr_from_truth(
   }
   try {
     auto bddmgr = PyBddMgr::Get(self);
-    auto ans_bdd = bddmgr.from_truth(str);
+    vector<BddVar> var_list;
+    auto ans_bdd = bddmgr.from_truth(var_list, str);
     return PyBdd::ToPyObject(ans_bdd);
   }
   catch ( std::invalid_argument ) {
@@ -226,15 +165,6 @@ PyMethodDef BddMgr_methods[] = {
    PyDoc_STR("generate Zero")},
   {"one", BddMgr_one, METH_NOARGS,
    PyDoc_STR("generate One")},
-  {"literal", reinterpret_cast<PyCFunction>(BddMgr_literal),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("generate literal")},
-  {"posi_literal", BddMgr_posi_literal,
-   METH_VARARGS,
-   PyDoc_STR("generate positive literal")},
-  {"nega_literal", BddMgr_nega_literal,
-   METH_VARARGS,
-   PyDoc_STR("generate positive literal")},
   {"from_truth", BddMgr_from_truth, METH_VARARGS,
    PyDoc_STR("generate BDD from truth-table string")},
   {"enable_gc", BddMgr_enable_gc, METH_NOARGS,
