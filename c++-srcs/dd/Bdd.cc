@@ -318,6 +318,52 @@ Bdd::is_const() const
   return is_valid() && root().is_const();
 }
 
+// @brief 変数の時 true を返す．
+bool
+Bdd::is_variable() const
+{
+  return is_posilit();
+}
+
+// @brief リテラルの時 true を返す．
+bool
+Bdd::is_literal() const
+{
+  if ( is_invalid() ) {
+    return false;
+  }
+  auto node = root().node();
+  auto e0 = node->edge0();
+  if ( !e0.is_const() ) {
+    return false;
+  }
+  auto e1 = node->edge1();
+  if ( !e1.is_const() ) {
+    return false;
+  }
+  return true;
+}
+
+// @brief 肯定のリテラルの時 true を返す．
+bool
+Bdd::is_posilit() const
+{
+  if ( !is_literal() ) {
+    return false;
+  }
+  return !root().inv();
+}
+
+// @brief 否定のリテラルの時 true を返す．
+bool
+Bdd::is_negalit() const
+{
+  if ( !is_literal() ) {
+    return false;
+  }
+  return root().inv();
+}
+
 // @brief 根の変数とコファクターを求める．
 BddVar
 Bdd::root_decomp(
@@ -531,6 +577,18 @@ BddVar::BddVar(
   _check_valid();
 }
 
+// @brief Bdd からの変換関数
+BddVar
+BddVar::from_bdd(
+  const Bdd& bdd
+)
+{
+  if ( bdd.is_variable() ) {
+    return BddVar{bdd};
+  }
+  return invalid();
+}
+
 // @brief 変数番号を返す．
 SizeType
 BddVar::id() const
@@ -559,22 +617,6 @@ BddLit
 BddVar::negalit() const
 {
   return BddLit{*this, true};
-}
-
-// @brief 正しいBDDかチェックする．
-void
-BddVar::_check_valid() const
-{
-  Bdd::_check_valid();
-  auto node = root().node();
-  auto e0 = node->edge0();
-  auto e1 = node->edge1();
-  if ( !root().inv() &&
-       e0 == DdEdge::zero() &&
-       e1 == DdEdge::one() ) {
-    return;
-  }
-  throw std::invalid_argument{"invalid BDD for BddVar"};
 }
 
 END_NAMESPACE_YM_DD

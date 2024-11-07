@@ -25,7 +25,7 @@ TvFunc::bdd(
   auto ni = input_num();
   vector<BddVar> var_list(ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
-    //var_list[i] = i;
+    var_list[i] = mgr.variable(ni - i - 1);
   }
   return bdd(mgr, var_list);
 }
@@ -52,12 +52,6 @@ Bdd
 Tv2Bdd::run()
 {
   SizeType ni = mFunc.input_num();
-#if 0
-  // TvFunc の内部構造の都合上逆順になる．
-  for ( SizeType i = 0; i < ni; ++ i ) {
-    mOrder[i] = order[ni - i - 1];
-  }
-#endif
   SizeType nexp = 1UL << ni;
   return decomp_step(0, 0, nexp);
 }

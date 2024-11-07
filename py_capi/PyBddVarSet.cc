@@ -9,7 +9,6 @@
 #include "pym/PyBddVarSet.h"
 #include "pym/PyBddMgr.h"
 #include "pym/PyBdd.h"
-#include "pym/PyBddVar.h"
 #include "pym/PyModule.h"
 
 
@@ -57,11 +56,17 @@ BddVarSet_new(
       var_set.reserve(n);
       for ( SizeType i = 0; i < n; ++ i ) {
 	auto obj1 = PyList_GetItem(varset_obj, i);
-	if ( !PyBddVar::Check(obj1) ) {
+	if ( !PyBdd::Check(obj1) ) {
 	  PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'BddVar'");
 	  return nullptr;
 	}
-	var_set.push_back(PyBddVar::Get(obj1));
+	auto bdd = PyBdd::Get(obj1);
+	auto var = BddVar::from_bdd(bdd);
+	if ( var.is_invalid() ) {
+	  PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'BddVar'");
+	  return nullptr;
+	}
+	var_set.push_back(var);
       }
     }
     auto mgr = PyBddMgr::Get(mgr_obj);
@@ -102,7 +107,7 @@ BddVarSet_to_varlist(
     auto ans_obj = PyList_New(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto var = varlist[i];
-      auto var_obj = PyBddVar::ToPyObject(var);
+      auto var_obj = PyBdd::ToPyObject(var);
       PyList_SET_ITEM(ans_obj, i, var_obj);
     }
     return ans_obj;

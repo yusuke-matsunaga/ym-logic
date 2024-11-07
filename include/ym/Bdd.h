@@ -441,6 +441,24 @@ public:
   bool
   is_const() const;
 
+  /// @brief 変数の時 true を返す．
+  bool
+  is_variable() const;
+
+  /// @brief リテラルの時 true を返す．
+  bool
+  is_literal() const;
+
+  /// @brief 肯定のリテラルの時 true を返す．
+  ///
+  /// - is_variable() と等価
+  bool
+  is_posilit() const;
+
+  /// @brief 否定のリテラルの時 true を返す．
+  bool
+  is_negalit() const;
+
   /// @brief 積項の時 true を返す．
   bool
   is_cube() const;

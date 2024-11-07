@@ -58,6 +58,30 @@ TEST_F(BddTest, copy_assignment)
   check(bdd1, exp_str);
 }
 
+TEST_F(BddTest, variable1)
+{
+  auto bdd = literal(0);
+  check(bdd, "10");
+}
+
+TEST_F(BddTest, variable2)
+{
+  auto bdd = ~literal(1);
+  check(bdd, "0101");
+}
+
+TEST_F(BddTest, variable3)
+{
+  auto bdd = literal(2);
+  check(bdd, "10101010");
+}
+
+TEST_F(BddTest, variable4)
+{
+  auto bdd = ~literal(3);
+  check(bdd, "0101010101010101");
+}
+
 TEST_F(BddTest, invert1)
 {
   const char* src_str = "1101";
@@ -1082,10 +1106,10 @@ TEST_F(BddTest, support_cup1)
   BddVarSet sup = sup1 + sup2;
   auto var_list = sup.to_varlist();
   EXPECT_EQ( 4, var_list.size() );
-  EXPECT_EQ( 0, var_list[0].index() );
-  EXPECT_EQ( 1, var_list[1].index() );
-  EXPECT_EQ( 2, var_list[2].index() );
-  EXPECT_EQ( 3, var_list[3].index() );
+  EXPECT_EQ( 0, var_list[0].id() );
+  EXPECT_EQ( 1, var_list[1].id() );
+  EXPECT_EQ( 2, var_list[2].id() );
+  EXPECT_EQ( 3, var_list[3].id() );
 }
 
 TEST_F(BddTest, support_cup1_invalid1)
@@ -1137,10 +1161,10 @@ TEST_F(BddTest, support_cup_int1)
   auto sup = sup1 += sup2;
   auto var_list = sup1.to_varlist();
   EXPECT_EQ( 4, var_list.size() );
-  EXPECT_EQ( 0, var_list[0].index() );
-  EXPECT_EQ( 1, var_list[1].index() );
-  EXPECT_EQ( 2, var_list[2].index() );
-  EXPECT_EQ( 3, var_list[3].index() );
+  EXPECT_EQ( 0, var_list[0].id() );
+  EXPECT_EQ( 1, var_list[1].id() );
+  EXPECT_EQ( 2, var_list[2].id() );
+  EXPECT_EQ( 3, var_list[3].id() );
 
   EXPECT_EQ( sup1, sup );
 }
@@ -1195,7 +1219,7 @@ TEST_F(BddTest, support_cap1)
   auto var_list = sup.to_varlist();
 
   EXPECT_EQ( 1, var_list.size() );
-  EXPECT_EQ( 1, var_list[0].index() );
+  EXPECT_EQ( 1, var_list[0].id() );
 }
 
 TEST_F(BddTest, support_cap1_invalid1)
@@ -1248,7 +1272,7 @@ TEST_F(BddTest, support_cap_int1)
   auto var_list = sup1.to_varlist();
 
   EXPECT_EQ( 1, var_list.size() );
-  EXPECT_EQ( 1, var_list[0].index() );
+  EXPECT_EQ( 1, var_list[0].id() );
 
   EXPECT_EQ( sup1, sup );
 }
@@ -1303,8 +1327,8 @@ TEST_F(BddTest, support_diff1)
   auto var_list = sup.to_varlist();
 
   EXPECT_EQ( 2, var_list.size() );
-  EXPECT_EQ( 0, var_list[0].index() );
-  EXPECT_EQ( 2, var_list[1].index() );
+  EXPECT_EQ( 0, var_list[0].id() );
+  EXPECT_EQ( 2, var_list[1].id() );
 }
 
 TEST_F(BddTest, support_diff1_invalid1)
@@ -1357,8 +1381,8 @@ TEST_F(BddTest, support_diff_int1)
   auto var_list = sup.to_varlist();
 
   EXPECT_EQ( 2, var_list.size() );
-  EXPECT_EQ( 0, var_list[0].index() );
-  EXPECT_EQ( 2, var_list[1].index() );
+  EXPECT_EQ( 0, var_list[0].id() );
+  EXPECT_EQ( 2, var_list[1].id() );
 
   EXPECT_EQ( sup1, sup );
 }
@@ -1721,7 +1745,7 @@ TEST_F(BddTest, root_decomp1)
   Bdd bdd1;
   auto top = bdd.root_decomp(bdd0, bdd1);
 
-  EXPECT_EQ( 0, top.index() );
+  EXPECT_EQ( 0, top.id() );
   EXPECT_TRUE( bdd0.is_zero() );
 
   Bdd bdd00;
@@ -1735,7 +1759,7 @@ TEST_F(BddTest, root_decomp1)
   Bdd bdd11;
   auto second = bdd1.root_decomp(bdd10, bdd11);
 
-  EXPECT_EQ( 1, second.index() );
+  EXPECT_EQ( 1, second.id() );
   EXPECT_TRUE( bdd10.is_zero() );
   EXPECT_TRUE( bdd11.is_one() );
 }
@@ -1759,7 +1783,7 @@ TEST_F(BddTest, root_decomp2)
   auto bdd0 = bdd.root_cofactor0();
   auto bdd1 = bdd.root_cofactor1();
 
-  EXPECT_EQ( 0, top.index() );
+  EXPECT_EQ( 0, top.id() );
   EXPECT_TRUE( bdd0.is_zero() );
 
   auto dummy = bdd0.root_var();
@@ -1774,7 +1798,7 @@ TEST_F(BddTest, root_decomp2)
   auto bdd10 = bdd1.root_cofactor0();
   auto bdd11 = bdd1.root_cofactor1();
 
-  EXPECT_EQ( 1, second.index() );
+  EXPECT_EQ( 1, second.id() );
   EXPECT_TRUE( bdd10.is_zero() );
   EXPECT_TRUE( bdd11.is_one() );
 }

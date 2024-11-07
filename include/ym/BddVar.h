@@ -26,6 +26,7 @@ class BddVar :
   public Bdd
 {
   friend class BddMgrImpl;
+  friend class Bdd;
   friend class BddLit;
 private:
 
@@ -44,7 +45,9 @@ private:
     const Bdd& src   ///< [in] コピー元のオブジェクト
   ) : Bdd{src}
   {
-    _check_valid();
+    if ( !src.is_variable() ) {
+      throw std::invalid_argument{"src is not a variable"};
+    }
   }
 
 
@@ -71,6 +74,16 @@ public:
     return BddVar{};
   }
 
+  /// @brief Bdd からの変換関数
+  ///
+  /// - bdd.is_variable() == true の時のみ成功する．
+  /// - bdd.is_variable() == false の時は BddVar::invalid() が返される．
+  static
+  BddVar
+  from_bdd(
+    const Bdd& bdd ///< [in] コピー元のオブジェクト
+  );
+
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -80,10 +93,6 @@ public:
   /// @brief 変数番号を返す．
   SizeType
   id() const;
-
-  /// @brief インデックスを返す．
-  SizeType
-  index() const;
 
   /// @brief 肯定のリテラルを返す．
   BddLit
@@ -117,9 +126,9 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 正しいBDDかチェックする．
-  void
-  _check_valid() const;
+  /// @brief インデックスを返す．
+  SizeType
+  index() const;
 
 };
 

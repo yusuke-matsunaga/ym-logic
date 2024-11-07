@@ -43,6 +43,17 @@ END_NONAMESPACE
 class BddLit :
   public Bdd
 {
+private:
+
+  /// @brief Bdd からのコピーコンストラクタ
+  ///
+  /// src はリテラル関数だけが正しい値
+  BddLit(
+    const Bdd& src   ///< [in] コピー元のオブジェクト
+  ) : Bdd{src}
+  {
+  }
+
 
 public:
 
@@ -71,6 +82,22 @@ public:
   invalid()
   {
     return BddLit{};
+  }
+
+  /// @brief Bdd からの変換関数
+  ///
+  /// - bdd.is_literal() == true の時のみ成功する．
+  /// - bdd.is_literal() == false の時は BddLit::invalid() が返される．
+  static
+  BddLit
+  from_bdd(
+    const Bdd& bdd ///< [in] コピー元のオブジェクト
+  )
+  {
+    if ( bdd.is_literal() ) {
+      return BddLit{bdd};
+    }
+    return BddLit::invalid();
   }
 
   /// @brief 肯定のリテラルを作るクラスメソッド

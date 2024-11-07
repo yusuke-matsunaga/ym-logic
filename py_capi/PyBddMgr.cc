@@ -8,8 +8,6 @@
 
 #include "pym/PyBddMgr.h"
 #include "pym/PyBdd.h"
-#include "pym/PyBddVar.h"
-#include "pym/PyBddLit.h"
 #include "pym/PyModule.h"
 #include "dd/BddMgrImpl.h"
 
@@ -65,6 +63,28 @@ BddMgr_dealloc(
   auto impl = bddmgr_obj->mVal;
   impl->dec();
   Py_TYPE(self)->tp_free(self);
+}
+
+PyObject*
+BddMgr_variable(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kw_list[] = {
+    "varid",
+    nullptr
+  };
+  SizeType varid = -1;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
+				    const_cast<char**>(kw_list),
+				    &varid) ) {
+    return nullptr;
+  }
+  auto bddmgr = PyBddMgr::Get(self);
+  auto var = bddmgr.variable(varid);
+  return PyBdd::ToPyObject(var);
 }
 
 PyObject*
@@ -158,6 +178,9 @@ BddMgr_disable_gc(
 
 // メソッド定義
 PyMethodDef BddMgr_methods[] = {
+  {"variable", reinterpret_cast<PyCFunction>(BddMgr_variable),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("return variable object")},
   {"copy", reinterpret_cast<PyCFunction>(BddMgr_copy),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("copy BDD")},

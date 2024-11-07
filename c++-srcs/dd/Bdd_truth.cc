@@ -16,29 +16,84 @@ BEGIN_NAMESPACE_YM_DD
 
 BEGIN_NONAMESPACE
 
-string
-truth_step(
-  DdEdge edge,
-  SizeType pos,
-  const vector<SizeType>& index_list
-)
+//////////////////////////////////////////////////////////////////////
+/// @class TruStrOp TruStrOp.h "TruStrOp.h"
+/// @brief 真理値表文字列を作る
+///
+/// 具体的には var_list を保持しているだけのクラス
+//////////////////////////////////////////////////////////////////////
+class TruStrOp
 {
-  if ( pos >= index_list.size() ) {
-    if ( edge.is_zero() ) {
+public:
+
+  /// @brief コンストラクタ
+  TruStrOp(
+    const vector<BddVar>& var_list ///< [in] 変数のリスト
+  ) : mVarList{var_list}
+  {
+  }
+
+  /// @brief デストラクタ
+  ~TruStrOp() = default;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  string
+  run(
+    const Bdd& bdd
+  ) const
+  {
+    return trustr_step(bdd, 0);
+  }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  string
+  trustr_step(
+    const Bdd& bdd,
+    SizeType pos
+  ) const;
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // 変数のリスト
+  vector<BddVar> mVarList;
+
+};
+
+string
+TruStrOp::trustr_step(
+  const Bdd& bdd,
+  SizeType pos
+) const
+{
+  if ( pos >= mVarList.size() ) {
+    if ( bdd.is_zero() ) {
       return "0";
     }
-    if ( edge.is_one() ) {
+    if ( bdd.is_one() ) {
       return "1";
     }
     throw std::invalid_argument("Bdd::to_truth(var_list): invalid var_list");
   }
-  auto index = index_list[pos];
-  // edge を index で分解する．
-  // -> edge0 と edge1
-  DdEdge edge0;
-  DdEdge edge1;
-  auto ans0 = truth_step(edge0, pos + 1, index_list);
-  auto ans1 = truth_step(edge1, pos + 1, index_list);
+  auto var = mVarList[pos];
+  // bdd を var で分解する．
+  auto bdd0 = bdd / ~var;
+  auto bdd1 = bdd / var;
+  auto ans0 = trustr_step(bdd0, pos + 1);
+  auto ans1 = trustr_step(bdd1, pos + 1);
   auto ans = ans1 + ans0;
   return ans;
 }
@@ -55,8 +110,8 @@ Bdd::to_truth(
     // 不正値の場合には空文字列を返す．
     return string{};
   }
-  auto index_list = mMgr->index_list(var_list);
-  return truth_step(DdEdge{mRoot}, 0, index_list);
+  TruStrOp op{var_list};
+  return op.run(*this);
 }
 
 END_NAMESPACE_YM_DD

@@ -8,10 +8,10 @@
 
 #include "pym/PyBdd.h"
 #include "pym/PyBddMgr.h"
-#include "pym/PyBddVar.h"
 #include "pym/PyBddVarSet.h"
-#include "pym/PyBddLit.h"
 #include "pym/PyModule.h"
+#include "ym/BddVar.h"
+#include "ym/BddLit.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -86,47 +86,29 @@ Bdd_cofactor(
     "inv",
     nullptr
   };
-  PyObject* obj1 = nullptr;
+  PyObject* bdd_obj = nullptr;
   int inv_int = 0;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$p",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!|$p",
 				    const_cast<char**>(kwlist),
-				    &obj1, &inv_int) ) {
+				    PyBdd::_typeobject(), &bdd_obj,
+				    &inv_int) ) {
     return nullptr;
   }
 
   auto inv = static_cast<bool>(inv_int);
   auto bdd = PyBdd::Get(self);
-  Bdd ans_bdd;
-  if ( PyBddVar::Check(obj1) ) {
-    auto& var = PyBddVar::_get(obj1);
-    ans_bdd = bdd.cofactor(var, inv);
+  auto bdd1 = PyBdd::Get(bdd_obj);
+  if ( inv ) {
+    bdd1 = ~bdd1;
   }
-  else if ( PyBddLit::Check(obj1) ) {
-    auto lit = PyBddLit::Get(obj1);
-    if ( inv ) {
-      lit = ~lit;
-    }
-    ans_bdd = bdd.cofactor(lit);
+  try {
+    auto ans_bdd = bdd.cofactor(bdd1);
     return PyBdd::ToPyObject(ans_bdd);
   }
-  else if ( PyBdd::Check(obj1) ) {
-    auto bdd1 = PyBdd::Get(obj1);
-    if ( inv ) {
-      bdd1 = ~bdd1;
-    }
-    try {
-      ans_bdd = bdd.cofactor(bdd1);
-    }
-    catch ( std::invalid_argument ) {
-      PyErr_SetString(PyExc_ValueError, "argument 1 must be a cube type BDD");
-      return nullptr;
-    }
-  }
-  else {
-    PyErr_SetString(PyExc_TypeError, "argument 1 must be an int or Literal or Cube");
+  catch ( std::invalid_argument ) {
+    PyErr_SetString(PyExc_ValueError, "argument 1 should be a cube type BDD");
     return nullptr;
   }
-  return PyBdd::ToPyObject(ans_bdd);
 }
 
 PyObject*
@@ -173,11 +155,16 @@ Bdd_compose(
   PyObject* opr_obj = nullptr;
   if ( PyArg_ParseTupleAndKeywords(args, kwds, "O!O!",
 				   const_cast<char**>(kw_list),
-				   PyBddVar::_typeobject(), &var_obj,
+				   PyBdd::_typeobject(), &var_obj,
 				   PyBdd::_typeobject(), &opr_obj) ) {
     return nullptr;
   }
-  auto var = PyBddVar::Get(var_obj);
+  auto var_bdd = PyBdd::Get(var_obj);
+  auto var = BddVar::from_bdd(var_bdd);
+  if ( var.is_invalid() ) {
+    PyErr_SetString(PyExc_TypeError, "var should be a variable");
+    return nullptr;
+  }
   auto opr = PyBdd::Get(opr_obj);
   auto bdd = PyBdd::Get(self);
   try {
@@ -208,12 +195,17 @@ Bdd_multi_compose(
     PyObject* var_obj = nullptr;
     PyObject* opr_obj = nullptr;
     if ( !PyArg_ParseTuple(obj1, "O!O!",
-			   PyBddVar::_typeobject(), &var_obj,
+			   PyBdd::_typeobject(), &var_obj,
 			   PyBdd::_typeobject(), &opr_obj) ) {
       Py_DecRef(values);
       return nullptr;
     }
-    auto var = PyBddVar::Get(var_obj);
+    auto var_bdd = PyBdd::Get(var_obj);
+    auto var = BddVar::from_bdd(var_bdd);
+    if ( var.is_invalid() ) {
+      PyErr_SetString(PyExc_TypeError, "var should be a variable");
+      return nullptr;
+    }
     auto opr = PyBdd::Get(opr_obj);
     compose_map.emplace(var, opr);
   }
@@ -247,12 +239,22 @@ Bdd_remap_vars(
     PyObject* var_obj = nullptr;
     PyObject* lit_obj = nullptr;
     if ( !PyArg_ParseTuple(obj1, "O!O!",
-			   PyBddVar::_typeobject(), &var_obj,
-			   PyBddLit::_typeobject(), &lit_obj) ) {
+			   PyBdd::_typeobject(), &var_obj,
+			   PyBdd::_typeobject(), &lit_obj) ) {
       return nullptr;
     }
-    auto var = PyBddVar::Get(var_obj);
-    auto lit = PyBddLit::Get(lit_obj);
+    auto var_bdd = PyBdd::Get(var_obj);
+    auto var = BddVar::from_bdd(var_bdd);
+    if ( var.is_invalid() ) {
+      PyErr_SetString(PyExc_TypeError, "var should be a variable");
+      return nullptr;
+    }
+    auto lit_bdd = PyBdd::Get(lit_obj);
+    auto lit = BddLit::from_bdd(lit_bdd);
+    if ( lit.is_invalid() ) {
+      PyErr_SetString(PyExc_TypeError, "operand should be a literal");
+      return nullptr;
+    }
     var_map.emplace(var, lit);
   }
   auto bdd = PyBdd::Get(self);
@@ -346,10 +348,15 @@ Bdd_check_sup(
   PyObject* var_obj = nullptr;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
 				    const_cast<char**>(kw_list),
-				    PyBddVar::_typeobject(), &var_obj) ) {
+				    PyBdd::_typeobject(), &var_obj) ) {
     return nullptr;
   }
-  auto var = PyBddVar::Get(var_obj);
+  auto var_bdd = PyBdd::Get(var_obj);
+  auto var = BddVar::from_bdd(var_bdd);
+  if ( var.is_invalid() ) {
+    PyErr_SetString(PyExc_TypeError, "var should be a variable");
+    return nullptr;
+  }
   auto bdd = PyBdd::Get(self);
   try {
     auto r = bdd.check_sup(var);
@@ -379,13 +386,23 @@ Bdd_check_sym(
   int inv_int = 0;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!O!|$p",
 				    const_cast<char**>(kw_list),
-				    PyBddVar::_typeobject(), &var1_obj,
-				    PyBddVar::_typeobject(), &var2_obj,
+				    PyBdd::_typeobject(), &var1_obj,
+				    PyBdd::_typeobject(), &var2_obj,
 				    &inv_int) ) {
     return nullptr;
   }
-  auto var1 = PyBddVar::Get(var1_obj);
-  auto var2 = PyBddVar::Get(var2_obj);
+  auto var1_bdd = PyBdd::Get(var1_obj);
+  auto var1 = BddVar::from_bdd(var1_bdd);
+  if ( var1.is_invalid() ) {
+    PyErr_SetString(PyExc_TypeError, "var1 should be a variable");
+    return nullptr;
+  }
+  auto var2_bdd = PyBdd::Get(var2_obj);
+  auto var2 = BddVar::from_bdd(var2_bdd);
+  if ( var2.is_invalid() ) {
+    PyErr_SetString(PyExc_TypeError, "var2 should be a variable");
+    return nullptr;
+  }
   auto inv = static_cast<bool>(inv_int);
   auto bdd = PyBdd::Get(self);
   try {
@@ -460,7 +477,7 @@ Bdd_root_decomp(
     Bdd f0;
     Bdd f1;
     auto var = bdd.root_decomp(f0, f1);
-    auto var_obj = PyBddVar::ToPyObject(var);
+    auto var_obj = PyBdd::ToPyObject(var);
     auto f0_obj = PyBdd::ToPyObject(f0);
     auto f1_obj = PyBdd::ToPyObject(f1);
     return Py_BuildValue("OOO", var_obj, f0_obj, f1_obj);
@@ -480,7 +497,7 @@ Bdd_root_var(
   auto bdd = PyBdd::Get(self);
   try {
     auto var = bdd.root_var();
-    return PyBddVar::ToPyObject(var);
+    return PyBdd::ToPyObject(var);
   }
   catch ( std::invalid_argument ) {
     PyErr_SetString(PyExc_ValueError, "invalid_argument");
@@ -570,7 +587,7 @@ Bdd_to_litlist(
     auto ans_obj = PyList_New(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto lit = litlist[i];
-      auto lit_obj = PyBddLit::ToPyObject(lit);
+      auto lit_obj = PyBdd::ToPyObject(lit);
       PyList_SET_ITEM(ans_obj, i, lit_obj);
     }
     return ans_obj;
@@ -606,11 +623,16 @@ Bdd_to_truth(
   vector<BddVar> var_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto var_obj = PySequence_GetItem(list_obj, i);
-    if ( !PyBddVar::Check(var_obj) ) {
+    if ( !PyBdd::Check(var_obj) ) {
       PyErr_SetString(PyExc_TypeError, "'var_list' should be a list of 'BddVar'");
       return nullptr;
     }
-    auto var = PyBddVar::Get(var_obj);
+    auto var_bdd = PyBdd::Get(var_obj);
+    auto var = BddVar::from_bdd(var_bdd);
+    if ( var.is_invalid() ) {
+      PyErr_SetString(PyExc_TypeError, "var should be a variable");
+      return nullptr;
+    }
     var_list[i] = var;
     Py_DECREF(var_obj);
   }

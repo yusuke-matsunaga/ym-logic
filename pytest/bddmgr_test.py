@@ -11,7 +11,7 @@ import pytest
 from ymlogic import Bdd, BddMgr
 
 
-def check(bdd, exp_str):
+def check(bdd, mgr, exp_str):
     n = len(exp_str)
     ni = 0
     while ( (1 << ni) < n ):
@@ -30,7 +30,8 @@ def check(bdd, exp_str):
             print(f"val = {val}")
             print(f"exp_val = {exp_val}")
             return False
-    truth_str = bdd.to_truth(ni)
+    var_list = [ mgr.variable(i) for i in range(ni) ]
+    truth_str = bdd.to_truth(var_list)
     if truth_str != exp_str:
         print(f'truth_str = {truth_str}')
         return False
@@ -45,7 +46,7 @@ def test_zero():
     assert bdd.is_zero()
     assert not bdd.is_one()
 
-    assert check(bdd, "0")
+    assert check(bdd, mgr, "0")
 
 def test_one():
     mgr = BddMgr()
@@ -56,13 +57,13 @@ def test_one():
     assert not bdd.is_zero()
     assert bdd.is_one()
 
-    assert check(bdd, "1")
+    assert check(bdd, mgr, "1")
 
-def test_literal1():
+def test_variable1():
     mgr = BddMgr()
 
-    var = 0
-    bdd = mgr.literal(var)
+    var = mgr.variable(0)
+    bdd = var
     assert not bdd.is_invalid()
     assert bdd.is_valid()
     assert not bdd.is_zero()
@@ -74,31 +75,13 @@ def test_literal1():
     assert f0.is_zero()
     assert f1.is_one()
     
-    assert check(bdd, "10")
+    assert check(bdd, mgr, "10")
     
-def test_literal2():
+def test_variable2():
     mgr = BddMgr()
 
-    var = 1
-    bdd = mgr.literal(var, inv=False)
-    assert not bdd.is_invalid()
-    assert bdd.is_valid()
-    assert not bdd.is_zero()
-    assert not bdd.is_one()
-
-    var1, f0, f1 = bdd.root_decomp()
-
-    assert var1 == var
-    assert f0.is_zero()
-    assert f1.is_one()
-
-    assert check(bdd, "1010")
-    
-def test_literal3():
-    mgr = BddMgr()
-
-    var = 1
-    bdd = mgr.literal(var, inv=True)
+    var = mgr.variable(1)
+    bdd = ~var
     assert not bdd.is_invalid()
     assert bdd.is_valid()
     assert not bdd.is_zero()
@@ -110,13 +93,13 @@ def test_literal3():
     assert f0.is_one()
     assert f1.is_zero()
 
-    assert check(bdd, "0101")
+    assert check(bdd, mgr, "0101")
 
-def test_posi_literal():
+def test_variable3():
     mgr = BddMgr()
 
-    var = 2
-    bdd = mgr.posi_literal(var)
+    var = mgr.variable(2)
+    bdd = var
     assert not bdd.is_invalid()
     assert bdd.is_valid()
     assert not bdd.is_zero()
@@ -128,13 +111,13 @@ def test_posi_literal():
     assert f0.is_zero()
     assert f1.is_one()
 
-    assert check(bdd, "10101010")
+    assert check(bdd, mgr, "10101010")
 
-def test_nega_literal():
+def test_variable4():
     mgr = BddMgr()
 
-    var = 3
-    bdd = mgr.nega_literal(var)
+    var = mgr.variable(3)
+    bdd = ~var
     assert not bdd.is_invalid()
     assert bdd.is_valid()
     assert not bdd.is_zero()
@@ -146,7 +129,7 @@ def test_nega_literal():
     assert f0.is_one()
     assert f1.is_zero()
 
-    assert check(bdd, "0101010101010101")
+    assert check(bdd, mgr, "0101010101010101")
 
 def test_from_truth1():
     mgr = BddMgr()
@@ -157,4 +140,4 @@ def test_from_truth1():
     assert not bdd.is_invalid()
     assert bdd.is_valid()
 
-    assert check(bdd, exp_str)
+    assert check(bdd, mgr, exp_str)
