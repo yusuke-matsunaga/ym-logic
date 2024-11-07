@@ -43,6 +43,13 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 新しい変数テーブルを追加する．
+  /// @return インデックスを返す．
+  SizeType
+  new_table(
+    SizeType varid ///< [in] 変数番号
+  );
+
   /// @brief ノードを作る．
   const DdNode*
   new_node(
@@ -50,6 +57,12 @@ public:
     DdEdge edge0,   ///< [in] 0枝
     DdEdge edge1    ///< [in] 1枝
   );
+
+  /// @brief インデックスから変数番号を返す．
+  SizeType
+  index_to_varid(
+    SizeType index ///< [in] インデックス
+  ) const;
 
   /// @brief DD の構造をコピーする．
   ///
@@ -182,6 +195,7 @@ private:
   // 参照回数
   SizeType mRefCount{0};
 
+#if 0
   // 表のサイズ
   SizeType mSize{0};
 
@@ -197,6 +211,10 @@ private:
 
   // テーブルを拡張する目安
   SizeType mNextLimit;
+#else
+  // インデックスごとのテーブル配列
+  vector<DdNodeTable*> mTableArray;
+#endif
 
   // ガーベージノード数
   SizeType mGarbageNum{0};

@@ -9,55 +9,10 @@
 #include "dd/DdNodeMgr.h"
 #include "dd/DdNode.h"
 #include "dd/DdEdge.h"
+#include "dd/DdNodeTable.h"
 
 
 BEGIN_NAMESPACE_YM_DD
-
-BEGIN_NONAMESPACE
-
-// 2のべき乗数を超えない最大の素数
-static
-SizeType tablesize[] = {
-  1021,
-  2039,
-  4093,
-  8191,
-  16381,
-  32749,
-  65521,
-  131071,
-  262139,
-  524287,
-  1048573,
-  2097143,
-  4194301,
-  8388593,
-  16777213,
-  33554393,
-  67108859,
-  134217689,
-  268435399,
-  536870909,
-  1073741789,
-  0
-};
-
-inline
-SizeType
-hash_func(
-  SizeType index,
-  DdEdge edge0,
-  DdEdge edge1
-)
-{
-  SizeType v{0};
-  v += index;
-  v += edge0.hash() * 13;
-  v += edge1.hash() * 17;
-  return v;
-}
-
-END_NONAMESPACE
 
 // @brief コンストラクタ
 DdNodeMgr::DdNodeMgr()
@@ -68,14 +23,18 @@ DdNodeMgr::DdNodeMgr()
 // @brief デストラクタ
 DdNodeMgr::~DdNodeMgr()
 {
-  DdNode* next = nullptr;
-  for ( SizeType i = 0; i < mSize; ++ i ) {
-    for ( auto node = mTable[i]; node != nullptr; node = next ) {
-      next = node->mLink;
-      delete node;
-    }
-  }
-  delete [] mTable;
+}
+
+// @brief 新しい変数テーブルを追加する．
+SizeType
+DdNodeMgr::new_table(
+  SizeType varid
+)
+{
+  auto table = new DdNodeTable{varid};
+  auto index = mTableArray.size();
+  mTableArray.push_back(table);
+  return index;
 }
 
 // @brief ノードを作る．
@@ -86,35 +45,13 @@ DdNodeMgr::new_node(
   DdEdge edge1
 )
 {
-  // ノードテーブルを探す．
-  // ハッシュ値を求める．
-  SizeType pos0 = hash_func(index, edge0, edge1);
-  SizeType pos = pos0 % mHashSize;
-  DdNode* node = nullptr;
-  for ( node = mTable[pos]; node != nullptr; node = node->mLink ) {
-    if ( node->index() == index &&
-	 node->edge0() == edge0 &&
-	 node->edge1() == edge1 ) {
-      // 見つけた．
-      break;
-    }
+  if ( index >= mTableArray.size() ) {
+    throw std::out_of_range("index is out of range");
   }
-  if ( node == nullptr ) {
-    // なかったので新規に作る．
-    node = new DdNode{index, edge0, edge1};
-    // テーブルに登録する．
-    if ( mNodeNum >= mNextLimit ) {
-      // テーブルを拡張する．
-      extend(mSize * 2);
-      // 位置は再計算する．
-      pos = pos0 % mHashSize;
-    }
-    auto prev = mTable[pos];
-    mTable[pos] = node;
-    node->mLink = prev;
-    ++ mNodeNum;
-    ++ mGarbageNum;
-  }
+  auto table = mTableArray[index];
+  auto node = table->new_node(index, edge0, edge1);
+  ++ mGarbageNum;
+
   return node;
 }
 
@@ -176,24 +113,9 @@ void
 DdNodeMgr::garbage_collection()
 {
   if ( mGcEnable && mGarbageNum >= mGcLimit ) {
-    SizeType dcount = 0;
-    for ( SizeType i = 0; i < mHashSize; ++ i ) {
-      DdNode** pprev = &mTable[i];
-      DdNode* node;
-      while ( (node = *pprev) != nullptr ) {
-	if ( node->mRefCount == 0 ) {
-	  *pprev = node->mLink;
-	  delete node;
-	  ++ dcount;
-	}
-	else {
-	  pprev = &node->mLink;
-	}
-      }
+    for ( auto& table: mTableArray ) {
+      table.garbage_collection();
     }
-    ASSERT_COND( dcount == mGarbageNum );
-    mNodeNum -= mGarbageNum;
-    mGarbageNum = 0;
   }
   after_gc();
 }
@@ -202,48 +124,6 @@ DdNodeMgr::garbage_collection()
 void
 DdNodeMgr::after_gc()
 {
-}
-
-// @brief 表を拡張する．
-void
-DdNodeMgr::extend(
-  SizeType req_size
-)
-{
-  SizeType old_size = mSize;
-  DdNode** old_table = mTable;
-
-  mSize = req_size;
-  mTable = new DdNode*[mSize];
-  for ( SizeType i = 0; i < mSize; ++ i ) {
-    mTable[i] = nullptr;
-  }
-
-  mHashSize = 0;
-  for ( auto size: tablesize ) {
-    if ( mSize / 2 < size && size < mSize ) {
-      mHashSize = size;
-      break;
-    }
-  }
-  ASSERT_COND( mHashSize != 0 );
-
-  if ( old_size > 0 ) {
-    // 昔のテーブルの内容をコピーする．
-    for ( SizeType i = 0; i < old_size; ++ i ) {
-      DdNode* next = nullptr;
-      for ( auto node = old_table[i]; node != nullptr; node = next ) {
-	next = node->mLink;
-	SizeType pos = hash_func(node->index(), node->edge0(), node->edge1()) % mHashSize;
-	auto prev = mTable[pos];
-	mTable[pos] = node;
-	node->mLink = prev;
-      }
-    }
-    delete [] old_table;
-  }
-
-  mNextLimit = static_cast<SizeType>(mSize * 1.8);
 }
 
 
