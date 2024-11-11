@@ -21,7 +21,7 @@ BEGIN_NAMESPACE_YM_DD
 class DdNode
 {
   friend class DdNodeMgr;
-
+  friend class DdNodeTable;
 public:
 
   /// @brief コンストラクタ

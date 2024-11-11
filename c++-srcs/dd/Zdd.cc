@@ -166,45 +166,45 @@ Zdd::diff_int(
   return *this;
 }
 
-// @brief 変数を含む集合を求める．
+// @brief 要素を含む集合を求める．
 Zdd
 Zdd::onset(
-  SizeType var
+  const ZddItem& item
 ) const
 {
   _check_valid();
-  return mMgr->onset(*this, var);
+  return mMgr->onset(*this, item);
 }
 
 // @brief onset を計算して代入する．
 Zdd&
 Zdd::onset_int(
-  SizeType var
+  const ZddItem& item
 )
 {
   _check_valid();
-  *this = mMgr->onset(*this, var);
+  *this = mMgr->onset(*this, item);
   return *this;
 }
 
-// @brief 変数を含まない集合を求める．
+// @brief 要素を含まない集合を求める．
 Zdd
 Zdd::offset(
-  SizeType var
+  const ZddItem& item
 ) const
 {
   _check_valid();
-  return mMgr->offset(*this, var);
+  return mMgr->offset(*this, item);
 }
 
 // @brief offset を計算して代入する．
 Zdd&
 Zdd::offset_int(
-  SizeType var
+  const ZddItem& item
 )
 {
   _check_valid();
-  *this = mMgr->offset(*this, var);
+  *this = mMgr->offset(*this, item);
   return *this;
 }
 
@@ -250,8 +250,27 @@ Zdd::is_const() const
   return is_valid() && DdEdge{mRoot}.is_const();
 }
 
+// @brief シングルトンの時 true を返す．
+bool
+Zdd::is_singleton() const
+{
+  if ( is_invalid() ) {
+    return false;
+  }
+  auto node = root().node();
+  auto e0 = node->edge0();
+  if ( !e0.is_zero() ) {
+    return false;
+  }
+  auto e1 = node->edge1();
+  if ( !e1.is_one() ) {
+    return false;
+  }
+  return true;
+}
+
 // @brief 根の変数とコファクターを求める．
-SizeType
+ZddItem
 Zdd::root_decomp(
   Zdd& f0,
   Zdd& f1
@@ -264,28 +283,30 @@ Zdd::root_decomp(
   if ( node == nullptr ) {
     f0 = *this;
     f1 = *this;
-    return BAD_VARID;
+    return ZddItem::invalid();
   }
   else {
     f0 = Zdd{mMgr, node->edge0()};
     f1 = Zdd{mMgr, node->edge1()};
-    return node->index();
+    auto item = mMgr->index_to_item(node->index());
+    return item;
   }
 }
 
 // @brief 根の変数を得る．
-SizeType
-Zdd::root_var() const
+ZddItem
+Zdd::root_item() const
 {
   _check_valid();
 
   auto root = DdEdge{mRoot};
   auto node = root.node();
   if ( node == nullptr ) {
-    return BAD_VARID;
+    return ZddItem::invalid();
   }
   else {
-    return node->index();
+    auto item = mMgr->index_to_item(node->index());
+    return item;
   }
 }
 
@@ -400,6 +421,55 @@ Zdd::size() const
 {
   _check_valid();
   return mMgr->zdd_size({*this});
+}
+
+// @brief 根の枝を返す．
+DdEdge
+Zdd::root() const
+{
+  return DdEdge{mRoot};
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// クラス ZddItem
+//////////////////////////////////////////////////////////////////////
+
+// @brief 内容を指定したコンストラクタ
+ZddItem::ZddItem(
+  ZddMgrImpl* mgr,
+  DdEdge root
+) : Zdd{mgr, root}
+{
+  _check_valid();
+}
+
+// @breif Zdd からの変換関数
+ZddItem
+ZddItem::from_zdd(
+  const Zdd& zdd
+)
+{
+  if ( zdd.is_singleton() ) {
+    return ZddItem{zdd};
+  }
+  return invalid();
+}
+
+// @brief 要素番号を返す．
+SizeType
+ZddItem::id() const
+{
+  return _mgr()->index_to_varid(index());
+}
+
+// @brief インデックスを返す．
+SizeType
+ZddItem::index() const
+{
+  _check_valid();
+  auto node = root().node();
+  return node->index();
 }
 
 END_NAMESPACE_YM_DD

@@ -17,7 +17,6 @@ BEGIN_NAMESPACE_YM_DD
 // @brief コンストラクタ
 DdNodeMgr::DdNodeMgr()
 {
-  extend(1024);
 }
 
 // @brief デストラクタ
@@ -25,16 +24,49 @@ DdNodeMgr::~DdNodeMgr()
 {
 }
 
+// @brief 変数の数を返す．
+SizeType
+DdNodeMgr::variable_num() const
+{
+  return mIndexArray.size();
+}
+
 // @brief 新しい変数テーブルを追加する．
 SizeType
-DdNodeMgr::new_table(
-  SizeType varid
-)
+DdNodeMgr::new_variable()
 {
+  auto varid = mTableArray.size();
   auto table = new DdNodeTable{varid};
-  auto index = mTableArray.size();
+  // 追加される変数のインデックスは最初は変数番号に等しい
+  auto index = varid;
   mTableArray.push_back(table);
-  return index;
+  mIndexArray.push_back(varid);
+  return varid;
+}
+
+// @brief 変数番号からインデックスを返す．
+SizeType
+DdNodeMgr::varid_to_index(
+  SizeType varid
+) const
+{
+  if ( varid >= mIndexArray.size() ) {
+    throw std::out_of_range{"varid is out of range"};
+  }
+  return mIndexArray[varid];
+}
+
+// @brief インデックスから変数番号を返す．
+SizeType
+DdNodeMgr::index_to_varid(
+  SizeType index
+) const
+{
+  if ( index >= mTableArray.size() ) {
+    throw std::out_of_range{"index is out of range"};
+  }
+  auto table = mTableArray[index];
+  return table->varid();
 }
 
 // @brief ノードを作る．
@@ -49,9 +81,11 @@ DdNodeMgr::new_node(
     throw std::out_of_range("index is out of range");
   }
   auto table = mTableArray[index];
-  auto node = table->new_node(index, edge0, edge1);
-  ++ mGarbageNum;
-
+  DdNode* node = nullptr;
+  if ( table->new_node(index, edge0, edge1, node) ) {
+    ++ mNodeNum;
+    ++ mGarbageNum;
+  }
   return node;
 }
 
@@ -113,9 +147,11 @@ void
 DdNodeMgr::garbage_collection()
 {
   if ( mGcEnable && mGarbageNum >= mGcLimit ) {
-    for ( auto& table: mTableArray ) {
-      table.garbage_collection();
+    for ( auto table: mTableArray ) {
+      auto n = table->garbage_collection();
+      mNodeNum -= n;
     }
+    mGarbageNum = 0;
   }
   after_gc();
 }

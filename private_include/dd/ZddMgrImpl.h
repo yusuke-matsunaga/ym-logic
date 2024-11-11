@@ -9,6 +9,8 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/Zdd.h"
+#include "ym/ZddItem.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 #include "dd/DdNode.h"
@@ -41,6 +43,20 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 要素数を返す．
+  SizeType
+  item_num() const;
+
+  /// @brief 要素を返す．
+  ZddItem
+  item(
+    SizeType elem_id ///< [in] 要素番号
+  );
+
+  /// @brief 要素のリストを返す．
+  vector<ZddItem>
+  item_list() const;
+
   /// @brief 空集合を作る．
   Zdd
   zero();
@@ -69,7 +85,7 @@ public:
   /// @brief 部分集合を作る．
   Zdd
   make_set(
-    const vector<SizeType>& elem_list
+    const vector<ZddItem>& item_list
   );
 
   /// @brief ZDD を反転する．
@@ -104,7 +120,7 @@ public:
   Zdd
   onset(
     const Zdd& zdd,
-    SizeType var    ///< [in] 変数
+    const ZddItem& item
   );
 
   /// @brief 変数を含まない集合を求める．
@@ -112,7 +128,7 @@ public:
   Zdd
   offset(
     const Zdd& zdd,
-    SizeType var    ///< [in] 変数
+    const ZddItem& item
   );
 
   /// @brief PRODUCT 演算を行う．
@@ -251,6 +267,12 @@ public:
     const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
+  /// @brief インデックスを要素に変換する．
+  ZddItem
+  index_to_item(
+    SizeType index ///< [in] インデックス
+  );
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -260,6 +282,32 @@ private:
   /// @brief garbage_collection() が呼ばれた後に呼び出される関数
   void
   after_gc() override;
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief このマネージャに属しているオブジェクトかチェックする．
+  void
+  _check_mgr(
+    const Zdd& zdd ///< [in] 対象のオブジェクト
+  ) const
+  {
+    if ( zdd.mMgr != this ) {
+      throw std::invalid_argument{"ZddMgr mismatch"};
+    }
+  }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // 要素のリスト
+  vector<ZddItem> mItemList;
 
 };
 

@@ -42,6 +42,29 @@ ZddMgr::~ZddMgr()
   mImpl->dec();
 }
 
+// @brief 要素数を返す．
+SizeType
+ZddMgr::item_num() const
+{
+  return mImpl->item_num();
+}
+
+// @brief 要素を返す．
+ZddItem
+ZddMgr::item(
+  SizeType item_id
+)
+{
+  return mImpl->item(item_id);
+}
+
+// @brief 要素のリストを返す．
+vector<ZddItem>
+ZddMgr::item_list() const
+{
+  return mImpl->item_list();
+}
+
 // @brief ZDD をコピーする．
 Zdd
 ZddMgr::copy(
@@ -68,10 +91,10 @@ ZddMgr::one()
 // @brief 部分集合を作る．
 Zdd
 ZddMgr::make_set(
-  const vector<SizeType> elem_list
+  const vector<ZddItem> item_list
 )
 {
-  return impl()->make_set(elem_list);
+  return impl()->make_set(item_list);
 }
 
 // @brief 複数のZDDのノード数を数える．

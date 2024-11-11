@@ -152,18 +152,18 @@ public:
     return product(right);
   }
 
-  /// @brief 変数を含む集合を求める．
+  /// @brief 要素を含む集合を求める．
   /// @return 結果を返す．
   Zdd
   onset(
-    SizeType var ///< [in] 変数
+    const ZddItem& item ///< [in] 要素
   ) const;
 
-  /// @brief 変数を含まない集合を求める．
+  /// @brief 要素を含まない集合を求める．
   /// @return 結果を返す．
   Zdd
   offset(
-    SizeType var ///< [in] 変数
+    const ZddItem& item ///< [in] 要素
   ) const;
 
   /// @}
@@ -253,14 +253,14 @@ public:
   /// @return 自分自身への参照を返す．
   Zdd&
   onset_int(
-    SizeType var ///< [in] 変数
+    const ZddItem& item ///< [in] 要素
   );
 
   /// @brief offset を計算して代入する．
   /// @return 自分自身への参照を返す．
   Zdd&
   offset_int(
-    SizeType var ///< [in] 変数
+    const ZddItem& item ///< [in] 要素
   );
 
   /// @}
@@ -299,21 +299,29 @@ public:
   bool
   is_const() const;
 
-  /// @brief 根の変数とコファクターを求める．
+  /// @brief シングルトンの時 true を返す．
+  bool
+  is_singleton() const;
+
+  /// @brief サポートのリストを返す．
+  vector<ZddItem>
+  get_support_list() const;
+
+  /// @brief 根の要素とコファクターを求める．
   ///
-  /// 自身が葉のノードの場合，BAD_VARID を返す．
+  /// 自身が葉のノードの場合，ZddItem::invalid() を返す．
   /// f0, f1 には自分自身が入る．
-  SizeType
+  ZddItem
   root_decomp(
     Zdd& f0, ///< [out] 負のコファクター
     Zdd& f1  ///< [out] 正のコファクター
   ) const;
 
-  /// @brief 根の変数を得る．
+  /// @brief 根の要素を得る．
   ///
-  /// 自身が葉のノードの場合，BAD_VARID を返す．
-  SizeType
-  root_var() const;
+  /// 自身が葉のノードの場合，ZddItem::invalid() を返す．
+  ZddItem
+  root_item() const;
 
   /// @brief 負のコファクターを返す．
   ///
@@ -414,9 +422,9 @@ public:
   //////////////////////////////////////////////////////////////////////
 
 
-private:
+protected:
   //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
+  // 継承クラスで用いられる関数
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 内容を指定したコンストラクタ
@@ -425,11 +433,16 @@ private:
     DdEdge root
   );
 
-  /// @brief 根の枝を変更する．
-  void
-  change_root(
-    DdEdge new_root ///< [in] 変更する枝
-  );
+  /// @brief マネージャ(の実体)を返す．
+  ZddMgrImpl*
+  _mgr() const
+  {
+    return mMgr;
+  }
+
+  /// @brief 根の枝を返す．
+  DdEdge
+  root() const;
 
   /// @brief 適正な状態か調べる．
   ///
@@ -441,6 +454,31 @@ private:
       throw std::invalid_argument("invalid ZDD");
     }
   }
+
+  /// @brief オペランドが同じマネージャに属しているかチェックする．
+  ///
+  /// 異なるマネージャに属している場合には std::invalid_argument 例外を送出する．
+  void
+  _check_mgr(
+    const Zdd& obj ///< [in] 対象のオブジェクト
+  ) const
+  {
+    if ( mMgr != obj.mMgr ) {
+      throw std::invalid_argument{"ZddMgr mismatch"};
+    }
+  }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 根の枝を変更する．
+  void
+  change_root(
+    DdEdge new_root ///< [in] 変更する枝
+  );
 
 
 private:

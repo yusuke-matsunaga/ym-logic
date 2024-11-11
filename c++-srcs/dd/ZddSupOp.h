@@ -1,8 +1,8 @@
-#ifndef ZDDCOFACTOROP_H
-#define ZDDCOFACTOROP_H
+#ifndef ZDDSUPOP_H
+#define ZDDSUPOP_H
 
-/// @file ZddCofactorOp.h
-/// @brief ZddCofactorOp のヘッダファイル
+/// @file ZddSupOp.h
+/// @brief ZddSupOp のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2023 Yusuke Matsunaga
@@ -10,33 +10,28 @@
 
 #include "ym/logic.h"
 #include "ZddOpBase.h"
-#include "dd/DdEdge.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 //////////////////////////////////////////////////////////////////////
-/// @class ZddCofactorOp ZddCofactorOp.h "ZddCofactorOp.h"
-/// @brief コファクターを計算するためのクラス
+/// @class ZddSupOp ZddSupOp.h "ZddSupOp.h"
+/// @brief サポートを表すZDDを求める演算
 //////////////////////////////////////////////////////////////////////
-class ZddCofactorOp :
+class ZddSupOp :
   public ZddOpBase
 {
 public:
 
   /// @brief コンストラクタ
-  ZddCofactorOp(
-    ZddMgrImpl& mgr, ///< [in] マネージャ
-    SizeType index,  ///< [in] インデックス
-    bool phase       ///< [in] 極性
-  ) : ZddOpBase{mgr},
-      mIndex{index},
-      mPhase{phase}
+  ZddSupOp(
+    ZddMgrImpl& mgr ///< [in] マネージャ
+  ) : ZddOpBase{mgr}
   {
   }
 
   /// @brief デストラクタ
-  ~ZddCofactorOp() = default;
+  ~ZddSupOp() = default;
 
 
 public:
@@ -44,10 +39,17 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief コファクターを計算する．
+  /// @brief サポートを表すZDDを返す．
   DdEdge
-  cofactor_step(
+  get_step(
     DdEdge edge ///< [in] 枝
+  );
+
+  /// @brief サポートのユニオンを求める．
+  DdEdge
+  cup_step(
+    DdEdge edge0,
+    DdEdge edge1
   );
 
 
@@ -56,17 +58,11 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // インデックス
-  SizeType mIndex;
-
-  // 極性
-  bool mPhase;
-
   // 演算結果テーブル
-  unordered_map<DdEdge, DdEdge> mTable;
+  unordered_map<const DdNode*, DdEdge> mTable;
 
 };
 
 END_NAMESPACE_YM_DD
 
-#endif // ZDD_COFACTOROP_H
+#endif // ZDDSUPOP_H

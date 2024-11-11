@@ -41,11 +41,10 @@ BddMgrImpl::variable(
 )
 {
   while ( mVarList.size() <= varid ) {
-    auto index = mVarIdList.size();
-    auto var = index_to_var(index);
-    auto id = mVarList.size();
-    mVarList.push_back(var);
-    mVarIdList.push_back(id);
+    auto varid1 = new_variable();
+    auto index1 = varid_to_index(varid1);
+    auto var1 = index_to_var(index1);
+    mVarList.push_back(var1);
   }
   return mVarList[varid];
 }
@@ -74,35 +73,16 @@ BddMgrImpl::one()
 // @brief BDD を作る．
 Bdd
 BddMgrImpl::bdd(
-  SizeType index,   ///< [in] インデックス
-  const Bdd& edge0, ///< [in] 0枝
-  const Bdd& edge1  ///< [in] 1枝
+  SizeType index,
+  const Bdd& bdd0,
+  const Bdd& bdd1
 )
 {
-  edge0._check_valid();
-  edge1._check_valid();
-  auto tmp0 = copy(edge0);
-  auto tmp1 = copy(edge1);
-  auto e = new_node(index, _edge(tmp0), _edge(tmp1));
-  return _bdd(e);
-}
-
-// @brief BDD をコピーする．
-Bdd
-BddMgrImpl::copy(
-  const Bdd& src
-)
-{
-  if ( src.mMgr == nullptr ) {
-    // 不正な ZDD はそのまま
-    return src;
-  }
-  if ( src.mMgr == this ) {
-    // 自分自身に属している場合もそのまま
-    return src;
-  }
-  CopyOp op{*this};
-  auto e = op.copy_step(_edge(src));
+  bdd0._check_valid();
+  bdd1._check_valid();
+  _check_mgr(bdd0);
+  _check_mgr(bdd1);
+  auto e = new_node(index, _edge(bdd0), _edge(bdd1));
   return _bdd(e);
 }
 
@@ -128,18 +108,6 @@ BddMgrImpl::index_to_var(
 {
   auto e = new_node(index, DdEdge::zero(), DdEdge::one());
   return BddVar{this, e};
-}
-
-// @brief インデックスを変数番号に変換する．
-SizeType
-BddMgrImpl::index_to_varid(
-  SizeType index
-) const
-{
-  if ( index >= mVarIdList.size() ) {
-    throw std::out_of_range{"index is out of range"};
-  }
-  return mVarIdList[index];
 }
 
 // @brief 複数のBDDのノード数を数える．
@@ -321,26 +289,22 @@ BddMgrImpl::dump(
   const vector<Bdd>& bdd_list
 )
 {
-  SizeType n = bdd_list.size();
-  vector<Bdd> tmp_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto& bdd = bdd_list[i];
-    bdd._check_valid();
-    auto tmp = copy(bdd);
-    tmp_list[i] = tmp;
+  // sanity check
+  for ( auto& bdd: bdd_list ) {
+    _check_mgr(bdd);
   }
 
   // シグネチャ
   s.write_signature(BDD_SIG);
   // 要素数
+  auto n = bdd_list.size();
   s.write_vint(n);
-
   if ( n == 0 ) {
     return;
   }
 
   vector<SizeType> root_edge_list;
-  auto node_list = node_info(tmp_list, root_edge_list);
+  auto node_list = node_info(bdd_list, root_edge_list);
   // 根の枝
   for ( auto root_edge: root_edge_list ) {
     s.write_vint(root_edge);

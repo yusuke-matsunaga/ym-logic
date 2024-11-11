@@ -23,10 +23,10 @@ BddMgrImpl::cofactor(
 )
 {
   bdd._check_valid();
-  auto tmp = copy(bdd);
+  _check_mgr(bdd);
   auto cube = literal(var, inv);
   BddCofactorOp op{*this};
-  auto e = op.op_step(_edge(tmp), _edge(cube));
+  auto e = op.op_step(_edge(bdd), _edge(cube));
   return _bdd(e);
 }
 
@@ -40,10 +40,10 @@ BddMgrImpl::cofactor(
   bdd._check_valid();
   cube._check_valid();
   cube._check_cube();
-  auto tmp0 = copy(bdd);
-  auto tmp1 = copy(cube);
+  _check_mgr(bdd);
+  _check_mgr(cube);
   BddCofactorOp op{*this};
-  auto e = op.op_step(_edge(tmp0), _edge(tmp1));
+  auto e = op.op_step(_edge(bdd), _edge(cube));
   return _bdd(e);
 }
 

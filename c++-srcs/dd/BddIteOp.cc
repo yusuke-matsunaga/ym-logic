@@ -20,10 +20,10 @@ BddMgrImpl::and_op(
 {
   left._check_valid();
   right._check_valid();
-  auto tmp0 = copy(left);
-  auto tmp1 = copy(right);
+  _check_mgr(left);
+  _check_mgr(right);
   BddIteOp op{*this};
-  auto e = op.and_step(_edge(tmp0), _edge(tmp1));
+  auto e = op.and_step(_edge(left), _edge(right));
   return _bdd(e);
 }
 
@@ -36,10 +36,10 @@ BddMgrImpl::xor_op(
 {
   left._check_valid();
   right._check_valid();
-  auto tmp0 = copy(left);
-  auto tmp1 = copy(right);
+  _check_mgr(left);
+  _check_mgr(right);
   BddIteOp op{*this};
-  auto e = op.xor_step(_edge(tmp0), _edge(tmp1));
+  auto e = op.xor_step(_edge(left), _edge(right));
   return _bdd(e);
 }
 
@@ -54,11 +54,11 @@ BddMgrImpl::ite(
   e0._check_valid();
   e1._check_valid();
   e2._check_valid();
-  auto tmp0 = copy(e0);
-  auto tmp1 = copy(e1);
-  auto tmp2 = copy(e2);
+  _check_mgr(e0);
+  _check_mgr(e1);
+  _check_mgr(e2);
   BddIteOp op{*this};
-  auto e = op.ite_step(_edge(tmp0), _edge(tmp1), _edge(tmp2));
+  auto e = op.ite_step(_edge(e0), _edge(e1), _edge(e2));
   return _bdd(e);
 }
 

@@ -84,6 +84,7 @@ set (tvfunc_SOURCES
 
 set (dd_SOURCES
   dd/DdNodeMgr.cc
+  dd/DdNodeTable.cc
   dd/CopyOp.cc
   dd/DotGen.cc
   dd/DotWriter.cc
@@ -97,6 +98,7 @@ set (dd_SOURCES
   dd/BddCheckSupOp.cc
   dd/BddCheckSymOp.cc
   dd/BddCofactorOp.cc
+  dd/BddCopyOp.cc
   dd/BddIteOp.cc
   dd/BddSimp.cc
   dd/BddMultiCompOp.cc
@@ -113,8 +115,10 @@ set (dd_SOURCES
   dd/ZddCupOp.cc
   dd/ZddDiffOp.cc
   dd/ZddCofactorOp.cc
+  dd/ZddCopyOp.cc
   dd/ZddCountOp.cc
   dd/ZddProductOp.cc
+  dd/ZddSupOp.cc
   )
 
 set (ym_logic_SOURCES

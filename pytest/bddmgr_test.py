@@ -134,8 +134,9 @@ def test_variable4():
 def test_from_truth1():
     mgr = BddMgr()
 
+    var_list = [ mgr.variable(i) for i in range(3) ]
     exp_str = "10010110"
-    bdd = mgr.from_truth(exp_str)
+    bdd = mgr.from_truth(var_list, exp_str)
 
     assert not bdd.is_invalid()
     assert bdd.is_valid()

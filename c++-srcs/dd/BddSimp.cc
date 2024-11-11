@@ -20,10 +20,10 @@ BddMgrImpl::simplify(
 {
   on._check_valid();
   dc._check_valid();
-  auto tmp0 = copy(on);
-  auto tmp1 = copy(dc);
+  _check_mgr(on);
+  _check_mgr(dc);
   BddSimp op{*this};
-  auto e = op.simp_step(_edge(tmp0), _edge(tmp1));
+  auto e = op.simp_step(_edge(on), _edge(dc));
   return _bdd(e);
 }
 

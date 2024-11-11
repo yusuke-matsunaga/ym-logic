@@ -106,6 +106,7 @@ class BddLit;
 class BddMgr;
 
 class Zdd;
+class ZddItem;
 class ZddMgr;
 
 END_NAMESPACE_YM_DD
@@ -156,6 +157,7 @@ using nsDd::BddLit;
 using nsDd::BddMgr;
 
 using nsDd::Zdd;
+using nsDd::ZddItem;
 using nsDd::ZddMgr;
 
 /// @brief 不正な変数番号

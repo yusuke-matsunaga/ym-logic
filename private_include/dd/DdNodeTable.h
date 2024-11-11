@@ -47,11 +47,13 @@ public:
   }
 
   /// @brief ノードを作る．
-  const DdNode*
+  /// @return 新規にノードを作った時の true を返す．
+  bool
   new_node(
     SizeType index, ///< [in] インデックス
     DdEdge edge0,   ///< [in] 0枝
-    DdEdge edge1    ///< [in] 1枝
+    DdEdge edge1,   ///< [in] 1枝
+    DdNode*& node   ///< [out] 結果を格納する変数
   );
 
   /// @brief ノード数を返す．
@@ -62,7 +64,8 @@ public:
   }
 
   /// @brief ガーベージコレクションを行う．
-  void
+  /// @return 削除したノード数を返す．
+  SizeType
   garbage_collection();
 
 
@@ -101,9 +104,6 @@ private:
 
   // テーブルを拡張する目安
   SizeType mNextLimit;
-
-  // ガーベージノード数
-  SizeType mGarbageNum{0};
 
 };
 

@@ -27,6 +27,35 @@ ZddMgrImpl::~ZddMgrImpl()
 {
 }
 
+// @brief 要素数を返す．
+SizeType
+ZddMgrImpl::item_num() const
+{
+  return mItemList.size();
+}
+
+// @brief 要素を返す．
+ZddItem
+ZddMgrImpl::item(
+  SizeType elem_id
+)
+{
+  while ( mItemList.size() <= elem_id ) {
+    auto id1 = new_variable();
+    auto index1 = varid_to_index(id1);
+    auto item1 = index_to_item(index1);
+    mItemList.push_back(item1);
+  }
+  return mItemList[elem_id];
+}
+
+// @brief 要素のリストを返す．
+vector<ZddItem>
+ZddMgrImpl::item_list() const
+{
+  return mItemList;
+}
+
 // @brief 空集合を作る．
 Zdd
 ZddMgrImpl::zero()
@@ -51,38 +80,25 @@ ZddMgrImpl::zdd(
 {
   edge0._check_valid();
   edge1._check_valid();
-  auto tmp0 = copy(edge0);
-  auto tmp1 = copy(edge1);
-  auto e = new_node(index, _edge(tmp0), _edge(tmp1));
-  return _zdd(e);
-}
-
-// @brief ZDD をコピーする．
-Zdd
-ZddMgrImpl::copy(
-  const Zdd& src
-)
-{
-  if ( src.mMgr == nullptr ) {
-    // 不正な ZDD はそのまま
-    return src;
-  }
-  if ( src.mMgr == this ) {
-    // 自分自身に属している場合もそのまま
-    return src;
-  }
-  CopyOp op{*this};
-  auto e = op.copy_step(_edge(src));
+  _check_mgr(edge0);
+  _check_mgr(edge1);
+  auto e = new_node(index, _edge(edge0), _edge(edge1));
   return _zdd(e);
 }
 
 // @brief 部分集合を作る．
 Zdd
 ZddMgrImpl::make_set(
-  const vector<SizeType>& elem_list
+  const vector<ZddItem>& item_list
 )
 {
-  vector<SizeType> tmp_list{elem_list};
+  auto n = item_list.size();
+  vector<SizeType> tmp_list;
+  tmp_list.reserve(n);
+  for ( auto& item: item_list ) {
+    auto index = item.index();
+    tmp_list.push_back(index);
+  }
   sort(tmp_list.begin(), tmp_list.end(), [](int a, int b) {
     return a > b;
   });
@@ -164,6 +180,16 @@ ZddMgrImpl::root_list(
     edge_list[i] = _edge(zdd);
   }
   return edge_list;
+}
+
+// @brief インデックスを要素に変換する．
+ZddItem
+ZddMgrImpl::index_to_item(
+  SizeType index
+)
+{
+  auto e = new_node(index, DdEdge::zero(), DdEdge::one());
+  return ZddItem{this, e};
 }
 
 // @brief 複数のZDDのノードの情報を取り出す．

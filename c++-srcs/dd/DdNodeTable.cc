@@ -58,7 +58,9 @@ hash_func(
 END_NONAMESPACE
 
 // @brief コンストラクタ
-DdNodeTable::DdNodeTable()
+DdNodeTable::DdNodeTable(
+  SizeType varid
+) : mVarId{varid}
 {
   extend(1024);
 }
@@ -77,46 +79,43 @@ DdNodeTable::~DdNodeTable()
 }
 
 // @brief ノードを作る．
-const DdNode*
+bool
 DdNodeTable::new_node(
   SizeType index,
   DdEdge edge0,
-  DdEdge edge1
+  DdEdge edge1,
+  DdNode*& node
 )
 {
   // ノードテーブルを探す．
   // ハッシュ値を求める．
   auto pos0 = hash_func(edge0, edge1);
   auto pos = pos0 % mHashSize;
-  DdNode* node = nullptr;
   for ( node = mTable[pos]; node != nullptr; node = node->mLink ) {
     if ( node->edge0() == edge0 &&
 	 node->edge1() == edge1 ) {
       // 見つけた．
-      break;
+      return false;
     }
   }
-  if ( node == nullptr ) {
-    // なかったので新規に作る．
-    node = new DdNode{index, edge0, edge1};
-    // テーブルに登録する．
-    if ( mNodeNum >= mNextLimit ) {
-      // テーブルを拡張する．
-      extend(mSize * 2);
-      // 位置は再計算する．
-      pos = pos0 % mHashSize;
-    }
-    auto prev = mTable[pos];
-    mTable[pos] = node;
-    node->mLink = prev;
-    ++ mNodeNum;
-    ++ mGarbageNum;
+  // なかったので新規に作る．
+  node = new DdNode{index, edge0, edge1};
+  // テーブルに登録する．
+  if ( mNodeNum >= mNextLimit ) {
+    // テーブルを拡張する．
+    extend(mSize * 2);
+    // 位置は再計算する．
+    pos = pos0 % mHashSize;
   }
-  return node;
+  auto prev = mTable[pos];
+  mTable[pos] = node;
+  node->mLink = prev;
+  ++ mNodeNum;
+  return true;
 }
 
 // @brief ガーベージコレクションを行う．
-void
+SizeType
 DdNodeTable::garbage_collection()
 {
   SizeType dcount = 0;
@@ -135,7 +134,7 @@ DdNodeTable::garbage_collection()
     }
   }
   mNodeNum -= dcount;
-  mGarbageNum = 0;
+  return dcount;
 }
 
 // @brief 表を拡張する．
@@ -168,7 +167,7 @@ DdNodeTable::extend(
       DdNode* next = nullptr;
       for ( auto node = old_table[i]; node != nullptr; node = next ) {
 	next = node->mLink;
-	SizeType pos = hash_func(node->index(), node->edge0(), node->edge1()) % mHashSize;
+	auto pos = hash_func(node->edge0(), node->edge1()) % mHashSize;
 	auto prev = mTable[pos];
 	mTable[pos] = node;
 	node->mLink = prev;

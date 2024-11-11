@@ -222,12 +222,6 @@ public:
     SizeType index ///< [in] インデックス
   );
 
-  /// @brief インデックスを変数番号に変換する．
-  SizeType
-  index_to_varid(
-    SizeType index ///< [in] インデックス
-  ) const;
-
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -390,9 +384,6 @@ private:
 
   // 変数のリスト
   vector<BddVar> mVarList;
-
-  // index をキーにして変数番号を格納するリスト
-  vector<SizeType> mVarIdList;
 
 };
 

@@ -15,6 +15,8 @@
 
 BEGIN_NAMESPACE_YM_DD
 
+class DdNodeTable;
+
 //////////////////////////////////////////////////////////////////////
 /// @class DdNodeMgr DdNodeMgr.h "DdNodeMgr.h"
 /// @brief DdNode の管理を行うクラス
@@ -43,20 +45,20 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 新しい変数テーブルを追加する．
-  /// @return インデックスを返す．
+  /// @brief 変数の数を返す．
   SizeType
-  new_table(
-    SizeType varid ///< [in] 変数番号
-  );
+  variable_num() const;
 
-  /// @brief ノードを作る．
-  const DdNode*
-  new_node(
-    SizeType index, ///< [in] インデックス
-    DdEdge edge0,   ///< [in] 0枝
-    DdEdge edge1    ///< [in] 1枝
-  );
+  /// @brief 新しい変数テーブルを追加する．
+  /// @return 変数番号を返す．
+  SizeType
+  new_variable();
+
+  /// @brief 変数番号からインデックスを返す．
+  SizeType
+  varid_to_index(
+    SizeType varid
+  ) const;
 
   /// @brief インデックスから変数番号を返す．
   SizeType
@@ -64,12 +66,12 @@ public:
     SizeType index ///< [in] インデックス
   ) const;
 
-  /// @brief DD の構造をコピーする．
-  ///
-  /// edge は他のマネージャーに属すると仮定する．
-  DdEdge
-  copy(
-    DdEdge edge ///< [in] 根の枝
+  /// @brief ノードを作る．
+  const DdNode*
+  new_node(
+    SizeType index, ///< [in] インデックス
+    DdEdge edge0,   ///< [in] 0枝
+    DdEdge edge1    ///< [in] 1枝
   );
 
   /// @brief ノード(枝)の参照回数を増やす．
@@ -175,12 +177,6 @@ private:
     DdEdge edge ///< [in] 対象の枝
   );
 
-  /// @brief 表を拡張する．
-  void
-  extend(
-    SizeType req_size ///< [in] 要求サイズ
-  );
-
   /// @brief garbage_collection() が呼ばれた後に呼び出される関数
   virtual
   void
@@ -212,9 +208,16 @@ private:
   // テーブルを拡張する目安
   SizeType mNextLimit;
 #else
+
+  // 変数番号をキーにしてインデックスを格納する配列
+  vector<SizeType> mIndexArray;
+
   // インデックスごとのテーブル配列
   vector<DdNodeTable*> mTableArray;
 #endif
+
+  // 格納されているノード数
+  SizeType mNodeNum{0};
 
   // ガーベージノード数
   SizeType mGarbageNum{0};

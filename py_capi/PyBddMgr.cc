@@ -106,7 +106,8 @@ BddMgr_copy(
   }
   auto src_bdd = PyBdd::Get(bdd_obj);
   auto bddmgr = PyBddMgr::Get(self);
-  auto ans_bdd = bddmgr.copy(src_bdd);
+  //auto ans_bdd = bddmgr.copy(src_bdd);
+  Bdd ans_bdd;
   return PyBdd::ToPyObject(ans_bdd);
 }
 
@@ -135,16 +136,44 @@ BddMgr_one(
 PyObject*
 BddMgr_from_truth(
   PyObject* self,
-  PyObject* args
+  PyObject* args,
+  PyObject* kwds
 )
 {
+  static const char* kw_list[] = {
+    "var_list",
+    "func_str",
+    nullptr
+  };
+  PyObject* var_list_obj = nullptr;
   const char* str = nullptr;
-  if ( !PyArg_ParseTuple(args, "s", &str) ) {
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "Os",
+				    const_cast<char**>(kw_list),
+				    &var_list_obj, &str) ) {
     return nullptr;
   }
+  static const char* err_msg = "var_list should be a sequence of BddVar";
+  if ( !PySequence_Check(var_list_obj) ) {
+    PyErr_SetString(PyExc_TypeError, err_msg);
+    return nullptr;
+  }
+  auto n = PySequence_Size(var_list_obj);
+  vector<BddVar> var_list(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto var_obj = PySequence_GetItem(var_list_obj, i);
+    if ( !PyBdd::Check(var_obj) ) {
+      PyErr_SetString(PyExc_TypeError, err_msg);
+      return nullptr;
+    }
+    auto var = PyBdd::Get(var_obj);
+    if ( !var.is_variable() ) {
+      PyErr_SetString(PyExc_TypeError, err_msg);
+      return nullptr;
+    }
+    var_list[i] = BddVar::from_bdd(var);
+  }
+  auto bddmgr = PyBddMgr::Get(self);
   try {
-    auto bddmgr = PyBddMgr::Get(self);
-    vector<BddVar> var_list;
     auto ans_bdd = bddmgr.from_truth(var_list, str);
     return PyBdd::ToPyObject(ans_bdd);
   }
@@ -188,7 +217,8 @@ PyMethodDef BddMgr_methods[] = {
    PyDoc_STR("generate Zero")},
   {"one", BddMgr_one, METH_NOARGS,
    PyDoc_STR("generate One")},
-  {"from_truth", BddMgr_from_truth, METH_VARARGS,
+  {"from_truth", reinterpret_cast<PyCFunction>(BddMgr_from_truth),
+   METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("generate BDD from truth-table string")},
   {"enable_gc", BddMgr_enable_gc, METH_NOARGS,
    PyDoc_STR("enable GC")},

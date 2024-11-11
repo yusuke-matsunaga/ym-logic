@@ -17,13 +17,15 @@ BEGIN_NAMESPACE_YM_DD
 Zdd
 ZddMgrImpl::onset(
   const Zdd& dd,
-  SizeType var    ///< [in] 変数
+  const ZddItem& item
 )
 {
   dd._check_valid();
-  auto tmp_zdd = copy(dd);
-  ZddCofactorOp op(*this, var, true);
-  auto e = op.cofactor_step(_edge(tmp_zdd));
+  item._check_valid();
+  _check_mgr(dd);
+  _check_mgr(item);
+  ZddCofactorOp op(*this, item.index(), true);
+  auto e = op.cofactor_step(_edge(dd));
   return _zdd(e);
 }
 
@@ -31,13 +33,15 @@ ZddMgrImpl::onset(
 Zdd
 ZddMgrImpl::offset(
   const Zdd& dd,
-  SizeType var
+  const ZddItem& item
 )
 {
   dd._check_valid();
-  auto tmp_zdd = copy(dd);
-  ZddCofactorOp op(*this, var, false);
-  auto e = op.cofactor_step(_edge(tmp_zdd));
+  item._check_valid();
+  _check_mgr(dd);
+  _check_mgr(item);
+  ZddCofactorOp op(*this, item.index(), false);
+  auto e = op.cofactor_step(_edge(dd));
   return _zdd(e);
 }
 
