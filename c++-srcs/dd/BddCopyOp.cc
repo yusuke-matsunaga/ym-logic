@@ -33,6 +33,10 @@ BddMgrImpl::copy(
   }
   // src のサポート変数を取り出す．
   auto var_list = src.get_support_list();
+  for ( auto& var: var_list ) {
+    auto vid = var.id();
+    (void) variable(vid);
+  }
   // var_list を変数順にしたがって並べ替える．
   sort(var_list.begin(), var_list.end(),
        [&](const BddVar& a, const BddVar& b){
