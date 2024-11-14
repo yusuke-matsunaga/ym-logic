@@ -100,18 +100,43 @@ DdNodeTable::new_node(
   }
   // なかったので新規に作る．
   node = new DdNode{index, edge0, edge1};
+  reg_node(node);
+  return true;
+}
+
+// @brief ノードを登録する．
+void
+DdNodeTable::reg_node(
+  DdNode* node
+)
+{
   // テーブルに登録する．
   if ( mNodeNum >= mNextLimit ) {
     // テーブルを拡張する．
     extend(mSize * 2);
-    // 位置は再計算する．
-    pos = pos0 % mHashSize;
   }
+  auto pos0 = hash_func(node->edge0(), node->edge1());
+  auto pos = pos0 % mHashSize;
   auto prev = mTable[pos];
   mTable[pos] = node;
   node->mLink = prev;
   ++ mNodeNum;
-  return true;
+}
+
+// @brief 内容を取り出す．
+vector<DdNode*>
+DdNodeTable::move()
+{
+  vector<DdNode*> node_list;
+  node_list.reserve(mNodeNum);
+  for ( SizeType i = 0; i < mHashSize; ++ i ) {
+    for ( auto node = mTable[i]; node != nullptr; node = node->mLink ) {
+      node_list.push_back(node);
+    }
+    mTable[i] = nullptr;
+  }
+  mNodeNum = 0;
+  return node_list;
 }
 
 // @brief ガーベージコレクションを行う．

@@ -23,6 +23,7 @@ BEGIN_NAMESPACE_YM_DD
 //////////////////////////////////////////////////////////////////////
 class DdNodeTable
 {
+  friend class DdNodeIter;
 public:
 
   /// @brief コンストラクタ
@@ -56,12 +57,24 @@ public:
     DdNode*& node   ///< [out] 結果を格納する変数
   );
 
+  /// @brief ノードを登録する．
+  void
+  reg_node(
+    DdNode* node
+  );
+
   /// @brief ノード数を返す．
   SizeType
   node_num()
   {
     return mNodeNum;
   }
+
+  /// @brief 内容を取り出す．
+  ///
+  /// 自身は空になる．
+  vector<DdNode*>
+  move();
 
   /// @brief ガーベージコレクションを行う．
   /// @return 削除したノード数を返す．

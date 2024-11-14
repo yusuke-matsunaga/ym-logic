@@ -11,11 +11,10 @@
 #include "ym/logic.h"
 #include "dd/DdNode.h"
 #include "dd/DdEdge.h"
+#include "dd/DdNodeTable.h"
 
 
 BEGIN_NAMESPACE_YM_DD
-
-class DdNodeTable;
 
 //////////////////////////////////////////////////////////////////////
 /// @class DdNodeMgr DdNodeMgr.h "DdNodeMgr.h"
@@ -74,6 +73,12 @@ public:
     DdEdge edge1    ///< [in] 1枝
   );
 
+  /// @brief ノードを登録する．
+  void
+  reg_node(
+    DdNode* node
+  );
+
   /// @brief ノード(枝)の参照回数を増やす．
   void
   activate(
@@ -85,6 +90,33 @@ public:
   deactivate(
     DdEdge edge ///< [in] 対象の枝
   );
+
+  /// @brief 指定されたインデックスのノードリストを得る．
+  ///
+  /// テーブルは空になる．
+  vector<DdNode*>
+  extract_node_list(
+    SizeType index ///< [in] インデックス
+  )
+  {
+    if ( index >= mTableArray.size() ) {
+      throw std::out_of_range{"index is out of range"};
+    }
+    return mTableArray[index]->move();
+  }
+
+  /// @brief 隣り合うインデックスの変数を交換する．
+  void
+  swap_index(
+    SizeType index
+  )
+  {
+    auto index2 = index + 1;
+    auto var1 = mIndexArray[index];
+    auto var2 = mIndexArray[index2];
+    mIndexArray[index] = var2;
+    mIndexArray[index2] = var1;
+  }
 
   /// @brief ガーベージコレクションを行う．
   void
@@ -191,30 +223,11 @@ private:
   // 参照回数
   SizeType mRefCount{0};
 
-#if 0
-  // 表のサイズ
-  SizeType mSize{0};
-
-  // ハッシュ用のモジュロサイズ
-  // 素数になるように調整されている．
-  SizeType mHashSize{0};
-
-  // 表の本体
-  DdNode** mTable{nullptr};
-
-  // 格納されているノード数
-  SizeType mNodeNum{0};
-
-  // テーブルを拡張する目安
-  SizeType mNextLimit;
-#else
-
   // 変数番号をキーにしてインデックスを格納する配列
   vector<SizeType> mIndexArray;
 
   // インデックスごとのテーブル配列
   vector<DdNodeTable*> mTableArray;
-#endif
 
   // 格納されているノード数
   SizeType mNodeNum{0};

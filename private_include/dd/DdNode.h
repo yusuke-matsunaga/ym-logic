@@ -72,16 +72,26 @@ public:
     return mRefCount;
   }
 
-  /// @brief ハッシュ関数
-  SizeType
-  hash() const
+  /// @brief インデックスを変更する．
+  void
+  chg_index(
+    SizeType new_index
+  )
   {
-    SizeType v{0};
-    v += mIndex;
-    v += mEdge0.hash() * 13;
-    v += mEdge1.hash() * 17;
-    return v;
+    mIndex = new_index;
   }
+
+  /// @brief 枝を変更する．
+  void
+  chg_edges(
+    DdEdge new_edge0,
+    DdEdge new_edge1
+  )
+  {
+    mEdge0 = new_edge0;
+    mEdge1 = new_edge1;
+  }
+
 
 
 private:
@@ -133,22 +143,5 @@ operator!=(
 }
 
 END_NAMESPACE_YM_DD
-
-BEGIN_NAMESPACE_STD
-
-/// @brief ハッシュ用の関数オブジェクト
-template<>
-struct hash<nsYm::nsDd::DdNode>
-{
-  SizeType
-  operator()(
-    const nsYm::nsDd::DdNode& key
-  ) const
-  {
-    return key.hash();
-  }
-};
-
-END_NAMESPACE_STD
 
 #endif // DDNODE_H

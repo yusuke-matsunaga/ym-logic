@@ -64,6 +64,15 @@ BddMgr::variable_list() const
   return mImpl->variable_list();
 }
 
+// @brief 変数順を設定する．
+void
+BddMgr::set_variable_order(
+  const vector<BddVar>& order_list
+)
+{
+  mImpl->set_variable_order(order_list);
+}
+
 // @brief BDD をコピーする．
 Bdd
 BddMgr::copy(

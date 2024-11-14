@@ -110,6 +110,84 @@ BddMgrImpl::index_to_var(
   return BddVar{this, e};
 }
 
+// @brief 変数順を設定する．
+void
+BddMgrImpl::set_variable_order(
+  const vector<BddVar>& order_list
+)
+{
+}
+
+BEGIN_NONAMESPACE
+
+inline
+bool
+_decomp(
+  DdEdge edge,
+  SizeType index1,
+  std::unordered_set<const void*>& node_mark,
+  DdEdge& edge0,
+  DdEdge& edge1
+)
+{
+  if ( !edge.is_const() ) {
+    auto node = edge.node();
+    auto inv = edge.inv();
+    auto index = node->index();
+    if ( index == index1 ) {
+      node_mark.emplace(reinterpret_cast<const void*>(node));
+      edge0 = node->edge0() ^ inv;
+      edge1 = node->edge1() ^ inv;
+      return true;
+    }
+  }
+  edge0 = edge;
+  edge1 = edge;
+  return false;
+}
+
+END_NONAMESPACE
+
+// @brief 隣り合うインデックスを交換する．
+void
+BddMgrImpl::swap_index(
+  SizeType index
+)
+{
+  auto index2 = index + 1;
+  auto node_list = extract_node_list(index);
+  auto node_list2 = extract_node_list(index2);
+  // index のレベルのノードから参照されている node_list2 のノードに印を付ける．
+  std::unordered_set<const void*> node_mark;
+  for ( auto node: node_list ) {
+    DdEdge e00, e01;
+    auto d0 = _decomp(node->edge0(), index2, node_mark, e00, e01);
+    DdEdge e10, e11;
+    auto d1 = _decomp(node->edge1(), index2, node_mark, e10, e11);
+    if ( !d0 && !d1 ) {
+      // index2 のノードがなかった．
+      // node のインデックスを index2 にするだけでよい．
+      node->chg_index(index2);
+    }
+    else {
+      // 2つのレベルのインデックスを入れ替える．
+      auto new_e0 = new_node(index2, e00, e10);
+      auto new_e1 = new_node(index2, e01, e11);
+      node->chg_edges(new_e0, new_e1);
+    }
+    reg_node(node);
+  }
+  for ( auto node: node_list2 ) {
+    if ( node_mark.count(reinterpret_cast<const void*>(node)) > 0 ) {
+      // 処理済み
+      continue;
+    }
+    node->chg_index(index);
+    reg_node(node);
+  }
+  DdNodeMgr::swap_index(index);
+}
+
 // @brief 複数のBDDのノード数を数える．
 SizeType
 BddMgrImpl::bdd_size(

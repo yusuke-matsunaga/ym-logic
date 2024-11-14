@@ -89,6 +89,17 @@ DdNodeMgr::new_node(
   return node;
 }
 
+// @brief ノードを登録する．
+void
+DdNodeMgr::reg_node(
+  DdNode* node
+)
+{
+  auto index = node->index();
+  auto table = mTableArray[index];
+  table->reg_node(node);
+}
+
 // @brief ノード(枝)の参照回数を増やす．
 void
 DdNodeMgr::activate(

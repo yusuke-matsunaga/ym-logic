@@ -82,6 +82,12 @@ public:
   vector<BddVar>
   variable_list() const;
 
+  /// @brief 変数順を設定する．
+  void
+  set_variable_order(
+    const vector<BddVar>& order_list ///< [in] 変数順を表すリスト
+  );
+
 
 public:
   //////////////////////////////////////////////////////////////////////
