@@ -100,7 +100,12 @@ DdNodeTable::new_node(
   }
   // なかったので新規に作る．
   node = new DdNode{index, edge0, edge1};
+  if ( mNodeNum >= mNextLimit ) {
+    // テーブルを拡張する．
+    extend(mSize * 2);
+  }
   reg_node(node);
+  ++ mNodeNum;
   return true;
 }
 
@@ -111,32 +116,46 @@ DdNodeTable::reg_node(
 )
 {
   // テーブルに登録する．
-  if ( mNodeNum >= mNextLimit ) {
-    // テーブルを拡張する．
-    extend(mSize * 2);
-  }
   auto pos0 = hash_func(node->edge0(), node->edge1());
   auto pos = pos0 % mHashSize;
   auto prev = mTable[pos];
   mTable[pos] = node;
   node->mLink = prev;
-  ++ mNodeNum;
 }
 
-// @brief 内容を取り出す．
-vector<DdNode*>
-DdNodeTable::move()
+// @brief 保持しているノードのインデックスを変更する．
+void
+DdNodeTable::chg_index(
+  SizeType new_index
+)
 {
-  vector<DdNode*> node_list;
-  node_list.reserve(mNodeNum);
   for ( SizeType i = 0; i < mHashSize; ++ i ) {
     for ( auto node = mTable[i]; node != nullptr; node = node->mLink ) {
-      node_list.push_back(node);
+      node->chg_index(new_index);
     }
-    mTable[i] = nullptr;
   }
-  mNodeNum = 0;
-  return node_list;
+}
+
+// @brief 保持しているノードに対して処理を行う．
+void
+DdNodeTable::scan(
+  std::function<bool(DdNode*)> func
+)
+{
+  for ( SizeType i = 0; i < mHashSize; ++ i ) {
+    DdNode** pprev = &mTable[i];
+    DdNode* node = mTable[i];
+    while ( node != nullptr ) {
+      auto next = node->mLink;
+      if ( func(node) ) {
+	*pprev = next;
+      }
+      else {
+	pprev = &node->mLink;
+      }
+      node = next;
+    }
+  }
 }
 
 // @brief ガーベージコレクションを行う．
@@ -144,20 +163,14 @@ SizeType
 DdNodeTable::garbage_collection()
 {
   SizeType dcount = 0;
-  for ( SizeType i = 0; i < mHashSize; ++ i ) {
-    DdNode** pprev = &mTable[i];
-    DdNode* node;
-    while ( (node = *pprev) != nullptr ) {
-      if ( node->mRefCount == 0 ) {
-	*pprev = node->mLink;
-	delete node;
-	++ dcount;
-      }
-      else {
-	pprev = &node->mLink;
-      }
+  scan([&](DdNode* node){
+    if ( node->mRefCount == 0 ) {
+      delete node;
+      ++ dcount;
+      return true;
     }
-  }
+    return false;
+  });
   mNodeNum -= dcount;
   return dcount;
 }

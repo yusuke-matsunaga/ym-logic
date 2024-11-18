@@ -91,20 +91,6 @@ public:
     DdEdge edge ///< [in] 対象の枝
   );
 
-  /// @brief 指定されたインデックスのノードリストを得る．
-  ///
-  /// テーブルは空になる．
-  vector<DdNode*>
-  extract_node_list(
-    SizeType index ///< [in] インデックス
-  )
-  {
-    if ( index >= mTableArray.size() ) {
-      throw std::out_of_range{"index is out of range"};
-    }
-    return mTableArray[index]->move();
-  }
-
   /// @brief 隣り合うインデックスの変数を交換する．
   void
   swap_index(
@@ -112,21 +98,59 @@ public:
   )
   {
     auto index2 = index + 1;
-    auto var1 = mIndexArray[index];
-    auto var2 = mIndexArray[index2];
-    mIndexArray[index] = var2;
-    mIndexArray[index2] = var1;
+    std::swap(mTableArray[index], mTableArray[index2]);
+    auto table1 = mTableArray[index];
+    table1->chg_index(index);
+    auto table2 = mTableArray[index2];
+    table2->chg_index(index2);
+
+    auto varid1 = index_to_varid(index);
+    auto varid2 = index_to_varid(index2);
+    std::swap(mIndexArray[varid1], mIndexArray[varid2]);
+  }
+
+  /// @brief 保持しているノードに対して処理を行う．
+  void
+  scan(
+    SizeType index,
+    std::function<bool(DdNode*)> func
+  )
+  {
+    _check_index(index);
+    mTableArray[index]->scan(func);
   }
 
   /// @brief ガーベージコレクションを行う．
   void
   garbage_collection();
 
+  /// @brief ガーベージコレクションを行う．
+  void
+  garbage_collection(
+    SizeType index ///< [in] インデックス
+  )
+  {
+    _check_index(index);
+    auto n = mTableArray[index]->garbage_collection();
+    mNodeNum -= n;
+    mGarbageNum -= n;
+  }
+
   /// @brief ノード数を返す．
   SizeType
-  node_num()
+  node_num() const
   {
     return mNodeNum;
+  }
+
+  /// @brief 特定のインデックスのノード数を返す．
+  SizeType
+  node_num(
+    SizeType index ///< [in] インデックス
+  ) const
+  {
+    _check_index(index);
+    return mTableArray[index]->node_num();
   }
 
   /// @brief ガーベージノード数を返す．
@@ -213,6 +237,17 @@ private:
   virtual
   void
   after_gc();
+
+  /// @brief インデックスが適正か調べる．
+  void
+  _check_index(
+    SizeType index
+  ) const
+  {
+    if ( index >= mTableArray.size() ) {
+      throw std::out_of_range{"index is out of range"};
+    }
+  }
 
 
 private:

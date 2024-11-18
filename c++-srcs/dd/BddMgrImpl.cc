@@ -116,6 +116,89 @@ BddMgrImpl::set_variable_order(
   const vector<BddVar>& order_list
 )
 {
+  auto nv = variable_num();
+  if ( order_list.size() != nv ) {
+    throw std::invalid_argument{"order_list.size() mismatch"};
+  }
+  for ( SizeType i = 0; i < nv; ++ i ) {
+    auto dst_index = nv - i - 1;
+    auto var = order_list[dst_index];
+    auto varid = var.id();
+    auto index = varid_to_index(varid);
+    // index を dst_index に移動する．
+    for ( ; index < dst_index; ++ index ) {
+      swap_index(index);
+    }
+  }
+}
+
+// @brief sifting を用いて変数順の最適化を行う．
+void
+BddMgrImpl::dvo_sift()
+{
+  auto nv = variable_num();
+  vector<bool> lock_array(nv, false);
+  while ( true ) {
+    // ノード数が最大の変数を選ぶ．
+    SizeType max_num = 0;
+    SizeType max_varid = 0;
+    SizeType max_index = 0;
+    for ( SizeType varid = 0; varid < nv; ++ varid ) {
+      if ( lock_array[varid] ) {
+	// ロックされていたらスキップする．
+	continue;
+      }
+      auto index = varid_to_index(varid);
+      auto n = node_num(index);
+      if ( max_num < n ) {
+	max_num = n;
+	max_varid = varid;
+	max_index = index;
+      }
+    }
+    if ( max_num == 0 ) {
+      break;
+    }
+    dvo_sub(max_index);
+    lock_array[max_varid] = true;
+  }
+}
+
+// @brief dvo_sift() の下請け関数
+void
+BddMgrImpl::dvo_sub(
+  SizeType index
+)
+{
+  auto best_num = node_num();
+  auto best_index = index;
+  // index を最下部まで移動させる．
+  auto bottom_index = variable_num() - 1;
+  for ( SizeType index1 = index; index1 < bottom_index; ++ index1 ) {
+    swap_index(index1);
+    auto num = node_num();
+    if ( best_num > num ) {
+      best_num = num;
+      best_index = index1 + 1;
+    }
+  }
+  // 最下部のインデックスを index まで移動させる．
+  for ( SizeType index1 = variable_num(); index1 > index; -- index1 ) {
+    swap_index(index1 - 1);
+  }
+  // index を最上部まで移動させる．
+  for ( SizeType index1 = index; index1 > 0; -- index1 ) {
+    swap_index(index1 - 1);
+    auto num = node_num();
+    if ( best_num > num ) {
+      best_num = num;
+      best_index = index1 - 1;
+    }
+  }
+  // 最上部のインデックスを best_index まで移動させる．
+  for ( SizeType index1 = 0; index1 < best_index; ++ index1 ) {
+    swap_index(index1);
+  }
 }
 
 BEGIN_NONAMESPACE
@@ -125,7 +208,6 @@ bool
 _decomp(
   DdEdge edge,
   SizeType index1,
-  std::unordered_set<const void*>& node_mark,
   DdEdge& edge0,
   DdEdge& edge1
 )
@@ -135,7 +217,6 @@ _decomp(
     auto inv = edge.inv();
     auto index = node->index();
     if ( index == index1 ) {
-      node_mark.emplace(reinterpret_cast<const void*>(node));
       edge0 = node->edge0() ^ inv;
       edge1 = node->edge1() ^ inv;
       return true;
@@ -154,38 +235,43 @@ BddMgrImpl::swap_index(
   SizeType index
 )
 {
+  // まず単純に隣り合うレベルのテーブルを入れ替える．
+  DdNodeMgr::swap_index(index);
+
+  // 問題は index + 1 の子供を持つ index のノード
+  //
+  //      index                index
+  //     /     \              /     \
+  // index+1 index+1  ==> index+1 index+1
+  //  /   \   /   \        /   \    /   \
+  // e00 e01 e10 e11      e00 e10  e01 e11
+  //
+  // 他のノードから参照されているので同じノードの
+  // 中身を入れ替える．
   auto index2 = index + 1;
-  auto node_list = extract_node_list(index);
-  auto node_list2 = extract_node_list(index2);
-  // index のレベルのノードから参照されている node_list2 のノードに印を付ける．
-  std::unordered_set<const void*> node_mark;
-  for ( auto node: node_list ) {
+  scan(index, [&](DdNode* node) {
+    DdEdge e0 = node->edge0();
     DdEdge e00, e01;
-    auto d0 = _decomp(node->edge0(), index2, node_mark, e00, e01);
+    auto d0 = _decomp(e0, index, e00, e01);
+    DdEdge e1 = node->edge1();
     DdEdge e10, e11;
-    auto d1 = _decomp(node->edge1(), index2, node_mark, e10, e11);
-    if ( !d0 && !d1 ) {
-      // index2 のノードがなかった．
-      // node のインデックスを index2 にするだけでよい．
-      node->chg_index(index2);
-    }
-    else {
+    auto d1 = _decomp(e1, index, e10, e11);
+    if ( d0 || d1 ) {
       // 2つのレベルのインデックスを入れ替える．
       auto new_e0 = new_node(index2, e00, e10);
       auto new_e1 = new_node(index2, e01, e11);
+      node->chg_index(index);
       node->chg_edges(new_e0, new_e1);
+      activate(new_e0);
+      activate(new_e1);
+      deactivate(e0);
+      deactivate(e1);
+      reg_node(node);
+      return true;
     }
-    reg_node(node);
-  }
-  for ( auto node: node_list2 ) {
-    if ( node_mark.count(reinterpret_cast<const void*>(node)) > 0 ) {
-      // 処理済み
-      continue;
-    }
-    node->chg_index(index);
-    reg_node(node);
-  }
-  DdNodeMgr::swap_index(index);
+    return false;
+  });
+  garbage_collection(index);
 }
 
 // @brief 複数のBDDのノード数を数える．

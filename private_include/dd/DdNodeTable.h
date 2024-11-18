@@ -70,11 +70,17 @@ public:
     return mNodeNum;
   }
 
-  /// @brief 内容を取り出す．
-  ///
-  /// 自身は空になる．
-  vector<DdNode*>
-  move();
+  /// @brief 保持しているノードのインデックスを変更する．
+  void
+  chg_index(
+    SizeType new_index
+  );
+
+  /// @brief 保持しているノードに対して処理を行う．
+  void
+  scan(
+    std::function<bool(DdNode*)> func
+  );
 
   /// @brief ガーベージコレクションを行う．
   /// @return 削除したノード数を返す．
