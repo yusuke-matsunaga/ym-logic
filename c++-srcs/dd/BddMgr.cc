@@ -64,6 +64,13 @@ BddMgr::variable_list() const
   return mImpl->variable_list();
 }
 
+// @brief 変数順を表す変数のリストを返す．
+vector<BddVar>
+BddMgr::variable_order() const
+{
+  return mImpl->variable_order();
+}
+
 // @brief 変数順を設定する．
 void
 BddMgr::set_variable_order(

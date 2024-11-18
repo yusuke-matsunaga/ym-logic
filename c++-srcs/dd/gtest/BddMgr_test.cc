@@ -119,7 +119,6 @@ TEST_F(BddTest, from_truth2)
   check(bdd, exp_str);
 }
 
-#if 0
 TEST_F(BddTest, copy)
 {
   mMgr.variable(3);
@@ -128,16 +127,12 @@ TEST_F(BddTest, copy)
   Bdd bdd = mMgr.from_truth(var_list, exp_str);
 
   BddMgr mgr1;
-  //Bdd bdd1 = mgr1.copy(bdd);
-  Bdd bdd1;
-  check(bdd1, exp_str);
+  Bdd bdd1 = mgr1.copy(bdd);
+  EXPECT_TRUE( bdd1.is_valid() );
 
-  //Bdd bdd2 = mMgr.copy(bdd1);
-  Bdd bdd2;
-
-  EXPECT_EQ( bdd, bdd2 );
+  auto bdd2 = mMgr.copy(bdd1);
+  check(bdd2, exp_str);
 }
-#endif
 
 TEST_F(BddTest, mgr_copy)
 {
@@ -162,6 +157,29 @@ TEST_F(BddTest, mgr_lifetime)
 
   EXPECT_TRUE( bdd.is_valid() );
   //check(bdd, "10");
+}
+
+TEST_F(BddTest, mgr_var_ordering)
+{
+  auto var0 = variable(0);
+  auto var1 = variable(1);
+  auto var2 = variable(2);
+  auto var3 = variable(3);
+
+  EXPECT_EQ( 0, var0.id() );
+  EXPECT_EQ( 1, var1.id() );
+  EXPECT_EQ( 2, var2.id() );
+  EXPECT_EQ( 3, var3.id() );
+
+  auto v_list = mMgr.variable_list();
+  vector<BddVar> exp_v_list{var0, var1, var2, var3};
+  EXPECT_EQ( exp_v_list, v_list );
+
+  mMgr.set_variable_order({var3, var2, var1, var0});
+
+  auto o_list = mMgr.variable_order();
+  vector<BddVar> exp_o_list{var3, var2, var1, var0};
+  EXPECT_EQ( exp_o_list, o_list );
 }
 
 END_NAMESPACE_YM

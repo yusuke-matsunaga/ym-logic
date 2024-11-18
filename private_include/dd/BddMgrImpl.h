@@ -222,6 +222,12 @@ public:
     SizeType index ///< [in] インデックス
   );
 
+  /// @brief 変数順を表す変数のリストを返す．
+  ///
+  /// インデックスの昇順に並んでいる
+  vector<BddVar>
+  variable_order() const;
+
   /// @brief 変数順を設定する．
   void
   set_variable_order(

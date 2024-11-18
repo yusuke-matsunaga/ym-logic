@@ -110,6 +110,20 @@ BddMgrImpl::index_to_var(
   return BddVar{this, e};
 }
 
+// @brief 変数順を表す変数のリストを返す．
+vector<BddVar>
+BddMgrImpl::variable_order() const
+{
+  vector<BddVar> order_list{mVarList};
+  sort(order_list.begin(), order_list.end(),
+       [&](const BddVar& a, const BddVar& b){
+	 auto index_a = varid_to_index(a.id());
+	 auto index_b = varid_to_index(b.id());
+	 return index_a < index_b;
+       });
+  return order_list;
+}
+
 // @brief 変数順を設定する．
 void
 BddMgrImpl::set_variable_order(
