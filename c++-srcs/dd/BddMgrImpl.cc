@@ -525,11 +525,16 @@ BddMgrImpl::restore(
     return {};
   }
 
-  SizeType nv = s.read_vint();
+  SizeType nv = variable_num();
+  SizeType nv1 = s.read_vint();
+  nv = std::max(nv, nv1);
   vector<BddVar> var_list(nv);
-  for ( SizeType i = 0; i < nv; ++ i ) {
+  for ( SizeType i = 0; i < nv1; ++ i ) {
     auto varid = s.read_vint();
     var_list[i] = variable(varid);
+  }
+  for ( SizeType i = nv1; i < nv; ++ i ) {
+    var_list[i] = variable(i);
   }
   set_variable_order(var_list);
 
