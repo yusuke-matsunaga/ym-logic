@@ -24,7 +24,7 @@ ZddMgrImpl::onset(
   item._check_valid();
   _check_mgr(dd);
   _check_mgr(item);
-  ZddCofactorOp op(*this, item.index(), true);
+  ZddCofactorOp op(*this, item.level(), true);
   auto e = op.cofactor_step(_edge(dd));
   return _zdd(e);
 }
@@ -40,7 +40,7 @@ ZddMgrImpl::offset(
   item._check_valid();
   _check_mgr(dd);
   _check_mgr(item);
-  ZddCofactorOp op(*this, item.index(), false);
+  ZddCofactorOp op(*this, item.level(), false);
   auto e = op.cofactor_step(_edge(dd));
   return _zdd(e);
 }
@@ -66,12 +66,12 @@ ZddCofactorOp::cofactor_step(
   }
 
   auto node = edge.node();
-  auto index = node->index();
+  auto level = node->level();
   auto edge0 = node->edge0();
   auto edge1 = node->edge1();
 
   DdEdge result;
-  if ( index == mIndex ) {
+  if ( level == mLevel ) {
     if ( mPhase ) {
       result = cofactor_step(edge1);
     }
@@ -79,12 +79,12 @@ ZddCofactorOp::cofactor_step(
       result = cofactor_step(edge0);
     }
   }
-  else if ( index < mIndex ) {
+  else if ( level < mLevel ) {
     auto ans0 = cofactor_step(edge0);
     auto ans1 = cofactor_step(edge1);
-    result = new_node(index, ans0, ans1);;
+    result = new_node(level, ans0, ans1);;
   }
-  else { // index > mIndex
+  else { // level > mLevel
     result = edge;
   }
   mTable.emplace(edge, result);

@@ -25,7 +25,7 @@ Zdd::get_support_list() const
   vector<ZddItem> item_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
-    auto item = mMgr->index_to_item(node->index());
+    auto item = mMgr->level_to_item(node->level());
     item_list.push_back(item);
     edge = node->edge1();
   }
@@ -51,13 +51,13 @@ ZddSupOp::get_step(
   if ( mTable.count(node) > 0 ) {
     return mTable.at(node);
   }
-  auto index = node->index();
+  auto level = node->level();
   auto edge0 = node->edge0();
   auto edge1 = node->edge1();
   auto r0 = get_step(edge0);
   auto r1 = get_step(edge1);
   auto tmp = cup_step(r0, r1);
-  auto result = new_node(index, DdEdge::zero(), tmp);
+  auto result = new_node(level, DdEdge::zero(), tmp);
   mTable.emplace(node, result);
   return result;
 }
@@ -81,20 +81,20 @@ ZddSupOp::cup_step(
 
   auto node0 = edge0.node();
   auto node1 = edge1.node();
-  auto index0 = node0->index();
-  auto index1 = node1->index();
-  auto top = std::min(index0, index1);
-  if ( index0 < index1 ) {
+  auto level0 = node0->level();
+  auto level1 = node1->level();
+  auto top = std::min(level0, level1);
+  if ( level0 < level1 ) {
     auto tmp = cup_step(node0->edge1(), edge1);
-    return new_node(index0, DdEdge::zero(), tmp);
+    return new_node(level0, DdEdge::zero(), tmp);
   }
-  else if ( index0 == index1 ) {
+  else if ( level0 == level1 ) {
     auto tmp = cup_step(node0->edge1(), node1->edge1());
-    return new_node(index0, DdEdge::zero(), tmp);
+    return new_node(level0, DdEdge::zero(), tmp);
   }
   else {
     auto tmp = cup_step(edge0, node1->edge1());
-    return new_node(index1, DdEdge::zero(), tmp);
+    return new_node(level1, DdEdge::zero(), tmp);
   }
 }
 

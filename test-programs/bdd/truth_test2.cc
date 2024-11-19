@@ -51,12 +51,11 @@ truth_test(
     SizeType nsingle = 0;
     SizeType nall = 0;
     vector<Bdd> func_list;
-    vector<BddVar> var_list;
     while ( getline(s, buf) ) {
       TvFunc tvf{buf};
       ni = tvf.input_num();
       auto truth_str = tvf.str();
-      auto f = mgr.from_truth(var_list, truth_str);
+      auto f = mgr.from_truth(truth_str);
       func_list.push_back(f);
       nsingle += f.size();
     }

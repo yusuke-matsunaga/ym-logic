@@ -14,22 +14,6 @@
 
 BEGIN_NAMESPACE_YM
 
-BEGIN_NONAMESPACE
-
-SizeType
-log2(
-  SizeType x
-)
-{
-  SizeType y = 0;
-  while ( (1 << y) < x ) {
-    ++ y;
-  }
-  return y;
-}
-
-END_NONAMESPACE
-
 int
 dot_test(
   int argc,
@@ -46,23 +30,25 @@ dot_test(
 
     BddMgr mgr;
     string buf;
-    SizeType ni = 0;
     vector<Bdd> func_list;
-    vector<BddVar> var_list;
     while ( getline(s, buf) ) {
-      auto f = mgr.from_truth(var_list, buf);
+      auto f = mgr.from_truth(buf);
       func_list.push_back(f);
     }
-    unordered_map<string, string> attr_dict;
-    attr_dict["graph:bgcolor"] = "yellow";
+#if 0
+    std::unordered_map<string, string> attr_dict;
+    attr_dict["graph:bgcolor"] = "beige";
     attr_dict["edge0:color"] = "blue";
     attr_dict["edge1:color"] = "red";
-    attr_dict["node:color"] = "green";
+    attr_dict["node:color"] = "mediumaquamarine";
     attr_dict["node:style"] = "filled";
     attr_dict["terminal:style"] = "filled";
-    attr_dict["terminal0:color"] = "blue";
-    attr_dict["terminal1:color"] = "red";
+    attr_dict["terminal0:color"] = "mediumpurple";
+    attr_dict["terminal1:color"] = "lightsalmon";
     mgr.gen_dot(cout, func_list, attr_dict);
+#else
+    mgr.gen_dot(cout, func_list);
+#endif
   }
   return 0;
 }

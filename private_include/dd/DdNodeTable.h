@@ -19,11 +19,11 @@ BEGIN_NAMESPACE_YM_DD
 /// @class DdNodeTable DdNodeTable.h "DdNodeTable.h"
 /// @brief DdNode の管理を行うクラス
 ///
-/// 同じ index, edge0, edge1 を持つノードを共有する処理を行う．
+/// 同じ edge0, edge1 を持つノードを共有する処理を行う．
+/// このクラスでは同一のレベルのノードのみを対象にする．
 //////////////////////////////////////////////////////////////////////
 class DdNodeTable
 {
-  friend class DdNodeIter;
 public:
 
   /// @brief コンストラクタ
@@ -51,7 +51,7 @@ public:
   /// @return 新規にノードを作った時の true を返す．
   bool
   new_node(
-    SizeType index, ///< [in] インデックス
+    SizeType level, ///< [in] レベル
     DdEdge edge0,   ///< [in] 0枝
     DdEdge edge1,   ///< [in] 1枝
     DdNode*& node   ///< [out] 結果を格納する変数
@@ -70,10 +70,10 @@ public:
     return mNodeNum;
   }
 
-  /// @brief 保持しているノードのインデックスを変更する．
+  /// @brief 保持しているノードのレベルを変更する．
   void
-  chg_index(
-    SizeType new_index
+  chg_level(
+    SizeType new_level
   );
 
   /// @brief 保持しているノードに対して処理を行う．

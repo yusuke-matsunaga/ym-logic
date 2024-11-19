@@ -288,7 +288,7 @@ Zdd::root_decomp(
   else {
     f0 = Zdd{mMgr, node->edge0()};
     f1 = Zdd{mMgr, node->edge1()};
-    auto item = mMgr->index_to_item(node->index());
+    auto item = mMgr->level_to_item(node->level());
     return item;
   }
 }
@@ -305,7 +305,7 @@ Zdd::root_item() const
     return ZddItem::invalid();
   }
   else {
-    auto item = mMgr->index_to_item(node->index());
+    auto item = mMgr->level_to_item(node->level());
     return item;
   }
 }
@@ -460,16 +460,16 @@ ZddItem::from_zdd(
 SizeType
 ZddItem::id() const
 {
-  return _mgr()->index_to_varid(index());
+  return _mgr()->level_to_varid(level());
 }
 
-// @brief インデックスを返す．
+// @brief レベルを返す．
 SizeType
-ZddItem::index() const
+ZddItem::level() const
 {
   _check_valid();
   auto node = root().node();
-  return node->index();
+  return node->level();
 }
 
 END_NAMESPACE_YM_DD

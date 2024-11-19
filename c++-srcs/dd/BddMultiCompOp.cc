@@ -58,11 +58,11 @@ BddMgrImpl::multi_compose(
   unordered_map<SizeType, DdEdge> cmap;
   for ( auto& p: compose_map ) {
     auto var = p.first;
-    auto index = var.index();
+    auto level = var.level();
     auto& bdd = p.second;
     bdd._check_valid();
     auto cedge = _edge(bdd);
-    cmap.emplace(index, cedge);
+    cmap.emplace(level, cedge);
   }
   BddMultiCompOp op{*this, cmap};
   auto e = op.mcomp_op(_edge(bdd));
@@ -80,10 +80,10 @@ BddMgrImpl::remap_vars(
   unordered_map<SizeType, DdEdge> cmap;
   for ( auto& p: varmap ) {
     auto var = p.first;
-    auto index = var.index();
+    auto level = var.level();
     auto lit = p.second;
     DdEdge cedge = lit.root();
-    cmap.emplace(index, cedge);
+    cmap.emplace(level, cedge);
   }
   BddMultiCompOp op{*this, cmap};
   auto e = op.mcomp_op(_edge(bdd));
@@ -124,31 +124,31 @@ BddMultiCompOp::mcomp_step(
   }
 
   auto node = edge.node();
-  auto index = node->index();
+  auto level = node->level();
 
   DdEdge result;
   if ( mTable.count(node) > 0 ) {
     result = mTable.at(node);
   }
   else {
-    auto cindex = mCompList[pos].first;
-    while ( cindex < index ) {
+    auto clevel = mCompList[pos].first;
+    while ( clevel < level ) {
       ++ pos;
       if ( pos == mCompList.size() ) {
 	return edge;
       }
-      cindex = mCompList[pos].first;
+      clevel = mCompList[pos].first;
     }
-    ASSERT_COND( cindex >= index );
+    ASSERT_COND( clevel >= level );
 
     auto edge0 = node->edge0();
     auto edge1 = node->edge1();
-    if ( index < cindex ) {
+    if ( level < clevel ) {
       auto r0 = mcomp_step(edge0, pos);
       auto r1 = mcomp_step(edge1, pos);
-      result = new_node(index, r0, r1);
+      result = new_node(level, r0, r1);
     }
-    else { // index == cindex
+    else { // level == clevel
       auto r0 = mcomp_step(edge0, pos + 1);
       auto r1 = mcomp_step(edge1, pos + 1);
       auto cedge = mCompList[pos].second;

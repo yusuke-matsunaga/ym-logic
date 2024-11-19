@@ -96,16 +96,7 @@ public:
     const char* str
   )
   {
-    auto len = strlen(str);
-    SizeType ni = 0;
-    while ( (1 << ni) < len ) {
-      ++ ni;
-    }
-    if ( ni > 0 ) {
-      mMgr.variable(ni - 1);
-    }
-    auto var_list = mMgr.variable_list();
-    return mMgr.from_truth(var_list, str);
+    return mMgr.from_truth(str);
   }
 
 

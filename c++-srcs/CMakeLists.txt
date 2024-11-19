@@ -85,11 +85,10 @@ set (tvfunc_SOURCES
 set (dd_SOURCES
   dd/DdNodeMgr.cc
   dd/DdNodeTable.cc
-  dd/CopyOp.cc
   dd/DotGen.cc
   dd/DotWriter.cc
+  dd/DdInfoMgr.cc
   dd/NodeCollector.cc
-  dd/display.cc
 
   dd/Bdd.cc
   dd/Bdd_truth.cc

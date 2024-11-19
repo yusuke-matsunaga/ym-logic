@@ -27,10 +27,10 @@ public:
   /// @brief コンストラクタ
   ZddCofactorOp(
     ZddMgrImpl& mgr, ///< [in] マネージャ
-    SizeType index,  ///< [in] インデックス
+    SizeType level,  ///< [in] レベル
     bool phase       ///< [in] 極性
   ) : ZddOpBase{mgr},
-      mIndex{index},
+      mLevel{level},
       mPhase{phase}
   {
   }
@@ -56,8 +56,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // インデックス
-  SizeType mIndex;
+  // レベル
+  SizeType mLevel;
 
   // 極性
   bool mPhase;

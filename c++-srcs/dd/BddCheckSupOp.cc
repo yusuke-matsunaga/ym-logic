@@ -20,8 +20,8 @@ Bdd::check_sup(
   const BddVar& var
 ) const
 {
-  auto index = var.index();
-  BddCheckSupOp op{index};
+  auto level = var.level();
+  BddCheckSupOp op{level};
   return op.op_step(DdEdge{mRoot});
 }
 
@@ -41,12 +41,12 @@ BddCheckSupOp::op_step(
   }
 
   auto node = edge.node();
-  auto index = node->index();
+  auto level = node->level();
   auto inv = edge.inv();
-  if ( index == mIndex ) {
+  if ( level == mLevel ) {
     return true;
   }
-  if ( index > mIndex ) {
+  if ( level > mLevel ) {
     return false;
   }
 

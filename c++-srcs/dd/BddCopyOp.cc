@@ -42,19 +42,19 @@ BddMgrImpl::copy(
        [&](const BddVar& a, const BddVar& b){
 	 auto vid_a = a.id();
 	 auto vid_b = b.id();
-	 auto index_a = varid_to_index(vid_a);
-	 auto index_b = varid_to_index(vid_b);
-	 return index_a < index_b;
+	 auto level_a = varid_to_level(vid_a);
+	 auto level_b = varid_to_level(vid_b);
+	 return level_a < level_b;
        });
-  // それを自身のインデックスに変換する．
-  vector<SizeType> index_list;
-  index_list.reserve(var_list.size());
+  // それを自身のレベルに変換する．
+  vector<SizeType> level_list;
+  level_list.reserve(var_list.size());
   for ( auto& var: var_list ) {
     auto vid = var.id();
-    auto index = varid_to_index(vid);
-    index_list.push_back(index);
+    auto level = varid_to_level(vid);
+    level_list.push_back(level);
   }
-  BddCopyOp op{*this, var_list, index_list};
+  BddCopyOp op{*this, var_list, level_list};
   auto e = op.copy_step(src, 0);
   return _bdd(e);
 }
@@ -84,8 +84,8 @@ BddCopyOp::copy_step(
   auto bdd1 = bdd /  var;
   auto r0 = copy_step(bdd0, pos + 1);
   auto r1 = copy_step(bdd1, pos + 1);
-  auto index = mIndexList[pos];
-  auto result = mMgr.new_node(index, r0, r1);
+  auto level = mLevelList[pos];
+  auto result = mMgr.new_node(level, r0, r1);
   mTable.emplace(bdd, result);
   return result;
 }

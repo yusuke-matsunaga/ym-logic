@@ -24,8 +24,8 @@ public:
 
   /// @brief コンストラクタ
   BddCheckSupOp(
-    SizeType index   ///< [in] インデックス
-  ) : mIndex{index}
+    SizeType level   ///< [in] レベル
+  ) : mLevel{level}
   {
   }
 
@@ -50,8 +50,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // インデックス
-  SizeType mIndex;
+  // レベル
+  SizeType mLevel;
 
   // 演算結果テーブル
   unordered_map<const DdNode*, bool> mTable;

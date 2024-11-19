@@ -106,11 +106,11 @@ BddMgr::one()
 // @brief 真理値表形式の文字列からBDDを作る．
 Bdd
 BddMgr::from_truth(
-  const vector<BddVar>& var_list,
-  const string& str
+  const string& str,
+  const vector<BddVar>& var_list
 )
 {
-  return impl()->from_truth(var_list, str);
+  return impl()->from_truth(str, var_list);
 }
 
 // @brief ITE 演算を行う．
@@ -162,6 +162,17 @@ BddMgr::gen_dot(
 )
 {
   impl()->gen_dot(s, bdd_list, attr_dict);
+}
+
+// @brief 複数のBDDを dot 形式で出力する．
+void
+BddMgr::gen_dot(
+  ostream& s,
+  const vector<Bdd>& bdd_list,
+  const JsonValue& attr
+)
+{
+  impl()->gen_dot(s, bdd_list, attr);
 }
 
 // @brief 構造を表す整数配列を作る．

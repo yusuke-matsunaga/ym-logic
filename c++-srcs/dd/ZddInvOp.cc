@@ -43,7 +43,7 @@ ZddInvOp::inv_step(
   }
 
   auto node = edge.node();
-  auto index = node->index();
+  auto level = node->level();
   if ( mTable.count(node) > 0 ) {
     auto rnode = mTable.at(node);
     return DdEdge{rnode};
@@ -52,7 +52,7 @@ ZddInvOp::inv_step(
   auto edge1 = node->edge1();
   auto redge0 = inv_step(edge0);
   auto redge1 = inv_step(edge1);
-  auto redge = new_node(index, redge0, redge1);
+  auto redge = new_node(level, redge0, redge1);
   auto rnode = redge.node();
   mTable.emplace(node, rnode);
   return redge;

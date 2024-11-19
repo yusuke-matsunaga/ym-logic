@@ -74,15 +74,15 @@ Bdd::support_check_intersect(
   while ( !e1.is_one() && !e2.is_one() ) {
     auto node1 = e1.node();
     auto node2 = e2.node();
-    auto index1 = node1->index();
-    auto index2 = node2->index();
-    if ( index1 == index2 ) {
+    auto level1 = node1->level();
+    auto level2 = node2->level();
+    if ( level1 == level2 ) {
       return true;
     }
-    else if ( index1 < index2 ) {
+    else if ( level1 < level2 ) {
       e1 = node1->edge1();
     }
-    else { // index > index2
+    else { // level > level2
       e2 = node2->edge1();
     }
   }
@@ -174,7 +174,7 @@ Bdd::to_varlist() const
   vector<BddVar> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
-    auto var = mMgr->index_to_var(node->index());
+    auto var = mMgr->level_to_var(node->level());
     var_list.push_back(var);
     edge = node->edge1();
   }
@@ -195,7 +195,7 @@ Bdd::to_litlist() const
     auto inv = edge.inv();
     auto e0 = node->edge0() ^ inv;
     auto e1 = node->edge1() ^ inv;
-    auto var = mMgr->index_to_var(node->index());
+    auto var = mMgr->level_to_var(node->level());
     if ( e0.is_zero() ) {
       lit_list.push_back(BddLit{var, false});
       edge = e1;
@@ -227,13 +227,13 @@ BddSupOp::get_step(
   if ( mTable.count(node) > 0 ) {
     return mTable.at(node);
   }
-  auto index = node->index();
+  auto level = node->level();
   auto edge0 = node->edge0();
   auto edge1 = node->edge1();
   auto r0 = get_step(edge0);
   auto r1 = get_step(edge1);
   auto tmp = cup_step(r0, r1);
-  auto result = new_node(index, DdEdge::zero(), tmp);
+  auto result = new_node(level, DdEdge::zero(), tmp);
   mTable.emplace(node, result);
   return result;
 }
@@ -257,20 +257,20 @@ BddSupOp::cup_step(
 
   auto node0 = edge0.node();
   auto node1 = edge1.node();
-  auto index0 = node0->index();
-  auto index1 = node1->index();
-  auto top = std::min(index0, index1);
-  if ( index0 < index1 ) {
+  auto level0 = node0->level();
+  auto level1 = node1->level();
+  auto top = std::min(level0, level1);
+  if ( level0 < level1 ) {
     auto tmp = cup_step(node0->edge1(), edge1);
-    return new_node(index0, DdEdge::zero(), tmp);
+    return new_node(level0, DdEdge::zero(), tmp);
   }
-  else if ( index0 == index1 ) {
+  else if ( level0 == level1 ) {
     auto tmp = cup_step(node0->edge1(), node1->edge1());
-    return new_node(index0, DdEdge::zero(), tmp);
+    return new_node(level0, DdEdge::zero(), tmp);
   }
   else {
     auto tmp = cup_step(edge0, node1->edge1());
-    return new_node(index1, DdEdge::zero(), tmp);
+    return new_node(level1, DdEdge::zero(), tmp);
   }
 }
 
@@ -290,15 +290,15 @@ BddSupOp::cap_step(
 
   auto node0 = edge0.node();
   auto node1 = edge1.node();
-  auto index0 = node0->index();
-  auto index1 = node1->index();
-  auto top = std::min(index0, index1);
-  if ( index0 < index1 ) {
+  auto level0 = node0->level();
+  auto level1 = node1->level();
+  auto top = std::min(level0, level1);
+  if ( level0 < level1 ) {
     return cap_step(node0->edge1(), edge1);
   }
-  else if ( index0 == index1 ) {
+  else if ( level0 == level1 ) {
     auto tmp = cap_step(node0->edge1(), node1->edge1());
-    return new_node(index0, DdEdge::zero(), tmp);
+    return new_node(level0, DdEdge::zero(), tmp);
   }
   else {
     return cap_step(edge0, node1->edge1());
@@ -324,16 +324,16 @@ BddSupOp::diff_step(
 
   auto node0 = edge0.node();
   auto node1 = edge1.node();
-  auto index0 = node0->index();
-  auto index1 = node1->index();
-  if ( index0 < index1 ) {
+  auto level0 = node0->level();
+  auto level1 = node1->level();
+  if ( level0 < level1 ) {
     auto tmp = diff_step(node0->edge1(), edge1);
-    return new_node(index0, DdEdge::zero(), tmp);
+    return new_node(level0, DdEdge::zero(), tmp);
   }
-  else if ( index0 == index1 ) {
+  else if ( level0 == level1 ) {
     return diff_step(node0->edge1(), node1->edge1());
   }
-  else { // index0 > index1
+  else { // level0 > level1
     return diff_step(edge0, node1->edge1());
   }
 }

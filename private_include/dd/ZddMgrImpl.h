@@ -11,6 +11,7 @@
 #include "ym/logic.h"
 #include "ym/Zdd.h"
 #include "ym/ZddItem.h"
+#include "ym/JsonValue.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 #include "dd/DdNode.h"
@@ -20,7 +21,7 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-class DdInfo;
+class DdInfoMgr;
 
 //////////////////////////////////////////////////////////////////////
 /// @class ZddMgrImpl ZddMgrImpl.h "ZddMgrImpl.h"
@@ -68,7 +69,7 @@ public:
   /// @brief ZDDを作る．
   Zdd
   zdd(
-    SizeType index,   ///< [in] インデックス
+    SizeType level,   ///< [in] レベル
     const Zdd& edge0, ///< [in] 0枝
     const Zdd& edge1  ///< [in] 1枝
   );
@@ -151,7 +152,14 @@ public:
     ostream& s,                                    ///< [in] 出力ストリーム
     const vector<Zdd>& zdd_list,                   ///< [in] ZDDのリスト
     const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-    = {}
+  );
+
+  /// @brief 複数のBDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                  ///< [in] 出力ストリーム
+    const vector<Zdd>& bdd_list, ///< [in] ZDDのリスト
+    const JsonValue& attr        ///< [in] 属性値を表す JSON オブジェクト
   );
 
   /// @brief 構造を表す整数配列を作る．
@@ -184,12 +192,17 @@ public:
     const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
-  /// @brief 複数のZDDのノードの情報を取り出す．
-  vector<DdInfo>
+  /// @brief 複数のBDDのノードの情報を取り出す．
+  DdInfoMgr
   node_info(
-    const vector<Zdd>& zdd_list,     ///< [in] ZDDのリスト
-    vector<SizeType>& root_edge_list ///< [out] 根の情報を格納するリスト
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // DdEdge を扱う関数
+  //////////////////////////////////////////////////////////////////////
 
   /// @brief DdEdge を Zdd に変換する．
   Zdd
@@ -206,7 +219,7 @@ public:
   // @brief ノードを作る．
   DdEdge
   new_node(
-    SizeType index,
+    SizeType level,
     DdEdge edge0,
     DdEdge edge1
   );
@@ -223,26 +236,26 @@ public:
     DdEdge& right1
   )
   {
-    SizeType l_index;
+    SizeType l_level;
     const DdNode* l_node;
     if ( left.is_const() ) {
-      l_index = BAD_VARID;
+      l_level = BAD_VARID;
     }
     else {
       l_node = left.node();
-      l_index = l_node->index();
+      l_level = l_node->level();
     }
-    SizeType r_index;
+    SizeType r_level;
     const DdNode* r_node;
     if ( right.is_const() ) {
-      r_index = BAD_VARID;
+      r_level = BAD_VARID;
     }
     else {
       r_node = right.node();
-      r_index = r_node->index();
+      r_level = r_node->level();
     }
-    auto top = std::min(l_index, r_index);
-    if ( l_index == top ) {
+    auto top = std::min(l_level, r_level);
+    if ( l_level == top ) {
       left0 = l_node->edge0();
       left1 = l_node->edge1();
     }
@@ -250,7 +263,7 @@ public:
       left0 = left;
       left1 = DdEdge::zero();
     }
-    if ( r_index == top ) {
+    if ( r_level == top ) {
       right0 = r_node->edge0();
       right1 = r_node->edge1();
     }
@@ -267,10 +280,10 @@ public:
     const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
-  /// @brief インデックスを要素に変換する．
+  /// @brief レベルを要素に変換する．
   ZddItem
-  index_to_item(
-    SizeType index ///< [in] インデックス
+  level_to_item(
+    SizeType level ///< [in] レベル
   );
 
 

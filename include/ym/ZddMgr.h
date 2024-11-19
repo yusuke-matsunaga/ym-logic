@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/JsonValue.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 
@@ -141,10 +142,21 @@ public:
     ostream& s,                                    ///< [in] 出力ストリーム
     const Zdd& zdd,                                ///< [in] ZDDのリスト
     const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-    = {}
   )
   {
     gen_dot(s, {zdd}, attr_dict);
+  }
+
+  /// @brief ZDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,           ///< [in] 出力ストリーム
+    const Zdd& zdd,       ///< [in] ZDDのリスト
+    const JsonValue& attr ///< [in] 属性値を表す JSON オブジェクト
+    = JsonValue{}
+  )
+  {
+    gen_dot(s, {zdd}, attr);
   }
 
   /// @brief 複数のZDDを dot 形式で出力する．
@@ -153,7 +165,15 @@ public:
     ostream& s,                                    ///< [in] 出力ストリーム
     const vector<Zdd>& zdd_list,                   ///< [in] ZDDのリスト
     const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-    = {}
+  );
+
+  /// @brief 複数のZDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                  ///< [in] 出力ストリーム
+    const vector<Zdd>& zdd_list, ///< [in] ZDDのリスト
+    const JsonValue& attr        ///< [in] 属性値を表す JSON オブジェクト
+    = JsonValue{}
   );
 
   /// @brief 構造を表す整数配列を作る．

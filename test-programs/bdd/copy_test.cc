@@ -13,30 +13,11 @@
 
 BEGIN_NAMESPACE_YM
 
-// @brief 真理値表形式の文字列からBDDを作る．
-Bdd
-from_truth(
-  BddMgr& mgr,
-  const char* str
-)
-{
-  auto len = strlen(str);
-  SizeType ni = 0;
-  while ( (1 << ni) < len ) {
-    ++ ni;
-  }
-  if ( ni > 0 ) {
-    mgr.variable(ni - 1);
-  }
-  auto var_list = mgr.variable_list();
-  return mgr.from_truth(var_list, str);
-}
-
 void
 test()
 {
   BddMgr mgr;
-  auto bdd = from_truth(mgr, "1101");
+  auto bdd = mgr.from_truth("1101");
 
   Bdd bdd1{bdd};
 

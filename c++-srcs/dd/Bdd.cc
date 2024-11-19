@@ -383,7 +383,7 @@ Bdd::root_decomp(
     auto oinv = root().inv();
     f0 = Bdd{mMgr, node->edge0() ^ oinv};
     f1 = Bdd{mMgr, node->edge1() ^ oinv};
-    auto var = mMgr->index_to_var(node->index());
+    auto var = mMgr->level_to_var(node->level());
     return var;
   }
 }
@@ -399,7 +399,7 @@ Bdd::root_var() const
     return BddVar::invalid();
   }
   else {
-    auto var = mMgr->index_to_var(node->index());
+    auto var = mMgr->level_to_var(node->level());
     return var;
   }
 }
@@ -463,8 +463,8 @@ Bdd::eval(
     }
     auto node = edge.node();
     auto inv = edge.inv();
-    auto index = node->index();
-    if ( inputs[index] ) {
+    auto level = node->level();
+    if ( inputs[level] ) {
       edge = node->edge1();
     }
     else {
@@ -593,16 +593,16 @@ BddVar::from_bdd(
 SizeType
 BddVar::id() const
 {
-  return _mgr()->index_to_varid(index());
+  return _mgr()->level_to_varid(level());
 }
 
-// @brief インデックスを返す．
+// @brief レベルを返す．
 SizeType
-BddVar::index() const
+BddVar::level() const
 {
   _check_valid();
   auto node = root().node();
-  return node->index();
+  return node->level();
 }
 
 // @brief 肯定のリテラルを返す．

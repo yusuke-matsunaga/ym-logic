@@ -8,9 +8,8 @@
 
 #include "ym/Zdd.h"
 #include "dd/ZddMgrImpl.h"
-#include "CopyOp.h"
-#include "NodeCollector.h"
 #include "dd/DdInfo.h"
+#include "dd/DdInfoMgr.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 
@@ -42,8 +41,8 @@ ZddMgrImpl::item(
 {
   while ( mItemList.size() <= elem_id ) {
     auto id1 = new_variable();
-    auto index1 = varid_to_index(id1);
-    auto item1 = index_to_item(index1);
+    auto level1 = varid_to_level(id1);
+    auto item1 = level_to_item(level1);
     mItemList.push_back(item1);
   }
   return mItemList[elem_id];
@@ -73,7 +72,7 @@ ZddMgrImpl::one()
 // @brief ZDDを作る．
 Zdd
 ZddMgrImpl::zdd(
-  SizeType index,
+  SizeType level,
   const Zdd& edge0,
   const Zdd& edge1
 )
@@ -82,7 +81,7 @@ ZddMgrImpl::zdd(
   edge1._check_valid();
   _check_mgr(edge0);
   _check_mgr(edge1);
-  auto e = new_node(index, _edge(edge0), _edge(edge1));
+  auto e = new_node(level, _edge(edge0), _edge(edge1));
   return _zdd(e);
 }
 
@@ -96,8 +95,8 @@ ZddMgrImpl::make_set(
   vector<SizeType> tmp_list;
   tmp_list.reserve(n);
   for ( auto& item: item_list ) {
-    auto index = item.index();
-    tmp_list.push_back(index);
+    auto level = item.level();
+    tmp_list.push_back(level);
   }
   sort(tmp_list.begin(), tmp_list.end(), [](int a, int b) {
     return a > b;
@@ -120,9 +119,8 @@ ZddMgrImpl::zdd_size(
   if ( zdd_list.empty() ) {
     return 0;
   }
-  vector<SizeType> root_list;
-  auto node_list = node_info(zdd_list, root_list);
-  return node_list.size();
+  auto info_mgr = node_info(zdd_list);
+  return info_mgr.node_list().size();
 }
 
 // @brief ZDD を作る．
@@ -146,7 +144,7 @@ ZddMgrImpl::_edge(
 // @brief ノードを作る．
 DdEdge
 ZddMgrImpl::new_node(
-  SizeType index,
+  SizeType level,
   DdEdge edge0,
   DdEdge edge1
 )
@@ -156,7 +154,7 @@ ZddMgrImpl::new_node(
     return edge0;
   }
 
-  auto node = DdNodeMgr::new_node(index, edge0, edge1);
+  auto node = DdNodeMgr::new_node(level, edge0, edge1);
   return DdEdge{node};
 }
 
@@ -182,43 +180,24 @@ ZddMgrImpl::root_list(
   return edge_list;
 }
 
-// @brief インデックスを要素に変換する．
+// @brief レベルを要素に変換する．
 ZddItem
-ZddMgrImpl::index_to_item(
-  SizeType index
+ZddMgrImpl::level_to_item(
+  SizeType level
 )
 {
-  auto e = new_node(index, DdEdge::zero(), DdEdge::one());
+  auto e = new_node(level, DdEdge::zero(), DdEdge::one());
   return ZddItem{this, e};
 }
 
 // @brief 複数のZDDのノードの情報を取り出す．
-vector<DdInfo>
+DdInfoMgr
 ZddMgrImpl::node_info(
-  const vector<Zdd>& zdd_list,
-  vector<SizeType>& root_edge_list
+  const vector<Zdd>& zdd_list
 )
 {
   auto edge_list = root_list(zdd_list);
-  NodeCollector nc{edge_list};
-
-  root_edge_list.clear();
-  root_edge_list.reserve(zdd_list.size());
-  for ( auto root: nc.root_list() ) {
-    root_edge_list.push_back(nc.edge2int(root));
-  }
-
-  vector<DdInfo> node_list;
-  node_list.reserve(nc.node_list().size());
-  for ( auto node: nc.node_list() ) {
-    SizeType id = nc.node_id(node);
-    ASSERT_COND( id == node_list.size() + 1 );
-    SizeType index = node->index();
-    SizeType edge0 = nc.edge2int(node->edge0());
-    SizeType edge1 = nc.edge2int(node->edge1());
-    node_list.push_back(DdInfo{index, edge0, edge1});
-  }
-  return node_list;
+  return DdInfoMgr{edge_list, this};
 }
 
 // @brief 複数のZDDの内容を出力する．
@@ -228,9 +207,8 @@ ZddMgrImpl::display(
   const vector<Zdd>& bdd_list
 )
 {
-  vector<SizeType> root_edge_list;
-  auto node_list = node_info(bdd_list, root_edge_list);
-  DdInfo::display(s, root_edge_list, node_list);
+  auto info_mgr = node_info(bdd_list);
+  info_mgr.display(s);
 }
 
 // @brief 構造を表す整数配列を作る．
@@ -239,9 +217,8 @@ ZddMgrImpl::rep_data(
   const vector<Zdd>& bdd_list
 )
 {
-  vector<SizeType> root_edge_list;
-  auto node_list = node_info(bdd_list, root_edge_list);
-  return DdInfo::rep_data(root_edge_list, node_list);
+  auto info_mgr = node_info(bdd_list);
+  return info_mgr.rep_data();
 }
 
 BEGIN_NONAMESPACE
@@ -286,17 +263,16 @@ ZddMgrImpl::dump(
     return;
   }
 
-  vector<SizeType> root_edge_list;
-  auto node_list = node_info(zdd_list, root_edge_list);
+  auto info_mgr = node_info(zdd_list);
   // 根の枝
-  for ( auto root_edge: root_edge_list ) {
-    s.write_vint(root_edge);
+  for ( auto root: info_mgr.root_list() ) {
+    s.write_vint(root);
   }
   // ノードリスト
   SizeType id = 1;
-  for ( auto& node: node_list ) {
-    // インデックス
-    s.write_vint(node.index());
+  for ( auto& node: info_mgr.node_list() ) {
+    // レベル
+    s.write_vint(node.level());
     // 0枝
     dump_edge(s, id, node.edge0_node());
     // 1枝
@@ -366,15 +342,15 @@ ZddMgrImpl::restore(
 
   vector<DdEdge> edge_list;
   for ( SizeType id = 1; ; ++ id ) {
-    SizeType index = s.read_vint();
+    SizeType level = s.read_vint();
     SizeType edge0_info = restore_edge(s, id);
     SizeType edge1_info = restore_edge(s, id);
-    if ( index == 0 && edge0_info == 0 && edge1_info == 0 ) {
+    if ( level == 0 && edge0_info == 0 && edge1_info == 0 ) {
       break;
     }
     auto edge0 = decode(edge0_info, edge_list);
     auto edge1 = decode(edge1_info, edge_list);
-    auto edge = new_node(index, edge0, edge1);
+    auto edge = new_node(level, edge0, edge1);
     edge_list.push_back(edge);
   }
 

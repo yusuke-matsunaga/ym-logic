@@ -28,7 +28,7 @@ DdNodeMgr::~DdNodeMgr()
 SizeType
 DdNodeMgr::variable_num() const
 {
-  return mIndexArray.size();
+  return mLevelArray.size();
 }
 
 // @brief 新しい変数テーブルを追加する．
@@ -37,52 +37,25 @@ DdNodeMgr::new_variable()
 {
   auto varid = mTableArray.size();
   auto table = new DdNodeTable{varid};
-  // 追加される変数のインデックスは最初は変数番号に等しい
-  auto index = varid;
+  // 追加される変数のレベルは最初は変数番号に等しい
+  auto level = varid;
   mTableArray.push_back(table);
-  mIndexArray.push_back(varid);
+  mLevelArray.push_back(varid);
   return varid;
-}
-
-// @brief 変数番号からインデックスを返す．
-SizeType
-DdNodeMgr::varid_to_index(
-  SizeType varid
-) const
-{
-  if ( varid >= mIndexArray.size() ) {
-    throw std::out_of_range{"varid is out of range"};
-  }
-  return mIndexArray[varid];
-}
-
-// @brief インデックスから変数番号を返す．
-SizeType
-DdNodeMgr::index_to_varid(
-  SizeType index
-) const
-{
-  if ( index >= mTableArray.size() ) {
-    throw std::out_of_range{"index is out of range"};
-  }
-  auto table = mTableArray[index];
-  return table->varid();
 }
 
 // @brief ノードを作る．
 const DdNode*
 DdNodeMgr::new_node(
-  SizeType index,
+  SizeType level,
   DdEdge edge0,
   DdEdge edge1
 )
 {
-  if ( index >= mTableArray.size() ) {
-    throw std::out_of_range("index is out of range");
-  }
-  auto table = mTableArray[index];
+  _check_level(level);
+  auto table = mTableArray[level];
   DdNode* node = nullptr;
-  if ( table->new_node(index, edge0, edge1, node) ) {
+  if ( table->new_node(level, edge0, edge1, node) ) {
     ++ mNodeNum;
     ++ mGarbageNum;
   }
@@ -95,8 +68,8 @@ DdNodeMgr::reg_node(
   DdNode* node
 )
 {
-  auto index = node->index();
-  auto table = mTableArray[index];
+  auto level = node->level();
+  auto table = mTableArray[level];
   table->reg_node(node);
 }
 
@@ -197,14 +170,14 @@ dfs_sub(
     return id_map.at(edge);
   }
   auto node = edge.node();
-  auto index = node->index();
+  auto level = node->level();
   auto edge0 = node->edge0();
   auto edge1 = node->edge1();
   auto id0 = dfs_sub(edge0.posi_edge(), data_list, id_map);
   auto id1 = dfs_sub(edge1.posi_edge(), data_list, id_map);
   auto id = (data_list.size() / 3) + 1;
   id_map.emplace(edge, id);
-  data_list.push_back(index);
+  data_list.push_back(level);
   auto inv = edge.inv();
   auto inv0 = node->edge0().inv() ^ inv;
   SizeType tmp0 = id0 * 2;
@@ -267,11 +240,11 @@ print(
   SizeType n = data_list.size() / 3;
   for ( SizeType i = 0; i < n; ++ i ) {
     SizeType base = (n - i - 1) * 3;
-    auto index = data_list[base + 0];
+    auto level = data_list[base + 0];
     auto tmp0 = data_list[base + 1];
     auto tmp1 = data_list[base + 2];
     s << setw(7) << (n - i) << ":"
-      << setw(6) << index;
+      << setw(6) << level;
     print_edge(s, tmp0);
     print_edge(s, tmp1);
     s << endl;

@@ -38,27 +38,11 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 根の枝を表す整数のリストを返す．
-  const vector<DdEdge>&
-  root_list() const
-  {
-    return mRootList;
-  }
-
-  /// @brief ノードリストを返す．
+  /// @brief ノードのリストを返す．
   const vector<const DdNode*>&
   node_list() const
   {
     return mNodeList;
-  }
-
-  /// @brief ノード番号を得る．
-  SizeType
-  node_id(
-    const DdNode* node ///< [in] ノード
-  ) const
-  {
-    return mNodeMap.at(node);
   }
 
   /// @brief DdEdge の情報を整数値に変換する．
@@ -79,20 +63,26 @@ private:
     DdEdge edge ///< [in] 枝
   );
 
+  /// @brief ノード番号を得る．
+  SizeType
+  node_id(
+    const DdNode* node ///< [in] ノード
+  ) const
+  {
+    return mNodeMap.at(node);
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 根の枝のリスト
-  vector<DdEdge> mRootList;
+  // ノード番号の対応表
+  unordered_map<const DdNode*, SizeType> mNodeMap;
 
   // ノードリスト
   vector<const DdNode*> mNodeList;
-
-  // ノード番号の対応表
-  unordered_map<const DdNode*, SizeType> mNodeMap;
 
 };
 

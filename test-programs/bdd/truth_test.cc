@@ -14,22 +14,6 @@
 
 BEGIN_NAMESPACE_YM
 
-BEGIN_NONAMESPACE
-
-SizeType
-log2(
-  SizeType x
-)
-{
-  SizeType y = 0;
-  while ( (1 << y) < x ) {
-    ++ y;
-  }
-  return y;
-}
-
-END_NONAMESPACE
-
 int
 truth_test(
   int argc,
@@ -51,13 +35,8 @@ truth_test(
     SizeType nsingle = 0;
     SizeType nall = 0;
     vector<Bdd> func_list;
-    vector<BddVar> var_list;
     while ( getline(s, buf) ) {
-      SizeType n = buf.size();
-      ni = log2(n);
-      ASSERT_COND( (1 << ni) == n );
-      auto f = mgr.from_truth(var_list, buf);
-      ASSERT_COND( f.to_truth(var_list) == buf );
+      auto f = mgr.from_truth(buf);
       func_list.push_back(f);
       nsingle += f.size();
     }

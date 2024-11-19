@@ -28,6 +28,7 @@ set ( npn_test_SOURCES
 add_executable ( npn_test
   ${npn_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   $<TARGET_OBJECTS:ym_base_obj>
   )
 
@@ -43,6 +44,7 @@ target_link_libraries ( npn_test
 add_executable ( npn_test_d
   ${npn_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
   )
 
@@ -67,6 +69,7 @@ add_executable ( npn_test2
   ${npn_test2_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_link_libraries ( npn_test2
@@ -82,6 +85,7 @@ add_executable ( npn_test2_d
   ${npn_test2_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_compile_options ( npn_test2_d

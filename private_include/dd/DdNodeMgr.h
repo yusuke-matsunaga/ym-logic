@@ -21,7 +21,8 @@ BEGIN_NAMESPACE_YM_DD
 /// @brief DdNode の管理を行うクラス
 ///
 /// BDD と ZDD のノードの縮約ルールが異なるのでここでは縮約は行わない．
-/// index, edge0, edge1 が等しいノードを共有する処理だけを行う．
+/// level, edge0, edge1 が等しいノードを共有する処理だけを行う．
+/// ただし実際の共有処理は DdNodeTable が行う．
 /// また，各ノードは参照回数を持っており，参照回数が 0 のノードは
 /// 必要に応じて再利用される(GC: ガーベージコレクション)．
 /// GC は明示的に行うこともできるが deactivate() をトリガーとして
@@ -53,22 +54,32 @@ public:
   SizeType
   new_variable();
 
-  /// @brief 変数番号からインデックスを返す．
+  /// @brief 変数番号からレベルを返す．
   SizeType
-  varid_to_index(
+  varid_to_level(
     SizeType varid
-  ) const;
+  ) const
+  {
+    if ( varid >= mLevelArray.size() ) {
+      throw std::out_of_range{"varid is out of range"};
+    }
+    return mLevelArray[varid];
+  }
 
-  /// @brief インデックスから変数番号を返す．
+  /// @brief レベルから変数番号を返す．
   SizeType
-  index_to_varid(
-    SizeType index ///< [in] インデックス
-  ) const;
+  level_to_varid(
+    SizeType level ///< [in] レベル
+  ) const
+  {
+    _check_level(level);
+    return mTableArray[level]->varid();
+  }
 
   /// @brief ノードを作る．
   const DdNode*
   new_node(
-    SizeType index, ///< [in] インデックス
+    SizeType level, ///< [in] レベル
     DdEdge edge0,   ///< [in] 0枝
     DdEdge edge1    ///< [in] 1枝
   );
@@ -91,33 +102,35 @@ public:
     DdEdge edge ///< [in] 対象の枝
   );
 
-  /// @brief 隣り合うインデックスの変数を交換する．
+  /// @brief 隣り合うレベルの変数を交換する．
+  ///
+  /// 具体的には level と (level + 1) を交換する．
   void
-  swap_index(
-    SizeType index
+  swap_level(
+    SizeType level
   )
   {
-    auto index2 = index + 1;
-    std::swap(mTableArray[index], mTableArray[index2]);
-    auto table1 = mTableArray[index];
-    table1->chg_index(index);
-    auto table2 = mTableArray[index2];
-    table2->chg_index(index2);
+    auto level2 = level + 1;
+    std::swap(mTableArray[level], mTableArray[level2]);
+    auto table1 = mTableArray[level];
+    table1->chg_level(level);
+    auto table2 = mTableArray[level2];
+    table2->chg_level(level2);
 
-    auto varid1 = index_to_varid(index);
-    auto varid2 = index_to_varid(index2);
-    std::swap(mIndexArray[varid1], mIndexArray[varid2]);
+    auto varid1 = level_to_varid(level);
+    auto varid2 = level_to_varid(level2);
+    std::swap(mLevelArray[varid1], mLevelArray[varid2]);
   }
 
   /// @brief 保持しているノードに対して処理を行う．
   void
   scan(
-    SizeType index,
+    SizeType level,
     std::function<bool(DdNode*)> func
   )
   {
-    _check_index(index);
-    mTableArray[index]->scan(func);
+    _check_level(level);
+    mTableArray[level]->scan(func);
   }
 
   /// @brief ガーベージコレクションを行う．
@@ -127,11 +140,11 @@ public:
   /// @brief ガーベージコレクションを行う．
   void
   garbage_collection(
-    SizeType index ///< [in] インデックス
+    SizeType level ///< [in] レベル
   )
   {
-    _check_index(index);
-    auto n = mTableArray[index]->garbage_collection();
+    _check_level(level);
+    auto n = mTableArray[level]->garbage_collection();
     mNodeNum -= n;
     mGarbageNum -= n;
   }
@@ -143,14 +156,14 @@ public:
     return mNodeNum;
   }
 
-  /// @brief 特定のインデックスのノード数を返す．
+  /// @brief 特定のレベルのノード数を返す．
   SizeType
   node_num(
-    SizeType index ///< [in] インデックス
+    SizeType level ///< [in] レベル
   ) const
   {
-    _check_index(index);
-    return mTableArray[index]->node_num();
+    _check_level(level);
+    return mTableArray[level]->node_num();
   }
 
   /// @brief ガーベージノード数を返す．
@@ -238,14 +251,15 @@ private:
   void
   after_gc();
 
-  /// @brief インデックスが適正か調べる．
+  /// @brief レベルが適正か調べる．
   void
-  _check_index(
-    SizeType index
+  _check_level(
+    SizeType level
   ) const
   {
-    if ( index >= mTableArray.size() ) {
-      throw std::out_of_range{"index is out of range"};
+    if ( level >= mTableArray.size() ) {
+      abort();
+      throw std::out_of_range{"level is out of range"};
     }
   }
 
@@ -258,10 +272,10 @@ private:
   // 参照回数
   SizeType mRefCount{0};
 
-  // 変数番号をキーにしてインデックスを格納する配列
-  vector<SizeType> mIndexArray;
+  // 変数番号をキーにしてレベルを格納する配列
+  vector<SizeType> mLevelArray;
 
-  // インデックスごとのテーブル配列
+  // レベルごとのテーブル配列
   vector<DdNodeTable*> mTableArray;
 
   // 格納されているノード数

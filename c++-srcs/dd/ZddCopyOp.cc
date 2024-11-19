@@ -38,19 +38,19 @@ ZddMgrImpl::copy(
        [&](const ZddItem& a, const ZddItem& b){
 	 auto vid_a = a.id();
 	 auto vid_b = b.id();
-	 auto index_a = varid_to_index(vid_a);
-	 auto index_b = varid_to_index(vid_b);
-	 return index_a < index_b;
+	 auto level_a = varid_to_level(vid_a);
+	 auto level_b = varid_to_level(vid_b);
+	 return level_a < level_b;
        });
   // それを自身のインデックスに変換する．
-  vector<SizeType> index_list;
-  index_list.reserve(item_list.size());
+  vector<SizeType> level_list;
+  level_list.reserve(item_list.size());
   for ( auto& item: item_list ) {
     auto vid = item.id();
-    auto index = varid_to_index(vid);
-    index_list.push_back(index);
+    auto level = varid_to_level(vid);
+    level_list.push_back(level);
   }
-  ZddCopyOp op{*this, item_list, index_list};
+  ZddCopyOp op{*this, item_list, level_list};
   auto edge = op.copy_step(src, 0);
   return _zdd(edge);
 }
@@ -79,8 +79,8 @@ ZddCopyOp::copy_step(
   auto zdd1 = zdd.onset(item);
   auto r0 = copy_step(zdd0, pos + 1);
   auto r1 = copy_step(zdd1, pos + 1);
-  auto index = mIndexList[pos];
-  auto result = mMgr.new_node(index, r0, r1);
+  auto level = mLevelList[pos];
+  auto result = mMgr.new_node(level, r0, r1);
   mTable.emplace(zdd, result);
   return result;
 }

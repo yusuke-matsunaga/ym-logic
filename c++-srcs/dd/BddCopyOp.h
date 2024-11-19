@@ -31,10 +31,10 @@ public:
   BddCopyOp(
     BddMgrImpl& mgr,                   ///< [in] マネージャ
     const vector<BddVar>& var_list,    ///< [in] 変数リスト
-    const vector<SizeType>& index_list ///< [in] インデックスのリスト
+    const vector<SizeType>& level_list ///< [in] レベルのリスト
   ) : mMgr{mgr},
       mVarList{var_list},
-      mIndexList{index_list}
+      mLevelList{level_list}
   {
   }
 
@@ -66,8 +66,8 @@ private:
   // 変数リスト
   vector<BddVar> mVarList;
 
-  // インデックスのリスト
-  vector<SizeType> mIndexList;
+  // レベルのリスト
+  vector<SizeType> mLevelList;
 
   // 演算結果テーブル
   unordered_map<Bdd, DdEdge> mTable;

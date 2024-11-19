@@ -127,6 +127,17 @@ ZddMgr::gen_dot(
   impl()->gen_dot(s, zdd_list, attr_dict);
 }
 
+// @brief 複数のZDDを dot 形式で出力する．
+void
+ZddMgr::gen_dot(
+  ostream& s,
+  const vector<Zdd>& zdd_list,
+  const JsonValue& attr
+)
+{
+  impl()->gen_dot(s, zdd_list, attr);
+}
+
 // @brief 構造を表す整数配列を作る．
 vector<SizeType>
 ZddMgr::rep_data(

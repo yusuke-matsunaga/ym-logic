@@ -52,15 +52,16 @@ BddOneOp::op_step(
 
   auto node = edge.node();
   auto inv = edge.inv();
+  auto level = node->level();
   auto edge0 = node->edge0() ^ inv;
   auto edge1 = node->edge1() ^ inv;
   if ( !edge1.is_zero() ) {
     auto tmp = op_step(edge1);
-    return new_node(node->index(), DdEdge::zero(), tmp);
+    return new_node(level, DdEdge::zero(), tmp);
   }
   if ( !edge0.is_zero() ) {
     auto tmp = op_step(edge0);
-    return new_node(node->index(), tmp, DdEdge::zero());
+    return new_node(level, tmp, DdEdge::zero());
   }
   ASSERT_NOT_REACHED;
   return DdEdge{};

@@ -10,9 +10,11 @@
 #include "ym/Zdd.h"
 #include "dd/BddMgrImpl.h"
 #include "dd/ZddMgrImpl.h"
-#include "DotGen.h"
 #include "dd/DdEdge.h"
 #include "dd/DdInfo.h"
+#include "dd/DdInfoMgr.h"
+#include "DotGen.h"
+#include "DotWriter.h"
 
 
 BEGIN_NAMESPACE_YM_DD
@@ -25,10 +27,22 @@ BddMgrImpl::gen_dot(
   const unordered_map<string, string>& attr_dict
 )
 {
-  DotGen dg{s, attr_dict};
-  vector<SizeType> redge_list;
-  auto node_list = node_info(bdd_list, redge_list);
-  dg.write(node_list, redge_list);
+  DotGen dg{attr_dict};
+  auto info_mgr = node_info(bdd_list);
+  dg.write(s, info_mgr);
+}
+
+// @brief 複数のBDDを dot 形式で出力する．
+void
+BddMgrImpl::gen_dot(
+  ostream& s,
+  const vector<Bdd>& bdd_list,
+  const JsonValue& attr
+)
+{
+  DotGen dg{attr};
+  auto info_mgr = node_info(bdd_list);
+  dg.write(s, info_mgr);
 }
 
 // @brief 複数のZDDを dot 形式で出力する．
@@ -39,10 +53,22 @@ ZddMgrImpl::gen_dot(
   const unordered_map<string, string>& attr_dict
 )
 {
-  DotGen dg{s, attr_dict};
-  vector<SizeType> redge_list;
-  auto node_list = node_info(zdd_list, redge_list);
-  dg.write(node_list, redge_list);
+  DotGen dg{attr_dict};
+  auto info_mgr = node_info(zdd_list);
+  dg.write(s, info_mgr);
+}
+
+// @brief 複数のZDDを dot 形式で出力する．
+void
+ZddMgrImpl::gen_dot(
+  ostream& s,
+  const vector<Zdd>& zdd_list,
+  const JsonValue& attr
+)
+{
+  DotGen dg{attr};
+  auto info_mgr = node_info(zdd_list);
+  dg.write(s, info_mgr);
 }
 
 
@@ -50,20 +76,62 @@ ZddMgrImpl::gen_dot(
 // クラス DotGen
 //////////////////////////////////////////////////////////////////////
 
+BEGIN_NONAMESPACE
+
+std::unordered_map<string, string>
+json_to_dict(
+  const JsonValue& attr
+)
+{
+  std::unordered_map<string, string> attr_dict;
+  if ( attr.is_object() ) {
+    for ( auto& p: attr.item_list() ) {
+      auto key = p.first;
+      auto val = p.second;
+      if ( val.is_string() ) {
+	attr_dict.emplace(key, val.get_string());
+      }
+      else {
+	throw std::invalid_argument{"value should be a string"};
+      }
+    }
+  }
+  else if ( !attr.is_null() ) {
+    throw std::invalid_argument{"attr should be a JSON object"};
+  }
+  return attr_dict;
+}
+
+END_NONAMESPACE
+
 // @brief コンストラクタ
 DotGen::DotGen(
-  ostream& s,
+  const JsonValue& attr
+) : DotGen{json_to_dict(attr)}
+{
+}
+
+// @brief コンストラクタ
+DotGen::DotGen(
   const unordered_map<string, string>& attr_dict
-) : mWriter{s}
+)
 {
   // デフォルト値の設定
   mGraphAttrList.emplace("rankdir", "TB");
+  mGraphAttrList.emplace("bgcolor", "beige");
   mRootAttrList.emplace("shape", "box");
   mTerminal0AttrList.emplace("shape", "box");
+  mTerminal0AttrList.emplace("style", "filled");
   mTerminal0AttrList.emplace("label", "\"0\"");
+  mTerminal0AttrList.emplace("color", "mediumpurple");
   mTerminal1AttrList.emplace("shape", "box");
+  mTerminal1AttrList.emplace("style", "filled");
   mTerminal1AttrList.emplace("label", "\"1\"");
+  mTerminal1AttrList.emplace("color", "lightsalmon");
   mEdge0AttrList.emplace("style", "dotted");
+  mEdge0AttrList.emplace("color", "blue");
+  mEdge1AttrList.emplace("style", "solid");
+  mEdge1AttrList.emplace("color", "red");
   for ( auto& p: attr_dict ) {
     auto attr_name = p.first;
     auto attr_val = p.second;
@@ -119,102 +187,87 @@ DotGen::DotGen(
 // @brief dot 形式で出力する．
 void
 DotGen::write(
-  const vector<DdInfo>& node_list,
-  const vector<SizeType>& redge_list
+  ostream& s,
+  const DdInfoMgr& info_mgr
 )
 {
+  DotWriter writer{s};
+
   // dot の開始
-  mWriter.graph_begin("bdd", mGraphAttrList);
+  writer.graph_begin("bdd", mGraphAttrList);
 
   // 根のノードの定義
   SizeType i = 1;
-  for ( auto edge: redge_list ) {
+  for ( auto edge: info_mgr.root_list() ) {
     auto attr_list{mRootAttrList};
     ostringstream buf;
     buf << "\"BDD#" << i << "\"";
     attr_list.emplace("label", buf.str());
-    mWriter.write_node(root_name(i), attr_list);
+    writer.write_node(root_name(i), attr_list);
     ++ i;
   }
 
   // ノードの定義
   {
     SizeType id = 1;
-    for ( auto node: node_list ) {
+    for ( auto node: info_mgr.node_list() ) {
       auto attr_list{mNodeAttrList};
       ostringstream buf;
-      buf << "\"" << node.index() << "\"";
+      buf << "\"" << node.level() << "\"";
       attr_list.emplace("label", buf.str());
-      mWriter.write_node(node_name(id), attr_list);
+      writer.write_node(node_name(id), attr_list);
       ++ id;
     }
   }
 
   // 終端の定義
-  mWriter.write_node("const0", mTerminal0AttrList);
-  mWriter.write_node("const1", mTerminal1AttrList);
+  writer.write_node("const0", mTerminal0AttrList);
+  writer.write_node("const1", mTerminal1AttrList);
 
   // 根の枝の定義
   i = 1;
-  for ( auto edge: redge_list ) {
-    write_edge(root_name(i), edge, false);
+  for ( auto edge: info_mgr.root_list() ) {
+    write_edge(writer, root_name(i), edge, false);
     ++ i;
   }
 
   // 枝の定義
   {
     SizeType id = 1;
-    for ( auto node: node_list ) {
-      write_edge(node_name(id), node.edge0(), true);
-      write_edge(node_name(id), node.edge1(), false);
+    for ( auto node: info_mgr.node_list() ) {
+      write_edge(writer, node_name(id), node.edge0(), true);
+      write_edge(writer, node_name(id), node.edge1(), false);
       ++ id;
     }
   }
 
   // 根のランクの設定
   {
-    SizeType n = redge_list.size();
+    SizeType n = info_mgr.root_list().size();
     vector<string> node_list(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       node_list[i] = root_name(i + 1);
     }
-    mWriter.write_rank_group(node_list);
+    writer.write_rank_group(node_list, "min");
   }
 
   // ノードのランクの設定
-  SizeType max_index = 0;
-  for ( auto node: node_list ) {
-    SizeType index = node.index();
-    if ( max_index < index ) {
-      max_index = index;
-    }
-  }
-  ++ max_index;
-  vector<vector<SizeType>> indexed_node_list(max_index);
-  {
-    SizeType id = 1;
-    for ( auto node: node_list ) {
-      SizeType index = node.index();
-      indexed_node_list[index].push_back(id);
-      ++ id;
-    }
-  }
-  for ( SizeType i = 0; i < max_index; ++ i ) {
-    auto& node_list = indexed_node_list[i];
+  for ( SizeType level = 0; level < info_mgr.max_level(); ++ level ) {
+    auto& node_list = info_mgr.id_list(level);
     SizeType n = node_list.size();
     vector<string> node_name_list;
     node_name_list.reserve(n);
     for ( auto id: node_list ) {
       node_name_list.push_back(node_name(id));
     }
-    mWriter.write_rank_group(node_name_list);
+    writer.write_rank_group(node_name_list);
   }
 
   // 終端ノードのランクの設定
   vector<string> terminal_nodes{"const0", "const1"};
-  mWriter.write_rank_group(terminal_nodes);
+  writer.write_rank_group(terminal_nodes, "max");
 
-  mWriter.graph_end();
+  writer.graph_end();
 }
 
 // @brief ルート名を返す．
@@ -242,6 +295,7 @@ DotGen::node_name(
 // @brief 枝の内容を出力する．
 void
 DotGen::write_edge(
+  DotWriter& writer,
   const string& from_node,
   SizeType edge,
   bool zero
@@ -266,7 +320,7 @@ DotGen::write_edge(
     attr_list.emplace("arrowtail", "odot");
   }
 
-  mWriter.write_edge(from_node, to_node, attr_list);
+  writer.write_edge(from_node, to_node, attr_list);
 }
 
 END_NAMESPACE_YM_DD

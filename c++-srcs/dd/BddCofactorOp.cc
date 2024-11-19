@@ -83,15 +83,15 @@ BddCofactorOp::op_step(
   }
 
   auto node = edge.node();
-  auto index = node->index();
+  auto level = node->level();
   auto edge0 = node->edge0();
   auto edge1 = node->edge1();
 
   auto cnode = cedge.node();
-  auto cindex = cnode->index();
+  auto clevel = cnode->level();
   auto cinv = cedge.inv();
   DdEdge result;
-  if ( index == cindex ) {
+  if ( level == clevel ) {
     auto cedge0 = cnode->edge0() ^ cinv;
     auto cedge1 = cnode->edge1() ^ cinv;
     if ( cedge0.is_zero() ) {
@@ -104,12 +104,12 @@ BddCofactorOp::op_step(
       ASSERT_NOT_REACHED;
     }
   }
-  else if ( index < cindex ) {
+  else if ( level < clevel ) {
     auto ans0 = op_step(edge0, cedge);
     auto ans1 = op_step(edge1, cedge);
-    result = new_node(index, ans0, ans1);;
+    result = new_node(level, ans0, ans1);;
   }
-  else { // index > cindex
+  else { // level > clevel
     auto cedge0 = cnode->edge0() ^ cinv;
     auto cedge1 = cnode->edge1() ^ cinv;
     if ( cedge0.is_zero() ) {

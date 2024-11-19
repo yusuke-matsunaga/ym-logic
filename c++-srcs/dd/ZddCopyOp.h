@@ -31,10 +31,10 @@ public:
   ZddCopyOp(
     ZddMgrImpl& mgr,                   ///< [in] マネージャ
     const vector<ZddItem>& item_list,  ///< [in] 変数リスト
-    const vector<SizeType>& index_list ///< [in] インデックスのリスト
+    const vector<SizeType>& level_list ///< [in] レベルのリスト
   ) : mMgr{mgr},
       mItemList{item_list},
-      mIndexList{index_list}
+      mLevelList{level_list}
   {
   }
 
@@ -66,8 +66,8 @@ private:
   // 要素リスト
   vector<ZddItem> mItemList;
 
-  // インデックスのリスト
-  vector<SizeType> mIndexList;
+  // レベルのリスト
+  vector<SizeType> mLevelList;
 
   // 演算結果テーブル
   unordered_map<Zdd, DdEdge> mTable;

@@ -57,10 +57,11 @@ DotWriter::write_edge(
 // @brief ランクグループの定義
 void
 DotWriter::write_rank_group(
-  const vector<string>& node_list
+  const vector<string>& node_list,
+  const string& rank
 )
 {
-  mS << "  { rank = same;";
+  mS << "  { rank = " << rank << ";";
   for ( auto node: node_list ) {
     mS << " " << node << ";";
   }

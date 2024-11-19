@@ -25,6 +25,7 @@
 ym_add_gtest ( logic_Literal_test
   LiteralTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 

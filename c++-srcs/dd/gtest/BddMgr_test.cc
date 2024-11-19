@@ -103,28 +103,33 @@ TEST_F(BddTest, nega_literal)
 
 TEST_F(BddTest, from_truth1)
 {
-  mMgr.variable(2);
-  auto var_list = mMgr.variable_list();
   const char* exp_str = "10010110";
-  Bdd bdd = mMgr.from_truth(var_list, exp_str);
+  Bdd bdd = mMgr.from_truth(exp_str);
   check(bdd, exp_str);
 }
 
 TEST_F(BddTest, from_truth2)
 {
-  mMgr.variable(2);
-  auto var_list = mMgr.variable_list();
   const char* exp_str = "10010101";
-  Bdd bdd = mMgr.from_truth(var_list, exp_str);
+  Bdd bdd = mMgr.from_truth(exp_str);
+  check(bdd, exp_str);
+}
+
+TEST_F(BddTest, from_truth3)
+{
+  auto var0 = mMgr.variable(0);
+  auto var1 = mMgr.variable(1);
+  auto var2 = mMgr.variable(2);
+  vector<BddVar> var_list{var2, var1, var0};
+  const char* exp_str = "10010101";
+  Bdd bdd = mMgr.from_truth(exp_str, var_list);
   check(bdd, exp_str);
 }
 
 TEST_F(BddTest, copy)
 {
-  mMgr.variable(3);
-  auto var_list = mMgr.variable_list();
   const char* exp_str = "1001010110111010";
-  Bdd bdd = mMgr.from_truth(var_list, exp_str);
+  Bdd bdd = mMgr.from_truth(exp_str);
 
   BddMgr mgr1;
   Bdd bdd1 = mgr1.copy(bdd);

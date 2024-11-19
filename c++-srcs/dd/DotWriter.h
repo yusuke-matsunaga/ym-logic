@@ -66,7 +66,8 @@ public:
   /// @brief ランクグループの定義
   void
   write_rank_group(
-    const vector<string>& node_list ///< [in] 同一グループのノードリスト
+    const vector<string>& node_list, ///< [in] 同一グループのノードリスト
+    const string& rank = "same"      ///< [in] ランク属性
   );
 
 

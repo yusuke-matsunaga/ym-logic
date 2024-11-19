@@ -8,9 +8,8 @@
 
 #include "ym/Bdd.h"
 #include "dd/BddMgrImpl.h"
-#include "CopyOp.h"
-#include "NodeCollector.h"
 #include "dd/DdInfo.h"
+#include "dd/DdInfoMgr.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 
@@ -42,8 +41,8 @@ BddMgrImpl::variable(
 {
   while ( mVarList.size() <= varid ) {
     auto varid1 = new_variable();
-    auto index1 = varid_to_index(varid1);
-    auto var1 = index_to_var(index1);
+    auto level1 = varid_to_level(varid1);
+    auto var1 = level_to_var(level1);
     mVarList.push_back(var1);
   }
   return mVarList[varid];
@@ -73,7 +72,7 @@ BddMgrImpl::one()
 // @brief BDD を作る．
 Bdd
 BddMgrImpl::bdd(
-  SizeType index,
+  SizeType level,
   const Bdd& bdd0,
   const Bdd& bdd1
 )
@@ -82,31 +81,31 @@ BddMgrImpl::bdd(
   bdd1._check_valid();
   _check_mgr(bdd0);
   _check_mgr(bdd1);
-  auto e = new_node(index, _edge(bdd0), _edge(bdd1));
+  auto e = new_node(level, _edge(bdd0), _edge(bdd1));
   return _bdd(e);
 }
 
 // @brief 変数リストをインデックスリストに変換する．
 vector<SizeType>
-BddMgrImpl::index_list(
+BddMgrImpl::level_list(
   const vector<BddVar>& var_list
 ) const
 {
   vector<SizeType> ans;
   ans.reserve(var_list.size());
   for ( auto var: var_list ) {
-    ans.push_back(var.index());
+    ans.push_back(var.level());
   }
   return ans;
 }
 
 // @brief インデックスを変数に変換する．
 BddVar
-BddMgrImpl::index_to_var(
-  SizeType index
+BddMgrImpl::level_to_var(
+  SizeType level
 )
 {
-  auto e = new_node(index, DdEdge::zero(), DdEdge::one());
+  auto e = new_node(level, DdEdge::zero(), DdEdge::one());
   return BddVar{this, e};
 }
 
@@ -117,9 +116,9 @@ BddMgrImpl::variable_order() const
   vector<BddVar> order_list{mVarList};
   sort(order_list.begin(), order_list.end(),
        [&](const BddVar& a, const BddVar& b){
-	 auto index_a = varid_to_index(a.id());
-	 auto index_b = varid_to_index(b.id());
-	 return index_a < index_b;
+	 auto level_a = varid_to_level(a.id());
+	 auto level_b = varid_to_level(b.id());
+	 return level_a < level_b;
        });
   return order_list;
 }
@@ -135,13 +134,13 @@ BddMgrImpl::set_variable_order(
     throw std::invalid_argument{"order_list.size() mismatch"};
   }
   for ( SizeType i = 0; i < nv; ++ i ) {
-    auto dst_index = nv - i - 1;
-    auto var = order_list[dst_index];
+    auto dst_level = nv - i - 1;
+    auto var = order_list[dst_level];
     auto varid = var.id();
-    auto index = varid_to_index(varid);
-    // index を dst_index に移動する．
-    for ( ; index < dst_index; ++ index ) {
-      swap_index(index);
+    auto level = varid_to_level(varid);
+    // level を dst_level に移動する．
+    for ( ; level < dst_level; ++ level ) {
+      swap_level(level);
     }
   }
 }
@@ -156,24 +155,24 @@ BddMgrImpl::dvo_sift()
     // ノード数が最大の変数を選ぶ．
     SizeType max_num = 0;
     SizeType max_varid = 0;
-    SizeType max_index = 0;
+    SizeType max_level = 0;
     for ( SizeType varid = 0; varid < nv; ++ varid ) {
       if ( lock_array[varid] ) {
 	// ロックされていたらスキップする．
 	continue;
       }
-      auto index = varid_to_index(varid);
-      auto n = node_num(index);
+      auto level = varid_to_level(varid);
+      auto n = node_num(level);
       if ( max_num < n ) {
 	max_num = n;
 	max_varid = varid;
-	max_index = index;
+	max_level = level;
       }
     }
     if ( max_num == 0 ) {
       break;
     }
-    dvo_sub(max_index);
+    dvo_sub(max_level);
     lock_array[max_varid] = true;
   }
 }
@@ -181,37 +180,37 @@ BddMgrImpl::dvo_sift()
 // @brief dvo_sift() の下請け関数
 void
 BddMgrImpl::dvo_sub(
-  SizeType index
+  SizeType level
 )
 {
   auto best_num = node_num();
-  auto best_index = index;
-  // index を最下部まで移動させる．
-  auto bottom_index = variable_num() - 1;
-  for ( SizeType index1 = index; index1 < bottom_index; ++ index1 ) {
-    swap_index(index1);
+  auto best_level = level;
+  // level を最下部まで移動させる．
+  auto bottom_level = variable_num() - 1;
+  for ( SizeType level1 = level; level1 < bottom_level; ++ level1 ) {
+    swap_level(level1);
     auto num = node_num();
     if ( best_num > num ) {
       best_num = num;
-      best_index = index1 + 1;
+      best_level = level1 + 1;
     }
   }
-  // 最下部のインデックスを index まで移動させる．
-  for ( SizeType index1 = variable_num(); index1 > index; -- index1 ) {
-    swap_index(index1 - 1);
+  // 最下部のインデックスを level まで移動させる．
+  for ( SizeType level1 = variable_num(); level1 > level; -- level1 ) {
+    swap_level(level1 - 1);
   }
-  // index を最上部まで移動させる．
-  for ( SizeType index1 = index; index1 > 0; -- index1 ) {
-    swap_index(index1 - 1);
+  // level を最上部まで移動させる．
+  for ( SizeType level1 = level; level1 > 0; -- level1 ) {
+    swap_level(level1 - 1);
     auto num = node_num();
     if ( best_num > num ) {
       best_num = num;
-      best_index = index1 - 1;
+      best_level = level1 - 1;
     }
   }
-  // 最上部のインデックスを best_index まで移動させる．
-  for ( SizeType index1 = 0; index1 < best_index; ++ index1 ) {
-    swap_index(index1);
+  // 最上部のインデックスを best_level まで移動させる．
+  for ( SizeType level1 = 0; level1 < best_level; ++ level1 ) {
+    swap_level(level1);
   }
 }
 
@@ -221,7 +220,7 @@ inline
 bool
 _decomp(
   DdEdge edge,
-  SizeType index1,
+  SizeType level1,
   DdEdge& edge0,
   DdEdge& edge1
 )
@@ -229,8 +228,8 @@ _decomp(
   if ( !edge.is_const() ) {
     auto node = edge.node();
     auto inv = edge.inv();
-    auto index = node->index();
-    if ( index == index1 ) {
+    auto level = node->level();
+    if ( level == level1 ) {
       edge0 = node->edge0() ^ inv;
       edge1 = node->edge1() ^ inv;
       return true;
@@ -245,36 +244,36 @@ END_NONAMESPACE
 
 // @brief 隣り合うインデックスを交換する．
 void
-BddMgrImpl::swap_index(
-  SizeType index
+BddMgrImpl::swap_level(
+  SizeType level
 )
 {
   // まず単純に隣り合うレベルのテーブルを入れ替える．
-  DdNodeMgr::swap_index(index);
+  DdNodeMgr::swap_level(level);
 
-  // 問題は index + 1 の子供を持つ index のノード
+  // 問題は level + 1 の子供を持つ level のノード
   //
-  //      index                index
+  //      level                level
   //     /     \              /     \
-  // index+1 index+1  ==> index+1 index+1
+  // level+1 level+1  ==> level+1 level+1
   //  /   \   /   \        /   \    /   \
   // e00 e01 e10 e11      e00 e10  e01 e11
   //
   // 他のノードから参照されているので同じノードの
   // 中身を入れ替える．
-  auto index2 = index + 1;
-  scan(index, [&](DdNode* node) {
+  auto level2 = level + 1;
+  scan(level, [&](DdNode* node) {
     DdEdge e0 = node->edge0();
     DdEdge e00, e01;
-    auto d0 = _decomp(e0, index, e00, e01);
+    auto d0 = _decomp(e0, level, e00, e01);
     DdEdge e1 = node->edge1();
     DdEdge e10, e11;
-    auto d1 = _decomp(e1, index, e10, e11);
+    auto d1 = _decomp(e1, level, e10, e11);
     if ( d0 || d1 ) {
       // 2つのレベルのインデックスを入れ替える．
-      auto new_e0 = new_node(index2, e00, e10);
-      auto new_e1 = new_node(index2, e01, e11);
-      node->chg_index(index);
+      auto new_e0 = new_node(level2, e00, e10);
+      auto new_e1 = new_node(level2, e01, e11);
+      node->chg_level(level);
       node->chg_edges(new_e0, new_e1);
       activate(new_e0);
       activate(new_e1);
@@ -285,7 +284,7 @@ BddMgrImpl::swap_index(
     }
     return false;
   });
-  garbage_collection(index);
+  garbage_collection(level);
 }
 
 // @brief 複数のBDDのノード数を数える．
@@ -297,9 +296,8 @@ BddMgrImpl::bdd_size(
   if ( bdd_list.empty() ) {
     return 0;
   }
-  vector<SizeType> root_list;
-  auto node_list = node_info(bdd_list, root_list);
-  return node_list.size();
+  auto info_mgr = node_info(bdd_list);
+  return info_mgr.node_num();
 }
 
 // @brief DdEdge を Bdd に変換する．
@@ -323,7 +321,7 @@ BddMgrImpl::_edge(
 // @brief ノードを作る．
 DdEdge
 BddMgrImpl::new_node(
-  SizeType index,
+  SizeType level,
   DdEdge edge0,
   DdEdge edge1
 )
@@ -338,7 +336,7 @@ BddMgrImpl::new_node(
   edge0 ^= oinv;
   edge1 ^= oinv;
 
-  auto node = DdNodeMgr::new_node(index, edge0, edge1);
+  auto node = DdNodeMgr::new_node(level, edge0, edge1);
 
   return DdEdge{node, oinv};
 }
@@ -366,32 +364,13 @@ BddMgrImpl::root_list(
 }
 
 // @brief 複数のBDDのノードの情報を取り出す．
-vector<DdInfo>
+DdInfoMgr
 BddMgrImpl::node_info(
-  const vector<Bdd>& bdd_list,
-  vector<SizeType>& root_edge_list
+  const vector<Bdd>& bdd_list
 )
 {
   auto edge_list = root_list(bdd_list);
-  NodeCollector nc{edge_list};
-
-  root_edge_list.clear();
-  root_edge_list.reserve(bdd_list.size());
-  for ( auto root: nc.root_list() ) {
-    root_edge_list.push_back(nc.edge2int(root));
-  }
-
-  vector<DdInfo> node_list;
-  node_list.reserve(nc.node_list().size());
-  for ( auto node: nc.node_list() ) {
-    SizeType id = nc.node_id(node);
-    ASSERT_COND( id == node_list.size() + 1 );
-    SizeType index = node->index();
-    SizeType edge0 = nc.edge2int(node->edge0());
-    SizeType edge1 = nc.edge2int(node->edge1());
-    node_list.push_back(DdInfo{index, edge0, edge1});
-  }
-  return node_list;
+  return DdInfoMgr{edge_list, this};
 }
 
 // @brief 複数のBDDの内容を出力する．
@@ -401,10 +380,8 @@ BddMgrImpl::display(
   const vector<Bdd>& bdd_list
 )
 {
-  vector<SizeType> root_edge_list;
-  auto node_list = node_info(bdd_list, root_edge_list);
-
-  DdInfo::display(s, root_edge_list, node_list);
+  auto info_mgr = node_info(bdd_list);
+  info_mgr.display(s);
 }
 
 // @brief 構造を表す整数配列を作る．
@@ -413,9 +390,8 @@ BddMgrImpl::rep_data(
   const vector<Bdd>& bdd_list
 )
 {
-  vector<SizeType> root_edge_list;
-  auto node_list = node_info(bdd_list, root_edge_list);
-  return DdInfo::rep_data(root_edge_list, node_list);
+  auto info_mgr = node_info(bdd_list);
+  return info_mgr.rep_data();
 }
 
 BEGIN_NONAMESPACE
@@ -474,6 +450,7 @@ BddMgrImpl::dump(
 
   // シグネチャ
   s.write_signature(BDD_SIG);
+
   // 要素数
   auto n = bdd_list.size();
   s.write_vint(n);
@@ -481,17 +458,25 @@ BddMgrImpl::dump(
     return;
   }
 
-  vector<SizeType> root_edge_list;
-  auto node_list = node_info(bdd_list, root_edge_list);
+  auto info_mgr = node_info(bdd_list);
+
+  // 変数順
+  auto nv = info_mgr.max_level();
+  s.write_vint(nv);
+  for ( SizeType i = 0; i < nv; ++ i ) {
+    auto varid = info_mgr.level_to_varid(i);
+    s.write_vint(varid);
+  }
+
   // 根の枝
-  for ( auto root_edge: root_edge_list ) {
-    s.write_vint(root_edge);
+  for ( auto root: info_mgr.root_list() ) {
+    s.write_vint(root);
   }
   // ノードリスト
   SizeType id = 1;
-  for ( auto& node: node_list ) {
-    // インデックス
-    s.write_vint(node.index());
+  for ( auto& node: info_mgr.node_list() ) {
+    // レベル
+    s.write_vint(node.level());
     // 0枝
     dump_edge(s, id, node.edge0_node(), node.edge0_inv());
     // 1枝
@@ -540,6 +525,14 @@ BddMgrImpl::restore(
     return {};
   }
 
+  SizeType nv = s.read_vint();
+  vector<BddVar> var_list(nv);
+  for ( SizeType i = 0; i < nv; ++ i ) {
+    auto varid = s.read_vint();
+    var_list[i] = variable(varid);
+  }
+  set_variable_order(var_list);
+
   vector<SizeType> root_info_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     root_info_list[i] = s.read_vint();
@@ -547,15 +540,15 @@ BddMgrImpl::restore(
 
   vector<DdEdge> edge_list;
   for ( SizeType id = 1; ; ++ id ) {
-    SizeType index = s.read_vint();
+    SizeType level = s.read_vint();
     SizeType edge0_info = restore_edge(s, id);
     SizeType edge1_info = restore_edge(s, id);
-    if ( index == 0 && edge0_info == 0 && edge1_info == 0 ) {
+    if ( level == 0 && edge0_info == 0 && edge1_info == 0 ) {
       break;
     }
     auto edge0 = decode(edge0_info, edge_list);
     auto edge1 = decode(edge1_info, edge_list);
-    auto edge = new_node(index, edge0, edge1);
+    auto edge = new_node(level, edge0, edge1);
     edge_list.push_back(edge);
   }
 

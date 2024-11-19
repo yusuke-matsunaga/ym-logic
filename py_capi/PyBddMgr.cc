@@ -141,45 +141,58 @@ BddMgr_from_truth(
 )
 {
   static const char* kw_list[] = {
-    "var_list",
     "func_str",
+    "var_list",
     nullptr
   };
   PyObject* var_list_obj = nullptr;
   const char* str = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "Os",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|O",
 				    const_cast<char**>(kw_list),
-				    &var_list_obj, &str) ) {
+				    &str,
+				    &var_list_obj) ) {
     return nullptr;
-  }
-  static const char* err_msg = "var_list should be a sequence of BddVar";
-  if ( !PySequence_Check(var_list_obj) ) {
-    PyErr_SetString(PyExc_TypeError, err_msg);
-    return nullptr;
-  }
-  auto n = PySequence_Size(var_list_obj);
-  vector<BddVar> var_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto var_obj = PySequence_GetItem(var_list_obj, i);
-    if ( !PyBdd::Check(var_obj) ) {
-      PyErr_SetString(PyExc_TypeError, err_msg);
-      return nullptr;
-    }
-    auto var = PyBdd::Get(var_obj);
-    if ( !var.is_variable() ) {
-      PyErr_SetString(PyExc_TypeError, err_msg);
-      return nullptr;
-    }
-    var_list[i] = BddVar::from_bdd(var);
   }
   auto bddmgr = PyBddMgr::Get(self);
-  try {
-    auto ans_bdd = bddmgr.from_truth(var_list, str);
-    return PyBdd::ToPyObject(ans_bdd);
+  if ( var_list_obj == nullptr ) {
+    try {
+      auto ans_bdd = bddmgr.from_truth(str);
+      return PyBdd::ToPyObject(ans_bdd);
+    }
+    catch ( std::invalid_argument ) {
+      PyErr_SetString(PyExc_ValueError, "invalid string");
+      return nullptr;
+    }
   }
-  catch ( std::invalid_argument ) {
-    PyErr_SetString(PyExc_ValueError, "invalid string");
-    return nullptr;
+  else {
+    static const char* err_msg = "var_list should be a sequence of BddVar";
+    if ( !PySequence_Check(var_list_obj) ) {
+      PyErr_SetString(PyExc_TypeError, err_msg);
+      return nullptr;
+    }
+    auto n = PySequence_Size(var_list_obj);
+    vector<BddVar> var_list(n);
+    for ( SizeType i = 0; i < n; ++ i ) {
+      auto var_obj = PySequence_GetItem(var_list_obj, i);
+      if ( !PyBdd::Check(var_obj) ) {
+	PyErr_SetString(PyExc_TypeError, err_msg);
+	return nullptr;
+      }
+      auto var = PyBdd::Get(var_obj);
+      if ( !var.is_variable() ) {
+	PyErr_SetString(PyExc_TypeError, err_msg);
+	return nullptr;
+      }
+      var_list[i] = BddVar::from_bdd(var);
+    }
+    try {
+      auto ans_bdd = bddmgr.from_truth(str, var_list);
+      return PyBdd::ToPyObject(ans_bdd);
+    }
+    catch ( std::invalid_argument ) {
+      PyErr_SetString(PyExc_ValueError, "invalid string");
+      return nullptr;
+    }
   }
 }
 

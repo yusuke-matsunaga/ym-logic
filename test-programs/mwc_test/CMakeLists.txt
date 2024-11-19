@@ -28,6 +28,7 @@ add_executable ( mwc_test
   ${mwc_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_link_libraries ( mwc_test
@@ -43,6 +44,7 @@ add_executable ( mwc_test_d
   ${mwc_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_compile_options ( mwc_test_d

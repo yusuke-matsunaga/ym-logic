@@ -262,21 +262,21 @@ BddIteOp::ite_step(
 
   auto node0 = e0.node();
   auto inv0 = e0.inv();
-  auto index0 = node0->index();
+  auto level0 = node0->level();
 
   auto node1 = e1.node();
   auto inv1 = e1.inv();
-  auto index1 = node1->index();
+  auto level1 = node1->level();
 
   auto node2 = e2.node();
   auto inv2 = e2.inv();
-  auto index2 = node2->index();
+  auto level2 = node2->level();
 
-  auto top = std::min(std::min(index0, index1), index2);
+  auto top = std::min(std::min(level0, level1), level2);
 
   // e0 -> e00, e01
   DdEdge e00, e01;
-  if ( index0 == top ) {
+  if ( level0 == top ) {
     e00 = node0->edge0() ^ inv0;
     e01 = node0->edge1() ^ inv0;
   }
@@ -286,7 +286,7 @@ BddIteOp::ite_step(
 
   // e1 -> e10, e11
   DdEdge e10, e11;
-  if ( index1 == top ) {
+  if ( level1 == top ) {
     e10 = node1->edge0() ^ inv1;
     e11 = node1->edge1() ^ inv1;
   }
@@ -296,7 +296,7 @@ BddIteOp::ite_step(
 
   // e2 -> e20, e21
   DdEdge e20, e21;
-  if ( index2 == top ) {
+  if ( level2 == top ) {
     e20 = node2->edge0() ^ inv2;
     e21 = node2->edge1() ^ inv2;
   }

@@ -35,6 +35,7 @@ add_executable( py_ymlogic
   $<TARGET_OBJECTS:py_ymlogic_obj>
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
+  $<TARGET_OBJECTS:ym_json_obj>
   )
 
 target_compile_options( py_ymlogic
@@ -55,6 +56,7 @@ add_executable( py_ymlogic_d
   $<TARGET_OBJECTS:py_ymlogic_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_compile_options( py_ymlogic_d

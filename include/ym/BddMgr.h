@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/JsonValue.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
 
@@ -126,12 +127,13 @@ public:
   /// - ただし，長さはvar_listのサイズのべき乗である必要がある．
   /// - for some reason, この文字列は big endian となっている．
   /// - 0文字目が(1, 1, 1, 1)に対応する
-  ///
-  /// 不正な形式の場合は std::invalid_argument 例外を送出する．
+  /// - var_list が省略された場合は自動的に適切な変数リストを用いる．
+  /// - 不正な形式の場合は std::invalid_argument 例外を送出する．
   Bdd
   from_truth(
-    const vector<BddVar>& var_list, ///< [in] 変数のリスト
-    const string& str               ///< [in] 01の文字列
+    const string& str,             ///< [in] 01の文字列
+    const vector<BddVar>& var_list ///< [in] 変数のリスト
+    = {}
   );
 
   /// @brief ITE 演算を行う．
@@ -193,10 +195,21 @@ public:
     ostream& s,                                    ///< [in] 出力ストリーム
     const Bdd& bdd,                                ///< [in] BDDのリスト
     const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-    = {}
   )
   {
     gen_dot(s, {bdd}, attr_dict);
+  }
+
+  /// @brief BDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,           ///< [in] 出力ストリーム
+    const Bdd& bdd,       ///< [in] BDDのリスト
+    const JsonValue& attr ///< [in] 属性値を表す JSON オブジェクト
+    = JsonValue{}
+  )
+  {
+    gen_dot(s, {bdd}, attr);
   }
 
   /// @brief 複数のBDDを dot 形式で出力する．
@@ -205,7 +218,15 @@ public:
     ostream& s,                                    ///< [in] 出力ストリーム
     const vector<Bdd>& bdd_list,                   ///< [in] BDDのリスト
     const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-    = {}
+  );
+
+  /// @brief 複数のBDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                   ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list,  ///< [in] BDDのリスト
+    const JsonValue& attr         ///< [in] 属性値を表す JSON オブジェクト
+    = JsonValue{}
   );
 
   /// @brief 構造を表す整数配列を作る．

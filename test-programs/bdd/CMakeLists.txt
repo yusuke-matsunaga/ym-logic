@@ -29,6 +29,7 @@ add_executable ( copy_test
   ${copy_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_compile_options ( copy_test
@@ -52,6 +53,7 @@ add_executable ( truth_test
   ${truth_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_link_libraries ( truth_test
@@ -67,6 +69,7 @@ add_executable ( truth_test_d
   ${truth_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_compile_options ( truth_test_d
@@ -90,6 +93,7 @@ add_executable ( truth_test2
   ${truth_test2_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_link_libraries ( truth_test2
@@ -105,6 +109,7 @@ add_executable ( truth_test2_d
   ${truth_test2_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_compile_options ( truth_test2_d
@@ -128,6 +133,7 @@ add_executable ( dot_test
   ${dot_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_link_libraries ( dot_test
@@ -143,6 +149,7 @@ add_executable ( dot_test_d
   ${dot_test_SOURCES}
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_json_obj_d>
   )
 
 target_compile_options ( dot_test_d

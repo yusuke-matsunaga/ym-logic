@@ -12,6 +12,7 @@
 #include "ym/Bdd.h"
 #include "ym/BddVar.h"
 #include "ym/BddLit.h"
+#include "ym/JsonValue.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
 #include "dd/DdNode.h"
@@ -21,7 +22,7 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-class DdInfo;
+class DdInfoMgr;
 
 //////////////////////////////////////////////////////////////////////
 /// @class BddMgrImpl BddMgrImpl.h "BddMgrImpl.h"
@@ -123,8 +124,8 @@ public:
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
   Bdd
   from_truth(
-    const vector<BddVar>& var_list, ///< [in] 変数のリスト
-    const string& str               ///< [in] 01の文字列
+    const string& str,             ///< [in] 01の文字列
+    const vector<BddVar>& var_list ///< [in] 変数のリスト
   );
 
   /// @brief AND 演算を行う．
@@ -210,21 +211,21 @@ public:
     const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
   );
 
-  /// @brief 変数リストをインデックスリストに変換する．
+  /// @brief 変数のリストをレベルのリストに変換する．
   vector<SizeType>
-  index_list(
+  level_list(
     const vector<BddVar>& var_list ///< [in] 変数リスト
   ) const;
 
-  /// @brief インデックスを変数に変換する．
+  /// @brief レベルを変数に変換する．
   BddVar
-  index_to_var(
-    SizeType index ///< [in] インデックス
+  level_to_var(
+    SizeType level ///< [in] レベル
   );
 
   /// @brief 変数順を表す変数のリストを返す．
   ///
-  /// インデックスの昇順に並んでいる
+  /// レベルの昇順に並んでいる
   vector<BddVar>
   variable_order() const;
 
@@ -263,7 +264,14 @@ public:
     ostream& s,                                    ///< [in] 出力ストリーム
     const vector<Bdd>& bdd_list,                   ///< [in] BDDのリスト
     const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-    = {}
+  );
+
+  /// @brief 複数のBDDを dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                  ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list, ///< [in] BDDのリスト
+    const JsonValue& attr        ///< [in] 属性値を表す JSON オブジェクト
   );
 
   /// @brief 構造を表す整数配列を作る．
@@ -289,10 +297,9 @@ public:
   );
 
   /// @brief 複数のBDDのノードの情報を取り出す．
-  vector<DdInfo>
+  DdInfoMgr
   node_info(
-    const vector<Bdd>& bdd_list,     ///< [in] BDDのリスト
-    vector<SizeType>& root_edge_list ///< [out] 根の情報を格納するリスト
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
 
@@ -335,12 +342,12 @@ public:
   {
     auto l_node = left.node();
     auto l_inv = left.inv();
-    auto l_index = l_node->index();
+    auto l_level = l_node->level();
     auto r_node = right.node();
     auto r_inv = right.inv();
-    auto r_index = r_node->index();
-    auto top = std::min(l_index, r_index);
-    if ( l_index == top ) {
+    auto r_level = r_node->level();
+    auto top = std::min(l_level, r_level);
+    if ( l_level == top ) {
       left0 = l_node->edge0() ^ l_inv;
       left1 = l_node->edge1() ^ l_inv;
     }
@@ -348,7 +355,7 @@ public:
       left0 = left;
       left1 = left;
     }
-    if ( r_index == top ) {
+    if ( r_level == top ) {
       right0 = r_node->edge0() ^ r_inv;
       right1 = r_node->edge1() ^ r_inv;
     }
@@ -383,23 +390,16 @@ private:
 
   /// @brief dvo_sift() の下請け関数
   ///
-  /// index の移動先として最適な位置を求める．
+  /// level の移動先として最適な位置を求める．
   void
   dvo_sub(
-    SizeType index
+    SizeType level
   );
 
-  /// @brief インデックスを移動する．
+  /// @brief 隣り合うレベルを交換する．
   void
-  move_index(
-    SizeType from_index, ///< [in] 移動元のインデックス
-    SizeType to_index    ///< [in] 移動先のインデックス
-  );
-
-  /// @brief 隣り合うインデックスを交換する．
-  void
-  swap_index(
-    SizeType index ///< [in] 交換する上のインデックス
+  swap_level(
+    SizeType level ///< [in] 交換する上のレベル
   );
 
   /// @brief このマネージャに属しているオブジェクトかチェックする．

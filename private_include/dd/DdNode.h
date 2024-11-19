@@ -17,6 +17,15 @@ BEGIN_NAMESPACE_YM_DD
 //////////////////////////////////////////////////////////////////////
 /// @class DdNode DdNode.h "ym/DdNode.h"
 /// @brief BDD/ZDD のノードを表すクラス
+///
+/// 意味的には以下の情報を持つ．
+/// - レベル
+/// - 0-枝
+/// - 1-枝
+///
+/// さらに以下の情報も管理用に持つ．
+/// - 参照回数
+/// - ハッシュ用にリンクポインタ
 //////////////////////////////////////////////////////////////////////
 class DdNode
 {
@@ -26,10 +35,10 @@ public:
 
   /// @brief コンストラクタ
   DdNode(
-    SizeType index,
+    SizeType level,
     DdEdge edge0,
     DdEdge edge1
-  ) : mIndex{index},
+  ) : mLevel{level},
       mEdge0{edge0},
       mEdge1{edge1}
   {
@@ -44,11 +53,11 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief インデックスを返す．
+  /// @brief レベルを返す．
   SizeType
-  index() const
+  level() const
   {
-    return mIndex;
+    return mLevel;
   }
 
   /// @brief 0枝を返す．
@@ -72,13 +81,13 @@ public:
     return mRefCount;
   }
 
-  /// @brief インデックスを変更する．
+  /// @brief レベルを変更する．
   void
-  chg_index(
-    SizeType new_index
+  chg_level(
+    SizeType new_level
   )
   {
-    mIndex = new_index;
+    mLevel = new_level;
   }
 
   /// @brief 枝を変更する．
@@ -98,8 +107,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // インデックス
-  SizeType mIndex;
+  // レベル
+  SizeType mLevel;
 
   // 0枝
   DdEdge mEdge0;
@@ -125,7 +134,7 @@ operator==(
   const DdNode& key2
 )
 {
-  return key1.index() == key2.index() &&
+  return key1.level() == key2.level() &&
     key1.edge0() == key2.edge0() &&
     key1.edge1() == key2.edge1();
 }

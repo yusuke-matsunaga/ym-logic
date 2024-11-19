@@ -1,8 +1,8 @@
 #ifndef DDINFO_H
 #define DDINFO_H
 
-/// @file BddInfo.h
-/// @brief BddInfo のヘッダファイル
+/// @file DdInfo.h
+/// @brief DdInfo のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2023 Yusuke Matsunaga
@@ -28,10 +28,10 @@ public:
 
   /// @brief コンストラクタ
   DdInfo(
-    SizeType index, ///< [in] インデックス
+    SizeType level, ///< [in] レベル
     SizeType edge0, ///< [in] 0枝の情報
     SizeType edge1  ///< [in] 1枝の情報
-  ) : mIndex{index},
+  ) : mLevel{level},
       mEdge0{edge0},
       mEdge1{edge1}
   {
@@ -46,11 +46,11 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief インデックスを返す．
+  /// @brief レベルを返す．
   SizeType
-  index() const
+  level() const
   {
-    return mIndex;
+    return mLevel;
   }
 
   /// @brief 0枝の情報を返す．
@@ -144,8 +144,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // インデックス
-  SizeType mIndex;
+  // レベル
+  SizeType mLevel;
 
   // 0枝の情報
   SizeType mEdge0;

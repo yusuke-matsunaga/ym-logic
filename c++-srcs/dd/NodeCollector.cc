@@ -7,7 +7,6 @@
 /// All rights reserved.
 
 #include "NodeCollector.h"
-#include "dd/DdInfo.h"
 #include "dd/DdEdge.h"
 #include "dd/DdNode.h"
 
@@ -23,10 +22,8 @@ NodeCollector::NodeCollector(
   const vector<DdEdge>& root_list
 )
 {
-  mRootList.reserve(root_list.size());
   for ( auto root: root_list ) {
     get_node(root);
-    mRootList.push_back(root);
   }
 }
 
@@ -44,6 +41,7 @@ NodeCollector::get_node(
   if ( mNodeMap.count(node) == 0 ) {
     get_node(node->edge0());
     get_node(node->edge1());
+    // 定数用に '0' は予約されている．
     SizeType id = mNodeList.size() + 1;
     mNodeMap.emplace(node, id);
     mNodeList.push_back(node);

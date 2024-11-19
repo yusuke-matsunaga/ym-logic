@@ -23,11 +23,11 @@ public:
 
   /// @brief コンストラクタ
   BddCheckSymOp(
-    SizeType index1, ///< [in] インデックス1
-    SizeType index2, ///< [in] インデックス2
+    SizeType level1, ///< [in] レベル1
+    SizeType level2, ///< [in] レベル2
     bool inv = false ///< [in] 極性
-  ) : mIndex1{std::min(index1, index2)},
-      mIndex2{std::max(index1, index2)},
+  ) : mLevel1{std::min(level1, level2)},
+      mLevel2{std::max(level1, level2)},
       mInv{inv}
   {
   }
@@ -56,13 +56,13 @@ private:
   /// @brief op_step の下請け関数
   bool
   op_step2(
-    DdEdge edge0, ///< [in] mIndex1 の 0 のコファクター
-    DdEdge edge1  ///< [in] mIndex1 の 1 のコファクター
+    DdEdge edge0, ///< [in] mLevel1 の 0 のコファクター
+    DdEdge edge1  ///< [in] mLevel1 の 1 のコファクター
   );
 
   /// @brief op_step の下請け関数
   ///
-  /// mIndex2 に依存していないときに true を返す．
+  /// mLevel2 に依存していないときに true を返す．
   bool
   op_step3(
     DdEdge edge ///< [in] 枝
@@ -74,11 +74,11 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // インデックス1
-  SizeType mIndex1;
+  // レベル1
+  SizeType mLevel1;
 
-  // インデックス2
-  SizeType mIndex2;
+  // レベル2
+  SizeType mLevel2;
 
   // 極性
   bool mInv;

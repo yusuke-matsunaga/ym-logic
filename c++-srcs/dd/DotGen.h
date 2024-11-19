@@ -9,13 +9,14 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "DotWriter.h"
+#include "ym/JsonValue.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 class DdEdge;
-class DdInfo;
+class DdInfoMgr;
+class DotWriter;
 
 //////////////////////////////////////////////////////////////////////
 /// @class DotGen DotGen.h "DotGen.h"
@@ -26,9 +27,15 @@ class DotGen
 public:
 
   /// @brief コンストラクタ
+  explicit
   DotGen(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
+    const std::unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
+  );
+
+  /// @brief コンストラクタ
+  explicit
+  DotGen(
+    const JsonValue& attr = JsonValue{} ///< [in] 属性値を表すJSONオブジェクト
   );
 
   /// @brief デストラクタ
@@ -43,8 +50,8 @@ public:
   /// @brief dot 形式で出力する．
   void
   write(
-    const vector<DdInfo>& node_list,   ///< [in] ノード情報のリスト
-    const vector<SizeType>& redge_list ///< [in] 根の枝の情報のリスト
+    ostream& s,               ///< [in] 出力ストリーム
+    const DdInfoMgr& info_mgr ///< [in] グラフ構造の情報を持つオブジェクト
   );
 
 
@@ -68,6 +75,7 @@ private:
   /// @brief 枝の内容を出力する．
   void
   write_edge(
+    DotWriter& writer,       ///< [in] dot 出力着
     const string& from_node, ///< [in] 始点のノード名
     SizeType edge,           ///< [in] 枝
     bool zero                ///< [in] 0枝の時 true にするフラグ
@@ -78,9 +86,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
-
-  // Dot出力器
-  DotWriter mWriter;
 
   // グラフの属性リスト
   unordered_map<string, string> mGraphAttrList;

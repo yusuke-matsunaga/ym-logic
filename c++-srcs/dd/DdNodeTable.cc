@@ -81,7 +81,7 @@ DdNodeTable::~DdNodeTable()
 // @brief ノードを作る．
 bool
 DdNodeTable::new_node(
-  SizeType index,
+  SizeType level,
   DdEdge edge0,
   DdEdge edge1,
   DdNode*& node
@@ -99,7 +99,7 @@ DdNodeTable::new_node(
     }
   }
   // なかったので新規に作る．
-  node = new DdNode{index, edge0, edge1};
+  node = new DdNode{level, edge0, edge1};
   if ( mNodeNum >= mNextLimit ) {
     // テーブルを拡張する．
     extend(mSize * 2);
@@ -123,15 +123,15 @@ DdNodeTable::reg_node(
   node->mLink = prev;
 }
 
-// @brief 保持しているノードのインデックスを変更する．
+// @brief 保持しているノードのレベルを変更する．
 void
-DdNodeTable::chg_index(
-  SizeType new_index
+DdNodeTable::chg_level(
+  SizeType new_level
 )
 {
   for ( SizeType i = 0; i < mHashSize; ++ i ) {
     for ( auto node = mTable[i]; node != nullptr; node = node->mLink ) {
-      node->chg_index(new_index);
+      node->chg_level(new_level);
     }
   }
 }

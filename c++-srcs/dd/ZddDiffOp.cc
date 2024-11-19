@@ -106,10 +106,10 @@ ZddDiffOp::diff_step2(
     return mTable.at(key);
   }
   auto node = right.node();
-  auto index = node->index();
+  auto level = node->level();
   auto edge0 = node->edge0();
   auto ans0 = diff_step2(edge0);
-  auto result = new_node(index, ans0, DdEdge::zero());
+  auto result = new_node(level, ans0, DdEdge::zero());
   mTable.emplace(key, result);
   return result;
 }
@@ -128,11 +128,11 @@ ZddDiffOp::diff_step3(
     return mTable.at(key);
   }
   auto node = left.node();
-  auto index = node->index();
+  auto level = node->level();
   auto edge0 = node->edge0();
   auto edge1 = node->edge1();
   auto ans0 = diff_step3(edge0);
-  auto result = new_node(index, ans0, edge1);
+  auto result = new_node(level, ans0, edge1);
   mTable.emplace(key, result);
   return result;
 }
