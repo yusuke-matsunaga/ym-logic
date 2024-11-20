@@ -25,7 +25,6 @@
 ym_add_gtest ( logic_SopMgr_test
   SopMgrTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
-  $<TARGET_OBJECTS:ym_json_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
@@ -37,21 +36,18 @@ target_include_directories( logic_SopMgr_test
 ym_add_gtest ( logic_SopCube_test
   SopCubeTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
-  $<TARGET_OBJECTS:ym_json_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
 ym_add_gtest ( logic_SopCover_test
   SopCoverTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
-  $<TARGET_OBJECTS:ym_json_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
 ym_add_gtest ( logic_Kernel_test
   KernelTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
-  $<TARGET_OBJECTS:ym_json_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
@@ -63,7 +59,6 @@ target_include_directories( logic_Kernel_test
 ym_add_gtest ( logic_GenFactor_test
   GenFactorTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
-  $<TARGET_OBJECTS:ym_json_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
