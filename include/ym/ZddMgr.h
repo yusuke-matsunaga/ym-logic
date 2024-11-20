@@ -104,108 +104,60 @@ public:
   // ZDD の内容を出力する関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief ZDDのノード数を数える．
-  SizeType
-  zdd_size(
-    const Zdd& zdd ///< [in] ZDD
-  )
-  {
-    return zdd_size({zdd});
-  }
-
   /// @brief 複数のZDDのノード数を数える．
+  static
   SizeType
   zdd_size(
     const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
-  /// @brief ZDDの内容を出力する．
-  void
-  display(
-    ostream& s, ///< [in] 出力ストリーム
-    Zdd& zdd    ///< [in] ZDD
-  )
-  {
-    display(s, {zdd});
-  }
-
   /// @brief 複数のZDDの内容を出力する．
+  static
   void
   display(
     ostream& s,                 ///< [in] 出力ストリーム
     const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
-  /// @brief ZDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const Zdd& zdd,                                ///< [in] ZDDのリスト
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-  )
-  {
-    gen_dot(s, {zdd}, attr_dict);
-  }
-
-  /// @brief ZDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,           ///< [in] 出力ストリーム
-    const Zdd& zdd,       ///< [in] ZDDのリスト
-    const JsonValue& attr ///< [in] 属性値を表す JSON オブジェクト
-    = JsonValue{}
-  )
-  {
-    gen_dot(s, {zdd}, attr);
-  }
-
   /// @brief 複数のZDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list,                   ///< [in] ZDDのリスト
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-  );
-
-  /// @brief 複数のZDDを dot 形式で出力する．
+  ///
+  /// - option は以下のようなキーを持った JSON オブジェクト
+  ///   * attr: dot の各種属性値を持った辞書
+  ///     属性値は <グループ名> ':' <属性名> で表す．
+  ///     グループ名は以下の通り
+  ///     - graph:     グラフ全体
+  ///     - root:      根のノード
+  ///     - node:      通常のノード
+  ///     - terminal:  終端ノード
+  ///     - terminal0: 定数0の終端ノード
+  ///     - terminal1: 定数1の終端ノード
+  ///     グループ名と ':' がない場合には全てのグループに対して同一の属性値
+  ///     を適用する．
+  ///     具体的な属性名と属性値については graphviz の使用を参照すること．
+  ///   * var_label: 変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_texlbl: TeX用の変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_label と var_texlbl は排他的となる．var_texlbl がある時，
+  ///     var_label は無視される．
+  static
   void
   gen_dot(
     ostream& s,                  ///< [in] 出力ストリーム
     const vector<Zdd>& zdd_list, ///< [in] ZDDのリスト
-    const JsonValue& attr        ///< [in] 属性値を表す JSON オブジェクト
+    const JsonValue& option      ///< [in] オプションを表す JSON オブジェクト
     = JsonValue{}
   );
 
   /// @brief 構造を表す整数配列を作る．
-  vector<SizeType>
-  rep_data(
-    const Zdd& zdd ///< [in] ZDDのリスト
-  )
-  {
-    return rep_data({zdd});
-  }
-
-  /// @brief 構造を表す整数配列を作る．
+  static
   vector<SizeType>
   rep_data(
     const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
-  /// @brief ZDDを独自形式でバイナリダンプする．
-  ///
-  /// 復元には ZddMgr::restore() を用いる．
-  void
-  dump(
-    BinEnc& s,     ///< [in] 出力ストリーム
-    const Zdd& zdd ///< [in] ZDDのリスト
-  )
-  {
-    dump(s, {zdd});
-  }
-
   /// @brief 複数のZDDを独自形式でバイナリダンプする．
   ///
   /// 復元には ZddMgr::restore() を用いる．
+  static
   void
   dump(
     BinEnc& s,                  ///< [in] 出力ストリーム

@@ -24,23 +24,10 @@ void
 BddMgrImpl::gen_dot(
   ostream& s,
   const vector<Bdd>& bdd_list,
-  const unordered_map<string, string>& attr_dict
+  const JsonValue& option
 )
 {
-  DotGen dg{attr_dict};
-  auto info_mgr = node_info(bdd_list);
-  dg.write(s, info_mgr);
-}
-
-// @brief 複数のBDDを dot 形式で出力する．
-void
-BddMgrImpl::gen_dot(
-  ostream& s,
-  const vector<Bdd>& bdd_list,
-  const JsonValue& attr
-)
-{
-  DotGen dg{attr};
+  DotGen dg{option};
   auto info_mgr = node_info(bdd_list);
   dg.write(s, info_mgr);
 }
@@ -50,23 +37,10 @@ void
 ZddMgrImpl::gen_dot(
   ostream& s,
   const vector<Zdd>& zdd_list,
-  const unordered_map<string, string>& attr_dict
+  const JsonValue& option
 )
 {
-  DotGen dg{attr_dict};
-  auto info_mgr = node_info(zdd_list);
-  dg.write(s, info_mgr);
-}
-
-// @brief 複数のZDDを dot 形式で出力する．
-void
-ZddMgrImpl::gen_dot(
-  ostream& s,
-  const vector<Zdd>& zdd_list,
-  const JsonValue& attr
-)
-{
-  DotGen dg{attr};
+  DotGen dg{option};
   auto info_mgr = node_info(zdd_list);
   dg.write(s, info_mgr);
 }
@@ -76,50 +50,16 @@ ZddMgrImpl::gen_dot(
 // クラス DotGen
 //////////////////////////////////////////////////////////////////////
 
-BEGIN_NONAMESPACE
-
-std::unordered_map<string, string>
-json_to_dict(
-  const JsonValue& attr
-)
-{
-  std::unordered_map<string, string> attr_dict;
-  if ( attr.is_object() ) {
-    for ( auto& p: attr.item_list() ) {
-      auto key = p.first;
-      auto val = p.second;
-      if ( val.is_string() ) {
-	attr_dict.emplace(key, val.get_string());
-      }
-      else {
-	throw std::invalid_argument{"value should be a string"};
-      }
-    }
-  }
-  else if ( !attr.is_null() ) {
-    throw std::invalid_argument{"attr should be a JSON object"};
-  }
-  return attr_dict;
-}
-
-END_NONAMESPACE
-
 // @brief コンストラクタ
 DotGen::DotGen(
-  const JsonValue& attr
-) : DotGen{json_to_dict(attr)}
-{
-}
-
-// @brief コンストラクタ
-DotGen::DotGen(
-  const unordered_map<string, string>& attr_dict
+  const JsonValue& option
 )
 {
   // デフォルト値の設定
   mGraphAttrList.emplace("rankdir", "TB");
   mGraphAttrList.emplace("bgcolor", "beige");
   mRootAttrList.emplace("shape", "box");
+  mNodeAttrList.emplace("shape", "circle");
   mTerminal0AttrList.emplace("shape", "box");
   mTerminal0AttrList.emplace("style", "filled");
   mTerminal0AttrList.emplace("label", "\"0\"");
@@ -128,13 +68,46 @@ DotGen::DotGen(
   mTerminal1AttrList.emplace("style", "filled");
   mTerminal1AttrList.emplace("label", "\"1\"");
   mTerminal1AttrList.emplace("color", "lightsalmon");
-  mEdge0AttrList.emplace("style", "dotted");
+  mEdge0AttrList.emplace("style", "dashed");
   mEdge0AttrList.emplace("color", "blue");
   mEdge1AttrList.emplace("style", "solid");
   mEdge1AttrList.emplace("color", "red");
-  for ( auto& p: attr_dict ) {
+  // オプションの解析
+  if ( option.is_object() ) {
+    if ( option.has_key("attr") ) {
+      auto attr_obj = option.at("attr");
+      // 属性値の設定
+      set_attr(attr_obj);
+    }
+    if ( option.has_key("var_label") ) {
+      auto obj = option.at("var_label");
+      set_label("var_label", obj, mLabelDict);
+    }
+    if ( option.has_key("var_texlbl") ) {
+      auto obj = option.at("var_texlbl");
+      set_label("var_texlbl", obj, mTexLblDict);
+    }
+  }
+}
+
+void
+DotGen::set_attr(
+  const JsonValue& attr_json
+)
+{
+  if ( attr_json.is_null() ) {
+    return;
+  }
+  if ( !attr_json.is_object() ) {
+    throw std::invalid_argument{"attr should be a JSON object"};
+  }
+  for ( auto& p: attr_json.item_list() ) {
     auto attr_name = p.first;
-    auto attr_val = p.second;
+    auto val_json = p.second;
+    if ( !val_json.is_string() ) {
+      throw std::invalid_argument{"value should be a string"};
+    }
+    auto attr_val = val_json.get_string();
     auto pos = attr_name.find_first_of(":");
     if ( pos == string::npos ) {
       // 全てのタイプに指定する．
@@ -178,9 +151,37 @@ DotGen::DotGen(
 	mEdge1AttrList.emplace(attr_name1, attr_val);
       }
       else {
-	// type error
+	ostringstream buf;
+	buf << type << ": Unknown group name";
+	throw std::invalid_argument{buf.str()};
       }
     }
+  }
+}
+
+// @brief 変数ラベルをセットする．
+void
+DotGen::set_label(
+  const string& name,
+  const JsonValue& label_array,
+  std::unordered_map<SizeType, string>& label_dict
+)
+{
+  if ( !label_array.is_array() ) {
+    ostringstream buf;
+    buf << "'" << name << "' should be a JSON array";
+    throw std::invalid_argument{buf.str()};
+  }
+  auto n = label_array.size();
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto obj = label_array.at(i);
+    if ( !obj.is_string() ) {
+      ostringstream buf;
+      buf << "value of '" << name << "' should be a string";
+      throw std::invalid_argument{buf.str()};
+    }
+    auto label = obj.get_string();
+    label_dict.emplace(i, label);
   }
 }
 
@@ -199,7 +200,7 @@ DotGen::write(
   // 根のノードの定義
   SizeType i = 1;
   for ( auto edge: info_mgr.root_list() ) {
-    auto attr_list{mRootAttrList};
+    auto attr_list = mRootAttrList;
     ostringstream buf;
     buf << "\"BDD#" << i << "\"";
     attr_list.emplace("label", buf.str());
@@ -211,10 +212,29 @@ DotGen::write(
   {
     SizeType id = 1;
     for ( auto node: info_mgr.node_list() ) {
-      auto attr_list{mNodeAttrList};
-      ostringstream buf;
-      buf << "\"" << node.level() << "\"";
-      attr_list.emplace("label", buf.str());
+      auto attr_list = mNodeAttrList;
+      auto varid = info_mgr.level_to_varid(node.level());
+      {
+	ostringstream buf;
+	buf << "\"";
+	if ( mLabelDict.count(varid) > 0 ) {
+	  buf << mLabelDict.at(varid);
+	}
+	else {
+	  buf << varid;
+	}
+	buf << "\"";
+	attr_list.emplace("label", buf.str());
+      }
+      {
+	if ( mTexLblDict.count(varid) > 0 ) {
+	  ostringstream buf;
+	  buf << "\""
+	      << mTexLblDict.at(varid)
+	      << "\"";
+	  attr_list.emplace("texlbl", buf.str());
+	}
+      }
       writer.write_node(node_name(id), attr_list);
       ++ id;
     }

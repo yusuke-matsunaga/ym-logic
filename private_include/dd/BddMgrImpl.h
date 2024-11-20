@@ -261,17 +261,9 @@ public:
   /// @brief 複数のBDDを dot 形式で出力する．
   void
   gen_dot(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list,                   ///< [in] BDDのリスト
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-  );
-
-  /// @brief 複数のBDDを dot 形式で出力する．
-  void
-  gen_dot(
     ostream& s,                  ///< [in] 出力ストリーム
     const vector<Bdd>& bdd_list, ///< [in] BDDのリスト
-    const JsonValue& attr        ///< [in] 属性値を表す JSON オブジェクト
+    const JsonValue& option      ///< [in] オプションを表す JSON オブジェクト
   );
 
   /// @brief 構造を表す整数配列を作る．

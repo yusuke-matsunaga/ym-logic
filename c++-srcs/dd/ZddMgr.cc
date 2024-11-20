@@ -103,7 +103,12 @@ ZddMgr::zdd_size(
   const vector<Zdd>& zdd_list
 )
 {
-  return impl()->zdd_size(zdd_list);
+  if ( zdd_list.empty() ) {
+    return 0;
+  }
+  auto zdd0 = zdd_list.front();
+  auto mgr = zdd0.mgr();
+  return mgr.impl()->zdd_size(zdd_list);
 }
 
 // @brief 複数のZDDの内容を出力する．
@@ -113,7 +118,12 @@ ZddMgr::display(
   const vector<Zdd>& zdd_list
 )
 {
-  impl()->display(s, zdd_list);
+  if ( zdd_list.empty() ) {
+    return;
+  }
+  auto zdd0 = zdd_list.front();
+  auto mgr = zdd0.mgr();
+  mgr.impl()->display(s, zdd_list);
 }
 
 // @brief 複数のZDDを dot 形式で出力する．
@@ -121,21 +131,15 @@ void
 ZddMgr::gen_dot(
   ostream& s,
   const vector<Zdd>& zdd_list,
-  const unordered_map<string, string>& attr_dict
+  const JsonValue& option
 )
 {
-  impl()->gen_dot(s, zdd_list, attr_dict);
-}
-
-// @brief 複数のZDDを dot 形式で出力する．
-void
-ZddMgr::gen_dot(
-  ostream& s,
-  const vector<Zdd>& zdd_list,
-  const JsonValue& attr
-)
-{
-  impl()->gen_dot(s, zdd_list, attr);
+  if ( zdd_list.empty() ) {
+    return;
+  }
+  auto zdd0 = zdd_list.front();
+  auto mgr = zdd0.mgr();
+  mgr.impl()->gen_dot(s, zdd_list, option);
 }
 
 // @brief 構造を表す整数配列を作る．
@@ -144,7 +148,12 @@ ZddMgr::rep_data(
   const vector<Zdd>& zdd_list
 )
 {
-  return impl()->rep_data(zdd_list);
+  if ( zdd_list.empty() ) {
+    return {};
+  }
+  auto zdd0 = zdd_list.front();
+  auto mgr = zdd0.mgr();
+  return mgr.impl()->rep_data(zdd_list);
 }
 
 // @brief 複数のZDDを独自形式でバイナリダンプする．
@@ -154,7 +163,12 @@ ZddMgr::dump(
   const vector<Zdd>& zdd_list
 )
 {
-  impl()->dump(s, zdd_list);
+  if ( zdd_list.empty() ) {
+    return;
+  }
+  auto zdd0 = zdd_list.front();
+  auto mgr = zdd0.mgr();
+  mgr.impl()->dump(s, zdd_list);
 }
 
 // @brief バイナリダンプから復元する．

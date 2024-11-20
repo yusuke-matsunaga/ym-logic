@@ -1863,7 +1863,6 @@ TEST_F(BddTest, size_invalid1)
   EXPECT_EQ( 0, bdd.size() );
 }
 
-#if 0
 TEST_F(BddTest, is_identical1)
 {
   Bdd bdd1 = from_truth("1011");
@@ -1904,7 +1903,6 @@ TEST_F(BddTest, is_identical_invalid2)
 
   EXPECT_FALSE( bdd1.is_identical(bdd2) );
 }
-#endif
 
 TEST_F(BddTest, dump_restore)
 {
@@ -1925,6 +1923,21 @@ TEST_F(BddTest, dump_restore)
   EXPECT_EQ( bdd1, bdd_list[0] );
   EXPECT_EQ( bdd2, bdd_list[1] );
   EXPECT_EQ( bdd3, bdd_list[2] );
+}
+
+TEST_F(BddTest, display1)
+{
+  auto bdd1 = from_truth("1000");
+
+  ostringstream os;
+  bdd1.display(os);
+
+  static const char* exp_str =
+    "     2 \n"
+    "     2:    0   ZERO:      1 \n"
+    "     1:    1   ZERO:     ONE\n";
+
+  EXPECT_EQ( exp_str, os.str() );
 }
 
 END_NAMESPACE_YM

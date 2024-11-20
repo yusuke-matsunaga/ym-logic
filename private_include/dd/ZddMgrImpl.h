@@ -146,20 +146,12 @@ public:
     const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
-  /// @brief 複数のZDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list,                   ///< [in] ZDDのリスト
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-  );
-
   /// @brief 複数のBDDを dot 形式で出力する．
   void
   gen_dot(
     ostream& s,                  ///< [in] 出力ストリーム
     const vector<Zdd>& bdd_list, ///< [in] ZDDのリスト
-    const JsonValue& attr        ///< [in] 属性値を表す JSON オブジェクト
+    const JsonValue& option      ///< [in] オプションを表す JSON オブジェクト
   );
 
   /// @brief 構造を表す整数配列を作る．

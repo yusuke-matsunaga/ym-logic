@@ -29,13 +29,7 @@ public:
   /// @brief コンストラクタ
   explicit
   DotGen(
-    const std::unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-  );
-
-  /// @brief コンストラクタ
-  explicit
-  DotGen(
-    const JsonValue& attr = JsonValue{} ///< [in] 属性値を表すJSONオブジェクト
+    const JsonValue& option ///< [in] オプションを表すJSONオブジェクト
   );
 
   /// @brief デストラクタ
@@ -59,6 +53,20 @@ private:
   //////////////////////////////////////////////////////////////////////
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief 属性値をセットする．
+  void
+  set_attr(
+    const JsonValue& attr_json ///< [in] 属性値の辞書を表す JSON オブジェクト
+  );
+
+  /// @brief 変数ラベルをセットする．
+  void
+  set_label(
+    const string& name,          ///< [in] 名前(エラーメッセージ用)
+    const JsonValue& label_json, ///< [in] 変数ラベル配列を表す JSON オブジェクト
+    std::unordered_map<SizeType, string>& label_dict ///< [in] 結果を格納する辞書
+  );
 
   /// @brief ルート名を返す．
   string
@@ -86,6 +94,12 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
+
+  // 変数ラベルの辞書
+  unordered_map<SizeType, string> mLabelDict;
+
+  // TeX用変数ラベルの辞書
+  unordered_map<SizeType, string> mTexLblDict;
 
   // グラフの属性リスト
   unordered_map<string, string> mGraphAttrList;

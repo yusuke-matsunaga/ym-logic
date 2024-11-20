@@ -187,4 +187,54 @@ TEST_F(BddTest, mgr_var_ordering)
   EXPECT_EQ( exp_o_list, o_list );
 }
 
+TEST_F(BddTest, mgr_bdd_size1)
+{
+  auto bdd1 = from_truth("1000");
+  auto bdd2 = from_truth("1110");
+
+  EXPECT_EQ( 3, mMgr.bdd_size({bdd1, bdd2}) );
+}
+
+TEST_F(BddTest, mgr_display1)
+{
+  auto var0 = variable(0);
+  auto var1 = variable(1);
+
+  auto bdd1 = var0 & var1;
+  auto bdd2 = var0 | var1;
+
+  ostringstream os;
+  mMgr.display(os, {bdd1, bdd2});
+
+  static const char* exp_str =
+    "     2      3 \n"
+    "     3:    0     1 :     ONE\n"
+    "     2:    0   ZERO:      1 \n"
+    "     1:    1   ZERO:     ONE\n";
+
+  EXPECT_EQ( exp_str, os.str() );
+}
+
+TEST_F(BddTest, mgr_display2)
+{
+  auto var0 = variable(0);
+  auto var1 = variable(1);
+
+  mMgr.set_variable_order({var1, var0});
+
+  auto bdd1 = var0 & var1;
+  auto bdd2 = var0 | var1;
+
+  ostringstream os;
+  mMgr.display(os, {bdd1, bdd2});
+
+  static const char* exp_str =
+    "     2      3 \n"
+    "     3:    1     1 :     ONE\n"
+    "     2:    1   ZERO:      1 \n"
+    "     1:    0   ZERO:     ONE\n";
+
+  EXPECT_EQ( exp_str, os.str() );
+}
+
 END_NAMESPACE_YM

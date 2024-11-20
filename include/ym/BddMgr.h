@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/Bdd.h"
 #include "ym/JsonValue.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
@@ -154,107 +155,70 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // BDD の内容を出力する関数
+  // 複数の BDD の情報を取得する関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief BDDのノード数を数える．
-  SizeType
-  bdd_size(
-    const Bdd& bdd ///< [in] BDDのリスト
-  )
-  {
-    return bdd_size({bdd});
-  }
-
   /// @brief 複数のBDDのノード数を数える．
+  ///
+  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  static
   SizeType
   bdd_size(
     const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
-  /// @brief BDDの内容を出力する．
-  void
-  display(
-    ostream& s,    ///< [in] 出力ストリーム
-    const Bdd& bdd ///< [in] BDDのリスト
-  )
-  {
-    display(s, {bdd});
-  }
-
   /// @brief 複数のBDDの内容を出力する．
+  ///
+  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  static
   void
   display(
     ostream& s,                 ///< [in] 出力ストリーム
     const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
-  /// @brief BDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const Bdd& bdd,                                ///< [in] BDDのリスト
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-  )
-  {
-    gen_dot(s, {bdd}, attr_dict);
-  }
-
-  /// @brief BDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,           ///< [in] 出力ストリーム
-    const Bdd& bdd,       ///< [in] BDDのリスト
-    const JsonValue& attr ///< [in] 属性値を表す JSON オブジェクト
-    = JsonValue{}
-  )
-  {
-    gen_dot(s, {bdd}, attr);
-  }
-
   /// @brief 複数のBDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,                                    ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list,                   ///< [in] BDDのリスト
-    const unordered_map<string, string>& attr_dict ///< [in] 属性値の辞書
-  );
-
-  /// @brief 複数のBDDを dot 形式で出力する．
+  ///
+  /// - bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  /// - option は以下のようなキーを持った JSON オブジェクト
+  ///   * attr: dot の各種属性値を持った辞書
+  ///     属性値は <グループ名> ':' <属性名> で表す．
+  ///     グループ名は以下の通り
+  ///     - graph:     グラフ全体
+  ///     - root:      根のノード
+  ///     - node:      通常のノード
+  ///     - terminal:  終端ノード
+  ///     - terminal0: 定数0の終端ノード
+  ///     - terminal1: 定数1の終端ノード
+  ///     グループ名と ':' がない場合には全てのグループに対して同一の属性値
+  ///     を適用する．
+  ///     具体的な属性名と属性値については graphviz の使用を参照すること．
+  ///   * var_label: 変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_texlbl: TeX用の変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_label と var_texlbl は排他的となる．var_texlbl がある時，
+  ///     var_label は無視される．
+  static
   void
   gen_dot(
     ostream& s,                   ///< [in] 出力ストリーム
     const vector<Bdd>& bdd_list,  ///< [in] BDDのリスト
-    const JsonValue& attr         ///< [in] 属性値を表す JSON オブジェクト
+    const JsonValue& option       ///< [in] オプションを表す JSON オブジェクト
     = JsonValue{}
   );
 
   /// @brief 構造を表す整数配列を作る．
-  vector<SizeType>
-  rep_data(
-    const Bdd& bdd ///< [in] BDDのリスト
-  )
-  {
-    return rep_data({bdd});
-  }
-
-  /// @brief 構造を表す整数配列を作る．
+  ///
+  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  static
   vector<SizeType>
   rep_data(
     const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
   /// @brief BDD の内容をバイナリダンプする．
-  void
-  dump(
-    BinEnc& s,     ///< [in] 出力ストリーム
-    const Bdd& bdd ///< [in] 対象の BDD
-  )
-  {
-    dump(s, {bdd});
-  }
-
-  /// @brief BDD の内容をバイナリダンプする．
+  ///
+  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  static
   void
   dump(
     BinEnc& s,                  ///< [in] 出力ストリーム

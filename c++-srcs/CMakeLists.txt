@@ -88,6 +88,7 @@ set (dd_SOURCES
   dd/DotGen.cc
   dd/DotWriter.cc
   dd/DdInfoMgr.cc
+  dd/IdentOp.cc
   dd/NodeCollector.cc
 
   dd/Bdd.cc

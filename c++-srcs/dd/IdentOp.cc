@@ -71,7 +71,7 @@ IdentOp::ident_step(
 
   auto l_node = left.node();
   auto r_node = right.node();
-  if ( l_node->index() != r_node->index() ) {
+  if ( l_node->level() != r_node->level() ) {
     return false;
   }
 
@@ -88,7 +88,9 @@ IdentOp::ident_step(
   if ( ans ) {
     ans = ident_step(left1, right1);
   }
-  mTable.emplace(key, ans);
+  if ( ans ) {
+    mTable.emplace(key, ans);
+  }
   return ans;
 }
 

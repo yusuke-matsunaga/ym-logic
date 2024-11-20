@@ -521,11 +521,11 @@ Bdd::display(
 void
 Bdd::gen_dot(
   ostream& s,
-  const unordered_map<string, string>& attr_dict
+  const JsonValue& option
 ) const
 {
   _check_valid();
-  mMgr->gen_dot(s, {*this}, attr_dict);
+  mMgr->gen_dot(s, {*this}, option);
 }
 
 // @brief 構造を表す整数配列を作る．

@@ -140,7 +140,12 @@ BddMgr::bdd_size(
   const vector<Bdd>& bdd_list
 )
 {
-  return impl()->bdd_size(bdd_list);
+  if ( bdd_list.empty() ) {
+    return 0;
+  }
+  auto bdd0 = bdd_list.front();
+  auto mgr = bdd0.mgr();
+  return mgr.impl()->bdd_size(bdd_list);
 }
 
 // @brief 複数のBDDの内容を出力する．
@@ -150,7 +155,12 @@ BddMgr::display(
   const vector<Bdd>& bdd_list
 )
 {
-  impl()->display(s, bdd_list);
+  if ( bdd_list.empty() ) {
+    return;
+  }
+  auto bdd0 = bdd_list.front();
+  auto mgr = bdd0.mgr();
+  mgr.impl()->display(s, bdd_list);
 }
 
 // @brief 複数のBDDを dot 形式で出力する．
@@ -158,21 +168,15 @@ void
 BddMgr::gen_dot(
   ostream& s,
   const vector<Bdd>& bdd_list,
-  const unordered_map<string, string>& attr_dict
+  const JsonValue& option
 )
 {
-  impl()->gen_dot(s, bdd_list, attr_dict);
-}
-
-// @brief 複数のBDDを dot 形式で出力する．
-void
-BddMgr::gen_dot(
-  ostream& s,
-  const vector<Bdd>& bdd_list,
-  const JsonValue& attr
-)
-{
-  impl()->gen_dot(s, bdd_list, attr);
+  if ( bdd_list.empty() ) {
+    return;
+  }
+  auto bdd0 = bdd_list.front();
+  auto mgr = bdd0.mgr();
+  mgr.impl()->gen_dot(s, bdd_list, option);
 }
 
 // @brief 構造を表す整数配列を作る．
@@ -181,7 +185,12 @@ BddMgr::rep_data(
   const vector<Bdd>& bdd_list
 )
 {
-  return impl()->rep_data(bdd_list);
+  if ( bdd_list.empty() ) {
+    return {};
+  }
+  auto bdd0 = bdd_list.front();
+  auto mgr = bdd0.mgr();
+  return mgr.impl()->rep_data(bdd_list);
 }
 
 // @brief BDD の内容をバイナリダンプする．
@@ -191,7 +200,12 @@ BddMgr::dump(
   const vector<Bdd>& bdd_list
 )
 {
-  impl()->dump(s, bdd_list);
+  if ( bdd_list.empty() ) {
+    return;
+  }
+  auto bdd0 = bdd_list.front();
+  auto mgr = bdd0.mgr();
+  mgr.impl()->dump(s, bdd_list);
 }
 
 // @brief バイナリダンプから復元する．

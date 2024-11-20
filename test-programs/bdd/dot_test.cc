@@ -10,6 +10,7 @@
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
 #include "ym/BddVar.h"
+#include "ym/JsonValue.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -35,20 +36,31 @@ dot_test(
       auto f = mgr.from_truth(buf);
       func_list.push_back(f);
     }
-#if 0
-    std::unordered_map<string, string> attr_dict;
-    attr_dict["graph:bgcolor"] = "beige";
-    attr_dict["edge0:color"] = "blue";
-    attr_dict["edge1:color"] = "red";
-    attr_dict["node:color"] = "mediumaquamarine";
-    attr_dict["node:style"] = "filled";
-    attr_dict["terminal:style"] = "filled";
-    attr_dict["terminal0:color"] = "mediumpurple";
-    attr_dict["terminal1:color"] = "lightsalmon";
-    mgr.gen_dot(cout, func_list, attr_dict);
+    auto nv = mgr.variable_num();
+    vector<JsonValue> label_array(nv);
+#if 1
+    for ( SizeType i = 0; i < nv; ++ i ) {
+      ostringstream buf;
+      buf << "$X_{" << (i + 1) << "}$";
+      auto label = buf.str();
+      label_array[i] = JsonValue{label};
+    }
+    auto label_array_obj = JsonValue{label_array};
+    std::unordered_map<string, JsonValue> option_dict;
+    option_dict.emplace("var_texlbl", label_array_obj);
 #else
-    mgr.gen_dot(cout, func_list);
+    for ( SizeType i = 0; i < nv; ++ i ) {
+      char c = 'a' + i;
+      string label;
+      label += c;
+      label_array[i] = JsonValue{label};
+    }
+    auto label_array_obj = JsonValue{label_array};
+    std::unordered_map<string, JsonValue> option_dict;
+    option_dict.emplace("var_label", label_array_obj);
 #endif
+    auto option = JsonValue{option_dict};
+    BddMgr::gen_dot(cout, func_list, option);
   }
   return 0;
 }
