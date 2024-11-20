@@ -9,6 +9,7 @@
 #include "pym/PyBdd.h"
 #include "pym/PyBddMgr.h"
 #include "pym/PyBddVarSet.h"
+#include "pym/PyJsonValue.h"
 #include "pym/PyModule.h"
 #include "ym/BddVar.h"
 #include "ym/BddLit.h"
@@ -647,6 +648,43 @@ Bdd_to_truth(
   }
 }
 
+PyObject*
+Bdd_gen_dot(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  const static char* kw_list[] = {
+    "filename",
+    "option",
+    nullptr
+  };
+  const char* filename = nullptr;
+  PyObject* option_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|$O!",
+				    const_cast<char**>(kw_list),
+				    &filename,
+				    PyJsonValue::_typeobject(), &option_obj) ) {
+    return nullptr;
+  }
+  ofstream ofs{filename};
+  if ( !ofs ) {
+    ostringstream buf;
+    buf << "Could not create file '" << filename << "'";
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
+  JsonValue option;
+  if ( option_obj != nullptr ) {
+    option = PyJsonValue::Get(option_obj);
+  }
+  auto bdd = PyBdd::Get(self);
+  bdd.gen_dot(ofs, option);
+  Py_RETURN_NONE;
+}
+
+
 // メソッド定義
 PyMethodDef Bdd_methods[] = {
   {"invalid", Bdd_invalid,
@@ -721,6 +759,9 @@ PyMethodDef Bdd_methods[] = {
   {"to_truth", reinterpret_cast<PyCFunction>(Bdd_to_truth),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("convert to the truth-table string")},
+  {"gen_dot", reinterpret_cast<PyCFunction>(Bdd_gen_dot),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("generate DOT file")},
   {nullptr, nullptr, 0, nullptr}
 };
 

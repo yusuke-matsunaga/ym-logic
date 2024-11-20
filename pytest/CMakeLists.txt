@@ -33,6 +33,7 @@ set ( py_ymlogic_SOURCES
 add_executable( py_ymlogic
   ${py_ymlogic_SOURCES}
   $<TARGET_OBJECTS:py_ymlogic_obj>
+  $<TARGET_OBJECTS:py_ymbase_obj>
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
   )
@@ -53,6 +54,7 @@ target_link_libraries ( py_ymlogic
 add_executable( py_ymlogic_d
   ${py_ymlogic_SOURCES}
   $<TARGET_OBJECTS:py_ymlogic_obj_d>
+  $<TARGET_OBJECTS:py_ymbase_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   $<TARGET_OBJECTS:ym_base_obj_d>
   )
