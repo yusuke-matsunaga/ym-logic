@@ -47,6 +47,7 @@ ym_add_object_library( py_ymlogic
 add_library ( py_ymlogiclib
   SHARED
   $<TARGET_OBJECTS:py_ymlogic_obj>
+  $<TARGET_OBJECTS:py_ymbase_obj>
   $<TARGET_OBJECTS:ym_logic_obj>
   $<TARGET_OBJECTS:ym_base_obj>
   )
