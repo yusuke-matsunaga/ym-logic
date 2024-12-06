@@ -21,7 +21,7 @@ BEGIN_NONAMESPACE
 struct ExprObject
 {
   PyObject_HEAD
-  Expr* mPtr;
+  Expr mExpr;
 };
 
 // Python 用のタイプ定義
@@ -59,7 +59,7 @@ Expr_new(
       return nullptr;
     }
   }
-  expr_obj->mPtr = new Expr{src_expr};
+  new (&expr_obj->mExpr) Expr{src_expr};
   return obj;
 }
 
@@ -70,7 +70,7 @@ Expr_dealloc(
 )
 {
   auto expr_obj = reinterpret_cast<ExprObject*>(self);
-  delete expr_obj->mPtr;
+  expr_obj->mExpr.~Expr();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -1055,7 +1055,7 @@ PyExpr::ToPyObject(
 {
   auto obj = ExprType.tp_alloc(&ExprType, 0);
   auto expr_obj = reinterpret_cast<ExprObject*>(obj);
-  expr_obj->mPtr = new Expr{val};
+  new (&expr_obj->mExpr) Expr{val};
   return obj;
 }
 
@@ -1075,7 +1075,7 @@ PyExpr::Get(
 )
 {
   auto expr_obj = reinterpret_cast<ExprObject*>(obj);
-  return *expr_obj->mPtr;
+  return expr_obj->mExpr;
 }
 
 // @brief Expr を表すオブジェクトの型定義を返す．

@@ -20,7 +20,7 @@ BEGIN_NONAMESPACE
 struct SopCubeObject
 {
   PyObject_HEAD
-  SopCube* mVal;
+  SopCube mVal;
 };
 
 // Python 用のタイプ定義
@@ -71,7 +71,7 @@ SopCube_new(
   }
   auto self = type->tp_alloc(type, 0);
   auto sopcube_obj = reinterpret_cast<SopCubeObject*>(self);
-  sopcube_obj->mVal = new SopCube{ni, lit_list};
+  new (&sopcube_obj->mVal) SopCube{ni, lit_list};
   return self;
 }
 
@@ -82,7 +82,7 @@ SopCube_dealloc(
 )
 {
   auto sopcube_obj = reinterpret_cast<SopCubeObject*>(self);
-  delete sopcube_obj->mVal;
+  sopcube_obj->mVal.~SopCube();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -491,7 +491,7 @@ PySopCube::ToPyObject(
 {
   auto obj = SopCubeType.tp_alloc(&SopCubeType, 0);
   auto sopcube_obj = reinterpret_cast<SopCubeObject*>(obj);
-  sopcube_obj->mVal = new SopCube{val};
+  new (&sopcube_obj->mVal) SopCube{val};
   return obj;
 }
 
@@ -503,7 +503,7 @@ PySopCube::ToPyObject(
 {
   auto obj = SopCubeType.tp_alloc(&SopCubeType, 0);
   auto sopcube_obj = reinterpret_cast<SopCubeObject*>(obj);
-  sopcube_obj->mVal = new SopCube{std::move(val)};
+  new (&sopcube_obj->mVal) SopCube{std::move(val)};
   return obj;
 }
 
@@ -523,7 +523,7 @@ PySopCube::Get(
 )
 {
   auto sopcube_obj = reinterpret_cast<SopCubeObject*>(obj);
-  return *sopcube_obj->mVal;
+  return sopcube_obj->mVal;
 }
 
 // @brief SopCube を表すオブジェクトの型定義を返す．

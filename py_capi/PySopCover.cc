@@ -21,7 +21,7 @@ BEGIN_NONAMESPACE
 struct SopCoverObject
 {
   PyObject_HEAD
-  SopCover* mVal;
+  SopCover mVal;
 };
 
 // Python 用のタイプ定義
@@ -88,7 +88,7 @@ SopCover_new(
   {
     auto self = type->tp_alloc(type, 0);
     auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
-    sopcover_obj->mVal = new SopCover{ni, cube_list};
+    new (&sopcover_obj->mVal) SopCover{ni, cube_list};
     return self;
   }
  error:
@@ -104,7 +104,7 @@ SopCover_dealloc(
 )
 {
   auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
-  delete sopcover_obj->mVal;
+  sopcover_obj->mVal.~SopCover();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -706,7 +706,7 @@ PySopCover::ToPyObject(
 {
   auto obj = SopCoverType.tp_alloc(&SopCoverType, 0);
   auto sopcover_obj = reinterpret_cast<SopCoverObject*>(obj);
-  sopcover_obj->mVal = new SopCover{val};
+  new (&sopcover_obj->mVal) SopCover{val};
   return obj;
 }
 
@@ -718,7 +718,7 @@ PySopCover::ToPyObject(
 {
   auto obj = SopCoverType.tp_alloc(&SopCoverType, 0);
   auto sopcover_obj = reinterpret_cast<SopCoverObject*>(obj);
-  sopcover_obj->mVal = new SopCover{std::move(val)};
+  new (&sopcover_obj->mVal) SopCover{std::move(val)};
   return obj;
 }
 
@@ -738,7 +738,7 @@ PySopCover::Get(
 )
 {
   auto sopcover_obj = reinterpret_cast<SopCoverObject*>(obj);
-  return *sopcover_obj->mVal;
+  return sopcover_obj->mVal;
 }
 
 // @brief SopCover を表すオブジェクトの型定義を返す．

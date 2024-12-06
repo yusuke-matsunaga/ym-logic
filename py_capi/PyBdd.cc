@@ -23,7 +23,7 @@ BEGIN_NONAMESPACE
 struct BddObject
 {
   PyObject_HEAD
-  Bdd* mVal;
+  Bdd mBdd;
 };
 
 // Python 用のタイプ定義
@@ -50,7 +50,7 @@ Bdd_new(
   }
   auto self = type->tp_alloc(type, 0);
   auto bdd_obj = reinterpret_cast<BddObject*>(self);
-  bdd_obj->mVal = new Bdd{}; // 不正値となる．
+  new (&bdd_obj->mBdd) Bdd{}; // 不正値となる．
   return self;
 }
 
@@ -61,7 +61,7 @@ Bdd_dealloc(
 )
 {
   auto bdd_obj = reinterpret_cast<BddObject*>(self);
-  delete bdd_obj->mVal;
+  bdd_obj->mBdd.~Bdd();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -979,7 +979,7 @@ PyBdd::ToPyObject(
 {
   auto obj = BddType.tp_alloc(&BddType, 0);
   auto bdd_obj = reinterpret_cast<BddObject*>(obj);
-  bdd_obj->mVal = new Bdd{val};
+  new (&bdd_obj->mBdd) Bdd{val};
   return obj;
 }
 
@@ -999,7 +999,7 @@ PyBdd::Get(
 )
 {
   auto bdd_obj = reinterpret_cast<BddObject*>(obj);
-  return *bdd_obj->mVal;
+  return bdd_obj->mBdd;
 }
 
 // @brief Bdd を表すオブジェクトの型定義を返す．

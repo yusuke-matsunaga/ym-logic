@@ -19,7 +19,7 @@ BEGIN_NONAMESPACE
 struct BddLitObject
 {
   PyObject_HEAD
-  BddLit* mVal;
+  BddLit mVal;
 };
 
 // Python 用のタイプ定義
@@ -46,7 +46,7 @@ BddLit_dealloc(
 )
 {
   auto bddlit_obj = reinterpret_cast<BddLitObject*>(self);
-  delete bddlit_obj->mVal;
+  bddlit_obj->mVal.~BddList();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -301,7 +301,7 @@ PyBddLit::ToPyObject(
 {
   auto obj = BddLitType.tp_alloc(&BddLitType, 0);
   auto bddlit_obj = reinterpret_cast<BddLitObject*>(obj);
-  bddlit_obj->mVal = new BddLit{val};
+  new (&bddlit_obj->mVal) BddLit{val};
   return obj;
 }
 
@@ -321,7 +321,7 @@ PyBddLit::Get(
 )
 {
   auto bddlit_obj = reinterpret_cast<BddLitObject*>(obj);
-  return *bddlit_obj->mVal;
+  return bddlit_obj->mVal;
 }
 
 // @brief BddLit を表す PyObject から BddLit を取り出す．
@@ -331,7 +331,7 @@ PyBddLit::_get(
 )
 {
   auto bddlit_obj = reinterpret_cast<BddLitObject*>(obj);
-  return *bddlit_obj->mVal;
+  return bddlit_obj->mVal;
 }
 
 // @brief BddLit を表すオブジェクトの型定義を返す．

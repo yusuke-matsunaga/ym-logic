@@ -20,7 +20,7 @@ BEGIN_NONAMESPACE
 struct BddVarSetObject
 {
   PyObject_HEAD
-  BddVarSet* mVal;
+  BddVarSet mVal;
 };
 
 // Python 用のタイプ定義
@@ -49,6 +49,8 @@ BddVarSet_new(
 				    &PyList_Type, &varset_obj) ) {
     return nullptr;
   }
+  auto self = type->tp_alloc(type, 0);
+  auto bdd_obj = reinterpret_cast<BddVarSetObject*>(self);
   if ( mgr_obj != nullptr ) {
     vector<BddVar> var_set;
     if ( varset_obj != nullptr ) {
@@ -70,17 +72,12 @@ BddVarSet_new(
       }
     }
     auto mgr = PyBddMgr::Get(mgr_obj);
-    auto self = type->tp_alloc(type, 0);
-    auto bdd_obj = reinterpret_cast<BddVarSetObject*>(self);
-    bdd_obj->mVal = new BddVarSet{mgr, var_set};
-    return self;
+    new (&bdd_obj->mVal) BddVarSet{mgr, var_set};
   }
   else {
-    auto self = type->tp_alloc(type, 0);
-    auto bdd_obj = reinterpret_cast<BddVarSetObject*>(self);
-    bdd_obj->mVal = new BddVarSet{};
-    return self;
+    new (&bdd_obj->mVal) BddVarSet{};
   }
+  return self;
 }
 
 // 終了関数
@@ -90,7 +87,7 @@ BddVarSet_dealloc(
 )
 {
   auto bdd_obj = reinterpret_cast<BddVarSetObject*>(self);
-  delete bdd_obj->mVal;
+  bdd_obj->mVal.~BddVarSet();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -292,7 +289,7 @@ PyBddVarSet::ToPyObject(
 {
   auto obj = BddVarSetType.tp_alloc(&BddVarSetType, 0);
   auto bddvarset_obj = reinterpret_cast<BddVarSetObject*>(obj);
-  bddvarset_obj->mVal = new BddVarSet{val};
+  new (&bddvarset_obj->mVal) BddVarSet{val};
   return obj;
 }
 
@@ -312,7 +309,7 @@ PyBddVarSet::Get(
 )
 {
   auto bddvarset_obj = reinterpret_cast<BddVarSetObject*>(obj);
-  return *bddvarset_obj->mVal;
+  return bddvarset_obj->mVal;
 }
 
 // @brief BddVarSet を表すオブジェクトの型定義を返す．

@@ -19,7 +19,7 @@ BEGIN_NONAMESPACE
 struct BddVarObject
 {
   PyObject_HEAD
-  BddVar* mVal;
+  BddVar mVal;
 };
 
 // Python 用のタイプ定義
@@ -46,9 +46,7 @@ BddVar_dealloc(
 )
 {
   auto bddvar_obj = reinterpret_cast<BddVarObject*>(self);
-  if ( bddvar_obj->mVal != nullptr ) {
-    delete bddvar_obj->mVal;
-  }
+  bddvar_obj->mVal.~BddVar();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -189,7 +187,7 @@ PyBddVar::ToPyObject(
 {
   auto obj = BddVarType.tp_alloc(&BddVarType, 0);
   auto bddvar_obj = reinterpret_cast<BddVarObject*>(obj);
-  bddvar_obj->mVal = new BddVar{val};
+  new (&bddvar_obj->mVal) BddVar{val};
   return obj;
 }
 
@@ -209,7 +207,7 @@ PyBddVar::Get(
 )
 {
   auto bddvar_obj = reinterpret_cast<BddVarObject*>(obj);
-  return *(bddvar_obj->mVal);
+  return bddvar_obj->mVal;
 }
 
 // @brief BddVar を表す PyObject から BddVar を取り出す．
@@ -219,7 +217,7 @@ PyBddVar::_get(
 )
 {
   auto bddvar_obj = reinterpret_cast<BddVarObject*>(obj);
-  return *(bddvar_obj->mVal);
+  return bddvar_obj->mVal;
 }
 
 // @brief BddVar を表すオブジェクトの型定義を返す．

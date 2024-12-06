@@ -22,7 +22,7 @@ BEGIN_NONAMESPACE
 struct TvFuncObject
 {
   PyObject_HEAD
-  TvFunc* mVal;
+  TvFunc mVal;
 };
 
 // Python 用のタイプ定義
@@ -91,7 +91,7 @@ TvFunc_dealloc(
 )
 {
   auto tv_obj = reinterpret_cast<TvFuncObject*>(self);
-  delete tv_obj->mVal;
+  tv_obj->mVal.~TvFunc();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -1053,7 +1053,7 @@ PyTvFunc::ToPyObject(
   auto obj = TvFuncType.tp_alloc(&TvFuncType, 0);
   ASSERT_COND( obj != nullptr );
   auto tvfunc_obj = reinterpret_cast<TvFuncObject*>(obj);
-  tvfunc_obj->mVal = new TvFunc{val};
+  new (&tvfunc_obj->mVal) TvFunc{val};
   return obj;
 }
 
@@ -1065,7 +1065,7 @@ PyTvFunc::ToPyObject(
 {
   auto obj = TvFuncType.tp_alloc(&TvFuncType, 0);
   auto tvfunc_obj = reinterpret_cast<TvFuncObject*>(obj);
-  tvfunc_obj->mVal = new TvFunc{std::move(val)};
+  new (&tvfunc_obj->mVal) TvFunc{std::move(val)};
   ASSERT_COND( obj != nullptr );
   return obj;
 }
@@ -1086,7 +1086,7 @@ PyTvFunc::Get(
 )
 {
   auto tvfunc_obj = reinterpret_cast<TvFuncObject*>(obj);
-  return *tvfunc_obj->mVal;
+  return tvfunc_obj->mVal;
 }
 
 // @brief TvFunc を表すオブジェクトの型定義を返す．
