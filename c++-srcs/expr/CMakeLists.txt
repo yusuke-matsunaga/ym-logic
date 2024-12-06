@@ -16,12 +16,6 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(aig)
-add_subdirectory(dd)
-add_subdirectory(expr)
-add_subdirectory(npn)
-add_subdirectory(sop)
-add_subdirectory(tvfunc)
 add_subdirectory(gtest)
 
 
@@ -29,23 +23,20 @@ add_subdirectory(gtest)
 #  ソースファイルの設定
 # ===================================================================
 
-set (ym_logic_SOURCES
-  ${aig_SOURCES}
-  ${dd_SOURCES}
-  ${expr_SOURCES}
-  ${npn_SOURCES}
-  ${sop_SOURCES}
-  ${tvfunc_SOURCES}
+set (expr_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/Expr.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Expr_analyze.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/ExprMgr.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/ExprNode.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/ExprParser.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/ExprWriter.cc
+  PARENT_SCOPE
   )
 
 
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
-
-ym_add_object_library ( ym_logic
-  ${ym_logic_SOURCES}
-  )
 
 
 # ===================================================================

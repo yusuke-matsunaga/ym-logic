@@ -16,12 +16,6 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(aig)
-add_subdirectory(dd)
-add_subdirectory(expr)
-add_subdirectory(npn)
-add_subdirectory(sop)
-add_subdirectory(tvfunc)
 add_subdirectory(gtest)
 
 
@@ -29,23 +23,23 @@ add_subdirectory(gtest)
 #  ソースファイルの設定
 # ===================================================================
 
-set (ym_logic_SOURCES
-  ${aig_SOURCES}
-  ${dd_SOURCES}
-  ${expr_SOURCES}
-  ${npn_SOURCES}
-  ${sop_SOURCES}
-  ${tvfunc_SOURCES}
+set (npn_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/IgPartition.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/NpnMap.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/NpnMapM.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/NpnMgr.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/PolConf.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/walsh_01_normalize.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/walsh_2_refine.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/walsh_w0_refine.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/walsh_w1_refine.cc
+  PARENT_SCOPE
   )
 
 
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
-
-ym_add_object_library ( ym_logic
-  ${ym_logic_SOURCES}
-  )
 
 
 # ===================================================================

@@ -16,12 +16,6 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(aig)
-add_subdirectory(dd)
-add_subdirectory(expr)
-add_subdirectory(npn)
-add_subdirectory(sop)
-add_subdirectory(tvfunc)
 add_subdirectory(gtest)
 
 
@@ -29,23 +23,20 @@ add_subdirectory(gtest)
 #  ソースファイルの設定
 # ===================================================================
 
-set (ym_logic_SOURCES
-  ${aig_SOURCES}
-  ${dd_SOURCES}
-  ${expr_SOURCES}
-  ${npn_SOURCES}
-  ${sop_SOURCES}
-  ${tvfunc_SOURCES}
+set (tvfunc_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/TvFunc.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/TvFunc_analyze.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/TvFunc_bcf.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/TvFunc_walsh.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/TvFuncM.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Tv2Bdd.cc
+  PARENT_SCOPE
   )
 
 
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
-
-ym_add_object_library ( ym_logic
-  ${ym_logic_SOURCES}
-  )
 
 
 # ===================================================================
