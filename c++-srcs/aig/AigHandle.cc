@@ -50,14 +50,14 @@ AigHandle::~AigHandle()
 AigHandle
 AigHandle::zero()
 {
-  return AigHandle{nullptr, AigEdge::zero()};
+  return AigHandle{{}, AigEdge::zero()};
 }
 
 // @brief 定数1のハンドルを返す．
 AigHandle
 AigHandle::one()
 {
-  return AigHandle{nullptr, AigEdge::one()};
+  return AigHandle{{}, AigEdge::one()};
 }
 
 // @brief マネージャを返す．

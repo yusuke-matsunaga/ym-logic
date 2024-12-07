@@ -39,13 +39,6 @@ private:
     AigMgrImpl* ptr
   );
 
-  /// @brief 新しい AigMgrImpl を生成するコンストラクタ
-  ///
-  /// 引数はダミー
-  AigMgrPtr(
-    int dummy
-  );
-
   /// @brief コピーコンストラクタ
   AigMgrPtr(
     const AigMgrPtr& src
@@ -64,14 +57,14 @@ private:
   AigMgrImpl*
   get() const
   {
-    return mPtr;
+    return mPtr.get();
   }
 
   /// @brief get() の別名
   AigMgrImpl*
   operator->() const
   {
-    return mPtr;
+    return get();
   }
 
   /// @brief 等価比較演算子
@@ -139,7 +132,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // ポインタ本体
-  AigMgrImpl* mPtr{nullptr};
+  std::shared_ptr<AigMgrImpl> mPtr;
 
 };
 

@@ -22,7 +22,7 @@ END_NONAMESPACE
 
 // @brief コンストラクタ
 AigMgr::AigMgr(
-) : mMgr{0}
+) : mMgr{new AigMgrImpl}
 {
 }
 
