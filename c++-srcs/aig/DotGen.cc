@@ -10,10 +10,9 @@
 #include "AigMgrImpl.h"
 #include "AigEdge.h"
 #include "DotGen.h"
-#include "common/DotWriter.h"
 
 
-BEGIN_NAMESPACE_YM_DD
+BEGIN_NAMESPACE_YM_AIG
 
 // @brief 複数のAIGを dot 形式で出力する．
 void
@@ -21,24 +20,10 @@ AigMgrImpl::gen_dot(
   ostream& s,
   const vector<AigEdge>& root_list,
   const JsonValue& option
-)
+) const
 {
   DotGen dg{option};
-  auto info_mgr = node_info(bdd_list);
-  dg.write(s, info_mgr);
-}
-
-// @brief 複数のZDDを dot 形式で出力する．
-void
-ZddMgrImpl::gen_dot(
-  ostream& s,
-  const vector<Zdd>& zdd_list,
-  const JsonValue& option
-)
-{
-  DotGen dg{option};
-  auto info_mgr = node_info(zdd_list);
-  dg.write(s, info_mgr);
+  dg.write(s, root_list, mNodeArray);
 }
 
 
@@ -56,13 +41,16 @@ DotGen::DotGen(
   mGraphAttrList.emplace("bgcolor", "beige");
   mRootAttrList.emplace("shape", "box");
   mNodeAttrList.emplace("shape", "circle");
+  mNodeAttrList.emplace("color", "aquamarine");
+  mNodeAttrList.emplace("style", "filled");
   mTerminalAttrList.emplace("shape", "box");
   mTerminalAttrList.emplace("style", "filled");
-  mTerminal0AttrList.emplace("color", "mediumpurple");
-  mNormalEdgeAttrList.emplace("style", "dashed");
-  mNoamrlEdgeAttrList.emplace("color", "blue");
-  mInvEdgeAttrList.emplace("style", "solid");
-  mInvEdgeAttrList.emplace("color", "red");
+  mTerminalAttrList.emplace("color", "mediumpurple");
+  mEdgeAttrList.emplace("style", "solid");
+  mEdgeAttrList.emplace("color", "blue");
+  mConstAttrList.emplace("shape", "box");
+  mConstAttrList.emplace("style", "filled");
+  mConstAttrList.emplace("color", "coral");
   // オプションの解析
   if ( option.is_object() ) {
     if ( option.has_key("attr") ) {
@@ -105,8 +93,8 @@ DotGen::set_attr(
       mRootAttrList.emplace(attr_name, attr_val);
       mNodeAttrList.emplace(attr_name, attr_val);
       mTerminalAttrList.emplace(attr_name, attr_val);
-      mNormalEdgeAttrList.emplace(attr_name, attr_val);
-      mNormalEdgeAttrList.emplace(attr_name, attr_val);
+      mEdgeAttrList.emplace(attr_name, attr_val);
+      mConstAttrList.emplace(attr_name, attr_val);
     }
     else {
       auto type = attr_name.substr(0, pos);
@@ -125,6 +113,9 @@ DotGen::set_attr(
       }
       else if ( type == "edge" ) {
 	mEdgeAttrList.emplace(attr_name1, attr_val);
+      }
+      else if ( type == "const" ) {
+	mConstAttrList.emplace(attr_name1, attr_val);
       }
       else {
 	ostringstream buf;
@@ -165,81 +156,85 @@ DotGen::set_label(
 void
 DotGen::write(
   ostream& s,
-  const DdInfoMgr& info_mgr
+  const vector<AigEdge>& root_list,
+  const vector<AigNode*>& node_list
 )
 {
   DotWriter writer{s};
 
   // dot の開始
-  writer.graph_begin("aig", mGraphAttrList);
+  writer.graph_begin("digraph", "aig", mGraphAttrList);
 
   // 根のノードの定義
-  SizeType i = 1;
-  for ( auto edge: info_mgr.root_list() ) {
-    auto attr_list = mRootAttrList;
-    ostringstream buf;
-    buf << "\"AIG#" << i << "\"";
-    attr_list.emplace("label", buf.str());
-    writer.write_node(root_name(i), attr_list);
-    ++ i;
-  }
-
-  // ノードの定義
   {
     SizeType id = 1;
-    for ( auto node: info_mgr.node_list() ) {
-      auto attr_list = mNodeAttrList;
-      writer.write_node(node_name(id), attr_list);
+    for ( auto _: root_list ) {
+      auto attr_list = mRootAttrList;
+      ostringstream buf;
+      buf << "\"AIG#" << id << "\"";
+      attr_list.emplace("label", buf.str());
+      writer.write_node(root_name(id), attr_list);
       ++ id;
     }
   }
 
-  // 終端の定義
-  writer.write_node("const0", mTerminal0AttrList);
-  writer.write_node("const1", mTerminal1AttrList);
+  // ノードの定義
+  SizeType input_num = 0;
+  for ( auto node: node_list ) {
+    auto name = node_name(node);
+    if ( node->is_input() ) {
+      auto attr_list = mTerminalAttrList;
+      add_label_attr(attr_list, node->input_id());
+      writer.write_node(name, attr_list);
+      ++ input_num;
+    }
+    else {
+      auto attr_list = mNodeAttrList;
+      attr_list.emplace("label", "\"\"");
+      writer.write_node(name, attr_list);
+    }
+  }
 
   // 根の枝の定義
-  i = 1;
-  for ( auto edge: info_mgr.root_list() ) {
-    write_edge(writer, root_name(i), edge, false);
-    ++ i;
+  {
+    SizeType id = 1;
+    for ( auto edge: root_list ) {
+      write_edge(writer, root_name(id), edge);
+      ++ id;
+    }
   }
 
   // 枝の定義
-  {
-    SizeType id = 1;
-    for ( auto node: info_mgr.node_list() ) {
-      write_edge(writer, node_name(id), node.edge0(), true);
-      write_edge(writer, node_name(id), node.edge1(), false);
-      ++ id;
+  for ( auto node: node_list ) {
+    if ( node->is_and() ) {
+      auto name = node_name(node);
+      write_edge(writer, name, node->fanin0());
+      write_edge(writer, name, node->fanin1());
     }
   }
 
   // 根のランクの設定
   {
-    SizeType n = info_mgr.root_list().size();
-    vector<string> node_list(n);
+    SizeType n = root_list.size();
+    vector<string> name_list(n);
     for ( SizeType i = 0; i < n; ++ i ) {
-      node_list[i] = root_name(i + 1);
+      name_list[i] = root_name(i + 1);
     }
-    writer.write_rank_group(node_list, "min");
+    writer.write_rank_group(name_list, "min");
   }
 
-  // ノードのランクの設定
-  for ( SizeType level = 0; level < info_mgr.max_level(); ++ level ) {
-    auto& node_list = info_mgr.id_list(level);
-    SizeType n = node_list.size();
-    vector<string> node_name_list;
-    node_name_list.reserve(n);
-    for ( auto id: node_list ) {
-      node_name_list.push_back(node_name(id));
+  // 入力ノードのランクの設定
+  {
+    vector<string> name_list;
+    name_list.reserve(input_num);
+    for ( auto node: node_list ) {
+      if ( node->is_input() ) {
+	auto name = node_name(node);
+	name_list.push_back(name);
+      }
     }
-    writer.write_rank_group(node_name_list);
+    writer.write_rank_group(name_list, "max");
   }
-
-  // 終端ノードのランクの設定
-  vector<string> terminal_nodes{"const0", "const1"};
-  writer.write_rank_group(terminal_nodes, "max");
 
   writer.graph_end();
 }
@@ -258,12 +253,40 @@ DotGen::root_name(
 // @brief ノード名を返す．
 string
 DotGen::node_name(
-  SizeType id
+  const AigNode* node
 )
 {
   ostringstream buf;
-  buf << "node" << id;
+  buf << "node" << node->id();
   return buf.str();
+}
+
+// @brief 変数ラベルを設定する．
+void
+DotGen::add_label_attr(
+  std::unordered_map<string, string>& attr_list,
+  SizeType input_id
+)
+{
+  {
+    ostringstream buf;
+    buf << "\"";
+    if ( mLabelDict.count(input_id) > 0 ) {
+      buf << mLabelDict.at(input_id);
+    }
+    else {
+      buf << "Input#" << input_id;
+    }
+    buf << "\"";
+    attr_list.emplace("label", buf.str());
+  }
+  if ( mTexLblDict.count(input_id) > 0 ) {
+    ostringstream buf;
+    buf << "\""
+	<< mTexLblDict.at(input_id)
+	<< "\"";
+    attr_list.emplace("texlbl", buf.str());
+  }
 }
 
 // @brief 枝の内容を出力する．
@@ -271,25 +294,35 @@ void
 DotGen::write_edge(
   DotWriter& writer,
   const string& from_node,
-  SizeType edge,
-  bool zero
+  AigEdge edge
 )
 {
   string to_node;
-  bool inv{false};
-  if ( edge == 0 ) {
-    to_node = "const0";
+  if ( edge.is_zero() ) {
+    // その都度 const0 ノードを作る．
+    ostringstream buf;
+    buf << from_node << "_const0";
+    to_node = buf.str();
+    auto attr_list = mConstAttrList;
+    attr_list.emplace("label", "const_0");
+    writer.write_node(to_node, attr_list);
   }
-  else if ( edge == 1 ) {
-    to_node = "const1";
+  else if ( edge.is_one() ) {
+    // その都度 const1 ノードを作る．
+    ostringstream buf;
+    buf << from_node << "_const1";
+    to_node = buf.str();
+    auto attr_list = mConstAttrList;
+    attr_list.emplace("label", "const_1");
+    writer.write_node(to_node, attr_list);
   }
   else {
-    inv = static_cast<bool>(edge & 1);
-    to_node = node_name(edge >> 1);
+    auto node = edge.node();
+    to_node = node_name(node);
   }
 
-  auto attr_list{zero ? mEdge0AttrList : mEdge1AttrList};
-  if ( inv ) {
+  auto attr_list = mEdgeAttrList;
+  if ( edge.inv() && !edge.is_one() ) {
     attr_list.emplace("dir", "both");
     attr_list.emplace("arrowtail", "odot");
   }
@@ -297,4 +330,4 @@ DotGen::write_edge(
   writer.write_edge(from_node, to_node, attr_list);
 }
 
-END_NAMESPACE_YM_DD
+END_NAMESPACE_YM_AIG

@@ -8,7 +8,7 @@
 /// Copyright (C) 2024 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "dd/DdInfo.h"
+#include "DdInfo.h"
 
 
 BEGIN_NAMESPACE_YM_DD

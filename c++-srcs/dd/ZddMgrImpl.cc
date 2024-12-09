@@ -7,9 +7,9 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "dd/ZddMgrImpl.h"
-#include "dd/DdInfo.h"
-#include "dd/DdInfoMgr.h"
+#include "ZddMgrImpl.h"
+#include "DdInfo.h"
+#include "DdInfoMgr.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 

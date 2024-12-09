@@ -6,10 +6,10 @@
 /// Copyright (C) 2024 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "dd/DdInfoMgr.h"
-#include "dd/DdEdge.h"
-#include "dd/DdNode.h"
-#include "dd/DdNodeMgr.h"
+#include "DdInfoMgr.h"
+#include "DdEdge.h"
+#include "DdNode.h"
+#include "DdNodeMgr.h"
 #include "NodeCollector.h"
 
 

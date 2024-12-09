@@ -107,6 +107,17 @@ private:
     const vector<AigHandle>& handle_list ///< [in] ハンドルのリスト
   ) const;
 
+  /// @brief AigHandle のリストを AigEdge のリストに変換する．
+  /// @return マネージャを返す．
+  ///
+  /// 異なるマネージャのハンドルが含まれていたら例外を送出する．
+  static
+  AigMgrPtr
+  hlist_to_elist(
+    const vector<AigHandle>& handle_list, ///< [in] ハンドルのリスト
+    vector<AigEdge>& edge_list            ///< [out] 変換した枝のリスト
+  );
+
   /// @brief AigEdge を AigHandle に変換する．
   AigHandle
   edge_to_handle(

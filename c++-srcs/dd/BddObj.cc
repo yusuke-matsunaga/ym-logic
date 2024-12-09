@@ -8,7 +8,7 @@
 
 #include "ym/BddObj.h"
 #include "ym/BddMgr.h"
-#include "dd/BddMgrImpl.h"
+#include "BddMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_DD

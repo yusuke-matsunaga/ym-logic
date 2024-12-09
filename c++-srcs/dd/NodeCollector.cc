@@ -7,8 +7,8 @@
 /// All rights reserved.
 
 #include "NodeCollector.h"
-#include "dd/DdEdge.h"
-#include "dd/DdNode.h"
+#include "DdEdge.h"
+#include "DdNode.h"
 
 
 BEGIN_NAMESPACE_YM_DD

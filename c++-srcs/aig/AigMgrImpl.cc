@@ -95,37 +95,6 @@ AigMgrImpl::eval_sub(
   }
 }
 
-// @brief dot 形式で出力する．
-void
-AigMgrImpl::gen_dot(
-  ostream& s,
-  const vector<AigEdge>& edge_list,
-  const JsonValue& option
-) const
-{
-  // 各ノードのレベルを求める．
-  auto n = node_num();
-  vector<SizeType> mLevelArray(n);
-  SizeType max_level = 0;
-  for ( auto node: mNodeArray ) {
-    if ( node->is_input() ) {
-      mLevelArray[node->id()] = 0;
-    }
-    else {
-      auto h0 = node->fanin0();
-      auto node0 = h0.node();
-      auto level = mLevelArray[node0->id()];
-      auto h1 = node->fanin1();
-      auto node1 = h1.node();
-      level = std::max(level, mLevelArray[node1->id()]);
-      ++ level;
-      mLevelArray[node->id()] = level;
-      max_level = std::max(max_leve, level);
-    }
-  }
-  // レベルごとのリストを作る．
-}
-
 // @brief and_op() の下請け関数
 AigEdge
 AigMgrImpl::and_sub(

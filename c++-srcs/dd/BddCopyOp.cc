@@ -6,7 +6,7 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "dd/BddMgrImpl.h"
+#include "BddMgrImpl.h"
 #include "BddCopyOp.h"
 
 

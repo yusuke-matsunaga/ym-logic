@@ -7,9 +7,9 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "dd/DdEdge.h"
-#include "dd/ZddMgrImpl.h"
-#include "dd/DdNode.h"
+#include "DdEdge.h"
+#include "ZddMgrImpl.h"
+#include "DdNode.h"
 #include "ZddProductOp.h"
 
 

@@ -8,7 +8,7 @@
 
 #include "ym/Bdd.h"
 #include "ym/Zdd.h"
-#include "dd/DdNode.h"
+#include "DdNode.h"
 #include "IdentOp.h"
 
 

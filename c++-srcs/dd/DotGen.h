@@ -10,13 +10,13 @@
 
 #include "ym/logic.h"
 #include "ym/JsonValue.h"
+#include "ym/DotWriter.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 class DdEdge;
 class DdInfoMgr;
-class DotWriter;
 
 //////////////////////////////////////////////////////////////////////
 /// @class DotGen DotGen.h "DotGen.h"

@@ -8,8 +8,7 @@
 
 #include "ym/ZddMgr.h"
 #include "ym/Zdd.h"
-#include "dd/ZddMgrImpl.h"
-#include "CopyOp.h"
+#include "ZddMgrImpl.h"
 #include "ZddInvOp.h"
 
 

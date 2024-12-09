@@ -8,8 +8,8 @@
 
 #include "ym/BddMgr.h"
 #include "ym/Bdd.h"
-#include "dd/BddMgrImpl.h"
-#include "CopyOp.h"
+#include "BddMgrImpl.h"
+//#include "CopyOp.h"
 
 
 BEGIN_NAMESPACE_YM_DD

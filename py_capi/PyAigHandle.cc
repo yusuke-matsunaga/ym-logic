@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "pym/PyAigHandle.h"
+#include "pym/PyJsonValue.h"
 #include "pym/PyModule.h"
 
 
@@ -212,6 +213,43 @@ AigHandle_ex_fanin_list(
   }
 }
 
+PyObject*
+AigHandle_gen_dot(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kw_list[] = {
+    "filename",
+    "option",
+    nullptr
+  };
+  const char* filename = nullptr;
+  PyObject* option_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|$O!",
+				    const_cast<char**>(kw_list),
+				    &filename,
+				    PyJsonValue::_typeobject(), &option_obj) ) {
+    return nullptr;
+  }
+
+  ofstream ofs{filename};
+  if ( !ofs ) {
+    ostringstream buf;
+    buf << "Could not create file '" << filename << "'";
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
+  JsonValue option;
+  if ( option_obj != nullptr ) {
+    option = PyJsonValue::Get(option_obj);
+  }
+  auto aig = PyAigHandle::Get(self);
+  aig.gen_dot(ofs, option);
+  Py_RETURN_NONE;
+}
+
 // メソッド定義
 PyMethodDef AigHandle_methods[] = {
   {"inv", AigHandle_inv,
@@ -247,6 +285,9 @@ PyMethodDef AigHandle_methods[] = {
   {"ex_fanin_list", AigHandle_ex_fanin_list,
    METH_NOARGS,
    PyDoc_STR("returns an expanded fanin list")},
+  {"gen_dot", reinterpret_cast<PyCFunction>(AigHandle_gen_dot),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("gen DOT file")},
   {nullptr, nullptr, 0, nullptr}
 };
 

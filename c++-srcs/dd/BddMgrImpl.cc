@@ -7,9 +7,9 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "dd/BddMgrImpl.h"
-#include "dd/DdInfo.h"
-#include "dd/DdInfoMgr.h"
+#include "BddMgrImpl.h"
+#include "DdInfo.h"
+#include "DdInfoMgr.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 

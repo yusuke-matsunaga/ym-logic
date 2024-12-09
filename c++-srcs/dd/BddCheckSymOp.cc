@@ -7,9 +7,9 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "dd/DdNode.h"
+#include "DdNode.h"
 #include "BddCheckSymOp.h"
-#include "dd/BddMgrImpl.h"
+#include "BddMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_DD

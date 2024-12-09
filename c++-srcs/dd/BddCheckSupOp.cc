@@ -7,8 +7,8 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
-#include "dd/DdNode.h"
-#include "dd/BddMgrImpl.h"
+#include "DdNode.h"
+#include "BddMgrImpl.h"
 #include "BddCheckSupOp.h"
 
 

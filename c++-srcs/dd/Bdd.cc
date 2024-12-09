@@ -9,10 +9,10 @@
 #include "ym/Bdd.h"
 #include "ym/BddVar.h"
 #include "ym/BddMgr.h"
-#include "dd/DdEdge.h"
-#include "dd/DdNode.h"
-#include "dd/BddMgrImpl.h"
-#include "CopyOp.h"
+#include "DdEdge.h"
+#include "DdNode.h"
+#include "BddMgrImpl.h"
+//#include "CopyOp.h"
 
 
 BEGIN_NAMESPACE_YM_DD

@@ -67,6 +67,13 @@ AigHandle::mgr() const
   return AigMgr{mMgr};
 }
 
+// @brief マネージャのポインタを返す．
+AigMgrPtr
+AigHandle::mgr_ptr() const
+{
+  return mMgr;
+}
+
 // @brief 反転属性を得る．
 bool
 AigHandle::inv() const

@@ -15,9 +15,9 @@
 #include "ym/JsonValue.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
-#include "dd/DdNode.h"
-#include "dd/DdEdge.h"
-#include "dd/DdNodeMgr.h"
+#include "DdNode.h"
+#include "DdEdge.h"
+#include "DdNodeMgr.h"
 
 
 BEGIN_NAMESPACE_YM_DD

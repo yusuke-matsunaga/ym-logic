@@ -9,9 +9,9 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "dd/DdNode.h"
-#include "dd/DdEdge.h"
-#include "dd/DdNodeTable.h"
+#include "DdNode.h"
+#include "DdEdge.h"
+#include "DdNodeTable.h"
 
 
 BEGIN_NAMESPACE_YM_DD

@@ -56,9 +56,32 @@ AigMgrPtr::hlist_to_elist(
   vector<AigEdge> edge_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto h = handle_list[i];
-    edge_list[i] = handle_to_edge(h);
+    auto edge = handle_to_edge(h);
+    edge_list[i] = edge;
   }
   return edge_list;
+}
+
+// AigHandle のリストを AigEdge のリストに変換する．
+AigMgrPtr
+AigMgrPtr::hlist_to_elist(
+  const vector<AigHandle>& handle_list,
+  vector<AigEdge>& edge_list
+)
+{
+  edge_list.clear();
+  auto n = handle_list.size();
+  if ( n == 0 ) {
+    return AigMgrPtr{};
+  }
+  edge_list.reserve(n);
+  auto mgr = handle_list.front().mgr_ptr();
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto h = handle_list[i];
+    auto edge = mgr.handle_to_edge(h);
+    edge_list.push_back(edge);
+  }
+  return mgr;
 }
 
 // @brief AigEdge を AigHandle に変換する．

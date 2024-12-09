@@ -86,10 +86,11 @@ AigMgr::gen_dot(
   ostream& s,
   const vector<AigHandle>& root_list,
   const JsonValue& option
-) const
+)
 {
-  auto oedge_list = mMgr.hlist_to_elist(output_list);
-  return mMgr->gen_dot(s, oedge_list, option);
+  vector<AigEdge> oedge_list;
+  auto mgr = AigMgrPtr::hlist_to_elist(root_list, oedge_list);
+  return mgr->gen_dot(s, oedge_list, option);
 }
 
 // @brief 外部入力ノードを作る．

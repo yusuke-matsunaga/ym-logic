@@ -10,6 +10,7 @@
 
 #include "ym/aig.h"
 #include "ym/AigMgrPtr.h"
+#include "ym/JsonValue.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
@@ -66,6 +67,10 @@ public:
   /// @brief マネージャを返す．
   AigMgr
   mgr() const;
+
+  /// @brief マネージャのポインタを返す．
+  AigMgrPtr
+  mgr_ptr() const;
 
   /// @brief 反転属性を得る．
   bool

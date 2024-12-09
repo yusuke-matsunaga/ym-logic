@@ -6,7 +6,7 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "dd/ZddMgrImpl.h"
+#include "ZddMgrImpl.h"
 #include "ZddCopyOp.h"
 
 

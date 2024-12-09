@@ -8,7 +8,7 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "dd/DdEdge.h"
+#include "DdEdge.h"
 
 
 BEGIN_NAMESPACE_YM_DD

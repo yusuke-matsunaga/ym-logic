@@ -8,10 +8,9 @@
 
 #include "ym/Zdd.h"
 #include "ym/ZddMgr.h"
-#include "dd/DdEdge.h"
-#include "dd/ZddMgrImpl.h"
-#include "dd/DdNode.h"
-#include "CopyOp.h"
+#include "DdEdge.h"
+#include "ZddMgrImpl.h"
+#include "DdNode.h"
 
 
 BEGIN_NAMESPACE_YM_DD

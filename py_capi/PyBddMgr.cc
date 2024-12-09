@@ -10,7 +10,8 @@
 #include "pym/PyBdd.h"
 #include "pym/PyJsonValue.h"
 #include "pym/PyModule.h"
-#include "dd/BddMgrImpl.h"
+#include "ym/BddMgr.h"
+#include "ym/BddVar.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -21,7 +22,7 @@ BEGIN_NONAMESPACE
 struct BddMgrObject
 {
   PyObject_HEAD
-  nsDd::BddMgrImpl* mVal;
+  BddMgr mMgr;
 };
 
 // Python 用のタイプ定義
@@ -48,9 +49,7 @@ BddMgr_new(
 
   auto self = type->tp_alloc(type, 0);
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
-  auto impl = new nsDd::BddMgrImpl{};
-  bddmgr_obj->mVal = impl;
-  impl->inc();
+  new (&bddmgr_obj->mMgr) BddMgr{};
   return self;
 }
 
@@ -61,8 +60,7 @@ BddMgr_dealloc(
 )
 {
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
-  auto impl = bddmgr_obj->mVal;
-  impl->dec();
+  bddmgr_obj->mMgr.~BddMgr();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -382,9 +380,7 @@ PyBddMgr::ToPyObject(
 {
   auto obj = BddMgrType.tp_alloc(&BddMgrType, 0);
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
-  auto impl = val.impl();
-  bddmgr_obj->mVal = impl;
-  impl->inc();
+  new (&bddmgr_obj->mMgr) BddMgr{val};
   return obj;
 }
 
@@ -398,13 +394,13 @@ PyBddMgr::Check(
 }
 
 // @brief BddMgr を表す PyObject から BddMgr を取り出す．
-BddMgr
+BddMgr&
 PyBddMgr::Get(
   PyObject* obj
 )
 {
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
-  return BddMgr{bddmgr_obj->mVal};
+  return bddmgr_obj->mMgr;
 }
 
 // @brief BddMgr を表すオブジェクトの型定義を返す．

@@ -10,7 +10,7 @@
 
 #include "ym/logic.h"
 #include "BddOpBase.h"
-#include "dd/DdEdge.h"
+#include "DdEdge.h"
 #include "Apply2Key.h"
 
 

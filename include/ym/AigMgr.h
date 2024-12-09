@@ -12,6 +12,7 @@
 #include "ym/AigMgrPtr.h"
 #include "ym/AigHandle.h"
 #include "ym/Expr.h"
+#include "ym/JsonValue.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
@@ -93,13 +94,14 @@ public:
   ///   * var_texlbl: TeX用の変数ラベルを表す配列．配列のキーは変数番号
   ///   * var_label と var_texlbl は排他的となる．var_texlbl がある時，
   ///     var_label は無視される．
+  static
   void
   gen_dot(
     ostream& s,                         ///< [in] 出力ストリーム
     const vector<AigHandle>& root_list, ///< [in] 出力のリスト
     const JsonValue& option             ///< [in] オプションを表す JSON オブジェクト
     = JsonValue{}
-  ) const;
+  );
 
 
 public:

@@ -9,14 +9,14 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/DotWriter.h"
 #include "ym/JsonValue.h"
 
 
-BEGIN_NAMESPACE_YM_DD
+BEGIN_NAMESPACE_YM_AIG
 
 class AigEdge;
-class DdInfoMgr;
-class DotWriter;
+class AigNode;
 
 //////////////////////////////////////////////////////////////////////
 /// @class DotGen DotGen.h "DotGen.h"
@@ -44,8 +44,9 @@ public:
   /// @brief dot 形式で出力する．
   void
   write(
-    ostream& s,               ///< [in] 出力ストリーム
-    const DdInfoMgr& info_mgr ///< [in] グラフ構造の情報を持つオブジェクト
+    ostream& s,                        ///< [in] 出力ストリーム
+    const vector<AigEdge>& root_list,  ///< [in] 根の枝のリスト
+    const vector<AigNode*>& node_list  ///< [in] ノードのリスト
   );
 
 
@@ -77,7 +78,14 @@ private:
   /// @brief ノード名を返す．
   string
   node_name(
-    SizeType id ///< [in] 番号
+    const AigNode* node ///< [in] ノード
+  );
+
+  /// @brief 変数ラベルの属性を追加する．
+  void
+  add_label_attr(
+    std::unordered_map<string, string>& attr_list, ///< [in] 属性の辞書
+    SizeType input_id                              ///< [in] 入力番号
   );
 
   /// @brief 枝の内容を出力する．
@@ -85,8 +93,7 @@ private:
   write_edge(
     DotWriter& writer,       ///< [in] dot 出力着
     const string& from_node, ///< [in] 始点のノード名
-    SizeType edge,           ///< [in] 枝
-    bool inv                 ///< [in] 反転枝の時 true にするフラグ
+    AigEdge edge             ///< [in] 枝
   );
 
 
@@ -113,11 +120,14 @@ private:
   // 終端の属性リスト
   unordered_map<string, string> mTerminalAttrList;
 
+  // 定数ノードの属性リスト
+  unordered_map<string, string> mConstAttrList;
+
   // 枝の属性リスト
   unordered_map<string, string> mEdgeAttrList;
 
 };
 
-END_NAMESPACE_YM_DD
+END_NAMESPACE_YM_AIG
 
 #endif // DOTGEN_H

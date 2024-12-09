@@ -12,6 +12,7 @@
 #include "ym/Expr.h"
 #include "AigNode.h"
 #include "AigTable.h"
+#include "ym/JsonValue.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

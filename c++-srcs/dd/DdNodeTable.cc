@@ -6,9 +6,9 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "dd/DdNodeTable.h"
-#include "dd/DdNode.h"
-#include "dd/DdEdge.h"
+#include "DdNodeTable.h"
+#include "DdNode.h"
+#include "DdEdge.h"
 
 
 BEGIN_NAMESPACE_YM_DD

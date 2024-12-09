@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "dd/ZddMgrImpl.h"
+#include "ZddMgrImpl.h"
 #include "ZddDiffOp.h"
 
 

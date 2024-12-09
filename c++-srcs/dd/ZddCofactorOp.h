@@ -10,7 +10,7 @@
 
 #include "ym/logic.h"
 #include "ZddOpBase.h"
-#include "dd/DdEdge.h"
+#include "DdEdge.h"
 
 
 BEGIN_NAMESPACE_YM_DD

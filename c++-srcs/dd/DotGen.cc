@@ -8,13 +8,12 @@
 
 #include "ym/Bdd.h"
 #include "ym/Zdd.h"
-#include "dd/BddMgrImpl.h"
-#include "dd/ZddMgrImpl.h"
-#include "dd/DdEdge.h"
-#include "dd/DdInfo.h"
-#include "dd/DdInfoMgr.h"
+#include "BddMgrImpl.h"
+#include "ZddMgrImpl.h"
+#include "DdEdge.h"
+#include "DdInfo.h"
+#include "DdInfoMgr.h"
 #include "DotGen.h"
-#include "DotWriter.h"
 
 
 BEGIN_NAMESPACE_YM_DD
@@ -195,7 +194,7 @@ DotGen::write(
   DotWriter writer{s};
 
   // dot の開始
-  writer.graph_begin("bdd", mGraphAttrList);
+  writer.graph_begin("digraph", "bdd", mGraphAttrList);
 
   // 根のノードの定義
   SizeType i = 1;
