@@ -89,6 +89,14 @@ public:
     const vector<AigEdge>& output_list    ///< [in] 出力のリスト
   ) const;
 
+  /// @brief dot 形式で出力する．
+  void
+  gen_dot(
+    ostream& s,                       ///< [in] 出力ストリーム
+    const vector<AigEdge>& edge_list, ///< [in] 根の枝のリスト
+    const JsonValue& option           ///< [in] オプションを表す JSON オブジェクト
+  ) const;
+
   /// @brief 外部入力ノードを作る．
   AigEdge
   make_input()

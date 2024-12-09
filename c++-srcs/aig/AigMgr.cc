@@ -80,6 +80,17 @@ AigMgr::eval(
   return mMgr->eval(input_vals, oedge_list);
 }
 
+// @brief dot 形式で出力する．
+void
+AigMgr::gen_dot(
+  ostream& s,
+  const vector<AigHandle>& root_list,
+  const JsonValue& option
+) const
+{
+  auto oedge_list = mMgr.hlist_to_elist(output_list);
+  return mMgr->gen_dot(s, oedge_list, option);
+}
 
 // @brief 外部入力ノードを作る．
 AigHandle
@@ -150,47 +161,5 @@ AigMgr::cofactor(
   auto ans_list = mMgr->cofactor(cedge_list, edge_list);
   return mMgr.elist_to_hlist(ans_list);
 }
-
-#if 0
-// @brief AigHandle を AigEdge に変換する．
-AigEdge
-AigMgr::handle_to_edge(
-  AigHandle handle
-) const
-{
-  _check_mgr(handle);
-  return handle._edge();
-}
-
-// AigHandle のリストを AigEdge のリストに変換する．
-vector<AigEdge>
-AigMgr::hlist_to_elist(
-  const vector<AigHandle>& handle_list
-) const
-{
-  auto n = handle_list.size();
-  vector<AigEdge> edge_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto h = handle_list[i];
-    edge_list[i] = handle_to_edge(h);
-  }
-  return edge_list;
-}
-
-// @brief AigEdge のリストを AigHandle のリストに変換する．
-vector<AigHandle>
-AigMgr::elist_to_hlist(
-  const vector<AigEdge>& edge_list ///< [in] 枝のリスト
-) const
-{
-  auto n = edge_list.size();
-  vector<AigHandle> handle_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto edge = edge_list[i];
-    handle_list[i] = AigHandle{mMgr, edge};
-  }
-  return handle_list;
-}
-#endif
 
 END_NAMESPACE_YM_AIG

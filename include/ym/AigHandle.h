@@ -149,6 +149,31 @@ public:
   SizeType
   hash() const;
 
+  /// @brief dot 形式で出力する．
+  ///
+  /// - option は以下のようなキーを持った JSON オブジェクト
+  ///   * attr: dot の各種属性値を持った辞書
+  ///     属性値は <グループ名> ':' <属性名> で表す．
+  ///     グループ名は以下の通り
+  ///     - graph:    グラフ全体
+  ///     - root:     根のノード
+  ///     - node:     通常のノード
+  ///     - terminal: 入力ノード
+  ///     - edge:     枝
+  ///     グループ名と ':' がない場合には全てのグループに対して同一の属性値
+  ///     を適用する．
+  ///     具体的な属性名と属性値については graphviz の仕様を参照すること．
+  ///   * var_label: 変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_texlbl: TeX用の変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_label と var_texlbl は排他的となる．var_texlbl がある時，
+  ///     var_label は無視される．
+  void
+  gen_dot(
+    ostream& s,             ///< [in] 出力ストリーム
+    const JsonValue& option ///< [in] オプションを表す JSON オブジェクト
+    = JsonValue{}
+  ) const;
+
 
 public:
   //////////////////////////////////////////////////////////////////////

@@ -192,6 +192,16 @@ AigHandle::hash() const
   return ((v * v) >> 20) + idx;
 }
 
+// @brief dot 形式で出力する．
+void
+AigHandle::gen_dot(
+  ostream& s,
+  const JsonValue& option
+) const
+{
+  mMgr->gen_dot(s, {_edge()}, option);
+}
+
 // @brief 否定したハンドルを返す．
 AigHandle
 AigHandle::operator~() const
