@@ -15,10 +15,6 @@
 #include "ym/BinEnc.h"
 
 
-BEGIN_NAMESPACE_YM
-class PyBddMgr;
-END_NAMESPACE_YM
-
 BEGIN_NAMESPACE_YM_DD
 
 class BddMgrImpl;
@@ -41,8 +37,6 @@ class BddMgrImpl;
 //////////////////////////////////////////////////////////////////////
 class BddMgr
 {
-  friend class nsYm::PyBddMgr;
-
 public:
 
   /// @brief コンストラクタ

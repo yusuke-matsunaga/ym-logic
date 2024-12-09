@@ -12,7 +12,6 @@
 #include "DdEdge.h"
 #include "DdNode.h"
 #include "BddMgrImpl.h"
-//#include "CopyOp.h"
 
 
 BEGIN_NAMESPACE_YM_DD
