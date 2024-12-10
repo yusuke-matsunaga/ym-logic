@@ -51,6 +51,11 @@ public:
     const Bdd& src ///< [in] コピー元のBDD
   );
 
+  /// @brief ムーブコンストラクタ
+  Bdd(
+    const Bdd&& src ///< [in] ムーブ元のBDD
+  );
+
   /// @brief デストラクタ
   ~Bdd();
 
@@ -668,15 +673,15 @@ protected:
 
   /// @brief 内容を指定したコンストラクタ
   Bdd(
-    BddMgrImpl* mgr,
+    const BddMgrPtr& mgr,
     DdEdge root
   );
 
-  /// @brief マネージャ(の実体)を返す．
-  BddMgrImpl*
-  _mgr() const
+  /// @brief マネージャを返す．
+  BddMgrPtr
+  mgr_ptr() const
   {
-    return mMgr.get();
+    return mMgr;
   }
 
   /// @brief 根の枝を返す．

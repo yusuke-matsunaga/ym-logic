@@ -25,7 +25,7 @@ BddMgrImpl::cofactor(
   bdd._check_valid();
   _check_mgr(bdd);
   auto cube = literal(var, inv);
-  BddCofactorOp op{*this};
+  BddCofactorOp op{BddMgrPtr{this}};
   auto e = op.op_step(_edge(bdd), _edge(cube));
   return _bdd(e);
 }
@@ -42,7 +42,7 @@ BddMgrImpl::cofactor(
   cube._check_cube();
   _check_mgr(bdd);
   _check_mgr(cube);
-  BddCofactorOp op{*this};
+  BddCofactorOp op{BddMgrPtr{this}};
   auto e = op.op_step(_edge(bdd), _edge(cube));
   return _bdd(e);
 }

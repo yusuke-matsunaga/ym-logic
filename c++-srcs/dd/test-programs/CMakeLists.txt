@@ -24,8 +24,8 @@ include_directories(
 #  ターゲットの設定
 # ===================================================================
 
-add_executable( simp_test
-  simple_test.cc
+add_executable( bdd_test
+  bdd_test.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )

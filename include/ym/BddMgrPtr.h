@@ -26,15 +26,10 @@ class BddMgrPtr
 {
 public:
 
-  /// @brief 空のコンストラクタ
-  ///
-  /// 不正な値となる．
-  BddMgrPtr() = default;
-
   /// @brief 生のポインタを指定したコンストラクタ
   explicit
   BddMgrPtr(
-    BddMgrImpl* ptr  ///< [in] マネージャのポインタ
+    BddMgrImpl* ptr = nullptr ///< [in] マネージャのポインタ
   );
 
   /// @brief コピーコンストラクタ
@@ -46,6 +41,11 @@ public:
   BddMgrPtr&
   operator=(
     const BddMgrPtr& src ///< [in] コピー元のオブジェクト
+  );
+
+  /// @brief ムーブコンストラクタ
+  BddMgrPtr(
+    BddMgrPtr&& src ///< [in] ムーブ元のオブジェクト
   );
 
   /// @brief デストラクタ
@@ -61,26 +61,18 @@ public:
   BddMgr
   mgr() const;
 
-  /// マネージャの実体を返す．
-  BddMgrImpl*
-  get() const
-  {
-    return mPtr.get();
-    //return mPtr;
-  }
-
-  /// @brief get() の別名
+  /// @brief dereference
   BddMgrImpl*
   operator->() const
   {
-    return get();
+    return mPtr.get();
   }
 
   /// @brief 適正な値を持っている時に true を返す．
   bool
   is_valid() const
   {
-    return get() != nullptr;
+    return mPtr.get() != nullptr;
   }
 
   /// @brief 不正値の時に true を返す．
@@ -121,6 +113,19 @@ public:
     }
   }
 
+  /// @brief 同じマネージャの要素かチェックする．
+  ///
+  /// 異なる場合には std::invalid_argument 例外を送出する．
+  void
+  _check_mgr(
+    const BddMgrImpl* other
+  ) const
+  {
+    if ( mPtr.get() != other ) {
+      throw std::invalid_argument{"BddMgr mismatch"};
+    }
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -128,7 +133,6 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // マネージャ
-  //BddMgrImpl* mPtr{nullptr};
   std::shared_ptr<BddMgrImpl> mPtr;
 
 };

@@ -59,7 +59,7 @@ BddMgrImpl::from_truth(
     }
   }
 
-  BddTruthOp op{*this, level_list(tmp_var_list)};
+  BddTruthOp op{BddMgrPtr{this}, level_list(tmp_var_list)};
   auto e = op.op_step(str, 0);
   return _bdd(e);
 }

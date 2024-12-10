@@ -22,6 +22,7 @@ BddMgrPtr::BddMgrPtr(
   BddMgrImpl* ptr
 ) : mPtr{ptr}
 {
+  cout << "  BddMgrPtr::constr1" << endl;
   if ( is_valid() ) {
     mPtr->inc();
   }
@@ -32,6 +33,7 @@ BddMgrPtr::BddMgrPtr(
   const BddMgrPtr& src
 ) : mPtr{src.mPtr}
 {
+  cout << "  BddMgrPtr::copy_constr" << endl;
   if ( is_valid() ) {
     mPtr->inc();
   }
@@ -43,6 +45,7 @@ BddMgrPtr::operator=(
   const BddMgrPtr& src
 )
 {
+  cout << "  BddMgrPtr::copy_assign" << endl;
   if ( src.is_valid() ) {
     src.mPtr->inc();
   }
@@ -50,12 +53,22 @@ BddMgrPtr::operator=(
     mPtr->dec();
   }
   mPtr = src.mPtr;
+
   return *this;
+}
+
+// @brief ムーブコンストラクタ
+BddMgrPtr::BddMgrPtr(
+  BddMgrPtr&& src
+) : mPtr{std::move(src.mPtr)}
+{
+  cout << "  BddMgrPtr::move_constr" << endl;
 }
 
 // @brief デストラクタ
 BddMgrPtr::~BddMgrPtr()
 {
+  cout << "  BddMgrPtr::destr" << endl;
   if ( is_valid() ) {
     mPtr->dec();
   }
@@ -65,7 +78,7 @@ BddMgrPtr::~BddMgrPtr()
 BddMgr
 BddMgrPtr::mgr() const
 {
-  return BddMgr{get()};
+  return BddMgr{*this};
 }
 
 END_NAMESPACE_YM_DD

@@ -64,7 +64,7 @@ BddMgrImpl::multi_compose(
     auto cedge = _edge(bdd);
     cmap.emplace(level, cedge);
   }
-  BddMultiCompOp op{*this, cmap};
+  BddMultiCompOp op{BddMgrPtr{this}, cmap};
   auto e = op.mcomp_op(_edge(bdd));
   return _bdd(e);
 }
@@ -85,7 +85,7 @@ BddMgrImpl::remap_vars(
     DdEdge cedge = lit.root();
     cmap.emplace(level, cedge);
   }
-  BddMultiCompOp op{*this, cmap};
+  BddMultiCompOp op{BddMgrPtr{this}, cmap};
   auto e = op.mcomp_op(_edge(bdd));
   return _bdd(e);
 }
@@ -97,7 +97,7 @@ BddMgrImpl::remap_vars(
 
 // @brief コンストラクタ
 BddMultiCompOp::BddMultiCompOp(
-  BddMgrImpl& mgr,
+  const BddMgrPtr& mgr,
   const unordered_map<SizeType, DdEdge>& comp_map
 ) : BddOpBase{mgr},
     mIteOp{mgr}

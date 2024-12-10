@@ -22,8 +22,10 @@ BddMgrImpl::and_op(
   right._check_valid();
   _check_mgr(left);
   _check_mgr(right);
-  BddIteOp op{*this};
+  BddIteOp op{ptr()};
+  cout << "----BddMgrImpl::and_op()" << endl;
   auto e = op.and_step(_edge(left), _edge(right));
+  cout << "----BddMgrImpl::and_op()" << endl;
   return _bdd(e);
 }
 
@@ -38,7 +40,7 @@ BddMgrImpl::xor_op(
   right._check_valid();
   _check_mgr(left);
   _check_mgr(right);
-  BddIteOp op{*this};
+  BddIteOp op{ptr()};
   auto e = op.xor_step(_edge(left), _edge(right));
   return _bdd(e);
 }
@@ -57,7 +59,7 @@ BddMgrImpl::ite(
   _check_mgr(e0);
   _check_mgr(e1);
   _check_mgr(e2);
-  BddIteOp op{*this};
+  BddIteOp op{ptr()};
   auto e = op.ite_step(_edge(e0), _edge(e1), _edge(e2));
   return _bdd(e);
 }

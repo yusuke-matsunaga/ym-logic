@@ -24,7 +24,7 @@ public:
 
   /// @brief コンストラクタ
   BddOneOp(
-    BddMgrImpl& mgr ///< [in] マネージャ
+    const BddMgrPtr& mgr ///< [in] マネージャ
   ) : BddOpBase{mgr}
   {
   }

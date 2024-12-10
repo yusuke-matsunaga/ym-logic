@@ -12,6 +12,7 @@
 #include "ym/Bdd.h"
 #include "ym/BddVar.h"
 #include "ym/BddLit.h"
+#include "ym/BddMgrPtr.h"
 #include "ym/JsonValue.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
@@ -306,6 +307,12 @@ public:
     DdEdge edge
   );
 
+  /// @brief DdEdge を BddVar に変換する．
+  BddVar
+  _var(
+    DdEdge edge
+  );
+
   /// @brief Bdd から DdEdge を取り出す．
   DdEdge
   _edge(
@@ -394,15 +401,20 @@ private:
     SizeType level ///< [in] 交換する上のレベル
   );
 
+  /// @brief BddMgrPtr を返す．
+  BddMgrPtr
+  ptr()
+  {
+    return BddMgrPtr{this};
+  }
+
   /// @brief このマネージャに属しているオブジェクトかチェックする．
   void
   _check_mgr(
     const Bdd& bdd ///< [in] 対象のオブジェクト
   ) const
   {
-    if ( bdd._mgr() != this ) {
-      throw std::invalid_argument{"BddMgr mismatch"};
-    }
+    bdd.mMgr._check_mgr(this);
   }
 
 

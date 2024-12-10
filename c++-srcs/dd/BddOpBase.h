@@ -9,12 +9,12 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/BddMgrPtr.h"
 #include "BddMgrImpl.h"
+#include "DdEdge.h"
 
 
 BEGIN_NAMESPACE_YM_DD
-
-class BddMgrImpl;
 
 //////////////////////////////////////////////////////////////////////
 /// @class BddOpBase BddOpBase.h "BddOpBase.h"
@@ -28,13 +28,18 @@ public:
 
   /// @brief コンストラクタ
   BddOpBase(
-    BddMgrImpl& mgr ///< [in] マネージャ
+    const BddMgrPtr& mgr ///< [in] マネージャ
   ) : mMgr{mgr}
   {
+    cout << "BddOpBase::constr" << endl;
   }
 
   /// @brief デストラクタ
-  ~BddOpBase() = default;
+  //~BddOpBase() = default;
+  ~BddOpBase()
+  {
+    cout << "BddOpBase::destr" << endl;
+  }
 
 
 protected:
@@ -43,7 +48,7 @@ protected:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief マネージャを返す．
-  BddMgrImpl&
+  BddMgrPtr&
   mgr()
   {
     return mMgr;
@@ -57,7 +62,7 @@ protected:
     DdEdge edge1    ///< [in] 1枝
   )
   {
-    return mMgr.new_node(index, edge0, edge1);
+    return mMgr->new_node(index, edge0, edge1);
   }
 
   /// @brief トップの変数で分解する．
@@ -82,7 +87,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // マネージャ
-  BddMgrImpl& mMgr;
+  BddMgrPtr mMgr;
 
 };
 

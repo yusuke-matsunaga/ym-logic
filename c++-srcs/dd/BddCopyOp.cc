@@ -27,7 +27,7 @@ BddMgrImpl::copy(
     // 不正な ZDD はそのまま
     return src;
   }
-  if ( src._mgr() == this ) {
+  if ( src.mMgr == BddMgrPtr{this} ) {
     // 自分自身に属している場合もそのまま
     return src;
   }

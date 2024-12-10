@@ -22,7 +22,7 @@ BddMgrImpl::simplify(
   dc._check_valid();
   _check_mgr(on);
   _check_mgr(dc);
-  BddSimp op{*this};
+  BddSimp op{BddMgrPtr{this}};
   auto e = op.simp_step(_edge(on), _edge(dc));
   return _bdd(e);
 }

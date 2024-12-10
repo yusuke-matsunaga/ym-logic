@@ -28,13 +28,14 @@ class BddVar :
   friend class BddMgrImpl;
   friend class Bdd;
   friend class BddLit;
+
 private:
 
   /// @brief 内容を指定したコンストラクタ
   ///
   /// root は正のリテラル関数だけが正しい値
   BddVar(
-    BddMgrImpl* mgr,
+    const BddMgrPtr& mgr,
     DdEdge root
   );
 

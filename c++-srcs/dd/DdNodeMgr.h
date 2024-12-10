@@ -213,6 +213,7 @@ public:
   void
   inc()
   {
+    cout << "    DdNodeMgr::inc()" << endl;
 #if 0
     ++ mRefCount;
 #endif
@@ -224,6 +225,7 @@ public:
   void
   dec()
   {
+    cout << "    DdNodeMgr::dec()" << endl;
 #if 0
     -- mRefCount;
     if ( mRefCount == 0 ) {

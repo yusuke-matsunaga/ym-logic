@@ -18,14 +18,14 @@ BEGIN_NAMESPACE_YM_DD
 // @brief サポート集合のユニオンを計算して代入する．
 Bdd&
 Bdd::support_cup_int(
-  const Bdd& right ///< [in] 第2オペランド
+  const Bdd& right
 )
 {
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{*_mgr()};
-  auto e = op.cup_step(DdEdge{mRoot}, DdEdge{right.mRoot});
+  BddSupOp op{mMgr};
+  auto e = op.cup_step(root(), right.root());
   change_root(e);
   return *this;
 }
@@ -39,8 +39,8 @@ Bdd::support_cap_int(
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{*_mgr()};
-  auto e = op.cap_step(DdEdge{mRoot}, DdEdge{right.mRoot});
+  BddSupOp op{mMgr};
+  auto e = op.cap_step(root(), right.root());
   change_root(e);
   return *this;
 }
@@ -48,14 +48,14 @@ Bdd::support_cap_int(
 // @brief サポート集合の差を計算して代入する．
 Bdd&
 Bdd::support_diff_int(
-  const Bdd& right ///< [in] 第2オペランド
+  const Bdd& right
 )
 {
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{*_mgr()};
-  auto e = op.diff_step(DdEdge{mRoot}, DdEdge{right.mRoot});
+  BddSupOp op{mMgr};
+  auto e = op.diff_step(root(), right.root());
   change_root(e);
   return *this;
 }
@@ -69,8 +69,8 @@ Bdd::support_check_intersect(
   _check_posicube();
   right._check_posicube();
 
-  auto e1 = DdEdge{mRoot};
-  auto e2 = DdEdge{right.mRoot};
+  auto e1 = root();
+  auto e2 = right.root();
   while ( !e1.is_one() && !e2.is_one() ) {
     auto node1 = e1.node();
     auto node2 = e2.node();
@@ -97,7 +97,7 @@ Bdd::is_cube() const
     return false;
   }
 
-  auto e = DdEdge{mRoot};
+  auto e = root();
   if ( e.is_zero() ) {
     return false;
   }
@@ -127,7 +127,7 @@ Bdd::is_posicube() const
     return false;
   }
 
-  auto e = DdEdge{mRoot};
+  auto e = root();
   if ( e.is_zero() ) {
     return false;
   }
@@ -151,9 +151,9 @@ Bdd::get_support() const
 {
   _check_valid();
 
-  BddSupOp op{*_mgr()};
-  auto e = op.get_step(DdEdge{mRoot});
-  return BddVarSet{Bdd{_mgr(), e}};
+  BddSupOp op{mMgr};
+  auto e = op.get_step(root());
+  return BddVarSet{Bdd{mMgr, e}};
 }
 
 // @brief サポート変数のリスト(vector)を得る．
@@ -170,7 +170,7 @@ Bdd::to_varlist() const
   _check_valid();
   _check_posicube();
 
-  auto edge = DdEdge{mRoot};
+  auto edge = root();
   vector<BddVar> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
@@ -188,7 +188,7 @@ Bdd::to_litlist() const
   _check_valid();
   _check_cube();
 
-  auto edge = DdEdge{mRoot};
+  auto edge = root();
   vector<BddLit> lit_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();

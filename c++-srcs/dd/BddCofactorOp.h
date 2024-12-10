@@ -27,7 +27,7 @@ public:
 
   /// @brief コンストラクタ
   BddCofactorOp(
-    BddMgrImpl& mgr ///< [in] マネージャ
+    const BddMgrPtr& mgr ///< [in] マネージャ
   ) : BddOpBase{mgr}
   {
   }

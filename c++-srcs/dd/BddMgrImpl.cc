@@ -43,8 +43,7 @@ BddMgrImpl::variable(
   while ( mVarList.size() <= varid ) {
     auto varid1 = new_variable();
     auto level1 = varid_to_level(varid1);
-    auto var1 = level_to_var(level1);
-    auto edge1 = _edge(var1);
+    auto edge1 = new_node(level1, DdEdge::zero(), DdEdge::one());
     mVarList.push_back(edge1);
     activate(edge1);
   }
@@ -58,7 +57,7 @@ BddMgrImpl::variable_list()
   vector<BddVar> var_list;
   var_list.reserve(variable_num());
   for ( auto edge: mVarList ) {
-    auto var = BddVar{_bdd(edge)};
+    auto var = _var(edge);
     var_list.push_back(var);
   }
   return var_list;
@@ -115,7 +114,7 @@ BddMgrImpl::level_to_var(
 )
 {
   auto e = new_node(level, DdEdge::zero(), DdEdge::one());
-  return BddVar{this, e};
+  return _var(e);
 }
 
 // @brief 変数順を表す変数のリストを返す．
@@ -315,7 +314,16 @@ BddMgrImpl::_bdd(
   DdEdge edge
 )
 {
-  return Bdd{this, edge};
+  return Bdd{ptr(), edge};
+}
+
+// @brief DdEdge を BddVar に変換する．
+BddVar
+BddMgrImpl::_var(
+  DdEdge edge
+)
+{
+  return BddVar{ptr(), edge};
 }
 
 // @brief Bdd から DdEdge を取り出す．

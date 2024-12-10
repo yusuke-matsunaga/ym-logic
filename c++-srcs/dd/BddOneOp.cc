@@ -21,11 +21,11 @@ Bdd::get_onepath() const
   _check_valid();
 
   if ( is_zero() ) {
-    return Bdd{_mgr(), DdEdge::zero()};
+    return Bdd{mMgr, DdEdge::zero()};
   }
-  BddOneOp op{*_mgr()};
+  BddOneOp op{mMgr};
   auto e = op.op_step(DdEdge{mRoot});
-  return Bdd{_mgr(), e};
+  return Bdd{mMgr, e};
 }
 
 // @brief 0となるパスを求める．

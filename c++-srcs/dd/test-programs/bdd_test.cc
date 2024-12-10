@@ -20,8 +20,23 @@ simple_test(
 {
   BddMgr mgr;
 
-  auto bdd = mgr.from_truth("10010110");
+  //auto bdd = mgr.from_truth("10010110");
+  cout << "_A" << endl;
+  auto bdd = mgr.variable(0);
+  cout << "A" << endl;
   bdd.display(cout);
+  cout << "B" << endl;
+  auto bdd2 = mgr.variable(1);
+  cout << "C" << endl;
+  bdd2.display(cout);
+  cout << "D" << endl;
+
+#if 1
+  auto bdd3 = bdd & bdd2;
+  cout << "E" << endl;
+  bdd3.display(cout);
+  cout << "F" << endl;
+#endif
 
   return 0;
 }

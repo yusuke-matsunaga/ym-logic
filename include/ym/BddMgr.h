@@ -44,9 +44,9 @@ public:
   /// @brief コンストラクタ
   BddMgr();
 
-  /// @brief BddMgrImpl を指定したコンストラクタ
+  /// @brief BddMgrPtr を指定したコンストラクタ
   BddMgr(
-    BddMgrImpl* impl
+    const BddMgrPtr& impl
   );
 
   /// @brief コピーコンストラクタ
@@ -283,19 +283,6 @@ public:
   ) const
   {
     return !operator==(right);
-  }
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief BddMgrImpl を取り出す．
-  BddMgrImpl*
-  impl() const
-  {
-    return mImpl.get();
   }
 
 

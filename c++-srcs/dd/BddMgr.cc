@@ -15,27 +15,31 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief コンストラクタ
 BddMgr::BddMgr(
-) : BddMgr{new BddMgrImpl}
+) : mImpl{new BddMgrImpl}
 {
+  cout << "BddMgr::const1" << endl;
 }
 
 // @brief BddMgrImpl を指定したコンストラクタ
 BddMgr::BddMgr(
-  BddMgrImpl* impl
+  const BddMgrPtr& impl
 ) : mImpl{impl}
 {
+  cout << "BddMgr::const2" << endl;
 }
 
 // @brief コピーコンストラクタ
 BddMgr::BddMgr(
   const BddMgr& src
-) : BddMgr{src.mImpl.get()}
+) : BddMgr{src.mImpl}
 {
+  cout << "BddMgr::copy_const" << endl;
 }
 
 // @brief デストラクタ
 BddMgr::~BddMgr()
 {
+  cout << "BddMgr::dest" << endl;
 }
 
 // @breif 変数の数を返す．
@@ -83,21 +87,21 @@ BddMgr::copy(
   const Bdd& src
 )
 {
-  return impl()->copy(src);
+  return mImpl->copy(src);
 }
 
 // @brief 恒儀関数を作る．
 Bdd
 BddMgr::zero()
 {
-  return impl()->zero();
+  return mImpl->zero();
 }
 
 // @brief 恒新関数を作る．
 Bdd
 BddMgr::one()
 {
-  return impl()->one();
+  return mImpl->one();
 }
 
 // @brief 真理値表形式の文字列からBDDを作る．
@@ -107,7 +111,7 @@ BddMgr::from_truth(
   const vector<BddVar>& var_list
 )
 {
-  return impl()->from_truth(str, var_list);
+  return mImpl->from_truth(str, var_list);
 }
 
 // @brief ITE 演算を行う．
@@ -118,7 +122,7 @@ BddMgr::ite(
   const Bdd& e2
 )
 {
-  return impl()->ite(e0, e1, e2);
+  return mImpl->ite(e0, e1, e2);
 }
 
 // @brief ドントケアを利用した簡単化を行う．
@@ -128,7 +132,7 @@ BddMgr::simplify(
   const Bdd& dc   ///< [in] ドントケアセット
 )
 {
-  return impl()->simplify(on, dc);
+  return mImpl->simplify(on, dc);
 }
 
 // @brief 複数のBDDのノード数を数える．
@@ -142,7 +146,7 @@ BddMgr::bdd_size(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  return mgr.impl()->bdd_size(bdd_list);
+  return mgr.mImpl->bdd_size(bdd_list);
 }
 
 // @brief 複数のBDDの内容を出力する．
@@ -157,7 +161,7 @@ BddMgr::display(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  mgr.impl()->display(s, bdd_list);
+  mgr.mImpl->display(s, bdd_list);
 }
 
 // @brief 複数のBDDを dot 形式で出力する．
@@ -173,7 +177,7 @@ BddMgr::gen_dot(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  mgr.impl()->gen_dot(s, bdd_list, option);
+  mgr.mImpl->gen_dot(s, bdd_list, option);
 }
 
 // @brief 構造を表す整数配列を作る．
@@ -187,7 +191,7 @@ BddMgr::rep_data(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  return mgr.impl()->rep_data(bdd_list);
+  return mgr.mImpl->rep_data(bdd_list);
 }
 
 // @brief BDD の内容をバイナリダンプする．
@@ -202,7 +206,7 @@ BddMgr::dump(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  mgr.impl()->dump(s, bdd_list);
+  mgr.mImpl->dump(s, bdd_list);
 }
 
 // @brief バイナリダンプから復元する．
@@ -211,28 +215,28 @@ BddMgr::restore(
   BinDec& s
 )
 {
-  return impl()->restore(s);
+  return mImpl->restore(s);
 }
 
 // @brief ガーベージコレクションを行う．
 void
 BddMgr::garbage_collection()
 {
-  impl()->garbage_collection();
+  mImpl->garbage_collection();
 }
 
 // @brief ノード数を返す．
 SizeType
 BddMgr::node_num() const
 {
-  return impl()->node_num();
+  return mImpl->node_num();
 }
 
 // @brief GC を起動するしきい値を返す．
 SizeType
 BddMgr::gc_limit() const
 {
-  return impl()->gc_limit();
+  return mImpl->gc_limit();
 }
 
 // @brief GC を起動するしきい値を設定する．
@@ -241,21 +245,21 @@ BddMgr::set_gc_limit(
   SizeType limit
 )
 {
-  impl()->set_gc_limit(limit);
+  mImpl->set_gc_limit(limit);
 }
 
 // @brief GC を許可する．
 void
 BddMgr::enable_gc()
 {
-  impl()->enable_gc();
+  mImpl->enable_gc();
 }
 
 // @brief GC を禁止する．
 void
 BddMgr::disable_gc()
 {
-  impl()->disable_gc();
+  mImpl->disable_gc();
 }
 
 END_NAMESPACE_YM_DD

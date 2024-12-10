@@ -18,11 +18,12 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief 内容を指定したコンストラクタ
 Bdd::Bdd(
-  BddMgrImpl* mgr,
+  const BddMgrPtr& mgr,
   DdEdge edge
 ) : mMgr{mgr},
     mRoot{edge.body()}
 {
+  cout << "Bdd:const1" << endl;
   if ( is_valid() ) {
     mMgr->activate(root());
   }
@@ -31,8 +32,13 @@ Bdd::Bdd(
 // @brief コピーコンストラクタ
 Bdd::Bdd(
   const Bdd& src
-) : Bdd{src.mMgr.get(), src.root()}
+) : mMgr{src.mMgr},
+    mRoot{src.mRoot}
 {
+  cout << "Bdd:copy_const" << endl;
+  if ( is_valid() ) {
+    mMgr->activate(root());
+  }
 }
 
 // @brief コピー代入演算子
@@ -41,6 +47,7 @@ Bdd::operator=(
   const Bdd& src
 )
 {
+  cout << "Bdd:copy_assign" << endl;
   // この順序なら自分自身に代入しても正しく動作する．
   if ( src.is_valid() ) {
     src.mMgr->activate(src.root());
@@ -53,9 +60,19 @@ Bdd::operator=(
   return *this;
 }
 
+// @brief ムーブコンストラクタ
+Bdd::Bdd(
+  const Bdd&& src
+) : mMgr{std::move(src.mMgr)},
+    mRoot{src.mRoot}
+{
+  cout << "Bdd:move_const" << endl;
+}
+
 // @brief デストラクタ
 Bdd::~Bdd()
 {
+  cout << "Bdd:destr" << endl;
   if ( is_valid() ) {
     mMgr->deactivate(root());
   }
@@ -65,7 +82,7 @@ Bdd::~Bdd()
 Bdd
 Bdd::invert() const
 {
-  return Bdd{_mgr(), ~root()};
+  return Bdd{mMgr, ~root()};
 }
 
 // @brief 極性をかけ合わせる．
@@ -74,7 +91,7 @@ Bdd::operator^(
   bool inv
 ) const
 {
-  return Bdd{_mgr(), root() ^ inv};
+  return Bdd{mMgr, root() ^ inv};
 }
 
 // @brief 自分自身を否定する．
@@ -110,7 +127,14 @@ Bdd::and_op(
 ) const
 {
   _check_valid();
+#if 0
   return mMgr->and_op(*this, right);
+#else
+  cout << "before and_op()" << endl;
+  auto e = mMgr->and_op(*this, right);
+  cout << "after and_op()" << endl;
+  return e;
+#endif
 }
 
 // @brief 論理和を返す．
@@ -286,7 +310,7 @@ Bdd::remap_vars(
 BddMgr
 Bdd::mgr() const
 {
-  return BddMgr{_mgr()};
+  return BddMgr{mMgr};
 }
 
 // @brief 定数0の時 true を返す．
@@ -373,8 +397,8 @@ Bdd::root_decomp(
   }
   else {
     auto oinv = root().inv();
-    f0 = Bdd{_mgr(), node->edge0() ^ oinv};
-    f1 = Bdd{_mgr(), node->edge1() ^ oinv};
+    f0 = Bdd{mMgr, node->edge0() ^ oinv};
+    f1 = Bdd{mMgr, node->edge1() ^ oinv};
     auto var = mMgr->level_to_var(node->level());
     return var;
   }
@@ -408,7 +432,7 @@ Bdd::root_cofactor0() const
   }
   else {
     auto oinv = root().inv();
-    return Bdd{_mgr(), node->edge0() ^ oinv};
+    return Bdd{mMgr, node->edge0() ^ oinv};
   }
 }
 
@@ -424,7 +448,7 @@ Bdd::root_cofactor1() const
   }
   else {
     auto oinv = root().inv();
-    return Bdd{_mgr(), node->edge1() ^ oinv};
+    return Bdd{mMgr, node->edge1() ^ oinv};
   }
 }
 
@@ -562,7 +586,7 @@ Bdd::root() const
 
 // @brief 内容を指定したコンストラクタ
 BddVar::BddVar(
-  BddMgrImpl* mgr,
+  const BddMgrPtr& mgr,
   DdEdge root
 ) : Bdd{mgr, root}
 {
@@ -585,7 +609,7 @@ BddVar::from_bdd(
 SizeType
 BddVar::id() const
 {
-  return _mgr()->level_to_varid(level());
+  return mgr_ptr()->level_to_varid(level());
 }
 
 // @brief レベルを返す．

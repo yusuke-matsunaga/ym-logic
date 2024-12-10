@@ -25,7 +25,7 @@ public:
 
   /// @brief コンストラクタ
   BddTruthOp(
-    BddMgrImpl& mgr,                   ///< [in] マネージャ
+    const BddMgrPtr& mgr,              ///< [in] マネージャ
     const vector<SizeType>& index_list ///< [in] インデックスリスト
   ) : BddOpBase{mgr},
       mIndexList{index_list}
