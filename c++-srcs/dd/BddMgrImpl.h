@@ -400,7 +400,7 @@ private:
     const Bdd& bdd ///< [in] 対象のオブジェクト
   ) const
   {
-    if ( bdd.mMgr != this ) {
+    if ( bdd._mgr() != this ) {
       throw std::invalid_argument{"BddMgr mismatch"};
     }
   }

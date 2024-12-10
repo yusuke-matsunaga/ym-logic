@@ -26,20 +26,19 @@ Zdd::Zdd(
 // @brief 内容を指定したコンストラクタ
 Zdd::Zdd(
   ZddMgrImpl* mgr,
-  DdEdge root
+  DdEdge edge
 ) : mMgr{mgr},
-    mRoot{root.body()}
+    mRoot{edge.body()}
 {
-  if ( mMgr != nullptr ) {
-    mMgr->inc();
-    mMgr->activate(DdEdge{mRoot});
+  if ( is_valid() ) {
+    mMgr->activate(root());
   }
 }
 
 // @brief コピーコンストラクタ
 Zdd::Zdd(
   const Zdd& src
-) : Zdd{src.mMgr, DdEdge{src.mRoot}}
+) : Zdd{src.mMgr.get(), src.root()}
 {
   // いわゆる delegate constructor
 }
@@ -51,13 +50,11 @@ Zdd::operator=(
 )
 {
   // この順序なら自分自身に代入しても正しく動作する．
-  if ( src.mMgr != nullptr ) {
-    src.mMgr->inc();
-    src.mMgr->activate(DdEdge{src.mRoot});
+  if ( src.is_valid() ) {
+    src.mMgr->activate(src.root());
   }
-  if ( mMgr != nullptr ) {
-    mMgr->deactivate(DdEdge{mRoot});
-    mMgr->dec();
+  if ( is_valid() ) {
+    mMgr->deactivate(root());
   }
   mMgr = src.mMgr;
   mRoot = src.mRoot;
@@ -67,9 +64,9 @@ Zdd::operator=(
 // @brief デストラクタ
 Zdd::~Zdd()
 {
-  if ( mMgr != nullptr ) {
+  if ( is_valid() ) {
     mMgr->deactivate(DdEdge{mRoot});
-    mMgr->dec();
+    //mMgr->dec();
   }
 }
 
@@ -77,14 +74,14 @@ Zdd::~Zdd()
 ZddMgr
 Zdd::mgr() const
 {
-  return ZddMgr{mMgr};
+  return ZddMgr{mMgr.get()};
 }
 
 // @brief 否定した関数を返す．
 Zdd
 Zdd::invert() const
 {
-  if ( mMgr != nullptr ) {
+  if ( is_valid() ) {
     return mMgr->invert(*this);
   }
   // 不正値の時には演算を行わない．
@@ -95,7 +92,7 @@ Zdd::invert() const
 Zdd&
 Zdd::invert_int()
 {
-  if ( mMgr != nullptr ) {
+  if ( is_valid() ) {
     *this = mMgr->invert(*this);
   }
   // 不正値の時には演算を行わない．
@@ -285,8 +282,8 @@ Zdd::root_decomp(
     return ZddItem::invalid();
   }
   else {
-    f0 = Zdd{mMgr, node->edge0()};
-    f1 = Zdd{mMgr, node->edge1()};
+    f0 = Zdd{_mgr(), node->edge0()};
+    f1 = Zdd{_mgr(), node->edge1()};
     auto item = mMgr->level_to_item(node->level());
     return item;
   }
@@ -321,7 +318,7 @@ Zdd::root_cofactor0() const
     return *this;
   }
   else {
-    return Zdd{mMgr, node->edge0()};
+    return Zdd{_mgr(), node->edge0()};
   }
 }
 
@@ -337,7 +334,7 @@ Zdd::root_cofactor1() const
     return *this;
   }
   else {
-    return Zdd{mMgr, node->edge1()};
+    return Zdd{_mgr(), node->edge1()};
   }
 }
 

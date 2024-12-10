@@ -53,8 +53,8 @@ protected:
   DdEdge
   new_node(
     SizeType index, ///< [in] インデックス
-    DdEdge edge0,  ///< [in] 0枝
-    DdEdge edge1   ///< [in] 1枝
+    DdEdge edge0,   ///< [in] 0枝
+    DdEdge edge1    ///< [in] 1枝
   )
   {
     return mMgr.new_node(index, edge0, edge1);

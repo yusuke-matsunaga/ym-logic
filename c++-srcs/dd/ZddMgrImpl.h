@@ -300,7 +300,7 @@ private:
     const Zdd& zdd ///< [in] 対象のオブジェクト
   ) const
   {
-    if ( zdd.mMgr != this ) {
+    if ( zdd.mMgr.get() != this ) {
       throw std::invalid_argument{"ZddMgr mismatch"};
     }
   }

@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/BddMgrPtr.h"
 #include "ym/BinEnc.h"
 #include "ym/JsonValue.h"
 
@@ -420,7 +421,7 @@ public:
   bool
   is_valid() const
   {
-    return mMgr != nullptr;
+    return mMgr.is_valid();
   }
 
   /// @brief 不正値の時に true を返す．
@@ -675,7 +676,7 @@ protected:
   BddMgrImpl*
   _mgr() const
   {
-    return mMgr;
+    return mMgr.get();
   }
 
   /// @brief 根の枝を返す．
@@ -747,7 +748,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // マネージャ
-  BddMgrImpl* mMgr{nullptr};
+  BddMgrPtr mMgr;
 
   // 根の枝(ポインタ+反転属性)
   PtrIntType mRoot{0};

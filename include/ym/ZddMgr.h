@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/ZddMgrPtr.h"
 #include "ym/JsonValue.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
@@ -235,7 +236,7 @@ private:
   ZddMgrImpl*
   impl() const
   {
-    return mImpl;
+    return mImpl.get();
   }
 
 
@@ -245,7 +246,8 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 本体
-  ZddMgrImpl* mImpl;
+  //ZddMgrImpl* mImpl;
+  ZddMgrPtr mImpl;
 
 };
 

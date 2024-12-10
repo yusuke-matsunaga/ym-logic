@@ -24,20 +24,18 @@ BddMgr::BddMgr(
   BddMgrImpl* impl
 ) : mImpl{impl}
 {
-  mImpl->inc();
 }
 
 // @brief コピーコンストラクタ
 BddMgr::BddMgr(
   const BddMgr& src
-) : BddMgr{src.mImpl}
+) : BddMgr{src.mImpl.get()}
 {
 }
 
 // @brief デストラクタ
 BddMgr::~BddMgr()
 {
-  mImpl->dec();
 }
 
 // @breif 変数の数を返す．

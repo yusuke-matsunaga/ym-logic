@@ -23,11 +23,11 @@ ZddMgrImpl::copy(
   const Zdd& src
 )
 {
-  if ( src.mMgr == nullptr ) {
+  if ( src.is_invalid() ) {
     // 不正な ZDD はそのまま
     return src;
   }
-  if ( src.mMgr == this ) {
+  if ( src.mMgr.get() == this ) {
     // 自分自身に属している場合もそのまま
     return src;
   }

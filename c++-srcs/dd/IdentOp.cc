@@ -20,7 +20,7 @@ Bdd::is_identical(
   const Bdd& right
 ) const
 {
-  if ( mMgr == nullptr || right.mMgr == nullptr ) {
+  if ( is_invalid() || right.is_invalid() ) {
     return false;
   }
   if ( mMgr == right.mMgr ) {
@@ -37,7 +37,7 @@ Zdd::is_identical(
   const Zdd& right
 ) const
 {
-  if ( mMgr == nullptr || right.mMgr == nullptr ) {
+  if ( is_invalid() || right.is_invalid() ) {
     return false;
   }
   if ( mMgr == right.mMgr ) {

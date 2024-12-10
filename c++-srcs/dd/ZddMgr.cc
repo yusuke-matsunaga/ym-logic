@@ -25,20 +25,18 @@ ZddMgr::ZddMgr(
   ZddMgrImpl* impl
 ) : mImpl{impl}
 {
-  mImpl->inc();
 }
 
 // @brief コピーコンストラクタ
 ZddMgr::ZddMgr(
   const ZddMgr& src
-) : ZddMgr{src.mImpl}
+) : ZddMgr{src.mImpl.get()}
 {
 }
 
 // @brief デストラクタ
 ZddMgr::~ZddMgr()
 {
-  mImpl->dec();
 }
 
 // @brief 要素数を返す．

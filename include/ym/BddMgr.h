@@ -10,6 +10,7 @@
 
 #include "ym/logic.h"
 #include "ym/Bdd.h"
+#include "ym/BddMgrPtr.h"
 #include "ym/JsonValue.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
@@ -293,7 +294,7 @@ private:
   BddMgrImpl*
   impl() const
   {
-    return mImpl;
+    return mImpl.get();
   }
 
 
@@ -303,7 +304,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 本体
-  BddMgrImpl* mImpl;
+  BddMgrPtr mImpl;
 
 };
 

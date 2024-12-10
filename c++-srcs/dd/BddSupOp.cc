@@ -24,7 +24,7 @@ Bdd::support_cup_int(
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{*mMgr};
+  BddSupOp op{*_mgr()};
   auto e = op.cup_step(DdEdge{mRoot}, DdEdge{right.mRoot});
   change_root(e);
   return *this;
@@ -39,7 +39,7 @@ Bdd::support_cap_int(
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{*mMgr};
+  BddSupOp op{*_mgr()};
   auto e = op.cap_step(DdEdge{mRoot}, DdEdge{right.mRoot});
   change_root(e);
   return *this;
@@ -54,7 +54,7 @@ Bdd::support_diff_int(
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{*mMgr};
+  BddSupOp op{*_mgr()};
   auto e = op.diff_step(DdEdge{mRoot}, DdEdge{right.mRoot});
   change_root(e);
   return *this;
@@ -151,9 +151,9 @@ Bdd::get_support() const
 {
   _check_valid();
 
-  BddSupOp op{*mMgr};
+  BddSupOp op{*_mgr()};
   auto e = op.get_step(DdEdge{mRoot});
-  return BddVarSet{Bdd{mMgr, e}};
+  return BddVarSet{Bdd{_mgr(), e}};
 }
 
 // @brief サポート変数のリスト(vector)を得る．

@@ -19,22 +19,20 @@ BEGIN_NAMESPACE_YM_DD
 // @brief 内容を指定したコンストラクタ
 Bdd::Bdd(
   BddMgrImpl* mgr,
-  DdEdge root
+  DdEdge edge
 ) : mMgr{mgr},
-    mRoot{root.body()}
+    mRoot{edge.body()}
 {
   if ( is_valid() ) {
-    mMgr->inc();
-    mMgr->activate(root);
+    mMgr->activate(root());
   }
 }
 
 // @brief コピーコンストラクタ
 Bdd::Bdd(
   const Bdd& src
-) : Bdd{src.mMgr, DdEdge{src.mRoot}}
+) : Bdd{src.mMgr.get(), src.root()}
 {
-  // いわゆる delegate constructor
 }
 
 // @brief コピー代入演算子
@@ -45,12 +43,10 @@ Bdd::operator=(
 {
   // この順序なら自分自身に代入しても正しく動作する．
   if ( src.is_valid() ) {
-    src.mMgr->inc();
-    src.mMgr->activate(DdEdge{src.mRoot});
+    src.mMgr->activate(src.root());
   }
   if ( is_valid() ) {
     mMgr->deactivate(root());
-    mMgr->dec();
   }
   mMgr = src.mMgr;
   mRoot = src.mRoot;
@@ -62,7 +58,6 @@ Bdd::~Bdd()
 {
   if ( is_valid() ) {
     mMgr->deactivate(root());
-    mMgr->dec();
   }
 }
 
@@ -70,7 +65,7 @@ Bdd::~Bdd()
 Bdd
 Bdd::invert() const
 {
-  return Bdd{mMgr, ~root()};
+  return Bdd{_mgr(), ~root()};
 }
 
 // @brief 極性をかけ合わせる．
@@ -79,7 +74,7 @@ Bdd::operator^(
   bool inv
 ) const
 {
-  return Bdd{mMgr, root() ^ inv};
+  return Bdd{_mgr(), root() ^ inv};
 }
 
 // @brief 自分自身を否定する．
@@ -180,8 +175,7 @@ ite(
 )
 {
   cond._check_valid();
-  auto mgr = cond.mMgr;
-  return mgr->ite(cond, then_f, else_f);
+  return cond.mMgr->ite(cond, then_f, else_f);
 }
 
 // @brief ドントケアを利用した簡単化を行う．
@@ -192,8 +186,7 @@ simplify(
 )
 {
   on._check_valid();
-  auto mgr = on.mMgr;
-  return mgr->simplify(on, dc);
+  return on.mMgr->simplify(on, dc);
 }
 
 // @brief コファクターを計算する．
@@ -293,7 +286,7 @@ Bdd::remap_vars(
 BddMgr
 Bdd::mgr() const
 {
-  return BddMgr{mMgr};
+  return BddMgr{_mgr()};
 }
 
 // @brief 定数0の時 true を返す．
@@ -380,8 +373,8 @@ Bdd::root_decomp(
   }
   else {
     auto oinv = root().inv();
-    f0 = Bdd{mMgr, node->edge0() ^ oinv};
-    f1 = Bdd{mMgr, node->edge1() ^ oinv};
+    f0 = Bdd{_mgr(), node->edge0() ^ oinv};
+    f1 = Bdd{_mgr(), node->edge1() ^ oinv};
     auto var = mMgr->level_to_var(node->level());
     return var;
   }
@@ -415,7 +408,7 @@ Bdd::root_cofactor0() const
   }
   else {
     auto oinv = root().inv();
-    return Bdd{mMgr, node->edge0() ^ oinv};
+    return Bdd{_mgr(), node->edge0() ^ oinv};
   }
 }
 
@@ -431,7 +424,7 @@ Bdd::root_cofactor1() const
   }
   else {
     auto oinv = root().inv();
-    return Bdd{mMgr, node->edge1() ^ oinv};
+    return Bdd{_mgr(), node->edge1() ^ oinv};
   }
 }
 

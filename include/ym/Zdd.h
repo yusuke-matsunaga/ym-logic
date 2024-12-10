@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/ZddMgrPtr.h"
 #include "ym/BinEnc.h"
 #include "ym/JsonValue.h"
 
@@ -278,7 +279,7 @@ public:
   bool
   is_valid() const
   {
-    return mMgr != nullptr;
+    return mMgr.get() != nullptr;
   }
 
   /// @brief 不正値の時に true を返す．
@@ -457,7 +458,7 @@ protected:
   ZddMgrImpl*
   _mgr() const
   {
-    return mMgr;
+    return mMgr.get();
   }
 
   /// @brief 根の枝を返す．
@@ -507,7 +508,8 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // マネージャ
-  ZddMgrImpl* mMgr{nullptr};
+  //ZddMgrImpl* mMgr{nullptr};
+  ZddMgrPtr mMgr;
 
   // 根の枝
   PtrIntType mRoot;

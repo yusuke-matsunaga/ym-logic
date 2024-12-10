@@ -20,7 +20,7 @@ Zdd::get_support_list() const
 {
   _check_valid();
 
-  ZddSupOp op{*mMgr};
+  ZddSupOp op{*_mgr()};
   auto edge = op.get_step(DdEdge{mRoot});
   vector<ZddItem> item_list;
   while ( !edge.is_const() ) {
