@@ -24,6 +24,7 @@ BddMgrImpl::BddMgrImpl()
 // @brief デストラクタ
 BddMgrImpl::~BddMgrImpl()
 {
+  cout << "BddMgrImpl is destructed" << endl;
 }
 
 // @breif 変数の数を返す．
@@ -43,16 +44,24 @@ BddMgrImpl::variable(
     auto varid1 = new_variable();
     auto level1 = varid_to_level(varid1);
     auto var1 = level_to_var(level1);
-    mVarList.push_back(var1);
+    auto edge1 = _edge(var1);
+    mVarList.push_back(edge1);
+    activate(edge1);
   }
-  return mVarList[varid];
+  return _bdd(mVarList[varid]);
 }
 
 // @brief 変数のリストを返す．
 vector<BddVar>
-BddMgrImpl::variable_list() const
+BddMgrImpl::variable_list()
 {
-  return mVarList;
+  vector<BddVar> var_list;
+  var_list.reserve(variable_num());
+  for ( auto edge: mVarList ) {
+    auto var = BddVar{_bdd(edge)};
+    var_list.push_back(var);
+  }
+  return var_list;
 }
 
 // @brief 恒偽関数を作る．
@@ -111,9 +120,9 @@ BddMgrImpl::level_to_var(
 
 // @brief 変数順を表す変数のリストを返す．
 vector<BddVar>
-BddMgrImpl::variable_order() const
+BddMgrImpl::variable_order()
 {
-  vector<BddVar> order_list{mVarList};
+  auto order_list = variable_list();
   sort(order_list.begin(), order_list.end(),
        [&](const BddVar& a, const BddVar& b){
 	 auto level_a = varid_to_level(a.id());

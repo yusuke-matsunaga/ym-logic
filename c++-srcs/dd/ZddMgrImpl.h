@@ -56,7 +56,7 @@ public:
 
   /// @brief 要素のリストを返す．
   vector<ZddItem>
-  item_list() const;
+  item_list();
 
   /// @brief 空集合を作る．
   Zdd
@@ -311,8 +311,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 要素のリスト
-  vector<ZddItem> mItemList;
+  // 要素(の枝)のリスト
+  vector<DdEdge> mItemList;
 
 };
 

@@ -24,8 +24,6 @@ class BddMgrImpl;
 //////////////////////////////////////////////////////////////////////
 class BddMgrPtr
 {
-  friend class BddMgrImpl;
-
 public:
 
   /// @brief 空のコンストラクタ
@@ -67,7 +65,8 @@ public:
   BddMgrImpl*
   get() const
   {
-    return mMgr;
+    return mPtr.get();
+    //return mPtr;
   }
 
   /// @brief get() の別名
@@ -81,7 +80,7 @@ public:
   bool
   is_valid() const
   {
-    return mMgr != nullptr;
+    return get() != nullptr;
   }
 
   /// @brief 不正値の時に true を返す．
@@ -97,7 +96,7 @@ public:
     const BddMgrPtr& right
   ) const
   {
-    return mMgr == right.mMgr;
+    return mPtr == right.mPtr;
   }
 
   /// @brief 非等価比較演算子
@@ -109,18 +108,6 @@ public:
     return !operator==(right);
   }
 
-
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 継承クラスから用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief マネージャをセットする．
-  void
-  set_mgr(
-    BddMgrImpl* mgr
-  );
-
   /// @brief 同じマネージャの要素かチェックする．
   ///
   /// 異なる場合には std::invalid_argument 例外を送出する．
@@ -129,7 +116,7 @@ public:
     const BddMgrPtr& other
   ) const
   {
-    if ( mMgr != other.mMgr ) {
+    if ( mPtr != other.mPtr ) {
       throw std::invalid_argument{"BddMgr mismatch"};
     }
   }
@@ -141,7 +128,8 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // マネージャ
-  BddMgrImpl* mMgr{nullptr};
+  //BddMgrImpl* mPtr{nullptr};
+  std::shared_ptr<BddMgrImpl> mPtr;
 
 };
 

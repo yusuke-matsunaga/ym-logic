@@ -20,21 +20,25 @@ BEGIN_NAMESPACE_YM_DD
 // @brief 生のポインタを指定したコンストラクタ
 ZddMgrPtr::ZddMgrPtr(
   ZddMgrImpl* ptr
-) : mMgr{ptr}
+) : mPtr{ptr}
 {
+#if 0
   if ( is_valid() ) {
-    mMgr->inc();
+    mPtr->inc();
   }
+#endif
 }
 
 // @brief コピーコンストラクタ
 ZddMgrPtr::ZddMgrPtr(
   const ZddMgrPtr& src
-) : mMgr{src.mMgr}
+) : mPtr{src.mPtr}
 {
+#if 0
   if ( is_valid() ) {
-    mMgr->inc();
+    mPtr->inc();
   }
+#endif
 }
 
 // @brief コピー代入演算子
@@ -43,29 +47,33 @@ ZddMgrPtr::operator=(
   const ZddMgrPtr& src
 )
 {
+#if 0
   if ( src.is_valid() ) {
-    src.mMgr->inc();
+    src.mPtr->inc();
   }
   if ( is_valid() ) {
-    mMgr->dec();
+    mPtr->dec();
   }
-  mMgr = src.mMgr;
+#endif
+  mPtr = src.mPtr;
   return *this;
 }
 
 // @brief デストラクタ
 ZddMgrPtr::~ZddMgrPtr()
 {
+#if 0
   if ( is_valid() ) {
-    mMgr->dec();
+    mPtr->dec();
   }
+#endif
 }
 
 // @brief 親のマネージャを返す．
 ZddMgr
 ZddMgrPtr::mgr() const
 {
-  return ZddMgr{mMgr};
+  return ZddMgr{get()};
 }
 
 END_NAMESPACE_YM_DD

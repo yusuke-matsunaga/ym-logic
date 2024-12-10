@@ -45,6 +45,7 @@ TEST_F(BddTest, copy_constructor)
   Bdd bdd = from_truth(exp_str);
 
   Bdd bdd1{bdd};
+
   check(bdd1, exp_str);
 }
 

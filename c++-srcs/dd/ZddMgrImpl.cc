@@ -43,16 +43,24 @@ ZddMgrImpl::item(
     auto id1 = new_variable();
     auto level1 = varid_to_level(id1);
     auto item1 = level_to_item(level1);
-    mItemList.push_back(item1);
+    auto edge1 = _edge(item1);
+    mItemList.push_back(edge1);
+    activate(edge1);
   }
-  return mItemList[elem_id];
+  return _zdd(mItemList[elem_id]);
 }
 
 // @brief 要素のリストを返す．
 vector<ZddItem>
-ZddMgrImpl::item_list() const
+ZddMgrImpl::item_list()
 {
-  return mItemList;
+  vector<ZddItem> ans_list;
+  ans_list.reserve(item_num());
+  for ( auto edge: mItemList ) {
+    auto item = ZddItem{_zdd(edge)};
+    ans_list.push_back(item);
+  }
+  return ans_list;
 }
 
 // @brief 空集合を作る．

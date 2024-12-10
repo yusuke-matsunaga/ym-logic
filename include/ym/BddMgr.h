@@ -10,6 +10,7 @@
 
 #include "ym/logic.h"
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
 #include "ym/BddMgrPtr.h"
 #include "ym/JsonValue.h"
 #include "ym/BinDec.h"

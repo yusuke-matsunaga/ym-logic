@@ -57,7 +57,7 @@ public:
 
   /// @brief 変数のリストを返す．
   vector<BddVar>
-  variable_list() const;
+  variable_list();
 
   /// @brief インデックス
   /// @brief 恒偽関数を作る．
@@ -227,7 +227,7 @@ public:
   ///
   /// レベルの昇順に並んでいる
   vector<BddVar>
-  variable_order() const;
+  variable_order();
 
   /// @brief 変数順を設定する．
   void
@@ -411,8 +411,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 変数のリスト
-  vector<BddVar> mVarList;
+  // 変数(の枝)のリスト
+  vector<DdEdge> mVarList;
 
 };
 

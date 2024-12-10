@@ -20,20 +20,20 @@ BEGIN_NAMESPACE_YM_DD
 // @brief 生のポインタを指定したコンストラクタ
 BddMgrPtr::BddMgrPtr(
   BddMgrImpl* ptr
-) : mMgr{ptr}
+) : mPtr{ptr}
 {
   if ( is_valid() ) {
-    mMgr->inc();
+    mPtr->inc();
   }
 }
 
 // @brief コピーコンストラクタ
 BddMgrPtr::BddMgrPtr(
   const BddMgrPtr& src
-) : mMgr{src.mMgr}
+) : mPtr{src.mPtr}
 {
   if ( is_valid() ) {
-    mMgr->inc();
+    mPtr->inc();
   }
 }
 
@@ -44,12 +44,12 @@ BddMgrPtr::operator=(
 )
 {
   if ( src.is_valid() ) {
-    src.mMgr->inc();
+    src.mPtr->inc();
   }
   if ( is_valid() ) {
-    mMgr->dec();
+    mPtr->dec();
   }
-  mMgr = src.mMgr;
+  mPtr = src.mPtr;
   return *this;
 }
 
@@ -57,7 +57,7 @@ BddMgrPtr::operator=(
 BddMgrPtr::~BddMgrPtr()
 {
   if ( is_valid() ) {
-    mMgr->dec();
+    mPtr->dec();
   }
 }
 
@@ -65,7 +65,7 @@ BddMgrPtr::~BddMgrPtr()
 BddMgr
 BddMgrPtr::mgr() const
 {
-  return BddMgr{mMgr};
+  return BddMgr{get()};
 }
 
 END_NAMESPACE_YM_DD

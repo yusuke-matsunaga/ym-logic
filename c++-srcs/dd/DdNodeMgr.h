@@ -213,7 +213,9 @@ public:
   void
   inc()
   {
+#if 0
     ++ mRefCount;
+#endif
   }
 
   /// @brief 自身の参照回数を減らす．
@@ -222,10 +224,12 @@ public:
   void
   dec()
   {
+#if 0
     -- mRefCount;
     if ( mRefCount == 0 ) {
       this->~DdNodeMgr();
     }
+#endif
   }
 
 
