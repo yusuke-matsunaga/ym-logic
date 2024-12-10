@@ -26,7 +26,7 @@ public:
 
   /// @brief コンストラクタ
   ZddCofactorOp(
-    ZddMgrImpl& mgr, ///< [in] マネージャ
+    ZddMgrImpl* mgr, ///< [in] マネージャ
     SizeType level,  ///< [in] レベル
     bool phase       ///< [in] 極性
   ) : ZddOpBase{mgr},

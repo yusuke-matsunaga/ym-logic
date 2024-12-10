@@ -25,7 +25,7 @@ class DdEdge;
 class BddVar :
   public Bdd
 {
-  friend class BddMgrImpl;
+  friend class BddMgrPtr;
   friend class Bdd;
   friend class BddLit;
 

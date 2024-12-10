@@ -7,61 +7,71 @@
 /// All rights reserved.
 
 #include "BddIteOp.h"
+#include "ym/Bdd.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 // @brief AND 演算を行う．
 Bdd
-BddMgrImpl::and_op(
+BddMgrPtr::and_op(
   const Bdd& left,
   const Bdd& right
-)
+) const
 {
   left._check_valid();
   right._check_valid();
-  _check_mgr(left);
-  _check_mgr(right);
-  BddIteOp op{ptr()};
-  cout << "----BddMgrImpl::and_op()" << endl;
-  auto e = op.and_step(_edge(left), _edge(right));
-  cout << "----BddMgrImpl::and_op()" << endl;
-  return _bdd(e);
+  _check_mgr(left.mMgr);
+  _check_mgr(right.mMgr);
+  BddIteOp op{get()};
+  auto edge = op.and_step(left.root(), right.root());
+  return _bdd(edge);
+}
+
+// @brief OR 演算を行う．
+Bdd
+BddMgrPtr::or_op(
+  const Bdd& left,
+  const Bdd& right
+) const
+{
+  // DeMorgan's law
+  return ~and_op(~left, ~right);
 }
 
 // @brief XOR 演算を行う．
 Bdd
-BddMgrImpl::xor_op(
+BddMgrPtr::xor_op(
   const Bdd& left,
   const Bdd& right
-)
+) const
 {
   left._check_valid();
   right._check_valid();
   _check_mgr(left);
   _check_mgr(right);
-  BddIteOp op{ptr()};
-  auto e = op.xor_step(_edge(left), _edge(right));
-  return _bdd(e);
+  BddIteOp op{get()};
+  auto edge = op.xor_step(left.root(), right.root());
+  return _bdd(edge);
 }
 
 // @brief ITE 演算を行う．
 Bdd
-BddMgrImpl::ite(
+BddMgrPtr::ite(
   const Bdd& e0,
   const Bdd& e1,
   const Bdd& e2
-)
+) const
 {
   e0._check_valid();
   e1._check_valid();
   e2._check_valid();
-  _check_mgr(e0);
-  _check_mgr(e1);
-  _check_mgr(e2);
-  BddIteOp op{ptr()};
-  auto e = op.ite_step(_edge(e0), _edge(e1), _edge(e2));
-  return _bdd(e);
+  _check_mgr(e0.mMgr);
+  _check_mgr(e1.mMgr);
+  _check_mgr(e2.mMgr);
+  BddIteOp op{get()};
+  auto edge = op.ite_step(e0.root(), e1.root(), e2.root());
+  return _bdd(edge);
 }
 
 

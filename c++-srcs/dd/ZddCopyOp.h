@@ -29,7 +29,7 @@ public:
 
   /// @brief コンストラクタ
   ZddCopyOp(
-    ZddMgrImpl& mgr,                   ///< [in] マネージャ
+    ZddMgrImpl* mgr,                   ///< [in] マネージャ
     const vector<ZddItem>& item_list,  ///< [in] 変数リスト
     const vector<SizeType>& level_list ///< [in] レベルのリスト
   ) : mMgr{mgr},
@@ -61,7 +61,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // Zddマネージャ
-  ZddMgrImpl& mMgr;
+  ZddMgrImpl* mMgr;
 
   // 要素リスト
   vector<ZddItem> mItemList;

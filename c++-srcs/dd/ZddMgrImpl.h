@@ -48,116 +48,23 @@ public:
   SizeType
   item_num() const;
 
-  /// @brief 要素を返す．
-  ZddItem
+  /// @brief 要素(を表す枝)を返す．
+  DdEdge
   item(
     SizeType elem_id ///< [in] 要素番号
   );
 
-  /// @brief 要素のリストを返す．
-  vector<ZddItem>
-  item_list();
-
-  /// @brief 空集合を作る．
-  Zdd
-  zero();
-
-  /// @brief ユニバースを作る．
-  Zdd
-  one();
-
-  /// @brief ZDDを作る．
-  Zdd
-  zdd(
-    SizeType level,   ///< [in] レベル
-    const Zdd& edge0, ///< [in] 0枝
-    const Zdd& edge1  ///< [in] 1枝
-  );
-
-  /// @brief ZDD をコピーする．
-  ///
-  /// 通常は同じものを返すが，src のマネージャが異なる場合には
-  /// 同じ構造のコピーを作る．
-  Zdd
-  copy(
-    const Zdd& src
-  );
+  /// @brief 要素(を表す枝)のリストを返す．
+  vector<DdEdge>
+  item_list()
+  {
+    return mItemList;
+  }
 
   /// @brief 部分集合を作る．
-  Zdd
+  DdEdge
   make_set(
-    const vector<ZddItem>& item_list
-  );
-
-  /// @brief ZDD を反転する．
-  Zdd
-  invert(
-    const Zdd& src
-  );
-
-  /// @brief CAP 演算を行う．
-  Zdd
-  cap(
-    const Zdd& left,
-    const Zdd& right
-  );
-
-  /// @brief CUP 演算を行う．
-  Zdd
-  cup(
-    const Zdd& left,
-    const Zdd& right
-  );
-
-  /// @brief DIFF 演算を行う．
-  Zdd
-  diff(
-    const Zdd& left,
-    const Zdd& right
-  );
-
-  /// @brief 変数を含む集合を求める．
-  /// @return 結果を返す．
-  Zdd
-  onset(
-    const Zdd& zdd,
-    const ZddItem& item
-  );
-
-  /// @brief 変数を含まない集合を求める．
-  /// @return 結果を返す．
-  Zdd
-  offset(
-    const Zdd& zdd,
-    const ZddItem& item
-  );
-
-  /// @brief PRODUCT 演算を行う．
-  Zdd
-  product(
-    const Zdd& left,
-    const Zdd& right
-  );
-
-  /// @brief 複数のZDDの内容を出力する．
-  void
-  display(
-    ostream& s,                 ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
-  );
-
-  /// @brief 複数のBDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,                  ///< [in] 出力ストリーム
-    const vector<Zdd>& bdd_list, ///< [in] ZDDのリスト
-    const JsonValue& option      ///< [in] オプションを表す JSON オブジェクト
-  );
-
-  /// @brief 構造を表す整数配列を作る．
-  vector<SizeType>
-  rep_data(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+    const vector<SizeType>& level_list
   );
 
   /// @brief 複数のZDDを独自形式でバイナリダンプする．
@@ -165,29 +72,17 @@ public:
   /// 復元には ZddMgr::restore() を用いる．
   void
   dump(
-    BinEnc& s,                  ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+    BinEnc& s,                ///< [in] 出力ストリーム
+    const DdInfoMgr& info_mgr ///< [in] 構造の情報
   );
 
   /// @brief バイナリダンプから復元する．
   /// @return 生成されたZDDのリストを返す．
   ///
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
-  vector<Zdd>
+  vector<DdEdge>
   restore(
     BinDec& s ///< [in] 入力ストリーム
-  );
-
-  /// @brief 複数のZDDのノード数を数える．
-  SizeType
-  zdd_size(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
-  );
-
-  /// @brief 複数のBDDのノードの情報を取り出す．
-  DdInfoMgr
-  node_info(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
 
@@ -195,18 +90,6 @@ public:
   //////////////////////////////////////////////////////////////////////
   // DdEdge を扱う関数
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief DdEdge を Zdd に変換する．
-  Zdd
-  _zdd(
-    DdEdge edge ///< [in] 根の枝
-  );
-
-  /// @brief Zdd から DdEdge を取り出す．
-  DdEdge
-  _edge(
-    const Zdd& zdd
-  );
 
   // @brief ノードを作る．
   DdEdge
@@ -266,18 +149,6 @@ public:
     return top;
   }
 
-  /// @brief ZDDの根の枝のリストを作る．
-  vector<DdEdge>
-  root_list(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
-  );
-
-  /// @brief レベルを要素に変換する．
-  ZddItem
-  level_to_item(
-    SizeType level ///< [in] レベル
-  );
-
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -287,23 +158,6 @@ private:
   /// @brief garbage_collection() が呼ばれた後に呼び出される関数
   void
   after_gc() override;
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief このマネージャに属しているオブジェクトかチェックする．
-  void
-  _check_mgr(
-    const Zdd& zdd ///< [in] 対象のオブジェクト
-  ) const
-  {
-    if ( zdd.mMgr.get() != this ) {
-      throw std::invalid_argument{"ZddMgr mismatch"};
-    }
-  }
 
 
 private:

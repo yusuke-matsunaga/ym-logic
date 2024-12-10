@@ -7,8 +7,8 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
 #include "DdNode.h"
-#include "BddMgrImpl.h"
 #include "BddCheckSupOp.h"
 
 
@@ -22,7 +22,7 @@ Bdd::check_sup(
 {
   auto level = var.level();
   BddCheckSupOp op{level};
-  return op.op_step(DdEdge{mRoot});
+  return op.op_step(root());
 }
 
 

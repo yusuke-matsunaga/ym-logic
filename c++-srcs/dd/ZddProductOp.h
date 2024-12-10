@@ -26,7 +26,7 @@ public:
 
   /// @brief コンストラクタ
   ZddProductOp(
-    ZddMgrImpl& mgr ///< [in] マネージャ
+    ZddMgrImpl* mgr ///< [in] マネージャ
   ) : ZddOpBase{mgr},
       mCupOp{mgr}
   {

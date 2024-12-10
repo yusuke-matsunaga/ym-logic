@@ -7,8 +7,8 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
+#include "ym/ZddMgrPtr.h"
 #include "DdEdge.h"
-#include "ZddMgrImpl.h"
 #include "DdNode.h"
 #include "ZddProductOp.h"
 
@@ -17,18 +17,18 @@ BEGIN_NAMESPACE_YM_DD
 
 /// @brief PRODUCT 演算を行う．
 Zdd
-ZddMgrImpl::product(
+ZddMgrPtr::product(
   const Zdd& left,
   const Zdd& right
-)
+) const
 {
   left._check_valid();
   right._check_valid();
-  auto tmp0 = copy(left);
-  auto tmp1 = copy(right);
-  ZddProductOp op(*this);
-  auto e = op.prod_step(_edge(tmp0), _edge(tmp1));
-  return _zdd(e);
+  _check_mgr(left);
+  _check_mgr(right);
+  ZddProductOp op(get());
+  auto edge = op.prod_step(left.root(), right.root());
+  return _zdd(edge);
 }
 
 

@@ -20,12 +20,15 @@ Bdd::get_onepath() const
 {
   _check_valid();
 
+  DdEdge edge;
   if ( is_zero() ) {
-    return Bdd{mMgr, DdEdge::zero()};
+    edge = DdEdge::zero();
   }
-  BddOneOp op{mMgr};
-  auto e = op.op_step(DdEdge{mRoot});
-  return Bdd{mMgr, e};
+  else {
+    BddOneOp op{mMgr.get()};
+    edge = op.op_step(root());
+  }
+  return Bdd{mMgr, edge};
 }
 
 // @brief 0となるパスを求める．

@@ -18,7 +18,7 @@ BEGIN_NAMESPACE_YM_DD
 // @brief コンストラクタ
 DdInfoMgr::DdInfoMgr(
   const vector<DdEdge>& root_list,
-  DdNodeMgr* node_mgr
+  const DdNodeMgr* node_mgr
 )
 {
   NodeCollector nc{root_list};

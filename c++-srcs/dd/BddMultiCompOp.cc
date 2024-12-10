@@ -7,8 +7,10 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
+#include "ym/BddLit.h"
+#include "ym/BddMgrPtr.h"
 #include "DdEdge.h"
-#include "BddMgrImpl.h"
 #include "DdNode.h"
 #include "BddMultiCompOp.h"
 
@@ -37,11 +39,11 @@ Bdd::compose_int(
 
 // @brief compose 演算を行う．
 Bdd
-BddMgrImpl::compose(
+BddMgrPtr::compose(
   const Bdd& bdd,
   const BddVar& var,
   const Bdd& cedge
-)
+) const
 {
   unordered_map<BddVar, Bdd> cmap{{var, cedge}};
   return multi_compose(bdd, cmap);
@@ -49,10 +51,10 @@ BddMgrImpl::compose(
 
 // @brief 複合compose演算
 Bdd
-BddMgrImpl::multi_compose(
+BddMgrPtr::multi_compose(
   const Bdd& bdd,
   const unordered_map<BddVar, Bdd>& compose_map
-)
+) const
 {
   bdd._check_valid();
   unordered_map<SizeType, DdEdge> cmap;
@@ -61,20 +63,20 @@ BddMgrImpl::multi_compose(
     auto level = var.level();
     auto& bdd = p.second;
     bdd._check_valid();
-    auto cedge = _edge(bdd);
+    auto cedge = bdd.root();
     cmap.emplace(level, cedge);
   }
-  BddMultiCompOp op{BddMgrPtr{this}, cmap};
-  auto e = op.mcomp_op(_edge(bdd));
-  return _bdd(e);
+  BddMultiCompOp op{get(), cmap};
+  auto edge = op.mcomp_op(bdd.root());
+  return _bdd(edge);
 }
 
 // @brief 変数順を入れ替える演算
 Bdd
-BddMgrImpl::remap_vars(
+BddMgrPtr::remap_vars(
   const Bdd& bdd,
   const unordered_map<BddVar, BddLit>& varmap
-)
+) const
 {
   bdd._check_valid();
   unordered_map<SizeType, DdEdge> cmap;
@@ -85,8 +87,8 @@ BddMgrImpl::remap_vars(
     DdEdge cedge = lit.root();
     cmap.emplace(level, cedge);
   }
-  BddMultiCompOp op{BddMgrPtr{this}, cmap};
-  auto e = op.mcomp_op(_edge(bdd));
+  BddMultiCompOp op{get(), cmap};
+  auto e = op.mcomp_op(bdd.root());
   return _bdd(e);
 }
 
@@ -97,7 +99,7 @@ BddMgrImpl::remap_vars(
 
 // @brief コンストラクタ
 BddMultiCompOp::BddMultiCompOp(
-  const BddMgrPtr& mgr,
+  BddMgrImpl* mgr,
   const unordered_map<SizeType, DdEdge>& comp_map
 ) : BddOpBase{mgr},
     mIteOp{mgr}

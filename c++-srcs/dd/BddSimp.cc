@@ -7,24 +7,25 @@
 /// All rights reserved.
 
 #include "BddSimp.h"
+#include "ym/Bdd.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 // @brief 簡単化を行う．
 Bdd
-BddMgrImpl::simplify(
+BddMgrPtr::simplify(
   const Bdd& on,
   const Bdd& dc
-)
+) const
 {
   on._check_valid();
   dc._check_valid();
-  _check_mgr(on);
-  _check_mgr(dc);
-  BddSimp op{BddMgrPtr{this}};
-  auto e = op.simp_step(_edge(on), _edge(dc));
-  return _bdd(e);
+  _check_mgr(on.mMgr);
+  _check_mgr(dc.mMgr);
+  BddSimp op{get()};
+  auto edge = op.simp_step(on.root(), dc.root());
+  return _bdd(edge);
 }
 
 

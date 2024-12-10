@@ -25,7 +25,7 @@ public:
 
   /// @brief コンストラクタ
   BddMultiCompOp(
-    const BddMgrPtr& mgr,                           ///< [in] マネージャ
+    BddMgrImpl* mgr,                                ///< [in] マネージャ
     const unordered_map<SizeType, DdEdge>& comp_map ///< [in] 変換マップ
   );
 

@@ -7,7 +7,9 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
 #include "ym/BddVarSet.h"
+#include "ym/BddLit.h"
 #include "DdEdge.h"
 #include "DdNode.h"
 #include "BddSupOp.h"
@@ -24,7 +26,7 @@ Bdd::support_cup_int(
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{mMgr};
+  BddSupOp op{mMgr.get()};
   auto e = op.cup_step(root(), right.root());
   change_root(e);
   return *this;
@@ -39,7 +41,7 @@ Bdd::support_cap_int(
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{mMgr};
+  BddSupOp op{mMgr.get()};
   auto e = op.cap_step(root(), right.root());
   change_root(e);
   return *this;
@@ -54,7 +56,7 @@ Bdd::support_diff_int(
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{mMgr};
+  BddSupOp op{mMgr.get()};
   auto e = op.diff_step(root(), right.root());
   change_root(e);
   return *this;
@@ -151,7 +153,7 @@ Bdd::get_support() const
 {
   _check_valid();
 
-  BddSupOp op{mMgr};
+  BddSupOp op{mMgr.get()};
   auto e = op.get_step(root());
   return BddVarSet{Bdd{mMgr, e}};
 }
@@ -174,7 +176,7 @@ Bdd::to_varlist() const
   vector<BddVar> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
-    auto var = mMgr->level_to_var(node->level());
+    auto var = mMgr.level_to_var(node->level());
     var_list.push_back(var);
     edge = node->edge1();
   }
@@ -195,7 +197,7 @@ Bdd::to_litlist() const
     auto inv = edge.inv();
     auto e0 = node->edge0() ^ inv;
     auto e1 = node->edge1() ^ inv;
-    auto var = mMgr->level_to_var(node->level());
+    auto var = mMgr.level_to_var(node->level());
     if ( e0.is_zero() ) {
       lit_list.push_back(BddLit{var, false});
       edge = e1;

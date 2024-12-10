@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ZddMgrImpl.h"
+#include "ym/ZddMgrPtr.h"
 #include "ZddCofactorOp.h"
 
 
@@ -15,34 +15,34 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief 変数を含む集合を求める．
 Zdd
-ZddMgrImpl::onset(
+ZddMgrPtr::onset(
   const Zdd& dd,
   const ZddItem& item
-)
+) const
 {
   dd._check_valid();
   item._check_valid();
   _check_mgr(dd);
   _check_mgr(item);
-  ZddCofactorOp op(*this, item.level(), true);
-  auto e = op.cofactor_step(_edge(dd));
-  return _zdd(e);
+  ZddCofactorOp op(get(), item.level(), true);
+  auto edge = op.cofactor_step(dd.root());
+  return _zdd(edge);
 }
 
 // @brief 変数を含まない集合を求める．
 Zdd
-ZddMgrImpl::offset(
+ZddMgrPtr::offset(
   const Zdd& dd,
   const ZddItem& item
-)
+) const
 {
   dd._check_valid();
   item._check_valid();
   _check_mgr(dd);
   _check_mgr(item);
-  ZddCofactorOp op(*this, item.level(), false);
-  auto e = op.cofactor_step(_edge(dd));
-  return _zdd(e);
+  ZddCofactorOp op(get(), item.level(), false);
+  auto edge = op.cofactor_step(dd.root());
+  return _zdd(edge);
 }
 
 

@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
 #include "DdNode.h"
 #include "BddCheckSymOp.h"
 #include "BddMgrImpl.h"
@@ -27,7 +28,7 @@ Bdd::check_sym(
   auto idx1 = var1.level();
   auto idx2 = var2.level();
   BddCheckSymOp op{idx1, idx2, inv};
-  return op.op_step(DdEdge{mRoot});
+  return op.op_step(root());
 }
 
 

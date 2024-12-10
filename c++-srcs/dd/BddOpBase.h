@@ -9,7 +9,6 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/BddMgrPtr.h"
 #include "BddMgrImpl.h"
 #include "DdEdge.h"
 
@@ -28,31 +27,19 @@ public:
 
   /// @brief コンストラクタ
   BddOpBase(
-    const BddMgrPtr& mgr ///< [in] マネージャ
+    BddMgrImpl* mgr ///< [in] マネージャ
   ) : mMgr{mgr}
   {
-    cout << "BddOpBase::constr" << endl;
   }
 
   /// @brief デストラクタ
-  //~BddOpBase() = default;
-  ~BddOpBase()
-  {
-    cout << "BddOpBase::destr" << endl;
-  }
+  ~BddOpBase() = default;
 
 
 protected:
   //////////////////////////////////////////////////////////////////////
   // 継承クラスから用いられる関数
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief マネージャを返す．
-  BddMgrPtr&
-  mgr()
-  {
-    return mMgr;
-  }
 
   /// @brief ノードを作る．
   DdEdge
@@ -87,7 +74,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // マネージャ
-  BddMgrPtr mMgr;
+  BddMgrImpl* mMgr;
 
 };
 

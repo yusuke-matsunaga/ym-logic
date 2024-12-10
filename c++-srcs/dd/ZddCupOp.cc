@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ZddMgrImpl.h"
+#include "ym/ZddMgrPtr.h"
 #include "ZddCupOp.h"
 
 
@@ -15,19 +15,18 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief CUP 演算を行う．
 Zdd
-ZddMgrImpl::cup(
+ZddMgrPtr::cup(
   const Zdd& left,
   const Zdd& right
-)
+) const
 {
   left._check_valid();
   right._check_valid();
-
-  auto tmp_left = copy(left);
-  auto tmp_right = copy(right);
-  ZddCupOp op{*this};
-  auto e = op.cup_step(_edge(tmp_left), _edge(tmp_right));
-  return _zdd(e);
+  _check_mgr(left);
+  _check_mgr(right);
+  ZddCupOp op{get()};
+  auto edge = op.cup_step(left.root(), right.root());
+  return _zdd(edge);
 }
 
 

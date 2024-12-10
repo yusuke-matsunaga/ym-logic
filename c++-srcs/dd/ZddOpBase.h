@@ -28,7 +28,7 @@ public:
 
   /// @brief コンストラクタ
   ZddOpBase(
-    ZddMgrImpl& mgr ///< [in] マネージャ
+    ZddMgrImpl* mgr ///< [in] マネージャ
   ) : mMgr{mgr}
   {
   }
@@ -43,7 +43,7 @@ protected:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief マネージャを返す．
-  ZddMgrImpl&
+  ZddMgrImpl*
   mgr()
   {
     return mMgr;
@@ -57,7 +57,7 @@ protected:
     DdEdge edge1   ///< [in] 1枝
   )
   {
-    return mMgr.new_node(index, edge0, edge1);
+    return mMgr->new_node(index, edge0, edge1);
   }
 
   /// @brief 先頭の変数で分解する．
@@ -82,7 +82,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // マネージャ
-  ZddMgrImpl& mMgr;
+  ZddMgrImpl* mMgr;
 
 };
 

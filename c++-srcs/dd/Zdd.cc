@@ -3,29 +3,22 @@
 /// @brief Zdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2024 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Zdd.h"
 #include "ym/ZddMgr.h"
-#include "DdEdge.h"
+#include "ym/ZddMgrPtr.h"
 #include "ZddMgrImpl.h"
+#include "DdEdge.h"
 #include "DdNode.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
-// @brief 空のコンストラクタ
-Zdd::Zdd(
-) : mMgr{nullptr},
-    mRoot{0}
-{
-  // 不正値となる．
-}
-
 // @brief 内容を指定したコンストラクタ
 Zdd::Zdd(
-  ZddMgrImpl* mgr,
+  const ZddMgrPtr& mgr,
   DdEdge edge
 ) : mMgr{mgr},
     mRoot{edge.body()}
@@ -38,9 +31,12 @@ Zdd::Zdd(
 // @brief コピーコンストラクタ
 Zdd::Zdd(
   const Zdd& src
-) : Zdd{src.mMgr.get(), src.root()}
+) : mMgr{src.mMgr},
+    mRoot{src.mRoot}
 {
-  // いわゆる delegate constructor
+  if ( is_valid() ) {
+    mMgr->activate(root());
+  }
 }
 
 // @brief コピー代入演算子
@@ -65,8 +61,7 @@ Zdd::operator=(
 Zdd::~Zdd()
 {
   if ( is_valid() ) {
-    mMgr->deactivate(DdEdge{mRoot});
-    //mMgr->dec();
+    mMgr->deactivate(root());
   }
 }
 
@@ -74,18 +69,14 @@ Zdd::~Zdd()
 ZddMgr
 Zdd::mgr() const
 {
-  return ZddMgr{mMgr.get()};
+  return ZddMgr{mMgr};
 }
 
 // @brief 否定した関数を返す．
 Zdd
 Zdd::invert() const
 {
-  if ( is_valid() ) {
-    return mMgr->invert(*this);
-  }
-  // 不正値の時には演算を行わない．
-  return *this;
+  return Zdd{mMgr, ~root()};
 }
 
 // @brief 自分自身を否定する．
@@ -93,9 +84,8 @@ Zdd&
 Zdd::invert_int()
 {
   if ( is_valid() ) {
-    *this = mMgr->invert(*this);
+    mRoot = (~root()).body();
   }
-  // 不正値の時には演算を行わない．
   return *this;
 }
 
@@ -106,7 +96,7 @@ Zdd::cap(
 ) const
 {
   _check_valid();
-  return mMgr->cap(*this, right);
+  return mMgr.cap(*this, right);
 }
 
 // @brief CAP演算つき代入
@@ -116,7 +106,7 @@ Zdd::cap_int(
 )
 {
   _check_valid();
-  *this = mMgr->cap(*this, right);
+  *this = mMgr.cap(*this, right);
   return *this;
 }
 
@@ -127,7 +117,7 @@ Zdd::cup(
 ) const
 {
   _check_valid();
-  return mMgr->cup(*this, right);
+  return mMgr.cup(*this, right);
 }
 
 // @brief CUP演算つき代入
@@ -137,7 +127,7 @@ Zdd::cup_int(
 )
 {
   _check_valid();
-  *this = mMgr->cup(*this, right);
+  *this = mMgr.cup(*this, right);
   return *this;
 }
 
@@ -148,7 +138,7 @@ Zdd::diff(
 ) const
 {
   _check_valid();
-  return mMgr->diff(*this, right);
+  return mMgr.diff(*this, right);
 }
 
 // @brief DIFF演算つき代入
@@ -158,7 +148,7 @@ Zdd::diff_int(
 )
 {
   _check_valid();
-  *this = mMgr->diff(*this, right);
+  *this = mMgr.diff(*this, right);
   return *this;
 }
 
@@ -169,7 +159,7 @@ Zdd::onset(
 ) const
 {
   _check_valid();
-  return mMgr->onset(*this, item);
+  return mMgr.onset(*this, item);
 }
 
 // @brief onset を計算して代入する．
@@ -179,7 +169,7 @@ Zdd::onset_int(
 )
 {
   _check_valid();
-  *this = mMgr->onset(*this, item);
+  *this = mMgr.onset(*this, item);
   return *this;
 }
 
@@ -190,7 +180,7 @@ Zdd::offset(
 ) const
 {
   _check_valid();
-  return mMgr->offset(*this, item);
+  return mMgr.offset(*this, item);
 }
 
 // @brief offset を計算して代入する．
@@ -200,7 +190,7 @@ Zdd::offset_int(
 )
 {
   _check_valid();
-  *this = mMgr->offset(*this, item);
+  *this = mMgr.offset(*this, item);
   return *this;
 }
 
@@ -211,7 +201,7 @@ Zdd::product(
 ) const
 {
   _check_valid();
-  return mMgr->product(*this, right);
+  return mMgr.product(*this, right);
 }
 
 // @brief PRODUCT付き代入
@@ -221,7 +211,7 @@ Zdd::product_int(
 )
 {
   _check_valid();
-  *this = mMgr->product(*this, right);
+  *this = mMgr.product(*this, right);
   return *this;
 }
 
@@ -229,21 +219,21 @@ Zdd::product_int(
 bool
 Zdd::is_zero() const
 {
-  return is_valid() && DdEdge{mRoot}.is_zero();
+  return is_valid() && root().is_zero();
 }
 
 // @brief 定数1の時 true を返す．
 bool
 Zdd::is_one() const
 {
-  return is_valid() && DdEdge{mRoot}.is_one();
+  return is_valid() && root().is_one();
 }
 
 // @brief 定数の時 true を返す．
 bool
 Zdd::is_const() const
 {
-  return is_valid() && DdEdge{mRoot}.is_const();
+  return is_valid() && root().is_const();
 }
 
 // @brief シングルトンの時 true を返す．
@@ -274,17 +264,16 @@ Zdd::root_decomp(
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  auto node = root.node();
+  auto node = root().node();
   if ( node == nullptr ) {
     f0 = *this;
     f1 = *this;
     return ZddItem::invalid();
   }
   else {
-    f0 = Zdd{_mgr(), node->edge0()};
-    f1 = Zdd{_mgr(), node->edge1()};
-    auto item = mMgr->level_to_item(node->level());
+    f0 = Zdd{mMgr, node->edge0()};
+    f1 = Zdd{mMgr, node->edge1()};
+    auto item = mMgr.level_to_item(node->level());
     return item;
   }
 }
@@ -295,13 +284,12 @@ Zdd::root_item() const
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  auto node = root.node();
+  auto node = root().node();
   if ( node == nullptr ) {
     return ZddItem::invalid();
   }
   else {
-    auto item = mMgr->level_to_item(node->level());
+    auto item = mMgr.level_to_item(node->level());
     return item;
   }
 }
@@ -312,13 +300,12 @@ Zdd::root_cofactor0() const
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  auto node = root.node();
+  auto node = root().node();
   if ( node == nullptr ) {
     return *this;
   }
   else {
-    return Zdd{_mgr(), node->edge0()};
+    return Zdd{mMgr, node->edge0()};
   }
 }
 
@@ -328,13 +315,12 @@ Zdd::root_cofactor1() const
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  auto node = root.node();
+  auto node = root().node();
   if ( node == nullptr ) {
     return *this;
   }
   else {
-    return Zdd{_mgr(), node->edge1()};
+    return Zdd{mMgr, node->edge1()};
   }
 }
 
@@ -353,8 +339,7 @@ Zdd::hash() const
 {
   _check_valid();
 
-  auto root = DdEdge{mRoot};
-  return root.hash();
+  return root().hash();
 }
 
 // @brief 根の枝を変更する．
@@ -368,7 +353,7 @@ Zdd::change_root(
   // この順序なら new_root と mRoot が等しくても
   // 正しく動く
   mMgr->activate(new_root);
-  mMgr->deactivate(DdEdge{mRoot});
+  mMgr->deactivate(root());
   mRoot = new_root.body();
 }
 
@@ -379,7 +364,7 @@ Zdd::display(
 ) const
 {
   _check_valid();
-  mMgr->display(s, {*this});
+  mMgr.display(s, {*this});
 }
 
 // @brief dot 形式で出力する．
@@ -390,7 +375,7 @@ Zdd::gen_dot(
 ) const
 {
   _check_valid();
-  mMgr->gen_dot(s, {*this}, option);
+  mMgr.gen_dot(s, {*this}, option);
 }
 
 // @brief 構造を表す整数配列を作る．
@@ -398,7 +383,7 @@ vector<SizeType>
 Zdd::rep_data() const
 {
   _check_valid();
-  return mMgr->rep_data({*this});
+  return mMgr.rep_data({*this});
 }
 
 // @brief 独自形式でバイナリダンプする．
@@ -408,7 +393,7 @@ Zdd::dump(
 ) const
 {
   _check_valid();
-  mMgr->dump(s, {*this});
+  mMgr.dump(s, {*this});
 }
 
 // @brief ノード数を返す．
@@ -416,7 +401,7 @@ SizeType
 Zdd::size() const
 {
   _check_valid();
-  return mMgr->zdd_size({*this});
+  return mMgr.zdd_size({*this});
 }
 
 // @brief 根の枝を返す．
@@ -433,7 +418,7 @@ Zdd::root() const
 
 // @brief 内容を指定したコンストラクタ
 ZddItem::ZddItem(
-  ZddMgrImpl* mgr,
+  const ZddMgrPtr& mgr,
   DdEdge root
 ) : Zdd{mgr, root}
 {
@@ -456,7 +441,7 @@ ZddItem::from_zdd(
 SizeType
 ZddItem::id() const
 {
-  return _mgr()->level_to_varid(level());
+  return mgr_ptr()->level_to_varid(level());
 }
 
 // @brief レベルを返す．

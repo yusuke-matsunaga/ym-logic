@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ZddMgrImpl.h"
+#include "ym/ZddMgrPtr.h"
 #include "ZddDiffOp.h"
 
 
@@ -15,17 +15,17 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief DIFF演算を行う．
 Zdd
-ZddMgrImpl::diff(
+ZddMgrPtr::diff(
   const Zdd& left,
   const Zdd& right
-)
+) const
 {
   left._check_valid();
   right._check_valid();
-  auto tmp_left = copy(left);
-  auto tmp_right = copy(right);
-  ZddDiffOp op{*this};
-  auto e = op.diff_step(_edge(tmp_left), _edge(tmp_right));
+  _check_mgr(left);
+  _check_mgr(right);
+  ZddDiffOp op{get()};
+  auto e = op.diff_step(left.root(), right.root());
   return _zdd(e);
 }
 

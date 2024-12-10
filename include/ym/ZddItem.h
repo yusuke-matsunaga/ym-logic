@@ -25,16 +25,18 @@ class DdEdge;
 class ZddItem :
   public Zdd
 {
-  friend class ZddMgrImpl;
+  //friend class ZddMgrImpl;
+  friend class ZddMgrPtr;
   friend class Zdd;
+
 private:
 
   /// @brief 内容を指定したコンストラクタ
   ///
   /// root はシングルトンでなければならない．
   ZddItem(
-    ZddMgrImpl* mgr, ///< [in] マネージャ
-    DdEdge root      ///< [in] 根の枝
+    const ZddMgrPtr& mgr, ///< [in] マネージャ
+    DdEdge root           ///< [in] 根の枝
   );
 
   /// @brief Zdd からのコピーコンストラクタ

@@ -9,10 +9,6 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/Bdd.h"
-#include "ym/BddVar.h"
-#include "ym/BddLit.h"
-#include "ym/BddMgrPtr.h"
 #include "ym/JsonValue.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
@@ -50,190 +46,29 @@ public:
   SizeType
   variable_num() const;
 
-  /// @brief 変数を返す．
-  BddVar
+  /// @brief 変数(を表す枝)を返す．
+  DdEdge
   variable(
     SizeType varid ///< [in] 変数番号
   );
 
-  /// @brief 変数のリストを返す．
-  vector<BddVar>
-  variable_list();
-
-  /// @brief インデックス
-  /// @brief 恒偽関数を作る．
-  Bdd
-  zero();
-
-  /// @brief 恒真関数を作る．
-  Bdd
-  one();
-
-  /// @brief BDD を作る．
-  Bdd
-  bdd(
-    SizeType index,   ///< [in] インデックス
-    const Bdd& edge0, ///< [in] 0枝
-    const Bdd& edge1  ///< [in] 1枝
-  );
-
-  /// @brief BDD をコピーする．
-  ///
-  /// 通常は同じものを返すが，src のマネージャが異なる場合には
-  /// 同じ構造のコピーを作る．
-  Bdd
-  copy(
-    const Bdd& src
-  );
-
-  /// @brief リテラル関数を表すBDDを作る．
-  BddLit
-  literal(
-    const BddVar& var, ///< [in] 変数
-    bool inv = false   ///< [in] 反転フラグ
-  )
+  /// @brief 変数(を表す枝)のリストを返す．
+  const vector<DdEdge>&
+  variable_list()
   {
-    _check_mgr(var);
-    return BddLit{var, inv};
+    return mVarList;
   }
-
-  /// @brief 肯定のリテラル関数を作る．
-  BddLit
-  posi_literal(
-    const BddVar& var ///< [in] 変数
-  )
-  {
-    return literal(var, false);
-  }
-
-  /// @brief 否定のリテラル関数を作る．
-  BddLit
-  nega_literal(
-    const BddVar& var ///< [in] 変数
-  )
-  {
-    return literal(var, true);
-  }
-
-  /// @brief 真理値表形式の文字列からBDDを作る．
-  ///
-  /// str は '0' か '1' の文字列．
-  /// ただし，長さは var_list の長さのべき乗である必要がある．
-  /// for some reason, この文字列は big endian となっている．
-  /// 0文字目が(1, 1, 1, 1)に対応する
-  ///
-  /// 不正な形式の場合は std::invalid_argument 例外を送出する．
-  Bdd
-  from_truth(
-    const string& str,             ///< [in] 01の文字列
-    const vector<BddVar>& var_list ///< [in] 変数のリスト
-  );
-
-  /// @brief AND 演算を行う．
-  Bdd
-  and_op(
-    const Bdd& left,
-    const Bdd& right
-  );
-
-  /// @brief OR 演算を行う．
-  Bdd
-  or_op(
-    const Bdd& left,
-    const Bdd& right
-  )
-  {
-    // DeMorgan's law
-    return ~and_op(~left, ~right);
-  }
-
-  /// @brief XOR 演算を行う．
-  Bdd
-  xor_op(
-    const Bdd& left,
-    const Bdd& right
-  );
-
-  /// @brief ITE 演算を行う．
-  Bdd
-  ite(
-    const Bdd& e0,
-    const Bdd& e1,
-    const Bdd& e2
-  );
-
-  /// @brief ドントケアを利用した簡単化を行う．
-  Bdd
-  simplify(
-    const Bdd& on,  ///< [in] オンセット
-    const Bdd& dc   ///< [in] ドントケアセット
-  );
-
-  /// @brief コファクターを計算する．
-  /// @return 結果を返す．
-  Bdd
-  cofactor(
-    const Bdd& bdd,    ///< [in] 対象の BDD
-    const BddVar& var, ///< [in] 変数
-    bool inv           ///< [in] 反転フラグ
-                       ///<  - false: 反転なし (正極性)
-                       ///<  - true:  反転あり (負極性)
-  );
-
-  /// @brief コファクターを計算する．
-  Bdd
-  cofactor(
-    const Bdd& bdd, ///< [in] 対象の BDD
-    const Bdd& cube ///< [in] コファクターのキューブ
-                    /// cube.is_cube() = true でなければならない．
-  );
-
-  /// @brief compose 演算を行う．
-  Bdd
-  compose(
-    const Bdd& edge,
-    const BddVar& var,
-    const Bdd& cedge
-  );
-
-  /// @brief 複合compose演算
-  Bdd
-  multi_compose(
-    const Bdd& bdd,                               ///< [in] 対象の BDD
-    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
-  );
-
-  /// @brief 変数順を入れ替える演算
-  ///
-  /// 極性も入れ替え可能
-  Bdd
-  remap_vars(
-    const Bdd& bdd,                             ///< [in] 対象の BDD
-    const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
-  );
-
-  /// @brief 変数のリストをレベルのリストに変換する．
-  vector<SizeType>
-  level_list(
-    const vector<BddVar>& var_list ///< [in] 変数リスト
-  ) const;
-
-  /// @brief レベルを変数に変換する．
-  BddVar
-  level_to_var(
-    SizeType level ///< [in] レベル
-  );
 
   /// @brief 変数順を表す変数のリストを返す．
   ///
   /// レベルの昇順に並んでいる
-  vector<BddVar>
+  vector<DdEdge>
   variable_order();
 
   /// @brief 変数順を設定する．
   void
   set_variable_order(
-    const vector<BddVar>& order_list ///< [in] 変数順を表すリスト
+    const vector<DdEdge>& order_list ///< [in] 変数順を表すリスト
   );
 
   /// @brief sifting を用いて変数順の最適化を行う．
@@ -246,53 +81,20 @@ public:
   // 内容の出力を行う関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 複数のBDDのノード数を数える．
-  SizeType
-  bdd_size(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
-
-  /// @brief 複数のBDDの内容を出力する．
-  void
-  display(
-    ostream& s,                 ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
-
-  /// @brief 複数のBDDを dot 形式で出力する．
-  void
-  gen_dot(
-    ostream& s,                  ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list, ///< [in] BDDのリスト
-    const JsonValue& option      ///< [in] オプションを表す JSON オブジェクト
-  );
-
-  /// @brief 構造を表す整数配列を作る．
-  vector<SizeType>
-  rep_data(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
-
   /// @brief BDD の内容をバイナリダンプする．
   void
   dump(
-    BinEnc& s,                  ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list ///< [in] 対象の BDDのリスト
+    BinEnc& s,                ///< [in] 出力ストリーム
+    const DdInfoMgr& info_mgr ///< [in] ノード情報
   );
 
   /// @brief バイナリダンプから復元する．
   /// @return 生成されたBDDのリストを返す．
   ///
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
-  vector<Bdd>
+  vector<DdEdge>
   restore(
     BinDec& s ///< [in] 入力ストリーム
-  );
-
-  /// @brief 複数のBDDのノードの情報を取り出す．
-  DdInfoMgr
-  node_info(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
 
@@ -300,24 +102,6 @@ public:
   //////////////////////////////////////////////////////////////////////
   // DdEdge を扱う関数
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief DdEdge を Bdd に変換する．
-  Bdd
-  _bdd(
-    DdEdge edge
-  );
-
-  /// @brief DdEdge を BddVar に変換する．
-  BddVar
-  _var(
-    DdEdge edge
-  );
-
-  /// @brief Bdd から DdEdge を取り出す．
-  DdEdge
-  _edge(
-    const Bdd& bdd
-  );
 
   /// @brief ノードを作る．
   DdEdge
@@ -365,12 +149,6 @@ public:
     return top;
   }
 
-  /// @brief BDDの根の枝のリストを作る．
-  vector<DdEdge>
-  root_list(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
-
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -400,22 +178,6 @@ private:
   swap_level(
     SizeType level ///< [in] 交換する上のレベル
   );
-
-  /// @brief BddMgrPtr を返す．
-  BddMgrPtr
-  ptr()
-  {
-    return BddMgrPtr{this};
-  }
-
-  /// @brief このマネージャに属しているオブジェクトかチェックする．
-  void
-  _check_mgr(
-    const Bdd& bdd ///< [in] 対象のオブジェクト
-  ) const
-  {
-    bdd.mMgr._check_mgr(this);
-  }
 
 
 private:

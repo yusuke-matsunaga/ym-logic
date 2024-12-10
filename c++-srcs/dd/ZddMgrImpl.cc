@@ -34,7 +34,7 @@ ZddMgrImpl::item_num() const
 }
 
 // @brief 要素を返す．
-ZddItem
+DdEdge
 ZddMgrImpl::item(
   SizeType elem_id
 )
@@ -42,111 +42,25 @@ ZddMgrImpl::item(
   while ( mItemList.size() <= elem_id ) {
     auto id1 = new_variable();
     auto level1 = varid_to_level(id1);
-    auto item1 = level_to_item(level1);
-    auto edge1 = _edge(item1);
+    auto edge1 = new_node(level1, DdEdge::zero(), DdEdge::one());
     mItemList.push_back(edge1);
     activate(edge1);
   }
-  return _zdd(mItemList[elem_id]);
-}
-
-// @brief 要素のリストを返す．
-vector<ZddItem>
-ZddMgrImpl::item_list()
-{
-  vector<ZddItem> ans_list;
-  ans_list.reserve(item_num());
-  for ( auto edge: mItemList ) {
-    auto item = ZddItem{_zdd(edge)};
-    ans_list.push_back(item);
-  }
-  return ans_list;
-}
-
-// @brief 空集合を作る．
-Zdd
-ZddMgrImpl::zero()
-{
-  return _zdd(DdEdge::zero());
-}
-
-// @brief ユニバースを作る．
-Zdd
-ZddMgrImpl::one()
-{
-  return _zdd(DdEdge::one());
-}
-
-// @brief ZDDを作る．
-Zdd
-ZddMgrImpl::zdd(
-  SizeType level,
-  const Zdd& edge0,
-  const Zdd& edge1
-)
-{
-  edge0._check_valid();
-  edge1._check_valid();
-  _check_mgr(edge0);
-  _check_mgr(edge1);
-  auto e = new_node(level, _edge(edge0), _edge(edge1));
-  return _zdd(e);
+  return mItemList[elem_id];
 }
 
 // @brief 部分集合を作る．
-Zdd
+DdEdge
 ZddMgrImpl::make_set(
-  const vector<ZddItem>& item_list
+  const vector<SizeType>& level_list
 )
 {
-  auto n = item_list.size();
-  vector<SizeType> tmp_list;
-  tmp_list.reserve(n);
-  for ( auto& item: item_list ) {
-    auto level = item.level();
-    tmp_list.push_back(level);
-  }
-  sort(tmp_list.begin(), tmp_list.end(), [](int a, int b) {
-    return a > b;
-  });
-
   auto f0 = DdEdge::zero();
   auto f1 = DdEdge::one();
-  for ( auto elem: tmp_list ) {
-    f1 = new_node(elem, f0, f1);
+  for ( auto level: level_list ) {
+    f1 = new_node(level, f0, f1);
   }
-  return _zdd(f1);
-}
-
-// @brief 複数のZDDのノード数を数える．
-SizeType
-ZddMgrImpl::zdd_size(
-  const vector<Zdd>& zdd_list
-)
-{
-  if ( zdd_list.empty() ) {
-    return 0;
-  }
-  auto info_mgr = node_info(zdd_list);
-  return info_mgr.node_list().size();
-}
-
-// @brief ZDD を作る．
-Zdd
-ZddMgrImpl::_zdd(
-  DdEdge edge
-)
-{
-  return Zdd{this, edge};
-}
-
-// @brief Zdd から DdEdge を取り出す．
-DdEdge
-ZddMgrImpl::_edge(
-  const Zdd& zdd
-)
-{
-  return DdEdge{zdd.mRoot};
+  return f1;
 }
 
 // @brief ノードを作る．
@@ -170,63 +84,6 @@ ZddMgrImpl::new_node(
 void
 ZddMgrImpl::after_gc()
 {
-}
-
-// @brief BDDの根の枝のリストを作る．
-vector<DdEdge>
-ZddMgrImpl::root_list(
-  const vector<Zdd>& zdd_list
-)
-{
-  SizeType n = zdd_list.size();
-  vector<DdEdge> edge_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto& zdd = zdd_list[i];
-    zdd._check_valid();
-    edge_list[i] = _edge(zdd);
-  }
-  return edge_list;
-}
-
-// @brief レベルを要素に変換する．
-ZddItem
-ZddMgrImpl::level_to_item(
-  SizeType level
-)
-{
-  auto e = new_node(level, DdEdge::zero(), DdEdge::one());
-  return ZddItem{this, e};
-}
-
-// @brief 複数のZDDのノードの情報を取り出す．
-DdInfoMgr
-ZddMgrImpl::node_info(
-  const vector<Zdd>& zdd_list
-)
-{
-  auto edge_list = root_list(zdd_list);
-  return DdInfoMgr{edge_list, this};
-}
-
-// @brief 複数のZDDの内容を出力する．
-void
-ZddMgrImpl::display(
-  ostream& s,
-  const vector<Zdd>& bdd_list
-)
-{
-  auto info_mgr = node_info(bdd_list);
-  info_mgr.display(s);
-}
-
-// @brief 構造を表す整数配列を作る．
-vector<SizeType>
-ZddMgrImpl::rep_data(
-  const vector<Zdd>& bdd_list
-)
-{
-  auto info_mgr = node_info(bdd_list);
-  return info_mgr.rep_data();
 }
 
 BEGIN_NONAMESPACE
@@ -258,10 +115,11 @@ END_NONAMESPACE
 void
 ZddMgrImpl::dump(
   BinEnc& s,
-  const vector<Zdd>& zdd_list
+  const DdInfoMgr& info_mgr
 )
 {
-  SizeType n = zdd_list.size();
+  SizeType n = info_mgr.root_list().size();
+
   // シグネチャ
   s.write_signature(ZDD_SIG);
   // 要素数
@@ -271,7 +129,6 @@ ZddMgrImpl::dump(
     return;
   }
 
-  auto info_mgr = node_info(zdd_list);
   // 根の枝
   for ( auto root: info_mgr.root_list() ) {
     s.write_vint(root);
@@ -329,7 +186,7 @@ decode(
 END_NONAMESPACE
 
 // @brief バイナリダンプから復元する．
-vector<Zdd>
+vector<DdEdge>
 ZddMgrImpl::restore(
   BinDec& s
 )
@@ -362,13 +219,13 @@ ZddMgrImpl::restore(
     edge_list.push_back(edge);
   }
 
-  vector<Zdd> zdd_list(n);
+  vector<DdEdge> root_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     SizeType root_info = root_info_list[i];
     auto edge = decode(root_info, edge_list);
-    zdd_list[i] = _zdd(edge);
+    root_list[i] = edge;
   }
-  return zdd_list;
+  return root_list;
 }
 
 END_NAMESPACE_YM_DD

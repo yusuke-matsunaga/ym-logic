@@ -17,7 +17,6 @@
 BEGIN_NAMESPACE_YM_DD
 
 class DdEdge;
-class BddMgrImpl;
 
 //////////////////////////////////////////////////////////////////////
 /// @class Bdd Bdd.h "ym/Bdd.h"
@@ -31,7 +30,7 @@ class BddMgrImpl;
 //////////////////////////////////////////////////////////////////////
 class Bdd
 {
-  friend class BddMgrImpl;
+  friend class BddMgrPtr;
 
 public:
 
@@ -49,11 +48,6 @@ public:
   Bdd&
   operator=(
     const Bdd& src ///< [in] コピー元のBDD
-  );
-
-  /// @brief ムーブコンストラクタ
-  Bdd(
-    const Bdd&& src ///< [in] ムーブ元のBDD
   );
 
   /// @brief デストラクタ
@@ -666,27 +660,11 @@ public:
   //////////////////////////////////////////////////////////////////////
 
 
-protected:
+public:
   //////////////////////////////////////////////////////////////////////
-  // 継承クラスで用いられる関数
+  /// @name 正常検査用の関数
+  /// @{
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief 内容を指定したコンストラクタ
-  Bdd(
-    const BddMgrPtr& mgr,
-    DdEdge root
-  );
-
-  /// @brief マネージャを返す．
-  BddMgrPtr
-  mgr_ptr() const
-  {
-    return mMgr;
-  }
-
-  /// @brief 根の枝を返す．
-  DdEdge
-  root() const;
 
   /// @brief 適正な状態か調べる．
   ///
@@ -729,10 +707,45 @@ protected:
     const Bdd& obj ///< [in] 対象のオブジェクト
   ) const
   {
-    if ( mMgr != obj.mMgr ) {
-      throw std::invalid_argument{"BddMgr mismatch"};
-    }
+    _check_mgr(obj.mMgr);
   }
+
+  /// @brief オペランドが同じマネージャに属しているかチェックする．
+  ///
+  /// 異なるマネージャに属している場合には std::invalid_argument 例外を送出する．
+  void
+  _check_mgr(
+    const BddMgrPtr& ptr ///< [in] マネージャ
+  ) const
+  {
+    mMgr._check_mgr(ptr);
+  }
+
+  /// @}
+  //////////////////////////////////////////////////////////////////////
+
+
+protected:
+  //////////////////////////////////////////////////////////////////////
+  // 継承クラスで用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 内容を指定したコンストラクタ
+  Bdd(
+    const BddMgrPtr& mgr,
+    DdEdge root
+  );
+
+  /// @brief マネージャを返す．
+  BddMgrPtr
+  mgr_ptr() const
+  {
+    return mMgr;
+  }
+
+  /// @brief 根の枝を返す．
+  DdEdge
+  root() const;
 
 
 private:

@@ -6,44 +6,43 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "BddMgrImpl.h"
+#include "ym/BddMgrPtr.h"
 #include "BddCopyOp.h"
+#include "BddMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
-
 //////////////////////////////////////////////////////////////////////
-// クラス BddMgrImpl
+// クラス BddMgrPtr
 //////////////////////////////////////////////////////////////////////
 
 // @brief BDD をコピーする．
 Bdd
-BddMgrImpl::copy(
+BddMgrPtr::copy(
   const Bdd& src
-)
+) const
 {
   if ( src.is_invalid() ) {
     // 不正な ZDD はそのまま
     return src;
   }
-  if ( src.mMgr == BddMgrPtr{this} ) {
+  if ( src.mMgr == *this ) {
     // 自分自身に属している場合もそのまま
     return src;
   }
   // src のサポート変数を取り出す．
   auto var_list = src.get_support_list();
+  // こちら側にも同じ分の変数を確保する．
   for ( auto& var: var_list ) {
     auto vid = var.id();
     (void) variable(vid);
   }
   // var_list を変数順にしたがって並べ替える．
   sort(var_list.begin(), var_list.end(),
-       [&](const BddVar& a, const BddVar& b){
-	 auto vid_a = a.id();
-	 auto vid_b = b.id();
-	 auto level_a = varid_to_level(vid_a);
-	 auto level_b = varid_to_level(vid_b);
+       [&](const BddVar& a, const BddVar& b) {
+	 auto level_a = a.level();
+	 auto level_b = b.level();
 	 return level_a < level_b;
        });
   // それを自身のレベルに変換する．
@@ -51,12 +50,12 @@ BddMgrImpl::copy(
   level_list.reserve(var_list.size());
   for ( auto& var: var_list ) {
     auto vid = var.id();
-    auto level = varid_to_level(vid);
+    auto level = mPtr->varid_to_level(vid);
     level_list.push_back(level);
   }
-  BddCopyOp op{*this, var_list, level_list};
-  auto e = op.copy_step(src, 0);
-  return _bdd(e);
+  BddCopyOp op{get(), var_list, level_list};
+  auto edge = op.copy_step(src, 0);
+  return _bdd(edge);
 }
 
 
@@ -71,8 +70,11 @@ BddCopyOp::copy_step(
   SizeType pos
 )
 {
-  if ( bdd.is_const() ) {
-    return mMgr._edge(bdd);
+  if ( bdd.is_zero() ) {
+    return DdEdge::zero();
+  }
+  if ( bdd.is_one() ) {
+    return DdEdge::one();
   }
 
   if ( mTable.count(bdd) > 0 ) {
@@ -85,7 +87,7 @@ BddCopyOp::copy_step(
   auto r0 = copy_step(bdd0, pos + 1);
   auto r1 = copy_step(bdd1, pos + 1);
   auto level = mLevelList[pos];
-  auto result = mMgr.new_node(level, r0, r1);
+  auto result = mMgr->new_node(level, r0, r1);
   mTable.emplace(bdd, result);
   return result;
 }

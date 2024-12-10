@@ -17,7 +17,6 @@
 BEGIN_NAMESPACE_YM_DD
 
 class DdEdge;
-class ZddMgrImpl;
 
 //////////////////////////////////////////////////////////////////////
 /// @class Zdd Zdd.h "ym/Zdd.h"
@@ -25,14 +24,14 @@ class ZddMgrImpl;
 //////////////////////////////////////////////////////////////////////
 class Zdd
 {
-  friend class ZddMgrImpl;
+  friend class ZddMgrPtr;
 
 public:
 
   /// @brief 空のコンストラクタ
   ///
   /// 不正な値となる．
-  Zdd();
+  Zdd() = default;
 
   /// @brief コピーコンストラクタ
   Zdd(
@@ -450,15 +449,15 @@ protected:
 
   /// @brief 内容を指定したコンストラクタ
   Zdd(
-    ZddMgrImpl* mgr,
+    const ZddMgrPtr& mgr,
     DdEdge root
   );
 
-  /// @brief マネージャ(の実体)を返す．
-  ZddMgrImpl*
-  _mgr() const
+  /// @brief マネージャを返す．
+  ZddMgrPtr
+  mgr_ptr() const
   {
-    return mMgr.get();
+    return mMgr;
   }
 
   /// @brief 根の枝を返す．
@@ -508,7 +507,6 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // マネージャ
-  //ZddMgrImpl* mMgr{nullptr};
   ZddMgrPtr mMgr;
 
   // 根の枝

@@ -21,7 +21,7 @@ Zdd::count() const
   _check_valid();
 
   ZddCountOp op;
-  return op.count_step(DdEdge{mRoot});
+  return op.count_step(root());
 }
 
 

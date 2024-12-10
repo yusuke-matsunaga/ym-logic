@@ -29,7 +29,7 @@ public:
 
   /// @brief コンストラクタ
   BddCopyOp(
-    BddMgrImpl& mgr,                   ///< [in] マネージャ
+    BddMgrImpl* mgr,                   ///< [in] マネージャ
     const vector<BddVar>& var_list,    ///< [in] 変数リスト
     const vector<SizeType>& level_list ///< [in] レベルのリスト
   ) : mMgr{mgr},
@@ -61,7 +61,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // Bddマネージャ
-  BddMgrImpl& mMgr;
+  BddMgrImpl* mMgr;
 
   // 変数リスト
   vector<BddVar> mVarList;

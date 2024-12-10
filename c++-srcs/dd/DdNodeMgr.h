@@ -213,10 +213,6 @@ public:
   void
   inc()
   {
-    cout << "    DdNodeMgr::inc()" << endl;
-#if 0
-    ++ mRefCount;
-#endif
   }
 
   /// @brief 自身の参照回数を減らす．
@@ -225,13 +221,6 @@ public:
   void
   dec()
   {
-    cout << "    DdNodeMgr::dec()" << endl;
-#if 0
-    -- mRefCount;
-    if ( mRefCount == 0 ) {
-      this->~DdNodeMgr();
-    }
-#endif
   }
 
 
@@ -274,9 +263,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
-
-  // 参照回数
-  SizeType mRefCount{0};
 
   // 変数番号をキーにしてレベルを格納する配列
   vector<SizeType> mLevelArray;

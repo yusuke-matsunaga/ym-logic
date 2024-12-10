@@ -19,8 +19,6 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-class BddMgrImpl;
-
 //////////////////////////////////////////////////////////////////////
 /// @class BddMgr BddMgr.h "ym/BddMgr.h"
 /// @brief BDD を管理するためのクラス
@@ -283,6 +281,23 @@ public:
   ) const
   {
     return !operator==(right);
+  }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 同じマネージャの要素かチェックする．
+  ///
+  /// 異なる場合には std::invalid_argument 例外を送出する．
+  void
+  _check_mgr(
+    const Bdd& bdd
+  ) const
+  {
+    bdd._check_mgr(mImpl);
   }
 
 

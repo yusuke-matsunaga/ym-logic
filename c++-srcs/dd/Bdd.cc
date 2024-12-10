@@ -8,6 +8,7 @@
 
 #include "ym/Bdd.h"
 #include "ym/BddVar.h"
+#include "ym/BddLit.h"
 #include "ym/BddMgr.h"
 #include "DdEdge.h"
 #include "DdNode.h"
@@ -23,7 +24,6 @@ Bdd::Bdd(
 ) : mMgr{mgr},
     mRoot{edge.body()}
 {
-  cout << "Bdd:const1" << endl;
   if ( is_valid() ) {
     mMgr->activate(root());
   }
@@ -35,7 +35,6 @@ Bdd::Bdd(
 ) : mMgr{src.mMgr},
     mRoot{src.mRoot}
 {
-  cout << "Bdd:copy_const" << endl;
   if ( is_valid() ) {
     mMgr->activate(root());
   }
@@ -47,7 +46,6 @@ Bdd::operator=(
   const Bdd& src
 )
 {
-  cout << "Bdd:copy_assign" << endl;
   // この順序なら自分自身に代入しても正しく動作する．
   if ( src.is_valid() ) {
     src.mMgr->activate(src.root());
@@ -60,19 +58,9 @@ Bdd::operator=(
   return *this;
 }
 
-// @brief ムーブコンストラクタ
-Bdd::Bdd(
-  const Bdd&& src
-) : mMgr{std::move(src.mMgr)},
-    mRoot{src.mRoot}
-{
-  cout << "Bdd:move_const" << endl;
-}
-
 // @brief デストラクタ
 Bdd::~Bdd()
 {
-  cout << "Bdd:destr" << endl;
   if ( is_valid() ) {
     mMgr->deactivate(root());
   }
@@ -127,14 +115,7 @@ Bdd::and_op(
 ) const
 {
   _check_valid();
-#if 0
-  return mMgr->and_op(*this, right);
-#else
-  cout << "before and_op()" << endl;
-  auto e = mMgr->and_op(*this, right);
-  cout << "after and_op()" << endl;
-  return e;
-#endif
+  return mMgr.and_op(*this, right);
 }
 
 // @brief 論理和を返す．
@@ -144,7 +125,7 @@ Bdd::or_op(
 ) const
 {
   _check_valid();
-  return mMgr->or_op(*this, right);
+  return mMgr.or_op(*this, right);
 }
 
 // @brief 排他的論理和を返す．
@@ -154,7 +135,7 @@ Bdd::xor_op(
 ) const
 {
   _check_valid();
-  return mMgr->xor_op(*this, right);
+  return mMgr.xor_op(*this, right);
 }
 
 // @brief 論理積を計算して代入する．
@@ -164,7 +145,7 @@ Bdd::and_int(
 )
 {
   _check_valid();
-  *this = mMgr->and_op(*this, right);
+  *this = mMgr.and_op(*this, right);
   return *this;
 }
 
@@ -175,7 +156,7 @@ Bdd::or_int(
 )
 {
   _check_valid();
-  *this = mMgr->or_op(*this, right);
+  *this = mMgr.or_op(*this, right);
   return *this;
 }
 
@@ -186,7 +167,7 @@ Bdd::xor_int(
 )
 {
   _check_valid();
-  *this = mMgr->xor_op(*this, right);
+  *this = mMgr.xor_op(*this, right);
   return *this;
 }
 
@@ -199,7 +180,7 @@ ite(
 )
 {
   cond._check_valid();
-  return cond.mMgr->ite(cond, then_f, else_f);
+  return cond.mMgr.ite(cond, then_f, else_f);
 }
 
 // @brief ドントケアを利用した簡単化を行う．
@@ -210,7 +191,7 @@ simplify(
 )
 {
   on._check_valid();
-  return on.mMgr->simplify(on, dc);
+  return on.mMgr.simplify(on, dc);
 }
 
 // @brief コファクターを計算する．
@@ -221,7 +202,7 @@ Bdd::cofactor(
 ) const
 {
   _check_valid();
-  return mMgr->cofactor(*this, var, inv);
+  return mMgr.cofactor(*this, var, inv);
 }
 
 // @brief コファクターを計算する．
@@ -240,7 +221,7 @@ Bdd::cofactor(
 ) const
 {
   _check_valid();
-  return mMgr->cofactor(*this, cube);
+  return mMgr.cofactor(*this, cube);
 }
 
 // @brief コファクターを計算して代入する．
@@ -251,7 +232,7 @@ Bdd::cofactor_int(
 )
 {
   _check_valid();
-  *this = mMgr->cofactor(*this, var, inv);
+  *this = mMgr.cofactor(*this, var, inv);
   return *this;
 }
 
@@ -271,7 +252,7 @@ Bdd::cofactor_int(
 )
 {
   _check_valid();
-  *this = mMgr->cofactor(*this, cube);
+  *this = mMgr.cofactor(*this, cube);
   return *this;
 }
 
@@ -282,7 +263,7 @@ Bdd::multi_compose(
 ) const
 {
   _check_valid();
-  return mMgr->multi_compose(*this, compose_map);
+  return mMgr.multi_compose(*this, compose_map);
 }
 
 // @brief 複合compose演算を行って代入する．
@@ -292,7 +273,7 @@ Bdd::multi_compose_int(
 )
 {
   _check_valid();
-  *this = mMgr->multi_compose(*this, compose_map);
+  *this = mMgr.multi_compose(*this, compose_map);
   return *this;
 }
 
@@ -303,7 +284,7 @@ Bdd::remap_vars(
 ) const
 {
   _check_valid();
-  return mMgr->remap_vars(*this, varmap);
+  return mMgr.remap_vars(*this, varmap);
 }
 
 // @brief 親のマネージャを返す．
@@ -399,7 +380,7 @@ Bdd::root_decomp(
     auto oinv = root().inv();
     f0 = Bdd{mMgr, node->edge0() ^ oinv};
     f1 = Bdd{mMgr, node->edge1() ^ oinv};
-    auto var = mMgr->level_to_var(node->level());
+    auto var = mMgr.level_to_var(node->level());
     return var;
   }
 }
@@ -415,7 +396,7 @@ Bdd::root_var() const
     return BddVar::invalid();
   }
   else {
-    auto var = mMgr->level_to_var(node->level());
+    auto var = mMgr.level_to_var(node->level());
     return var;
   }
 }
@@ -530,7 +511,8 @@ Bdd::display(
 ) const
 {
   _check_valid();
-  mMgr->display(s, {*this});
+
+  mMgr.display(s, {*this});
 }
 
 // @brief dot 形式で出力する．
@@ -541,7 +523,8 @@ Bdd::gen_dot(
 ) const
 {
   _check_valid();
-  mMgr->gen_dot(s, {*this}, option);
+
+  mMgr.gen_dot(s, {*this}, option);
 }
 
 // @brief 構造を表す整数配列を作る．
@@ -549,7 +532,8 @@ vector<SizeType>
 Bdd::rep_data() const
 {
   _check_valid();
-  return mMgr->rep_data({*this});
+
+  return mMgr.rep_data({*this});
 }
 
 // @brief 独自形式でバイナリダンプする．
@@ -559,7 +543,8 @@ Bdd::dump(
 ) const
 {
   _check_valid();
-  mMgr->dump(s, {*this});
+
+  mMgr.dump(s, {*this});
 }
 
 // @brief ノード数を返す．
@@ -569,7 +554,7 @@ Bdd::size() const
   if ( is_invalid() ) {
     return 0;
   }
-  return mMgr->bdd_size({*this});
+  return mMgr.bdd_size({*this});
 }
 
 // @brief 根の枝を返す．

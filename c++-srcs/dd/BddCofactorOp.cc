@@ -7,8 +7,9 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddLit.h"
+#include "ym/BddMgrPtr.h"
 #include "DdEdge.h"
-#include "BddMgrImpl.h"
 #include "BddCofactorOp.h"
 
 
@@ -16,34 +17,34 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief コファクターを計算する．
 Bdd
-BddMgrImpl::cofactor(
+BddMgrPtr::cofactor(
   const Bdd& bdd,
   const BddVar& var,
   bool inv
-)
+) const
 {
   bdd._check_valid();
-  _check_mgr(bdd);
+  _check_mgr(bdd.mMgr);
   auto cube = literal(var, inv);
-  BddCofactorOp op{BddMgrPtr{this}};
-  auto e = op.op_step(_edge(bdd), _edge(cube));
-  return _bdd(e);
+  BddCofactorOp op{get()};
+  auto edge = op.op_step(bdd.root(), cube.root());
+  return _bdd(edge);
 }
 
 // @brief コファクターを計算する．
 Bdd
-BddMgrImpl::cofactor(
+BddMgrPtr::cofactor(
   const Bdd& bdd,
   const Bdd& cube
-)
+) const
 {
   bdd._check_valid();
   cube._check_valid();
   cube._check_cube();
-  _check_mgr(bdd);
-  _check_mgr(cube);
-  BddCofactorOp op{BddMgrPtr{this}};
-  auto e = op.op_step(_edge(bdd), _edge(cube));
+  _check_mgr(bdd.mMgr);
+  _check_mgr(cube.mMgr);
+  BddCofactorOp op{get()};
+  auto e = op.op_step(bdd.root(), cube.root());
   return _bdd(e);
 }
 

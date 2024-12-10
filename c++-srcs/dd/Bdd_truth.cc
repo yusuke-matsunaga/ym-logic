@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
 #include "BddMgrImpl.h"
 #include "DdEdge.h"
 #include "DdNode.h"

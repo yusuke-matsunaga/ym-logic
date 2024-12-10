@@ -25,7 +25,7 @@ public:
 
   /// @brief コンストラクタ
   ZddSupOp(
-    ZddMgrImpl& mgr ///< [in] マネージャ
+    ZddMgrImpl* mgr ///< [in] マネージャ
   ) : ZddOpBase{mgr}
   {
   }

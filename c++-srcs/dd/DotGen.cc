@@ -8,8 +8,6 @@
 
 #include "ym/Bdd.h"
 #include "ym/Zdd.h"
-#include "BddMgrImpl.h"
-#include "ZddMgrImpl.h"
 #include "DdEdge.h"
 #include "DdInfo.h"
 #include "DdInfoMgr.h"
@@ -20,11 +18,11 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief 複数のBDDを dot 形式で出力する．
 void
-BddMgrImpl::gen_dot(
+BddMgrPtr::gen_dot(
   ostream& s,
   const vector<Bdd>& bdd_list,
   const JsonValue& option
-)
+) const
 {
   DotGen dg{option};
   auto info_mgr = node_info(bdd_list);
@@ -33,11 +31,11 @@ BddMgrImpl::gen_dot(
 
 // @brief 複数のZDDを dot 形式で出力する．
 void
-ZddMgrImpl::gen_dot(
+ZddMgrPtr::gen_dot(
   ostream& s,
   const vector<Zdd>& zdd_list,
   const JsonValue& option
-)
+) const
 {
   DotGen dg{option};
   auto info_mgr = node_info(zdd_list);

@@ -27,7 +27,7 @@ public:
   /// @brief コンストラクタ
   DdInfoMgr(
     const vector<DdEdge>& root_list, ///< [in] 根の枝のリスト
-    DdNodeMgr* node_mgr              ///< [in] DdNodeMgr
+    const DdNodeMgr* node_mgr        ///< [in] DdNodeMgr
   );
 
   /// @brief デストラクタ

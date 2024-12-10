@@ -17,7 +17,6 @@ BEGIN_NAMESPACE_YM_DD
 BddMgr::BddMgr(
 ) : mImpl{new BddMgrImpl}
 {
-  cout << "BddMgr::const1" << endl;
 }
 
 // @brief BddMgrImpl を指定したコンストラクタ
@@ -25,7 +24,6 @@ BddMgr::BddMgr(
   const BddMgrPtr& impl
 ) : mImpl{impl}
 {
-  cout << "BddMgr::const2" << endl;
 }
 
 // @brief コピーコンストラクタ
@@ -33,13 +31,11 @@ BddMgr::BddMgr(
   const BddMgr& src
 ) : BddMgr{src.mImpl}
 {
-  cout << "BddMgr::copy_const" << endl;
 }
 
 // @brief デストラクタ
 BddMgr::~BddMgr()
 {
-  cout << "BddMgr::dest" << endl;
 }
 
 // @breif 変数の数を返す．
@@ -55,21 +51,21 @@ BddMgr::variable(
   SizeType varid
 )
 {
-  return mImpl->variable(varid);
+  return mImpl.variable(varid);
 }
 
 // @brief 変数のリストを返す．
 vector<BddVar>
 BddMgr::variable_list() const
 {
-  return mImpl->variable_list();
+  return mImpl.variable_list();
 }
 
 // @brief 変数順を表す変数のリストを返す．
 vector<BddVar>
 BddMgr::variable_order() const
 {
-  return mImpl->variable_order();
+  return mImpl.variable_order();
 }
 
 // @brief 変数順を設定する．
@@ -78,7 +74,7 @@ BddMgr::set_variable_order(
   const vector<BddVar>& order_list
 )
 {
-  mImpl->set_variable_order(order_list);
+  mImpl.set_variable_order(order_list);
 }
 
 // @brief BDD をコピーする．
@@ -87,21 +83,21 @@ BddMgr::copy(
   const Bdd& src
 )
 {
-  return mImpl->copy(src);
+  return mImpl.copy(src);
 }
 
 // @brief 恒儀関数を作る．
 Bdd
 BddMgr::zero()
 {
-  return mImpl->zero();
+  return mImpl.zero();
 }
 
 // @brief 恒新関数を作る．
 Bdd
 BddMgr::one()
 {
-  return mImpl->one();
+  return mImpl.one();
 }
 
 // @brief 真理値表形式の文字列からBDDを作る．
@@ -111,7 +107,7 @@ BddMgr::from_truth(
   const vector<BddVar>& var_list
 )
 {
-  return mImpl->from_truth(str, var_list);
+  return mImpl.from_truth(str, var_list);
 }
 
 // @brief ITE 演算を行う．
@@ -122,7 +118,7 @@ BddMgr::ite(
   const Bdd& e2
 )
 {
-  return mImpl->ite(e0, e1, e2);
+  return mImpl.ite(e0, e1, e2);
 }
 
 // @brief ドントケアを利用した簡単化を行う．
@@ -132,7 +128,7 @@ BddMgr::simplify(
   const Bdd& dc   ///< [in] ドントケアセット
 )
 {
-  return mImpl->simplify(on, dc);
+  return mImpl.simplify(on, dc);
 }
 
 // @brief 複数のBDDのノード数を数える．
@@ -146,7 +142,7 @@ BddMgr::bdd_size(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  return mgr.mImpl->bdd_size(bdd_list);
+  return mgr.mImpl.bdd_size(bdd_list);
 }
 
 // @brief 複数のBDDの内容を出力する．
@@ -161,7 +157,7 @@ BddMgr::display(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  mgr.mImpl->display(s, bdd_list);
+  mgr.mImpl.display(s, bdd_list);
 }
 
 // @brief 複数のBDDを dot 形式で出力する．
@@ -177,7 +173,7 @@ BddMgr::gen_dot(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  mgr.mImpl->gen_dot(s, bdd_list, option);
+  mgr.mImpl.gen_dot(s, bdd_list, option);
 }
 
 // @brief 構造を表す整数配列を作る．
@@ -191,7 +187,7 @@ BddMgr::rep_data(
   }
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  return mgr.mImpl->rep_data(bdd_list);
+  return mgr.mImpl.rep_data(bdd_list);
 }
 
 // @brief BDD の内容をバイナリダンプする．
@@ -204,9 +200,14 @@ BddMgr::dump(
   if ( bdd_list.empty() ) {
     return;
   }
+
   auto bdd0 = bdd_list.front();
   auto mgr = bdd0.mgr();
-  mgr.mImpl->dump(s, bdd_list);
+  // sanity check
+  for ( auto& bdd: bdd_list ) {
+    bdd._check_mgr(mgr.mImpl);
+  }
+  mgr.mImpl.dump(s, bdd_list);
 }
 
 // @brief バイナリダンプから復元する．
@@ -215,7 +216,7 @@ BddMgr::restore(
   BinDec& s
 )
 {
-  return mImpl->restore(s);
+  return mImpl.restore(s);
 }
 
 // @brief ガーベージコレクションを行う．

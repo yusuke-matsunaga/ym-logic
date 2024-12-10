@@ -6,8 +6,9 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/Bdd.h"
 #include "BddMgrImpl.h"
+#include "ym/Bdd.h"
+#include "ym/BddVar.h"
 #include "DdInfo.h"
 #include "DdInfoMgr.h"
 #include "ym/BinEnc.h"
@@ -24,7 +25,6 @@ BddMgrImpl::BddMgrImpl()
 // @brief デストラクタ
 BddMgrImpl::~BddMgrImpl()
 {
-  cout << "BddMgrImpl is destructed" << endl;
 }
 
 // @breif 変数の数を返す．
@@ -35,7 +35,7 @@ BddMgrImpl::variable_num() const
 }
 
 // @brief 変数を返す．
-BddVar
+DdEdge
 BddMgrImpl::variable(
   SizeType varid
 )
@@ -47,85 +47,20 @@ BddMgrImpl::variable(
     mVarList.push_back(edge1);
     activate(edge1);
   }
-  return _bdd(mVarList[varid]);
-}
-
-// @brief 変数のリストを返す．
-vector<BddVar>
-BddMgrImpl::variable_list()
-{
-  vector<BddVar> var_list;
-  var_list.reserve(variable_num());
-  for ( auto edge: mVarList ) {
-    auto var = _var(edge);
-    var_list.push_back(var);
-  }
-  return var_list;
-}
-
-// @brief 恒偽関数を作る．
-Bdd
-BddMgrImpl::zero()
-{
-  return _bdd(DdEdge::zero());
-}
-
-// @brief 恒真関数を作る．
-Bdd
-BddMgrImpl::one()
-{
-  return _bdd(DdEdge::one());
-}
-
-// @brief BDD を作る．
-Bdd
-BddMgrImpl::bdd(
-  SizeType level,
-  const Bdd& bdd0,
-  const Bdd& bdd1
-)
-{
-  bdd0._check_valid();
-  bdd1._check_valid();
-  _check_mgr(bdd0);
-  _check_mgr(bdd1);
-  auto e = new_node(level, _edge(bdd0), _edge(bdd1));
-  return _bdd(e);
-}
-
-// @brief 変数リストをインデックスリストに変換する．
-vector<SizeType>
-BddMgrImpl::level_list(
-  const vector<BddVar>& var_list
-) const
-{
-  vector<SizeType> ans;
-  ans.reserve(var_list.size());
-  for ( auto var: var_list ) {
-    ans.push_back(var.level());
-  }
-  return ans;
-}
-
-// @brief インデックスを変数に変換する．
-BddVar
-BddMgrImpl::level_to_var(
-  SizeType level
-)
-{
-  auto e = new_node(level, DdEdge::zero(), DdEdge::one());
-  return _var(e);
+  return mVarList[varid];
 }
 
 // @brief 変数順を表す変数のリストを返す．
-vector<BddVar>
+vector<DdEdge>
 BddMgrImpl::variable_order()
 {
   auto order_list = variable_list();
   sort(order_list.begin(), order_list.end(),
-       [&](const BddVar& a, const BddVar& b){
-	 auto level_a = varid_to_level(a.id());
-	 auto level_b = varid_to_level(b.id());
+       [&](DdEdge a, DdEdge b) {
+	 auto node_a = a.node();
+	 auto node_b = b.node();
+	 auto level_a = node_a->level();
+	 auto level_b = node_b->level();
 	 return level_a < level_b;
        });
   return order_list;
@@ -134,7 +69,7 @@ BddMgrImpl::variable_order()
 // @brief 変数順を設定する．
 void
 BddMgrImpl::set_variable_order(
-  const vector<BddVar>& order_list
+  const vector<DdEdge>& order_list
 )
 {
   auto nv = variable_num();
@@ -143,9 +78,9 @@ BddMgrImpl::set_variable_order(
   }
   for ( SizeType i = 0; i < nv; ++ i ) {
     auto dst_level = nv - i - 1;
-    auto var = order_list[dst_level];
-    auto varid = var.id();
-    auto level = varid_to_level(varid);
+    auto edge = order_list[dst_level];
+    auto node = edge.node();
+    auto level = node->level();
     // level を dst_level に移動する．
     for ( ; level < dst_level; ++ level ) {
       swap_level(level);
@@ -295,46 +230,6 @@ BddMgrImpl::swap_level(
   garbage_collection(level);
 }
 
-// @brief 複数のBDDのノード数を数える．
-SizeType
-BddMgrImpl::bdd_size(
-  const vector<Bdd>& bdd_list
-)
-{
-  if ( bdd_list.empty() ) {
-    return 0;
-  }
-  auto info_mgr = node_info(bdd_list);
-  return info_mgr.node_num();
-}
-
-// @brief DdEdge を Bdd に変換する．
-Bdd
-BddMgrImpl::_bdd(
-  DdEdge edge
-)
-{
-  return Bdd{ptr(), edge};
-}
-
-// @brief DdEdge を BddVar に変換する．
-BddVar
-BddMgrImpl::_var(
-  DdEdge edge
-)
-{
-  return BddVar{ptr(), edge};
-}
-
-// @brief Bdd から DdEdge を取り出す．
-DdEdge
-BddMgrImpl::_edge(
-  const Bdd& bdd
-)
-{
-  return DdEdge{bdd.mRoot};
-}
-
 // @brief ノードを作る．
 DdEdge
 BddMgrImpl::new_node(
@@ -362,53 +257,6 @@ BddMgrImpl::new_node(
 void
 BddMgrImpl::after_gc()
 {
-}
-
-// @brief BDDの根の枝のリストを作る．
-vector<DdEdge>
-BddMgrImpl::root_list(
-  const vector<Bdd>& bdd_list
-)
-{
-  SizeType n = bdd_list.size();
-  vector<DdEdge> edge_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto& bdd = bdd_list[i];
-    bdd._check_valid();
-    edge_list[i] = _edge(bdd);
-  }
-  return edge_list;
-}
-
-// @brief 複数のBDDのノードの情報を取り出す．
-DdInfoMgr
-BddMgrImpl::node_info(
-  const vector<Bdd>& bdd_list
-)
-{
-  auto edge_list = root_list(bdd_list);
-  return DdInfoMgr{edge_list, this};
-}
-
-// @brief 複数のBDDの内容を出力する．
-void
-BddMgrImpl::display(
-  ostream& s,
-  const vector<Bdd>& bdd_list
-)
-{
-  auto info_mgr = node_info(bdd_list);
-  info_mgr.display(s);
-}
-
-// @brief 構造を表す整数配列を作る．
-vector<SizeType>
-BddMgrImpl::rep_data(
-  const vector<Bdd>& bdd_list
-)
-{
-  auto info_mgr = node_info(bdd_list);
-  return info_mgr.rep_data();
 }
 
 BEGIN_NONAMESPACE
@@ -451,31 +299,41 @@ restore_edge(
   return node * 2 + static_cast<SizeType>(inv);
 }
 
+DdEdge
+decode(
+  SizeType edge_info,
+  const vector<DdEdge>& edge_list
+)
+{
+  if ( edge_info == 0 ) {
+    return DdEdge::zero();
+  }
+  if ( edge_info == 1 ) {
+    return DdEdge::one();
+  }
+  auto node = DdInfo::edge2node(edge_info);
+  auto inv = DdInfo::edge2inv(edge_info);
+  return edge_list[node - 1] ^ inv;
+}
+
 END_NONAMESPACE
 
 // @brief BDD の内容をバイナリダンプする．
 void
 BddMgrImpl::dump(
   BinEnc& s,
-  const vector<Bdd>& bdd_list
+  const DdInfoMgr& info_mgr
 )
 {
-  // sanity check
-  for ( auto& bdd: bdd_list ) {
-    _check_mgr(bdd);
-  }
-
   // シグネチャ
   s.write_signature(BDD_SIG);
 
   // 要素数
-  auto n = bdd_list.size();
+  auto n = info_mgr.root_list().size();
   s.write_vint(n);
   if ( n == 0 ) {
     return;
   }
-
-  auto info_mgr = node_info(bdd_list);
 
   // 変数順
   auto nv = info_mgr.max_level();
@@ -506,29 +364,8 @@ BddMgrImpl::dump(
   s.write_vint(0);
 }
 
-BEGIN_NONAMESPACE
-
-DdEdge
-decode(
-  SizeType edge_info,
-  const vector<DdEdge>& edge_list
-)
-{
-  if ( edge_info == 0 ) {
-    return DdEdge::zero();
-  }
-  if ( edge_info == 1 ) {
-    return DdEdge::one();
-  }
-  auto node = DdInfo::edge2node(edge_info);
-  auto inv = DdInfo::edge2inv(edge_info);
-  return edge_list[node - 1] ^ inv;
-}
-
-END_NONAMESPACE
-
 // @brief バイナリダンプから復元する．
-vector<Bdd>
+vector<DdEdge>
 BddMgrImpl::restore(
   BinDec& s
 )
@@ -545,7 +382,7 @@ BddMgrImpl::restore(
   SizeType nv = variable_num();
   SizeType nv1 = s.read_vint();
   nv = std::max(nv, nv1);
-  vector<BddVar> var_list(nv);
+  vector<DdEdge> var_list(nv);
   for ( SizeType i = 0; i < nv1; ++ i ) {
     auto varid = s.read_vint();
     var_list[i] = variable(varid);
@@ -574,13 +411,13 @@ BddMgrImpl::restore(
     edge_list.push_back(edge);
   }
 
-  vector<Bdd> bdd_list(n);
+  vector<DdEdge> root_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     SizeType root_info = root_info_list[i];
     auto edge = decode(root_info, edge_list);
-    bdd_list[i] = _bdd(edge);
+    root_list[i] = edge;
   }
-  return bdd_list;
+  return root_list;
 }
 
 END_NAMESPACE_YM_DD

@@ -7,6 +7,8 @@
 /// All rights reserved.
 
 #include "ym/Bdd.h"
+#include "ym/BddVar.h"
+#include "ym/BddLit.h"
 #include "BddMgrImpl.h"
 #include "BddTruthOp.h"
 
@@ -31,10 +33,10 @@ END_NONAMESPACE
 
 // @brief 真理値表形式の文字列からBDDを作る．
 Bdd
-BddMgrImpl::from_truth(
+BddMgrPtr::from_truth(
   const string& str,
   const vector<BddVar>& var_list
-)
+) const
 {
   auto n = str.size();
   auto ni = log2(n);
@@ -59,9 +61,9 @@ BddMgrImpl::from_truth(
     }
   }
 
-  BddTruthOp op{BddMgrPtr{this}, level_list(tmp_var_list)};
-  auto e = op.op_step(str, 0);
-  return _bdd(e);
+  BddTruthOp op{get(), level_list(tmp_var_list)};
+  auto edge = op.op_step(str, 0);
+  return _bdd(edge);
 }
 
 
