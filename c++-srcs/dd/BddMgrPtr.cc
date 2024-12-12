@@ -23,9 +23,6 @@ BddMgrPtr::BddMgrPtr(
   BddMgrImpl* ptr
 ) : mPtr{ptr}
 {
-  if ( is_valid() ) {
-    mPtr->inc();
-  }
 }
 
 // @brief コピーコンストラクタ
@@ -33,9 +30,6 @@ BddMgrPtr::BddMgrPtr(
   const BddMgrPtr& src
 ) : mPtr{src.mPtr}
 {
-  if ( is_valid() ) {
-    mPtr->inc();
-  }
 }
 
 // @brief コピー代入演算子
@@ -44,12 +38,6 @@ BddMgrPtr::operator=(
   const BddMgrPtr& src
 )
 {
-  if ( src.is_valid() ) {
-    src.mPtr->inc();
-  }
-  if ( is_valid() ) {
-    mPtr->dec();
-  }
   mPtr = src.mPtr;
 
   return *this;
@@ -58,9 +46,6 @@ BddMgrPtr::operator=(
 // @brief デストラクタ
 BddMgrPtr::~BddMgrPtr()
 {
-  if ( is_valid() ) {
-    mPtr->dec();
-  }
 }
 
 // @brief 変数を返す．
