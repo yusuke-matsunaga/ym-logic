@@ -121,6 +121,16 @@ BddMgr::ite(
   return mImpl.ite(e0, e1, e2);
 }
 
+// @brief 論理式から BDD を作る．
+Bdd
+BddMgr::from_expr(
+  const Expr& expr,
+  const vector<BddVar>& var_list
+)
+{
+  return mImpl.from_expr(expr, var_list);
+}
+
 // @brief ドントケアを利用した簡単化を行う．
 Bdd
 BddMgr::simplify(

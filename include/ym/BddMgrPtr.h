@@ -154,6 +154,15 @@ public:
     const vector<BddVar>& var_list ///< [in] 変数のリスト
   ) const;
 
+  /// @brief 論理式から BDD を作る．
+  ///
+  /// - var_list が省略された場合は自動的に適切な変数リストを用いる．
+  Bdd
+  from_expr(
+    const Expr& expr,              ///< [in] 論理式
+    const vector<BddVar>& var_list ///< [in] 変数のリスト
+  );
+
   /// @brief ドントケアを利用した簡単化を行う．
   Bdd
   simplify(

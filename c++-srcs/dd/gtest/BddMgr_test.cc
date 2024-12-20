@@ -10,6 +10,7 @@
 #include "ym/Bdd.h"
 #include "ym/BddMgr.h"
 #include "ym/BddVar.h"
+#include "ym/Expr.h"
 #include "BddTest.h"
 
 
@@ -124,6 +125,58 @@ TEST_F(BddTest, from_truth3)
   const char* exp_str = "10010101";
   Bdd bdd = mMgr.from_truth(exp_str, var_list);
   check(bdd, exp_str);
+}
+
+TEST_F(BddTest, from_expr1)
+{
+  auto expr = Expr::zero();
+  auto bdd = mMgr.from_expr(expr);
+  check(bdd, "0");
+}
+
+TEST_F(BddTest, from_expr2)
+{
+  auto expr = Expr::one();
+  auto bdd = mMgr.from_expr(expr);
+  check(bdd, "1");
+}
+
+TEST_F(BddTest, from_expr3)
+{
+  auto expr = Expr::posi_literal(0);
+  auto bdd = mMgr.from_expr(expr);
+  check(bdd, "10");
+}
+
+TEST_F(BddTest, from_expr4)
+{
+  auto expr = Expr::nega_literal(0);
+  auto bdd = mMgr.from_expr(expr);
+  check(bdd, "01");
+}
+
+TEST_F(BddTest, from_expr5)
+{
+  auto expr1 = Expr::posi_literal(0);
+  auto expr2 = Expr::posi_literal(1);
+  auto bdd = mMgr.from_expr(expr1 & expr2);
+  check(bdd, "1000");
+}
+
+TEST_F(BddTest, from_expr6)
+{
+  auto expr1 = Expr::posi_literal(0);
+  auto expr2 = Expr::posi_literal(1);
+  auto bdd = mMgr.from_expr(expr1 | expr2);
+  check(bdd, "1110");
+}
+
+TEST_F(BddTest, from_expr7)
+{
+  auto expr1 = Expr::posi_literal(0);
+  auto expr2 = Expr::posi_literal(1);
+  auto bdd = mMgr.from_expr(expr1 ^ expr2);
+  check(bdd, "0110");
 }
 
 TEST_F(BddTest, copy)
