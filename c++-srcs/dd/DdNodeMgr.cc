@@ -22,6 +22,9 @@ DdNodeMgr::DdNodeMgr()
 // @brief デストラクタ
 DdNodeMgr::~DdNodeMgr()
 {
+  for ( auto p: mTableArray ) {
+    delete p;
+  }
 }
 
 // @brief 変数の数を返す．

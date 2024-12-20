@@ -30,6 +30,12 @@ add_executable( bdd_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
+add_executable( loop_test
+  loop_test.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
 
 # ===================================================================
 #  インストールターゲットの設定
