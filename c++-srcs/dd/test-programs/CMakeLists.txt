@@ -30,10 +30,18 @@ add_executable( bdd_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
+target_link_libraries ( bdd_test
+  ${YM_LIB_DEPENDS}
+  )
+
 add_executable( loop_test
   loop_test.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_link_libraries ( loop_test
+  ${YM_LIB_DEPENDS}
   )
 
 
