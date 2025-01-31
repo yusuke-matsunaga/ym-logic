@@ -51,8 +51,7 @@ TEST(KernelTest, test1)
 
   KernelGen kg;
 
-  vector<pair<SopCover, SopCover>> kernel_list;
-  kg.all_kernel(cover1, kernel_list);
+  auto kernel_list = kg.all_kernels(cover1);
 
   vector<string> exp_list
     {

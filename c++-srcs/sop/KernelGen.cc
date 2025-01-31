@@ -14,6 +14,29 @@
 BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
+// クラス SopCover
+//////////////////////////////////////////////////////////////////////
+
+// @brief すべてのカーネルとコカーネルペアを列挙する．
+vector<pair<SopCover, SopCover>>
+SopCover::all_kernels() const
+{
+  vector<pair<SopCover, SopCover>> ans_list;
+
+  KernelGen kg;
+  return kg.all_kernels(*this);
+}
+
+// @brief 最も価値の高いカーネルを求める．
+SopCover
+SopCover::best_kernel() const
+{
+  KernelGen kg;
+  return kg.best_kernel(*this);
+}
+
+
+//////////////////////////////////////////////////////////////////////
 // クラス KernelGen
 //////////////////////////////////////////////////////////////////////
 
@@ -29,20 +52,23 @@ KernelGen::~KernelGen()
 }
 
 // @brief カーネルとコカーネルを列挙する．
-void
-KernelGen::all_kernel(
-  const SopCover& cover,
-  vector<pair<SopCover, SopCover>>& kernel_list
+vector<pair<SopCover, SopCover>>
+KernelGen::all_kernels(
+  const SopCover& cover
 )
 {
   generate(cover);
 
   // kernel_list に設定する．
+  vector<pair<SopCover, SopCover>> kernel_list;
+  kernel_list.reserve(mCellList.size());
   // この処理は破壊的なので以降は mHashTable は使えない．
   for ( auto cell: mCellList ) {
     kernel_list.push_back(make_pair(std::move(cell->mKernel), std::move(cell->mCoKernels)));
   }
   hash_clear();
+
+  return kernel_list;
 }
 
 // @brief 最も価値の高いカーネルを返す．

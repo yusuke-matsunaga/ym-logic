@@ -9,6 +9,7 @@
 #include "ym/SopCover.h"
 #include "ym/Range.h"
 #include "SopMgr.h"
+#include "GenFactor.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
@@ -255,6 +256,22 @@ SopBlock
 SopCover::block() const
 {
   return SopBlock{mCubeNum, mCubeCap, mBody};
+}
+
+// @brief "quick factor" を行う．
+Expr
+SopCover::quick_factor() const
+{
+  QuickFactor qf;
+  return qf(*this);
+}
+
+// @brief "good factor" を行う．
+Expr
+SopCover::good_factor() const
+{
+  GoodFactor gf;
+  return gf(*this);
 }
 
 // @brief Expr に変換する．

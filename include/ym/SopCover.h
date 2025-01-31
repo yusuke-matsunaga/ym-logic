@@ -313,6 +313,22 @@ public:
   SopCube
   common_cube() const;
 
+  /// @brief すべてのカーネルとコカーネルペアを列挙する．
+  vector<pair<SopCover, SopCover>>
+  all_kernels() const;
+
+  /// @brief 最も価値の高いカーネルを求める．
+  SopCover
+  best_kernel() const;
+
+  /// @brief "quick factor" を行う．
+  Expr
+  quick_factor() const;
+
+  /// @brief "good factor" を行う．
+  Expr
+  good_factor() const;
+
   /// @brief Expr に変換する．
   Expr
   expr() const;

@@ -38,10 +38,10 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief カーネルとコカーネルを列挙する．
-  void
-  all_kernel(
-    const SopCover& cover,                        ///< [in] 対象のカバー
-    vector<pair<SopCover, SopCover>>& kernel_list ///< [out] カーネルとコカーネルのペアのリスト
+  /// @return カーネルとコカーネル集合のペアのリストを返す．
+  vector<pair<SopCover, SopCover>>
+  all_kernels(
+    const SopCover& cover ///< [in] 対象のカバー
   );
 
   /// @brief 価値の最も高いカーネルを求める．
