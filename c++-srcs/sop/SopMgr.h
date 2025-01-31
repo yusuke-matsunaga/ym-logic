@@ -291,6 +291,19 @@ public:
     dst.cube_num = src.cube_num;
   }
 
+  /// @brief 指定されたキューブの先頭を求める．
+  SopBitVect*
+  cube_top(
+    const SopBlock& block, ///< [in] カバーの内容
+    SizeType cube_id       ///< [in] キューブ番号
+  ) const
+  {
+    if ( cube_id >= block.cube_num ) {
+      throw std::out_of_range{"cube_id is out of range"};
+    }
+    return _calc_offset(block.body, cube_id);
+  }
+
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -626,7 +639,7 @@ protected:
   _calc_offset(
     SopBitVect* bv,   ///< [in] ビットベクタの先頭
     SizeType cube_num ///< [in] キューブ数
-  )
+  ) const
   {
     return bv + cube_num * _cube_size();
   }
@@ -636,7 +649,7 @@ protected:
   _calc_offset(
     const SopBitVect* bv, ///< [in] ビットベクタの先頭
     SizeType cube_num     ///< [in] キューブ数
-  )
+  ) const
   {
     return bv + cube_num * _cube_size();
   }

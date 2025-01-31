@@ -233,6 +233,18 @@ SopCover::literal_list() const
   return cube_list;
 }
 
+// @brief キューブを取り出す．
+SopCube
+SopCover::get_cube(
+  SizeType cube_id
+) const
+{
+  SopMgr mgr{variable_num()};
+  auto src_bv = mgr.cube_top(block(), cube_id);
+  auto bv = mgr.new_bv(src_bv);
+  return mgr.make_cube(bv);
+}
+
 // @brief パタンを返す．
 SopPat
 SopCover::get_pat(

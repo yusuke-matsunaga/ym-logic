@@ -153,6 +153,12 @@ public:
   vector<vector<Literal>>
   literal_list() const;
 
+  /// @brief キューブを取り出す．
+  SopCube
+  get_cube(
+    SizeType cube_id ///< [in] キューブ番号 ( 0 <= cube_id < cube_num() )
+  ) const;
+
   /// @brief パタンを返す．
   /// @retval SopPat::_X その変数は現れない．
   /// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
