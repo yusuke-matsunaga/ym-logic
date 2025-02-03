@@ -12,6 +12,20 @@
 ///
 /// 論理式(ファクタードフォーム)と論理関数を扱うためのクラスライブラリ
 /// C++ の機能を活かして論理演算子のオーバーロードを使っている．
+///
+/// 主なクラスは以下の通り
+/// - Literal: 変数リテラル(変数番号＋極性)
+/// - Expr: 通常の論理式
+/// - TvFunc: 真理値表を用いた論理関数表現
+/// - Bdd: Binary Decision Diagram
+/// - Zdd: Zero-surpressed Decision Diagram
+/// - SopCover, SopCube: 積和形論理式とキューブ
+/// - AlgCover, AlgCube: 代数的表現にもとづく積和形論理式とキューブ
+///
+/// SopCover/SopCube と AlgCover/AlgCube は似ているが，内部のビットパタンの
+/// エンコーディングが異なる．
+/// 具体的には SopCover/SopCube ではドントケアは '11' だが，
+/// AlgCover/AlgCube ではドントケアは '00' となる．
 
 #include "ym_config.h"
 
@@ -116,7 +130,7 @@ END_NAMESPACE_YM_DD
 BEGIN_NAMESPACE_YM \
 BEGIN_NAMESPACE(nsSop)
 
-/// @brief ym-sop 用の名前空間の終了
+/// @brief SOP 用の名前空間の終了
 #define END_NAMESPACE_YM_SOP \
 END_NAMESPACE(nsSop) \
 END_NAMESPACE_YM
@@ -143,6 +157,39 @@ class SopCube;
 class SopCover;
 
 END_NAMESPACE_YM_SOP
+
+/// @brief ALG 用の名前空間の開始
+#define BEGIN_NAMESPACE_YM_ALG \
+BEGIN_NAMESPACE_YM \
+BEGIN_NAMESPACE(nsAlg)
+
+/// @brief ALG 用の名前空間の終了
+#define END_NAMESPACE_YM_ALG \
+END_NAMESPACE(nsAlg) \
+END_NAMESPACE_YM
+
+
+BEGIN_NAMESPACE_YM_ALG
+
+/// @brief AlgBitVect のワード型
+using AlgPatWord = std::uint64_t;
+
+/// @brief AlgPat をパックしたビットベクタ型
+using AlgBitVect = vector<AlgPatWord>;
+
+/// @brief AlgBitVect の反復子
+using AlgBitVectIter = AlgBitVect::iterator;
+
+/// @brief AlgBitVect の定数反復子
+using AlgBitVectConstIter = AlgBitVect::const_iterator;
+
+// クラス名の前方参照用宣言
+class AlgBlock;
+class AlgMgr;
+class AlgCube;
+class AlgCover;
+
+END_NAMESPACE_YM_ALG
 
 
 BEGIN_NAMESPACE_YM
@@ -172,11 +219,12 @@ using nsDd::ZddMgr;
 /// @brief 不正な変数番号
 const SizeType BAD_VARID = static_cast<SizeType>(-1);
 
-/// @brief パタンを表す列挙型
+/// @brief SopCover/SopCube 中のパタンを表す列挙型
 enum class SopPat : std::uint8_t {
-  _X = 0, ///< なし
+  __ = 0, ///< 未使用
   _1 = 1, ///< 正極性
-  _0 = 2  ///< 負極性
+  _0 = 2, ///< 負極性
+  _X = 3  ///< なし
 };
 
 /// @relates SopPat
@@ -190,6 +238,7 @@ operator<<(
 )
 {
   switch ( pat ) {
+  case SopPat::__: s << '_'; break;
   case SopPat::_0: s << '0'; break;
   case SopPat::_1: s << '1'; break;
   case SopPat::_X: s << 'X'; break;
@@ -199,6 +248,36 @@ operator<<(
 
 using nsSop::SopCube;
 using nsSop::SopCover;
+
+/// @brief AlgCover/AlgCube 中パタンを表す列挙型
+enum class AlgPat : std::uint8_t {
+  _X = 0, ///< なし
+  _1 = 1, ///< 正極性
+  _0 = 2, ///< 負極性
+  __ = 3  ///< 未使用
+};
+
+/// @relates AlgPat
+/// @brief AlgPat のストリーム出力
+/// @return s を返す．
+inline
+ostream&
+operator<<(
+  ostream& s, ///< [in] ストリーム
+  AlgPat pat  ///< [in] パタン
+)
+{
+  switch ( pat ) {
+  case AlgPat::_0: s << '0'; break;
+  case AlgPat::_1: s << '1'; break;
+  case AlgPat::_X: s << 'X'; break;
+  case AlgPat::__: s << '_'; break;
+  }
+  return s;
+}
+
+using nsAlg::AlgCube;
+using nsAlg::AlgCover;
 
 END_NAMESPACE_YM
 
