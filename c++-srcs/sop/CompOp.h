@@ -5,7 +5,7 @@
 /// @brief CompOp のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -41,8 +41,8 @@ public:
   /// @brief カバーの比較を行う．
   int
   operator()(
-    const SopBlock& src1, ///< [in] オペランド1
-    const SopBlock& src2  ///< [in] オペランド2
+    const SopBlockRef& block1, ///< [in] 第1オペランドのビットベクタ
+    const SopBlockRef& block2  ///< [in] 第2オペランドのビットベクタ
   );
 
 };

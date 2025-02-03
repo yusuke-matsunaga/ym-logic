@@ -124,8 +124,17 @@ END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_YM_SOP
 
+/// @brief SopBitVect のワード型
+using SopPatWord = std::uint64_t;
+
 /// @brief SopPat をパックしたビットベクタ型
-using SopBitVect = std::uint64_t;
+using SopBitVect = vector<SopPatWord>;
+
+/// @brief SopBitVect の反復子
+using SopBitVectIter = SopBitVect::iterator;
+
+/// @brief SopBitVect の定数反復子
+using SopBitVectConstIter = SopBitVect::const_iterator;
 
 // クラス名の前方参照用宣言
 class SopBlock;

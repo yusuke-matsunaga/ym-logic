@@ -3,7 +3,7 @@
 /// @brief ConcateOp の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ConcateOp.h"
@@ -24,8 +24,7 @@ SopCover::operator+(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto src2 = right.block();
-  return concate_sub(src2);
+  return concate_sub(right.to_block());
 }
 
 // @brief 論理和を計算して代入する．
@@ -37,8 +36,7 @@ SopCover::operator+=(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto src2 = right.block();
-  concate_int_sub(src2);
+  concate_int_sub(right.to_block());
   return *this;
 }
 
@@ -51,8 +49,7 @@ SopCover::operator+(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto src2 = right.block();
-  return concate_sub(src2);
+  return concate_sub(right.to_block());
 }
 
 // @brief 論理和を計算して代入する(キューブ版)．
@@ -64,43 +61,30 @@ SopCover::operator+=(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto src2 = right.block();
-  concate_int_sub(src2);
+  concate_int_sub(right.to_block());
   return *this;
 }
 
 // @brief concate の共通処理
 SopCover
 SopCover::concate_sub(
-  const SopBlock& src2
+  const SopBlockRef& block2
 ) const
 {
   ConcateOp concate{variable_num()};
-  auto src1 = block();
-  auto dst = concate.new_block(src1.cube_num + src2.cube_num);
-  concate(dst, src1, src2);
-  return concate.make_cover(dst);
+  auto dst = concate(to_block(), block2);
+  return concate.make_cover(std::move(dst));
 }
 
 // @brief concate_int の共通処理
 void
 SopCover::concate_int_sub(
-  const SopBlock& src2
+  const SopBlockRef& block2
 )
 {
   ConcateOp concate{variable_num()};
-  auto src1 = block();
-  SizeType cap = src1.cube_num + src2.cube_num;
-  if ( src1.capacity < cap ) {
-    auto dst = concate.new_block(cap);
-    concate(dst, src1, src2);
-    delete_body();
-    _set(dst);
-  }
-  else {
-    concate(src1, src1, src2);
-    _set(src1);
-  }
+  auto dst = concate(to_block(), block2);
+  _set(std::move(dst));
 }
 
 
@@ -109,54 +93,51 @@ SopCover::concate_int_sub(
 //////////////////////////////////////////////////////////////////////
 
 // @brief 2つのカバーの論理和を計算する．
-void
+SopBlock
 ConcateOp::operator()(
-  SopBlock& dst,
-  const SopBlock& src1,
-  const SopBlock& src2
+  const SopBlockRef& block1,
+  const SopBlockRef& block2
 )
 {
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-
-  auto bv2 = src2.body;
-  auto bv2_end = _calc_offset(bv2, src2.cube_num);
-
-  auto dst_bv = dst.body;
-
-  SizeType nc = 0;
-  while ( bv1 != bv1_end && bv2 != bv2_end ) {
-    int res = cube_compare(bv1, bv2);
+  auto dst = new_block(block1.cube_num + block2.cube_num);
+  auto& dst_bv = dst.body;
+  auto dst_iter = _cube_begin(dst_bv);
+  dst.cube_num = 0;
+  auto src1_iter = _cube_begin(block1.body);
+  auto src1_end = _cube_end(src1_iter, block1.cube_num);
+  auto src2_iter = _cube_begin(block2.body);
+  auto src2_end = _cube_end(src2_iter, block2.cube_num);
+  while ( src1_iter != src1_end && src2_iter != src2_end ) {
+    int res = cube_compare(src1_iter, src2_iter);
     if ( res > 0 ) {
-      cube_copy(dst_bv, bv1);
-      bv1 += _cube_size();
+      cube_copy(dst_iter, src1_iter);
+      src1_iter += _cube_size();
     }
     else if ( res < 0 ) {
-      cube_copy(dst_bv, bv2);
-      bv2 += _cube_size();
+      cube_copy(dst_iter, src2_iter);
+      src2_iter += _cube_size();
     }
     else {
-      cube_copy(dst_bv, bv1);
-      bv1 += _cube_size();
-      bv2 += _cube_size();
+      cube_copy(dst_iter, src1_iter);
+      src1_iter += _cube_size();
+      src2_iter += _cube_size();
     }
-    dst_bv += _cube_size();
-    ++ nc;
+    dst_iter += _cube_size();
+    ++ dst.cube_num;
   }
-  while ( bv1 != bv1_end ) {
-    cube_copy(dst_bv, bv1);
-    bv1 += _cube_size();
-    dst_bv += _cube_size();
-    ++ nc;
+  while ( src1_iter != src1_end ) {
+    cube_copy(dst_iter, src1_iter);
+    src1_iter += _cube_size();
+    dst_iter += _cube_size();
+    ++ dst.cube_num;
   }
-  while ( bv2 != bv2_end ) {
-    cube_copy(dst_bv, bv2);
-    bv2 += _cube_size();
-    dst_bv += _cube_size();
-    ++ nc;
+  while ( src2_iter != src2_end ) {
+    cube_copy(dst_iter, src2_iter);
+    src2_iter += _cube_size();
+    dst_iter += _cube_size();
+    ++ dst.cube_num;
   }
-
-  dst.cube_num = nc;
+  return dst;
 }
 
 END_NAMESPACE_YM_SOP

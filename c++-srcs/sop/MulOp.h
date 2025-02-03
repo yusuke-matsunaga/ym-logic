@@ -5,7 +5,7 @@
 /// @brief MulOp のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -40,28 +40,27 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 2つのカバーの論理積を計算する．
-  void
+  SopBlock
   operator()(
-    SopBlock& dst,        ///< [in] 結果を格納するブロック
-    const SopBlock& src1, ///< [in] 1つめのカバー
-    const SopBlock& src2  ///< [in] 2つめのカバー
+    const SopBlockRef& block1, ///< [in] 被乗数のビットベクタ
+    const SopBlockRef& block2  ///< [in] 乗数のビットベクタ
   );
 
   /// @brief カバーとキューブの論理積を計算する．
-  /// @return 結果のカバーを返す．
-  void
+  SopBlock
   operator()(
-    SopBlock& dst,         ///< [in] 結果を格納するブロック
-    const SopBlock& src1,  ///< [in] 1つめのカバー
-    const SopBitVect* cube ///< [in] 対象のキューブ
-  );
+    const SopBlockRef& block1, ///< [in] 被乗数のビットベクタ
+    const SopBitVect& bv2      ///< [in] 乗数のキューブのビットベクタ
+  )
+  {
+    return operator()(block1, SopBlockRef{1, bv2});
+  }
 
   /// @brief カバーとリテラルとの論理積を計算する．
-  void
+  SopBlock
   operator()(
-    SopBlock& dst,        ///< [in] 結果を格納するブロック
-    const SopBlock& src1, ///< [in] 1つめのカバー
-    Literal lit           ///< [in] 対象のリテラル
+    const SopBlockRef& block1, ///< [in] 被乗数のビットベクタ
+    Literal lit                ///< [in] 乗数のリテラル
   );
 
 };

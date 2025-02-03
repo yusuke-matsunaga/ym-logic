@@ -14,22 +14,57 @@
 BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
+/// @class SopBlockRef SopBlock.h "SopBlock.h"
+/// @brief SopCover/SopCube の中身
+///
+/// ただし入力数の情報は持たない．
+//////////////////////////////////////////////////////////////////////
+struct SopBlockRef
+{
+
+  // キューブ数
+  SizeType cube_num;
+
+  // ビットベクタの本体
+  const SopBitVect& body;
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /// @class SopBlock SopBlock.h "SopBlock.h"
-/// @brief SopCover の中身
+/// @brief SopCover/SopCube の中身
 ///
 /// ただし入力数の情報は持たない．
 //////////////////////////////////////////////////////////////////////
 struct SopBlock
 {
 
+  // 空のコンストラクタ
+  SopBlock() = default;
+
+  // コンストラクタ
+  SopBlock(
+    SizeType _cube_num,
+    SizeType _cube_size
+  ) : cube_num{_cube_num},
+      body(_cube_num * _cube_size)
+  {
+  }
+
+  // SopBlockRef からの疑似コピーコンストラクタ
+  SopBlock(
+    const SopBlockRef& src
+  ) : cube_num{src.cube_num},
+      body{src.body}
+  {
+  }
+
   // キューブ数
-  SizeType cube_num;
+  SizeType cube_num{0};
 
-  // 容量
-  SizeType capacity;
-
-  // ブロックの先頭アドレス
-  SopBitVect* body;
+  // ビットベクタの本体
+  SopBitVect body;
 
 };
 

@@ -3,7 +3,7 @@
 /// @brief SopMgr のキューブ関係の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -20,13 +20,12 @@ BEGIN_NAMESPACE_YM_SOP
 // @brief 空キューブかどうか調べる．
 bool
 SopMgr::cube_check_null(
-  const SopBitVect* bv
+  SopBitVectConstIter cube
 )
 {
-  auto bv_end = _calc_offset(bv, 1);
-  for ( ; bv != bv_end; ++ bv ) {
-    auto pat = *bv;
-    if ( pat != 0UL ) {
+  auto cube_end = _cube_end(cube);
+  for ( ; cube != cube_end; ++ cube ) {
+    if ( *cube != 0UL ) {
       return false;
     }
   }
@@ -36,27 +35,23 @@ SopMgr::cube_check_null(
 // @brief 2つのキューブの積を計算する．
 bool
 SopMgr::cube_product(
-  SopBitVect* dst_bv,
-  const SopBitVect* bv1,
-  const SopBitVect* bv2
+  SopBitVectIter dst_iter,
+  SopBitVectConstIter src1_iter,
+  SopBitVectConstIter src2_iter
 )
 {
-  const SopBitVect mask1 = 0x5555555555555555ULL;
-  const SopBitVect mask2 = 0xAAAAAAAAAAAAAAAAULL;
-  auto dst_bv0 = dst_bv;
-  auto dst_bv_end = _calc_offset(dst_bv, 1);
-  while ( dst_bv != dst_bv_end ) {
-    auto tmp = *bv1 | *bv2;
+  const SopPatWord mask1 = 0x5555555555555555ULL;
+  const SopPatWord mask2 = 0xAAAAAAAAAAAAAAAAULL;
+  auto dst_end = _cube_end(dst_iter);
+  for ( ; dst_iter != dst_end; ++ dst_iter, ++ src1_iter, ++ src2_iter ) {
+    auto tmp = *src1_iter | *src2_iter;
     auto tmp1 = tmp & mask1;
     auto tmp2 = tmp & mask2;
     if ( (tmp1 & (tmp2 >> 1)) != 0ULL ) {
       // 同じ変数の異なる極性のリテラルがあった．
       return false;
     }
-    *dst_bv = tmp;
-    ++ dst_bv;
-    ++ bv1;
-    ++ bv2;
+    *dst_iter = tmp;
   }
   return true;
 }
@@ -64,8 +59,8 @@ SopMgr::cube_product(
 // @brief キューブとリテラルの積を計算する．
 bool
 SopMgr::cube_product(
-  SopBitVect* dst_body,
-  const SopBitVect* bv1,
+  SopBitVectIter dst_iter,
+  SopBitVectConstIter src_iter,
   Literal lit
 )
 {
@@ -73,26 +68,27 @@ SopMgr::cube_product(
   auto inv = lit.is_negative();
   auto blk = _block_pos(varid);
   auto sft = _shift_num(varid);
-  auto pat = bitvect(inv);
-  auto pat1 = pat << sft;
+  auto pat1 = get_mask(varid, inv);
   auto mask = 3UL << sft;
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  auto tmp = bv1[blk] | pat1;
+  auto src_p = src_iter + blk;
+  auto tmp = *src_p | pat1;
   if ( (tmp & mask) == mask ) {
     // 相反するリテラルがあった．
     return false;
   }
-  cube_copy(dst_body, bv1);
-  dst_body[blk] = tmp;
+  cube_copy(dst_iter, src_iter);
+  auto dst_p = dst_iter + blk;
+  *dst_p = tmp;
   return true;
 }
 
 // @brief キューブとリテラルの積を計算する．
 bool
 SopMgr::cube_product_int(
-  SopBitVect* dst_body,
+  SopBitVectIter dst_iter,
   Literal lit
 )
 {
@@ -100,41 +96,38 @@ SopMgr::cube_product_int(
   auto inv = lit.is_negative();
   auto blk = _block_pos(varid);
   auto sft = _shift_num(varid);
-  auto pat = bitvect(inv);
-  auto pat1 = pat << sft;
+  auto pat1 = get_mask(varid, inv);
   auto mask = 3UL << sft;
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  auto tmp = dst_body[blk] | pat1;
+  auto dst_p = dst_iter + blk;
+  auto tmp = *dst_p | pat1;
   if ( (tmp & mask) == mask ) {
     // 相反するリテラルがあった．
     return false;
   }
-  dst_body[blk] = tmp;
+  *dst_p = tmp;
   return true;
 }
 
 // @brief キューブによる商を求める．
 bool
 SopMgr::cube_quotient(
-  SopBitVect* dst_bv,
-  const SopBitVect* bv1,
-  const SopBitVect* bv2
+  SopBitVectIter dst_iter,
+  SopBitVectConstIter src1_iter,
+  SopBitVectConstIter src2_iter
 )
 {
-  auto dst_bv_end = _calc_offset(dst_bv, 1);
-  while ( dst_bv != dst_bv_end ) {
-    auto pat1 = *bv1;
-    auto pat2 = *bv2;
+  auto dst_end = _cube_end(dst_iter);
+  for ( ; dst_iter != dst_end; ++ dst_iter, ++ src1_iter, ++ src2_iter ) {
+    auto pat1 = *src1_iter;
+    auto pat2 = *src2_iter;
     if ( (~pat1 & pat2) != 0ULL ) {
       // この場合の dst の値は不定
       return false;
     }
-    *dst_bv = pat1 & ~pat2;
-    ++ dst_bv;
-    ++ bv1;
-    ++ bv2;
+    *dst_iter = pat1 & ~pat2;
   }
   return true;
 }
@@ -142,8 +135,8 @@ SopMgr::cube_quotient(
 // @brief リテラルによる商を求める．
 bool
 SopMgr::cube_quotient(
-  SopBitVect* dst_bv,
-  const SopBitVect* bv1,
+  SopBitVectIter dst_iter,
+  SopBitVectConstIter src_iter,
   Literal lit
 )
 {
@@ -151,13 +144,14 @@ SopMgr::cube_quotient(
   auto inv = lit.is_negative();
   auto blk = _block_pos(varid);
   auto sft = _shift_num(varid);
-  auto pat = bitvect(inv);
-  auto pat1 = pat << sft;
+  auto pat1 = get_mask(varid, inv);
   auto mask = 3UL << sft;
   auto nmask = ~mask;
-  if ( (bv1[blk] & mask) == pat1 ) {
-    cube_copy(dst_bv, bv1);
-    dst_bv[blk] &= nmask;
+  auto src_p = src_iter + blk;
+  auto dst_p = dst_iter + blk;
+  if ( (*src_p & mask) == pat1 ) {
+    cube_copy(dst_iter, src_iter);
+    *dst_p &= nmask;
     return true;
   }
   return false;
@@ -166,22 +160,20 @@ SopMgr::cube_quotient(
 // @brief キューブ(を表すビットベクタ)の比較を行う．
 int
 SopMgr::cube_compare(
-  const SopBitVect* bv1,
-  const SopBitVect* bv2
+  SopBitVectConstIter src1_iter,
+  SopBitVectConstIter src2_iter
 )
 {
-  auto bv1_end = _calc_offset(bv1, 1);
-  while ( bv1 != bv1_end ) {
-    auto pat1 = *bv1;
-    auto pat2 = *bv2;
+  auto src1_end = _cube_end(src1_iter);
+  for ( ; src1_iter != src1_end; ++ src1_iter, ++ src2_iter ) {
+    auto pat1 = *src1_iter;
+    auto pat2 = *src2_iter;
     if ( pat1 < pat2 ) {
       return -1;
     }
     else if ( pat1 > pat2 ) {
       return 1;
     }
-    ++ bv1;
-    ++ bv2;
   }
   return 0;
 }

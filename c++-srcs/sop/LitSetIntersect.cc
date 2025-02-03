@@ -3,7 +3,7 @@
 /// @brief LitSetIntersect の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "LitSet.h"
@@ -14,7 +14,7 @@
 BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
-// クラス SopCube
+// クラス LitSet
 //////////////////////////////////////////////////////////////////////
 
 // @brief 引数のキューブ中のリテラルをひとつでも含んでいたら true を返す．
@@ -23,12 +23,12 @@ LitSet::check_intersect(
   const SopCube& right
 ) const
 {
-  if ( mVariableNum != right.variable_num() ) {
+  if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument{"variable_num() mismatch"};
   }
 
-  LitSetIntersect litset_intersect{mVariableNum};
-  return litset_intersect(mBody, right.block().body);
+  LitSetIntersect litset_intersect{variable_num()};
+  return litset_intersect(mBody, right.body());
 }
 
 
@@ -39,17 +39,17 @@ LitSet::check_intersect(
 // @brief 要素のチェック
 bool
 LitSetIntersect::operator()(
-  SopBitVect* bv1,
-  SopBitVect* bv2
+  const SopBitVect& bv1,
+  const SopBitVect& bv2
 )
 {
-  auto bv1_end = _calc_offset(bv1, 1);
-  while ( bv1 != bv1_end ) {
-    if ( (*bv1 & *bv2) != 0ULL ) {
+  auto iter1 = bv1.begin();
+  auto end1 = _cube_end(iter1);
+  auto iter2 = bv2.begin();
+  for ( ; iter1 != end1; ++ iter1, ++ iter2 ) {
+    if ( (*iter1 & *iter2) != 0ULL ) {
       return true;
     }
-    ++ bv1;
-    ++ bv2;
   }
   return false;
 }

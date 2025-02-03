@@ -3,7 +3,7 @@
 /// @brief complement() 関係の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "CoverOp.h"
@@ -20,29 +20,34 @@ BEGIN_NAMESPACE_YM_SOP
 // @brief 否定のカバーを求める．
 SopBlock
 CoverOp::_compl_recur(
-  SopBlock& src
+  const SopBlockRef& src
 )
 {
-  auto bv1 = src.body;
-  auto nc1 = src.cube_num;
+  auto src_bv = src.body;
+  auto src_nc = src.cube_num;
 
-  if ( nc1 == 0 ) {
+  if ( src_nc == 0 ) {
     // 結果は tautology
     return new_cover(1);
   }
-  if ( nc1 == 1 ) {
+  if ( src_nc == 1 ) {
     // キューブに対する否定
-    return cube_complement(src.body);
+    return cube_complement(_cube_begin(src_bv));
   }
-  for ( SizeType c = 0; c < nc1; ++ c ) {
-    if ( cube_check_null(bv1, c) ) {
+
+  // 空のキューブ(universal cube)があるかチェックする．
+  auto cube = _cube_begin(src_bv);
+  auto end = _cube_end(cube, src_nc);
+  for ( ; cube != end; cube += _cube_size() ) {
+    if ( cube_check_null(cube) ) {
       // 結果は空
       return SopBlock{0, 0, nullptr};
     }
   }
 
-  auto cc = common_cube(src);
+  auto cc_bv = common_cube(src);
   SopBlock r{0, 0, nullptr};
+  auto cc = _cube_begin(cc_bv);
   if ( !cube_check_null(cc) ) {
     r = cube_complement(cc);
     quotient_int(src, cc);

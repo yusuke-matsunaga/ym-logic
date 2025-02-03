@@ -5,7 +5,7 @@
 /// @brief LitSetIntersect のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -42,8 +42,8 @@ public:
   /// @return cube と共通部分があれば true を返す．
   bool
   operator()(
-    SopBitVect* bv,  ///< [in] ビットベクタ
-    SopBitVect* cube ///< [in] 対象のキューブ
+    const SopBitVect& bv,  ///< [in] ビットベクタ
+    const SopBitVect& cube ///< [in] 対象のキューブ
   );
 
 };

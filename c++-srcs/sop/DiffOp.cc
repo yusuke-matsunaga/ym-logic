@@ -3,7 +3,7 @@
 /// @brief DiffOp の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "DiffOp.h"
@@ -24,8 +24,7 @@ SopCover::operator-(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto src2 = right.block();
-  return diff_sub(src2);
+  return diff_sub(right.to_block());
 }
 
 // @brief 差分を計算して代入する．
@@ -37,8 +36,7 @@ SopCover::operator-=(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto src2 = right.block();
-  diff_int_sub(src2);
+  diff_int_sub(right.to_block());
   return *this;
 }
 
@@ -51,8 +49,7 @@ SopCover::operator-(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto src2 = right.block();
-  return diff_sub(src2);
+  return diff_sub(right.to_block());
 }
 
 // @brief 差分を計算して代入する(キューブ版)．
@@ -64,35 +61,30 @@ SopCover::operator-=(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto src2 = right.block();
-  diff_int_sub(src2);
+  diff_int_sub(right.to_block());
   return *this;
 }
 
 // @brief diff の共通処理
 SopCover
 SopCover::diff_sub(
-  const SopBlock& src2
+  const SopBlockRef& block2
 ) const
 {
   DiffOp diff{variable_num()};
-  auto src1 = block();
-  auto dst = diff.new_block(src1.cube_num + src2.cube_num);
-  diff(dst, src1, src2);
-  return diff.make_cover(dst);
+  auto dst = diff(to_block(), block2);
+  return diff.make_cover(std::move(dst));
 }
 
 // @brief diff_int の共通処理
 void
 SopCover::diff_int_sub(
-  const SopBlock& src2
+  const SopBlockRef& block2
 )
 {
   DiffOp diff{variable_num()};
-  auto src1 = block();
-  // 結果のキューブ数は増えない．
-  diff(src1, src1, src2);
-  _set(src1);
+  auto dst = diff(to_block(), block2);
+  _set(std::move(dst));
 }
 
 
@@ -101,45 +93,52 @@ SopCover::diff_int_sub(
 //////////////////////////////////////////////////////////////////////
 
 // @brief 2つのカバーの差分を計算する．
-void
+SopBlock
 DiffOp::operator()(
-  SopBlock& dst,
-  const SopBlock& src1,
-  const SopBlock& src2
+  const SopBlockRef& block1,
+  const SopBlockRef& block2
 )
 {
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-
-  auto bv2 = src2.body;
-  auto bv2_end = _calc_offset(bv2, src2.cube_num);
-
-  auto dst_bv = dst.body;
-
-  SizeType nc = 0;
-  while ( bv1 != bv1_end && bv2 != bv2_end ) {
-    int res = cube_compare(bv1, bv2);
+  // 結果のキューブ数は block1 のキューブ数を超えない．
+  auto dst = new_block(block1.cube_num);
+  auto& src1_bv = block1.body;
+  auto src1_cube = _cube_begin(src1_bv);
+  auto src1_end = _cube_end(src1_cube, block1.cube_num);
+  auto& src2_bv = block1.body;
+  auto src2_cube = _cube_begin(src2_bv);
+  auto src2_end = _cube_end(src2_cube, block2.cube_num);
+  auto& dst_bv = dst.body;
+  auto dst_cube = _cube_begin(dst_bv);
+  dst.cube_num = 0;
+  while ( src1_cube != src1_end && src2_cube != src2_end ) {
+    int res = cube_compare(src1_cube, src2_cube);
     if ( res > 0 ) {
-      cube_copy(dst_bv, bv1);
-      bv1 += _cube_size();
-      dst_bv += _cube_size();
-      ++ nc;
+      // src1_cube のみ存在する．
+      // そのまま結果に含める．
+      cube_copy(dst_cube, src1_cube);
+      src1_cube += _cube_size();
+      dst_cube += _cube_size();
+      ++ dst.cube_num;
     }
     else if ( res < 0 ) {
-      bv2 += _cube_size();
+      // src2_cube のみ存在する．
+      src2_cube += _cube_size();
     }
     else {
-      bv1 += _cube_size();
-      bv2 += _cube_size();
+      // src1_cube == src2_cube だった．
+      // つまり結果には含めない．
+      src1_cube += _cube_size();
+      src2_cube += _cube_size();
     }
   }
-  while ( bv1 != bv1_end ) {
-    cube_copy(dst_bv, bv1);
-    bv1 += _cube_size();
-    dst_bv += _cube_size();
-    ++ nc;
+  while ( src1_cube != src1_end ) {
+    cube_copy(dst_cube, src1_cube);
+    src1_cube += _cube_size();
+    dst_cube += _cube_size();
+    ++ dst.cube_num;
   }
-  dst.cube_num = nc;
+
+  return dst;
 }
 
 END_NAMESPACE_YM_SOP

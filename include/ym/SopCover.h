@@ -5,15 +5,18 @@
 /// @brief SopCover のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/SopBase.h"
 #include "ym/Expr.h"
 #include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
+
+class SopBlockRef;
 
 //////////////////////////////////////////////////////////////////////
 /// @class SopCover SopCover.h "ym/SopCover.h"
@@ -26,8 +29,11 @@ BEGIN_NAMESPACE_YM_SOP
 /// 許されない．もちろん重複したキューブも許されない．<br>
 /// 通常の操作を行っているかぎり代数的な式しか生成されない．<br>
 /// 実際の操作は SopMgr が行う．
+///
+/// 実装としてはパタンの実体は SopBitVect が持つ．
 //////////////////////////////////////////////////////////////////////
-class SopCover
+class SopCover:
+  public SopBase
 {
   friend class SopMgr;
 
@@ -38,7 +44,7 @@ public:
   /// * 空のカバーとなる．
   explicit
   SopCover(
-    SizeType variable_num ///< [in] 変数の数
+    SizeType variable_num = 0 ///< [in] 変数の数
   );
 
   /// @brief コンストラクタ
@@ -117,13 +123,6 @@ public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief 変数の数を返す．
-  SizeType
-  variable_num() const
-  {
-    return mVariableNum;
-  }
 
   /// @brief キューブの数を返す．
   SizeType
@@ -339,6 +338,10 @@ public:
   Expr
   expr() const;
 
+  /// @brief SopBlockRef に変換する．
+  SopBlockRef
+  to_block() const;
+
   /// @brief ハッシュ値を返す．
   SizeType
   hash() const;
@@ -368,46 +371,37 @@ private:
   SopCover(
     SizeType variable_num, ///< [in] 変数の数
     SizeType cube_num,     ///< [in] キューブ数
-    SizeType cube_cap,     ///< [in] キューブ容量
-    SopBitVect* body       ///< [in] 内容のパタンを表す本体
+    SopBitVect&& body      ///< [in] 内容のパタンを表す本体
   );
 
   /// @brief concate の共通処理
   SopCover
   concate_sub(
-    const SopBlock& src2
+    const SopBlockRef& block2
   ) const;
 
   /// @brief concate_int の共通処理
   void
   concate_int_sub(
-    const SopBlock& src2
+    const SopBlockRef& block2
   );
 
   /// @brief diff の共通処理
   SopCover
   diff_sub(
-    const SopBlock& src2
+    const SopBlockRef& block2
   ) const;
 
   /// @brief diff_int の共通処理
   void
   diff_int_sub(
-    const SopBlock& src2
+    const SopBlockRef& block2
   );
-
-  /// @brief mBody の領域を削除する．
-  void
-  delete_body();
-
-  /// @brief 内容を表す SopBlock を返す．
-  SopBlock
-  block() const;
 
   /// @brief SopBlock の内容をセットする．
   void
   _set(
-    const SopBlock& src
+    SopBlock&& src_block
   );
 
   /// @brief 比較演算子(rich compare)
@@ -427,17 +421,11 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 変数の数
-  SizeType mVariableNum;
-
   // キューブ数
-  SizeType mCubeNum;
-
-  // mBody の実際に確保されているキューブ容量
-  SizeType mCubeCap;
+  SizeType mCubeNum{0};
 
   // 内容を表すビットベクタ
-  SopBitVect* mBody;
+  SopBitVect mBody;
 
 };
 

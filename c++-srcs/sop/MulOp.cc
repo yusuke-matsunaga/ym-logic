@@ -3,7 +3,7 @@
 /// @brief MulOp の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "MulOp.h"
@@ -26,12 +26,8 @@ SopCover::operator*(
   }
 
   MulOp product{variable_num()};
-  auto src1 = block();
-  auto src2 = right.block();
-  SizeType cap = src1.cube_num * src2.cube_num;
-  auto dst = product.new_block(cap);
-  product(dst, src1, src2);
-  return product.make_cover(dst);
+  auto dst = product(to_block(), right.to_block());
+  return product.make_cover(std::move(dst));
 }
 
 // @brief 論理積を計算して代入する．
@@ -45,19 +41,8 @@ SopCover::operator*=(
   }
 
   MulOp product{variable_num()};
-  auto src1 = block();
-  auto src2 = right.block();
-  SizeType cap = src1.cube_num * src2.cube_num;
-  if ( src1.capacity < cap ) {
-    auto dst = product.new_block(cap);
-    product(dst, src1, src2);
-    delete_body();
-    _set(dst);
-  }
-  else {
-    product(src1, src1, src2);
-    _set(src1);
-  }
+  auto dst = product(to_block(), right.to_block());
+  _set(std::move(dst));
   return *this;
 }
 
@@ -72,11 +57,8 @@ SopCover::operator*(
   }
 
   MulOp product{variable_num()};
-  auto src1 = block();
-  SizeType cap = src1.cube_num;
-  auto dst = product.new_block(cap);
-  product(dst, src1, right.block().body);
-  return product.make_cover(dst);
+  auto dst = product(to_block(), right.body());
+  return product.make_cover(std::move(dst));
 }
 
 // @brief 論理積を計算して代入する(キューブ版)．
@@ -90,10 +72,8 @@ SopCover::operator*=(
   }
 
   MulOp product{variable_num()};
-  auto src1 = block();
-  // 結果のキューブ数は増えない．
-  product(src1, src1, right.block().body);
-  _set(src1);
+  auto dst = product(to_block(), right.body());
+  _set(std::move(dst));
   return *this;
 }
 
@@ -104,11 +84,8 @@ SopCover::operator*(
 ) const
 {
   MulOp product{variable_num()};
-  auto src1 = block();
-  SizeType cap = src1.cube_num;
-  auto dst = product.new_block(cap);
-  product(dst, src1, right);
-  return product.make_cover(dst);
+  auto dst = product(to_block(), right);
+  return product.make_cover(std::move(dst));
 }
 
 // @brief 論理積を計算して代入する(リテラル版)．
@@ -118,10 +95,8 @@ SopCover::operator*=(
 )
 {
   MulOp product{variable_num()};
-  auto src1 = block();
-  // 結果のキューブ数は増えない．
-  product(src1, src1, right);
-  _set(src1);
+  auto dst = product(to_block(), right);
+  _set(std::move(dst));
   return *this;
 }
 
@@ -131,90 +106,81 @@ SopCover::operator*=(
 //////////////////////////////////////////////////////////////////////
 
 // @brief 2つのカバーの論理積を計算する．
-void
+SopBlock
 MulOp::operator()(
-  SopBlock& dst,
-  const SopBlock& src1,
-  const SopBlock& src2
+  const SopBlockRef& block1,
+  const SopBlockRef& block2
 )
 {
-  auto bv1 = src1.body;
-  auto bv2_start = src2.body;
-  SizeType cap = src1.cube_num * src2.cube_num;
+  auto& src1_bv = block1.body;
+  auto& src2_bv = block2.body;
+  SizeType src1_nc = block1.cube_num;
+  SizeType src2_nc = block2.cube_num;
+
+  auto dst = new_block(src1_nc + src2_nc);
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  SizeType nc = 0;
-  auto dst_bv = dst.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-  auto bv2_end = _calc_offset(bv2_start, src2.cube_num);
-  for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
-    for ( auto bv2 = bv2_start; bv2 != bv2_end; bv2 += _cube_size() ) {
-      if ( cube_product(dst_bv, bv1, bv2) ) {
-	dst_bv += _cube_size();
-	++ nc;
+  auto dst_cube = _cube_begin(dst.body);
+  dst.cube_num = 0;
+  auto src1_begin = _cube_begin(src1_bv);
+  auto src1_end = _cube_end(src1_begin, src1_nc);
+  auto src2_begin = _cube_begin(src2_bv);
+  auto src2_end = _cube_end(src2_begin, src2_nc);
+  for ( auto src1_cube = src1_begin;
+	src1_cube != src1_end;
+	src1_cube += _cube_size() ) {
+    for ( auto src2_cube = src2_begin;
+	  src2_cube != src2_end;
+	  src2_cube += _cube_size() ) {
+      if ( cube_product(dst_cube, src1_cube, src2_cube) ) {
+	dst_cube += _cube_size();
+	++ dst.cube_num;
       }
     }
   }
-  dst.cube_num = nc;
   sort(dst);
-}
-
-// @brief カバーとキューブの論理積を計算する．
-void
-MulOp::operator()(
-  SopBlock& dst,
-  const SopBlock& src1,
-  const SopBitVect* bv2
-)
-{
-  auto bv1 = src1.body;
-
-  // 相反するリテラルを含む積は数えない．
-  SizeType nc = 0;
-  auto dst_body = dst.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-  for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
-    if ( cube_product(_calc_offset(dst_body, nc), bv1, bv2) ) {
-      ++ nc;
-    }
-  }
-  dst.cube_num = nc;
-  sort(dst);
+  return dst;
 }
 
 // @brief カバーとリテラルとの論理積を計算する．
-void
+SopBlock
 MulOp::operator()(
-  SopBlock& dst,
-  const SopBlock& src1,
+  const SopBlockRef& block1,
   Literal lit
 )
 {
   auto varid = lit.varid();
   auto inv = lit.is_negative();
   auto blk = _block_pos(varid);
-  auto sft = _shift_num(varid);
-  auto pat = bitvect(inv);
-  auto npat = bitvect(!inv);
-  auto pat1 = pat << sft;
-  auto npat1 = npat << sft;
+  auto pat1 = get_mask(varid, inv);
+  auto npat1 = get_mask(varid, !inv);
 
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
+  SizeType src1_nc = block1.cube_num;
+  auto src1_begin = _cube_begin(block1.body);
+  auto src1_end = _cube_end(src1_begin, src1_nc);
+
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  auto dst_body = dst.body;
-  SizeType nc = 0;
-  for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
-    if ( (bv1[blk] & npat1) == 0 ) {
-      auto dst1 = _calc_offset(dst_body, nc);
-      cube_copy(dst1, bv1);
-      dst1[blk] |= pat1;
-      ++ nc;
+  auto dst = new_block(src1_nc);
+  auto dst_begin = _cube_begin(dst.body);
+  auto dst_cube = dst_begin;
+  dst.cube_num = 0;
+  for ( auto src1_cube = src1_begin;
+	src1_cube != src1_end;
+	src1_cube += _cube_size() ) {
+    auto src1_p = src1_cube + blk;
+    if ( (*src1_p & npat1) == 0 ) {
+      cube_copy(dst_cube, src1_cube);
+      auto dst_p = dst_cube + blk;
+      *dst_cube |= pat1;
+      dst_cube += _cube_size();
+      ++ dst.cube_num;
     }
   }
-  dst.cube_num = nc;
+  // 同じ位置にパタンが足されるだけなので
+  // 順序関係は変わらない．
+  return dst;
 }
 
 END_NAMESPACE_YM_SOP

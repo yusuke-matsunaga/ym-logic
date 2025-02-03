@@ -5,7 +5,7 @@
 /// @brief ConcateOp のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -40,11 +40,10 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 2つのカバーを結合する．
-  void
+  SopBlock
   operator()(
-    SopBlock& dst,        ///< [in] 結果を格納するブロック
-    const SopBlock& cov1, ///< [in] 1つめのカバー
-    const SopBlock& cov2  ///< [in] 2つめのカバー
+    const SopBlockRef& block1, ///< [in] 1つめのカバーのビットベクタ
+    const SopBlockRef& block2  ///< [in] 2つめのカバーのビットベクタ
   );
 
 };

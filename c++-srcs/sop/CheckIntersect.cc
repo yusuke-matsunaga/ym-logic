@@ -3,7 +3,7 @@
 /// @brief CheckIntersect の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "CheckIntersect.h"
@@ -21,11 +21,12 @@ SopCube::check_intersect(
   const SopCube& right
 ) const
 {
-  if ( mVariableNum != right.mVariableNum ) {
+  if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  CheckIntersect check_intersect{mVariableNum};
-  return check_intersect(mBody, right.mBody);
+  CheckIntersect check_intersect{variable_num()};
+  return check_intersect(_cube_begin(mBody),
+			 _cube_begin(right.mBody));
 }
 
 
@@ -36,17 +37,15 @@ SopCube::check_intersect(
 // @brief ２つのキューブに共通なリテラルがあれば true を返す．
 bool
 CheckIntersect::operator()(
-  const SopBitVect* bv1,
-  const SopBitVect* bv2
+  SopBitVectConstIter src1_cube,
+  SopBitVectConstIter src2_cube
 )
 {
-  auto bv1_end = _calc_offset(bv1, 1);
-  while ( bv1 != bv1_end ) {
-    if ( (*bv1 & *bv2) != 0ULL ) {
+  auto src1_end = _cube_end(src1_cube);
+  for ( ; src1_cube != src1_end; ++ src1_cube, ++ src2_cube ) {
+    if ( (*src1_cube & *src2_cube) != 0ULL ) {
       return true;
     }
-    ++ bv1;
-    ++ bv2;
   }
   return false;
 }

@@ -3,7 +3,7 @@
 /// @brief CompOp の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "CompOp.h"
@@ -27,9 +27,7 @@ compare(
   }
 
   CompOp compare{left.variable_num()};
-  auto src1 = left.block();
-  auto src2 = right.block();
-  return compare(src1, src2);
+  return compare(left.to_block(), right.to_block());
 }
 
 
@@ -40,29 +38,29 @@ compare(
 // @brief カバーの比較を行う．
 int
 CompOp::operator()(
-  const SopBlock& src1,
-  const SopBlock& src2
+  const SopBlockRef& block1,
+  const SopBlockRef& block2
 )
 {
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-
-  auto bv2 = src2.body;
-  auto bv2_end = _calc_offset(bv2, src2.cube_num);
-
-  for ( ; bv1 != bv1_end && bv2 != bv2_end;
-	bv1 += _cube_size(), bv2 += _cube_size() ) {
-    int res = cube_compare(bv1, bv2);
+  auto& src1_bv = block1.body;
+  auto& src2_bv = block2.body;
+  auto src1_iter = _cube_begin(src1_bv);
+  auto src2_iter = _cube_begin(src2_bv);
+  auto src1_end = _cube_end(src1_iter, block1.cube_num);
+  auto src2_end = _cube_end(src2_iter, block2.cube_num);
+  for ( ; src1_iter != src1_end && src2_iter != src2_end;
+	src1_iter += _cube_size(), src2_iter += _cube_size() ) {
+    int res = cube_compare(src1_iter, src2_iter);
     if ( res != 0 ) {
       return res;
     }
   }
-  if ( bv1 != bv1_end ) {
-    // bv2 == bv2_end なので bv1 が大きい
+  if ( src1_iter < src1_end ) {
+    // src2_iter == src2_end なので block1 が大きい
     return 1;
   }
-  if ( bv2 != bv2_end ) {
-    // bv1 == bv1_end なので bv2 が大きい
+  if ( src2_iter < src2_end ) {
+    // src1_iter == src1_end なので block2 が大きい
     return -1;
   }
   // 等しい

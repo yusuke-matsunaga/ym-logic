@@ -5,7 +5,7 @@
 /// @brief CheckIntersect のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -42,8 +42,8 @@ public:
   /// @return ２つのキューブに共通なリテラルがあれば true を返す．
   bool
   operator()(
-    const SopBitVect* bv1, ///< [in] 1つめのキューブを表すビットベクタ
-    const SopBitVect* bv2  ///< [in] 2つめのキューブを表すビットベクタ
+    SopBitVectConstIter src1_cube, ///< [in] 1つめのキューブを表すビットベクタ
+    SopBitVectConstIter src2_cube  ///< [in] 2つめのキューブを表すビットベクタ
   );
 
 };

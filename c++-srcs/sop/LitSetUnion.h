@@ -5,7 +5,7 @@
 /// @brief LitSetUnion のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -41,8 +41,8 @@ public:
   /// @brief ユニオン演算
   void
   operator()(
-    SopBitVect* dst_bv,      ///< [in] 対象のビットベクタ
-    const SopBitVect* src_bv ///< [in] 加えるビットベクタ
+    SopBitVect& dst_bv,      ///< [in] 対象のビットベクタ
+    const SopBitVect& src_bv ///< [in] 加えるビットベクタ
   );
 
 };

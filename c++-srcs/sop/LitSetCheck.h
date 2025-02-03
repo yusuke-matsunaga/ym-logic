@@ -5,7 +5,7 @@
 /// @brief LitSetCheck のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -42,8 +42,8 @@ public:
   /// @return lit を含んでいたら true を返す．
   bool
   operator()(
-    SopBitVect* bv, ///< [in] ビットベクタ
-    Literal lit     ///< [in] 対象のリテラル
+    const SopBitVect& bv, ///< [in] ビットベクタ
+    Literal lit           ///< [in] 対象のリテラル
   );
 
 };

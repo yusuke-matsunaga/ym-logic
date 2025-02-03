@@ -5,10 +5,11 @@
 /// @brief LitSet のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/SopBase.h"
 #include "ym/Literal.h"
 
 
@@ -21,7 +22,8 @@ BEGIN_NAMESPACE_YM_SOP
 /// SopCube と異なり，相反するリテラル(x と x')を同時に含んでも良い．
 /// Kernel の列挙用に使うだけなので使用する演算も限られている．
 //////////////////////////////////////////////////////////////////////
-class LitSet
+class LitSet:
+  public SopBase
 {
 public:
 
@@ -84,13 +86,6 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 変数の数を返す．
-  SizeType
-  variable_num() const
-  {
-    return mVariableNum;
-  }
-
   /// @brief 該当するリテラルが含まれているか調べる．
   /// @retval true 含まれている．
   /// @retval false 含まれていない．
@@ -122,24 +117,11 @@ public:
 
 private:
   //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief mBody の領域を削除する．
-  void
-  delete_body();
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 変数の数
-  SizeType mVariableNum;
-
   // 内容を表すビットベクタ
-  SopBitVect* mBody;
+  SopBitVect mBody;
 
 };
 

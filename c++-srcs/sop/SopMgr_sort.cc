@@ -3,7 +3,7 @@
 /// @brief SopMgr のソート関係の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -19,7 +19,7 @@ BEGIN_NAMESPACE_YM_SOP
 // @brief マージソートを行う下請け関数
 void
 SopMgr::_sort(
-  SopBitVect* bv,
+  SopBitVect& bv,
   SizeType start,
   SizeType end
 )
@@ -30,60 +30,60 @@ SopMgr::_sort(
   }
   if ( n == 2 ) {
     // (0, 1) と (1, 0) の2通りだけ
-    auto bv0 = _calc_offset(bv, start + 0);
-    auto bv1 = _calc_offset(bv, start + 1);
-    if ( cube_compare(bv0, bv1) < 0 ) {
+    auto cube0 = _cube_begin(bv, start + 0);
+    auto cube1 = _cube_begin(bv, start + 1);
+    if ( cube_compare(cube0, cube1) < 0 ) {
       // (1, 0) だったので交換する．
       _resize_buff(1);
-      cube_swap(bv0, bv1);
+      cube_swap(cube0, cube1);
     }
     return;
   }
   if ( n == 3 ) {
     // (0, 1, 2), (0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0)
     // の6通りなので虱潰し
-    auto bv0 = _calc_offset(bv, start + 0);
-    auto bv1 = _calc_offset(bv, start + 1);
-    auto bv2 = _calc_offset(bv, start + 2);
-    if ( cube_compare(bv0, bv1) < 0 ) {
+    auto cube0 = _cube_begin(bv, start + 0);
+    auto cube1 = _cube_begin(bv, start + 1);
+    auto cube2 = _cube_begin(bv, start + 2);
+    if ( cube_compare(cube0, cube1) < 0 ) {
       // (1, 0, 2), (1, 2, 0), (2, 1, 0)
-      if ( cube_compare(bv0, bv2) < 0 ) {
+      if ( cube_compare(cube0, cube2) < 0 ) {
 	// (1, 2, 0), (2, 1, 0)
-	if ( cube_compare(bv1, bv2) < 0 ) {
+	if ( cube_compare(cube1, cube2) < 0 ) {
 	  // (2, 1, 0)
 	  // 0 と 2 を交換
 	  _resize_buff(1);
-	  cube_swap(bv0, bv2);
+	  cube_swap(cube0, cube2);
 	}
 	else {
 	  // (1, 2, 0)
 	  // 0 <- 1, 1 <- 2, 2 <- 0
 	  _resize_buff(1);
-	  cube_rotate3(bv0, bv1, bv2);
+	  cube_rotate3(cube0, cube1, cube2);
 	}
       }
       else {
 	// (1, 0, 2)
 	// 0 <-> 1
 	_resize_buff(1);
-	cube_swap(bv0, bv1);
+	cube_swap(cube0, cube1);
       }
     }
     else {
       // (0, 1, 2), (0, 2, 1), (2, 0, 1)
-      if ( cube_compare(bv0, bv2) < 0 ) {
+      if ( cube_compare(cube0, cube2) < 0 ) {
 	// (2, 0, 1)
 	// 0 <- 2, 2 <- 1, 1 <- 0
 	_resize_buff(1);
-	cube_rotate3(bv0, bv2, bv1);
+	cube_rotate3(cube0, cube2, cube1);
       }
       else {
 	// (0, 1, 2), (0, 2, 1)
-	if ( cube_compare(bv1, bv2) < 0 ) {
+	if ( cube_compare(cube1, cube2) < 0 ) {
 	  // (0, 2, 1)
 	  // 1 <-> 2
 	  _resize_buff(1);
-	  cube_swap(bv1, bv2);
+	  cube_swap(cube1, cube2);
 	}
 	else {
 	  // (0, 1, 2)
@@ -94,43 +94,43 @@ SopMgr::_sort(
     return;
   }
   if ( n == 4 ) {
-    auto bv0 = _calc_offset(bv, start + 0);
-    auto bv1 = _calc_offset(bv, start + 1);
-    auto bv2 = _calc_offset(bv, start + 2);
-    auto bv3 = _calc_offset(bv, start + 3);
+    auto cube0 = _cube_begin(bv, start + 0);
+    auto cube1 = _cube_begin(bv, start + 1);
+    auto cube2 = _cube_begin(bv, start + 2);
+    auto cube3 = _cube_begin(bv, start + 3);
     _resize_buff(1);
     // 0 と 1 を整列
-    if ( cube_compare(bv0, bv1) < 0 ) {
-      cube_swap(bv0, bv1);
+    if ( cube_compare(cube0, cube1) < 0 ) {
+      cube_swap(cube0, cube1);
     }
     // 2 と 3 を整列
-    if ( cube_compare(bv2, bv3) < 0 ) {
-      cube_swap(bv2, bv3);
+    if ( cube_compare(cube2, cube3) < 0 ) {
+      cube_swap(cube2, cube3);
     }
     // 0 と 2 を比較
-    if ( cube_compare(bv0, bv2) < 0 ) {
-      if ( cube_compare(bv0, bv3) < 0 ) {
+    if ( cube_compare(cube0, cube2) < 0 ) {
+      if ( cube_compare(cube0, cube3) < 0 ) {
 	// (0, 1) と (2, 3) を交換
-	cube_swap(bv0, bv2);
-	cube_swap(bv1, bv3);
+	cube_swap(cube0, cube2);
+	cube_swap(cube1, cube3);
       }
-      else if ( cube_compare(bv1, bv3) < 0 ) {
+      else if ( cube_compare(cube1, cube3) < 0 ) {
 	// 0 <- 2, 2 <- 3, 3 <- 1, 1 <- 0
-	cube_rotate4(bv0, bv2, bv3, bv1);
+	cube_rotate4(cube0, cube2, cube3, cube1);
       }
       else {
 	// 0 <- 2, 2 <- 1, 1 <- 0
-	cube_rotate3(bv0, bv2, bv1);
+	cube_rotate3(cube0, cube2, cube1);
       }
     }
-    else if ( cube_compare(bv1, bv2) < 0 ) {
-      if ( cube_compare(bv1, bv3) < 0 ) {
+    else if ( cube_compare(cube1, cube2) < 0 ) {
+      if ( cube_compare(cube1, cube3) < 0 ) {
 	// 1 <- 2, 2 <- 3, 3 <- 1
-	cube_rotate3(bv1, bv2, bv3);
+	cube_rotate3(cube1, cube2, cube3);
       }
       else {
 	// 1 <- 2, 2 <- 1
-	cube_swap(bv1, bv2);
+	cube_swap(cube1, cube2);
       }
     }
     else {
@@ -151,45 +151,49 @@ SopMgr::_sort(
   // trivial case
   // 前半部分の末尾が後半部分の先頭より大きければ
   // すでに整列している．
-  auto bv_end1 = _calc_offset(bv, (end1 - 1));
-  auto bv_start2 = _calc_offset(bv, start2);
-  if ( cube_compare(bv_end1, bv_start2) > 0 ) {
+  auto cube_end1 = _cube_begin(bv, end1 - 1);
+  auto cube_start2 = _cube_begin(bv, start2);
+  if ( cube_compare(cube_end1, cube_start2) > 0 ) {
     return;
   }
 
   // マージする．
   // 前半部分を一旦 mTmpBuff にコピーする．
   _resize_buff(hn);
-  _copy(mTmpBuff, _calc_offset(bv,  start1), hn);
-  auto bv1 = mTmpBuff;
-  auto bv1_end = _calc_offset(mTmpBuff, hn);
-  auto bv2 = _calc_offset(bv, start2);
-  auto bv2_end = _calc_offset(bv, end2);
-  auto dst_bv = _calc_offset(bv, start);
-  while ( bv1 != bv1_end && bv2 != bv2_end ) {
-    int comp_res = cube_compare(bv1, bv2);
+  {
+    auto dst_cube = _cube_begin(mTmpBlock.body);
+    auto src_cube = _cube_begin(bv, start1);
+    _copy(dst_cube, src_cube, hn);
+  }
+  auto src1_iter = _cube_begin(mTmpBlock.body);
+  auto src1_end = src1_iter + hn;
+  auto src2_iter = _cube_begin(bv, start2);
+  auto src2_end = _cube_begin(bv, end2);
+  auto dst_iter = _cube_begin(bv);
+  while ( src1_iter != src1_end && src2_iter != src2_end ) {
+    int comp_res = cube_compare(src1_iter, src2_iter);
     if ( comp_res > 0 ) {
-      cube_copy(dst_bv, bv1);
-      bv1 += _cube_size();
-      dst_bv += _cube_size();
+      cube_copy(dst_iter, src1_iter);
+      ++ src1_iter;
+      ++ dst_iter;
     }
     else if ( comp_res < 0 ) {
-      cube_copy(dst_bv, bv2);
-      bv2 += _cube_size();
-      dst_bv += _cube_size();
+      cube_copy(dst_iter, src2_iter);
+      ++ src2_iter;
+      ++ dst_iter;
     }
     else {
       // 重複したキューブはエラー
       ASSERT_NOT_REACHED;
     }
   }
-  while ( bv1 != bv1_end ) {
-    cube_copy(dst_bv, bv1);
-    bv1 += _cube_size();
-    dst_bv += _cube_size();
+  while ( src1_iter != src1_end ) {
+    cube_copy(dst_iter, src1_iter);
+    ++ src1_iter;
+    ++ dst_iter;
   }
   // 後半部分が残っている時はそのままでいいはず．
-  ASSERT_COND( bv2 == dst_bv );
+  ASSERT_COND( src2_iter == dst_iter );
 }
 
 END_NAMESPACE_YM_SOP

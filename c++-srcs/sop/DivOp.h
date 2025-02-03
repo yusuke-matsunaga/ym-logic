@@ -5,7 +5,7 @@
 /// @brief DivOp のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
@@ -40,27 +40,27 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief カバーの代数的除算を行う．
-  void
+  SopBlock
   operator()(
-    SopBlock& dst,        ///< [in] 結果を格納するブロック
-    const SopBlock& cov1, ///< [in] 被除数
-    const SopBlock& cov2  ///< [in] 除数
+    const SopBlockRef& block1, ///< [in] 被除数のビットベクタ
+    const SopBlockRef& block2  ///< [in] 除数のビットベクタ
   );
 
   /// @brief カバーをキューブで割る．
-  void
+  ///
+  /// 上の block2 のキューブ数を1にしても同じことが行えるが，
+  /// こちらのほうが効率がよい．
+  SopBlock
   operator()(
-    SopBlock& dst,         ///< [in] 1つめのカバー
-    const SopBlock& cov1,  ///< [in] 1つめのカバー
-    const SopBitVect* cube ///< [in] 除数のキューブ
+    const SopBlockRef& block1, ///< [in] 被除数のビットベクタ
+    const SopBitVect& bv2      ///< [in] 除数のキューブのビットベクタ
   );
 
   /// @brief カバーをリテラルで割る．
-  void
+  SopBlock
   operator()(
-    SopBlock& dst,        ///< [in] 結果を格納するブロック
-    const SopBlock& cov1, ///< [in] 1つめのカバー
-    Literal lit           ///< [in] 除数のリテラル
+    const SopBlockRef& block1, ///< [in] 被除数のビットベクタ
+    Literal lit                ///< [in] 除数のリテラル
   );
 
 };

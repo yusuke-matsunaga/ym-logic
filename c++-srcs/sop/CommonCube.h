@@ -5,11 +5,10 @@
 /// @brief CommonCube のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "SopMgr.h"
-#include "SopBlock.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
@@ -40,9 +39,9 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 共通なキューブを求める．
-  SopBitVect*
+  SopBitVect
   operator()(
-    const SopBlock& cov1 ///< [in] 被除数
+    const SopBlockRef& src_block ///< [in] 対象のカバーを表すビットベクタ
   );
 
 };

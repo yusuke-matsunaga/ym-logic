@@ -3,7 +3,7 @@
 /// @brief CommonCube の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "CommonCube.h"
@@ -20,9 +20,8 @@ SopCube
 SopCover::common_cube() const
 {
   CommonCube common_cube{variable_num()};
-  auto src = block();
-  auto bv = common_cube(src);
-  return common_cube.make_cube(bv);
+  auto bv = common_cube(to_block());
+  return common_cube.make_cube(std::move(bv));
 }
 
 
@@ -31,28 +30,31 @@ SopCover::common_cube() const
 //////////////////////////////////////////////////////////////////////
 
 // @brief カバー中のすべてのキューブの共通部分を求める．
-SopBitVect*
+SopBitVect
 CommonCube::operator()(
-  const SopBlock& src1
+  const SopBlockRef& src_block
 )
 {
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
+  auto& src_bv = src_block.body;
+  auto dst_bv = new_cube();
 
-  auto dst_bv = new_bv();
+  auto src_cube = _cube_begin(src_bv);
+  auto dst_cube = _cube_begin(dst_bv);
 
   // 最初のキューブをコピーする．
-  cube_copy(dst_bv, bv1);
+  cube_copy(dst_cube, src_cube);
 
   // 2番目以降のキューブとの共通部分を求める．
-  bv1 += _cube_size();
-  while ( bv1 != bv1_end ) {
-    SopBitVect tmp = 0ULL;
-    auto dst_bv1 = dst_bv;
-    auto bv1_end1 = _calc_offset(bv1, 1);
-    for ( ; bv1 != bv1_end1; ++ dst_bv1, ++ bv1) {
-      *dst_bv1 &= *bv1;
-      tmp |= *dst_bv1;
+  auto src_end = _cube_end(src_cube, src_block.cube_num);
+  for ( ; src_cube != src_end; src_cube += _cube_size() ) {
+    SopPatWord tmp = 0ULL;
+    auto src_iter = src_cube;
+    auto src_end1 = _cube_end(src_iter);
+    auto dst_iter = dst_cube;
+    for ( ; src_iter != src_end1;
+	  ++ src_iter, ++ dst_iter) {
+      *dst_iter &= *src_iter;
+      tmp |= *dst_iter;
     }
     if ( tmp == 0ULL ) {
       // 空になった．

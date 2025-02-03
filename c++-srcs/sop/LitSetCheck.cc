@@ -3,7 +3,7 @@
 /// @brief LitSetCheck の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2017, 2018, 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "LitSet.h"
@@ -23,7 +23,7 @@ LitSet::is_in(
   Literal lit
 ) const
 {
-  LitSetCheck litset_check{mVariableNum};
+  LitSetCheck litset_check{variable_num()};
   return litset_check(mBody, lit);
 }
 
@@ -35,16 +35,14 @@ LitSet::is_in(
 // @brief 要素のチェック
 bool
 LitSetCheck::operator()(
-  SopBitVect* bv,
+  const SopBitVect& bv,
   Literal lit
 )
 {
   auto varid = lit.varid();
   auto inv = lit.is_negative();
   auto blk = _block_pos(varid);
-  auto sft = _shift_num(varid);
-  auto pat = bitvect(inv);
-  auto mask = pat << sft;
+  auto mask = get_mask(varid, inv);
   if ( bv[blk] & mask ) {
     return true;
   }

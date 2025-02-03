@@ -3,7 +3,7 @@
 /// @brief DivOp の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "DivOp.h"
@@ -26,12 +26,8 @@ SopCover::operator/(
   }
 
   DivOp divide{variable_num()};
-  auto src1 = block();
-  auto src2 = right.block();
-  SizeType cap = src1.cube_num;
-  auto dst = divide.new_block(cap);
-  divide(dst, src1, src2);
-  return divide.make_cover(dst);
+  auto dst = divide(to_block(), right.to_block());
+  return divide.make_cover(std::move(dst));
 }
 
 // @brief algebraic division を行って代入する．
@@ -45,10 +41,8 @@ SopCover::operator/=(
   }
 
   DivOp divide{variable_num()};
-  auto src1 = block();
-  auto src2 = right.block();
-  divide(src1, src1, src2);
-  _set(src1);
+  auto dst = divide(to_block(), right.to_block());
+  _set(std::move(dst));
   return *this;
 }
 
@@ -63,12 +57,8 @@ SopCover::operator/(
   }
 
   DivOp divide{variable_num()};
-  auto src1 = block();
-  auto src2 = right.block();
-  SizeType cap = src1.cube_num;
-  auto dst = divide.new_block(cap);
-  divide(dst, src1, right.block().body);
-  return divide.make_cover(dst);
+  auto dst = divide(to_block(), right.body());
+  return divide.make_cover(std::move(dst));
 }
 
 // @brief キューブによる商を計算する．
@@ -82,10 +72,8 @@ SopCover::operator/=(
   }
 
   DivOp divide{variable_num()};
-  auto src1 = block();
-  auto src2 = right.block();
-  divide(src1, src1, right.block().body);
-  _set(src1);
+  auto dst = divide(to_block(), right.body());
+  _set(std::move(dst));
   return *this;
 }
 
@@ -96,11 +84,8 @@ SopCover::operator/(
 ) const
 {
   DivOp divide{variable_num()};
-  auto src1 = block();
-  SizeType cap = src1.cube_num;
-  auto dst = divide.new_block(cap);
-  divide(dst, src1, lit);
-  return divide.make_cover(dst);
+  auto dst = divide(to_block(), lit);
+  return divide.make_cover(std::move(dst));
 }
 
 // @brief リテラルによる商を計算して代入する．
@@ -110,9 +95,8 @@ SopCover::operator/=(
 )
 {
   DivOp divide{variable_num()};
-  auto src1 = block();
-  divide(src1, src1, lit);
-  _set(src1);
+  auto dst = divide(to_block(), lit);
+  _set(std::move(dst));
   return *this;
 }
 
@@ -122,60 +106,57 @@ SopCover::operator/=(
 //////////////////////////////////////////////////////////////////////
 
 // @brief カバーの代数的除算を行う．
-void
+SopBlock
 DivOp::operator()(
-  SopBlock& dst,
-  const SopBlock& src1,
-  const SopBlock& src2
+  const SopBlockRef& block1,
+  const SopBlockRef& block2
 )
 {
-  SizeType nc1 = src1.cube_num;
-  SizeType nc2 = src2.cube_num;
+  auto& src1_bv = block1.body;
+  SizeType src1_nc = block1.cube_num;
+  auto& src2_bv = block2.body;
+  SizeType src2_nc = block2.cube_num;
 
   // 作業領域のビットベクタを確保する．
-  _resize_buff(nc1);
+  _resize_buff(src1_nc);
 
-  auto bv1 = src1.body;
-  auto bv2 = src2.body;
-
-  // bv1 の各キューブは高々1つのキューブでしか割ることはできない．
+  // block1 の各キューブは高々1つのキューブでしか割ることはできない．
   // ただし，除数も被除数も algebraic expression の場合
   // ので bv1 の各キューブについて bv2 の各キューブで割ってみて
   // 成功した場合，その商を記録する．
-  vector<bool> mark(nc1, false);
-  for ( SizeType i = 0; i < nc1; ++ i ) {
-    auto tmp1 = _calc_offset(bv1, i);
-    for ( SizeType j = 0; j < nc2; ++ j ) {
-      auto tmp2 = _calc_offset(bv2, j);
-      auto dst1 = _calc_offset(mTmpBuff, i);
-      if ( cube_quotient(dst1, tmp1, tmp2) ) {
+  vector<bool> mark(src1_nc, false);
+  for ( SizeType i = 0; i < src1_nc; ++ i ) {
+    auto src1_cube = _cube_begin(src1_bv, i);
+    auto dst_cube = _cube_begin(mTmpBlock.body, i);
+    for ( SizeType j = 0; j < src2_nc; ++ j ) {
+      auto src2_cube = _cube_begin(src2_bv, j);
+      if ( cube_quotient(dst_cube, src1_cube, src2_cube) ) {
 	mark[i] = true;
 	break;
       }
     }
   }
 
-  // 商のキューブは tmp 中に nc2 回現れているはず．
+  // 商のキューブは mTmpBlock 中に block2.cube_num 回現れているはず．
   vector<SizeType> pos_list;
-  pos_list.reserve(nc1);
-  for ( SizeType i = 0; i < nc1; ++ i ) {
+  pos_list.reserve(src1_nc);
+  for ( SizeType i = 0; i < src1_nc; ++ i ) {
     if ( !mark[i] ) {
       // 対象ではない．
       continue;
     }
-    auto tmp1 = _calc_offset(mTmpBuff, i);
-
     SizeType c = 1;
     vector<SizeType> tmp_list;
-    for ( SizeType i2 = i + 1; i2 < nc1; ++ i2 ) {
-      auto tmp2 = _calc_offset(mTmpBuff, i2);
+    auto tmp1 = _cube_begin(mTmpBlock.body, i);
+    for ( SizeType i2 = i + 1; i2 < src1_nc; ++ i2 ) {
+      auto tmp2 = _cube_begin(mTmpBlock.body, i2);
       if ( mark[i2] && cube_compare(tmp1, tmp2) == 0 ) {
 	++ c;
 	// i 番目のキューブと等しかったキューブ位置を記録する．
 	tmp_list.push_back(i2);
       }
     }
-    if ( c == nc2 ) {
+    if ( c == src2_nc ) {
       // 見つけた
       pos_list.push_back(i);
       // tmp_list に含まれるキューブはもう調べなくて良い．
@@ -185,43 +166,46 @@ DivOp::operator()(
     }
   }
 
-  auto dst_bv = dst.body;
-  for ( SizeType pos: pos_list ) {
-    auto tmp = _calc_offset(mTmpBuff, pos);
-    cube_copy(dst_bv, tmp);
-    dst_bv += _cube_size();
+  SizeType nc = pos_list.size();
+  auto dst = new_block(nc);
+  dst.cube_num = nc;
+  auto dst_cube = _cube_begin(dst.body);
+  for ( auto pos: pos_list ) {
+    auto src_cube = _cube_begin(mTmpBlock.body, pos);
+    cube_copy(dst_cube, src_cube);
+    dst_cube += _cube_size();
   }
-  dst.cube_num = pos_list.size();
+  return dst;
 }
 
 // @brief カバーをキューブで割る．
-void
+SopBlock
 DivOp::operator()(
-  SopBlock& dst,
-  const SopBlock& src1,
-  const SopBitVect* bv2
+  const SopBlockRef& block1,
+  const SopBitVect& bv2
 )
 {
-  SizeType nc1 = src1.cube_num;
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, nc1);
-  auto dst_bv = dst.body;
-  auto nb = _cube_size();
-  SizeType nc = 0;
-  for ( ; bv1 != bv1_end; bv1 += _cube_size() ) {
-    if ( cube_quotient(dst_bv, bv1, bv2) ) {
-      dst_bv += nb;
-      ++ nc;
+  auto& src1_bv = block1.body;
+  SizeType src1_nc = block1.cube_num;
+  auto dst = new_block(src1_nc);
+  auto dst_cube = _cube_begin(dst.body);
+  dst.cube_num = 0;
+  auto src1_cube = _cube_begin(src1_bv);
+  auto src1_end = _cube_end(src1_cube, src1_nc);
+  auto src2_cube = _cube_begin(bv2);
+  for ( ; src1_cube != src1_end; src1_cube += _cube_size() ) {
+    if ( cube_quotient(dst_cube, src1_cube, src2_cube) ) {
+      dst_cube += _cube_size();
+      ++ dst.cube_num;
     }
   }
-  dst.cube_num = nc;
+  return dst;
 }
 
 // @brief カバーをリテラルで割る．
-void
+SopBlock
 DivOp::operator()(
-  SopBlock& dst,
-  const SopBlock& src1,
+  const SopBlockRef& block1,
   Literal lit
 )
 {
@@ -229,24 +213,26 @@ DivOp::operator()(
   auto inv = lit.is_negative();
   auto blk = _block_pos(varid);
   auto sft = _shift_num(varid);
-  auto pat = bitvect(inv);
-  auto pat1 = pat << sft;
+  auto pat1 = get_mask(varid, inv);
   auto mask = 3UL << sft;
   auto nmask = ~mask;
-  auto nb = _cube_size();
-  auto bv1 = src1.body;
-  auto bv1_end = _calc_offset(bv1, src1.cube_num);
-  auto dst_body = dst.body;
-  SizeType nc = 0;
-  for ( ; bv1 != bv1_end; bv1 += nb ) {
-    if ( (bv1[blk] & mask) == pat1 ) {
-      auto dst1 = _calc_offset(dst_body, nc);
-      cube_copy(dst1, bv1);
-      dst1[blk] &= nmask;
-      ++ nc;
+  SizeType src1_nc = block1.cube_num;
+  auto dst = new_block(src1_nc);
+  auto dst_cube = _cube_begin(dst.body);
+  dst.cube_num = 0;
+  auto src1_cube = _cube_begin(block1.body);
+  auto src1_end = _cube_end(src1_cube, src1_nc);
+  for ( ; src1_cube != src1_end; src1_cube += _cube_size() ) {
+    auto src1_p = src1_cube + blk;
+    if ( (*src1_p & mask) == pat1 ) {
+      cube_copy(dst_cube, src1_cube);
+      auto dst_p = dst_cube + blk;
+      *dst_p &= nmask;
+      dst_cube += _cube_size();
+      ++ dst.cube_num;
     }
   }
-  dst.cube_num = nc;
+  return dst;
 }
 
 END_NAMESPACE_YM_SOP

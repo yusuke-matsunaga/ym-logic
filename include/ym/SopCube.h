@@ -5,15 +5,18 @@
 /// @brief SopCube のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
+#include "ym/SopBase.h"
 #include "ym/Expr.h"
 #include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
+
+class SopBlockRef;
 
 //////////////////////////////////////////////////////////////////////
 /// @ingroup SopGroup
@@ -26,7 +29,8 @@ BEGIN_NAMESPACE_YM_SOP
 /// * そのため初期化の際に変数の数が必要となる．
 /// * 1つの変数につき2ビットを使用する．
 //////////////////////////////////////////////////////////////////////
-class SopCube
+class SopCube:
+  public SopBase
 {
   friend class SopMgr;
 
@@ -37,7 +41,7 @@ public:
   /// * 空のキューブを作る．
   explicit
   SopCube(
-    SizeType variable_num ///< [in] 変数の数
+    SizeType variable_num = 0 ///< [in] 変数の数
   );
 
   /// @brief コンストラクタ
@@ -85,20 +89,13 @@ public:
   );
 
   /// @brief デストラクタ
-  ~SopCube();
+  ~SopCube() = default;
 
 
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief 変数の数を返す．
-  SizeType
-  variable_num() const
-  {
-    return mVariableNum;
-  }
 
   /// @brief リテラル数を返す．
   SizeType
@@ -222,11 +219,23 @@ public:
   Expr
   expr() const;
 
-  /// @breif SopBlock に変換する．
-  ///
-  /// variable_num() の情報は失われる．
-  SopBlock
-  block() const;
+  /// @brief SopBlockRef に変換する．
+  SopBlockRef
+  to_block() const;
+
+  /// @brief 本体のビットベクタを返す．
+  const SopBitVect&
+  body() const
+  {
+    return mBody;
+  }
+
+  /// @brief 本体のビットベクタを返す．
+  SopBitVect&
+  body()
+  {
+    return mBody;
+  }
 
   /// @brief ハッシュ値を返す．
   SizeType
@@ -248,7 +257,7 @@ private:
   /// @brief 内容を指定するコンストラクタ
   SopCube(
     SizeType variable_num, ///< [in] 変数の数
-    SopBitVect* body       ///< [in] キューブのパタンを表す本体
+    SopBitVect&& body      ///< [in] キューブのパタンを表す本体
   );
 
   /// @brief SopBlock からのムーブコンストラクタ
@@ -256,10 +265,6 @@ private:
     SizeType variable_num, ///< [in] 変数の数
     SopBlock&& block       ///< [in] 変換元ののブロック
   );
-
-  /// @brief mBody を削除する．
-  void
-  delete_body();
 
 
 private:
@@ -281,11 +286,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 変数の数
-  SizeType mVariableNum;
-
   // 内容を表すビットベクタ
-  SopBitVect* mBody;
+  SopBitVect mBody;
 
 };
 
