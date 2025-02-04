@@ -5,13 +5,13 @@
 /// @brief Divisor のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 /// @class Divisor Divisor.h "Divisor.h"
@@ -34,13 +34,13 @@ public:
   /// @brief 除数を求める．
   /// @return 除数を表す論理式を返す．
   virtual
-  SopCover
+  AlgCover
   operator()(
-    const SopCover& f ///< [in] 対象の論理式
+    const AlgCover& f ///< [in] 対象の論理式
   ) const = 0;
 
 };
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG
 
 #endif // DIVISOR_H

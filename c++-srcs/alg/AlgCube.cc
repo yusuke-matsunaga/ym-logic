@@ -7,8 +7,6 @@
 /// All rights reserved.
 
 #include "ym/AlgCube.h"
-#include "AlgMgr.h"
-#include "AlgBlock.h"
 
 
 BEGIN_NAMESPACE_YM_ALG
@@ -17,7 +15,7 @@ BEGIN_NAMESPACE_YM_ALG
 AlgCube::AlgCube(
   SizeType var_num
 ) : AlgBase{var_num},
-    mBody(_cube_size(), 0ULL)
+    mChunk(_cube_size(), 0ULL)
 {
 }
 
@@ -27,7 +25,7 @@ AlgCube::AlgCube(
   Literal lit
 ) : AlgCube{var_num}
 {
-  cube_set_literal(mBody.begin(), lit);
+  _cube_set_literal(_dst_cube(), lit);
 }
 
 // @brief コンストラクタ
@@ -36,7 +34,7 @@ AlgCube::AlgCube(
   const vector<Literal>& lit_list
 ) : AlgCube{var_num}
 {
-  cube_set_literals(mBody.begin(), lit_list);
+  _cube_set_literals(_dst_cube(), lit_list);
 }
 
 // @brief コンストラクタ
@@ -45,14 +43,14 @@ AlgCube::AlgCube(
   std::initializer_list<Literal>& lit_list
 ) : AlgCube{var_num}
 {
-  cube_set_literals(mBody.begin(), lit_list);
+  _cube_set_literals(_dst_cube(), lit_list);
 }
 
 // @brief コピーコンストラクタ
 AlgCube::AlgCube(
   const AlgCube& src
 ) : AlgBase{src},
-    mBody{src.mBody}
+    mChunk{src.mChunk}
 {
 }
 
@@ -64,9 +62,8 @@ AlgCube::operator=(
 {
   if ( this != &src ) {
     AlgBase::operator=(src);
-    mBody = src.mBody;
+    mChunk = src.mChunk;
   }
-
   return *this;
 }
 
@@ -74,7 +71,7 @@ AlgCube::operator=(
 AlgCube::AlgCube(
   AlgCube&& src
 ) : AlgBase{std::move(src)},
-    mBody{std::move(src.mBody)}
+    mChunk{std::move(src.mChunk)}
 {
 }
 
@@ -85,17 +82,16 @@ AlgCube::operator=(
 )
 {
   AlgBase::operator=(std::move(src));
-  std::swap(mBody, src.mBody);
-
+  std::swap(mChunk, src.mChunk);
   return *this;
 }
 
 // @brief 内容を指定するコンストラクタ
 AlgCube::AlgCube(
   SizeType var_num,
-  AlgBitVect&& body
+  Chunk&& chunk
 ) : AlgBase{var_num},
-    mBody{std::move(body)}
+    mChunk{std::move(chunk)}
 {
 }
 
@@ -105,40 +101,39 @@ AlgCube::get_pat(
   SizeType var
 ) const
 {
-  return get_pat(mBody.begin(), var);
+  return _get_pat(_cube(), var);
 }
 
 // @brief リテラル数を返す．
 SizeType
 AlgCube::literal_num() const
 {
-  if ( mBody.empty() ) {
+  if ( mChunk.empty() ) {
     return 0;
   }
-  return literal_num(to_block());
+  return _literal_num(1, chunk());
 }
 
 // @brief 空のキューブの時 true を返す．
 bool
 AlgCube::is_tautology() const
 {
-  if ( mBody.empty() ) {
+  if ( mChunk.empty() ) {
     return true;
   }
-  return cube_check_null(mBody.begin());
+  return _cube_check_null(_cube());
 }
 
 // @brief 内容をリテラルのリストに変換する．
 vector<Literal>
 AlgCube::literal_list() const
 {
-  SizeType nl = literal_num();
-
-  auto src_cube = mBody.begin();
   vector<Literal> lit_list;
+  SizeType nl = literal_num();
   lit_list.reserve(nl);
+  auto src_cube = _cube();
   for ( SizeType var = 0; var < variable_num(); ++ var ) {
-    auto pat = get_pat(src_cube, var);
+    auto pat = _get_pat(src_cube, var);
     if ( pat == AlgPat::_1 ) {
       lit_list.push_back(Literal{var, false});
     }
@@ -146,7 +141,6 @@ AlgCube::literal_list() const
       lit_list.push_back(Literal{var, true});
     }
   }
-
   return lit_list;
 }
 
@@ -156,7 +150,7 @@ AlgCube::check_literal(
   Literal lit
 ) const
 {
-  return literal_num(to_block(), lit) > 0;
+  return _literal_num(1, chunk(), lit) > 0;
 }
 
 // @brief キューブの論理積を計算する
@@ -168,14 +162,14 @@ AlgCube::operator*(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto dst_bv = new_cube();
-  auto dst_cube = _cube_begin(dst_bv);
-  auto src1_cube = _cube_begin(mBody);
-  auto src2_cube = _cube_begin(right.mBody);
-  if ( !cube_product(dst_cube, src1_cube, src2_cube) ) {
-    cube_clear(dst_cube);
+  auto dst_chunk = _new_chunk(1);
+  auto dst_cube = dst_chunk.begin();
+  auto cube1 = _cube();
+  auto cube2 = right._cube();
+  if ( !_cube_product(dst_cube, cube1, cube2) ) {
+    _cube_clear(dst_cube);
   }
-  return make_cube(std::move(dst_bv));
+  return AlgCube{variable_num(), std::move(dst_chunk)};
 }
 
 // @brief 論理積を計算し自身に代入する．
@@ -187,12 +181,11 @@ AlgCube::operator*=(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto dst_cube = _cube_begin(mBody);
-  auto src_cube = _cube_begin(right.mBody);
-  if ( !cube_product(dst_cube, dst_cube, src_cube) ) {
-    cube_clear(dst_cube);
+  auto dst_cube = _dst_cube();
+  auto src_cube = right._cube();
+  if ( !_cube_product(dst_cube, dst_cube, src_cube) ) {
+    _cube_clear(dst_cube);
   }
-
   return *this;
 }
 
@@ -202,14 +195,13 @@ AlgCube::operator*(
   Literal right
 ) const
 {
-  auto dst_bv = new_cube();
-  auto dst_cube = _cube_begin(dst_bv);
-  auto src_cube = _cube_begin(mBody);
-  if ( !cube_product(dst_cube, src_cube, right) ) {
-    cube_clear(dst_cube);
+  auto dst_chunk = _new_chunk(1);
+  auto dst_cube = AlgBase::_dst_cube(dst_chunk);
+  auto src_cube = _cube();
+  if ( !_cube_product(dst_cube, src_cube, right) ) {
+    _cube_clear(dst_cube);
   }
-
-  return make_cube(std::move(dst_bv));
+  return AlgCube{variable_num(), std::move(dst_chunk)};
 }
 
 // @brief リテラルとの論理積を計算し自身に代入する．
@@ -218,11 +210,10 @@ AlgCube::operator*=(
   Literal right
 )
 {
-  auto dst_cube = _cube_begin(mBody);
-  if ( !cube_product(dst_cube, dst_cube, right) ) {
-    cube_clear(dst_cube);
+  auto dst_cube = _dst_cube();
+  if ( !_cube_product(dst_cube, dst_cube, right) ) {
+    _cube_clear(dst_cube);
   }
-
   return *this;
 }
 
@@ -236,15 +227,14 @@ AlgCube::operator/(
     throw std::invalid_argument("variable_num() is different from each other");
   }
 
-  auto dst_bv = new_cube();
-  auto dst_cube = _cube_begin(dst_bv);
-  auto src1_cube = _cube_begin(mBody);
-  auto src2_cube = _cube_begin(right.mBody);
-  if ( !cube_quotient(dst_cube, src1_cube, src2_cube) ) {
-    cube_clear(dst_cube);
+  auto dst_chunk = _new_chunk(1);
+  auto dst_cube = AlgBase::_dst_cube(dst_chunk);
+  auto cube1 = _cube();
+  auto cube2 = right._cube();
+  if ( !_cube_quotient(dst_cube, cube1, cube2) ) {
+    _cube_clear(dst_cube);
   }
-
-  return make_cube(std::move(dst_bv));
+  return AlgCube{variable_num(), std::move(dst_chunk)};
 }
 
 // @brief キューブによる商を計算し自身に代入する．
@@ -257,12 +247,11 @@ AlgCube::operator/=(
     throw std::invalid_argument("variable_num() is different from each other");
   }
 
-  auto dst_cube = _cube_begin(mBody);
-  auto src2_cube = _cube_begin(right.mBody);
-  if ( !cube_quotient(dst_cube, dst_cube, src2_cube) ) {
-    cube_clear(dst_cube);
+  auto dst_cube = _dst_cube();
+  auto cube2 = right._cube();
+  if ( !_cube_quotient(dst_cube, dst_cube, cube2) ) {
+    _cube_clear(dst_cube);
   }
-
   return *this;
 }
 
@@ -272,14 +261,13 @@ AlgCube::operator/(
   Literal right
 ) const
 {
-  auto dst_bv = new_cube();
-  auto dst_cube = _cube_begin(dst_bv);
-  auto src1_cube = _cube_begin(mBody);
-  if ( !cube_quotient(dst_cube, src1_cube, right) ) {
-    cube_clear(dst_cube);
+  auto dst_chunk = _new_chunk(1);
+  auto dst_cube = AlgBase::_dst_cube(dst_chunk);
+  auto cube1 = _cube();
+  if ( !_cube_quotient(dst_cube, cube1, right) ) {
+    _cube_clear(dst_cube);
   }
-
-  return make_cube(std::move(dst_bv));
+  return AlgCube{variable_num(), std::move(dst_chunk)};
 }
 
 // @brief リテラルによる商を計算し自身に代入する．
@@ -288,49 +276,25 @@ AlgCube::operator/=(
   Literal right
 )
 {
-  auto dst_cube = _cube_begin(mBody);
-  if ( !cube_quotient(dst_cube, dst_cube, right) ) {
-    cube_clear(dst_cube);
+  auto dst_cube = _dst_cube();
+  if ( !_cube_quotient(dst_cube, dst_cube, right) ) {
+    _cube_clear(dst_cube);
   }
-
   return *this;
-}
-
-// @relates AlgCube
-int
-compare(
-  const AlgCube& left,
-  const AlgCube& right
-)
-{
-  if ( left.variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
-  auto cube1 = left._cube_begin(left.mBody);
-  auto cube2 = right._cube_begin(right.mBody);
-  return cube_compare(cube1, cube2);
 }
 
 // @brief Expr に変換する．
 Expr
 AlgCube::expr() const
 {
-  return to_expr(to_block());
-}
-
-// @brief AlgBlockRef に変換する．
-AlgBlockRef
-AlgCube::to_block() const
-{
-  return AlgBlockRef{1, mBody};
+  return _to_expr(1, chunk());
 }
 
 // @brief ハッシュ値を返す．
 SizeType
 AlgCube::hash() const
 {
-  return hash(to_block());
+  return _hash(1, chunk());
 }
 
 // @brief 内容をわかりやすい形で出力する．
@@ -340,7 +304,36 @@ AlgCube::print(
   const vector<string>& varname_list
 ) const
 {
-  print(s, mBody, 0, 1, varname_list);
+  _print(s, chunk(), 0, 1, varname_list);
+}
+
+// @brief 内部で用いられるキューブを得る．
+AlgBase::Cube
+AlgCube::_cube() const
+{
+  return AlgBase::_cube(chunk());
+}
+
+// @brief 内部で用いられるキューブを得る．
+AlgBase::DstCube
+AlgCube::_dst_cube()
+{
+  return AlgBase::_dst_cube(chunk());
+}
+
+// @relates AlgCube
+int
+AlgCube::_compare(
+  const AlgCube& right
+) const
+{
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
+
+  auto cube1 = _cube();
+  auto cube2 = right._cube();
+  return _cube_compare(cube1, cube2);
 }
 
 END_NAMESPACE_YM_ALG

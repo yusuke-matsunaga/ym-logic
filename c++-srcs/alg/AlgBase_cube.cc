@@ -6,8 +6,7 @@
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "AlgBase.h"
-#include "AlgBlock.h"
+#include "ym/AlgBase.h"
 #include "ym/Literal.h"
 
 
@@ -20,8 +19,8 @@ BEGIN_NAMESPACE_YM_ALG
 // @brief 空キューブかどうか調べる．
 bool
 AlgBase::_cube_check_null(
-  AlgBitVectConstIter cube
-)
+  Cube cube
+) const
 {
   auto cube_end = _cube_end(cube);
   for ( ; cube != cube_end; ++ cube ) {
@@ -35,10 +34,10 @@ AlgBase::_cube_check_null(
 // @brief 2つのキューブの積を計算する．
 bool
 AlgBase::_cube_product(
-  AlgBitVectIter dst_cube,
-  AlgBitVectConstIter cube1,
-  AlgBitVectConstIter cube2
-)
+  DstCube dst_cube,
+  Cube cube1,
+  Cube cube2
+) const
 {
   const AlgPatWord mask1 = 0x5555555555555555ULL;
   const AlgPatWord mask2 = 0xAAAAAAAAAAAAAAAAULL;
@@ -59,10 +58,10 @@ AlgBase::_cube_product(
 // @brief キューブとリテラルの積を計算する．
 bool
 AlgBase::_cube_product(
-  AlgBitVectIter dst_cube,
-  AlgBitVectConstIter src_cube,
+  DstCube dst_cube,
+  Cube src_cube,
   Literal lit
-)
+) const
 {
   auto varid = lit.varid();
   auto inv = lit.is_negative();
@@ -87,16 +86,16 @@ AlgBase::_cube_product(
 
 // @brief キューブとリテラルの積を計算する．
 bool
-AlgBase::cube_product_int(
-  AlgBitVectIter dst_cube,
+AlgBase::_cube_product_int(
+  DstCube dst_cube,
   Literal lit
-)
+) const
 {
   auto varid = lit.varid();
   auto inv = lit.is_negative();
   auto blk = _block_pos(varid);
   auto sft = _shift_num(varid);
-  auto pat1 = get_mask(varid, inv);
+  auto pat1 = _get_mask(varid, inv);
   auto mask = 3UL << sft;
 
   // 単純には答の積項数は2つの積項数の積だが
@@ -113,11 +112,11 @@ AlgBase::cube_product_int(
 
 // @brief キューブによる商を求める．
 bool
-AlgBase::cube_quotient(
-  AlgBitVectIter dst_cube,
-  AlgBitVectConstIter cube1,
-  AlgBitVectConstIter cube2
-)
+AlgBase::_cube_quotient(
+  DstCube dst_cube,
+  Cube cube1,
+  Cube cube2
+) const
 {
   auto dst_end = _cube_end(dst_cube);
   for ( ; dst_cube != dst_end; ++ dst_cube, ++ cube1, ++ cube2 ) {
@@ -134,11 +133,11 @@ AlgBase::cube_quotient(
 
 // @brief リテラルによる商を求める．
 bool
-AlgBase::cube_quotient(
-  AlgBitVectIter dst_cube,
-  AlgBitVectConstIter src_cube,
+AlgBase::_cube_quotient(
+  DstCube dst_cube,
+  Cube src_cube,
   Literal lit
-)
+) const
 {
   auto varid = lit.varid();
   auto inv = lit.is_negative();
@@ -159,10 +158,10 @@ AlgBase::cube_quotient(
 
 // @brief キューブ(を表すビットベクタ)の比較を行う．
 int
-AlgBase::cube_compare(
-  AlgBitVectConstIter cube1,
-  AlgBitVectConstIter cube2
-)
+AlgBase::_cube_compare(
+  Cube cube1,
+  Cube cube2
+) const
 {
   auto src1_end = _cube_end(cube1);
   for ( ; cube1 != src1_end; ++ cube1, ++ cube2 ) {

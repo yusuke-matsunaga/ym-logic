@@ -11,25 +11,25 @@
 #include "ym/Range.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
-// クラス SopCover
+// クラス AlgCover
 //////////////////////////////////////////////////////////////////////
 
 // @brief すべてのカーネルとコカーネルペアを列挙する．
-vector<pair<SopCover, SopCover>>
-SopCover::all_kernels() const
+vector<pair<AlgCover, AlgCover>>
+AlgCover::all_kernels() const
 {
-  vector<pair<SopCover, SopCover>> ans_list;
+  vector<pair<AlgCover, AlgCover>> ans_list;
 
   KernelGen kg;
   return kg.all_kernels(*this);
 }
 
 // @brief 最も価値の高いカーネルを求める．
-SopCover
-SopCover::best_kernel() const
+AlgCover
+AlgCover::best_kernel() const
 {
   KernelGen kg;
   return kg.best_kernel(*this);
@@ -52,74 +52,106 @@ KernelGen::~KernelGen()
 }
 
 // @brief カーネルとコカーネルを列挙する．
-vector<pair<SopCover, SopCover>>
+vector<pair<AlgCover, AlgCover>>
 KernelGen::all_kernels(
-  const SopCover& cover
+  const AlgCover& cover
 )
 {
   generate(cover);
 
   // kernel_list に設定する．
-  vector<pair<SopCover, SopCover>> kernel_list;
-  kernel_list.reserve(mCellList.size());
-  // この処理は破壊的なので以降は mHashTable は使えない．
-  for ( auto cell: mCellList ) {
-    kernel_list.push_back(make_pair(std::move(cell->mKernel), std::move(cell->mCoKernels)));
+  vector<pair<AlgCover, AlgCover>> kernel_list;
+  kernel_list.reserve(mKernelDict.size());
+
+  // この処理は破壊的なので以降は mKernelDict は使えない．
+  for ( auto& p: mKernelDict ) {
+    auto& kernel = p.first;
+    auto& cokernels = p.second;
+    kernel_list.push_back(make_pair(std::move(kernel),
+				    std::move(cokernels)));
   }
   hash_clear();
+
+  std::sort(kernel_list.begin(), kernel_list.end());
 
   return kernel_list;
 }
 
 // @brief 最も価値の高いカーネルを返す．
-SopCover
+AlgCover
 KernelGen::best_kernel(
-  const SopCover& cover
+  const AlgCover& cover
 )
 {
   generate(cover);
 
   // 特例: 自身がレベル０カーネルの場合は空のカバーを返す．
-  if ( mCellList.size() == 1 && mCellList[0]->mCoKernels.literal_num() == 0 ) {
+  if ( mKernelDict.size() == 1 &&
+       mKernelDict.begin()->second.literal_num() == 0 ) {
     hash_clear();
-    return SopCover(cover.variable_num());
+    return AlgCover{cover.variable_num()};
   }
 
   // 価値の最も大きいカーネルを求める．
+  // この処理は破壊的なので以降は mKernelDict を使えない．
   int max_value = -1;
-  Cell* max_cell = nullptr;
-  for ( auto cell: mCellList ) {
-    const SopCover& kernel = cell->mKernel;
-    int k_nc = kernel.cube_num();
-    int k_nl = kernel.literal_num();
-    const SopCover& cokernels = cell->mCoKernels;
-    int c_nc = cokernels.cube_num();
-    int c_nl = cokernels.literal_num();
+  auto max_p = mKernelDict.end();
+  for ( auto p = mKernelDict.begin();
+	p != mKernelDict.end(); ++ p ) {
+    auto& kernel = p->first;
+    auto& cokernels = p->second;
+    auto k_nc = kernel.cube_num();
+    auto k_nl = kernel.literal_num();
+    auto c_nc = cokernels.cube_num();
+    auto c_nl = cokernels.literal_num();
     int value = (k_nc - 1) * c_nl + (c_nc - 1) * k_nl;
     if ( max_value < value ) {
       max_value = value;
-      max_cell = cell;
+      max_p = p;
     }
   }
-  SopCover ans{std::move(max_cell->mKernel)};
   hash_clear();
 
-  return ans;
+  return max_p->first;
 }
 
 // @brief カーネルとコカーネルを列挙する．
 void
 KernelGen::generate(
-  const SopCover& cover
+  const AlgCover& cover
+)
+{
+  // 2回以上現れるリテラルの（出現頻度でソートされた）リストを作る．
+  auto literal_list = gen_literal_list(cover);
+
+  mEnd = literal_list.end();
+  hash_clear();
+
+  SizeType nv = cover.variable_num();
+  auto ccube0 = AlgCube{nv}; // 空のキューブ
+  auto plits = LitSet{nv}; // 空集合
+  kern_sub(cover, literal_list.begin(), ccube0, plits);
+
+  // 特例：自分自身がカーネルとなっているか調べる．
+  auto ccube = cover.common_cube();
+  if ( ccube.literal_num() == 0 ) {
+    hash_add(cover, ccube);
+  }
+}
+
+// @brief 出現頻度の昇順にならべたリテラルのリストを作る．
+vector<Literal>
+KernelGen::gen_literal_list(
+  const AlgCover& cover ///< [in] 対象のカバー
 )
 {
   // cover に2回以上現れるリテラルとその出現頻度のリストを作る．
   SizeType nv = cover.variable_num();
-  vector<pair<int, Literal>> tmp_list;
+  vector<pair<SizeType, Literal>> tmp_list;
   tmp_list.reserve(nv * 2);
-  for ( int var: Range(nv) ) {
+  for ( SizeType var: Range(nv) ) {
     for ( auto lit: {Literal(var, false), Literal(var, true)} ) {
-      int n = cover.literal_num(lit);
+      auto n = cover.literal_num(lit);
       if ( n >= 2 ) {
 	tmp_list.push_back(make_pair(n, lit));
       }
@@ -129,45 +161,33 @@ KernelGen::generate(
   // 出現頻度の昇順にソートする．
   // c++-11 のラムダ式を使っている．
   sort(tmp_list.begin(), tmp_list.end(),
-       [](const pair<int, Literal>& a,
-	  const pair<int, Literal>& b) -> bool
+       [](const pair<SizeType, Literal>& a,
+	  const pair<SizeType, Literal>& b) -> bool
        { return a.first < b.first; });
 
   // リテラルだけを literal_list に移す．
-  int n = tmp_list.size();
-  vector<Literal> literal_list(n);
-  for ( int i: Range(n) ) {
-    literal_list[i] = tmp_list[i].second;
+  auto n = tmp_list.size();
+  vector<Literal> literal_list;
+  literal_list.reserve(n);
+  for ( auto& p: tmp_list ) {
+    auto lit = p.second;
+    literal_list.push_back(lit);
   }
-
-  mEnd = literal_list.end();
-  hash_clear();
-  hash_resize(32);
-
-  SopCube ccube0(nv); // 空のキューブ
-  LitSet plits(nv); // 空集合
-  kern_sub(cover, literal_list.begin(), ccube0, plits);
-
-  // 特例：自分自身がカーネルとなっているか調べる．
-  SopCube ccube = cover.common_cube();
-  if ( ccube.literal_num() == 0 ) {
-    SopCover cover1(cover);
-    hash_add(std::move(cover1), ccube);
-  }
+  return literal_list;
 }
 
 // @brief カーネルを求める下請け関数
 void
 KernelGen::kern_sub(
-  const SopCover& cover,
+  const AlgCover& cover,
   vector<Literal>::const_iterator p,
-  const SopCube& ccube,
+  const AlgCube& ccube,
   const LitSet& plits
 )
 {
-  LitSet plits1(plits);
+  auto plits1 = plits;
   while ( p != mEnd ) {
-    Literal lit = *p;
+    auto lit = *p;
     ++ p;
 
     if ( cover.literal_num(lit) <= 1 ) {
@@ -176,11 +196,11 @@ KernelGen::kern_sub(
     }
 
     // まず lit で割る．
-    SopCover cover1 = cover / lit;
+    auto cover1 = cover / lit;
     // 共通なキューブを求める．
-    SopCube ccube1 = cover1.common_cube();
+    auto ccube1 = cover1.common_cube();
     if ( plits1.check_intersect(ccube1) ) {
-      // plits にはすでに処理したリテラルが入っている．
+      // plits1 にはすでに処理したリテラルが入っている．
       // それと ccube1 が共通部分をもっていたということは
       // cover1 はすでに処理されている．
       continue;
@@ -208,64 +228,23 @@ KernelGen::kern_sub(
 void
 KernelGen::hash_clear()
 {
-  for ( auto cell: mCellList ) {
-    delete cell;
-  }
-  mHashTable.clear();
-  mCellList.clear();
+  mKernelDict.clear();
 }
 
 // @brief ハッシュ表に登録する．
 void
 KernelGen::hash_add(
-  SopCover&& kernel,
-  const SopCube& cokernel
+  AlgCover&& kernel,
+  const AlgCube& cokernel
 )
 {
-  SizeType hash = kernel.hash();
-  int index = hash % mHashSize;
-  bool found = false;
-  for ( auto cell = mHashTable[index];
-	cell != nullptr;
-	cell = cell->mLink ) {
-    if ( cell->mKernel == kernel ) {
-      // 同じカーネルがあった．
-      cell->mCoKernels += cokernel;
-      found = true;
-      break;
-    }
+  if ( mKernelDict.count(kernel) == 0 ) {
+    mKernelDict.emplace(std::move(kernel), AlgCover{cokernel});
   }
-  if ( !found ) {
-    if ( mCellList.size() >= mNextLimit ) {
-      hash_resize(mHashSize * 2);
-      index = hash % mHashSize;
-    }
-    auto cell = new Cell{std::move(kernel), cokernel};
-    cell->mLink = mHashTable[index];
-    mHashTable[index] = cell;
-    mCellList.push_back(cell);
+  else {
+    auto& cokernels = mKernelDict.at(kernel);
+    cokernels += cokernel;
   }
 }
 
-// @brief ハッシュ表をリサイズする．
-void
-KernelGen::hash_resize(
-  SizeType size
-)
-{
-  vector<Cell*> new_table(size, nullptr);
-  for ( auto cell: mHashTable ) {
-    while ( cell != nullptr ) {
-      auto next = cell->mLink;
-      SizeType hash = cell->mKernel.hash();
-      int index = hash % size;
-      cell->mLink = new_table[index];
-      new_table[index] = cell;
-    }
-  }
-  mHashTable.swap(new_table);
-  mHashSize = size;
-  mNextLimit = static_cast<int>(mHashSize * 1.8);
-}
-
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG

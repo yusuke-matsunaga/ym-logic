@@ -16,8 +16,6 @@
 
 BEGIN_NAMESPACE_YM_SOP
 
-class SopBlockRef;
-
 //////////////////////////////////////////////////////////////////////
 /// @class SopCover SopCover.h "ym/SopCover.h"
 /// @brief カバー(積和形論理式)を表すクラス
@@ -25,18 +23,12 @@ class SopBlockRef;
 /// 中身は positional cube matrix 表現を用いたビットベクタ<br>
 /// ビットベクタの内容は一旦，設定されたら変わることはない<br>
 /// キューブはワードレベルの順序で整列しているものと仮定している<br>
-/// この式は代数的(algebraic)なので他のキューブに包含されるキューブは
-/// 許されない．もちろん重複したキューブも許されない．<br>
-/// 通常の操作を行っているかぎり代数的な式しか生成されない．<br>
-/// 実際の操作は SopMgr が行う．
 ///
-/// 実装としてはパタンの実体は SopBitVect が持つ．
+/// 実装としてはパタンの実体は SopBase::Chunk が持つ．
 //////////////////////////////////////////////////////////////////////
 class SopCover:
   public SopBase
 {
-  friend class SopMgr;
-
 public:
 
   /// @brief コンストラクタ
@@ -116,7 +108,7 @@ public:
   /// @brief デストラクタ
   ///
   /// ここに属しているすべてのキューブは削除される．
-  ~SopCover();
+  ~SopCover() = default;
 
 
 public:
@@ -167,6 +159,47 @@ public:
     SizeType cube_id, ///< [in] キューブ番号 ( 0 <= cube_id < cube_num() )
     SizeType var_id   ///< [in] 変数( 0 <= var_id.val() < variable_num() )
   ) const;
+
+  /// @brief Expr に変換する．
+  Expr
+  expr() const;
+
+  /// @brief 内容を取り出す．
+  Chunk&
+  chunk()
+  {
+    return mChunk;
+  }
+
+  /// @brief 内容を取り出す．
+  const Chunk&
+  chunk() const
+  {
+    return mChunk;
+  }
+
+  /// @brief ハッシュ値を返す．
+  SizeType
+  hash() const;
+
+  /// @brief 内容をわかりやすい形で出力する．
+  void
+  print(
+    ostream& s,                             ///< [in] 出力先のストリーム
+    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
+  ) const;
+
+  /// @brief 内容をデバッグ用に出力する．
+  void
+  debug_print(
+    ostream& s ///< [in] 出力先のストリーム
+  ) const;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 演算子のオーバーロード
+  //////////////////////////////////////////////////////////////////////
 
   /// @brief 論理和を計算する．
   /// @return 計算結果を返す．
@@ -228,136 +261,93 @@ public:
     const SopCube& right ///< [in] オペランド
   );
 
-  /// @brief 論理積を計算する．
+  /// @brief コファクターを計算する．
   /// @return 計算結果を返す．
   SopCover
-  operator*(
-    const SopCover& right ///< [in] オペランド
-  ) const;
-
-  /// @brief 論理積を計算して代入する．
-  /// @return 演算後の自身への参照を返す．
-  SopCover&
-  operator*=(
-    const SopCover& right ///< [in] オペランド
-  );
-
-  /// @brief 論理積を計算する(キューブ版)．
-  /// @return 計算結果を返す．
-  SopCover
-  operator*(
+  operator/(
     const SopCube& right ///< [in] オペランド
   ) const;
 
-  /// @brief 論理積を計算して代入する(キューブ版)．
+  /// @brief コファクター演算を行って代入する．
   /// @return 演算後の自身への参照を返す．
   SopCover&
-  operator*=(
+  operator/=(
     const SopCube& right ///< [in] オペランド
   );
 
-  /// @brief 論理積を計算する(リテラル版)．
-  /// @return 計算結果を返す．
-  SopCover
-  operator*(
-    Literal right ///< [in] オペランド
-  ) const;
-
-  /// @brief 論理積を計算して代入する(リテラル版)．
-  /// @return 演算後の自身への参照を返す．
-  SopCover&
-  operator*=(
-    Literal right ///< [in] オペランド
-  );
-
-  /// @brief algebraic division を計算する．
+  /// @brief コファクターを計算する．
   /// @return 計算結果を返す．
   SopCover
   operator/(
-    const SopCover& right ///< [in] オペランド
+    Literal lit ///< [in] オペランド
   ) const;
 
-  /// @brief algebraic division を行って代入する．
+  /// @brief コファクター演算を行って代入する．
   /// @return 演算後の自身への参照を返す．
   SopCover&
   operator/=(
-    const SopCover& right ///< [in] オペランド
+    Literal lit ///< [in] オペランド
   );
 
-  /// @brief キューブによる商を計算する．
-  /// @return 計算結果を返す．
-  SopCover
-  operator/(
-    const SopCube& cube ///< [in] 対象のキューブ
-  ) const;
+  /// @brief 比較演算子 (EQ)
+  /// @return 等しい時に true を返す．
+  bool
+  operator==(
+    const SopCover& right ///< [in] 第2オペランド
+  ) const
+  {
+    return compare(right) == 0;
+  }
 
-  /// @brief キューブによる商を計算して代入する．
-  /// @return 演算後の自身への参照を返す．
-  SopCover&
-  operator/=(
-    const SopCube& cube ///< [in] 対象のキューブ
-  );
+  /// @brief 比較演算子 (NE)
+  /// @return 等しくない時に true を返す．
+  bool
+  operator!=(
+    const SopCover& right ///< [in] 第2オペランド
+  )
+  {
+    return compare(right) != 0;
+  }
 
-  /// @brief リテラルによる商を計算する．
-  /// @return 計算結果を返す．
-  SopCover
-  operator/(
-    Literal lit ///< [in] 対象のリテラル
-  ) const;
+  /// @brief 比較演算子 (LT)
+  /// @return left が right より小さい時に true を返す．
+  bool
+  operator<(
+    const SopCover& right ///< [in] 第2オペランド
+  ) const
+  {
+    return compare(right) < 0;
+  }
 
-  /// @brief リテラルによる商を計算して代入する．
-  /// @return 演算後の自身への参照を返す．
-  SopCover&
-  operator/=(
-    Literal lit ///< [in] 対象のリテラル
-  );
+  /// @brief 比較演算子 (GT)
+  /// @return left が right より大きい時に true を返す．
+  bool
+  operator>(
+    const SopCover& right ///< [in] 第2オペランド
+  ) const
+  {
+    return compare(right) > 0;
+  }
 
-  /// @brief 共通なキューブを返す．
-  ///
-  /// 共通なキューブがない場合には空のキューブを返す．
-  SopCube
-  common_cube() const;
+  /// @brief 比較演算子 (LE)
+  /// @return left が right と等しいか小さい時に true を返す．
+  bool
+  operator<=(
+    const SopCover& right ///< [in] 第2オペランド
+  ) const
+  {
+    return compare(right) <= 0;
+  }
 
-  /// @brief すべてのカーネルとコカーネルペアを列挙する．
-  vector<pair<SopCover, SopCover>>
-  all_kernels() const;
-
-  /// @brief 最も価値の高いカーネルを求める．
-  SopCover
-  best_kernel() const;
-
-  /// @brief "quick factor" を行う．
-  Expr
-  quick_factor() const;
-
-  /// @brief "good factor" を行う．
-  Expr
-  good_factor() const;
-
-  /// @brief Expr に変換する．
-  Expr
-  expr() const;
-
-  /// @brief SopBlockRef に変換する．
-  SopBlockRef
-  to_block() const;
-
-  /// @brief ハッシュ値を返す．
-  SizeType
-  hash() const;
-
-  /// @brief 内容をわかりやすい形で出力する．
-  void
-  print(
-    ostream& s,                             ///< [in] 出力先のストリーム
-    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
-  ) const;
-
-  /// @brief 内容をデバッグ用に出力する．
-  void
-  debug_print(
-    ostream& s ///< [in] 出力先のストリーム
-  ) const;
+  /// @brief 比較演算子 (GE)
+  /// @return left が right と等しいか大きい時に true を返す．
+  bool
+  operator>=(
+    const SopCover& right ///< [in] 第2オペランド
+  ) const
+  {
+    return compare(right) >= 0;
+  }
 
 
 private:
@@ -371,49 +361,48 @@ private:
   SopCover(
     SizeType variable_num, ///< [in] 変数の数
     SizeType cube_num,     ///< [in] キューブ数
-    SopBitVect&& body      ///< [in] 内容のパタンを表す本体
+    Chunk&& body           ///< [in] 内容のパタンを表す本体
   );
 
-  /// @brief concate の共通処理
-  SopCover
-  concate_sub(
-    const SopBlockRef& block2
-  ) const;
-
-  /// @brief concate_int の共通処理
+  /// @brief ソートする．
   void
-  concate_int_sub(
-    const SopBlockRef& block2
-  );
-
-  /// @brief diff の共通処理
-  SopCover
-  diff_sub(
-    const SopBlockRef& block2
-  ) const;
-
-  /// @brief diff_int の共通処理
-  void
-  diff_int_sub(
-    const SopBlockRef& block2
-  );
-
-  /// @brief SopBlock の内容をセットする．
-  void
-  _set(
-    SopBlock&& src_block
-  );
+  _sort();
 
   /// @brief 比較演算子(rich compare)
   /// @return 比較結果を返す．
   ///
   /// 比較方法はキューブごとの辞書式順序
-  friend
   int
   compare(
-    const SopCover& left, ///< [in] 第1オペランド
     const SopCover& right ///< [in] 第2オペランド
-  );
+  ) const;
+
+  /// @brief concate の共通処理
+  Chunk
+  concate(
+    SizeType num2,       ///< [in] 第2オペランドのキューブ数
+    const Chunk& chunk2, ///< [in] 第2オペランドキューブ本体
+    SizeType& dst_num    ///< [out] 結果のキューブ数
+  ) const;
+
+  /// @brief diff の共通処理
+  Chunk
+  diff(
+    SizeType num2,       ///< [in] 第2オペランドのキューブ数
+    const Chunk& chunk2, ///< [in] 第2オペランドのキューブ本体
+    SizeType& dst_num	 ///< [out] 結果のキューブ数
+  ) const;
+
+  /// @brief 内容をセットする．
+  void
+  _set(
+    SizeType num, ///< [in] キューブ数
+    Chunk&& chunk ///< [in] 本体
+  )
+  {
+    mCubeNum = num;
+    std::swap(mChunk, chunk);
+  }
 
 
 private:
@@ -425,7 +414,7 @@ private:
   SizeType mCubeNum{0};
 
   // 内容を表すビットベクタ
-  SopBitVect mBody;
+  Chunk mChunk;
 
 };
 
@@ -470,101 +459,6 @@ operator-(
 }
 
 /// @relates SopCover, SopCube
-/// @brief カバーとキューブの乗算
-/// @return 結果を返す．
-inline
-SopCover
-operator*(
-  SopCover&& left,     ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return SopCover{std::move(left)}.operator*=(right);
-}
-
-/// @relates SopCover, SopCube
-/// @brief キューブとカバーの乗算
-/// @return 結果を返す．
-inline
-SopCover
-operator*(
-  const SopCube& left,  ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  // 交換則を用いる．
-  return right.operator*(left);
-}
-
-/// @relates SopCover, SopCube
-/// @brief キューブとカバーの乗算
-/// @return 結果を返す．
-inline
-SopCover
-operator*(
-  const SopCube& left, ///< [in] 第1オペランド
-  SopCover&& right     ///< [in] 第2オペランド
-)
-{
-  // 交換則を用いる．
-  return SopCover{std::move(right)}.operator*=(left);
-}
-
-/// @relates SopCover, Literal
-/// @brief カバーとリテラルの乗算
-/// @return 結果を返す．
-inline
-SopCover
-operator*(
-  SopCover&& left, ///< [in] 第1オペランド
-  Literal right	   ///< [in] 第2オペランド
-)
-{
-  return SopCover{std::move(left)}.operator*=(right);
-}
-
-/// @relates SopCover, Literal
-/// @brief リテラルとカバーの乗算
-/// @return 結果を返す．
-inline
-SopCover
-operator*(
-  Literal left,         ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  // 交換則を用いる．
-  return right.operator*(left);
-}
-
-/// @relates SopCover, Literal
-/// @brief リテラルとカバーの乗算
-/// @return 結果を返す．
-inline
-SopCover
-operator*(
-  Literal left,    ///< [in] 第1オペランド
-  SopCover&& right ///< [in] 第2オペランド
-)
-{
-  // 交換則を用いる．
-  return SopCover{std::move(right)}.operator*=(left);
-}
-
-/// @relates SopCover
-/// @brief カバーの除算
-/// @return 結果を返す．
-inline
-SopCover
-operator/(
-  SopCover&& left,      ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  return SopCover{std::move(left)}.operator/=(right);
-}
-
-/// @relates SopCover, SopCube
 /// @brief カバーとキューブの除算
 /// @return 結果を返す．
 inline
@@ -588,95 +482,6 @@ operator/(
 )
 {
   return SopCover{std::move(left)}.operator/=(right);
-}
-
-/// @relates SopCover
-/// @brief 比較演算子(rich compare)
-/// @return 比較結果を返す．
-///
-/// 比較方法はキューブごとの辞書式順序
-int
-compare(
-  const SopCover& left, ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-);
-
-/// @relates SopCover
-/// @brief 比較演算子 (EQ)
-/// @return 等しい時に true を返す．
-inline
-bool
-operator==(
-  const SopCover& left, ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) == 0;
-}
-
-/// @relates SopCover
-/// @brief 比較演算子 (NE)
-/// @return 等しくない時に true を返す．
-inline
-bool
-operator!=(
-  const SopCover& left, ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) != 0;
-}
-
-/// @relates SopCover
-/// @brief 比較演算子 (LT)
-/// @return left が right より小さい時に true を返す．
-inline
-bool
-operator<(
-  const SopCover& left, ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) < 0;
-}
-
-/// @relates SopCover
-/// @brief 比較演算子 (GT)
-/// @return left が right より大きい時に true を返す．
-inline
-bool
-operator>(
-  const SopCover& left, ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) > 0;
-}
-
-/// @relates SopCover
-/// @brief 比較演算子 (LE)
-/// @return left が right と等しいか小さい時に true を返す．
-inline
-bool
-operator<=(
-  const SopCover& left, ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) <= 0;
-}
-
-/// @relates SopCover
-/// @brief 比較演算子 (GE)
-/// @return left が right と等しいか大きい時に true を返す．
-inline
-bool
-operator>=(
-  const SopCover& left, ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) >= 0;
 }
 
 /// @relates SopCover

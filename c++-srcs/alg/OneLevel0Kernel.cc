@@ -7,11 +7,11 @@
 /// All rights reserved.
 
 #include "OneLevel0Kernel.h"
-#include "ym/SopCover.h"
-#include "ym/SopCube.h"
+#include "ym/AlgCover.h"
+#include "ym/AlgCube.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 // クラス OneLevel0Kernel
@@ -34,7 +34,7 @@ BEGIN_NONAMESPACE
 inline
 Literal
 find_literal(
-  const SopCover& f
+  const AlgCover& f
 )
 {
   int nv = f.variable_num();
@@ -52,15 +52,15 @@ find_literal(
 END_NONAMESPACE
 
 // @brief 除数を求める．
-SopCover
+AlgCover
 OneLevel0Kernel::operator()(
-  const SopCover& f
+  const AlgCover& f
 ) const
 {
   if ( f.cube_num() < 2 ) {
     // f をこれ以上割ることはできない．
     // 空の論理式を返す．
-    return SopCover{f.variable_num()};
+    return AlgCover{f.variable_num()};
   }
 
   // f に2回以上現れるリテラルを求める．
@@ -68,7 +68,7 @@ OneLevel0Kernel::operator()(
   if ( lit == Literal::x() ) {
     // f をこれ以上割ることはできない．
     // 空の論理式を返す．
-    return SopCover{f.variable_num()};
+    return AlgCover{f.variable_num()};
   }
 
   auto f1 = f;
@@ -81,4 +81,4 @@ OneLevel0Kernel::operator()(
   return f1;
 }
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG

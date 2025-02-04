@@ -16,8 +16,6 @@
 
 BEGIN_NAMESPACE_YM_ALG
 
-class AlgBlockRef;
-
 //////////////////////////////////////////////////////////////////////
 /// @class AlgCover AlgCover.h "ym/AlgCover.h"
 /// @brief カバー(積和形論理式)を表すクラス
@@ -30,7 +28,7 @@ class AlgBlockRef;
 /// 通常の操作を行っているかぎり代数的な式しか生成されない．<br>
 /// 実際の操作は AlgMgr が行う．
 ///
-/// 実装としてはパタンの実体は AlgBitVect が持つ．
+/// 実装としてはパタンの実体は AlgBase::Chunk が持つ．
 //////////////////////////////////////////////////////////////////////
 class AlgCover:
   public AlgBase
@@ -114,7 +112,7 @@ public:
   /// @brief デストラクタ
   ///
   /// ここに属しているすべてのキューブは削除される．
-  ~AlgCover();
+  ~AlgCover() = default;
 
 
 public:
@@ -192,9 +190,19 @@ public:
   Expr
   expr() const;
 
-  /// @brief AlgBlockRef に変換する．
-  AlgBlockRef
-  to_block() const;
+  /// @brief 本体のビットベクタを返す．
+  const Chunk&
+  chunk() const
+  {
+    return mChunk;
+  }
+
+  /// @brief 本体のビットベクタを返す．
+  Chunk&
+  chunk()
+  {
+    return mChunk;
+  }
 
   /// @brief ハッシュ値を返す．
   SizeType
@@ -369,7 +377,7 @@ public:
     const AlgCover& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) == 0;
+    return _compare(right) == 0;
   }
 
   /// @brief 比較演算子 (NE)
@@ -379,7 +387,7 @@ public:
     const AlgCover& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) != 0;
+    return _compare(right) != 0;
   }
 
   /// @brief 比較演算子 (LT)
@@ -389,7 +397,7 @@ public:
     const AlgCover& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) < 0;
+    return _compare(right) < 0;
   }
 
   /// @brief 比較演算子 (GT)
@@ -399,7 +407,7 @@ public:
     const AlgCover& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) > 0;
+    return _compare(right) > 0;
   }
 
   /// @brief 比較演算子 (LE)
@@ -409,7 +417,7 @@ public:
     const AlgCover& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) <= 0;
+    return _compare(right) <= 0;
   }
 
   /// @brief 比較演算子 (GE)
@@ -419,7 +427,7 @@ public:
     const AlgCover& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) >= 0;
+    return _compare(right) >= 0;
   }
 
 
@@ -434,37 +442,7 @@ private:
   AlgCover(
     SizeType variable_num, ///< [in] 変数の数
     SizeType cube_num,     ///< [in] キューブ数
-    AlgBitVect&& body      ///< [in] 内容のパタンを表す本体
-  );
-
-  /// @brief concate の共通処理
-  AlgCover
-  concate_sub(
-    const AlgBlockRef& block2
-  ) const;
-
-  /// @brief concate_int の共通処理
-  void
-  concate_int_sub(
-    const AlgBlockRef& block2
-  );
-
-  /// @brief diff の共通処理
-  AlgCover
-  diff_sub(
-    const AlgBlockRef& block2
-  ) const;
-
-  /// @brief diff_int の共通処理
-  void
-  diff_int_sub(
-    const AlgBlockRef& block2
-  );
-
-  /// @brief AlgBlock の内容をセットする．
-  void
-  _set(
-    AlgBlock&& src_block
+    Chunk&& chunk          ///< [in] 内容のパタンを表す本体
   );
 
   /// @brief 比較演算子(rich compare)
@@ -472,9 +450,77 @@ private:
   ///
   /// 比較方法はキューブごとの辞書式順序
   int
-  compare(
+  _compare(
     const AlgCover& right ///< [in] 第2オペランド
   ) const;
+
+  /// @brief ソートする．
+  void
+  _sort();
+
+  /// @brief 連結演算の本体
+  Chunk
+  concate(
+    SizeType num2,
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 集合差演算の本体
+  Chunk
+  diff(
+    SizeType num2,
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 論理積演算の本体
+  Chunk
+  product(
+    SizeType num2,
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 論理積演算の本体
+  Chunk
+  product(
+    Literal lit,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 代数敵除算の本体
+  Chunk
+  algdiv(
+    SizeType num2,
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 代数敵除算の本体
+  Chunk
+  algdiv(
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 代数敵除算の本体
+  Chunk
+  algdiv(
+    Literal lit,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief AlgBlock の内容をセットする．
+  void
+  _set(
+    SizeType cube_num,
+    Chunk&& chunk
+  )
+  {
+    mCubeNum = cube_num;
+    std::swap(mChunk, chunk);
+  }
 
 
 private:
@@ -486,7 +532,7 @@ private:
   SizeType mCubeNum{0};
 
   // 内容を表すビットベクタ
-  AlgBitVect mBody;
+  Chunk mChunk;
 
 };
 

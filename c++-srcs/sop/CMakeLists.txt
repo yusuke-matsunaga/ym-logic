@@ -24,27 +24,24 @@ add_subdirectory(gtest)
 # ===================================================================
 
 set (sop_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopBase.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopBase_cube.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCube.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopMgr.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopMgr_cube.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopMgr_sort.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/ConcateOp.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/DiffOp.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/MulOp.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/DivOp.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/CompOp.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/CommonCube.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/CheckIntersect.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/CheckContainment.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/KernelGen.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/LitSet.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/LitSetCheck.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/LitSetUnion.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/LitSetIntersect.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/BestKernel.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/OneLevel0Kernel.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/WeakDivision.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCube_check.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_concate.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_diff.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_compare.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_sort.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/MulOp.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/DivOp.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/CommonCube.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/CheckIntersect.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/CheckContainment.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/LitSet.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/LitSetCheck.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/LitSetUnion.cc
+  #${CMAKE_CURRENT_SOURCE_DIR}/LitSetIntersect.cc
   PARENT_SCOPE
   )
 

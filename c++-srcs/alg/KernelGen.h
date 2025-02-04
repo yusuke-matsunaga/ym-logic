@@ -5,15 +5,15 @@
 /// @brief KernelGen のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/SopCover.h"
-#include "ym/SopCube.h"
+#include "ym/AlgCover.h"
+#include "ym/AlgCube.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 class LitSet;
 
@@ -39,15 +39,15 @@ public:
 
   /// @brief カーネルとコカーネルを列挙する．
   /// @return カーネルとコカーネル集合のペアのリストを返す．
-  vector<pair<SopCover, SopCover>>
+  vector<pair<AlgCover, AlgCover>>
   all_kernels(
-    const SopCover& cover ///< [in] 対象のカバー
+    const AlgCover& cover ///< [in] 対象のカバー
   );
 
   /// @brief 価値の最も高いカーネルを求める．
-  SopCover
+  AlgCover
   best_kernel(
-    const SopCover& cover ///< [in] 対象のカバー
+    const AlgCover& cover ///< [in] 対象のカバー
   );
 
 
@@ -59,19 +59,25 @@ private:
   /// @brief カーネルとコカーネルを列挙する．
   void
   generate(
-    const SopCover& cover ///< [in] 対象のカバー
+    const AlgCover& cover ///< [in] 対象のカバー
   );
 
   /// @brief カーネルを求める下請け関数
   void
   kern_sub(
-    const SopCover& cover,             ///< [in] 対象のカバー
+    const AlgCover& cover,             ///< [in] 対象のカバー
     vector<Literal>::const_iterator p, ///< [in] 次のリテラルの位置
-    const SopCube& ccube,              ///< [in] 今までに括りだされた共通のキューブ
+    const AlgCube& ccube,              ///< [in] 今までに括りだされた共通のキューブ
     const LitSet& plits                ///< [in] すでに括られたリテラルの集合
   );
 
+  /// @brief 出現頻度の昇順にならべたリテラルのリストを作る．
+  vector<Literal>
+  gen_literal_list(
+    const AlgCover& cover ///< [in] 対象のカバー
+  );
 
+#if 0
 private:
   //////////////////////////////////////////////////////////////////////
   // 内部で用いられるデータ構造
@@ -82,24 +88,24 @@ private:
   {
     // コンストラクタ
     Cell(
-      SopCover&& kernel,
-      const SopCube& cokernel
+      AlgCover&& kernel,
+      const AlgCube& cokernel
     ) : mKernel{kernel},
 	mCoKernels{cokernel}
     {
     }
 
     // カーネル
-    SopCover mKernel;
+    AlgCover mKernel;
 
     // コカーネルのリストを表すカバー
-    SopCover mCoKernels;
+    AlgCover mCoKernels;
 
     // 次のセルを指すリンクポインタ
     Cell* mLink;
 
   };
-
+#endif
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -113,16 +119,28 @@ private:
   /// @brief ハッシュ表に登録する．
   void
   hash_add(
-    SopCover&& kernel,
-    const SopCube& cokernel
+    const AlgCover& kernel,
+    const AlgCube& cokernel
+  )
+  {
+    auto tmp_kernel = kernel;
+    hash_add(std::move(tmp_kernel), cokernel);
+  }
+
+  /// @brief ハッシュ表に登録する．
+  void
+  hash_add(
+    AlgCover&& kernel,
+    const AlgCube& cokernel
   );
 
+#if 0
   /// @brief ハッシュ表をリサイズする．
   void
   hash_resize(
     SizeType size
   );
-
+#endif
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -133,6 +151,10 @@ private:
   vector<Literal>::const_iterator mEnd;
 
   // ハッシュ表
+  // カーネルをキーにしてコカーネルのリストを格納する．
+  std::unordered_map<AlgCover, AlgCover> mKernelDict;
+
+#if 0
   vector<Cell*> mHashTable;
 
   // ハッシュ表のサイズ
@@ -143,9 +165,10 @@ private:
 
   // ハッシュ表のセルのリスト
   vector<Cell*> mCellList;
+#endif
 
 };
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG
 
 #endif // KERNELGEN_H

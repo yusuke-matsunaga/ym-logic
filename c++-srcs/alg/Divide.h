@@ -11,7 +11,7 @@
 #include "ym/logic.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 /// @class Divide Divide.h "Divide.h"
@@ -34,14 +34,14 @@ public:
   /// @brief 除算を行う．
   /// @return 商q と余りr の pair を返す．
   virtual
-  pair<SopCover, SopCover>
+  pair<AlgCover, AlgCover>
   operator()(
-    const SopCover& f, ///< [in] 被除数
-    const SopCover& d  ///< [in] 除数
+    const AlgCover& f, ///< [in] 被除数
+    const AlgCover& d  ///< [in] 除数
   ) const = 0;
 
 };
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG
 
 #endif // DIVIDE_H

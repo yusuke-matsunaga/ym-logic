@@ -7,12 +7,12 @@
 /// All rights reserved.
 
 #include "BestKernel.h"
-#include "ym/SopCover.h"
-#include "ym/SopCube.h"
+#include "ym/AlgCover.h"
+#include "ym/AlgCube.h"
 #include "KernelGen.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 // クラス BestKernel
@@ -29,9 +29,9 @@ BestKernel::~BestKernel()
 }
 
 // @brief 除数を求める．
-SopCover
+AlgCover
 BestKernel::operator()(
-  const SopCover& f
+  const AlgCover& f
 ) const
 {
   KernelGen kernel_gen;
@@ -39,4 +39,4 @@ BestKernel::operator()(
   return kernel_gen.best_kernel(f);
 }
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG

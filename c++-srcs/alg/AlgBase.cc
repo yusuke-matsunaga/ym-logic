@@ -6,9 +6,7 @@
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "AlgBase.h"
-#include "AlgBlock.h"
-#include "ym/Literal.h"
+#include "ym/AlgBase.h"
 
 
 BEGIN_NAMESPACE_YM_ALG
@@ -54,14 +52,17 @@ END_NONAMESPACE
 // @brief ビットベクタ上のリテラル数を数える．
 SizeType
 AlgBase::_literal_num(
-  const AlgBlockRef& block
+  SizeType cube_num,
+  const Chunk& chunk
 ) const
 {
   // 8 ビットごとに区切って表引きで計算する．
+  // 以下のコードでは位置を全く見ていないので
+  // 未使用な部分が 0 で初期化されている必要がある．
   SizeType ans = 0;
-  auto start = _cube_begin(block.body);
-  auto end = _cube_end(start, block.cube_num);
-  for ( auto p = start; p != end; ++ p ) {
+  auto begin = _cube(chunk);
+  auto end = _cube(chunk, cube_num);
+  for ( auto p = begin; p != end; ++ p ) {
     auto pat = *p;
     auto p1 = pat & 0xFFUL;
     ans += _count(p1);
@@ -86,7 +87,8 @@ AlgBase::_literal_num(
 // @brief ビットベクタ上の特定のリテラルの出現頻度を数える．
 SizeType
 AlgBase::_literal_num(
-  const AlgBlockRef& block,
+  SizeType cube_num,
+  const Chunk& chunk,
   SizeType varid,
   bool inv
 ) const
@@ -94,10 +96,9 @@ AlgBase::_literal_num(
   auto blk = _block_pos(varid);
   auto mask = _get_mask(varid, inv);
   SizeType ans = 0;
-  auto start = _cube_begin(block.body);
-  auto end = _cube_end(start, block.cube_num);
-  for ( auto p = start; p != end; p += _cube_size() ) {
-    if ( (*(p + blk) & mask) == mask ) {
+  auto cube_list = _cube_list(chunk, 0, cube_num);
+  for ( auto cube: cube_list ) {
+    if ( (*(cube + blk) & mask) == mask ) {
       ++ ans;
     }
   }
@@ -107,17 +108,15 @@ AlgBase::_literal_num(
 // @brief 内容をリテラルのリストのリストに変換する．
 vector<vector<Literal>>
 AlgBase::_literal_list(
-  const AlgBlockRef& block ///< [in] 対象のブロック
+  SizeType cube_num,
+  const Chunk& chunk
 ) const
 {
-  vector<vector<Literal>> cube_list;
-  cube_list.reserve(block.cube_num);
+  vector<vector<Literal>> ans_list;
+  ans_list.reserve(cube_num);
 
-  auto begin = _cube_begin(block.body);
-  auto end = _cube_end(begin, block.cube_num);
-  for ( auto cube = begin;
-	cube != end;
-	cube += _cube_size() ) {
+  auto cube_list = _cube_list(chunk, 0, cube_num);
+  for ( auto cube: cube_list ) {
     vector<Literal> tmp_list;
     tmp_list.reserve(variable_num());
     for ( SizeType var = 0; var < variable_num(); ++ var ) {
@@ -129,31 +128,18 @@ AlgBase::_literal_list(
 	tmp_list.push_back(Literal{var, true});
       }
     }
-    cube_list.push_back(tmp_list);
+    ans_list.push_back(tmp_list);
   }
 
-  return cube_list;
-}
-
-// @brief カバーからキューブを取り出す．
-AlgCube
-AlgBase::_get_cube(
-  const AlgBlockRef& block,
-  SizeType cube_id
-) const
-{
-  auto dst_bv = new_cube();
-  auto dst_cube = _cube_begin(dst_bv);
-  auto src_cube = _cube_begin(block.body, cube_id);
-  _cube_copy(dst_cube, src_cube);
-  return AlgCube{variable_num(), std::move(dst_bv)};
+  return ans_list;
 }
 
 // @brief ビットベクタからハッシュ値を計算する．
 SizeType
 AlgBase::_hash(
-  const AlgBitVectRef& block
-)
+  SizeType cube_num,
+  const Chunk& chunk
+) const
 {
   // キューブは常にソートされているので
   // 順番は考慮する必要はない．
@@ -161,9 +147,9 @@ AlgBase::_hash(
   // 本当は区別しなければならないがどうしようもないので
   // 16ビットに区切って単純に XOR を取る．
   SizeType ans = 0;
-  auto start = _cube_begin(block.body());
-  auto end = _cube_end(start, block.cube_num);
-  for ( auto p = start; p != end; ++ p ) {
+  auto begin = _cube(chunk);
+  auto end = _cube(chunk, cube_num);
+  for ( auto p = begin; p != end; ++ p ) {
     auto pat = *p;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
@@ -176,13 +162,13 @@ AlgBase::_hash(
 // @brief Expr に変換する．
 Expr
 AlgBase::_to_expr(
-  const AlgBitVectRef& block,
-)
+  SizeType cube_num,
+  const Chunk& chunk
+) const
 {
   auto ans = Expr::zero();
-  auto start = _cube_begin(block.body());
-  auto end = _cube_end(start, block.cube_num);
-  for ( auto cube = start; cube != end; cube += _cube_size() ) {
+  auto cube_list = _cube_list(chunk, 0, cube_num);
+  for ( auto cube: cube_list ) {
     auto prod = Expr::one();
     for ( SizeType var = 0; var < variable_num(); ++ var ) {
       auto pat = _get_pat(cube, var);
@@ -202,16 +188,15 @@ AlgBase::_to_expr(
 void
 AlgBase::_print(
   ostream& s,
-  const AlgBitVect& bv,
+  const Chunk& chunk,
   SizeType start,
   SizeType end,
   const vector<string>& varname_list
-)
+) const
 {
   const char* plus = "";
-  auto cube_begin = _cube_begin(bv, start);
-  auto cube_end = _cube_begin(bv, end);
-  for ( auto cube = cube_begin; cube != cube_end; cube += _cube_size() ) {
+  auto cube_list = _cube_list(chunk, start, end);
+  for ( auto cube: cube_list ) {
     s << plus;
     plus = " + ";
     const char* spc = "";
@@ -242,24 +227,54 @@ AlgBase::_print(
 void
 AlgBase::_debug_print(
   ostream& s,
-  const AlgBlockRef& block
-)
+  SizeType cube_num,
+  const Chunk& chunk
+) const
 {
-  auto cube_begin = _cube_begin(block.body);
-  auto cube_end = _cube_end(cube_begin, block.cube_num);
-  for ( auto cube = cube_begin; cube != cube_end; cube += _cube_size() ) {
-    for ( SizeType var = 0; var < variable_num(); ++ var ) {
-      s << " ";
-      auto pat = get_pat(cube, var);
-      switch ( pat ) {
-      case AlgPat::_X: s << "00"; break;
-      case AlgPat::_0: s << "01"; break;
-      case AlgPat::_1: s << "10"; break;
-      default:         s << "--"; break;
-      }
-    }
-    s << endl;
+  auto cube_list = _cube_list(chunk, 0, cube_num);
+  for ( auto cube: cube_list ) {
+    _debug_print(s, cube);
   }
+}
+
+// @brief 内容を出力する(デバッグ用)．
+void
+AlgBase::_debug_print(
+  ostream& s,
+  Cube cube
+) const
+{
+  for ( SizeType var = 0; var < variable_num(); ++ var ) {
+    s << " ";
+    auto pat = _get_pat(cube, var);
+    switch ( pat ) {
+    case AlgPat::_X: s << "00"; break;
+    case AlgPat::_0: s << "01"; break;
+    case AlgPat::_1: s << "10"; break;
+    default:         s << "--"; break;
+    }
+  }
+  s << endl;
+}
+
+// @brief 内容を出力する(デバッグ用)．
+void
+AlgBase::_debug_print(
+  ostream& s,
+  DstCube cube
+) const
+{
+  for ( SizeType var = 0; var < variable_num(); ++ var ) {
+    s << " ";
+    auto pat = _get_pat(cube, var);
+    switch ( pat ) {
+    case AlgPat::_X: s << "00"; break;
+    case AlgPat::_0: s << "01"; break;
+    case AlgPat::_1: s << "10"; break;
+    default:         s << "--"; break;
+    }
+  }
+  s << endl;
 }
 
 END_NAMESPACE_YM_ALG

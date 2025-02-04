@@ -16,13 +16,6 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(aig)
-add_subdirectory(dd)
-add_subdirectory(expr)
-add_subdirectory(npn)
-add_subdirectory(sop)
-add_subdirectory(alg)
-add_subdirectory(tvfunc)
 add_subdirectory(gtest)
 
 
@@ -30,24 +23,32 @@ add_subdirectory(gtest)
 #  ソースファイルの設定
 # ===================================================================
 
-set (ym_logic_SOURCES
-  ${aig_SOURCES}
-  ${dd_SOURCES}
-  ${expr_SOURCES}
-  ${npn_SOURCES}
-  ${sop_SOURCES}
-  ${alg_SOURCES}
-  ${tvfunc_SOURCES}
+set (alg_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgBase.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgBase_cube.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCube.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCube_check.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_compare.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_concate.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_sort.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_diff.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_commoncube.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_algdiv.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_product.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/KernelGen.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/LitSet.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/BestKernel.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/OneLevel0Kernel.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/WeakDivision.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/GenFactor.cc
+  PARENT_SCOPE
   )
 
 
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
-
-ym_add_object_library ( ym_logic
-  ${ym_logic_SOURCES}
-  )
 
 
 # ===================================================================

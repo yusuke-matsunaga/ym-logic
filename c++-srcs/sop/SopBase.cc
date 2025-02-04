@@ -1,20 +1,18 @@
 
-/// @file SopMgr.cc
-/// @brief SopMgr の実装ファイル
+/// @file SopBase.cc
+/// @brief SopBase の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "SopMgr.h"
-#include "SopBlock.h"
-#include "ym/Literal.h"
+#include "ym/SopBase.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
-// クラス SopMgr
+// クラス SopBase
 //////////////////////////////////////////////////////////////////////
 
 BEGIN_NONAMESPACE
@@ -53,16 +51,17 @@ END_NONAMESPACE
 
 // @brief ビットベクタ上のリテラル数を数える．
 SizeType
-SopMgr::literal_num(
-  const SopBlockRef& block
+SopBase::_literal_num(
+  SizeType num,
+  const Chunk& chunk
 ) const
 {
   // 8 ビットごとに区切って表引きで計算する．
   SizeType ans = 0;
-  auto start = _cube_begin(block.body);
-  auto end = _cube_end(start, block.cube_num);
-  for ( auto p = start; p != end; ++ p ) {
-    auto pat = *p;
+  auto cube = _cube_begin(chunk);
+  auto end = _cube_end(cube, num);
+  for ( ; cube != end; ++ cube ) {
+    auto pat = *cube;
     auto p1 = pat & 0xFFUL;
     ans += _count(p1);
     auto p2 = (pat >> 8) & 0xFFUL;
@@ -85,19 +84,21 @@ SopMgr::literal_num(
 
 // @brief ビットベクタ上の特定のリテラルの出現頻度を数える．
 SizeType
-SopMgr::literal_num(
-  const SopBlockRef& block,
+SopBase::_literal_num(
+  SizeType cube_num,
+  const Chunk& chunk,
   SizeType varid,
   bool inv
 ) const
 {
   auto blk = _block_pos(varid);
-  auto mask = get_mask(varid, inv);
+  auto mask = _get_mask(varid, inv);
   SizeType ans = 0;
-  auto start = _cube_begin(block.body);
-  auto end = _cube_end(start, block.cube_num);
-  for ( auto p = start; p != end; p += _cube_size() ) {
-    if ( (*(p + blk) & mask) == mask ) {
+  auto cube = _cube_begin(chunk);
+  auto end = _cube_end(cube, cube_num);
+  for ( ; cube != end; _cube_next(cube) ) {
+    auto p = cube + blk;
+    if ( (*(p) & mask) == mask ) {
       ++ ans;
     }
   }
@@ -106,22 +107,21 @@ SopMgr::literal_num(
 
 // @brief 内容をリテラルのリストのリストに変換する．
 vector<vector<Literal>>
-SopMgr::literal_list(
-  const SopBlockRef& block ///< [in] 対象のブロック
+SopBase::_literal_list(
+  SizeType cube_num,
+  const Chunk& chunk
 ) const
 {
   vector<vector<Literal>> cube_list;
-  cube_list.reserve(block.cube_num);
+  cube_list.reserve(cube_num);
 
-  auto begin = _cube_begin(block.body);
-  auto end = _cube_end(begin, block.cube_num);
-  for ( auto cube = begin;
-	cube != end;
-	cube += _cube_size() ) {
+  auto cube = _cube_begin(chunk);
+  auto end = _cube_end(cube, cube_num);
+  for ( ; cube != end; _cube_next(cube) ) {
     vector<Literal> tmp_list;
     tmp_list.reserve(variable_num());
     for ( SizeType var = 0; var < variable_num(); ++ var ) {
-      auto pat = get_pat(cube, var);
+      auto pat = _get_pat(cube, var);
       if ( pat == SopPat::_1 ) {
 	tmp_list.push_back(Literal{var, false});
       }
@@ -135,25 +135,12 @@ SopMgr::literal_list(
   return cube_list;
 }
 
-// @brief カバーからキューブを取り出す．
-SopCube
-SopMgr::get_cube(
-  const SopBlockRef& block,
-  SizeType cube_id
-) const
-{
-  auto dst_bv = new_cube();
-  auto dst_cube = _cube_begin(dst_bv);
-  auto src_cube = _cube_begin(block.body, cube_id);
-  cube_copy(dst_cube, src_cube);
-  return make_cube(std::move(dst_bv));
-}
-
 // @brief ビットベクタからハッシュ値を計算する．
 SizeType
-SopMgr::hash(
-  const SopBitVectRef& block
-)
+SopBase::_hash(
+  SizeType cube_num,
+  const Chunk& chunk
+) const
 {
   // キューブは常にソートされているので
   // 順番は考慮する必要はない．
@@ -161,10 +148,10 @@ SopMgr::hash(
   // 本当は区別しなければならないがどうしようもないので
   // 16ビットに区切って単純に XOR を取る．
   SizeType ans = 0;
-  auto start = _cube_begin(block.body());
-  auto end = _cube_end(start, block.cube_num);
-  for ( auto p = start; p != end; ++ p ) {
-    auto pat = *p;
+  auto cube = _cube_begin(chunk);
+  auto end = _cube_end(cube, cube_num);
+  for ( ; cube != end; ++ cube ) {
+    auto pat = *cube;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
@@ -175,17 +162,18 @@ SopMgr::hash(
 
 // @brief Expr に変換する．
 Expr
-SopMgr::to_expr(
-  const SopBitVectRef& block,
-)
+SopBase::_to_expr(
+  SizeType cube_num,
+  const Chunk& chunk
+) const
 {
   auto ans = Expr::zero();
-  auto start = _cube_begin(block.body());
-  auto end = _cube_end(start, block.cube_num);
-  for ( auto p = start; p != end; p += _cube_size() ) {
+  auto cube = _cube_begin(chunk);
+  auto end = _cube_end(cube, cube_num);
+  for ( ; cube != end; _cube_next(cube) ) {
     auto prod = Expr::one();
     for ( SizeType var = 0; var < variable_num(); ++ var ) {
-      auto pat = get_pat(p, var);
+      auto pat = _get_pat(cube, var);
       if ( pat == SopPat::_1 ) {
 	prod &= Expr::posi_literal(var);
       }
@@ -200,30 +188,32 @@ SopMgr::to_expr(
 
 // @brief カバー/キューブの内容を出力する．
 void
-SopMgr::print(
+SopBase::_print(
   ostream& s,
-  const SopBitVect& bv,
-  SizeType start,
+  const Chunk& chunk,
+  SizeType begin,
   SizeType end,
   const vector<string>& varname_list
-)
+) const
 {
   const char* plus = "";
-  for ( SizeType i = start; i < end; ++ i ) {
+  auto cube = _cube_begin(chunk, begin);
+  auto cube_end = _cube_begin(chunk, end);
+  for ( ; cube != cube_end; _cube_next(cube) ) {
     s << plus;
     plus = " + ";
     const char* spc = "";
-    for ( SizeType j = 0; j < variable_num(); ++ j ) {
+    for ( SizeType var = 0; var < variable_num(); ++ var ) {
       string varname;
-      if ( varname_list.size() > j ) {
-	varname = varname_list[j];
+      if ( varname_list.size() > var ) {
+	varname = varname_list[var];
       }
       else {
 	ostringstream buf;
-	buf << "v" << j;
+	buf << "v" << var;
 	varname = buf.str();
       }
-      auto pat = get_pat(bv, i, j);
+      auto pat = _get_pat(cube, var);
       if ( pat == SopPat::_1 ) {
 	s << spc << varname;
 	spc = " ";
@@ -238,16 +228,18 @@ SopMgr::print(
 
 // @brief 内容を出力する(デバッグ用)．
 void
-SopMgr::debug_print(
+SopBase::_debug_print(
   ostream& s,
-  const SopBlockRef& block
-)
+  SizeType cube_num,
+  const Chunk& chunk
+) const
 {
-  for ( SizeType i = 0; i < block.cube_num; ++ i ) {
-    auto cube = _calc_offset(block.body, i);
-    for ( SizeType j = 0; j < variable_num(); ++ j ) {
+  auto cube = _cube_begin(chunk);
+  auto end = _cube_end(cube, cube_num);
+  for ( ; cube != end; _cube_next(cube) ) {
+    for ( SizeType var = 0; var < variable_num(); ++ var ) {
       s << " ";
-      auto pat = get_pat(cube, j);
+      auto pat = _get_pat(cube, var);
       switch ( pat ) {
       case SopPat::_X: s << "00"; break;
       case SopPat::_0: s << "01"; break;
@@ -257,26 +249,6 @@ SopMgr::debug_print(
     }
     s << endl;
   }
-}
-
-// @brief mTmpBlock に必要な領域を確保する．
-void
-SopMgr::_resize_buff(
-  SizeType req_size
-)
-{
-  if ( req_size <= mTmpBlock.cube_num ) {
-    return;
-  }
-  auto size = mTmpBlock.cube_num;
-  if ( size == 0 ) {
-    size = 1;
-  }
-  while ( mTmpBlock.cube_num < req_size ) {
-    size <<= 1;
-  }
-
-  mTmpBlock = _new_body(size);
 }
 
 END_NAMESPACE_YM_SOP

@@ -1,13 +1,13 @@
 
-/// @file PySopCover.cc
-/// @brief Python SopCover の実装ファイル
+/// @file PyAlgCover.cc
+/// @brief Python AlgCover の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "pym/PySopCover.h"
-#include "pym/PySopCube.h"
+#include "pym/PyAlgCover.h"
+#include "pym/PyAlgCube.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyExpr.h"
 #include "pym/PyModule.h"
@@ -18,20 +18,20 @@ BEGIN_NAMESPACE_YM
 BEGIN_NONAMESPACE
 
 // Python 用のオブジェクト定義
-struct SopCoverObject
+struct AlgCoverObject
 {
   PyObject_HEAD
-  SopCover mVal;
+  AlgCover mVal;
 };
 
 // Python 用のタイプ定義
-PyTypeObject SopCoverType = {
+PyTypeObject AlgCoverType = {
   PyVarObject_HEAD_INIT(nullptr, 0)
 };
 
 // 生成関数
 PyObject*
-SopCover_new(
+AlgCover_new(
   PyTypeObject* type,
   PyObject* args,
   PyObject* kwds
@@ -50,14 +50,14 @@ SopCover_new(
 				    &PyList_Type, &obj1) ) {
     return nullptr;
   }
-  vector<SopCube> cube_list;
+  vector<AlgCube> cube_list;
   if ( obj1 != nullptr ) {
     SizeType n = PyList_Size(obj1);
     cube_list.reserve(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto obj2 = PyList_GetItem(obj1, i);
-      if ( PySopCube::Check(obj2) ) {
-	auto cube = PySopCube::Get(obj2);
+      if ( PyAlgCube::Check(obj2) ) {
+	auto cube = PyAlgCube::Get(obj2);
 	if ( cube.variable_num() != ni ) {
 	  PyErr_SetString(PyExc_ValueError,
 			  "variable_num of cube mismatch");
@@ -78,7 +78,7 @@ SopCover_new(
 	    lit_list.push_back(PyLiteral::Get(obj3));
 	  }
 	}
-	cube_list.push_back(SopCube{ni, lit_list});
+	cube_list.push_back(AlgCube{ni, lit_list});
       }
       else {
 	goto error;
@@ -87,39 +87,39 @@ SopCover_new(
   }
   {
     auto self = type->tp_alloc(type, 0);
-    auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
-    new (&sopcover_obj->mVal) SopCover{ni, cube_list};
+    auto sopcover_obj = reinterpret_cast<AlgCoverObject*>(self);
+    new (&sopcover_obj->mVal) AlgCover{ni, cube_list};
     return self;
   }
  error:
   PyErr_SetString(PyExc_TypeError,
-		  "argument 2 must a list of 'SopCube' or list of list of 'Literal'");
+		  "argument 2 must a list of 'AlgCube' or list of list of 'Literal'");
   return nullptr;
 }
 
 // 終了関数
 void
-SopCover_dealloc(
+AlgCover_dealloc(
   PyObject* self
 )
 {
-  auto sopcover_obj = reinterpret_cast<SopCoverObject*>(self);
-  sopcover_obj->mVal.~SopCover();
+  auto sopcover_obj = reinterpret_cast<AlgCoverObject*>(self);
+  sopcover_obj->mVal.~AlgCover();
   Py_TYPE(self)->tp_free(self);
 }
 
 PyObject*
-SopCover_copy(
+AlgCover_copy(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& cov = PySopCover::Get(self);
-  return PySopCover::ToPyObject(cov);
+  auto& cov = PyAlgCover::Get(self);
+  return PyAlgCover::ToPyObject(cov);
 }
 
 PyObject*
-SopCover_literal_num(
+AlgCover_literal_num(
   PyObject* self,
   PyObject* args,
   PyObject* kwds
@@ -137,7 +137,7 @@ SopCover_literal_num(
 				    &var_obj, &inv_int) ) {
     return nullptr;
   }
-  auto& cov = PySopCover::Get(self);
+  auto& cov = PyAlgCover::Get(self);
   bool inv = static_cast<bool>(inv_int);
   int ans = 0;
   if ( var_obj == nullptr ) {
@@ -164,12 +164,12 @@ SopCover_literal_num(
 }
 
 PyObject*
-SopCover_literal_list(
+AlgCover_literal_list(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& cov = PySopCover::Get(self);
+  auto& cov = PyAlgCover::Get(self);
   auto cube_list = cov.literal_list();
   SizeType n = cube_list.size();
   auto ans_obj = PyList_New(n);
@@ -188,7 +188,7 @@ SopCover_literal_list(
 }
 
 PyObject*
-SopCover_get_pat(
+AlgCover_get_pat(
   PyObject* self,
   PyObject* args,
   PyObject* kwds
@@ -206,113 +206,109 @@ SopCover_get_pat(
 				    &cpos, &vpos) ) {
     return nullptr;
   }
-  auto& cov = PySopCover::Get(self);
+  auto& cov = PyAlgCover::Get(self);
   auto pat = cov.get_pat(cpos, vpos);
   const char* ans_str = nullptr;
-  if ( pat == SopPat::_X ) {
+  if ( pat == AlgPat::_X ) {
     ans_str = "-";
   }
-  else if ( pat == SopPat::_0 ) {
+  else if ( pat == AlgPat::_0 ) {
     ans_str = "0";
   }
-  else if ( pat == SopPat::_1 ) {
+  else if ( pat == AlgPat::_1 ) {
     ans_str = "1";
   }
   return Py_BuildValue("s", ans_str);
 }
 
-#if 0
 PyObject*
-SopCover_common_cube(
+AlgCover_common_cube(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& cov = PySopCover::Get(self);
+  auto& cov = PyAlgCover::Get(self);
   auto cc = cov.common_cube();
-  return PySopCube::ToPyObject(cc);
+  return PyAlgCube::ToPyObject(cc);
 }
-#endif
 
 PyObject*
-SopCover_expr(
+AlgCover_expr(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& cov = PySopCover::Get(self);
+  auto& cov = PyAlgCover::Get(self);
   auto expr = cov.expr();
   return PyExpr::ToPyObject(expr);
 }
 
 // メソッド定義
-PyMethodDef SopCover_methods[] = {
-  {"copy", SopCover_copy,
+PyMethodDef AlgCover_methods[] = {
+  {"copy", AlgCover_copy,
    METH_NOARGS,
    PyDoc_STR("return copy of this object.")},
-  {"literal_num", reinterpret_cast<PyCFunction>(SopCover_literal_num),
+  {"literal_num", reinterpret_cast<PyCFunction>(AlgCover_literal_num),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("count the number of literals")},
-  {"literal_list", SopCover_literal_list,
+  {"literal_list", AlgCover_literal_list,
    METH_NOARGS,
    PyDoc_STR("convert to the list of list of literals")},
-  {"get_pat", reinterpret_cast<PyCFunction>(SopCover_get_pat),
+  {"get_pat", reinterpret_cast<PyCFunction>(AlgCover_get_pat),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("get the pattern('-', '0', or '1') of the specified position")},
-#if 0
-  {"common_cube", SopCover_common_cube,
+  {"common_cube", AlgCover_common_cube,
    METH_NOARGS,
    PyDoc_STR("return the common cube")},
-#endif
-  {"expr", SopCover_expr,
+  {"expr", AlgCover_expr,
    METH_NOARGS,
    PyDoc_STR("convert to 'Expr'")},
   {nullptr, nullptr, 0, nullptr}
 };
 
 PyObject*
-SopCover_variable_num(
+AlgCover_variable_num(
   PyObject* self,
   void* Py_UNUSED(closure)
 )
 {
-  auto& cov = PySopCover::Get(self);
+  auto& cov = PyAlgCover::Get(self);
   auto ans = cov.variable_num();
   return PyLong_FromLong(ans);
 }
 
 PyObject*
-SopCover_cube_num(
+AlgCover_cube_num(
   PyObject* self,
   void* Py_UNUSED(closure)
 )
 {
-  auto& cov = PySopCover::Get(self);
+  auto& cov = PyAlgCover::Get(self);
   auto ans = cov.cube_num();
   return PyLong_FromLong(ans);
 }
 
 // get/set 関数定義
-PyGetSetDef SopCover_getset[] = {
-  {"variable_num", SopCover_variable_num, nullptr,
+PyGetSetDef AlgCover_getset[] = {
+  {"variable_num", AlgCover_variable_num, nullptr,
    PyDoc_STR("number of variables"), nullptr},
-  {"cube_num", SopCover_cube_num, nullptr,
+  {"cube_num", AlgCover_cube_num, nullptr,
    PyDoc_STR("number of cubes"), nullptr},
   {nullptr, nullptr, nullptr, nullptr, nullptr},
 };
 
 // 比較関数
 PyObject*
-SopCover_richcmpfunc(
+AlgCover_richcmpfunc(
   PyObject* self,
   PyObject* other,
   int op
 )
 {
-  if ( PySopCover::Check(self) &&
-       PySopCover::Check(other) ) {
-    auto val1 = PySopCover::Get(self);
-    auto val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) &&
+       PyAlgCover::Check(other) ) {
+    auto val1 = PyAlgCover::Get(self);
+    auto val2 = PyAlgCover::Get(other);
     if ( val1.variable_num() != val2.variable_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "variable_num() is different from each other");
@@ -325,59 +321,59 @@ SopCover_richcmpfunc(
 
 // 加算(連結)
 PyObject*
-SopCover_add(
+AlgCover_add(
   PyObject* self,
   PyObject* other
 )
 {
-  if ( PySopCover::Check(self) ) {
-    auto& val1 = PySopCover::Get(self);
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) ) {
+    auto& val1 = PyAlgCover::Get(self);
+    if ( PyAlgCover::Check(other) ) {
+      auto& val2 = PyAlgCover::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 + val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
+    if ( PyAlgCube::Check(other) ) {
+      auto& val2 = PyAlgCube::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 + val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
   }
-  else if ( PySopCube::Check(self) && PySopCover::Check(other) ) {
-    auto& val1 = PySopCube::Get(self);
-    auto& val2 = PySopCover::Get(other);
+  else if ( PyAlgCube::Check(self) && PyAlgCover::Check(other) ) {
+    auto& val1 = PyAlgCube::Get(self);
+    auto& val2 = PyAlgCover::Get(other);
     if ( val1.variable_num() != val2.variable_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "variable_num() is different from each other");
       return nullptr;
     }
     auto val3 = val1 + val2;
-    return PySopCover::ToPyObject(val3);
+    return PyAlgCover::ToPyObject(val3);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
 
 // 加算(連結)つき代入
 PyObject*
-SopCover_iadd(
+AlgCover_iadd(
   PyObject* self,
   PyObject* other
 )
 {
-  if ( PySopCover::Check(self) ) {
-    auto& val1 = PySopCover::Get(self);
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) ) {
+    auto& val1 = PyAlgCover::Get(self);
+    if ( PyAlgCover::Check(other) ) {
+      auto& val2 = PyAlgCover::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
@@ -387,8 +383,8 @@ SopCover_iadd(
       Py_IncRef(self);
       return self;
     }
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
+    if ( PyAlgCube::Check(other) ) {
+      auto& val2 = PyAlgCube::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
@@ -404,32 +400,32 @@ SopCover_iadd(
 
 // 減算
 PyObject*
-SopCover_sub(
+AlgCover_sub(
   PyObject* self,
   PyObject* other
 )
 {
-  if ( PySopCover::Check(self) ) {
-    auto& val1 = PySopCover::Get(self);
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) ) {
+    auto& val1 = PyAlgCover::Get(self);
+    if ( PyAlgCover::Check(other) ) {
+      auto& val2 = PyAlgCover::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 - val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
+    if ( PyAlgCube::Check(other) ) {
+      auto& val2 = PyAlgCube::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 - val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -437,15 +433,15 @@ SopCover_sub(
 
 // 減算つき代入
 PyObject*
-SopCover_isub(
+AlgCover_isub(
   PyObject* self,
   PyObject* other
 )
 {
-  if ( PySopCover::Check(self) ) {
-    auto& val1 = PySopCover::Get(self);
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) ) {
+    auto& val1 = PyAlgCover::Get(self);
+    if ( PyAlgCover::Check(other) ) {
+      auto& val2 = PyAlgCover::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
@@ -455,8 +451,8 @@ SopCover_isub(
       Py_IncRef(self);
       return self;
     }
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
+    if ( PyAlgCube::Check(other) ) {
+      auto& val2 = PyAlgCube::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
@@ -470,58 +466,57 @@ SopCover_isub(
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-#if 0
 // 乗算
 PyObject*
-SopCover_mult(
+AlgCover_mult(
   PyObject* self,
   PyObject* other
 )
 {
-  if ( PySopCover::Check(self) ) {
-    auto& val1 = PySopCover::Get(self);
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) ) {
+    auto& val1 = PyAlgCover::Get(self);
+    if ( PyAlgCover::Check(other) ) {
+      auto& val2 = PyAlgCover::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 * val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
+    if ( PyAlgCube::Check(other) ) {
+      auto& val2 = PyAlgCube::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 * val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
       auto val3 = val1 * val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
   }
-  else if ( PySopCover::Check(other) ) {
-    auto& val2 = PySopCover::Get(other);
-    if ( PySopCube::Check(self) ) {
-      auto& val1 = PySopCube::Get(self);
+  else if ( PyAlgCover::Check(other) ) {
+    auto& val2 = PyAlgCover::Get(other);
+    if ( PyAlgCube::Check(self) ) {
+      auto& val1 = PyAlgCube::Get(self);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 * val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
     if ( PyLiteral::Check(self) ) {
       auto val1 = PyLiteral::Get(self);
       auto val3 = val1 * val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -529,15 +524,15 @@ SopCover_mult(
 
 // 乗算つき代入
 PyObject*
-SopCover_imult(
+AlgCover_imult(
   PyObject* self,
   PyObject* other
 )
 {
-  if ( PySopCover::Check(self) ) {
-    auto& val1 = PySopCover::Get(self);
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) ) {
+    auto& val1 = PyAlgCover::Get(self);
+    if ( PyAlgCover::Check(other) ) {
+      auto& val2 = PyAlgCover::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
@@ -547,8 +542,8 @@ SopCover_imult(
       Py_IncRef(self);
       return self;
     }
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
+    if ( PyAlgCube::Check(other) ) {
+      auto& val2 = PyAlgCube::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
@@ -570,37 +565,37 @@ SopCover_imult(
 
 // 除算
 PyObject*
-SopCover_div(
+AlgCover_div(
   PyObject* self,
   PyObject* other
 )
 {
-  if ( PySopCover::Check(self) ) {
-    auto& val1 = PySopCover::Get(self);
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) ) {
+    auto& val1 = PyAlgCover::Get(self);
+    if ( PyAlgCover::Check(other) ) {
+      auto& val2 = PyAlgCover::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 / val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
+    if ( PyAlgCube::Check(other) ) {
+      auto& val2 = PyAlgCube::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
 	return nullptr;
       }
       auto val3 = val1 / val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
       auto val3 = val1 / val2;
-      return PySopCover::ToPyObject(val3);
+      return PyAlgCover::ToPyObject(val3);
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -608,15 +603,15 @@ SopCover_div(
 
 // 除算つき代入
 PyObject*
-SopCover_idiv(
+AlgCover_idiv(
   PyObject* self,
   PyObject* other
 )
 {
-  if ( PySopCover::Check(self) ) {
-    auto& val1 = PySopCover::Get(self);
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::Get(other);
+  if ( PyAlgCover::Check(self) ) {
+    auto& val1 = PyAlgCover::Get(self);
+    if ( PyAlgCover::Check(other) ) {
+      auto& val2 = PyAlgCover::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
@@ -626,8 +621,8 @@ SopCover_idiv(
       Py_IncRef(self);
       return self;
     }
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
+    if ( PyAlgCube::Check(other) ) {
+      auto& val2 = PyAlgCube::Get(other);
       if ( val1.variable_num() != val2.variable_num() ) {
 	PyErr_SetString(PyExc_ValueError,
 			"variable_num() is different from each other");
@@ -646,54 +641,53 @@ SopCover_idiv(
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
-#endif
 
 // 数値演算メソッド定義
-PyNumberMethods SopCover_number = {
-  .nb_add = SopCover_add,
-  .nb_subtract = SopCover_sub,
-  //.nb_multiply = SopCover_mult,
-  .nb_inplace_add = SopCover_iadd,
-  .nb_inplace_subtract = SopCover_isub,
-  //.nb_inplace_multiply = SopCover_mult,
-  //.nb_true_divide = SopCover_div,
-  //.nb_inplace_true_divide = SopCover_idiv
+PyNumberMethods AlgCover_number = {
+  .nb_add = AlgCover_add,
+  .nb_subtract = AlgCover_sub,
+  .nb_multiply = AlgCover_mult,
+  .nb_inplace_add = AlgCover_iadd,
+  .nb_inplace_subtract = AlgCover_isub,
+  .nb_inplace_multiply = AlgCover_mult,
+  .nb_true_divide = AlgCover_div,
+  .nb_inplace_true_divide = AlgCover_idiv
 };
 
 // ハッシュ関数
 Py_hash_t
-SopCover_hash(
+AlgCover_hash(
   PyObject* self
 )
 {
-  auto& val = PySopCover::Get(self);
+  auto& val = PyAlgCover::Get(self);
   return val.hash();
 }
 
 END_NONAMESPACE
 
 
-// @brief 'SopCover' オブジェクトを使用可能にする．
+// @brief 'AlgCover' オブジェクトを使用可能にする．
 bool
-PySopCover::init(
+PyAlgCover::init(
   PyObject* m
 )
 {
-  SopCoverType.tp_name = "SopCover";
-  SopCoverType.tp_basicsize = sizeof(SopCoverObject);
-  SopCoverType.tp_itemsize = 0;
-  SopCoverType.tp_dealloc = SopCover_dealloc;
-  SopCoverType.tp_flags = Py_TPFLAGS_DEFAULT;
-  SopCoverType.tp_doc = PyDoc_STR("SopCover object");
-  SopCoverType.tp_richcompare = SopCover_richcmpfunc;
-  SopCoverType.tp_methods = SopCover_methods;
-  SopCoverType.tp_getset = SopCover_getset;
-  SopCoverType.tp_new = SopCover_new;
-  SopCoverType.tp_as_number = &SopCover_number;
-  SopCoverType.tp_hash = SopCover_hash;
+  AlgCoverType.tp_name = "AlgCover";
+  AlgCoverType.tp_basicsize = sizeof(AlgCoverObject);
+  AlgCoverType.tp_itemsize = 0;
+  AlgCoverType.tp_dealloc = AlgCover_dealloc;
+  AlgCoverType.tp_flags = Py_TPFLAGS_DEFAULT;
+  AlgCoverType.tp_doc = PyDoc_STR("AlgCover object");
+  AlgCoverType.tp_richcompare = AlgCover_richcmpfunc;
+  AlgCoverType.tp_methods = AlgCover_methods;
+  AlgCoverType.tp_getset = AlgCover_getset;
+  AlgCoverType.tp_new = AlgCover_new;
+  AlgCoverType.tp_as_number = &AlgCover_number;
+  AlgCoverType.tp_hash = AlgCover_hash;
 
   // 型オブジェクトの登録
-  if ( !PyModule::reg_type(m, "SopCover", &SopCoverType) ) {
+  if ( !PyModule::reg_type(m, "AlgCover", &AlgCoverType) ) {
     goto error;
   }
 
@@ -704,54 +698,54 @@ PySopCover::init(
   return false;
 }
 
-// @brief SopCover を PyObject に変換する．
+// @brief AlgCover を PyObject に変換する．
 PyObject*
-PySopCover::ToPyObject(
-  const SopCover& val
+PyAlgCover::ToPyObject(
+  const AlgCover& val
 )
 {
-  auto obj = SopCoverType.tp_alloc(&SopCoverType, 0);
-  auto sopcover_obj = reinterpret_cast<SopCoverObject*>(obj);
-  new (&sopcover_obj->mVal) SopCover{val};
+  auto obj = AlgCoverType.tp_alloc(&AlgCoverType, 0);
+  auto sopcover_obj = reinterpret_cast<AlgCoverObject*>(obj);
+  new (&sopcover_obj->mVal) AlgCover{val};
   return obj;
 }
 
-// @brief SopCover を PyObject に変換する．
+// @brief AlgCover を PyObject に変換する．
 PyObject*
-PySopCover::ToPyObject(
-  const SopCover&& val
+PyAlgCover::ToPyObject(
+  const AlgCover&& val
 )
 {
-  auto obj = SopCoverType.tp_alloc(&SopCoverType, 0);
-  auto sopcover_obj = reinterpret_cast<SopCoverObject*>(obj);
-  new (&sopcover_obj->mVal) SopCover{std::move(val)};
+  auto obj = AlgCoverType.tp_alloc(&AlgCoverType, 0);
+  auto sopcover_obj = reinterpret_cast<AlgCoverObject*>(obj);
+  new (&sopcover_obj->mVal) AlgCover{std::move(val)};
   return obj;
 }
 
-// @brief PyObject が SopCover タイプか調べる．
+// @brief PyObject が AlgCover タイプか調べる．
 bool
-PySopCover::Check(
+PyAlgCover::Check(
   PyObject* obj
 )
 {
   return Py_IS_TYPE(obj, _typeobject());
 }
 
-// @brief SopCover を表す PyObject から SopCover を取り出す．
-SopCover&
-PySopCover::Get(
+// @brief AlgCover を表す PyObject から AlgCover を取り出す．
+AlgCover&
+PyAlgCover::Get(
   PyObject* obj
 )
 {
-  auto sopcover_obj = reinterpret_cast<SopCoverObject*>(obj);
+  auto sopcover_obj = reinterpret_cast<AlgCoverObject*>(obj);
   return sopcover_obj->mVal;
 }
 
-// @brief SopCover を表すオブジェクトの型定義を返す．
+// @brief AlgCover を表すオブジェクトの型定義を返す．
 PyTypeObject*
-PySopCover::_typeobject()
+PyAlgCover::_typeobject()
 {
-  return &SopCoverType;
+  return &AlgCoverType;
 }
 
 END_NAMESPACE_YM

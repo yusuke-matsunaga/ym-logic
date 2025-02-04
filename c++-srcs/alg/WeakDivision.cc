@@ -7,10 +7,10 @@
 /// All rights reserved.
 
 #include "WeakDivision.h"
-#include "ym/SopCover.h"
+#include "ym/AlgCover.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 // クラス WeakDivision
@@ -27,10 +27,10 @@ WeakDivision::~WeakDivision()
 }
 
 // @brief 除算を行う．
-pair<SopCover, SopCover>
+pair<AlgCover, AlgCover>
 WeakDivision::operator()(
-  const SopCover& f,
-  const SopCover& d
+  const AlgCover& f,
+  const AlgCover& d
 ) const
 {
   auto q = f / d;
@@ -38,4 +38,4 @@ WeakDivision::operator()(
   return make_pair(std::move(q), std::move(r));
 }
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG

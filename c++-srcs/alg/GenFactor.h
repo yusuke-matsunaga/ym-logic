@@ -5,18 +5,18 @@
 /// @brief GenFactor のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/SopCover.h"
-#include "ym/SopCube.h"
+#include "ym/AlgCover.h"
+#include "ym/AlgCube.h"
 #include "ym/Expr.h"
 #include "OneLevel0Kernel.h"
 #include "BestKernel.h"
 #include "WeakDivision.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 /// @class GenFactor GenFactor.h "GenFactor.h"
@@ -42,29 +42,29 @@ public:
   /// @brief ファクタリングを行う．
   Expr
   operator()(
-    const SopCover& f
+    const AlgCover& f
   )
   {
-    SopCover d = mDivisor(f);
+    AlgCover d = mDivisor(f);
     if ( d.cube_num() == 0 ) {
       return conv_to_expr(f);
     }
 
     auto p = mDivide(f, d);
-    const SopCover& q = p.first;
-    const SopCover& r = p.second;
+    const AlgCover& q = p.first;
+    const AlgCover& r = p.second;
     if ( q.cube_num() == 1 ) {
       auto cube_list = q.literal_list();
       ASSERT_COND( cube_list.size() == 1 );
       return literal_factor(f, cube_list[0]);
     }
     else {
-      SopCube cc = q.common_cube();
-      SopCover q1 = q / cc;
+      AlgCube cc = q.common_cube();
+      AlgCover q1 = q / cc;
       auto p = mDivide(f, q1);
-      const SopCover& d1 = p.first;
-      const SopCover& r1 = p.second;
-      SopCube cc1 = d1.common_cube();
+      const AlgCover& d1 = p.first;
+      const AlgCover& r1 = p.second;
+      AlgCube cc1 = d1.common_cube();
       if ( cc1.literal_num() == 0 ) {
 	Expr q_expr = operator()(q1);
 	Expr d_expr = operator()(d1);
@@ -87,7 +87,7 @@ private:
   /// @brief 'LF' を行う．
   Expr
   literal_factor(
-    const SopCover& f,
+    const AlgCover& f,
     const vector<Literal>& lit_list
   )
   {
@@ -109,10 +109,10 @@ private:
     return (q_expr & d_expr) | r_expr;
   }
 
-  /// @brief SopCover をそのまま Expr に変換する．
+  /// @brief AlgCover をそのまま Expr に変換する．
   Expr
   conv_to_expr(
-    const SopCover& f
+    const AlgCover& f
   )
   {
     auto cube_list = f.literal_list();
@@ -163,6 +163,6 @@ using QuickFactor = GenFactor<OneLevel0Kernel, WeakDivision>;
 using GoodFactor = GenFactor<BestKernel, WeakDivision>;
 
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG
 
 #endif // GENFACTOR_H

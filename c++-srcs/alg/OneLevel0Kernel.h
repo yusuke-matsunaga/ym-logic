@@ -11,7 +11,7 @@
 #include "Divisor.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 /// @class OneLevel0Kernel OneLevel0Kernel.h "OneLevel0Kernel.h"
@@ -36,13 +36,13 @@ public:
 
   /// @brief 除数を求める．
   /// @return 除数を表す論理式を返す．
-  SopCover
+  AlgCover
   operator()(
-    const SopCover& f ///< [in] 対象の論理式
+    const AlgCover& f ///< [in] 対象の論理式
   ) const override;
 
 };
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG
 
 #endif // ONELEVEL0KERNEL_H

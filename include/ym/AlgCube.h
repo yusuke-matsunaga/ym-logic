@@ -16,8 +16,6 @@
 
 BEGIN_NAMESPACE_YM_ALG
 
-class AlgBlockRef;
-
 //////////////////////////////////////////////////////////////////////
 /// @ingroup AlgGroup
 /// @class AlgCube AlgCube.h "ym/AlgCube.h"
@@ -86,6 +84,12 @@ public:
     AlgCube&& src ///< [in] ムーブ元のオブジェクト
   );
 
+  /// @brief 内容を指定するコンストラクタ
+  AlgCube(
+    SizeType variable_num, ///< [in] 変数の数
+    Chunk&& chunk          ///< [in] キューブのパタンを表す本体
+  );
+
   /// @brief デストラクタ
   ~AlgCube() = default;
 
@@ -141,22 +145,18 @@ public:
   Expr
   expr() const;
 
-  /// @brief AlgBlockRef に変換する．
-  AlgBlockRef
-  to_block() const;
-
   /// @brief 本体のビットベクタを返す．
-  const AlgBitVect&
-  body() const
+  const Chunk&
+  chunk() const
   {
-    return mBody;
+    return mChunk;
   }
 
   /// @brief 本体のビットベクタを返す．
-  AlgBitVect&
-  body()
+  Chunk&
+  chunk()
   {
-    return mBody;
+    return mChunk;
   }
 
   /// @brief ハッシュ値を返す．
@@ -252,15 +252,6 @@ public:
     Literal right ///< [in] オペランドのリテラル
   );
 
-  /// @brief AlgCubeの比較演算子
-  /// @retval -1 left < right
-  /// @retval  0 left = right
-  /// @retval  1 left > right
-  int
-  compare(
-    const AlgCube& right ///< [in] 第2オペランド
-  ) const;
-
   /// @brief AlgCubeの比較演算子(EQ)
   /// @retval true  left == right
   /// @retval false left != right
@@ -269,7 +260,7 @@ public:
     const AlgCube& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) == 0;
+    return _compare(right) == 0;
   }
 
   /// @brief AlgCubeの比較演算子(NE)
@@ -280,7 +271,7 @@ public:
     const AlgCube& right ///< [in] 第2オペランド
   ) const
   {
-    return !left.operator==(right);
+    return _compare(right) != 0;
   }
 
   /// @brief AlgCubeの比較演算子(LT)
@@ -291,7 +282,7 @@ public:
     const AlgCube& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) < 0;
+    return _compare(right) < 0;
   }
 
   /// @brief AlgCubeの比較演算子(GT)
@@ -302,7 +293,7 @@ public:
     const AlgCube& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) > 0;
+    return _compare(right) > 0;
   }
 
   /// @brief AlgCubeの比較演算子(LE)
@@ -313,7 +304,7 @@ public:
     const AlgCube& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) <= 0;
+    return _compare(right) <= 0;
   }
 
   /// @brief AlgCubeの比較演算子(GE)
@@ -324,7 +315,7 @@ public:
     const AlgCube& right ///< [in] 第2オペランド
   ) const
   {
-    return left.compare(right) >= 0;
+    return _compare(right) >= 0;
   }
 
 
@@ -333,16 +324,28 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 内容を指定するコンストラクタ
-  AlgCube(
-    SizeType variable_num, ///< [in] 変数の数
-    AlgBitVect&& body      ///< [in] キューブのパタンを表す本体
-  );
+  /// @brief 内部で用いられるキューブを得る．
+  Cube
+  _cube() const;
 
-  /// @brief AlgBlock からのムーブコンストラクタ
-  AlgCube(
-    SizeType variable_num, ///< [in] 変数の数
-    AlgBlock&& block       ///< [in] 変換元ののブロック
+  /// @brief 内部で用いられるキューブを得る．
+  DstCube
+  _dst_cube();
+
+  /// @brief AlgCubeの比較演算子
+  /// @retval -1 left < right
+  /// @retval  0 left = right
+  /// @retval  1 left > right
+  int
+  _compare(
+    const AlgCube& right ///< [in] 第2オペランド
+  ) const;
+
+  friend
+  int
+  compare(
+    const AlgCube& left,
+    const AlgCube& right
   );
 
 
@@ -352,16 +355,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 内容を表すビットベクタ
-  AlgBitVect mBody;
+  Chunk mChunk;
 
 };
-
 
 /// @relates AlgCube
 /// @brief キューブの論理積を計算する
 ///
 /// リテラル集合としてみると和集合となる<br>
 /// ただし，相反するリテラルが含まれていたら空キューブとなる．
+inline
 AlgCube
 operator*(
   AlgCube&& left,      ///< [in] 第1オペランド(ムーブ参照)
@@ -470,6 +473,21 @@ operator/(
 )
 {
   return AlgCube{std::move(left)}.operator/=(right);
+}
+
+/// @relates AlgCube
+/// @brief AlgCubeの比較演算子
+/// @retval -1 left < right
+/// @retval  0 left = right
+/// @retval  1 left > right
+inline
+int
+compare(
+  const AlgCube& left, ///< [in] 第1オペランド
+  const AlgCube& right ///< [in] 第2オペランド
+)
+{
+  return left._compare(right);
 }
 
 /// @relates AlgCube

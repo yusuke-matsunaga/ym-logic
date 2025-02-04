@@ -11,7 +11,7 @@
 #include "Divide.h"
 
 
-BEGIN_NAMESPACE_YM_SOP
+BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 /// @class WeakDivision WeakDivision.h "WeakDivision.h"
@@ -36,14 +36,14 @@ public:
 
   /// @brief 除算を行う．
   /// @return 商q と余りr の pair を返す．
-  pair<SopCover, SopCover>
+  pair<AlgCover, AlgCover>
   operator()(
-    const SopCover& f, ///< [in] 被除数
-    const SopCover& d  ///< [in] 除数
+    const AlgCover& f, ///< [in] 被除数
+    const AlgCover& d  ///< [in] 除数
   ) const override;
 
 };
 
-END_NAMESPACE_YM_SOP
+END_NAMESPACE_YM_ALG
 
 #endif // WEAKDIVISION_H

@@ -7,9 +7,8 @@
 /// All rights reserved.
 
 #include "ym/SopCover.h"
+#include "ym/SopCube.h"
 #include "ym/Range.h"
-#include "SopMgr.h"
-#include "GenFactor.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
@@ -30,7 +29,9 @@ SopCover::SopCover(
 SopCover::SopCover(
   SizeType var_num,
   const vector<SopCube>& cube_list
-) : SopBase{var_num}
+) : SopBase{var_num},
+    mCubeNum{cube_list.size()},
+    mChunk(_cube_size() * cube_num(), 0ULL)
 {
   // cube_list のキューブのサイズが正しいかチェック
   for ( auto& cube: cube_list ) {
@@ -38,31 +39,68 @@ SopCover::SopCover(
       throw std::invalid_argument{"variable_num of cube mismatch"};
     }
   }
-  SopMgr mgr{variable_num()};
-  auto dst = mgr.new_block(cube_list);
-  _set(std::move(dst));
+
+  // mChunk に内容をコピーする．
+  auto dst_cube = _cube_begin(mChunk);
+  for ( auto& cube: cube_list ) {
+    auto src_cube = _cube_begin(cube.chunk());
+    _cube_copy(dst_cube, src_cube);
+    _cube_next(dst_cube);
+  }
+  _sort();
 }
 
 // @brief コンストラクタ
 SopCover::SopCover(
   SizeType var_num,
   const vector<vector<Literal>>& cube_list
-) : SopBase{var_num}
+) : SopBase{var_num},
+    mCubeNum{cube_list.size()},
+    mChunk(_cube_size() * cube_num(), 0ULL)
 {
-  SopMgr mgr{variable_num()};
-  auto dst = mgr.new_block(cube_list);
-  _set(std::move(dst));
+  // cube_list の中のリテラル番号が var_num に収まるがチェック
+  for ( auto& lits: cube_list ) {
+    for ( auto lit: lits ) {
+      if ( lit.varid() >= variable_num() ) {
+	throw std::out_of_range{"literal is out of range"};
+      }
+    }
+  }
+
+  // mChunk に内容をコピーする．
+  auto dst_cube = _cube_begin(mChunk);
+  for ( auto& lits: cube_list ) {
+    _cube_set_literals(dst_cube, lits);
+    _cube_next(dst_cube);
+  }
+  _sort();
+
 }
 
 // @brief コンストラクタ
 SopCover::SopCover(
   SizeType var_num,
   std::initializer_list<std::initializer_list<Literal>>& cube_list
-) : SopBase{var_num}
+) : SopBase{var_num},
+    mCubeNum{cube_list.size()},
+    mChunk(_cube_size() * cube_list.size(), 0ULL)
 {
-  SopMgr mgr{variable_num()};
-  auto dst = mgr.new_block(cube_list);
-  _set(std::move(dst));
+  // cube_list の中のリテラル番号が var_num に収まるがチェック
+  for ( auto& lits: cube_list ) {
+    for ( auto lit: lits ) {
+      if ( lit.varid() >= variable_num() ) {
+	throw std::out_of_range{"literal is out of range"};
+      }
+    }
+  }
+
+  // mChunk に内容をコピーする．
+  auto dst_cube = _cube_begin(mChunk);
+  for ( auto& lits: cube_list ) {
+    _cube_set_literals(dst_cube, lits);
+    _cube_next(dst_cube);
+  }
+  _sort();
 }
 
 // @brief コピーコンストラクタ
@@ -70,7 +108,7 @@ SopCover::SopCover(
   const SopCover& src
 ) : SopBase{src.variable_num()},
     mCubeNum{src.mCubeNum},
-    mBody{src.mBody}
+    mChunk{src.mChunk}
 {
 }
 
@@ -83,7 +121,7 @@ SopCover::operator=(
   if ( this != &src ) {
     SopBase::operator=(src);
     mCubeNum = src.mCubeNum;
-    mBody = src.mBody;
+    mChunk = src.mChunk;
   }
 
   return *this;
@@ -94,7 +132,7 @@ SopCover::SopCover(
   SopCover&& src
 ) : SopBase{src},
     mCubeNum{src.mCubeNum},
-    mBody{std::move(src.mBody)}
+    mChunk{std::move(src.mChunk)}
 {
 }
 
@@ -106,7 +144,7 @@ SopCover::operator=(
 {
   SopBase::operator=(src);
   mCubeNum = src.mCubeNum;
-  std::swap(mBody, src.mBody);
+  std::swap(mChunk, src.mChunk);
 
   return *this;
 }
@@ -116,7 +154,7 @@ SopCover::SopCover(
   const SopCube& cube
 ) : SopBase{cube.variable_num()},
     mCubeNum{1},
-    mBody{cube.body()}
+    mChunk{cube.chunk()}
 {
 }
 
@@ -126,7 +164,7 @@ SopCover::SopCover(
   SopCube&& cube
 ) : mVariableNum{cube.variable_num()},
     mCubeNum{1},
-    mBody{std::move(cube.mBody)}
+    mChunk{std::move(cube.mChunk)}
 {
 }
 #endif
@@ -135,10 +173,10 @@ SopCover::SopCover(
 SopCover::SopCover(
   SizeType variable_num,
   SizeType cube_num,
-  SopBitVect&& body
+  Chunk&& chunk
 ) : SopBase{variable_num},
     mCubeNum{cube_num},
-    mBody{body}
+    mChunk{std::move(chunk)}
 {
 }
 
@@ -146,8 +184,7 @@ SopCover::SopCover(
 SizeType
 SopCover::literal_num() const
 {
-  SopMgr mgr{variable_num()};
-  return mgr.literal_num(to_block());
+  return _literal_num(cube_num(), chunk());
 }
 
 // @brief 指定されたリテラルの出現回数を返す．
@@ -156,8 +193,7 @@ SopCover::literal_num(
   Literal lit
 ) const
 {
-  SopMgr mgr{variable_num()};
-  return mgr.literal_num(to_block(), lit);
+  return _literal_num(cube_num(), chunk(), lit);
 }
 
 // @brief 指定されたリテラルの出現回数を返す．
@@ -167,16 +203,14 @@ SopCover::literal_num(
   bool inv
 ) const
 {
-  SopMgr mgr{variable_num()};
-  return mgr.literal_num(to_block(), varid, inv);
+  return _literal_num(cube_num(), chunk(), varid, inv);
 }
 
 // @brief 内容をリテラルのリストのリストに変換する．
 vector<vector<Literal>>
 SopCover::literal_list() const
 {
-  SopMgr mgr{variable_num()};
-  return mgr.literal_list(to_block());
+  return _literal_list(cube_num(), chunk());
 }
 
 // @brief キューブを取り出す．
@@ -185,8 +219,11 @@ SopCover::get_cube(
   SizeType cube_id
 ) const
 {
-  SopMgr mgr{variable_num()};
-  return mgr.get_cube(to_block(), cube_id);
+  auto dst_chunk = _new_chunk(1);
+  auto dst_cube = _cube_begin(dst_chunk);
+  auto src_cube = _cube_begin(chunk(), cube_id);
+  _cube_copy(dst_cube, src_cube);
+  return SopCube{variable_num(), std::move(dst_chunk)};
 }
 
 // @brief パタンを返す．
@@ -196,48 +233,22 @@ SopCover::get_pat(
   SizeType var
 ) const
 {
-  SopMgr mgr{variable_num()};
-  auto src_cube = _cube_begin(mBody, cube_id);
-  return mgr.get_pat(src_cube, var);
-}
-
-// @brief "quick factor" を行う．
-Expr
-SopCover::quick_factor() const
-{
-  QuickFactor qf;
-  return qf(*this);
-}
-
-// @brief "good factor" を行う．
-Expr
-SopCover::good_factor() const
-{
-  GoodFactor gf;
-  return gf(*this);
+  auto src_cube = _cube_begin(mChunk, cube_id);
+  return _get_pat(src_cube, var);
 }
 
 // @brief Expr に変換する．
 Expr
 SopCover::expr() const
 {
-  SopMgr mgr{variable_num()};
-  return mgr.to_expr(to_block());
-}
-
-// @brief SopBlockRef に変換する．
-SopBlockRef
-SopCover::to_block() const
-{
-  return SopBlockRef{mCubeNum, mBody};
+  return _to_expr(cube_num(), chunk());
 }
 
 // @brief ハッシュ値を返す．
 SizeType
 SopCover::hash() const
 {
-  SopMgr mgr{variable_num()};
-  return mgr.hash(to_block());
+  return _hash(cube_num(), chunk());
 }
 
 // @brief 内容をわかりやすい形で出力する．
@@ -247,8 +258,7 @@ SopCover::print(
   const vector<string>& varname_list
 ) const
 {
-  SopMgr mgr{variable_num()};
-  mgr.print(s, mBody, 0, mCubeNum, varname_list);
+  _print(s, mChunk, 0, mCubeNum, varname_list);
 }
 
 // @brief 内容をデバッグ用に出力する．
@@ -257,18 +267,7 @@ SopCover::debug_print(
   ostream& s
 ) const
 {
-  SopMgr mgr{variable_num()};
-  mgr.debug_print(s, to_block());
-}
-
-// @brief SopBlock の内容をセットする．
-void
-SopCover::_set(
-  SopBlock&& src
-)
-{
-  mCubeNum = src.cube_num;
-  std::swap(mBody, src.body);
+  _debug_print(s, cube_num(), chunk());
 }
 
 END_NAMESPACE_YM_SOP

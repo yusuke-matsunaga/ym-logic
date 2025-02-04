@@ -138,17 +138,8 @@ END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_YM_SOP
 
-/// @brief SopBitVect のワード型
+/// @brief SopPat をパックしたワード型
 using SopPatWord = std::uint64_t;
-
-/// @brief SopPat をパックしたビットベクタ型
-using SopBitVect = vector<SopPatWord>;
-
-/// @brief SopBitVect の反復子
-using SopBitVectIter = SopBitVect::iterator;
-
-/// @brief SopBitVect の定数反復子
-using SopBitVectConstIter = SopBitVect::const_iterator;
 
 // クラス名の前方参照用宣言
 class SopBlock;
@@ -171,17 +162,8 @@ END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_YM_ALG
 
-/// @brief AlgBitVect のワード型
+/// @brief AlgPat をパックしたワード型
 using AlgPatWord = std::uint64_t;
-
-/// @brief AlgPat をパックしたビットベクタ型
-using AlgBitVect = vector<AlgPatWord>;
-
-/// @brief AlgBitVect の反復子
-using AlgBitVectIter = AlgBitVect::iterator;
-
-/// @brief AlgBitVect の定数反復子
-using AlgBitVectConstIter = AlgBitVect::const_iterator;
 
 // クラス名の前方参照用宣言
 class AlgBlock;

@@ -16,8 +16,6 @@
 
 BEGIN_NAMESPACE_YM_SOP
 
-class SopBlockRef;
-
 //////////////////////////////////////////////////////////////////////
 /// @ingroup SopGroup
 /// @class SopCube SopCube.h "ym/SopCube.h"
@@ -32,8 +30,6 @@ class SopBlockRef;
 class SopCube:
   public SopBase
 {
-  friend class SopMgr;
-
 public:
 
   /// @brief コンストラクタ
@@ -88,6 +84,12 @@ public:
     SopCube&& src ///< [in] ムーブ元のオブジェクト
   );
 
+  /// @brief 内容を指定するコンストラクタ
+  SopCube(
+    SizeType variable_num, ///< [in] 変数の数
+    Chunk&& body           ///< [in] キューブのパタンを表す本体
+  );
+
   /// @brief デストラクタ
   ~SopCube() = default;
 
@@ -138,6 +140,34 @@ public:
   check_intersect(
     const SopCube& right ///< [in] オペランドのキューブ
   ) const;
+
+  /// @brief Expr に変換する．
+  Expr
+  expr() const;
+
+  /// @brief 本体のビットベクタを返す．
+  const Chunk&
+  chunk() const
+  {
+    return mChunk;
+  }
+
+  /// @brief ハッシュ値を返す．
+  SizeType
+  hash() const;
+
+  /// @brief 内容をわかりやすい形で出力する．
+  void
+  print(
+    ostream& s,                             ///< [in] 出力先のストリーム
+    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
+  ) const;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 演算子のオーバーロード
+  //////////////////////////////////////////////////////////////////////
 
   /// @brief キューブの論理積を計算する
   ///
@@ -215,38 +245,71 @@ public:
     Literal right ///< [in] オペランドのリテラル
   );
 
-  /// @brief Expr に変換する．
-  Expr
-  expr() const;
-
-  /// @brief SopBlockRef に変換する．
-  SopBlockRef
-  to_block() const;
-
-  /// @brief 本体のビットベクタを返す．
-  const SopBitVect&
-  body() const
+  /// @brief SopCubeの比較演算子(EQ)
+  /// @retval true  left == right
+  /// @retval false left != right
+  bool
+  operator==(
+    const SopCube& right ///< [in] 第2オペランド
+  ) const
   {
-    return mBody;
+    return _compare(right) == 0;
   }
 
-  /// @brief 本体のビットベクタを返す．
-  SopBitVect&
-  body()
+  /// @brief SopCubeの比較演算子(NE)
+  /// @retval true  left != right
+  /// @retval false left == right
+  bool
+  operator!=(
+    const SopCube& right ///< [in] 第2オペランド
+  ) const
   {
-    return mBody;
+    return _compare(right) != 0;
   }
 
-  /// @brief ハッシュ値を返す．
-  SizeType
-  hash() const;
+  /// @brief SopCubeの比較演算子(LT)
+  /// @retval true  left < right
+  /// @retval false left >= right
+  bool
+  operator<(
+    const SopCube& right ///< [in] 第2オペランド
+  ) const
+  {
+    return _compare(right) < 0;
+  }
 
-  /// @brief 内容をわかりやすい形で出力する．
-  void
-  print(
-    ostream& s,                             ///< [in] 出力先のストリーム
-    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
-  ) const;
+  /// @brief SopCubeの比較演算子(GT)
+  /// @retval true  left > right
+  /// @retval false left <= right
+  bool
+  operator>(
+    const SopCube& right ///< [in] 第2オペランド
+  ) const
+  {
+    return _compare(right) > 0;
+  }
+
+  /// @brief SopCubeの比較演算子(LE)
+  /// @retval true  left < right
+  /// @retval false left >= right
+  bool
+  operator<=(
+    const SopCube& right ///< [in] 第2オペランド
+  ) const
+  {
+    return _compare(right) <= 0;
+  }
+
+  /// @brief SopCubeの比較演算子(GE)
+  /// @retval true  left < right
+  /// @retval false left >= right
+  bool
+  operator>=(
+    const SopCube& right ///< [in] 第2オペランド
+  ) const
+  {
+    return _compare(right) >= 0;
+  }
 
 
 private:
@@ -254,30 +317,17 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 内容を指定するコンストラクタ
-  SopCube(
-    SizeType variable_num, ///< [in] 変数の数
-    SopBitVect&& body      ///< [in] キューブのパタンを表す本体
-  );
-
-  /// @brief SopBlock からのムーブコンストラクタ
-  SopCube(
-    SizeType variable_num, ///< [in] 変数の数
-    SopBlock&& block       ///< [in] 変換元ののブロック
-  );
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // friend 関数の宣言
-  // private: 指定は実は関係ない．
-  //////////////////////////////////////////////////////////////////////
+  /// @brief 比較関数(rich compare)
+  int
+  _compare(
+    const SopCube& right ///< [in] 第2オペランド
+  ) const;
 
   friend
   int
   compare(
-    const SopCube& left,
-    const SopCube& right
+    const SopCube& left, ///< [in] 第1オペランド
+    const SopCube& right ///< [in] 第2オペランド
   );
 
 
@@ -287,7 +337,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 内容を表すビットベクタ
-  SopBitVect mBody;
+  Chunk mChunk;
 
 };
 
@@ -408,98 +458,15 @@ operator/(
 }
 
 /// @relates SopCube
-/// @brief SopCubeの比較演算子
-/// @retval -1 left < right
-/// @retval  0 left = right
-/// @retval  1 left > right
+/// @brief 比較関数(rich compare)
+inline
 int
 compare(
   const SopCube& left, ///< [in] 第1オペランド
   const SopCube& right ///< [in] 第2オペランド
-);
-
-/// @relates SopCube
-/// @brief SopCubeの比較演算子(EQ)
-/// @retval true  left == right
-/// @retval false left != right
-inline
-bool
-operator==(
-  const SopCube& left, ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return compare(left, right) == 0;
-}
-
-/// @relates SopCube
-/// @brief SopCubeの比較演算子(NE)
-/// @retval true  left != right
-/// @retval false left == right
-inline
-bool
-operator!=(
-  const SopCube& left, ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) != 0;
-}
-
-/// @relates SopCube
-/// @brief SopCubeの比較演算子(LT)
-/// @retval true  left < right
-/// @retval false left >= right
-inline
-bool
-operator<(
-  const SopCube& left, ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) < 0;
-}
-
-/// @relates SopCube
-/// @brief SopCubeの比較演算子(GT)
-/// @retval true  left > right
-/// @retval false left <= right
-inline
-bool
-operator>(
-  const SopCube& left, ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) > 0;
-}
-
-/// @relates SopCube
-/// @brief SopCubeの比較演算子(LE)
-/// @retval true  left < right
-/// @retval false left >= right
-inline
-bool
-operator<=(
-  const SopCube& left, ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) <= 0;
-}
-
-/// @relates SopCube
-/// @brief SopCubeの比較演算子(GE)
-/// @retval true  left < right
-/// @retval false left >= right
-inline
-bool
-operator>=(
-  const SopCube& left, ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) >= 0;
+  return left._compare(right);
 }
 
 /// @relates SopCube
