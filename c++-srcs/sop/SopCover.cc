@@ -31,7 +31,7 @@ SopCover::SopCover(
   const vector<SopCube>& cube_list
 ) : SopBase{var_num},
     mCubeNum{cube_list.size()},
-    mChunk(_cube_size() * cube_num(), 0ULL)
+    mChunk(_cube_size() * cube_num(), SOP_ALL1)
 {
   // cube_list のキューブのサイズが正しいかチェック
   for ( auto& cube: cube_list ) {
@@ -57,7 +57,7 @@ SopCover::SopCover(
   const vector<vector<Literal>>& cube_list
 ) : SopBase{var_num},
     mCubeNum{cube_list.size()},
-    mChunk(_cube_size() * cube_num(), 0ULL)
+    mChunk(_cube_size() * cube_num(), SOP_ALL1)
 {
   // cube_list の中のリテラル番号が var_num に収まるがチェック
   for ( auto& lits: cube_list ) {
@@ -85,7 +85,7 @@ SopCover::SopCover(
   std::initializer_list<std::initializer_list<Literal>>& cube_list
 ) : SopBase{var_num},
     mCubeNum{cube_list.size()},
-    mChunk(_cube_size() * cube_list.size(), 0ULL)
+    mChunk(_cube_size() * cube_list.size(), SOP_ALL1)
 {
   // cube_list の中のリテラル番号が var_num に収まるがチェック
   for ( auto& lits: cube_list ) {
@@ -111,7 +111,7 @@ SopCover::SopCover(
   const SopCover& src
 ) : SopBase{src.variable_num()},
     mCubeNum{src.mCubeNum},
-    mChunk(_cube_size() * cube_num(), 0ULL)
+    mChunk(_cube_size() * cube_num(), SOP_ALL1)
 {
   // mChunk に内容をコピーする．
   // mChunk の容量は余分に確保されている可能性があるので
@@ -137,7 +137,7 @@ SopCover::operator=(
     SizeType size = _cube_size() * cube_num();
     auto src_begin = src.chunk().begin();
     auto src_end = src_begin + size;
-    mChunk.resize(size, 0ULL);
+    mChunk.resize(size, SOP_ALL1);
     auto dst_begin = mChunk.begin();
     std::copy(src_begin, src_end, dst_begin);
   }

@@ -138,9 +138,6 @@ END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_YM_SOP
 
-/// @brief SopPat をパックしたワード型
-using SopPatWord = std::uint64_t;
-
 // クラス名の前方参照用宣言
 class SopBlock;
 class SopMgr;
@@ -161,9 +158,6 @@ END_NAMESPACE_YM
 
 
 BEGIN_NAMESPACE_YM_ALG
-
-/// @brief AlgPat をパックしたワード型
-using AlgPatWord = std::uint64_t;
 
 // クラス名の前方参照用宣言
 class AlgBlock;

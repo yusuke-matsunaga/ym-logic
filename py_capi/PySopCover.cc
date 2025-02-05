@@ -339,7 +339,7 @@ SopCover_add(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      auto val3 = val1 + val2;
+      auto val3 = val1 | val2;
       return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
@@ -349,7 +349,7 @@ SopCover_add(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      auto val3 = val1 + val2;
+      auto val3 = val1 | val2;
       return PySopCover::ToPyObject(val3);
     }
   }
@@ -361,7 +361,7 @@ SopCover_add(
 		      "variable_num() is different from each other");
       return nullptr;
     }
-    auto val3 = val1 + val2;
+    auto val3 = val1 | val2;
     return PySopCover::ToPyObject(val3);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -383,7 +383,7 @@ SopCover_iadd(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      val1 += val2;
+      val1 |= val2;
       Py_IncRef(self);
       return self;
     }
@@ -394,7 +394,7 @@ SopCover_iadd(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      val1 += val2;
+      val1 |= val2;
       Py_IncRef(self);
       return self;
     }
@@ -402,6 +402,7 @@ SopCover_iadd(
   Py_RETURN_NOTIMPLEMENTED;
 }
 
+#if 0
 // 減算
 PyObject*
 SopCover_sub(
@@ -469,6 +470,7 @@ SopCover_isub(
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
+#endif
 
 #if 0
 // 乗算
@@ -651,10 +653,10 @@ SopCover_idiv(
 // 数値演算メソッド定義
 PyNumberMethods SopCover_number = {
   .nb_add = SopCover_add,
-  .nb_subtract = SopCover_sub,
+  //.nb_subtract = SopCover_sub,
   //.nb_multiply = SopCover_mult,
   .nb_inplace_add = SopCover_iadd,
-  .nb_inplace_subtract = SopCover_isub,
+  //.nb_inplace_subtract = SopCover_isub,
   //.nb_inplace_multiply = SopCover_mult,
   //.nb_true_divide = SopCover_div,
   //.nb_inplace_true_divide = SopCover_idiv

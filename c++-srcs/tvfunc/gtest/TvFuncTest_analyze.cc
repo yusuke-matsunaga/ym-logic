@@ -1,9 +1,9 @@
 
-/// @file FuncAnalyzerTest.cc
-/// @brief FuncAnalyzerTest の実装ファイル
+/// @file TvFuncTest_analyze.cc
+/// @brief TvFunc::analyze() のテストプログラム
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2016, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "gtest/gtest.h"

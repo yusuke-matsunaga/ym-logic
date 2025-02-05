@@ -18,7 +18,7 @@ BEGIN_NAMESPACE_YM_SOP
 
 // @brief 論理和を計算する．
 SopCover
-SopCover::operator+(
+SopCover::operator|(
   const SopCover& right ///< [in] オペランド
 ) const
 {
@@ -32,7 +32,7 @@ SopCover::operator+(
 
 // @brief 論理和を計算して代入する．
 SopCover&
-SopCover::operator+=(
+SopCover::operator|=(
   const SopCover& right ///< [in] オペランド
 )
 {
@@ -47,7 +47,7 @@ SopCover::operator+=(
 
 // @brief 論理和を計算する(キューブ版)．
 SopCover
-SopCover::operator+(
+SopCover::operator|(
   const SopCube& right ///< [in] オペランド
 ) const
 {
@@ -61,7 +61,7 @@ SopCover::operator+(
 
 // @brief 論理和を計算して代入する(キューブ版)．
 SopCover&
-SopCover::operator+=(
+SopCover::operator|=(
   const SopCube& right ///< [in] オペランド
 )
 {

@@ -15,6 +15,15 @@
 
 BEGIN_NAMESPACE_YM_SOP
 
+/// @brief SopPat をパックしたワード型
+using SopPatWord = std::uint64_t;
+
+/// @brief オール0
+const SopPatWord SOP_ALL0 = 0x0000000000000000ULL;
+
+/// @brief オール1
+const SopPatWord SOP_ALL1 = 0xFFFFFFFFFFFFFFFFULL;
+
 //////////////////////////////////////////////////////////////////////
 /// @class SopBase SopBase.h "SopBase.h"
 /// @brief SopCover/SopCube に共通な基底クラス
@@ -366,7 +375,7 @@ public:
   {
     auto end = _cube_end(dst_cube);
     for ( ; dst_cube != end; ++ dst_cube ) {
-      *dst_cube = 0UL;
+      *dst_cube = SOP_ALL1;
     }
   }
 
@@ -393,7 +402,7 @@ public:
     auto blk = _block_pos(varid);
     auto mask = _get_mask(varid, inv);
     auto dst_p = dst_cube + blk;
-    *dst_p |= mask;
+    *dst_p &= mask;
   }
 
   /// @brief Literal のリストからキューブ(を表すビットベクタ)のコピーを行う．
@@ -500,7 +509,7 @@ protected:
   ) const
   {
     auto size = _cube_size() * cube_num;
-    return Chunk(size, 0UL);
+    return Chunk(size, SOP_ALL1);
   }
 
   /// @brief 単純なコピーを行う．
@@ -696,9 +705,9 @@ protected:
   )
   {
     auto sft = _shift_num(varid);
-    auto pat = _bitpat(inv);
+    auto pat = _bitpat(!inv);
     auto mask = static_cast<SopPatWord>(pat) << sft;
-    return mask;
+    return ~mask;
   }
 
 

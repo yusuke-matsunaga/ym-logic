@@ -204,31 +204,32 @@ public:
   /// @brief 論理和を計算する．
   /// @return 計算結果を返す．
   SopCover
-  operator+(
+  operator|(
     const SopCover& right ///< [in] オペランド
   ) const;
 
   /// @brief 論理和を計算して代入する．
   /// @return 演算後の自身への参照を返す．
   SopCover&
-  operator+=(
+  operator|=(
     const SopCover& right ///< [in] オペランド
   );
 
   /// @brief 論理和を計算する(キューブ版)．
   /// @return 計算結果を返す．
   SopCover
-  operator+(
+  operator|(
     const SopCube& right ///< [in] オペランド
   ) const;
 
   /// @brief 論理和を計算して代入する(キューブ版)．
   /// @return 演算後の自身への参照を返す．
   SopCover&
-  operator+=(
+  operator|=(
     const SopCube& right ///< [in] オペランド
   );
 
+#if 0
   /// @brief 差分を計算する．
   /// @return 計算結果を返す．
   ///
@@ -260,32 +261,33 @@ public:
   operator-=(
     const SopCube& right ///< [in] オペランド
   );
+#endif
 
   /// @brief コファクターを計算する．
   /// @return 計算結果を返す．
   SopCover
-  operator/(
+  cofactor(
     const SopCube& right ///< [in] オペランド
   ) const;
 
   /// @brief コファクター演算を行って代入する．
   /// @return 演算後の自身への参照を返す．
   SopCover&
-  operator/=(
+  cofactor_int(
     const SopCube& right ///< [in] オペランド
   );
 
   /// @brief コファクターを計算する．
   /// @return 計算結果を返す．
   SopCover
-  operator/(
+  cofactor(
     Literal lit ///< [in] オペランド
   ) const;
 
   /// @brief コファクター演算を行って代入する．
   /// @return 演算後の自身への参照を返す．
   SopCover&
-  operator/=(
+  cofactor_int(
     Literal lit ///< [in] オペランド
   );
 
@@ -385,6 +387,7 @@ private:
     SizeType& dst_num    ///< [out] 結果のキューブ数
   ) const;
 
+#if 0
   /// @brief diff の共通処理
   Chunk
   diff(
@@ -392,6 +395,7 @@ private:
     const Chunk& chunk2, ///< [in] 第2オペランドのキューブ本体
     SizeType& dst_num	 ///< [out] 結果のキューブ数
   ) const;
+#endif
 
   /// @brief 内容をセットする．
   void
@@ -419,19 +423,20 @@ private:
 };
 
 /// @relates SopCover
-/// @brief キューブとカバーの加算
+/// @brief キューブとカバーの論理和
 /// @return 結果を返す．
 inline
 SopCover
-operator+(
+operator|(
   const SopCube& left,  ///< [in] 第1オペランド
   const SopCover& right ///< [in] 第2オペランド
 )
 {
   // 交換則を用いる．
-  return right.operator+(left);
+  return right.operator|(left);
 }
 
+#if 0
 /// @relates SopCover
 /// @brief カバーの減算
 /// @return 結果を返す．
@@ -483,6 +488,7 @@ operator/(
 {
   return SopCover{std::move(left)}.operator/=(right);
 }
+#endif
 
 /// @relates SopCover
 /// @brief SopCover の内容を出力する．

@@ -15,6 +15,9 @@
 
 BEGIN_NAMESPACE_YM_ALG
 
+/// @brief AlgPat をパックしたワード型
+using AlgPatWord = std::uint64_t;
+
 //////////////////////////////////////////////////////////////////////
 /// @class AlgBase AlgBase.h "ym/AlgBase.h"
 /// @brief AlgCube, AlgCover の共通な基底クラス

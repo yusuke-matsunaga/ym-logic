@@ -208,6 +208,7 @@ SopCube_check_containment(
   return PyBool_FromLong(ans);
 }
 
+#if 0
 PyObject*
 SopCube_check_intersect(
   PyObject* self,
@@ -235,6 +236,7 @@ SopCube_check_intersect(
   auto ans = cube.check_intersect(cube1);
   return PyBool_FromLong(ans);
 }
+#endif
 
 PyObject*
 SopCube_expr(
@@ -267,9 +269,11 @@ PyMethodDef SopCube_methods[] = {
   {"check_containment", reinterpret_cast<PyCFunction>(SopCube_check_containment),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return True if being contained in the argument cube")},
+#if 0
   {"check_intersect", reinterpret_cast<PyCFunction>(SopCube_check_intersect),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return True if having intersection with the argument cube")},
+#endif
   {"expr", SopCube_expr,
    METH_NOARGS,
    PyDoc_STR("convert to 'Expr'")},
@@ -340,19 +344,19 @@ SopCube_mul(
     auto& val1 = PySopCube::Get(self);
     if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::Get(other);
-      auto val3 = val1 * val2;
+      auto val3 = val1 & val2;
       return PySopCube::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      auto val3 = val1 * val2;
+      auto val3 = val1 & val2;
       return PySopCube::ToPyObject(val3);
     }
   }
   else if ( PyLiteral::Check(self) && PySopCube::Check(other) ) {
     auto val1 = PyLiteral::Get(self);
     auto& val2 = PySopCube::Get(other);
-    auto val3 = val1 * val2;
+    auto val3 = val1 & val2;
     return PySopCube::ToPyObject(val3);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -369,13 +373,13 @@ SopCube_imul(
     auto& val1 = PySopCube::Get(self);
     if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::Get(other);
-      val1 *= val2;
+      val1 &= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      val1 *= val2;
+      val1 &= val2;
       Py_IncRef(self);
       return self;
     }
@@ -394,12 +398,12 @@ SopCube_div(
     auto& val1 = PySopCube::Get(self);
     if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::Get(other);
-      auto val3 = val1 / val2;
+      auto val3 = val1.cofactor(val2);
       return PySopCube::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      auto val3 = val1 / val2;
+      auto val3 = val1.cofactor(val2);
       return PySopCube::ToPyObject(val3);
     }
   }
@@ -417,13 +421,13 @@ SopCube_idiv(
     auto& val1 = PySopCube::Get(self);
     if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::Get(other);
-      val1 /= val2;
+      val1.cofactor_int(val2);
       Py_IncRef(self);
       return self;
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      val1 /= val2;
+      val1.cofactor_int(val2);
       Py_IncRef(self);
       return self;
     }

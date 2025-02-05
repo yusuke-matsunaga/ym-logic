@@ -18,6 +18,7 @@ BEGIN_NAMESPACE_YM_SOP
 BEGIN_NONAMESPACE
 
 // 表引きを使ってリテラル数の計算を行う．
+inline
 int
 _count(
   SopPatWord pat
@@ -81,7 +82,7 @@ SopBase::_literal_num(
   auto cube_list = _cube_list(chunk, 0, cube_num);
   for ( auto cube: cube_list ) {
     auto p = cube + blk;
-    if ( (*(p) & mask) == mask ) {
+    if ( (*(p) | mask) == mask ) {
       ++ ans;
     }
   }

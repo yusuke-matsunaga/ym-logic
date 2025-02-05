@@ -37,6 +37,7 @@ SopCube::check_containment(
   return true;
 }
 
+#if 0
 // @brief 2つのキューブに共通なリテラルがあれば true を返す．
 bool
 SopCube::check_intersect(
@@ -56,5 +57,6 @@ SopCube::check_intersect(
   }
   return false;
 }
+#endif
 
 END_NAMESPACE_YM_SOP

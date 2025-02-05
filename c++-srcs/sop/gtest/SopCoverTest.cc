@@ -429,7 +429,7 @@ TEST_F(SopTest, cover_cover_sum)
   auto src1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCover{nv, { {lit2, lit3} } };
 
-  auto cover1 = src1 + src2;
+  auto cover1 = src1 | src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -471,7 +471,7 @@ TEST_F(SopTest, cover_cover_sum_bad)
   auto src1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
-  ASSERT_THROW( src1 + src2, std::invalid_argument );
+  ASSERT_THROW( src1 | src2, std::invalid_argument );
 }
 
 TEST_F(SopTest, cover_cube_sum)
@@ -479,7 +479,7 @@ TEST_F(SopTest, cover_cube_sum)
   auto src1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCube{nv, {lit2, lit3} };
 
-  auto cover1 = src1 + src2;
+  auto cover1 = src1 | src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -521,7 +521,7 @@ TEST_F(SopTest, cover_cube_sum_bad)
   auto src1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCube{nv + 1, {lit2, lit3} };
 
-  ASSERT_THROW( src1 + src2, std::invalid_argument );
+  ASSERT_THROW( src1 | src2, std::invalid_argument );
 }
 
 TEST_F(SopTest, cube_cover_sum)
@@ -529,7 +529,7 @@ TEST_F(SopTest, cube_cover_sum)
   auto src1 = SopCube{nv, {lit0, lit1} };
   auto src2 = SopCover{nv, { {lit2, lit3} } };
 
-  auto cover1 = src1 + src2;
+  auto cover1 = src1 | src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -571,7 +571,7 @@ TEST_F(SopTest, cube_cover_sum_bad)
   auto src1 = SopCube{nv, {lit0, lit1} };
   auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
-  ASSERT_THROW( src1 + src2, std::invalid_argument );
+  ASSERT_THROW( src1 | src2, std::invalid_argument );
 }
 
 TEST_F(SopTest, Scover_cover_sum)
@@ -579,7 +579,7 @@ TEST_F(SopTest, Scover_cover_sum)
   auto cover1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCover{nv, { {lit2, lit3} } };
 
-  cover1 = cover1 + src2;
+  cover1 = cover1 | src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -621,7 +621,7 @@ TEST_F(SopTest, Scover_cube_sum1)
   auto cover1 = SopCover{nv, { {lit0, lit1} }};
   auto src2 = SopCube{nv, {lit2, lit3}};
 
-  cover1 = cover1 + src2;
+  cover1 = cover1 | src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -663,7 +663,7 @@ TEST_F(SopTest, cube_Scover_sum)
   auto src1 = SopCube{nv, {lit0, lit1} };
   auto cover1 = SopCover{nv, { {lit2, lit3} } };
 
-  cover1 = src1 + cover1;
+  cover1 = src1 | cover1;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -705,7 +705,7 @@ TEST_F(SopTest, Icover_cover_sum)
   auto cover1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCover{nv, { {lit2, lit3} } };
 
-  cover1 += src2;
+  cover1 |= src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -747,7 +747,7 @@ TEST_F(SopTest, Icover_cover_sum_bad)
   auto cover1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
-  ASSERT_THROW( cover1 += src2, std::invalid_argument );
+  ASSERT_THROW( cover1 |= src2, std::invalid_argument );
 }
 
 TEST_F(SopTest, Icover_cube_sum)
@@ -755,7 +755,7 @@ TEST_F(SopTest, Icover_cube_sum)
   auto cover1 = SopCover{nv, { {lit0, lit1} }};
   auto src2 = SopCube{nv, {lit2, lit3}};
 
-  cover1 += src2;
+  cover1 |= src2;
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -797,9 +797,10 @@ TEST_F(SopTest, Icover_cube_sum_bad)
   auto cover1 = SopCover{nv, { {lit0, lit1} }};
   auto src2 = SopCube{nv + 1, {lit2, lit3}};
 
-  ASSERT_THROW( cover1 += src2, std::invalid_argument );
+  ASSERT_THROW( cover1 |= src2, std::invalid_argument );
 }
 
+#if 0
 TEST_F(SopTest, cover_cover_diff)
 {
   auto src1 = SopCover{nv, { {lit0, lit1}, {lit2, lit3} } };
@@ -1106,6 +1107,7 @@ TEST_F(SopTest, Icover_cube_diff_bad)
 
   ASSERT_THROW( cover1 -= src2, std::invalid_argument );
 }
+#endif
 
 #if 0
 TEST_F(SopTest, cover_cover_product)

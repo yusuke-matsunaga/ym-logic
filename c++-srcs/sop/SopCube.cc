@@ -15,7 +15,7 @@ BEGIN_NAMESPACE_YM_SOP
 SopCube::SopCube(
   SizeType var_num
 ) : SopBase{var_num},
-    mChunk(_cube_size(), 0ULL)
+    mChunk(_cube_size(), SOP_ALL1)
 {
 }
 
@@ -160,7 +160,7 @@ SopCube::check_literal(
 
 // @brief キューブの論理積を計算する
 SopCube
-SopCube::operator*(
+SopCube::operator&(
   const SopCube& right
 ) const
 {
@@ -179,7 +179,7 @@ SopCube::operator*(
 
 // @brief 論理積を計算し自身に代入する．
 SopCube&
-SopCube::operator*=(
+SopCube::operator&=(
   const SopCube& right
 )
 {
@@ -196,7 +196,7 @@ SopCube::operator*=(
 
 // @brief キューブとリテラルの論理積を計算する
 SopCube
-SopCube::operator*(
+SopCube::operator&(
   Literal right
 ) const
 {
@@ -211,7 +211,7 @@ SopCube::operator*(
 
 // @brief リテラルとの論理積を計算し自身に代入する．
 SopCube&
-SopCube::operator*=(
+SopCube::operator&=(
   Literal right
 )
 {
@@ -222,9 +222,9 @@ SopCube::operator*=(
   return *this;
 }
 
-// @brief キューブによる商を計算する
+// @brief キューブによるコファクターを計算する
 SopCube
-SopCube::operator/(
+SopCube::cofactor(
   const SopCube& right
 ) const
 {
@@ -241,9 +241,9 @@ SopCube::operator/(
   return SopCube{variable_num(), std::move(dst_chunk)};
 }
 
-// @brief キューブによる商を計算し自身に代入する．
+// @brief キューブによるコファクターを計算し自身に代入する．
 SopCube&
-SopCube::operator/=(
+SopCube::cofactor_int(
   const SopCube& right
 )
 {
@@ -258,9 +258,9 @@ SopCube::operator/=(
   return *this;
 }
 
-// @brief リテラルによる商を計算する
+// @brief リテラルによるコファクターを計算する
 SopCube
-SopCube::operator/(
+SopCube::cofactor(
   Literal right
 ) const
 {
@@ -273,9 +273,9 @@ SopCube::operator/(
   return SopCube{variable_num(), std::move(dst_chunk)};
 }
 
-// @brief リテラルによる商を計算し自身に代入する．
+// @brief リテラルによるコファクターを計算し自身に代入する．
 SopCube&
-SopCube::operator/=(
+SopCube::cofactor_int(
   Literal right
 )
 {

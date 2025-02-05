@@ -122,13 +122,13 @@ bcf_sub(
   auto lit0 = Literal{var, true};
   for ( auto& cube: c0 ) {
     if ( check_cube(cube, R) ) {
-      cc.push_back(cube * lit0);
+      cc.push_back(cube & lit0);
     }
   }
   auto lit1 = Literal{var, false};
   for ( auto& cube: c1 ) {
     if ( check_cube(cube, R) ) {
-      cc.push_back(cube * lit1);
+      cc.push_back(cube & lit1);
     }
   }
 
@@ -230,7 +230,7 @@ mwc_sub(
 	ans_list.push_back(std::move(cube0));
       }
       else {
-	ans_list.push_back(cube0 * lit0);
+	ans_list.push_back(cube0 & lit0);
       }
     }
     else if ( stat > 0 ) {
@@ -239,7 +239,7 @@ mwc_sub(
 	ans_list.push_back(std::move(cube1));
       }
       else {
-	ans_list.push_back(cube1 * lit1);
+	ans_list.push_back(cube1 & lit1);
       }
     }
     else {
@@ -254,7 +254,7 @@ mwc_sub(
       ans_list.push_back(std::move(cube0));
     }
     else {
-      ans_list.push_back(cube0 * lit0);
+      ans_list.push_back(cube0 & lit0);
     }
     ++ i0;
   }
@@ -264,7 +264,7 @@ mwc_sub(
       ans_list.push_back(std::move(cube1));
     }
     else {
-      ans_list.push_back(cube1 * lit1);
+      ans_list.push_back(cube1 & lit1);
     }
     ++ i1;
   }

@@ -21,8 +21,7 @@ BEGIN_NAMESPACE_YM_SOP
 /// @class SopCube SopCube.h "ym/SopCube.h"
 /// @brief キューブ(積項)を表すクラス
 ///
-/// * 離散数学的には Literal の集合だが，相反するリテラル(x と x')は
-///   同時には含まない．
+/// * Literal の論理積を表す．
 /// * 常に固定サイズのビット配列として実装する．
 /// * そのため初期化の際に変数の数が必要となる．
 /// * 1つの変数につき2ビットを使用する．
@@ -135,11 +134,13 @@ public:
     const SopCube& right ///< [in] オペランドのキューブ
   ) const;
 
+#if 0
   /// @brief 2つのキューブに共通なリテラルがあれば true を返す．
   bool
   check_intersect(
     const SopCube& right ///< [in] オペランドのキューブ
   ) const;
+#endif
 
   /// @brief Expr に変換する．
   Expr
@@ -177,78 +178,73 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief キューブの論理積を計算する
+  /// @return 論理積のキューブを返す．
   ///
-  /// リテラル集合としてみると和集合となる<br>
-  /// ただし，相反するリテラルが含まれていたら空キューブとなる．
+  /// 相反するリテラルが含まれていたら空キューブとなる．
   SopCube
-  operator*(
+  operator&(
     const SopCube& right ///< [in] オペランド
   ) const;
 
   /// @brief 論理積を計算し自身に代入する．
   /// @return 演算後の自身の参照を返す．
   ///
-  /// リテラル集合とみなすとユニオンを計算することになる<br>
-  /// ただし，相反するリテラルとの積があったら答は空のキューブとなる．
+  /// 相反するリテラルとの積があったら答は空のキューブとなる．
   SopCube&
-  operator*=(
+  operator&=(
     const SopCube& right ///< [in] オペランドのキューブ
   );
 
   /// @brief キューブとリテラルの論理積を計算する
+  /// @return 論理積のキューブを返す．
   ///
-  /// リテラル集合としてみると和集合となる<br>
-  /// ただし，相反するリテラルが含まれていたら空キューブとなる．
+  /// 相反するリテラルが含まれていたら空キューブとなる．
   SopCube
-  operator*(
+  operator&(
     Literal right ///< [in] オペランドのリテラル
   ) const;
 
   /// @brief リテラルとの論理積を計算し自身に代入する．
   /// @return 演算後の自身の参照を返す．
   ///
-  /// リテラル集合とみなすとユニオンを計算することになる<br>
-  /// ただし，相反するリテラルとの積があったら答は空のキューブとなる．
+  /// 相反するリテラルとの積があったら答は空のキューブとなる．
   SopCube&
-  operator*=(
+  operator&=(
     Literal right ///< [in] オペランドのリテラル
   );
 
-  /// @brief キューブによる商を計算する
+  /// @brief キューブによるコファクターを計算する．
+  /// @return 結果のキューブを返す．
   ///
-  /// リテラル集合として考えると集合差を計算することになる<br>
-  /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
+  /// right のみに含まれるリテラルがあったら結果は空となる．
   SopCube
-  operator/(
+  cofactor(
     const SopCube& right ///< [in] オペランド
   ) const;
 
-  /// @brief キューブによる商を計算し自身に代入する．
+  /// @brief キューブによるコファクターを計算し自身に代入する．
   /// @return 演算後の自身の参照を返す．
   ///
-  /// リテラル集合として考えると集合差を計算することになる<br>
-  /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
+  /// right のみに含まれるリテラルがあったら結果は空となる．
   SopCube&
-  operator/=(
+  cofactor_int(
     const SopCube& right ///< [in] オペランドのキューブ
   );
 
-  /// @brief リテラルによる商を計算する
+  /// @brief リテラルによるコファクターを計算する
   ///
-  /// リテラル集合として考えると集合差を計算することになる<br>
-  /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
+  /// right のみに含まれるリテラルがあったら結果は空となる．
   SopCube
-  operator/(
+  cofactor(
     Literal right ///< [in] オペランドのリテラル
   ) const;
 
-  /// @brief リテラルによる商を計算し自身に代入する．
+  /// @brief リテラルによるコファクターを計算し自身に代入する．
   /// @return 演算後の自身の参照を返す．
   ///
-  /// リテラル集合として考えると集合差を計算することになる<br>
-  /// ただし，right のみに含まれるリテラルがあったら結果は空となる．
+  /// right のみに含まれるリテラルがあったら結果は空となる．
   SopCube&
-  operator/=(
+  cofactor_int(
     Literal right ///< [in] オペランドのリテラル
   );
 
@@ -359,61 +355,57 @@ private:
 /// @relates SopCube
 /// @brief キューブの論理積を計算する
 ///
-/// リテラル集合としてみると和集合となる<br>
-/// ただし，相反するリテラルが含まれていたら空キューブとなる．
+/// 相反するリテラルが含まれていたら空キューブとなる．
 inline
 SopCube
-operator*(
+operator&(
   SopCube&& left,      ///< [in] 第1オペランド
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(left)}.operator*=(right);
+  return SopCube{std::move(left)}.operator&=(right);
 }
 
 /// @relates SopCube
 /// @brief キューブの論理積を計算する
 ///
-/// リテラル集合としてみると和集合となる<br>
-/// ただし，相反するリテラルが含まれていたら空キューブとなる．
+/// 相反するリテラルが含まれていたら空キューブとなる．
 inline
 SopCube
-operator*(
+operator&(
   const SopCube& left, ///< [in] 第1オペランド
   SopCube&& right      ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(right)}.operator*=(left);
+  return SopCube{std::move(right)}.operator&=(left);
 }
 
 /// @relates SopCube
 /// @brief キューブの論理積を計算する
 ///
-/// リテラル集合としてみると和集合となる<br>
-/// ただし，相反するリテラルが含まれていたら空キューブとなる．
+/// 相反するリテラルが含まれていたら空キューブとなる．
 inline
 SopCube
-operator*(
+operator&(
   SopCube&& left, ///< [in] 第1オペランド
   SopCube&& right ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(left)}.operator*=(right);
+  return SopCube{std::move(left)}.operator&=(right);
 }
 
 /// @relates SopCube
 /// @brief キューブとリテラルの論理積を計算する
 ///
-/// リテラル集合としてみると和集合となる<br>
-/// ただし，相反するリテラルが含まれていたら空キューブとなる．
+/// 相反するリテラルが含まれていたら空キューブとなる．
 inline
 SopCube
-operator*(
+operator&(
   SopCube&& left, ///< [in] 第1オペランド
   Literal right	  ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(left)}.operator*=(right);
+  return SopCube{std::move(left)}.operator&=(right);
 }
 
 /// @relates SopCube
@@ -421,13 +413,13 @@ operator*(
 /// @return 結果のキューブを返す．
 inline
 SopCube
-operator*(
+operator&(
   Literal left,        ///< [in] 第1オペランド
   const SopCube& right ///< [in] 第2オペランド
 )
 {
   // 交換則を用いる．
-  return right.operator*(left);
+  return right.operator&(left);
 }
 
 /// @relates SopCube
@@ -435,41 +427,13 @@ operator*(
 /// @return 結果のキューブを返す．
 inline
 SopCube
-operator*(
+operator&(
   Literal left,    ///< [in] 第1オペランド
   SopCube&& right  ///< [in] 第2オペランド
 )
 {
   // 交換則を用いる．
-  return SopCube{std::move(right)}.operator*=(left);
-}
-
-/// @relates SopCube
-/// @brief キューブの除算を計算する
-///
-/// リテラル集合としてみると集合差となる<br>
-inline
-SopCube
-operator/(
-  SopCube&& left,      ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return SopCube{std::move(left)}.operator/=(right);
-}
-
-/// @relates SopCube
-/// @brief キューブとリテラルの除算を計算する
-///
-/// リテラル集合としてみると集合差となる<br>
-inline
-SopCube
-operator/(
-  SopCube&& left, ///< [in] 第1オペランド
-  Literal right	  ///< [in] 第2オペランド
-)
-{
-  return SopCube{std::move(left)}.operator/=(right);
+  return SopCube{std::move(right)}.operator&=(left);
 }
 
 /// @relates SopCube
