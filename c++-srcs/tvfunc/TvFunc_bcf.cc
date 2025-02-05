@@ -15,16 +15,18 @@ BEGIN_NAMESPACE_YM
 
 BEGIN_NONAMESPACE
 
-bool debug = false;
+bool debug = true;
 
-// キューブの表している論理関数を作る．
-TvFunc
-make_func(
-  SizeType ni,
-  const SopCube& cube
+// キューブが R と交差する時 true を返す．
+bool
+check_cube(
+  const SopCube& cube,
+  const TvFunc& R
 )
 {
-  TvFunc f_cube = TvFunc::one(ni);
+  // これ実装はもうちょっと効率化できるはず．
+  auto ni = cube.variable_num();
+  auto f_cube = TvFunc::one(ni);
   for ( SizeType var = 0; var < ni; ++ var ) {
     auto pat = cube.get_pat(var);
     if ( pat == SopPat::_1 ) {
@@ -34,28 +36,49 @@ make_func(
       f_cube &= TvFunc::nega_literal(ni, var);
     }
   }
-  return f_cube;
+  if ( f_cube && R ) {
+    return true;
+  }
+  return false;
 }
 
+// BCF の下請け関数
+//
+// f に対する主項のリストを返す．
+//
+// f を var で分解し，3つの部分に分ける．
+// f0: ~var のコファクター
+// f1:  var のコファクター
+// fc: f0 と f1 の共通部分
+//
+// f0, f1, fc それぞれに bcf_sub() を適用して
+// それぞれの結果を得る．c0, c1, cc とする．
+// このうち，cc に含まれるキューブは明らかに
+// f にとっても主項である．
+// c0/c1 のキューブは fc に含まれない部分が
+// ある場合のみ ~var/var を付加したものを加える．
 vector<SopCube>
 bcf_sub(
-  SizeType ni,
   const TvFunc& f,
   SizeType var
 )
 {
   if ( debug ) {
-    cout << "bcf_sub: " << f << ": " << var << endl;
+    cout << "**bcf_sub: " << f << ": " << var << endl;
   }
+
+  auto ni = f.input_num();
 
   if ( f.is_zero() ) {
     if ( debug ) {
+      cout << "bcf_sub: " << f << ": " << var << endl;
       cout << " ==> 0" << endl;
     }
     return vector<SopCube>{};
   }
   if ( f.is_one() ) {
     if ( debug ) {
+      cout << "bcf_sub: " << f << ": " << var << endl;
       cout << " ==> 1" << endl;
     }
     return vector<SopCube>{SopCube{ni}};
@@ -73,9 +96,9 @@ bcf_sub(
     cout << "  f0: " << f0 << endl;
     cout << "  f1: " << f1 << endl;
   }
-  auto cc = bcf_sub(ni, fc, var + 1);
-  auto c0 = bcf_sub(ni, f0, var + 1);
-  auto c1 = bcf_sub(ni, f1, var + 1);
+  auto cc = bcf_sub(fc, var + 1);
+  auto c0 = bcf_sub(f0, var + 1);
+  auto c1 = bcf_sub(f1, var + 1);
   if ( debug ) {
     cout << "  cc: ";
     for ( auto& cube: cc ) {
@@ -93,19 +116,18 @@ bcf_sub(
     }
     cout << endl;
   }
+
   // 結果をマージする．
   auto R = ~fc;
-  Literal lit0{var, true};
+  auto lit0 = Literal{var, true};
   for ( auto& cube: c0 ) {
-    auto f_cube = make_func(ni, cube);
-    if ( f_cube && R ) {
+    if ( check_cube(cube, R) ) {
       cc.push_back(cube * lit0);
     }
   }
-  Literal lit1{var, false};
+  auto lit1 = Literal{var, false};
   for ( auto& cube: c1 ) {
-    auto f_cube = make_func(ni, cube);
-    if ( f_cube && R ) {
+    if ( check_cube(cube, R) ) {
       cc.push_back(cube * lit1);
     }
   }
@@ -128,10 +150,9 @@ END_NONAMESPACE
 SopCover
 TvFunc::BCF() const
 {
-  SizeType ni = input_num();
-  auto cov = bcf_sub(ni, *this, 0);
-  sort(cov.begin(), cov.end());
-  return SopCover{ni, cov};
+  auto cov = bcf_sub(*this, 0);
+  std::sort(cov.begin(), cov.end());
+  return SopCover{input_num(), cov};
 }
 
 // @brief Blake's Cannonical Form を表す Expr を求める．
@@ -160,11 +181,11 @@ check_containment(
 
 vector<SopCube>
 mwc_sub(
-  SizeType ni,
   const TvFunc& f,
   SizeType var
 )
 {
+  auto ni = f.input_num();
 
   if ( f.is_zero() ) {
     if ( debug ) {
@@ -185,18 +206,18 @@ mwc_sub(
   auto f0 = f.cofactor(var, true);
   auto f1 = f.cofactor(var, false);
 
-  auto cov0 = mwc_sub(ni, f0, var + 1);
-  auto cov1 = mwc_sub(ni, f1, var + 1);
+  auto cov0 = mwc_sub(f0, var + 1);
+  auto cov1 = mwc_sub(f1, var + 1);
 
   // cov0, cov1 で同一のものを探す．
   // 同時に他方に包含されているキューブを削除する．
   vector<SopCube> ans_list;
-  SizeType n0 = cov0.size();
-  SizeType n1 = cov1.size();
+  auto n0 = cov0.size();
+  auto n1 = cov1.size();
   auto r0 = ~f0;
   auto r1 = ~f1;
-  Literal lit0{var, true};
-  Literal lit1{var, false};
+  auto lit0 = Literal{var, true};
+  auto lit1 = Literal{var, false};
   SizeType i0 = 0;
   SizeType i1 = 0;
   while ( i0 < n0 && i1 < n1 ) {
@@ -247,7 +268,7 @@ mwc_sub(
     }
     ++ i1;
   }
-  sort(ans_list.begin(), ans_list.end());
+  std::sort(ans_list.begin(), ans_list.end());
   return ans_list;
 }
 
@@ -257,9 +278,8 @@ END_NONAMESPACE
 SopCover
 TvFunc::MWC() const
 {
-  SizeType ni = input_num();
-  auto cov = mwc_sub(ni, *this, 0);
-  return SopCover{ni, cov};
+  auto cov = mwc_sub(*this, 0);
+  return SopCover{input_num(), cov};
 }
 
 // @brief Merge With Containment を行って Expr を得る．

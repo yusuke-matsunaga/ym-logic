@@ -111,8 +111,15 @@ SopCover::SopCover(
   const SopCover& src
 ) : SopBase{src.variable_num()},
     mCubeNum{src.mCubeNum},
-    mChunk{src.mChunk}
+    mChunk(_cube_size() * cube_num(), 0ULL)
 {
+  // mChunk に内容をコピーする．
+  // mChunk の容量は余分に確保されている可能性があるので
+  // _cube_size() に基づいて必要なぶんだけコピーする．
+  auto src_begin = src.chunk().begin();
+  auto src_end = src_begin + _cube_size() * cube_num();
+  auto dst_begin = mChunk.begin();
+  std::copy(src_begin, src_end, dst_begin);
 }
 
 // @brief コピー代入演算子
@@ -124,7 +131,15 @@ SopCover::operator=(
   if ( this != &src ) {
     SopBase::operator=(src);
     mCubeNum = src.mCubeNum;
-    mChunk = src.mChunk;
+    // mChunk に内容をコピーする．
+    // mChunk の容量は余分に確保されている可能性があるので
+    // _cube_size() に基づいて必要なぶんだけコピーする．
+    SizeType size = _cube_size() * cube_num();
+    auto src_begin = src.chunk().begin();
+    auto src_end = src_begin + size;
+    mChunk.resize(size, 0ULL);
+    auto dst_begin = mChunk.begin();
+    std::copy(src_begin, src_end, dst_begin);
   }
 
   return *this;
@@ -162,17 +177,6 @@ SopCover::SopCover(
     mChunk{cube.chunk()}
 {
 }
-
-#if 0
-// @brief キューブからのムーブ変換コンストラクタ
-SopCover::SopCover(
-  SopCube&& cube
-) : SopBase{cube.variable_num()},
-    mCubeNum{1},
-    mChunk{std::move(cube.mChunk)}
-{
-}
-#endif
 
 // @brief 内容を指定したコンストラクタ
 SopCover::SopCover(

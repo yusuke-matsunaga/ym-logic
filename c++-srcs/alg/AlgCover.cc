@@ -133,8 +133,10 @@ AlgCover::operator=(
     // mChunk に内容をコピーする．
     // mChunk の容量は余分に確保されている可能性があるので
     // _cube_size() に基づいて必要なぶんだけコピーする．
+    SizeType size = _cube_size() * cube_num();
     auto src_begin = src.chunk().begin();
-    auto src_end = src_begin + _cube_size() * cube_num();
+    auto src_end = src_begin + size;
+    mChunk.resize(size, 0ULL);
     auto dst_begin = mChunk.begin();
     std::copy(src_begin, src_end, dst_begin);
   }
