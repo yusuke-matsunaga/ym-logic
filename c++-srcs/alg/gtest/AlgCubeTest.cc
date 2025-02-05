@@ -7,34 +7,16 @@
 /// All rights reserved.
 
 #include <gtest/gtest.h>
+#include "AlgTest.h"
 #include "ym/AlgCube.h"
 #include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM
 
-class AlgCubeTest :
-public ::testing::Test
+TEST_F(AlgTest, constructor1)
 {
-public:
-
-  SizeType nv{10};
-  SizeType var0{0};
-  SizeType var1{1};
-  SizeType var2{2};
-  SizeType var3{3};
-  SizeType var4{4};
-  SizeType var5{5};
-  SizeType var6{6};
-  SizeType var7{7};
-  SizeType var8{8};
-  SizeType var9{9};
-
-};
-
-TEST_F(AlgCubeTest, constructor1)
-{
-  AlgCube cube1{nv};
+  auto cube1 = AlgCube{nv};
 
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( 0,  cube1.literal_num() );
@@ -43,17 +25,16 @@ TEST_F(AlgCubeTest, constructor1)
   EXPECT_TRUE( lit_list.empty() );
 };
 
-TEST_F(AlgCubeTest, constructor2)
+TEST_F(AlgTest, constructor2)
 {
-  Literal lit{var5, true};
-  AlgCube cube1{nv, lit};
+  auto cube1 = AlgCube{nv, ~lit5};
 
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( 1,  cube1.literal_num() );
 
   auto lit_list = cube1.literal_list();
   EXPECT_EQ( 1, lit_list.size() );
-  EXPECT_EQ( lit, lit_list[0] );
+  EXPECT_EQ( ~lit5, lit_list[0] );
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
@@ -78,12 +59,10 @@ TEST_F(AlgCubeTest, constructor2)
 
 };
 
-TEST_F(AlgCubeTest, constructor3)
+TEST_F(AlgTest, constructor3)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  vector<Literal> lit_list{lit1, lit2};
-  AlgCube cube1{nv, lit_list};
+  vector<Literal> lit_list{~lit5, lit0};
+  auto cube1 = AlgCube{nv, lit_list};
 
   auto nl = lit_list.size();
   EXPECT_EQ( nv, cube1.variable_num() );
@@ -91,8 +70,8 @@ TEST_F(AlgCubeTest, constructor3)
 
   auto lit_list1 = cube1.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
-  EXPECT_EQ( lit2, lit_list1[0] );
-  EXPECT_EQ( lit1, lit_list1[1] );
+  EXPECT_EQ( lit0, lit_list1[0] );
+  EXPECT_EQ( ~lit5, lit_list1[1] );
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
@@ -117,21 +96,18 @@ TEST_F(AlgCubeTest, constructor3)
 
 };
 
-TEST_F(AlgCubeTest, constructor4)
+TEST_F(AlgTest, constructor4)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  AlgCube cube1{nv, lit_list};
+  auto cube1 = AlgCube{nv, {~lit5, lit0}};
 
-  auto nl = lit_list.size();
+  auto nl = 2;
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( nl,  cube1.literal_num() );
 
   auto lit_list1 = cube1.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
-  EXPECT_EQ( lit2, lit_list1[0] );
-  EXPECT_EQ( lit1, lit_list1[1] );
+  EXPECT_EQ( lit0, lit_list1[0] );
+  EXPECT_EQ( ~lit5, lit_list1[1] );
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
@@ -156,22 +132,19 @@ TEST_F(AlgCubeTest, constructor4)
 
 };
 
-TEST_F(AlgCubeTest, copy_constructor)
+TEST_F(AlgTest, copy_constructor)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  auto nl = lit_list.size();
-  AlgCube cube1{nv, lit_list};
+  auto nl = 2;
+  auto cube1 = AlgCube{nv, {~lit5, lit0}};
 
-  AlgCube cube2{cube1};
+  auto cube2 = AlgCube{cube1};
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl,  cube2.literal_num() );
 
   auto lit_list1 = cube2.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
-  EXPECT_EQ( lit2, lit_list1[0] );
-  EXPECT_EQ( lit1, lit_list1[1] );
+  EXPECT_EQ( lit0, lit_list1[0] );
+  EXPECT_EQ( ~lit5, lit_list1[1] );
 
   EXPECT_TRUE(  cube2.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube2.check_literal(Literal(var0, true)) );
@@ -196,15 +169,12 @@ TEST_F(AlgCubeTest, copy_constructor)
 
 };
 
-TEST_F(AlgCubeTest, copy_assignment)
+TEST_F(AlgTest, copy_assignment)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  auto nl = lit_list.size();
-  AlgCube cube1{nv, lit_list};
+  auto nl = 2;
+  auto cube1 = AlgCube{nv, {~lit5, lit0}};
+  auto cube2 = AlgCube{nv};
 
-  AlgCube cube2{nv};
   EXPECT_EQ( 0, cube2.literal_num() );
 
   cube2 = cube1;
@@ -213,8 +183,8 @@ TEST_F(AlgCubeTest, copy_assignment)
 
   auto lit_list1 = cube2.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
-  EXPECT_EQ( lit2, lit_list1[0] );
-  EXPECT_EQ( lit1, lit_list1[1] );
+  EXPECT_EQ( lit0, lit_list1[0] );
+  EXPECT_EQ( ~lit5, lit_list1[1] );
 
   EXPECT_TRUE(  cube2.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube2.check_literal(Literal(var0, true)) );
@@ -239,15 +209,11 @@ TEST_F(AlgCubeTest, copy_assignment)
 
 };
 
-TEST_F(AlgCubeTest, move_constructor)
+TEST_F(AlgTest, move_constructor)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  auto nl = lit_list.size();
-  AlgCube cube1{nv, lit_list};
-
-  AlgCube cube2{std::move(cube1)};
+  auto nl = 2;
+  auto cube1 = AlgCube{nv, {~lit5, lit0}};
+  auto cube2 = AlgCube{std::move(cube1)};
 
   EXPECT_EQ( 0, cube1.literal_num() );
 
@@ -256,8 +222,8 @@ TEST_F(AlgCubeTest, move_constructor)
 
   auto lit_list1 = cube2.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
-  EXPECT_EQ( lit2, lit_list1[0] );
-  EXPECT_EQ( lit1, lit_list1[1] );
+  EXPECT_EQ( lit0, lit_list1[0] );
+  EXPECT_EQ( ~lit5, lit_list1[1] );
 
   EXPECT_TRUE(  cube2.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube2.check_literal(Literal(var0, true)) );
@@ -282,15 +248,11 @@ TEST_F(AlgCubeTest, move_constructor)
 
 };
 
-TEST_F(AlgCubeTest, move_assignment)
+TEST_F(AlgTest, move_assignment)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  auto nl = lit_list.size();
-  AlgCube cube1{nv, lit_list};
-
-  AlgCube cube2{nv};
+  auto nl = 2;
+  auto cube1 = AlgCube{nv, {~lit5, lit0}};
+  auto cube2 = AlgCube{nv};
   EXPECT_EQ( 0, cube2.literal_num() );
 
   cube2 = std::move(cube1);
@@ -302,8 +264,8 @@ TEST_F(AlgCubeTest, move_assignment)
 
   auto lit_list1 = cube2.literal_list();
   EXPECT_EQ( nl, lit_list1.size() );
-  EXPECT_EQ( lit2, lit_list1[0] );
-  EXPECT_EQ( lit1, lit_list1[1] );
+  EXPECT_EQ( lit0, lit_list1[0] );
+  EXPECT_EQ( ~lit5, lit_list1[1] );
 
   EXPECT_TRUE(  cube2.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube2.check_literal(Literal(var0, true)) );
@@ -328,76 +290,56 @@ TEST_F(AlgCubeTest, move_assignment)
 
 };
 
-TEST_F(AlgCubeTest, check_containment)
+TEST_F(AlgTest, check_containment)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  AlgCube cube1{nv, lit_list};
-
-  AlgCube cube2{nv, {lit1}};
+  auto cube1 = AlgCube{nv, {~lit5, lit0}};
+  auto cube2 = AlgCube{nv, {~lit5}};
 
   EXPECT_TRUE(  cube1.check_containment(cube2) );
   EXPECT_FALSE( cube2.check_containment(cube1) );
 
-  AlgCube cube3{nv, {lit2}};
+  auto cube3 = AlgCube{nv, {lit0}};
   EXPECT_FALSE( cube2.check_containment(cube3) );
   EXPECT_FALSE( cube3.check_containment(cube2) );
 };
 
-TEST_F(AlgCubeTest, check_containment_bad)
+TEST_F(AlgTest, check_containment_bad)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  AlgCube cube1{nv, lit_list};
-
-  AlgCube cube2{nv + 1, {lit1}};
+  auto cube1 = AlgCube{nv, {~lit5, lit0}};
+  auto cube2 = AlgCube{nv + 1, {~lit5}};
 
   ASSERT_THROW( cube1.check_containment(cube2), std::invalid_argument );
   ASSERT_THROW( cube2.check_containment(cube1), std::invalid_argument );
 };
 
-TEST_F(AlgCubeTest, check_intersect)
+TEST_F(AlgTest, check_intersect)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
-  AlgCube cube2{nv, {lit0, lit1}};
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit5}};
 
   EXPECT_TRUE(  cube1.check_intersect(cube2) );
   EXPECT_TRUE(  cube2.check_intersect(cube1) );
 
-  Literal lit3{var0, true};
-  AlgCube cube3{nv, {lit3}};
+  auto cube3 = AlgCube{nv, {~lit0}};
   EXPECT_FALSE( cube1.check_containment(cube3) );
   EXPECT_FALSE( cube2.check_containment(cube3) );
   EXPECT_FALSE( cube3.check_containment(cube1) );
   EXPECT_FALSE( cube3.check_containment(cube2) );
 };
 
-TEST_F(AlgCubeTest, check_intersect_bad)
+TEST_F(AlgTest, check_intersect_bad)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
-  AlgCube cube2{nv + 1, {lit0, lit1}};
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv + 1, {lit0, ~lit5}};
 
   ASSERT_THROW( cube1.check_intersect(cube2), std::invalid_argument );
   ASSERT_THROW( cube2.check_intersect(cube1), std::invalid_argument );
 };
 
-TEST_F(AlgCubeTest, cube_cube_product1)
+TEST_F(AlgTest, cube_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit1}};
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit5}};
 
   auto cube3 = cube1 * cube2;
 
@@ -423,14 +365,10 @@ TEST_F(AlgCubeTest, cube_cube_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_cube_product2)
+TEST_F(AlgTest, cube_cube_product2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  Literal lit3{var5, false};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit3}};
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, lit5}};
 
   auto cube3 = cube1 * cube2;
 
@@ -456,26 +394,18 @@ TEST_F(AlgCubeTest, cube_cube_product2)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_cube_product_bad)
+TEST_F(AlgTest, cube_cube_product_bad)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv + 1, {lit0, lit1}};
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv + 1, {lit0, ~lit5}};
 
   ASSERT_THROW( cube1 * cube2, std::invalid_argument );
 }
 
-TEST_F(AlgCubeTest, Rcube_cube_product1)
+TEST_F(AlgTest, Rcube_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit1}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit5}};
   auto cube3 = std::move(cube1) * cube2;
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -502,14 +432,10 @@ TEST_F(AlgCubeTest, Rcube_cube_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_Rcube_product1)
+TEST_F(AlgTest, cube_Rcube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit1}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit5}};
   auto cube3 = cube1 * std::move(cube2);
 
   EXPECT_EQ( 0, cube2.literal_num() );
@@ -536,14 +462,10 @@ TEST_F(AlgCubeTest, cube_Rcube_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Rcube_Rcube_product1)
+TEST_F(AlgTest, Rcube_Rcube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit1}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit5}};
   auto cube3 = std::move(cube1) * std::move(cube2);
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -570,13 +492,9 @@ TEST_F(AlgCubeTest, Rcube_Rcube_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, lit_cube_product1)
+TEST_F(AlgTest, lit_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   auto cube3 = lit0 * cube1;
 
   EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
@@ -601,13 +519,9 @@ TEST_F(AlgCubeTest, lit_cube_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, lit_Rcube_product1)
+TEST_F(AlgTest, lit_Rcube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   auto cube3 = lit0 * std::move(cube1);
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -634,14 +548,10 @@ TEST_F(AlgCubeTest, lit_Rcube_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, lit_cube_product2)
+TEST_F(AlgTest, lit_cube_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
-  auto cube3 = lit0 * cube1;
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube3 = lit5 * cube1;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
@@ -665,13 +575,9 @@ TEST_F(AlgCubeTest, lit_cube_product2)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_lit_product1)
+TEST_F(AlgTest, cube_lit_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   auto cube3 = cube1 * lit0;
 
   EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
@@ -696,13 +602,9 @@ TEST_F(AlgCubeTest, cube_lit_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Rcube_lit_product1)
+TEST_F(AlgTest, Rcube_lit_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   auto cube3 = std::move(cube1) * lit0;
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -729,14 +631,10 @@ TEST_F(AlgCubeTest, Rcube_lit_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_lit_product2)
+TEST_F(AlgTest, cube_lit_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
-  auto cube3 = cube1 * lit0;
+  auto cube1 = AlgCube{nv, {~lit5, ~lit5}};
+  auto cube3 = cube1 * lit5;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
@@ -760,14 +658,10 @@ TEST_F(AlgCubeTest, cube_lit_product2)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Scube_cube_product1)
+TEST_F(AlgTest, Scube_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit1}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit5}};
   cube1 = cube1 * cube2;
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
@@ -792,15 +686,10 @@ TEST_F(AlgCubeTest, Scube_cube_product1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Scube_cube_product2)
+TEST_F(AlgTest, Scube_cube_product2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  Literal lit3{var5, false};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit3}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, lit5}};
   cube1 = cube1 * cube2;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -825,13 +714,9 @@ TEST_F(AlgCubeTest, Scube_cube_product2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Scube_literal_product1)
+TEST_F(AlgTest, Scube_literal_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 = cube1 * lit0;
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
@@ -856,14 +741,10 @@ TEST_F(AlgCubeTest, Scube_literal_product1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Scube_literal_product2)
+TEST_F(AlgTest, Scube_literal_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
-  cube1 = cube1 * lit0;
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  cube1 = cube1 * lit5;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
@@ -887,13 +768,9 @@ TEST_F(AlgCubeTest, Scube_literal_product2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, literal_Scube_product1)
+TEST_F(AlgTest, literal_Scube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 = lit0 * cube1;
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
@@ -918,14 +795,10 @@ TEST_F(AlgCubeTest, literal_Scube_product1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, literal_Scube_product2)
+TEST_F(AlgTest, literal_Scube_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
-  cube1 = lit0 * cube1;
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  cube1 = lit5 * cube1;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
@@ -949,14 +822,10 @@ TEST_F(AlgCubeTest, literal_Scube_product2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Icube_cube_product1)
+TEST_F(AlgTest, Icube_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit1}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit5}};
   cube1 *= cube2;
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
@@ -981,15 +850,10 @@ TEST_F(AlgCubeTest, Icube_cube_product1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Icube_cube_product2)
+TEST_F(AlgTest, Icube_cube_product2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  Literal lit3{var5, false};
-  AlgCube cube1{nv, {lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit3}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, lit5}};
   cube1 *= cube2;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -1014,13 +878,9 @@ TEST_F(AlgCubeTest, Icube_cube_product2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Icube_literal_product1)
+TEST_F(AlgTest, Icube_literal_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 *= lit0;
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
@@ -1045,14 +905,10 @@ TEST_F(AlgCubeTest, Icube_literal_product1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Icube_literal_product2)
+TEST_F(AlgTest, Icube_literal_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit1, lit2}};
-
-  cube1 *= lit0;
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  cube1 *= lit5;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
@@ -1076,14 +932,10 @@ TEST_F(AlgCubeTest, Icube_literal_product2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_cube_quotient1)
+TEST_F(AlgTest, cube_cube_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit7}};
   auto cube3 = cube1 / cube2;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
@@ -1108,14 +960,10 @@ TEST_F(AlgCubeTest, cube_cube_quotient1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Rcube_cube_quotient1)
+TEST_F(AlgTest, Rcube_cube_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit7}};
   auto cube3 = std::move(cube1) / cube2;
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -1142,14 +990,10 @@ TEST_F(AlgCubeTest, Rcube_cube_quotient1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_cube_quotient2)
+TEST_F(AlgTest, cube_cube_quotient2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1}};
-  AlgCube cube2{nv, {lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5}};
+  auto cube2 = AlgCube{nv, {~lit7}};
   auto cube3 = cube1 / cube2;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
@@ -1174,24 +1018,17 @@ TEST_F(AlgCubeTest, cube_cube_quotient2)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_cube_quotient_bad)
+TEST_F(AlgTest, cube_cube_quotient_bad)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-  AlgCube cube2{nv + 1, {lit0, lit2}};
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv + 1, {lit0, ~lit7}};
 
   ASSERT_THROW( cube1 / cube2, std::invalid_argument );
 }
 
-TEST_F(AlgCubeTest, cube_lit_quotient1)
+TEST_F(AlgTest, cube_lit_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
   auto cube3 = cube1 / lit0;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
@@ -1216,13 +1053,9 @@ TEST_F(AlgCubeTest, cube_lit_quotient1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Rcube_lit_quotient1)
+TEST_F(AlgTest, Rcube_lit_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
   auto cube3 = std::move(cube1) / lit0;
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -1249,14 +1082,10 @@ TEST_F(AlgCubeTest, Rcube_lit_quotient1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, cube_lit_quotient2)
+TEST_F(AlgTest, cube_lit_quotient2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-
-  auto cube3 = cube1 / lit0;
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube3 = cube1 / lit5;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
@@ -1280,14 +1109,10 @@ TEST_F(AlgCubeTest, cube_lit_quotient2)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Scube_cube_quotient1)
+TEST_F(AlgTest, Scube_cube_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit7}};
   cube1 = cube1 / cube2;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -1312,14 +1137,10 @@ TEST_F(AlgCubeTest, Scube_cube_quotient1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Scube_cube_quotient2)
+TEST_F(AlgTest, Scube_cube_quotient2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1}};
-  AlgCube cube2{nv, {lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5}};
+  auto cube2 = AlgCube{nv, {~lit7}};
   cube1 = cube1 / cube2;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -1344,13 +1165,9 @@ TEST_F(AlgCubeTest, Scube_cube_quotient2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Scube_literal_quotient1)
+TEST_F(AlgTest, Scube_literal_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
   cube1 = cube1 / lit0;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -1375,14 +1192,10 @@ TEST_F(AlgCubeTest, Scube_literal_quotient1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Scube_literal_quotient2)
+TEST_F(AlgTest, Scube_literal_quotient2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-
-  cube1 = cube1 / lit0;
+  auto cube1 = AlgCube{nv, {lit4, ~lit5, ~lit7}};
+  cube1 = cube1 / lit5;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
@@ -1406,14 +1219,10 @@ TEST_F(AlgCubeTest, Scube_literal_quotient2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Icube_cube_quotient1)
+TEST_F(AlgTest, Icube_cube_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-  AlgCube cube2{nv, {lit0, lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv, {lit0, ~lit7}};
   cube1 /= cube2;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -1438,14 +1247,10 @@ TEST_F(AlgCubeTest, Icube_cube_quotient1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Icube_cube_quotient2)
+TEST_F(AlgTest, Icube_cube_quotient2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1}};
-  AlgCube cube2{nv, {lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5}};
+  auto cube2 = AlgCube{nv, {~lit7}};
   cube1 /= cube2;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -1470,13 +1275,9 @@ TEST_F(AlgCubeTest, Icube_cube_quotient2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Icube_literal_quotient1)
+TEST_F(AlgTest, Icube_literal_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
-
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
   cube1 /= lit0;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -1501,14 +1302,11 @@ TEST_F(AlgCubeTest, Icube_literal_quotient1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, Icube_literal_quotient2)
+TEST_F(AlgTest, Icube_literal_quotient2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  AlgCube cube1{nv, {lit0, lit1, lit2}};
+  auto cube1 = AlgCube{nv, {~lit5, lit1, lit2}};
 
-  cube1 /= lit0;
+  cube1 /= lit5;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
@@ -1532,17 +1330,17 @@ TEST_F(AlgCubeTest, Icube_literal_quotient2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgCubeTest, compare1)
+TEST_F(AlgTest, compare1)
 {
   const int nv1 = 100;
   SizeType var80{80};
 
-  Literal lit0{var0, false};
-  Literal lit1{var80, false};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var80, false};
 
-  AlgCube cube1{nv1, { lit0,  lit1}};
-  AlgCube cube2{nv1, { lit0, ~lit1}};
-  AlgCube cube3{nv1, {~lit0,  lit1}};
+  auto cube1 = AlgCube{nv1, { lit0,  lit1}};
+  auto cube2 = AlgCube{nv1, { lit0, ~lit1}};
+  auto cube3 = AlgCube{nv1, {~lit0,  lit1}};
 
   EXPECT_EQ(  0, compare(cube1, cube1) );
   EXPECT_EQ( -1, compare(cube1, cube2) );
@@ -1555,17 +1353,17 @@ TEST_F(AlgCubeTest, compare1)
   EXPECT_EQ(  0, compare(cube3, cube3) );
 };
 
-TEST_F(AlgCubeTest, compare2)
+TEST_F(AlgTest, compare2)
 {
   const int nv1 = 100;
   SizeType var80{80};
 
-  Literal lit0{var0, false};
-  Literal lit1{var80, false};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var80, false};
 
-  AlgCube cube1{nv1, { lit0,  lit1}};
-  AlgCube cube2{nv1, { lit0, ~lit1}};
-  AlgCube cube3{nv1, {~lit0,  lit1}};
+  auto cube1 = AlgCube{nv1, { lit0,  lit1}};
+  auto cube2 = AlgCube{nv1, { lit0, ~lit1}};
+  auto cube3 = AlgCube{nv1, {~lit0,  lit1}};
 
   EXPECT_TRUE(  cube1 == cube1 );
   EXPECT_FALSE( cube1 <  cube1 );
@@ -1623,16 +1421,16 @@ TEST_F(AlgCubeTest, compare2)
 
 };
 
-TEST_F(AlgCubeTest, compare_bad)
+TEST_F(AlgTest, compare_bad)
 {
   const int nv1 = 100;
   SizeType var80{80};
 
-  Literal lit0{var0, false};
-  Literal lit1{var80, false};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var80, false};
 
-  AlgCube cube1{nv1, { lit0,  lit1}};
-  AlgCube cube2{nv, { lit0, ~lit1}};
+  auto cube1 = AlgCube{nv1, { lit0,  lit1}};
+  auto cube2 = AlgCube{nv, { lit0, ~lit1}};
 
   ASSERT_THROW( auto r = (cube1 == cube2), std::invalid_argument );
   ASSERT_THROW( auto r = (cube1 < cube2), std::invalid_argument );
@@ -1641,13 +1439,9 @@ TEST_F(AlgCubeTest, compare_bad)
   ASSERT_THROW( auto r = (cube1 >= cube2), std::invalid_argument );
 }
 
-TEST_F(AlgCubeTest, to_expr1)
+TEST_F(AlgTest, to_expr1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var1, false};
-  Literal lit2{var2, false};
-
-  AlgCube cube1{3, {lit0, lit1, ~lit2}};
+  auto cube1 = AlgCube{3, {lit0, lit1, ~lit2}};
 
   auto expr = cube1.expr();
   auto expr_str = expr.to_string();

@@ -24,23 +24,28 @@ SopCover::compare(
     throw std::invalid_argument("variable_num() is different from each other");
   }
 
-  auto cube1 = _cube_begin(chunk());
-  auto cube2 = _cube_begin(right.chunk());
-  auto end1 = _cube_end(cube1, cube_num());
-  auto end2 = _cube_end(cube2, right.cube_num());
-  for ( ; cube1 != end1 && cube2 != end2;
-	_cube_next(cube1), _cube_next(cube2) ) {
+  auto cube1_list = _cube_list(chunk(), 0, cube_num());
+  auto cube1_iter = cube1_list.begin();
+  auto cube1_end = cube1_list.end();
+  auto cube2_list = _cube_list(right.chunk(), 0, right.cube_num());
+  auto cube2_iter = cube2_list.begin();
+  auto cube2_end = cube2_list.end();
+  for ( ; cube1_iter != cube1_end &&
+	  cube2_iter != cube2_end;
+	++ cube1_iter, ++ cube2_iter ) {
+    auto cube1 = *cube1_iter;
+    auto cube2 = *cube2_iter;
     int res = _cube_compare(cube1, cube2);
     if ( res != 0 ) {
       return res;
     }
   }
-  if ( cube1 != end1 ) {
-    // cube2 == end2 なので block1 が大きい
+  if ( cube1_iter != cube1_end ) {
+    // cube2_iter == cube2_end なので cube1_list が大きい
     return 1;
   }
-  if ( cube2 != end2 ) {
-    // cube1 == end1 なので block2 が大きい
+  if ( cube2_iter != cube2_end ) {
+    // cube1_iter == cube1_end なので cube2_list が大きい
     return -1;
   }
   // 等しい

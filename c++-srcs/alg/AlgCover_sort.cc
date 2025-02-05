@@ -201,14 +201,13 @@ AlgSorter::sort_sub(
     auto cube1 = *cube1_iter;
     auto cube2 = *cube2_iter;
     int comp_res = _cube_compare(cube1, cube2);
+    auto dst_cube = dst_list.back();
     if ( comp_res > 0 ) {
-      auto dst_cube = dst_list.back();
       _cube_copy(dst_cube, cube1);
       ++ cube1_iter;
       dst_list.inc();
     }
     else if ( comp_res < 0 ) {
-      auto dst_cube = dst_list.back();
       _cube_copy(dst_cube, cube2);
       ++ cube2_iter;
       dst_list.inc();
@@ -226,7 +225,6 @@ AlgSorter::sort_sub(
     dst_list.inc();
   }
   // 後半部分が残っている時はそのままでいいはず．
-  //ASSERT_COND( cube2_iter == dst_list.back() );
 }
 
 END_NAMESPACE_YM_ALG

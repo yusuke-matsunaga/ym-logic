@@ -35,6 +35,185 @@ protected:
   /// @brief 内部で代入先のキューブを表す型
   using DstCube = Chunk::iterator;
 
+
+  //////////////////////////////////////////////////////////////////////
+  /// @brief Cube の反復子を表すクラス
+  //////////////////////////////////////////////////////////////////////
+  class CubeIter
+  {
+  public:
+
+    /// @brief コンストラクタ
+    CubeIter(
+      Cube cube_begin,   ///< [in] 先頭のキューブ
+      SizeType cube_size ///< [in] キューブのサイズ
+    ) : mCube{cube_begin},
+	mCubeSize{cube_size}
+    {
+    }
+
+    /// @brief デストラクタ
+    ~CubeIter() = default;
+
+    /// @brief キューブを取り出す．
+    Cube
+    operator*() const
+    {
+      return mCube;
+    }
+
+    /// @brief 次の要素に進める．
+    CubeIter&
+    operator++()
+    {
+      mCube += mCubeSize;
+      return *this;
+    }
+
+    /// @brief 等価比較
+    bool
+    operator==(
+      const CubeIter& right
+    ) const
+    {
+      return mCube == right.mCube;
+    }
+
+    /// @brief 非等価比較
+    bool
+    operator!=(
+      const CubeIter& right
+    ) const
+    {
+      return !operator==(right);
+    }
+
+
+  private:
+    //////////////////////////////////////////////////////////////////////
+    // データメンバ
+    //////////////////////////////////////////////////////////////////////
+
+    // キューブ
+    Cube mCube;
+
+    // キューブサイズ
+    SizeType mCubeSize;
+
+  };
+
+
+  //////////////////////////////////////////////////////////////////////
+  /// @brief Cube のリストを表すクラス
+  ///
+  /// 内容は不変で読み出ししか行わない．
+  //////////////////////////////////////////////////////////////////////
+  class CubeList
+  {
+  public:
+
+    /// @brief コンストラクタ
+    CubeList(
+      CubeIter begin, ///< [in] 開始位置
+      CubeIter end    ///< [in] 終了位置
+    ) : mBegin{begin},
+	mEnd{end}
+    {
+    }
+
+    /// @brief デストラクタ
+    ~CubeList() = default;
+
+    /// @brief 開始位置を返す．
+    CubeIter
+    begin() const
+    {
+      return mBegin;
+    }
+
+    /// @brief 終了位置を返す．
+    CubeIter
+    end() const
+    {
+      return mEnd;
+    }
+
+
+  private:
+    //////////////////////////////////////////////////////////////////////
+    // データメンバ
+    //////////////////////////////////////////////////////////////////////
+
+    // 開始位置
+    CubeIter mBegin;
+
+    // 終了位置
+    CubeIter mEnd;
+
+  };
+
+
+  //////////////////////////////////////////////////////////////////////
+  /// @brief DstCube のリストを表すクラス
+  ///
+  /// 末尾への追加しか行わない．
+  //////////////////////////////////////////////////////////////////////
+  class DstCubeList
+  {
+  public:
+
+    /// @brief コンストラクタ
+    DstCubeList(
+      Chunk& chunk,      ///< [in] ビットベクタ本体
+      SizeType cube_size ///< [in] キューブサイズ
+    ) : mChunk{chunk},
+	mCubeSize{cube_size},
+	mNum{0}
+    {
+    }
+
+    /// @brief デストラクタ
+    ~DstCubeList() = default;
+
+    /// @brief 要素数を返す．
+    SizeType
+    num() const
+    {
+      return mNum;
+    }
+
+    /// @brief 末尾のキューブを返す．
+    DstCube
+    back()
+    {
+      return mChunk.begin() + mNum * mCubeSize;
+    }
+
+    /// @brief 要素数を増やす．
+    void
+    inc()
+    {
+      ++ mNum;
+    }
+
+
+  private:
+    //////////////////////////////////////////////////////////////////////
+    // データメンバ
+    //////////////////////////////////////////////////////////////////////
+
+    // ビットベクタ本体
+    Chunk& mChunk;
+
+    // キューブサイズ
+    SizeType mCubeSize;
+
+    // 現在の要素数
+    SizeType mNum;
+
+  };
+
+
 public:
 
   /// @brief コンストラクタ
@@ -153,6 +332,13 @@ protected:
     const Chunk& chunk ///< [in] 本体のビットベクタ
   ) const;
 
+  /// @brief 内容を出力する(デバッグ用)．
+  void
+  _debug_print(
+    ostream& s, ///< [in] 出力ストリーム
+    Cube cube   ///< [in] キューブ
+  ) const;
+
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -168,7 +354,8 @@ public:
     Cube src_cube     ///< [in] コピー元のビットベクタ
   ) const
   {
-    _copy(dst_cube, src_cube, 1);
+    auto src_end = _cube_end(src_cube);
+    std::copy(src_cube, src_end, dst_cube);
   }
 
   /// @brief キューブ(を表すビットベクタ)をクリアする．
@@ -324,10 +511,62 @@ protected:
     SizeType cube_num ///< [in] キューブ数
   ) const
   {
-    auto src_end = _cube_end(src_cube, cube_num);
+    auto src_end = src_cube + _cube_size() * cube_num;
     std::copy(src_cube, src_end, dst_cube);
   }
 
+  /// @brief キューブのリストを返す．
+  CubeList
+  _cube_list(
+    const Chunk& chunk, ///< [in] ビットベクタの先頭
+    SizeType begin_pos, ///< [in] 開始位置
+    SizeType end_pos    ///< [in] 終了位置
+  ) const
+  {
+    auto begin = CubeIter{_cube(chunk, begin_pos), _cube_size()};
+    auto end = CubeIter{_cube(chunk, end_pos), _cube_size()};
+    return CubeList{begin, end};
+  }
+
+  /// @brief キューブを取り出す．
+  Cube
+  _cube(
+    const Chunk& chunk, ///< [in] ビットベクタの先頭
+    SizeType pos = 0    ///< [in] キューブ位置
+  ) const
+  {
+    return chunk.begin() + pos * _cube_size();
+  }
+
+  /// @brief キューブの末尾を計算する．
+  Cube
+  _cube_end(
+    Cube cube ///< [in] キューブの先頭
+  ) const
+  {
+    return cube + _cube_size();
+  }
+
+  /// @brief キューブのリストを返す．
+  DstCubeList
+  _cube_list(
+    Chunk& chunk ///< [in] ビットベクタの先頭
+  ) const
+  {
+    return DstCubeList{chunk, _cube_size()};
+  }
+
+  /// @brief キューブを取り出す．
+  DstCube
+  _dst_cube(
+    Chunk& chunk,    ///< [in] ビットベクタの先頭
+    SizeType pos = 0 ///< [in] キューブ位置
+  ) const
+  {
+    return chunk.begin() + pos * _cube_size();
+  }
+
+#if 0
   /// @brief キューブ位置を計算する．
   DstCube
   _cube_begin(
@@ -385,6 +624,7 @@ protected:
   {
     cube += _cube_size();
   }
+#endif
 
   /// @brief ブロック位置を計算する．
   static

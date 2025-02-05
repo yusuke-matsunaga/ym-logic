@@ -56,8 +56,8 @@ SopSorter::sort_sub(
   }
   if ( n == 2 ) {
     // (0, 1) と (1, 0) の2通りだけ
-    auto cube0 = _cube_begin(chunk, begin + 0);
-    auto cube1 = _cube_begin(chunk, begin + 1);
+    auto cube0 = _dst_cube(chunk, begin + 0);
+    auto cube1 = _dst_cube(chunk, begin + 1);
     if ( _cube_compare(cube0, cube1) < 0 ) {
       // (1, 0) だったので交換する．
       _cube_swap(cube0, cube1);
@@ -67,9 +67,9 @@ SopSorter::sort_sub(
   if ( n == 3 ) {
     // (0, 1, 2), (0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0)
     // の6通りなので虱潰し
-    auto cube0 = _cube_begin(chunk, begin + 0);
-    auto cube1 = _cube_begin(chunk, begin + 1);
-    auto cube2 = _cube_begin(chunk, begin + 2);
+    auto cube0 = _dst_cube(chunk, begin + 0);
+    auto cube1 = _dst_cube(chunk, begin + 1);
+    auto cube2 = _dst_cube(chunk, begin + 2);
     if ( _cube_compare(cube0, cube1) < 0 ) {
       // (1, 0, 2), (1, 2, 0), (2, 1, 0)
       if ( _cube_compare(cube0, cube2) < 0 ) {
@@ -114,10 +114,10 @@ SopSorter::sort_sub(
     return;
   }
   if ( n == 4 ) {
-    auto cube0 = _cube_begin(chunk, begin + 0);
-    auto cube1 = _cube_begin(chunk, begin + 1);
-    auto cube2 = _cube_begin(chunk, begin + 2);
-    auto cube3 = _cube_begin(chunk, begin + 3);
+    auto cube0 = _dst_cube(chunk, begin + 0);
+    auto cube1 = _dst_cube(chunk, begin + 1);
+    auto cube2 = _dst_cube(chunk, begin + 2);
+    auto cube3 = _dst_cube(chunk, begin + 3);
     // 0 と 1 を整列
     if ( _cube_compare(cube0, cube1) < 0 ) {
       _cube_swap(cube0, cube1);
@@ -170,48 +170,58 @@ SopSorter::sort_sub(
   // trivial case
   // 前半部分の末尾が後半部分の先頭より大きければ
   // すでに整列している．
-  auto cube_end1 = _cube_begin(chunk, end1 - 1);
-  auto cube_begin2 = _cube_begin(chunk, begin2);
-  if ( _cube_compare(cube_end1, cube_begin2) > 0 ) {
-    return;
+  {
+    auto cube_end1 = _cube(chunk, end1 - 1);
+    auto cube_begin2 = _cube(chunk, begin2);
+    if ( _cube_compare(cube_end1, cube_begin2) > 0 ) {
+      return;
+    }
   }
 
   // マージする．
   // 前半部分を一旦 mTmpBuff にコピーする．
   {
-    auto dst_cube = _cube_begin(mTmpChunk);
-    auto src_cube = _cube_begin(chunk, begin1);
-    _copy(dst_cube, src_cube, hn);
+    auto dst_cube = _dst_cube(mTmpChunk);
+    auto src_cube = _cube(chunk, begin1);
+    auto src_end = src_cube + _cube_size() * hn;
+    std::copy(src_cube, src_end, dst_cube);
   }
-  auto cube1 = _cube_begin(mTmpChunk);
-  auto cube1_end = cube1 + hn;
-  auto cube2 = _cube_begin(chunk, begin2);
-  auto cube2_end = _cube_begin(chunk, end2);
-  auto dst_cube = _cube_begin(chunk);
-  while ( cube1 != cube1_end && cube2 != cube2_end ) {
+  auto cube1_list = _cube_list(mTmpChunk, 0, hn);
+  auto cube1_iter = cube1_list.begin();
+  auto cube1_end = cube1_list.end();
+  auto cube2_list = _cube_list(chunk, begin2, end2 - begin2);
+  auto cube2_iter = cube2_list.begin();
+  auto cube2_end = cube2_list.end();
+  auto dst_list = _cube_list(chunk);
+  while ( cube1_iter != cube1_end &&
+	  cube2_iter != cube2_end ) {
+    auto cube1 = *cube1_iter;
+    auto cube2 = *cube2_iter;
     int comp_res = _cube_compare(cube1, cube2);
+    auto dst_cube = dst_list.back();
     if ( comp_res > 0 ) {
       _cube_copy(dst_cube, cube1);
-      _cube_next(cube1);
-      _cube_next(dst_cube);
+      ++ cube1_iter;
+      dst_list.inc();
     }
     else if ( comp_res < 0 ) {
       _cube_copy(dst_cube, cube2);
-      _cube_next(cube2);
-      _cube_next(dst_cube);
+      ++ cube2_iter;
+      dst_list.inc();
     }
     else {
       // 重複したキューブはエラー
       ASSERT_NOT_REACHED;
     }
   }
-  while ( cube1 != cube1_end ) {
+  while ( cube1_iter != cube1_end ) {
+    auto cube1 = *cube1_iter;
+    auto dst_cube = dst_list.back();
     _cube_copy(dst_cube, cube1);
-    _cube_next(cube1);
-    _cube_next(dst_cube);
+    ++ cube1_iter;
+    dst_list.inc();
   }
   // 後半部分が残っている時はそのままでいいはず．
-  ASSERT_COND( cube2 == dst_cube );
 }
 
 END_NAMESPACE_YM_SOP

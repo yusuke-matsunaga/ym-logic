@@ -34,7 +34,7 @@ public:
 
 TEST_F(SopCubeTest, constructor1)
 {
-  SopCube cube1{nv};
+  auto cube1 = SopCube{nv};
 
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( 0,  cube1.literal_num() );
@@ -45,8 +45,8 @@ TEST_F(SopCubeTest, constructor1)
 
 TEST_F(SopCubeTest, constructor2)
 {
-  Literal lit{var5, true};
-  SopCube cube1{nv, lit};
+  auto lit = Literal{var5, true};
+  auto cube1 = SopCube{nv, lit};
 
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( 1,  cube1.literal_num() );
@@ -80,10 +80,10 @@ TEST_F(SopCubeTest, constructor2)
 
 TEST_F(SopCubeTest, constructor3)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  vector<Literal> lit_list{lit1, lit2};
-  SopCube cube1{nv, lit_list};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var0, false};
+  auto lit_list = vector<Literal>{lit1, lit2};
+  auto cube1 = SopCube{nv, lit_list};
 
   auto nl = lit_list.size();
   EXPECT_EQ( nv, cube1.variable_num() );
@@ -119,12 +119,11 @@ TEST_F(SopCubeTest, constructor3)
 
 TEST_F(SopCubeTest, constructor4)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  SopCube cube1{nv, lit_list};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var0, false};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
 
-  auto nl = lit_list.size();
+  auto nl = 2;
   EXPECT_EQ( nv, cube1.variable_num() );
   EXPECT_EQ( nl,  cube1.literal_num() );
 
@@ -158,13 +157,12 @@ TEST_F(SopCubeTest, constructor4)
 
 TEST_F(SopCubeTest, copy_constructor)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  auto nl = lit_list.size();
-  SopCube cube1{nv, lit_list};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var0, false};
+  auto nl = 2;
+  auto cube1 = SopCube{nv, {lit1, lit2}};
 
-  SopCube cube2{cube1};
+  auto cube2 = SopCube{cube1};
   EXPECT_EQ( nv, cube2.variable_num() );
   EXPECT_EQ( nl,  cube2.literal_num() );
 
@@ -198,13 +196,12 @@ TEST_F(SopCubeTest, copy_constructor)
 
 TEST_F(SopCubeTest, copy_assignment)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  auto nl = lit_list.size();
-  SopCube cube1{nv, lit_list};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var0, false};
+  auto nl = 2;
+  auto cube1 = SopCube{nv, {lit1, lit2}};
 
-  SopCube cube2{nv};
+  auto cube2 = SopCube{nv};
   EXPECT_EQ( 0, cube2.literal_num() );
 
   cube2 = cube1;
@@ -241,13 +238,12 @@ TEST_F(SopCubeTest, copy_assignment)
 
 TEST_F(SopCubeTest, move_constructor)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  auto nl = lit_list.size();
-  SopCube cube1{nv, lit_list};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var0, false};
+  auto nl = 2;
+  auto cube1 = SopCube{nv, {lit1, lit2}};
 
-  SopCube cube2{std::move(cube1)};
+  auto cube2 = SopCube{std::move(cube1)};
 
   EXPECT_EQ( 0, cube1.literal_num() );
 
@@ -284,13 +280,12 @@ TEST_F(SopCubeTest, move_constructor)
 
 TEST_F(SopCubeTest, move_assignment)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  auto nl = lit_list.size();
-  SopCube cube1{nv, lit_list};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var0, false};
+  auto nl = 2;
+  auto cube1 = SopCube{nv, {lit1, lit2}};
 
-  SopCube cube2{nv};
+  auto cube2 = SopCube{nv};
   EXPECT_EQ( 0, cube2.literal_num() );
 
   cube2 = std::move(cube1);
@@ -330,29 +325,25 @@ TEST_F(SopCubeTest, move_assignment)
 
 TEST_F(SopCubeTest, check_containment)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  SopCube cube1{nv, lit_list};
-
-  SopCube cube2{nv, {lit1}};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var0, false};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit1}};
 
   EXPECT_TRUE(  cube1.check_containment(cube2) );
   EXPECT_FALSE( cube2.check_containment(cube1) );
 
-  SopCube cube3{nv, {lit2}};
+  auto cube3 = SopCube{nv, {lit2}};
   EXPECT_FALSE( cube2.check_containment(cube3) );
   EXPECT_FALSE( cube3.check_containment(cube2) );
 };
 
 TEST_F(SopCubeTest, check_containment_bad)
 {
-  Literal lit1{var5, true};
-  Literal lit2{var0, false};
-  std::initializer_list<Literal> lit_list{lit1, lit2};
-  SopCube cube1{nv, lit_list};
-
-  SopCube cube2{nv + 1, {lit1}};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var0, false};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv + 1, {lit1}};
 
   ASSERT_THROW( cube1.check_containment(cube2), std::invalid_argument );
   ASSERT_THROW( cube2.check_containment(cube1), std::invalid_argument );
@@ -360,18 +351,17 @@ TEST_F(SopCubeTest, check_containment_bad)
 
 TEST_F(SopCubeTest, check_intersect)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
-  SopCube cube2{nv, {lit0, lit1}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit1}};
 
   EXPECT_TRUE(  cube1.check_intersect(cube2) );
   EXPECT_TRUE(  cube2.check_intersect(cube1) );
 
-  Literal lit3{var0, true};
-  SopCube cube3{nv, {lit3}};
+  auto lit3 = Literal{var0, true};
+  auto cube3 = SopCube{nv, {lit3}};
   EXPECT_FALSE( cube1.check_containment(cube3) );
   EXPECT_FALSE( cube2.check_containment(cube3) );
   EXPECT_FALSE( cube3.check_containment(cube1) );
@@ -380,12 +370,11 @@ TEST_F(SopCubeTest, check_intersect)
 
 TEST_F(SopCubeTest, check_intersect_bad)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
-  SopCube cube2{nv + 1, {lit0, lit1}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv + 1, {lit0, lit1}};
 
   ASSERT_THROW( cube1.check_intersect(cube2), std::invalid_argument );
   ASSERT_THROW( cube2.check_intersect(cube1), std::invalid_argument );
@@ -393,12 +382,11 @@ TEST_F(SopCubeTest, check_intersect_bad)
 
 TEST_F(SopCubeTest, cube_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit1}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit1}};
   auto cube3 = cube1 * cube2;
 
   EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
@@ -425,13 +413,12 @@ TEST_F(SopCubeTest, cube_cube_product1)
 
 TEST_F(SopCubeTest, cube_cube_product2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  Literal lit3{var5, false};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit3}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto lit3 = Literal{var5, false};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit3}};
   auto cube3 = cube1 * cube2;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
@@ -458,24 +445,23 @@ TEST_F(SopCubeTest, cube_cube_product2)
 
 TEST_F(SopCubeTest, cube_cube_product_bad)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
 
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv + 1, {lit0, lit1}};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv + 1, {lit0, lit1}};
 
   ASSERT_THROW( cube1 * cube2, std::invalid_argument );
 }
 
 TEST_F(SopCubeTest, Rcube_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit1}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit1}};
   auto cube3 = std::move(cube1) * cube2;
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -504,12 +490,11 @@ TEST_F(SopCubeTest, Rcube_cube_product1)
 
 TEST_F(SopCubeTest, cube_Rcube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit1}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit1}};
   auto cube3 = cube1 * std::move(cube2);
 
   EXPECT_EQ( 0, cube2.literal_num() );
@@ -538,12 +523,11 @@ TEST_F(SopCubeTest, cube_Rcube_product1)
 
 TEST_F(SopCubeTest, Rcube_Rcube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit1}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit1}};
   auto cube3 = std::move(cube1) * std::move(cube2);
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -572,11 +556,10 @@ TEST_F(SopCubeTest, Rcube_Rcube_product1)
 
 TEST_F(SopCubeTest, lit_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   auto cube3 = lit0 * cube1;
 
   EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
@@ -603,11 +586,10 @@ TEST_F(SopCubeTest, lit_cube_product1)
 
 TEST_F(SopCubeTest, lit_Rcube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   auto cube3 = lit0 * std::move(cube1);
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -636,11 +618,10 @@ TEST_F(SopCubeTest, lit_Rcube_product1)
 
 TEST_F(SopCubeTest, lit_cube_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var5, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   auto cube3 = lit0 * cube1;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
@@ -667,11 +648,10 @@ TEST_F(SopCubeTest, lit_cube_product2)
 
 TEST_F(SopCubeTest, cube_lit_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   auto cube3 = cube1 * lit0;
 
   EXPECT_TRUE(  cube3.check_literal(Literal(var0, false)) );
@@ -698,11 +678,10 @@ TEST_F(SopCubeTest, cube_lit_product1)
 
 TEST_F(SopCubeTest, Rcube_lit_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   auto cube3 = std::move(cube1) * lit0;
 
   EXPECT_EQ( 0, cube1.literal_num() );
@@ -731,11 +710,10 @@ TEST_F(SopCubeTest, Rcube_lit_product1)
 
 TEST_F(SopCubeTest, cube_lit_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var5, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   auto cube3 = cube1 * lit0;
 
   EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
@@ -762,12 +740,11 @@ TEST_F(SopCubeTest, cube_lit_product2)
 
 TEST_F(SopCubeTest, Scube_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit1}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit1}};
   cube1 = cube1 * cube2;
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
@@ -794,13 +771,12 @@ TEST_F(SopCubeTest, Scube_cube_product1)
 
 TEST_F(SopCubeTest, Scube_cube_product2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  Literal lit3{var5, false};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit3}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto lit3 = Literal{var5, false};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit3}};
   cube1 = cube1 * cube2;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -827,11 +803,10 @@ TEST_F(SopCubeTest, Scube_cube_product2)
 
 TEST_F(SopCubeTest, Scube_literal_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   cube1 = cube1 * lit0;
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
@@ -858,11 +833,10 @@ TEST_F(SopCubeTest, Scube_literal_product1)
 
 TEST_F(SopCubeTest, Scube_literal_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var5, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   cube1 = cube1 * lit0;
 
   EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
@@ -889,11 +863,10 @@ TEST_F(SopCubeTest, Scube_literal_product2)
 
 TEST_F(SopCubeTest, literal_Scube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
   cube1 = lit0 * cube1;
 
   EXPECT_TRUE(  cube1.check_literal(Literal(var0, false)) );
@@ -920,10 +893,10 @@ TEST_F(SopCubeTest, literal_Scube_product1)
 
 TEST_F(SopCubeTest, literal_Scube_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
+  auto lit0 = Literal{var5, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
 
   cube1 = lit0 * cube1;
 
@@ -951,11 +924,11 @@ TEST_F(SopCubeTest, literal_Scube_product2)
 
 TEST_F(SopCubeTest, Icube_cube_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit1}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit1}};
 
   cube1 *= cube2;
 
@@ -983,12 +956,12 @@ TEST_F(SopCubeTest, Icube_cube_product1)
 
 TEST_F(SopCubeTest, Icube_cube_product2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  Literal lit3{var5, false};
-  SopCube cube1{nv, {lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit3}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto lit3 = Literal{var5, false};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit3}};
 
   cube1 *= cube2;
 
@@ -1016,10 +989,10 @@ TEST_F(SopCubeTest, Icube_cube_product2)
 
 TEST_F(SopCubeTest, Icube_literal_product1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
 
   cube1 *= lit0;
 
@@ -1047,10 +1020,10 @@ TEST_F(SopCubeTest, Icube_literal_product1)
 
 TEST_F(SopCubeTest, Icube_literal_product2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit1, lit2}};
+  auto lit0 = Literal{var5, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit1, lit2}};
 
   cube1 *= lit0;
 
@@ -1078,11 +1051,11 @@ TEST_F(SopCubeTest, Icube_literal_product2)
 
 TEST_F(SopCubeTest, cube_cube_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit2}};
 
   auto cube3 = cube1 / cube2;
 
@@ -1110,11 +1083,11 @@ TEST_F(SopCubeTest, cube_cube_quotient1)
 
 TEST_F(SopCubeTest, Rcube_cube_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit2}};
 
   auto cube3 = std::move(cube1) / cube2;
 
@@ -1144,11 +1117,11 @@ TEST_F(SopCubeTest, Rcube_cube_quotient1)
 
 TEST_F(SopCubeTest, cube_cube_quotient2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1}};
-  SopCube cube2{nv, {lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1}};
+  auto cube2 = SopCube{nv, {lit2}};
 
   auto cube3 = cube1 / cube2;
 
@@ -1176,21 +1149,21 @@ TEST_F(SopCubeTest, cube_cube_quotient2)
 
 TEST_F(SopCubeTest, cube_cube_quotient_bad)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
-  SopCube cube2{nv + 1, {lit0, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
+  auto cube2 = SopCube{nv + 1, {lit0, lit2}};
 
   ASSERT_THROW( cube1 / cube2, std::invalid_argument );
 }
 
 TEST_F(SopCubeTest, cube_lit_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
 
   auto cube3 = cube1 / lit0;
 
@@ -1218,10 +1191,10 @@ TEST_F(SopCubeTest, cube_lit_quotient1)
 
 TEST_F(SopCubeTest, Rcube_lit_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
 
   auto cube3 = std::move(cube1) / lit0;
 
@@ -1251,10 +1224,10 @@ TEST_F(SopCubeTest, Rcube_lit_quotient1)
 
 TEST_F(SopCubeTest, cube_lit_quotient2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
+  auto lit0 = Literal{var5, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
 
   auto cube3 = cube1 / lit0;
 
@@ -1282,11 +1255,11 @@ TEST_F(SopCubeTest, cube_lit_quotient2)
 
 TEST_F(SopCubeTest, Scube_cube_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit2}};
 
   cube1 = cube1 / cube2;
 
@@ -1314,11 +1287,11 @@ TEST_F(SopCubeTest, Scube_cube_quotient1)
 
 TEST_F(SopCubeTest, Scube_cube_quotient2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1}};
-  SopCube cube2{nv, {lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1}};
+  auto cube2 = SopCube{nv, {lit2}};
 
   cube1 = cube1 / cube2;
 
@@ -1346,10 +1319,10 @@ TEST_F(SopCubeTest, Scube_cube_quotient2)
 
 TEST_F(SopCubeTest, Scube_literal_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
 
   cube1 = cube1 / lit0;
 
@@ -1377,10 +1350,10 @@ TEST_F(SopCubeTest, Scube_literal_quotient1)
 
 TEST_F(SopCubeTest, Scube_literal_quotient2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
+  auto lit0 = Literal{var5, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
 
   cube1 = cube1 / lit0;
 
@@ -1408,11 +1381,11 @@ TEST_F(SopCubeTest, Scube_literal_quotient2)
 
 TEST_F(SopCubeTest, Icube_cube_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
-  SopCube cube2{nv, {lit0, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
+  auto cube2 = SopCube{nv, {lit0, lit2}};
 
   cube1 /= cube2;
 
@@ -1440,11 +1413,11 @@ TEST_F(SopCubeTest, Icube_cube_quotient1)
 
 TEST_F(SopCubeTest, Icube_cube_quotient2)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1}};
-  SopCube cube2{nv, {lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1}};
+  auto cube2 = SopCube{nv, {lit2}};
 
   cube1 /= cube2;
 
@@ -1472,10 +1445,10 @@ TEST_F(SopCubeTest, Icube_cube_quotient2)
 
 TEST_F(SopCubeTest, Icube_literal_quotient1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
 
   cube1 /= lit0;
 
@@ -1503,10 +1476,10 @@ TEST_F(SopCubeTest, Icube_literal_quotient1)
 
 TEST_F(SopCubeTest, Icube_literal_quotient2)
 {
-  Literal lit0{var5, false};
-  Literal lit1{var5, true};
-  Literal lit2{var7, true};
-  SopCube cube1{nv, {lit0, lit1, lit2}};
+  auto lit0 = Literal{var5, false};
+  auto lit1 = Literal{var5, true};
+  auto lit2 = Literal{var7, true};
+  auto cube1 = SopCube{nv, {lit0, lit1, lit2}};
 
   cube1 /= lit0;
 
@@ -1537,12 +1510,12 @@ TEST_F(SopCubeTest, compare1)
   const int nv1 = 100;
   SizeType var80{80};
 
-  Literal lit0{var0, false};
-  Literal lit1{var80, false};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var80, false};
 
-  SopCube cube1{nv1, { lit0,  lit1}};
-  SopCube cube2{nv1, { lit0, ~lit1}};
-  SopCube cube3{nv1, {~lit0,  lit1}};
+  auto cube1 = SopCube{nv1, { lit0,  lit1}};
+  auto cube2 = SopCube{nv1, { lit0, ~lit1}};
+  auto cube3 = SopCube{nv1, {~lit0,  lit1}};
 
   EXPECT_EQ(  0, compare(cube1, cube1) );
   EXPECT_EQ( -1, compare(cube1, cube2) );
@@ -1560,12 +1533,12 @@ TEST_F(SopCubeTest, compare2)
   const int nv1 = 100;
   SizeType var80{80};
 
-  Literal lit0{var0, false};
-  Literal lit1{var80, false};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var80, false};
 
-  SopCube cube1{nv1, { lit0,  lit1}};
-  SopCube cube2{nv1, { lit0, ~lit1}};
-  SopCube cube3{nv1, {~lit0,  lit1}};
+  auto cube1 = SopCube{nv1, { lit0,  lit1}};
+  auto cube2 = SopCube{nv1, { lit0, ~lit1}};
+  auto cube3 = SopCube{nv1, {~lit0,  lit1}};
 
   EXPECT_TRUE(  cube1 == cube1 );
   EXPECT_FALSE( cube1 <  cube1 );
@@ -1628,11 +1601,11 @@ TEST_F(SopCubeTest, compare_bad)
   const int nv1 = 100;
   SizeType var80{80};
 
-  Literal lit0{var0, false};
-  Literal lit1{var80, false};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var80, false};
 
-  SopCube cube1{nv1, { lit0,  lit1}};
-  SopCube cube2{nv, { lit0, ~lit1}};
+  auto cube1 = SopCube{nv1, { lit0,  lit1}};
+  auto cube2 = SopCube{nv, { lit0, ~lit1}};
 
   ASSERT_THROW( auto r = (cube1 == cube2), std::invalid_argument );
   ASSERT_THROW( auto r = (cube1 < cube2), std::invalid_argument );
@@ -1643,11 +1616,11 @@ TEST_F(SopCubeTest, compare_bad)
 
 TEST_F(SopCubeTest, to_expr1)
 {
-  Literal lit0{var0, false};
-  Literal lit1{var1, false};
-  Literal lit2{var2, false};
+  auto lit0 = Literal{var0, false};
+  auto lit1 = Literal{var1, false};
+  auto lit2 = Literal{var2, false};
 
-  SopCube cube1{3, {lit0, lit1, ~lit2}};
+  auto cube1 = SopCube{3, {lit0, lit1, ~lit2}};
 
   auto expr = cube1.expr();
   auto expr_str = expr.to_string();

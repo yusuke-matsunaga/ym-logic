@@ -11,9 +11,6 @@
 #include "ym/AlgCover.h"
 #include "ym/AlgCube.h"
 #include "ym/Expr.h"
-#include "OneLevel0Kernel.h"
-#include "BestKernel.h"
-#include "WeakDivision.h"
 
 
 BEGIN_NAMESPACE_YM_ALG
@@ -26,15 +23,6 @@ template<class Divisor, class Divide>
 class GenFactor
 {
 public:
-
-  /// @brief コンストラクタ
-  GenFactor() = default;
-
-  /// @brief デストラクタ
-  ~GenFactor() = default;
-
-
-public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
@@ -45,12 +33,26 @@ public:
     const AlgCover& f
   )
   {
-    AlgCover d = mDivisor(f);
-    if ( d.cube_num() == 0 ) {
-      return conv_to_expr(f);
-    }
+    return factor(f);
+  }
 
-    auto p = mDivide(f, d);
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ファクタリングを行う．
+  Expr
+  factor(
+    const AlgCover& f
+  )
+  {
+    auto d = Divisor::divisor(f);
+    if ( d.cube_num() == 0 ) {
+      return cov_to_expr(f);
+    }
+    auto p = Divide::divide(f, d);
     const AlgCover& q = p.first;
     const AlgCover& r = p.second;
     if ( q.cube_num() == 1 ) {
@@ -59,16 +61,16 @@ public:
       return literal_factor(f, cube_list[0]);
     }
     else {
-      AlgCube cc = q.common_cube();
-      AlgCover q1 = q / cc;
-      auto p = mDivide(f, q1);
+      auto cc = q.common_cube();
+      auto q1 = q / cc;
+      auto p = Divide::divide(f, q1);
       const AlgCover& d1 = p.first;
       const AlgCover& r1 = p.second;
-      AlgCube cc1 = d1.common_cube();
+      auto cc1 = d1.common_cube();
       if ( cc1.literal_num() == 0 ) {
-	Expr q_expr = operator()(q1);
-	Expr d_expr = operator()(d1);
-	Expr r_expr = operator()(r1);
+	auto q_expr = factor(q1);
+	auto d_expr = factor(d1);
+	auto r_expr = factor(r1);
 	return (q_expr & d_expr) | r_expr;
       }
       else {
@@ -77,12 +79,6 @@ public:
       }
     }
   }
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
 
   /// @brief 'LF' を行う．
   Expr
@@ -103,15 +99,15 @@ private:
     }
     auto q = f / l;
     auto r = f - q * l;
-    auto q_expr = operator()(q);
+    auto q_expr = factor(q);
     auto d_expr = Expr::literal(l);
-    auto r_expr = operator()(r);
+    auto r_expr = factor(r);
     return (q_expr & d_expr) | r_expr;
   }
 
   /// @brief AlgCover をそのまま Expr に変換する．
   Expr
-  conv_to_expr(
+  cov_to_expr(
     const AlgCover& f
   )
   {
@@ -121,47 +117,23 @@ private:
     if ( nc == 0 ) {
       return Expr::zero();
     }
-    vector<Expr> and_list(nc);
-    for ( SizeType i = 0; i < nc; ++ i ) {
-      auto& cube = cube_list[i];
+    vector<Expr> and_list;
+    and_list.reserve(nc);
+    for ( auto cube: cube_list ) {
       SizeType nl = cube.size();
-      vector<Expr> lit_list(nl);
-      for ( SizeType j = 0; j < nl; ++ j ) {
-	lit_list[j] = Expr::literal(cube[j]);
+      vector<Expr> lit_list;
+      lit_list.reserve(nl);
+      for ( auto lit: cube ) {
+	auto lit_expr = Expr::literal(lit);
+	lit_list.push_back(lit_expr);
       }
-      and_list[i] = Expr::and_op(lit_list);
+      auto and_expr = Expr::and_op(lit_list);
+      and_list.push_back(and_expr);
     }
     return Expr::or_op(and_list);
   }
 
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // データメンバ
-  //////////////////////////////////////////////////////////////////////
-
-  // 除数を求めるクラス
-  Divisor mDivisor;
-
-  // 除算を行うクラス
-  Divide mDivide;
-
 };
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class QuickFactor QuickFactor.h "GenFactor.h"
-/// @brief 'QUICK_FACTOR' を実行するクラス
-//////////////////////////////////////////////////////////////////////
-using QuickFactor = GenFactor<OneLevel0Kernel, WeakDivision>;
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class GoodFactor GoodFactor.h "GenFactor.h"
-/// @brief 'GOOD_FACTOR' を実行するクラス
-//////////////////////////////////////////////////////////////////////
-using GoodFactor = GenFactor<BestKernel, WeakDivision>;
-
 
 END_NAMESPACE_YM_ALG
 

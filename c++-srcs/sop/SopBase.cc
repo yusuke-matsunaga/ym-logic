@@ -23,25 +23,9 @@ _count(
   SopPatWord pat
 )
 {
-  int table[] = {
-    // utils/gen_bitcount_tbl.py で生成
-    0,  1,  1,  0,  1,  2,  2,  0,  1,  2,  2,  0,  0,  0,  0,  0,
-    1,  2,  2,  0,  2,  3,  3,  0,  2,  3,  3,  0,  0,  0,  0,  0,
-    1,  2,  2,  0,  2,  3,  3,  0,  2,  3,  3,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    1,  2,  2,  0,  2,  3,  3,  0,  2,  3,  3,  0,  0,  0,  0,  0,
-    2,  3,  3,  0,  3,  4,  4,  0,  3,  4,  4,  0,  0,  0,  0,  0,
-    2,  3,  3,  0,  3,  4,  4,  0,  3,  4,  4,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    1,  2,  2,  0,  2,  3,  3,  0,  2,  3,  3,  0,  0,  0,  0,  0,
-    2,  3,  3,  0,  3,  4,  4,  0,  3,  4,  4,  0,  0,  0,  0,  0,
-    2,  3,  3,  0,  3,  4,  4,  0,  3,  4,  4,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-
+  static const int table[] = {
+    // utils/gen_litcount_tbl.py で生成
+#include "litcount_tbl.h"
   };
 
   return table[pat];
@@ -58,10 +42,10 @@ SopBase::_literal_num(
 {
   // 8 ビットごとに区切って表引きで計算する．
   SizeType ans = 0;
-  auto cube = _cube_begin(chunk);
-  auto end = _cube_end(cube, num);
-  for ( ; cube != end; ++ cube ) {
-    auto pat = *cube;
+  auto begin = _cube(chunk);
+  auto end = _cube(chunk, num);
+  for ( auto p = begin; p != end; ++ p ) {
+    auto pat = *p;
     auto p1 = pat & 0xFFUL;
     ans += _count(p1);
     auto p2 = (pat >> 8) & 0xFFUL;
@@ -94,9 +78,8 @@ SopBase::_literal_num(
   auto blk = _block_pos(varid);
   auto mask = _get_mask(varid, inv);
   SizeType ans = 0;
-  auto cube = _cube_begin(chunk);
-  auto end = _cube_end(cube, cube_num);
-  for ( ; cube != end; _cube_next(cube) ) {
+  auto cube_list = _cube_list(chunk, 0, cube_num);
+  for ( auto cube: cube_list ) {
     auto p = cube + blk;
     if ( (*(p) & mask) == mask ) {
       ++ ans;
@@ -112,12 +95,11 @@ SopBase::_literal_list(
   const Chunk& chunk
 ) const
 {
-  vector<vector<Literal>> cube_list;
-  cube_list.reserve(cube_num);
+  vector<vector<Literal>> ans_list;
+  ans_list.reserve(cube_num);
 
-  auto cube = _cube_begin(chunk);
-  auto end = _cube_end(cube, cube_num);
-  for ( ; cube != end; _cube_next(cube) ) {
+  auto cube_list = _cube_list(chunk, 0, cube_num);
+  for ( auto cube: cube_list ) {
     vector<Literal> tmp_list;
     tmp_list.reserve(variable_num());
     for ( SizeType var = 0; var < variable_num(); ++ var ) {
@@ -129,10 +111,10 @@ SopBase::_literal_list(
 	tmp_list.push_back(Literal{var, true});
       }
     }
-    cube_list.push_back(tmp_list);
+    ans_list.push_back(tmp_list);
   }
 
-  return cube_list;
+  return ans_list;
 }
 
 // @brief ビットベクタからハッシュ値を計算する．
@@ -148,10 +130,10 @@ SopBase::_hash(
   // 本当は区別しなければならないがどうしようもないので
   // 16ビットに区切って単純に XOR を取る．
   SizeType ans = 0;
-  auto cube = _cube_begin(chunk);
-  auto end = _cube_end(cube, cube_num);
-  for ( ; cube != end; ++ cube ) {
-    auto pat = *cube;
+  auto begin = _cube(chunk);
+  auto end = _cube(chunk, cube_num);
+  for ( auto p = begin; p != end; ++ p ) {
+    auto pat = *p;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
     ans ^= (pat & 0xFFFFULL); pat >>= 16;
@@ -168,9 +150,8 @@ SopBase::_to_expr(
 ) const
 {
   auto ans = Expr::zero();
-  auto cube = _cube_begin(chunk);
-  auto end = _cube_end(cube, cube_num);
-  for ( ; cube != end; _cube_next(cube) ) {
+  auto cube_list = _cube_list(chunk, 0, cube_num);
+  for ( auto cube: cube_list ) {
     auto prod = Expr::one();
     for ( SizeType var = 0; var < variable_num(); ++ var ) {
       auto pat = _get_pat(cube, var);
@@ -197,9 +178,8 @@ SopBase::_print(
 ) const
 {
   const char* plus = "";
-  auto cube = _cube_begin(chunk, begin);
-  auto cube_end = _cube_begin(chunk, end);
-  for ( ; cube != cube_end; _cube_next(cube) ) {
+  auto cube_list = _cube_list(chunk, begin, end);
+  for ( auto cube: cube_list ) {
     s << plus;
     plus = " + ";
     const char* spc = "";
@@ -234,21 +214,30 @@ SopBase::_debug_print(
   const Chunk& chunk
 ) const
 {
-  auto cube = _cube_begin(chunk);
-  auto end = _cube_end(cube, cube_num);
-  for ( ; cube != end; _cube_next(cube) ) {
-    for ( SizeType var = 0; var < variable_num(); ++ var ) {
-      s << " ";
-      auto pat = _get_pat(cube, var);
-      switch ( pat ) {
-      case SopPat::_X: s << "00"; break;
-      case SopPat::_0: s << "01"; break;
-      case SopPat::_1: s << "10"; break;
-      default:         s << "--"; break;
-      }
-    }
-    s << endl;
+  auto cube_list = _cube_list(chunk, 0, cube_num);
+  for ( auto cube: cube_list ) {
+    _debug_print(s, cube);
   }
+}
+
+// @brief 内容を出力する(デバッグ用)．
+void
+SopBase::_debug_print(
+  ostream& s,
+  Cube cube
+) const
+{
+  for ( SizeType var = 0; var < variable_num(); ++ var ) {
+    s << " ";
+    auto pat = _get_pat(cube, var);
+    switch ( pat ) {
+    case SopPat::_X: s << "00"; break;
+    case SopPat::_0: s << "01"; break;
+    case SopPat::_1: s << "10"; break;
+    default:         s << "--"; break;
+    }
+  }
+  s << endl;
 }
 
 END_NAMESPACE_YM_SOP

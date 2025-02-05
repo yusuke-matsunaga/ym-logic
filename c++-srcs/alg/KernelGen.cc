@@ -48,7 +48,6 @@ KernelGen::KernelGen()
 // @brief デストラクタ
 KernelGen::~KernelGen()
 {
-  hash_clear();
 }
 
 // @brief カーネルとコカーネルを列挙する．
@@ -70,7 +69,6 @@ KernelGen::all_kernels(
     kernel_list.push_back(make_pair(std::move(kernel),
 				    std::move(cokernels)));
   }
-  hash_clear();
 
   std::sort(kernel_list.begin(), kernel_list.end());
 
@@ -88,7 +86,6 @@ KernelGen::best_kernel(
   // 特例: 自身がレベル０カーネルの場合は空のカバーを返す．
   if ( mKernelDict.size() == 1 &&
        mKernelDict.begin()->second.literal_num() == 0 ) {
-    hash_clear();
     return AlgCover{cover.variable_num()};
   }
 
@@ -110,9 +107,9 @@ KernelGen::best_kernel(
       max_p = p;
     }
   }
-  hash_clear();
 
-  return max_p->first;
+  auto& best_kernel = max_p->first;
+  return best_kernel;
 }
 
 // @brief カーネルとコカーネルを列挙する．

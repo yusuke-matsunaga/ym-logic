@@ -5,30 +5,20 @@
 /// @brief OneLevel0Kernel のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2018 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "Divisor.h"
+#include "ym/AlgCover.h"
 
 
 BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 /// @class OneLevel0Kernel OneLevel0Kernel.h "OneLevel0Kernel.h"
-/// @brief 'one_level0_kernel' を求める Divisor の派生クラス
+/// @brief 'one_level0_kernel' を求める Divisor 型のクラス
 //////////////////////////////////////////////////////////////////////
-class OneLevel0Kernel :
-  public Divisor
+class OneLevel0Kernel
 {
-public:
-
-  /// @brief コンストラクタ
-  OneLevel0Kernel();
-
-  /// @brief デストラクタ
-  ~OneLevel0Kernel();
-
-
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -36,10 +26,11 @@ public:
 
   /// @brief 除数を求める．
   /// @return 除数を表す論理式を返す．
+  static
   AlgCover
-  operator()(
+  divisor(
     const AlgCover& f ///< [in] 対象の論理式
-  ) const override;
+  );
 
 };
 

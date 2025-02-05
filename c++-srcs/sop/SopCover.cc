@@ -41,11 +41,12 @@ SopCover::SopCover(
   }
 
   // mChunk に内容をコピーする．
-  auto dst_cube = _cube_begin(mChunk);
+  auto dst_list = _cube_list(chunk());
   for ( auto& cube: cube_list ) {
-    auto src_cube = _cube_begin(cube.chunk());
+    auto src_cube = _cube(cube.chunk());
+    auto dst_cube = dst_list.back();
     _cube_copy(dst_cube, src_cube);
-    _cube_next(dst_cube);
+    dst_list.inc();
   }
   _sort();
 }
@@ -68,10 +69,11 @@ SopCover::SopCover(
   }
 
   // mChunk に内容をコピーする．
-  auto dst_cube = _cube_begin(mChunk);
+  auto dst_list = _cube_list(chunk());
   for ( auto& lits: cube_list ) {
+    auto dst_cube = dst_list.back();
     _cube_set_literals(dst_cube, lits);
-    _cube_next(dst_cube);
+    dst_list.inc();
   }
   _sort();
 
@@ -95,10 +97,11 @@ SopCover::SopCover(
   }
 
   // mChunk に内容をコピーする．
-  auto dst_cube = _cube_begin(mChunk);
+  auto dst_list = _cube_list(chunk());
   for ( auto& lits: cube_list ) {
+    auto dst_cube = dst_list.back();
     _cube_set_literals(dst_cube, lits);
-    _cube_next(dst_cube);
+    dst_list.inc();
   }
   _sort();
 }
@@ -134,6 +137,7 @@ SopCover::SopCover(
     mCubeNum{src.mCubeNum},
     mChunk{std::move(src.mChunk)}
 {
+  src.mCubeNum = 0;
 }
 
 // @brief ムーブ代入演算子
@@ -144,6 +148,7 @@ SopCover::operator=(
 {
   SopBase::operator=(src);
   mCubeNum = src.mCubeNum;
+  src.mCubeNum = 0;
   std::swap(mChunk, src.mChunk);
 
   return *this;
@@ -162,7 +167,7 @@ SopCover::SopCover(
 // @brief キューブからのムーブ変換コンストラクタ
 SopCover::SopCover(
   SopCube&& cube
-) : mVariableNum{cube.variable_num()},
+) : SopBase{cube.variable_num()},
     mCubeNum{1},
     mChunk{std::move(cube.mChunk)}
 {
@@ -220,8 +225,8 @@ SopCover::get_cube(
 ) const
 {
   auto dst_chunk = _new_chunk(1);
-  auto dst_cube = _cube_begin(dst_chunk);
-  auto src_cube = _cube_begin(chunk(), cube_id);
+  auto dst_cube = SopBase::_dst_cube(dst_chunk);
+  auto src_cube = _cube(chunk(), cube_id);
   _cube_copy(dst_cube, src_cube);
   return SopCube{variable_num(), std::move(dst_chunk)};
 }
@@ -233,7 +238,7 @@ SopCover::get_pat(
   SizeType var
 ) const
 {
-  auto src_cube = _cube_begin(mChunk, cube_id);
+  auto src_cube = _cube(chunk(), cube_id);
   return _get_pat(src_cube, var);
 }
 

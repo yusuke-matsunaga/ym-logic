@@ -24,13 +24,13 @@ SopCube::check_containment(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto cube1 = _cube_begin(chunk());
+  auto cube1 = _cube();
   auto end1 = _cube_end(cube1);
-  auto cube2 = _cube_begin(right.chunk());
+  auto cube2 = right._cube();
   for ( ; cube1 != end1; ++ cube1, ++ cube2 ) {
     auto pat1 = *cube1;
     auto pat2 = *cube2;
-    if ( (pat1 & pat2) != pat1 ) {
+    if ( (pat1 & pat2) != pat2 ) {
       return false;
     }
   }
@@ -46,9 +46,9 @@ SopCube::check_intersect(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto cube1 = _cube_begin(chunk());
+  auto cube1 = _cube();
   auto end1 = _cube_end(cube1);
-  auto cube2 = _cube_begin(right.chunk());
+  auto cube2 = right._cube();
   for ( ; cube1 != end1; ++ cube1, ++ cube2 ) {
     if ( (*cube1 & *cube2) != 0ULL ) {
       return true;

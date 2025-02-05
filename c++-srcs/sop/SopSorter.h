@@ -117,7 +117,7 @@ private:
     Cube src_cube ///< [in] ソースのビットベクタ
   )
   {
-    auto dst_cube = _cube_begin(mTmpChunk);
+    auto dst_cube = _dst_cube(mTmpChunk);
     _cube_copy(dst_cube, src_cube);
   }
 
@@ -127,7 +127,7 @@ private:
     DstCube dst_cube ///< [in] コピー先のビットベクタ
   )
   {
-    auto src_cube = _cube_begin(mTmpChunk);
+    auto src_cube = _cube(mTmpChunk);
     _cube_copy(dst_cube, src_cube);
   }
 

@@ -509,20 +509,6 @@ protected:
     return Chunk(size, 0UL);
   }
 
-#if 0
-  /// @brief 単純なコピーを行う．
-  void
-  _copy(
-    DstCube dst_cube, ///< [in] コピー先のビットベクタ
-    Cube src_cube,    ///< [in] コピー元のビットベクタ
-    SizeType cube_num ///< [in] キューブ数
-  ) const
-  {
-    auto src_end = _cube_end(src_cube, cube_num);
-    std::copy(src_cube, src_end, dst_cube);
-  }
-#endif
-
   /// @brief キューブのリストを返す．
   CubeList
   _cube_list(
@@ -535,37 +521,6 @@ protected:
     auto end = CubeIter{_cube(chunk, end_pos), _cube_size()};
     return CubeList{begin, end};
   }
-
-#if 0
-  /// @brief キューブ位置を計算する．
-  Cube
-  _cube_begin(
-    const Chunk& chunk, ///< [in] ビットベクタの先頭
-    SizeType pos = 0    ///< [in] キューブ位置
-  ) const
-  {
-    return chunk.begin() + pos * _cube_size();
-  }
-
-  /// @brief キューブの末尾を計算する．
-  Cube
-  _cube_end(
-    Cube begin,           ///< [in] キューブの先頭
-    SizeType cube_num = 1 ///< [in] キューブ数
-  ) const
-  {
-    return begin + _cube_size() * cube_num;
-  }
-
-  /// @brief 次のキューブに移動する．
-  void
-  _cube_next(
-    Cube& cube ///< [out] キューブ
-  ) const
-  {
-    cube += _cube_size();
-  }
-#endif
 
   /// @brief キューブを取り出す．
   Cube
@@ -594,37 +549,6 @@ protected:
   {
     return DstCubeList{chunk, _cube_size()};
   }
-
-#if 0
-  /// @brief キューブ位置を計算する．
-  DstCube
-  _cube_begin(
-    Chunk& chunk,    ///< [in] ビットベクタの先頭
-    SizeType pos = 0 ///< [in] キューブ位置
-  ) const
-  {
-    return chunk.begin() + pos * _cube_size();
-  }
-
-  /// @brief キューブの末尾を計算する．
-  DstCube
-  _cube_end(
-    DstCube begin,        ///< [in] キューブの先頭
-    SizeType cube_num = 1 ///< [in] キューブ数
-  ) const
-  {
-    return begin + _cube_size() * cube_num;
-  }
-
-  /// @brief 次のキューブに移動する．
-  void
-  _cube_next(
-    DstCube& cube ///< [out] キューブ
-  ) const
-  {
-    cube += _cube_size();
-  }
-#endif
 
   /// @brief キューブを取り出す．
   DstCube

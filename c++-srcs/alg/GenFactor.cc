@@ -8,6 +8,9 @@
 
 #include "ym/AlgCover.h"
 #include "GenFactor.h"
+#include "OneLevel0Kernel.h"
+#include "BestKernel.h"
+#include "WeakDivision.h"
 
 
 BEGIN_NAMESPACE_YM_ALG
@@ -20,7 +23,7 @@ BEGIN_NAMESPACE_YM_ALG
 Expr
 AlgCover::quick_factor() const
 {
-  QuickFactor qf;
+  GenFactor<OneLevel0Kernel, WeakDivision> qf;
   return qf(*this);
 }
 
@@ -28,7 +31,7 @@ AlgCover::quick_factor() const
 Expr
 AlgCover::good_factor() const
 {
-  GoodFactor gf;
+  GenFactor<BestKernel, WeakDivision> gf;
   return gf(*this);
 }
 

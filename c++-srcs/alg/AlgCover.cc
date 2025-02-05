@@ -110,8 +110,15 @@ AlgCover::AlgCover(
   const AlgCover& src
 ) : AlgBase{src.variable_num()},
     mCubeNum{src.mCubeNum},
-    mChunk{src.mChunk}
+    mChunk(_cube_size() * cube_num(), 0ULL)
 {
+  // mChunk に内容をコピーする．
+  // mChunk の容量は余分に確保されている可能性があるので
+  // _cube_size() に基づいて必要なぶんだけコピーする．
+  auto src_begin = src.chunk().begin();
+  auto src_end = src_begin + _cube_size() * cube_num();
+  auto dst_begin = mChunk.begin();
+  std::copy(src_begin, src_end, dst_begin);
 }
 
 // @brief コピー代入演算子
@@ -123,7 +130,13 @@ AlgCover::operator=(
   if ( this != &src ) {
     AlgBase::operator=(src);
     mCubeNum = src.mCubeNum;
-    mChunk = src.mChunk;
+    // mChunk に内容をコピーする．
+    // mChunk の容量は余分に確保されている可能性があるので
+    // _cube_size() に基づいて必要なぶんだけコピーする．
+    auto src_begin = src.chunk().begin();
+    auto src_end = src_begin + _cube_size() * cube_num();
+    auto dst_begin = mChunk.begin();
+    std::copy(src_begin, src_end, dst_begin);
   }
 
   return *this;
@@ -132,7 +145,7 @@ AlgCover::operator=(
 // @brief ムーブコンストラクタ
 AlgCover::AlgCover(
   AlgCover&& src
-) : AlgBase{std::move(src)},
+) : AlgBase{src.variable_num()},
     mCubeNum{src.mCubeNum},
     mChunk{std::move(src.mChunk)}
 {

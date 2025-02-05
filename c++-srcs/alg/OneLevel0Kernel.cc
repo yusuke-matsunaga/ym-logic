@@ -7,7 +7,6 @@
 /// All rights reserved.
 
 #include "OneLevel0Kernel.h"
-#include "ym/AlgCover.h"
 #include "ym/AlgCube.h"
 
 
@@ -16,16 +15,6 @@ BEGIN_NAMESPACE_YM_ALG
 //////////////////////////////////////////////////////////////////////
 // クラス OneLevel0Kernel
 //////////////////////////////////////////////////////////////////////
-
-// @brief コンストラクタ
-OneLevel0Kernel::OneLevel0Kernel()
-{
-}
-
-// @brief デストラクタ
-OneLevel0Kernel::~OneLevel0Kernel()
-{
-}
 
 BEGIN_NONAMESPACE
 
@@ -53,9 +42,9 @@ END_NONAMESPACE
 
 // @brief 除数を求める．
 AlgCover
-OneLevel0Kernel::operator()(
+OneLevel0Kernel::divisor(
   const AlgCover& f
-) const
+)
 {
   if ( f.cube_num() < 2 ) {
     // f をこれ以上割ることはできない．

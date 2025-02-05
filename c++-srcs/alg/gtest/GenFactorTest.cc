@@ -8,6 +8,9 @@
 
 #include <gtest/gtest.h>
 #include "GenFactor.h"
+#include "OneLevel0Kernel.h"
+#include "BestKernel.h"
+#include "WeakDivision.h"
 #include "ym/AlgCover.h"
 #include "ym/Expr.h"
 #include "ym/Range.h"
@@ -42,16 +45,16 @@ TEST(GenFactorTest, quick_factor)
   Literal lit_j(var9, false);
 
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  AlgCover cover1{nv, { { lit_a, lit_b, lit_g },
-			{ lit_a, lit_c, lit_g },
-			{ lit_a, lit_d, lit_f },
-			{ lit_a, lit_f, lit_g },
-			{ lit_b, lit_d },
-			{ lit_c, lit_e },
-			{ lit_b, lit_e },
-			{ lit_c, lit_d } } };
+  auto cover1 = AlgCover{nv, { { lit_a, lit_b, lit_g },
+			       { lit_a, lit_c, lit_g },
+			       { lit_a, lit_d, lit_f },
+			       { lit_a, lit_f, lit_g },
+			       { lit_b, lit_d },
+			       { lit_c, lit_e },
+			       { lit_b, lit_e },
+			       { lit_c, lit_d } } };
 
-  QuickFactor factor;
+  GenFactor<OneLevel0Kernel, WeakDivision> factor;
 
   Expr expr = factor(cover1);
 
@@ -111,16 +114,16 @@ TEST(GenFactorTest, good_factor)
   Literal lit_j(var9, false);
 
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  AlgCover cover1{nv, { { lit_a, lit_b, lit_g },
-			{ lit_a, lit_c, lit_g },
-			{ lit_a, lit_d, lit_f },
-			{ lit_a, lit_f, lit_g },
-			{ lit_b, lit_d },
-			{ lit_c, lit_e },
-			{ lit_b, lit_e },
-			{ lit_c, lit_d } } };
+  auto cover1 = AlgCover{nv, { { lit_a, lit_b, lit_g },
+			       { lit_a, lit_c, lit_g },
+			       { lit_a, lit_d, lit_f },
+			       { lit_a, lit_f, lit_g },
+			       { lit_b, lit_d },
+			       { lit_c, lit_e },
+			       { lit_b, lit_e },
+			       { lit_c, lit_d } } };
 
-  GoodFactor factor;
+  GenFactor<BestKernel, WeakDivision> factor;
 
   Expr expr = factor(cover1);
 

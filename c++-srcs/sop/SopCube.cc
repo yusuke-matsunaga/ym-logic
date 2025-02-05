@@ -72,7 +72,7 @@ SopCube::operator=(
 SopCube::SopCube(
   SopCube&& src
 ) : SopBase{src},
-    mChunk{src.mChunk}
+    mChunk{std::move(src.mChunk)}
 {
 }
 
@@ -123,7 +123,7 @@ SopCube::is_tautology() const
   if ( mChunk.empty() ) {
     return true;
   }
-  auto cube = _cube_begin(mChunk);
+  auto cube = _cube();
   return _cube_check_null(cube);
 }
 
@@ -135,7 +135,7 @@ SopCube::literal_list() const
 
   vector<Literal> lit_list;
   lit_list.reserve(nl);
-  auto src_cube = _cube_begin(mChunk);
+  auto src_cube = _cube();
   for ( SizeType var = 0; var < variable_num(); ++ var ) {
     auto pat = _get_pat(src_cube, var);
     if ( pat == SopPat::_1 ) {
@@ -168,9 +168,9 @@ SopCube::operator*(
     throw std::invalid_argument("variable_num() is different from each other");
   }
   auto dst_chunk = _new_chunk(1);
-  auto dst_cube = _cube_begin(dst_chunk);
-  auto cube1 = _cube_begin(chunk());
-  auto cube2 = _cube_begin(right.chunk());
+  auto dst_cube = SopBase::_dst_cube(dst_chunk);
+  auto cube1 = _cube();
+  auto cube2 = right._cube();
   if ( !_cube_product(dst_cube, cube1, cube2) ) {
     _cube_clear(dst_cube);
   }
@@ -186,8 +186,8 @@ SopCube::operator*=(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto dst_cube = _cube_begin(mChunk);
-  auto src_cube = _cube_begin(right.chunk());
+  auto dst_cube = _dst_cube();
+  auto src_cube = right._cube();
   if ( !_cube_product(dst_cube, dst_cube, src_cube) ) {
     _cube_clear(dst_cube);
   }
@@ -201,8 +201,8 @@ SopCube::operator*(
 ) const
 {
   auto dst_chunk = _new_chunk(1);
-  auto dst_cube = _cube_begin(dst_chunk);
-  auto src_cube = _cube_begin(chunk());
+  auto dst_cube = SopBase::_dst_cube(dst_chunk);
+  auto src_cube = _cube();
   if ( !_cube_product(dst_cube, src_cube, right) ) {
     _cube_clear(dst_cube);
   }
@@ -215,7 +215,7 @@ SopCube::operator*=(
   Literal right
 )
 {
-  auto dst_cube = _cube_begin(mChunk);
+  auto dst_cube = _dst_cube();
   if ( !_cube_product(dst_cube, dst_cube, right) ) {
     _cube_clear(dst_cube);
   }
@@ -232,9 +232,9 @@ SopCube::operator/(
     throw std::invalid_argument("variable_num() is different from each other");
   }
   auto dst_chunk =_new_chunk(1);
-  auto dst_cube = _cube_begin(dst_chunk);
-  auto cube1 = _cube_begin(chunk());
-  auto cube2 = _cube_begin(right.chunk());
+  auto dst_cube = SopBase::_dst_cube(dst_chunk);
+  auto cube1 = _cube();
+  auto cube2 = right._cube();
   if ( !_cube_quotient(dst_cube, cube1, cube2) ) {
     _cube_clear(dst_cube);
   }
@@ -250,8 +250,8 @@ SopCube::operator/=(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto dst_cube = _cube_begin(mChunk);
-  auto cube2 = _cube_begin(right.chunk());
+  auto dst_cube = _dst_cube();
+  auto cube2 = right._cube();
   if ( !_cube_quotient(dst_cube, dst_cube, cube2) ) {
     _cube_clear(dst_cube);
   }
@@ -265,8 +265,8 @@ SopCube::operator/(
 ) const
 {
   auto dst_chunk = _new_chunk(1);
-  auto dst_cube = _cube_begin(dst_chunk);
-  auto cube1 = _cube_begin(chunk());
+  auto dst_cube = SopBase::_dst_cube(dst_chunk);
+  auto cube1 = _cube();
   if ( !_cube_quotient(dst_cube, cube1, right) ) {
     _cube_clear(dst_cube);
   }
@@ -279,7 +279,7 @@ SopCube::operator/=(
   Literal right
 )
 {
-  auto dst_cube = _cube_begin(mChunk);
+  auto dst_cube = _dst_cube();
   if ( !_cube_quotient(dst_cube, dst_cube, right) ) {
     _cube_clear(dst_cube);
   }
@@ -295,8 +295,8 @@ SopCube::_compare(
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto cube1 = _cube_begin(chunk());
-  auto cube2 = _cube_begin(right.chunk());
+  auto cube1 = _cube();
+  auto cube2 = right._cube();
   return _cube_compare(cube1, cube2);
 }
 
@@ -322,6 +322,20 @@ SopCube::print(
 ) const
 {
   _print(s, chunk(), 0, 1, varname_list);
+}
+
+// @brief 内部で用いられるキューブを得る．
+SopBase::Cube
+SopCube::_cube() const
+{
+  return SopBase::_cube(chunk());
+}
+
+// @brief 内部で用いられるキューブを得る．
+SopBase::DstCube
+SopCube::_dst_cube()
+{
+  return SopBase::_dst_cube(chunk());
 }
 
 END_NAMESPACE_YM_SOP

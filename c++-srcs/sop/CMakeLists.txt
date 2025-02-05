@@ -33,15 +33,6 @@ set (sop_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_diff.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_compare.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_sort.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/MulOp.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/DivOp.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/CommonCube.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/CheckIntersect.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/CheckContainment.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/LitSet.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/LitSetCheck.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/LitSetUnion.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/LitSetIntersect.cc
   PARENT_SCOPE
   )
 

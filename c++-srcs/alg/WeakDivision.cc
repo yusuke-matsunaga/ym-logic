@@ -7,7 +7,6 @@
 /// All rights reserved.
 
 #include "WeakDivision.h"
-#include "ym/AlgCover.h"
 
 
 BEGIN_NAMESPACE_YM_ALG
@@ -16,22 +15,12 @@ BEGIN_NAMESPACE_YM_ALG
 // クラス WeakDivision
 //////////////////////////////////////////////////////////////////////
 
-// @brief コンストラクタ
-WeakDivision::WeakDivision()
-{
-}
-
-// @brief デストラクタ
-WeakDivision::~WeakDivision()
-{
-}
-
 // @brief 除算を行う．
 pair<AlgCover, AlgCover>
-WeakDivision::operator()(
+WeakDivision::divide(
   const AlgCover& f,
   const AlgCover& d
-) const
+)
 {
   auto q = f / d;
   auto r = f - (q * d);

@@ -8,27 +8,17 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "Divide.h"
+#include "ym/AlgCover.h"
 
 
 BEGIN_NAMESPACE_YM_ALG
 
 //////////////////////////////////////////////////////////////////////
 /// @class WeakDivision WeakDivision.h "WeakDivision.h"
-/// @brief 'weak_division' を行う Divide の派生クラス
+/// @brief 'weak_division' を行う Divide 型のクラス
 //////////////////////////////////////////////////////////////////////
-class WeakDivision :
-  public Divide
+class WeakDivision
 {
-public:
-
-  /// @brief コンストラクタ
-  WeakDivision();
-
-  /// @brief デストラクタ
-  ~WeakDivision();
-
-
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -36,11 +26,12 @@ public:
 
   /// @brief 除算を行う．
   /// @return 商q と余りr の pair を返す．
+  static
   pair<AlgCover, AlgCover>
-  operator()(
+  divide(
     const AlgCover& f, ///< [in] 被除数
     const AlgCover& d  ///< [in] 除数
-  ) const override;
+  );
 
 };
 
