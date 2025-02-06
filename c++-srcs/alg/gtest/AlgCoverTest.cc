@@ -10,6 +10,7 @@
 #include "AlgTest.h"
 #include "ym/AlgCover.h"
 #include "ym/AlgCube.h"
+#include <random>
 
 
 BEGIN_NAMESPACE_YM
@@ -387,59 +388,6 @@ TEST_F(AlgTest, cube_constructor)
   EXPECT_EQ( lit1, cube_list1[0][1] );
 
 };
-
-#if 0
-TEST_F(AlgTest, cube_move_constructor)
-{
-  auto lit0 = Literal(var0, false);
-  auto lit1 = Literal(var1, false);
-  auto lit2 = Literal(var2, false);
-  auto lit3 = Literal(var3, false);
-  auto lit4 = Literal(var4, false);
-  auto lit5 = Literal(var5, false);
-  auto lit6 = Literal(var6, false);
-  auto lit7 = Literal(var7, false);
-  auto lit8 = Literal(var8, false);
-  auto lit9 = Literal(var9, false);
-
-  auto src = AlgCube_cube{nv, {lit0, lit1}};
-
-  AlgCover cover1{std::move(src_cube)};
-
-  EXPECT_EQ( 0, src_cube.literal_num() );
-
-  EXPECT_EQ( nv, cover1.variable_num() );
-  EXPECT_EQ(  1, cover1.cube_num() );
-  EXPECT_EQ(  2, cover1.literal_num() );
-  EXPECT_EQ(  1, cover1.literal_num( lit0) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit0) );
-  EXPECT_EQ(  1, cover1.literal_num( lit1) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit1) );
-  EXPECT_EQ(  0, cover1.literal_num( lit2) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit2) );
-  EXPECT_EQ(  0, cover1.literal_num( lit3) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit3) );
-  EXPECT_EQ(  0, cover1.literal_num( lit4) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit4) );
-  EXPECT_EQ(  0, cover1.literal_num( lit5) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit5) );
-  EXPECT_EQ(  0, cover1.literal_num( lit6) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit6) );
-  EXPECT_EQ(  0, cover1.literal_num( lit7) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit7) );
-  EXPECT_EQ(  0, cover1.literal_num( lit8) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit8) );
-  EXPECT_EQ(  0, cover1.literal_num( lit9) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit9) );
-
-  auto cube_list1 = cover1.literal_list();
-  EXPECT_EQ( 1, cube_list1.size() );
-  EXPECT_EQ( 2, cube_list1[0].size() );
-  EXPECT_EQ( lit0, cube_list1[0][0] );
-  EXPECT_EQ( lit1, cube_list1[0][1] );
-
-};
-#endif
 
 TEST_F(AlgTest, cover_cover_sum)
 {
@@ -2575,6 +2523,93 @@ TEST_F(AlgTest, comp3)
   EXPECT_TRUE( cover1 > cover2 );
   EXPECT_FALSE( cover1 <= cover2 );
   EXPECT_TRUE( cover1 >= cover2 );
+}
+
+TEST_F(AlgTest, sort1)
+{
+  auto cover1 = AlgCover{3, { {~lit1,  lit2},
+			      { lit1, ~lit2},
+			      {~lit0,  lit2},
+			      {~lit0,  lit1},
+			      { lit0, ~lit2},
+			      { lit0, ~lit1} } };
+  ostringstream buf;
+  cover1.print(buf);
+
+  auto str = buf.str();
+  auto expr_str = "v0 v1' + v0 v2' + v0' v1 + v0' v2 + v1 v2' + v1' v2";
+  EXPECT_EQ( expr_str, str );
+}
+
+TEST_F(AlgTest, sort2)
+{
+  auto cover1 = AlgCover{3, { {~lit1,  lit2},
+			      { lit1, ~lit2},
+			      {~lit0,  lit2},
+			      {~lit0,  lit2},
+			      { lit0, ~lit2},
+			      { lit0, ~lit1} } };
+  ostringstream buf;
+  cover1.print(buf);
+
+  auto str = buf.str();
+  auto expr_str = "v0 v1' + v0 v2' + v0' v2 + v1 v2' + v1' v2";
+  EXPECT_EQ( expr_str, str );
+}
+
+TEST_F(AlgTest, sort3)
+{
+  // サンプル数
+  SizeType nsample = 1000;
+
+  // キューブ数
+  SizeType ncube = 1000;
+
+  // キューブあたりのリテラル数
+  SizeType nlit = 100;
+
+  // 乱数生成器
+  std::mt19937 rand_gen;
+
+  // int 型の一様分布生成器
+  std::uniform_int_distribution<int> rand_dist;
+
+  SizeType nv = 30;
+  vector<Literal> lit_set(nv);
+  for ( SizeType i = 0; i < nv; ++ i ) {
+    lit_set[i] = Literal{i, false};
+  }
+
+  for ( SizeType i = 0; i < nsample; ++ i ) {
+    vector<vector<Literal>> cube_list;
+    cube_list.reserve(ncube);
+    for ( SizeType j = 0; j < ncube; ++ j ) {
+      vector<Literal> lit_list;
+      lit_list.reserve(nlit);
+      std::sample(lit_set.begin(), lit_set.end(),
+		  std::back_inserter(lit_list),
+		  nlit, rand_gen);
+      vector<Literal> lit_list2;
+      lit_list.reserve(nlit);
+      for ( auto lit: lit_list ) {
+	if ( rand_dist(rand_gen) % 2 ) {
+	  lit_list2.push_back(lit);
+	}
+	else {
+	  lit_list2.push_back(~lit);
+	}
+      }
+      cube_list.push_back(lit_list2);
+    }
+    auto cover = AlgCover{nv, cube_list};
+
+    auto nc = cover.cube_num();
+    for ( SizeType i = 1; i < nc; ++ i ) {
+      auto cube1 = cover.get_cube(i - 1);
+      auto cube2 = cover.get_cube(i);
+      EXPECT_TRUE( cube1 > cube2 );
+    }
+  }
 }
 
 TEST_F(AlgTest, comp4)

@@ -49,7 +49,7 @@ SopCube::SopCube(
 // @brief コピーコンストラクタ
 SopCube::SopCube(
   const SopCube& src
-) : SopBase{src},
+) : SopBase{src.variable_num()},
     mChunk{src.mChunk}
 {
 }
@@ -71,7 +71,7 @@ SopCube::operator=(
 // @brief ムーブコンストラクタ
 SopCube::SopCube(
   SopCube&& src
-) : SopBase{src},
+) : SopBase{src.variable_num()},
     mChunk{std::move(src.mChunk)}
 {
 }
@@ -152,10 +152,17 @@ SopCube::literal_list() const
 // @brief 指定したリテラルを含んでいたら true を返す．
 bool
 SopCube::check_literal(
-  Literal lit
+  SizeType varid,
+  bool inv
 ) const
 {
-  return _literal_num(1, chunk(), lit) > 0;
+  auto blk = _block_pos(varid);
+  auto mask = _get_mask(varid, inv);
+  auto word = _get_word(_cube(), blk);
+  if ( (word | mask) == mask ) {
+    return true;
+  }
+  return false;
 }
 
 // @brief キューブの論理積を計算する
@@ -188,7 +195,7 @@ SopCube::operator&=(
   }
   auto dst_cube = _dst_cube();
   auto src_cube = right._cube();
-  if ( !_cube_product(dst_cube, dst_cube, src_cube) ) {
+  if ( !_cube_product_int(dst_cube, src_cube) ) {
     _cube_clear(dst_cube);
   }
   return *this;
@@ -216,74 +223,32 @@ SopCube::operator&=(
 )
 {
   auto dst_cube = _dst_cube();
-  if ( !_cube_product(dst_cube, dst_cube, right) ) {
+  if ( !_cube_product_int(dst_cube, right) ) {
     _cube_clear(dst_cube);
   }
   return *this;
 }
 
-// @brief キューブによるコファクターを計算する
-SopCube
-SopCube::cofactor(
+// @brief オペランドのキューブに含まれていたら true を返す．
+bool
+SopCube::check_containment(
   const SopCube& right
 ) const
 {
   if ( variable_num() != right.variable_num() ) {
     throw std::invalid_argument("variable_num() is different from each other");
   }
-  auto dst_chunk =_new_chunk(1);
-  auto dst_cube = SopBase::_dst_cube(dst_chunk);
   auto cube1 = _cube();
+  auto end1 = _cube_end(cube1);
   auto cube2 = right._cube();
-  if ( !_cube_quotient(dst_cube, cube1, cube2) ) {
-    _cube_clear(dst_cube);
+  for ( ; cube1 != end1; ++ cube1, ++ cube2 ) {
+    auto pat1 = *cube1;
+    auto pat2 = *cube2;
+    if ( (pat1 & pat2) != pat1 ) {
+      return false;
+    }
   }
-  return SopCube{variable_num(), std::move(dst_chunk)};
-}
-
-// @brief キューブによるコファクターを計算し自身に代入する．
-SopCube&
-SopCube::cofactor_int(
-  const SopCube& right
-)
-{
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-  auto dst_cube = _dst_cube();
-  auto cube2 = right._cube();
-  if ( !_cube_quotient(dst_cube, dst_cube, cube2) ) {
-    _cube_clear(dst_cube);
-  }
-  return *this;
-}
-
-// @brief リテラルによるコファクターを計算する
-SopCube
-SopCube::cofactor(
-  Literal right
-) const
-{
-  auto dst_chunk = _new_chunk(1);
-  auto dst_cube = SopBase::_dst_cube(dst_chunk);
-  auto cube1 = _cube();
-  if ( !_cube_quotient(dst_cube, cube1, right) ) {
-    _cube_clear(dst_cube);
-  }
-  return SopCube{variable_num(), std::move(dst_chunk)};
-}
-
-// @brief リテラルによるコファクターを計算し自身に代入する．
-SopCube&
-SopCube::cofactor_int(
-  Literal right
-)
-{
-  auto dst_cube = _dst_cube();
-  if ( !_cube_quotient(dst_cube, dst_cube, right) ) {
-    _cube_clear(dst_cube);
-  }
-  return *this;
+  return true;
 }
 
 // @relates SopCube

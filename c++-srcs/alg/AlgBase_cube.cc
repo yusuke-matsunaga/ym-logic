@@ -72,15 +72,13 @@ AlgBase::_cube_product(
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  auto src_p = src_cube + blk;
-  auto tmp = *src_p | pat1;
+  auto tmp = _get_word(src_cube, blk) | pat1;
   if ( (tmp & mask) == mask ) {
     // 相反するリテラルがあった．
     return false;
   }
   _cube_copy(dst_cube, src_cube);
-  auto dst_p = dst_cube + blk;
-  *dst_p = tmp;
+  _set_word(dst_cube, blk, tmp);
   return true;
 }
 
@@ -100,13 +98,12 @@ AlgBase::_cube_product_int(
 
   // 単純には答の積項数は2つの積項数の積だが
   // 相反するリテラルを含む積は数えない．
-  auto dst_p = dst_cube + blk;
-  auto tmp = *dst_p | pat1;
+  auto tmp = _get_word(dst_cube, blk) | pat1;
   if ( (tmp & mask) == mask ) {
     // 相反するリテラルがあった．
     return false;
   }
-  *dst_p = tmp;
+  _set_word(dst_cube, blk, tmp);
   return true;
 }
 
@@ -147,9 +144,9 @@ AlgBase::_cube_quotient(
   auto mask = 3UL << sft;
   auto nmask = ~mask;
   auto src_p = src_cube + blk;
-  auto dst_p = dst_cube + blk;
   if ( (*src_p & mask) == pat1 ) {
     _cube_copy(dst_cube, src_cube);
+    auto dst_p = dst_cube + blk;
     *dst_p &= nmask;
     return true;
   }

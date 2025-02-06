@@ -37,14 +37,14 @@ END_NONAMESPACE
 // @brief ビットベクタ上のリテラル数を数える．
 SizeType
 SopBase::_literal_num(
-  SizeType num,
+  SizeType cube_num,
   const Chunk& chunk
 ) const
 {
   // 8 ビットごとに区切って表引きで計算する．
   SizeType ans = 0;
   auto begin = _cube(chunk);
-  auto end = _cube(chunk, num);
+  auto end = _cube(chunk, cube_num);
   for ( auto p = begin; p != end; ++ p ) {
     auto pat = *p;
     auto p1 = pat & 0xFFUL;
@@ -81,8 +81,8 @@ SopBase::_literal_num(
   SizeType ans = 0;
   auto cube_list = _cube_list(chunk, 0, cube_num);
   for ( auto cube: cube_list ) {
-    auto p = cube + blk;
-    if ( (*(p) | mask) == mask ) {
+    auto word = _get_word(cube, blk);
+    if ( (word | mask) == mask ) {
       ++ ans;
     }
   }
@@ -183,26 +183,37 @@ SopBase::_print(
   for ( auto cube: cube_list ) {
     s << plus;
     plus = " + ";
-    const char* spc = "";
-    for ( SizeType var = 0; var < variable_num(); ++ var ) {
-      string varname;
-      if ( varname_list.size() > var ) {
-	varname = varname_list[var];
-      }
-      else {
-	ostringstream buf;
-	buf << "v" << var;
-	varname = buf.str();
-      }
-      auto pat = _get_pat(cube, var);
-      if ( pat == SopPat::_1 ) {
-	s << spc << varname;
-	spc = " ";
-      }
-      else if ( pat == SopPat::_0 ) {
-	s << spc << varname << "'";
-	spc = " ";
-      }
+    _print(s, cube, varname_list);
+  }
+}
+
+// @brief キューブの内容を出力する．
+void
+SopBase::_print(
+  ostream& s,
+  Cube cube,
+  const vector<string>& varname_list
+) const
+{
+  const char* spc = "";
+  for ( SizeType var = 0; var < variable_num(); ++ var ) {
+    string varname;
+    if ( varname_list.size() > var ) {
+      varname = varname_list[var];
+    }
+    else {
+      ostringstream buf;
+      buf << "v" << var;
+      varname = buf.str();
+    }
+    auto pat = _get_pat(cube, var);
+    if ( pat == SopPat::_1 ) {
+      s << spc << varname;
+      spc = " ";
+    }
+    else if ( pat == SopPat::_0 ) {
+      s << spc << varname << "'";
+      spc = " ";
     }
   }
 }
@@ -232,10 +243,10 @@ SopBase::_debug_print(
     s << " ";
     auto pat = _get_pat(cube, var);
     switch ( pat ) {
-    case SopPat::_X: s << "00"; break;
+    case SopPat::_X: s << "--"; break;
     case SopPat::_0: s << "01"; break;
     case SopPat::_1: s << "10"; break;
-    default:         s << "--"; break;
+    default:         s << "**"; break;
     }
   }
   s << endl;

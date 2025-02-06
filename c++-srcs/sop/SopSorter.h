@@ -131,6 +131,27 @@ private:
     _cube_copy(dst_cube, src_cube);
   }
 
+  /// @brief ソートされているかチェックする．
+  /// デバッグ用
+  void
+  _check(
+    const Chunk& chunk,
+    SizeType begin,
+    SizeType end
+  )
+  {
+    for ( SizeType i = begin + 1; i < end; ++ i ) {
+      auto cube0 = _cube(chunk, i - 1);
+      auto cube1 = _cube(chunk, i);
+      if ( _cube_compare(cube0, cube1) < 0 ) {
+	cout << "order error" << endl;
+	_print(cout, chunk, begin, end);
+	cout << endl;
+	abort();
+      }
+    }
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////

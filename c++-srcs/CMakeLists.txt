@@ -16,13 +16,13 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(aig)
-add_subdirectory(dd)
 add_subdirectory(expr)
-add_subdirectory(npn)
 add_subdirectory(sop)
 add_subdirectory(alg)
 add_subdirectory(tvfunc)
+add_subdirectory(npn)
+add_subdirectory(aig)
+add_subdirectory(dd)
 add_subdirectory(gtest)
 
 

@@ -167,10 +167,12 @@ protected:
 
     /// @brief コンストラクタ
     DstCubeList(
-      Chunk& chunk,      ///< [in] ビットベクタ本体
-      SizeType cube_size ///< [in] キューブサイズ
+      Chunk& chunk,       ///< [in] ビットベクタ本体
+      SizeType cube_size, ///< [in] キューブサイズ
+      SizeType offset = 0 ///< [in] オフセット
     ) : mChunk{chunk},
 	mCubeSize{cube_size},
+	mOffset{offset},
 	mNum{0}
     {
     }
@@ -189,7 +191,7 @@ protected:
     DstCube
     back()
     {
-      return mChunk.begin() + mNum * mCubeSize;
+      return mChunk.begin() + mOffset + mNum * mCubeSize;
     }
 
     /// @brief 要素数を増やす．
@@ -210,6 +212,9 @@ protected:
 
     // キューブサイズ
     SizeType mCubeSize;
+
+    // オフセット
+    SizeType mOffset;
 
     // 現在の要素数
     SizeType mNum;
@@ -248,6 +253,27 @@ protected:
   // 継承クラスで用いられる便利関数
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief ビットベクタからワードを取り出す．
+  AlgPatWord
+  _get_word(
+    Cube cube,   ///< [in] キューブを表す反復子
+    SizeType blk ///< [in] ブロック番号
+  ) const
+  {
+    return *(cube + blk);
+  }
+
+  /// @brief ビットベクタにワードを書き込む．
+  void
+  _set_word(
+    DstCube cube,   ///< [in] キューブを表す反復子
+    SizeType blk,   ///< [in] ブロック番号
+    AlgPatWord word ///< [in] 書き込む値
+  ) const
+  {
+    *(cube + blk) = word;
+  }
+
   /// @brief ビットベクタからパタンを取り出す．
   AlgPat
   _get_pat(
@@ -259,10 +285,10 @@ protected:
       throw std::out_of_range{"var is out of range"};
     }
 
-    SizeType blk = _block_pos(var);
-    SizeType sft = _shift_num(var);
-    auto p = cube + blk;
-    return static_cast<AlgPat>((*p >> sft) & 3ULL);
+    auto blk = _block_pos(var);
+    auto sft = _shift_num(var);
+    auto word = _get_word(cube, blk);
+    return static_cast<AlgPat>((word >> sft) & 3ULL);
   }
 
   /// @brief リテラル数を数える．
@@ -322,6 +348,15 @@ protected:
     const Chunk& chunk, ///< [in] カバー/キューブを表すビットベクタ
     SizeType begin,     ///< [in] キューブの開始位置
     SizeType end,       ///< [in] キューブの終了位置(実際の末尾 + 1)
+    const vector<string>& varname_list ///< [in] 変数名のリスト
+    = {}
+  ) const;
+
+  /// @brief キューブの内容を出力する．
+  void
+  _print(
+    ostream& s,         ///< [in] 出力先のストリーム
+    Cube cube,          ///< [in] キューブ
     const vector<string>& varname_list ///< [in] 変数名のリスト
     = {}
   ) const;
@@ -547,10 +582,11 @@ protected:
   /// @brief キューブのリストを返す．
   DstCubeList
   _cube_list(
-    Chunk& chunk ///< [in] ビットベクタの先頭
+    Chunk& chunk,      ///< [in] ビットベクタの先頭
+    SizeType begin = 0 ///< [in] 開始位置
   ) const
   {
-    return DstCubeList{chunk, _cube_size()};
+    return DstCubeList{chunk, _cube_size(), begin};
   }
 
   /// @brief キューブを取り出す．

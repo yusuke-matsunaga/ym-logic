@@ -173,10 +173,12 @@ protected:
 
     /// @brief コンストラクタ
     DstCubeList(
-      Chunk& chunk,      ///< [in] ビットベクタ本体
-      SizeType cube_size ///< [in] キューブサイズ
+      Chunk& chunk,       ///< [in] ビットベクタ本体
+      SizeType cube_size, ///< [in] キューブサイズ
+      SizeType offset = 0 ///< [in] オフセット
     ) : mChunk{chunk},
 	mCubeSize{cube_size},
+	mOffset{offset},
 	mNum{0}
     {
     }
@@ -195,7 +197,7 @@ protected:
     DstCube
     back()
     {
-      return mChunk.begin() + mNum * mCubeSize;
+      return mChunk.begin() + mOffset + mNum * mCubeSize;
     }
 
     /// @brief 要素数を増やす．
@@ -216,6 +218,9 @@ protected:
 
     // キューブサイズ
     SizeType mCubeSize;
+
+    // オフセット
+    SizeType mOffset;
 
     // 現在の要素数
     SizeType mNum;
@@ -254,6 +259,27 @@ protected:
   //////////////////////////////////////////////////////////////////////
   // 継承クラスで用いられる関数
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief ビットベクタからワードを取り出す．
+  SopPatWord
+  _get_word(
+    Cube cube,   ///< [in] キューブを表す反復子
+    SizeType blk ///< [in] ブロック番号
+  ) const
+  {
+    return *(cube + blk);
+  }
+
+  /// @brief ビットベクタにワードを書き込む．
+  void
+  _set_word(
+    DstCube cube,   ///< [in] キューブを表す反復子
+    SizeType blk,   ///< [in] ブロック番号
+    SopPatWord word ///< [in] 書き込む値
+  ) const
+  {
+    *(cube + blk) = word;
+  }
 
   /// @brief ビットベクタからパタンを取り出す．
   SopPat
@@ -329,6 +355,15 @@ protected:
     const Chunk& chunk, ///< [in] カバー/キューブを表すビットベクタ
     SizeType begin,     ///< [in] キューブの開始位置
     SizeType end,       ///< [in] キューブの終了位置(実際の末尾 + 1)
+    const vector<string>& varname_list ///< [in] 変数名のリスト
+    = {}
+  ) const;
+
+  /// @brief キューブの内容を出力する．
+  void
+  _print(
+    ostream& s,                        ///< [in] 出力先のストリーム
+    Cube cube,                         ///< [in] キューブ
     const vector<string>& varname_list ///< [in] 変数名のリスト
     = {}
   ) const;
@@ -449,6 +484,15 @@ public:
     Cube cube2        ///< [in] 2つめのキューブを表すビットベクタ
   ) const;
 
+  /// @brief 2つのキューブの積を計算する．
+  /// @retval true 積が空でなかった．
+  /// @retval false 積が空だった．
+  bool
+  _cube_product_int(
+    DstCube dst_cube, ///< [in] コピー先のビットベクタ
+    Cube cube2        ///< [in] 2つめのキューブを表すビットベクタ
+  ) const;
+
   /// @brief キューブとリテラルの積を計算する．
   /// @retval true 積が空でなかった．
   /// @retval false 積が空だった．
@@ -468,19 +512,25 @@ public:
     Literal lit       ///< [in] リテラル
   ) const;
 
-  /// @brief キューブによる商を求める．
+  /// @brief キューブによるコファクターを求める．
   /// @return 正しく割ることができたら true を返す．
+  ///
+  /// cube1 と cube2 が相反するリテラルを持つ場合 false が返される．
+  /// その場合の dst_cube の内容は不正となる．
   bool
-  _cube_quotient(
+  _cube_cofactor(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
     Cube cube1,       ///< [in] 被除数を表すビットベクタ
     Cube cube2        ///< [in] 除数を表すビットベクタ
   ) const;
 
-  /// @brief リテラルによる商を求める．
+  /// @brief リテラルによるコファクターを求める．
   /// @return 正しく割ることができたら true を返す．
+  ///
+  /// cube1 が lit が相反するリテラルを持つ場合 false が返される．
+  /// その場合の dst_cube の内容は不正となる．
   bool
-  _cube_quotient(
+  _cube_cofactor(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
     Cube cube1,       ///< [in] 被除数を表すビットベクタ
     Literal lit       ///< [in] リテラル
@@ -559,10 +609,11 @@ protected:
   /// @brief キューブのリストを返す．
   DstCubeList
   _cube_list(
-    Chunk& chunk ///< [in] ビットベクタの先頭
+    Chunk& chunk,      ///< [in] ビットベクタの先頭
+    SizeType begin = 0 ///< [in] 開始位置
   ) const
   {
-    return DstCubeList{chunk, _cube_size()};
+    return DstCubeList{chunk, _cube_size(), begin};
   }
 
   /// @brief キューブを取り出す．
@@ -575,65 +626,11 @@ protected:
     return chunk.begin() + pos * _cube_size();
   }
 
-#if 0
-  /// @brief キューブ位置を計算する．
-  DstCube
-  _cube_begin(
-    Chunk& chunk,    ///< [in] ビットベクタの先頭
-    SizeType pos = 0 ///< [in] キューブ位置
-  ) const
-  {
-    return chunk.begin() + pos * _cube_size();
-  }
-
-  /// @brief キューブ位置を計算する．
-  Cube
-  _cube_begin(
-    const Chunk& chunk, ///< [in] ビットベクタの先頭
-    SizeType pos = 0    ///< [in] キューブ位置
-  ) const
-  {
-    return chunk.begin() + pos * _cube_size();
-  }
-
-  /// @brief キューブの末尾を計算する．
-  DstCube
-  _cube_end(
-    DstCube begin,        ///< [in] キューブの先頭
-    SizeType cube_num = 1 ///< [in] キューブ数
-  ) const
-  {
-    return begin + _cube_size() * cube_num;
-  }
-
-  /// @brief キューブの末尾を計算する．
-  Cube
-  _cube_end(
-    Cube begin,           ///< [in] キューブの先頭
-    SizeType cube_num = 1 ///< [in] キューブ数
-  ) const
-  {
-    return begin + _cube_size() * cube_num;
-  }
-
-  /// @brief 次のキューブに移動する．
-  void
-  _cube_next(
-    Cube& cube ///< [out] キューブ
-  ) const
-  {
-    cube += _cube_size();
-  }
-
-  /// @brief 次のキューブに移動する．
-  void
-  _cube_next(
-    DstCube& cube ///< [out] キューブ
-  ) const
-  {
-    cube += _cube_size();
-  }
-#endif
+  /// @brief ワード中にコンフリクトがあるか調べる．
+  bool
+  _word_check_conflict(
+    SopPatWord word ///< [in] 対象のワード
+  ) const;
 
   /// @brief ブロック位置を計算する．
   static

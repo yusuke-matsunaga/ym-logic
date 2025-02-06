@@ -77,35 +77,6 @@ private:
     const AlgCover& cover ///< [in] 対象のカバー
   );
 
-#if 0
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられるデータ構造
-  //////////////////////////////////////////////////////////////////////
-
-  // カーネルをキーにしてコカーネルを持つハッシュ表のセル
-  struct Cell
-  {
-    // コンストラクタ
-    Cell(
-      AlgCover&& kernel,
-      const AlgCube& cokernel
-    ) : mKernel{kernel},
-	mCoKernels{cokernel}
-    {
-    }
-
-    // カーネル
-    AlgCover mKernel;
-
-    // コカーネルのリストを表すカバー
-    AlgCover mCoKernels;
-
-    // 次のセルを指すリンクポインタ
-    Cell* mLink;
-
-  };
-#endif
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -114,7 +85,10 @@ private:
 
   /// @brief ハッシュ表をクリアする．
   void
-  hash_clear();
+  hash_clear()
+  {
+    mKernelDict.clear();
+  }
 
   /// @brief ハッシュ表に登録する．
   void
@@ -134,13 +108,6 @@ private:
     const AlgCube& cokernel
   );
 
-#if 0
-  /// @brief ハッシュ表をリサイズする．
-  void
-  hash_resize(
-    SizeType size
-  );
-#endif
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -153,19 +120,6 @@ private:
   // ハッシュ表
   // カーネルをキーにしてコカーネルのリストを格納する．
   std::unordered_map<AlgCover, AlgCover> mKernelDict;
-
-#if 0
-  vector<Cell*> mHashTable;
-
-  // ハッシュ表のサイズ
-  SizeType mHashSize;
-
-  // ハッシュ表を拡大する目安
-  SizeType mNextLimit;
-
-  // ハッシュ表のセルのリスト
-  vector<Cell*> mCellList;
-#endif
 
 };
 

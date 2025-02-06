@@ -9,6 +9,7 @@
 #include "ym/AlgCover.h"
 #include "AlgSorter.h"
 
+#define VERIFY 1
 
 BEGIN_NAMESPACE_YM_ALG
 
@@ -22,6 +23,26 @@ AlgCover::_sort()
 {
   AlgSorter sorter{variable_num()};
   sorter.sort(cube_num(), chunk());
+
+  // 重複したキューブを削除する．
+  SizeType n = cube_num();
+  if ( n > 0 ) {
+    SizeType prev_pos = 0;
+    SizeType dst_pos = 1;
+    for ( SizeType src_pos = 1; src_pos < n; ++ src_pos ) {
+      auto prev_cube = _cube(chunk(), prev_pos);
+      auto cube = _cube(chunk(), src_pos);
+      if ( _cube_compare(prev_cube, cube) != 0 ) {
+	if ( dst_pos < src_pos ) {
+	  auto dst_cube = _dst_cube(chunk(), dst_pos);
+	  _cube_copy(dst_cube, cube);
+	}
+	++ dst_pos;
+	prev_pos = src_pos;
+      }
+    }
+    mCubeNum = dst_pos;
+  }
 }
 
 
@@ -63,6 +84,9 @@ AlgSorter::sort_sub(
       // (1, 0) だったので交換する．
       _cube_swap(cube0, cube1);
     }
+#if VERIFY
+    _check(chunk, begin, end);
+#endif
     return;
   }
   if ( n == 3 ) {
@@ -112,6 +136,9 @@ AlgSorter::sort_sub(
 	}
       }
     }
+#if VERIFY
+    _check(chunk, begin, end);
+#endif
     return;
   }
   if ( n == 4 ) {
@@ -156,6 +183,9 @@ AlgSorter::sort_sub(
     else {
       // そのまま
     }
+#if VERIFY
+    _check(chunk, begin, end);
+#endif
     return;
   }
 
@@ -177,6 +207,9 @@ AlgSorter::sort_sub(
     auto cube1_end = _cube(chunk, end1 - 1);
     auto cube2_begin = _cube(chunk, begin2);
     if ( _cube_compare(cube1_end, cube2_begin) > 0 ) {
+#if VERIFY
+      _check(chunk, begin, end);
+#endif
       return;
     }
   }
@@ -192,29 +225,27 @@ AlgSorter::sort_sub(
   auto cube1_list = _cube_list(mTmpChunk, 0, hn);
   auto cube1_iter = cube1_list.begin();
   auto cube1_end = cube1_list.end();
-  auto cube2_list = _cube_list(chunk, begin2, end2 - begin2);
+  auto cube2_list = _cube_list(chunk, begin2, end2);
   auto cube2_iter = cube2_list.begin();
   auto cube2_end = cube2_list.end();
-  auto dst_list = _cube_list(chunk);
+  auto dst_list = _cube_list(chunk, begin);
   while ( cube1_iter != cube1_end &&
 	  cube2_iter != cube2_end ) {
     auto cube1 = *cube1_iter;
     auto cube2 = *cube2_iter;
     int comp_res = _cube_compare(cube1, cube2);
-    auto dst_cube = dst_list.back();
-    if ( comp_res > 0 ) {
+    // 重複したキューブもそのままコピーする．
+    if ( comp_res >= 0 ) {
+      auto dst_cube = dst_list.back();
       _cube_copy(dst_cube, cube1);
       ++ cube1_iter;
       dst_list.inc();
     }
-    else if ( comp_res < 0 ) {
+    if ( comp_res <= 0 ) {
+      auto dst_cube = dst_list.back();
       _cube_copy(dst_cube, cube2);
       ++ cube2_iter;
       dst_list.inc();
-    }
-    else {
-      // 重複したキューブはエラー
-      ASSERT_NOT_REACHED;
     }
   }
   while ( cube1_iter != cube1_end ) {
@@ -225,6 +256,9 @@ AlgSorter::sort_sub(
     dst_list.inc();
   }
   // 後半部分が残っている時はそのままでいいはず．
+#if VERIFY
+  _check(chunk, begin, end);
+#endif
 }
 
 END_NAMESPACE_YM_ALG

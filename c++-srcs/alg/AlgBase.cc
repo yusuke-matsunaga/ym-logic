@@ -41,8 +41,6 @@ AlgBase::_literal_num(
 ) const
 {
   // 8 ビットごとに区切って表引きで計算する．
-  // 以下のコードでは位置を全く見ていないので
-  // 未使用な部分が 0 で初期化されている必要がある．
   SizeType ans = 0;
   auto begin = _cube(chunk);
   auto end = _cube(chunk, cube_num);
@@ -82,7 +80,8 @@ AlgBase::_literal_num(
   SizeType ans = 0;
   auto cube_list = _cube_list(chunk, 0, cube_num);
   for ( auto cube: cube_list ) {
-    if ( (*(cube + blk) & mask) == mask ) {
+    auto word = _get_word(cube, blk);
+    if ( (word & mask) == mask ) {
       ++ ans;
     }
   }
@@ -173,36 +172,47 @@ void
 AlgBase::_print(
   ostream& s,
   const Chunk& chunk,
-  SizeType start,
+  SizeType begin,
   SizeType end,
   const vector<string>& varname_list
 ) const
 {
   const char* plus = "";
-  auto cube_list = _cube_list(chunk, start, end);
+  auto cube_list = _cube_list(chunk, begin, end);
   for ( auto cube: cube_list ) {
     s << plus;
     plus = " + ";
-    const char* spc = "";
-    for ( SizeType var = 0; var < variable_num(); ++ var ) {
-      string varname;
-      if ( varname_list.size() > var ) {
-	varname = varname_list[var];
-      }
-      else {
-	ostringstream buf;
-	buf << "v" << var;
-	varname = buf.str();
-      }
-      auto pat = _get_pat(cube, var);
-      if ( pat == AlgPat::_1 ) {
-	s << spc << varname;
-	spc = " ";
-      }
-      else if ( pat == AlgPat::_0 ) {
-	s << spc << varname << "'";
-	spc = " ";
-      }
+    _print(s, cube, varname_list);
+  }
+}
+
+// @brief キューブの内容を出力する．
+void
+AlgBase::_print(
+  ostream& s,
+  Cube cube,
+  const vector<string>& varname_list
+) const
+{
+  const char* spc = "";
+  for ( SizeType var = 0; var < variable_num(); ++ var ) {
+    string varname;
+    if ( varname_list.size() > var ) {
+      varname = varname_list[var];
+    }
+    else {
+      ostringstream buf;
+      buf << "v" << var;
+      varname = buf.str();
+    }
+    auto pat = _get_pat(cube, var);
+    if ( pat == AlgPat::_1 ) {
+      s << spc << varname;
+      spc = " ";
+    }
+    else if ( pat == AlgPat::_0 ) {
+      s << spc << varname << "'";
+      spc = " ";
     }
   }
 }

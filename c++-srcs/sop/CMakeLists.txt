@@ -27,10 +27,9 @@ set (sop_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/SopBase.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopBase_cube.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCube.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCube_check.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_concate.cc
-  #${CMAKE_CURRENT_SOURCE_DIR}/SopCover_diff.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_cofactor.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_compare.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_sort.cc
   PARENT_SCOPE

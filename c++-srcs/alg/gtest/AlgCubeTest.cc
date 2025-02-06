@@ -57,6 +57,27 @@ TEST_F(AlgTest, constructor2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 
+  EXPECT_FALSE( cube1.check_literal(var0, false) );
+  EXPECT_FALSE( cube1.check_literal(var0, true) );
+  EXPECT_FALSE( cube1.check_literal(var1, false) );
+  EXPECT_FALSE( cube1.check_literal(var1, true) );
+  EXPECT_FALSE( cube1.check_literal(var2, false) );
+  EXPECT_FALSE( cube1.check_literal(var2, true) );
+  EXPECT_FALSE( cube1.check_literal(var3, false) );
+  EXPECT_FALSE( cube1.check_literal(var3, true) );
+  EXPECT_FALSE( cube1.check_literal(var4, false) );
+  EXPECT_FALSE( cube1.check_literal(var4, true) );
+  EXPECT_FALSE( cube1.check_literal(var5, false) );
+  EXPECT_TRUE(  cube1.check_literal(var5, true) );
+  EXPECT_FALSE( cube1.check_literal(var6, false) );
+  EXPECT_FALSE( cube1.check_literal(var6, true) );
+  EXPECT_FALSE( cube1.check_literal(var7, false) );
+  EXPECT_FALSE( cube1.check_literal(var7, true) );
+  EXPECT_FALSE( cube1.check_literal(var8, false) );
+  EXPECT_FALSE( cube1.check_literal(var8, true) );
+  EXPECT_FALSE( cube1.check_literal(var9, false) );
+  EXPECT_FALSE( cube1.check_literal(var9, true) );
+
 };
 
 TEST_F(AlgTest, constructor3)
@@ -310,30 +331,6 @@ TEST_F(AlgTest, check_containment_bad)
 
   ASSERT_THROW( cube1.check_containment(cube2), std::invalid_argument );
   ASSERT_THROW( cube2.check_containment(cube1), std::invalid_argument );
-};
-
-TEST_F(AlgTest, check_intersect)
-{
-  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
-  auto cube2 = AlgCube{nv, {lit0, ~lit5}};
-
-  EXPECT_TRUE(  cube1.check_intersect(cube2) );
-  EXPECT_TRUE(  cube2.check_intersect(cube1) );
-
-  auto cube3 = AlgCube{nv, {~lit0}};
-  EXPECT_FALSE( cube1.check_containment(cube3) );
-  EXPECT_FALSE( cube2.check_containment(cube3) );
-  EXPECT_FALSE( cube3.check_containment(cube1) );
-  EXPECT_FALSE( cube3.check_containment(cube2) );
-};
-
-TEST_F(AlgTest, check_intersect_bad)
-{
-  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
-  auto cube2 = AlgCube{nv + 1, {lit0, ~lit5}};
-
-  ASSERT_THROW( cube1.check_intersect(cube2), std::invalid_argument );
-  ASSERT_THROW( cube2.check_intersect(cube1), std::invalid_argument );
 };
 
 TEST_F(AlgTest, cube_cube_product1)
@@ -1343,13 +1340,13 @@ TEST_F(AlgTest, compare1)
   auto cube3 = AlgCube{nv1, {~lit0,  lit1}};
 
   EXPECT_EQ(  0, compare(cube1, cube1) );
-  EXPECT_EQ( -1, compare(cube1, cube2) );
-  EXPECT_EQ( -1, compare(cube1, cube3) );
-  EXPECT_EQ(  1, compare(cube2, cube1) );
+  EXPECT_EQ(  1, compare(cube1, cube2) );
+  EXPECT_EQ(  1, compare(cube1, cube3) );
+  EXPECT_EQ( -1, compare(cube2, cube1) );
   EXPECT_EQ(  0, compare(cube2, cube2) );
-  EXPECT_EQ( -1, compare(cube2, cube3) );
-  EXPECT_EQ(  1, compare(cube3, cube1) );
-  EXPECT_EQ(  1, compare(cube3, cube2) );
+  EXPECT_EQ(  1, compare(cube2, cube3) );
+  EXPECT_EQ( -1, compare(cube3, cube1) );
+  EXPECT_EQ( -1, compare(cube3, cube2) );
   EXPECT_EQ(  0, compare(cube3, cube3) );
 };
 
@@ -1372,22 +1369,22 @@ TEST_F(AlgTest, compare2)
   EXPECT_TRUE(  cube1 >= cube1 );
 
   EXPECT_FALSE( cube1 == cube2 );
-  EXPECT_TRUE(  cube1 <  cube2 );
-  EXPECT_FALSE( cube1 >  cube2 );
-  EXPECT_TRUE(  cube1 <= cube2 );
-  EXPECT_FALSE( cube1 >= cube2 );
+  EXPECT_FALSE( cube1 <  cube2 );
+  EXPECT_TRUE(  cube1 >  cube2 );
+  EXPECT_FALSE( cube1 <= cube2 );
+  EXPECT_TRUE(  cube1 >= cube2 );
 
   EXPECT_FALSE( cube1 == cube3 );
-  EXPECT_TRUE(  cube1 <  cube3 );
-  EXPECT_FALSE( cube1 >  cube3 );
-  EXPECT_TRUE(  cube1 <= cube3 );
-  EXPECT_FALSE( cube1 >= cube3 );
+  EXPECT_FALSE( cube1 <  cube3 );
+  EXPECT_TRUE(  cube1 >  cube3 );
+  EXPECT_FALSE( cube1 <= cube3 );
+  EXPECT_TRUE(  cube1 >= cube3 );
 
   EXPECT_FALSE( cube2 == cube1 );
-  EXPECT_FALSE( cube2 <  cube1 );
-  EXPECT_TRUE(  cube2 >  cube1 );
-  EXPECT_FALSE( cube2 <= cube1 );
-  EXPECT_TRUE(  cube2 >= cube1 );
+  EXPECT_TRUE(  cube2 <  cube1 );
+  EXPECT_FALSE( cube2 >  cube1 );
+  EXPECT_TRUE(  cube2 <= cube1 );
+  EXPECT_FALSE( cube2 >= cube1 );
 
   EXPECT_TRUE(  cube2 == cube2 );
   EXPECT_FALSE( cube2 <  cube2 );
@@ -1396,22 +1393,22 @@ TEST_F(AlgTest, compare2)
   EXPECT_TRUE(  cube2 >= cube2 );
 
   EXPECT_FALSE( cube2 == cube3 );
-  EXPECT_TRUE(  cube2 <  cube3 );
-  EXPECT_FALSE( cube2 >  cube3 );
-  EXPECT_TRUE(  cube2 <= cube3 );
-  EXPECT_FALSE( cube2 >= cube3 );
+  EXPECT_FALSE( cube2 <  cube3 );
+  EXPECT_TRUE(  cube2 >  cube3 );
+  EXPECT_FALSE( cube2 <= cube3 );
+  EXPECT_TRUE(  cube2 >= cube3 );
 
   EXPECT_FALSE( cube3 == cube1 );
-  EXPECT_FALSE( cube3 <  cube1 );
-  EXPECT_TRUE(  cube3 >  cube1 );
-  EXPECT_FALSE( cube3 <= cube1 );
-  EXPECT_TRUE(  cube3 >= cube1 );
+  EXPECT_TRUE(  cube3 <  cube1 );
+  EXPECT_FALSE( cube3 >  cube1 );
+  EXPECT_TRUE(  cube3 <= cube1 );
+  EXPECT_FALSE( cube3 >= cube1 );
 
   EXPECT_FALSE( cube3 == cube2 );
-  EXPECT_FALSE( cube3 <  cube2 );
-  EXPECT_TRUE(  cube3 >  cube2 );
-  EXPECT_FALSE( cube3 <= cube2 );
-  EXPECT_TRUE(  cube3 >= cube2 );
+  EXPECT_TRUE(  cube3 <  cube2 );
+  EXPECT_FALSE( cube3 >  cube2 );
+  EXPECT_TRUE(  cube3 <= cube2 );
+  EXPECT_FALSE( cube3 >= cube2 );
 
   EXPECT_TRUE(  cube3 == cube3 );
   EXPECT_FALSE( cube3 <  cube3 );

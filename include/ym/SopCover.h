@@ -31,6 +31,11 @@ class SopCover:
 {
 public:
 
+  /// @brief Literal のリストのリストの形の初期化子
+  using initializer = std::initializer_list<std::initializer_list<Literal>>;
+
+public:
+
   /// @brief コンストラクタ
   ///
   /// * 空のカバーとなる．
@@ -61,8 +66,8 @@ public:
   ///
   /// * キューブの順番は変わる可能性がある．
   SopCover(
-    SizeType variable_num,                                 ///< [in] 変数の数
-    initializer_list<initializer_list<Literal>>& cube_list ///< [in] カバーを表すリテラルのリストのリスト
+    SizeType variable_num, ///< [in] 変数の数
+    initializer& cube_list ///< [in] カバーを表すリテラルのリストのリスト
   );
 
   /// @brief コピーコンストラクタ
@@ -229,40 +234,6 @@ public:
     const SopCube& right ///< [in] オペランド
   );
 
-#if 0
-  /// @brief 差分を計算する．
-  /// @return 計算結果を返す．
-  ///
-  /// right のみに含まれる要素があっても無視される．
-  SopCover
-  operator-(
-    const SopCover& right ///< [in] オペランド
-  ) const;
-
-  /// @brief 差分を計算して代入する．
-  /// @return 演算後の自身への参照を返す．
-  SopCover&
-  operator-=(
-    const SopCover& right ///< [in] オペランド
-  );
-
-  /// @brief 差分を計算する(キューブ版)．
-  /// @return 計算結果を返す．
-  ///
-  /// right のみに含まれる要素があっても無視される．
-  SopCover
-  operator-(
-    const SopCube& right ///< [in] オペランド
-  ) const;
-
-  /// @brief 差分を計算して代入する(キューブ版)．
-  /// @return 演算後の自身への参照を返す．
-  SopCover&
-  operator-=(
-    const SopCube& right ///< [in] オペランド
-  );
-#endif
-
   /// @brief コファクターを計算する．
   /// @return 計算結果を返す．
   SopCover
@@ -270,26 +241,12 @@ public:
     const SopCube& right ///< [in] オペランド
   ) const;
 
-  /// @brief コファクター演算を行って代入する．
-  /// @return 演算後の自身への参照を返す．
-  SopCover&
-  cofactor_int(
-    const SopCube& right ///< [in] オペランド
-  );
-
   /// @brief コファクターを計算する．
   /// @return 計算結果を返す．
   SopCover
   cofactor(
     Literal lit ///< [in] オペランド
   ) const;
-
-  /// @brief コファクター演算を行って代入する．
-  /// @return 演算後の自身への参照を返す．
-  SopCover&
-  cofactor_int(
-    Literal lit ///< [in] オペランド
-  );
 
   /// @brief 比較演算子 (EQ)
   /// @return 等しい時に true を返す．
@@ -387,16 +344,6 @@ private:
     SizeType& dst_num    ///< [out] 結果のキューブ数
   ) const;
 
-#if 0
-  /// @brief diff の共通処理
-  Chunk
-  diff(
-    SizeType num2,       ///< [in] 第2オペランドのキューブ数
-    const Chunk& chunk2, ///< [in] 第2オペランドのキューブ本体
-    SizeType& dst_num	 ///< [out] 結果のキューブ数
-  ) const;
-#endif
-
   /// @brief 内容をセットする．
   void
   _set(
@@ -435,60 +382,6 @@ operator|(
   // 交換則を用いる．
   return right.operator|(left);
 }
-
-#if 0
-/// @relates SopCover
-/// @brief カバーの減算
-/// @return 結果を返す．
-inline
-SopCover
-operator-(
-  SopCover&& left,      ///< [in] 第1オペランド
-  const SopCover& right ///< [in] 第2オペランド
-)
-{
-  return SopCover{std::move(left)}.operator-=(right);
-}
-
-/// @relates SopCover
-/// @brief カバーとキューブの減算
-/// @return 結果を返す．
-inline
-SopCover
-operator-(
-  SopCover&& left,     ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return SopCover{std::move(left)}.operator-=(right);
-}
-
-/// @relates SopCover, SopCube
-/// @brief カバーとキューブの除算
-/// @return 結果を返す．
-inline
-SopCover
-operator/(
-  SopCover&& left,     ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return SopCover{std::move(left)}.operator/=(right);
-}
-
-/// @relates SopCover, Literal
-/// @brief カバーとリテラルの除算
-/// @return 結果を返す．
-inline
-SopCover
-operator/(
-  SopCover&& left, ///< [in] 第1オペランド
-  Literal right	   ///< [in] 第2オペランド
-)
-{
-  return SopCover{std::move(left)}.operator/=(right);
-}
-#endif
 
 /// @relates SopCover
 /// @brief SopCover の内容を出力する．

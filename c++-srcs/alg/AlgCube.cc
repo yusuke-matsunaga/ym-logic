@@ -49,7 +49,7 @@ AlgCube::AlgCube(
 // @brief コピーコンストラクタ
 AlgCube::AlgCube(
   const AlgCube& src
-) : AlgBase{src},
+) : AlgBase{src.variable_num()},
     mChunk{src.mChunk}
 {
 }
@@ -70,7 +70,7 @@ AlgCube::operator=(
 // @brief ムーブコンストラクタ
 AlgCube::AlgCube(
   AlgCube&& src
-) : AlgBase{std::move(src)},
+) : AlgBase{src.variable_num()},
     mChunk{std::move(src.mChunk)}
 {
 }
@@ -81,7 +81,7 @@ AlgCube::operator=(
   AlgCube&& src
 )
 {
-  AlgBase::operator=(std::move(src));
+  AlgBase::operator=(src);
   std::swap(mChunk, src.mChunk);
   return *this;
 }
@@ -147,10 +147,17 @@ AlgCube::literal_list() const
 // @brief 指定したリテラルを含んでいたら true を返す．
 bool
 AlgCube::check_literal(
-  Literal lit
+  SizeType varid,
+  bool inv
 ) const
 {
-  return _literal_num(1, chunk(), lit) > 0;
+  auto blk = _block_pos(varid);
+  auto mask = _get_mask(varid, inv);
+  auto word = _get_word(_cube(), blk);
+  if ( (word & mask) == mask ) {
+    return true;
+  }
+  return false;
 }
 
 // @brief キューブの論理積を計算する
@@ -170,6 +177,26 @@ AlgCube::operator*(
     _cube_clear(dst_cube);
   }
   return AlgCube{variable_num(), std::move(dst_chunk)};
+}
+
+// @brief オペランドのキューブに含まれていたら true を返す．
+bool
+AlgCube::check_containment(
+  const AlgCube& right
+) const
+{
+  if ( variable_num() != right.variable_num() ) {
+    throw std::invalid_argument("variable_num() is different from each other");
+  }
+  auto cube1 = _cube();
+  auto end1 = _cube_end(cube1);
+  auto cube2 = right._cube();
+  for ( ; cube1 != end1; ++ cube1, ++ cube2 ) {
+    if ( (~(*cube1) & *cube2) != 0ULL ) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // @brief 論理積を計算し自身に代入する．

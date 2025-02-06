@@ -208,36 +208,6 @@ SopCube_check_containment(
   return PyBool_FromLong(ans);
 }
 
-#if 0
-PyObject*
-SopCube_check_intersect(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "cube",
-    nullptr
-  };
-  PyObject* cube_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
-				    const_cast<char**>(kw_list),
-				    PySopCube::_typeobject(), &cube_obj) ) {
-    return nullptr;
-  }
-  auto& cube = PySopCube::Get(self);
-  auto& cube1 = PySopCube::Get(cube_obj);
-  if ( cube.variable_num() != cube1.variable_num() ) {
-    PyErr_SetString(PyExc_ValueError,
-		    "variable_num() is differenct from each other");
-    return nullptr;
-  }
-  auto ans = cube.check_intersect(cube1);
-  return PyBool_FromLong(ans);
-}
-#endif
-
 PyObject*
 SopCube_expr(
   PyObject* self,
@@ -269,11 +239,6 @@ PyMethodDef SopCube_methods[] = {
   {"check_containment", reinterpret_cast<PyCFunction>(SopCube_check_containment),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return True if being contained in the argument cube")},
-#if 0
-  {"check_intersect", reinterpret_cast<PyCFunction>(SopCube_check_intersect),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("return True if having intersection with the argument cube")},
-#endif
   {"expr", SopCube_expr,
    METH_NOARGS,
    PyDoc_STR("convert to 'Expr'")},
@@ -387,60 +352,10 @@ SopCube_imul(
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-// 除算
-PyObject*
-SopCube_div(
-  PyObject* self,
-  PyObject* other
-)
-{
-  if ( PySopCube::Check(self) ) {
-    auto& val1 = PySopCube::Get(self);
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
-      auto val3 = val1.cofactor(val2);
-      return PySopCube::ToPyObject(val3);
-    }
-    if ( PyLiteral::Check(other) ) {
-      auto val2 = PyLiteral::Get(other);
-      auto val3 = val1.cofactor(val2);
-      return PySopCube::ToPyObject(val3);
-    }
-  }
-  Py_RETURN_NOTIMPLEMENTED;
-}
-
-// 除算つき代入
-PyObject*
-SopCube_idiv(
-  PyObject* self,
-  PyObject* other
-)
-{
-  if ( PySopCube::Check(self) ) {
-    auto& val1 = PySopCube::Get(self);
-    if ( PySopCube::Check(other) ) {
-      auto& val2 = PySopCube::Get(other);
-      val1.cofactor_int(val2);
-      Py_IncRef(self);
-      return self;
-    }
-    if ( PyLiteral::Check(other) ) {
-      auto val2 = PyLiteral::Get(other);
-      val1.cofactor_int(val2);
-      Py_IncRef(self);
-      return self;
-    }
-  }
-  Py_RETURN_NOTIMPLEMENTED;
-}
-
 // 数値演算メソッド定義
 PyNumberMethods SopCube_number = {
-  .nb_multiply = SopCube_mul,
-  .nb_inplace_multiply = SopCube_imul,
-  .nb_true_divide = SopCube_div,
-  .nb_inplace_true_divide = SopCube_div
+  .nb_and = SopCube_mul,
+  .nb_inplace_and = SopCube_imul,
 };
 
 // ハッシュ関数

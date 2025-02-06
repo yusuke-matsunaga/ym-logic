@@ -120,6 +120,18 @@ public:
   bool
   check_literal(
     Literal lit ///< [in] 対象のリテラル
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    return check_literal(varid, inv);
+  }
+
+  /// @brief 指定したリテラルを含んでいたら true を返す．
+  bool
+  check_literal(
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 反転属性
   ) const;
 
   /// @brief 内容をリテラルのリストに変換する．
@@ -132,12 +144,6 @@ public:
   /// * だからリテラル集合としてはオペランドのキューブを含むことになる．
   bool
   check_containment(
-    const AlgCube& right ///< [in] オペランドのキューブ
-  ) const;
-
-  /// @brief 2つのキューブに共通なリテラルがあれば true を返す．
-  bool
-  check_intersect(
     const AlgCube& right ///< [in] オペランドのキューブ
   ) const;
 

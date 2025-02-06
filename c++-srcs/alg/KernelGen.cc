@@ -221,13 +221,6 @@ KernelGen::kern_sub(
   }
 }
 
-// @brief ハッシュ表をクリアする．
-void
-KernelGen::hash_clear()
-{
-  mKernelDict.clear();
-}
-
 // @brief ハッシュ表に登録する．
 void
 KernelGen::hash_add(

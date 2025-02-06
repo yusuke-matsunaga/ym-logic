@@ -119,6 +119,18 @@ public:
   bool
   check_literal(
     Literal lit ///< [in] 対象のリテラル
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    return check_literal(varid, inv);
+  }
+
+  /// @brief 指定したリテラルを含んでいたら true を返す．
+  bool
+  check_literal(
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 反転属性
   ) const;
 
   /// @brief 内容をリテラルのリストに変換する．
@@ -133,14 +145,6 @@ public:
   check_containment(
     const SopCube& right ///< [in] オペランドのキューブ
   ) const;
-
-#if 0
-  /// @brief 2つのキューブに共通なリテラルがあれば true を返す．
-  bool
-  check_intersect(
-    const SopCube& right ///< [in] オペランドのキューブ
-  ) const;
-#endif
 
   /// @brief Expr に変換する．
   Expr
@@ -210,41 +214,6 @@ public:
   /// 相反するリテラルとの積があったら答は空のキューブとなる．
   SopCube&
   operator&=(
-    Literal right ///< [in] オペランドのリテラル
-  );
-
-  /// @brief キューブによるコファクターを計算する．
-  /// @return 結果のキューブを返す．
-  ///
-  /// right のみに含まれるリテラルがあったら結果は空となる．
-  SopCube
-  cofactor(
-    const SopCube& right ///< [in] オペランド
-  ) const;
-
-  /// @brief キューブによるコファクターを計算し自身に代入する．
-  /// @return 演算後の自身の参照を返す．
-  ///
-  /// right のみに含まれるリテラルがあったら結果は空となる．
-  SopCube&
-  cofactor_int(
-    const SopCube& right ///< [in] オペランドのキューブ
-  );
-
-  /// @brief リテラルによるコファクターを計算する
-  ///
-  /// right のみに含まれるリテラルがあったら結果は空となる．
-  SopCube
-  cofactor(
-    Literal right ///< [in] オペランドのリテラル
-  ) const;
-
-  /// @brief リテラルによるコファクターを計算し自身に代入する．
-  /// @return 演算後の自身の参照を返す．
-  ///
-  /// right のみに含まれるリテラルがあったら結果は空となる．
-  SopCube&
-  cofactor_int(
     Literal right ///< [in] オペランドのリテラル
   );
 

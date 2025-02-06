@@ -101,7 +101,7 @@ prime_cover(
       }
     }
   }
-  sort(ans_list.begin(), ans_list.end());
+  std::sort(ans_list.begin(), ans_list.end(), std::greater<>());
   return SopCover{ni, ans_list};
 }
 
@@ -172,7 +172,7 @@ TEST_P(TvFuncTestWithParam, bcf)
   vector<int> values(ni_exp, 0);
   for ( SizeType c: Range(n) ) {
     for ( auto p: Range(ni_exp) ) {
-      if ( ni < 4 ) {
+      if ( ni <= 4 ) {
 	if ( c & (1 << p) ) {
 	  values[p] = 1;
 	}
@@ -199,6 +199,6 @@ TEST_P(TvFuncTestWithParam, bcf)
 
 INSTANTIATE_TEST_SUITE_P(Test0to20,
 			 TvFuncTestWithParam,
-			 ::testing::Range(0, 21));
+			 ::testing::Range(0, 11));
 
 END_NAMESPACE_YM

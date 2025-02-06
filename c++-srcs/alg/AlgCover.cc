@@ -81,7 +81,7 @@ AlgCover::AlgCover(
 // @brief コンストラクタ
 AlgCover::AlgCover(
   SizeType var_num,
-  std::initializer_list<std::initializer_list<Literal>>& cube_list
+  initializer& cube_list
 ) : AlgBase{var_num},
     mCubeNum{cube_list.size()},
     mChunk(_cube_size() * cube_list.size(), 0ULL)
@@ -160,7 +160,7 @@ AlgCover::operator=(
   AlgCover&& src
 )
 {
-  AlgBase::operator=(std::move(src));
+  AlgBase::operator=(src);
   mCubeNum = src.mCubeNum;
   std::swap(mChunk, src.mChunk);
   src.mCubeNum = 0;

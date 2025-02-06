@@ -215,8 +215,8 @@ operator<<(
 {
   switch ( pat ) {
   case SopPat::__: s << '_'; break;
-  case SopPat::_0: s << '0'; break;
   case SopPat::_1: s << '1'; break;
+  case SopPat::_0: s << '0'; break;
   case SopPat::_X: s << 'X'; break;
   }
   return s;
@@ -228,8 +228,8 @@ using nsSop::SopCover;
 /// @brief AlgCover/AlgCube 中パタンを表す列挙型
 enum class AlgPat : std::uint8_t {
   _X = 0, ///< なし
-  _1 = 1, ///< 正極性
-  _0 = 2, ///< 負極性
+  _0 = 1, ///< 負極性
+  _1 = 2, ///< 正極性
   __ = 3  ///< 未使用
 };
 
@@ -244,9 +244,9 @@ operator<<(
 )
 {
   switch ( pat ) {
+  case AlgPat::_X: s << 'X'; break;
   case AlgPat::_0: s << '0'; break;
   case AlgPat::_1: s << '1'; break;
-  case AlgPat::_X: s << 'X'; break;
   case AlgPat::__: s << '_'; break;
   }
   return s;

@@ -35,6 +35,11 @@ class AlgCover:
 {
 public:
 
+  /// @brief Literal のリストのリストの形の初期化子
+  using initializer = std::initializer_list<std::initializer_list<Literal>>;
+
+public:
+
   /// @brief コンストラクタ
   ///
   /// * 空のカバーとなる．
@@ -65,8 +70,8 @@ public:
   ///
   /// * キューブの順番は変わる可能性がある．
   AlgCover(
-    SizeType variable_num,                                 ///< [in] 変数の数
-    initializer_list<initializer_list<Literal>>& cube_list ///< [in] カバーを表すリテラルのリストのリスト
+    SizeType variable_num, ///< [in] 変数の数
+    initializer& cube_list ///< [in] カバーを表すリテラルのリストのリスト
   );
 
   /// @brief コピーコンストラクタ

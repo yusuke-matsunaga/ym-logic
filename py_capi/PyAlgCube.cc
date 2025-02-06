@@ -209,34 +209,6 @@ AlgCube_check_containment(
 }
 
 PyObject*
-AlgCube_check_intersect(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "cube",
-    nullptr
-  };
-  PyObject* cube_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
-				    const_cast<char**>(kw_list),
-				    PyAlgCube::_typeobject(), &cube_obj) ) {
-    return nullptr;
-  }
-  auto& cube = PyAlgCube::Get(self);
-  auto& cube1 = PyAlgCube::Get(cube_obj);
-  if ( cube.variable_num() != cube1.variable_num() ) {
-    PyErr_SetString(PyExc_ValueError,
-		    "variable_num() is differenct from each other");
-    return nullptr;
-  }
-  auto ans = cube.check_intersect(cube1);
-  return PyBool_FromLong(ans);
-}
-
-PyObject*
 AlgCube_expr(
   PyObject* self,
   PyObject* Py_UNUSED(args)
@@ -267,9 +239,6 @@ PyMethodDef AlgCube_methods[] = {
   {"check_containment", reinterpret_cast<PyCFunction>(AlgCube_check_containment),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("return True if being contained in the argument cube")},
-  {"check_intersect", reinterpret_cast<PyCFunction>(AlgCube_check_intersect),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("return True if having intersection with the argument cube")},
   {"expr", AlgCube_expr,
    METH_NOARGS,
    PyDoc_STR("convert to 'Expr'")},

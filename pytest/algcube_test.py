@@ -412,50 +412,50 @@ def test_compare1():
     cube3 = AlgCube(ni, literal_list=[~lit0,  lit1])
     cube4 = AlgCube(ni, literal_list=[ lit0,  lit1])
 
-    assert cube1 == cube4
+    assert     cube1 == cube4
     assert not cube1 != cube4
     
     assert not cube1 == cube2
-    assert cube1 != cube2
-    assert cube1 < cube2
-    assert not cube1 > cube2
-    assert cube1 <= cube2
-    assert not cube1 >= cube2
+    assert     cube1 != cube2
+    assert not cube1 < cube2
+    assert     cube1 > cube2
+    assert not cube1 <= cube2
+    assert     cube1 >= cube2
 
     assert not cube1 == cube3
-    assert cube1 != cube3
-    assert cube1 < cube3
-    assert not cube1 > cube3
-    assert cube1 <= cube3
-    assert not cube1 >= cube3
+    assert     cube1 != cube3
+    assert not cube1 < cube3
+    assert     cube1 > cube3
+    assert not cube1 <= cube3
+    assert     cube1 >= cube3
 
     assert not cube2 == cube1
-    assert cube2 != cube1
-    assert not cube2 < cube1
-    assert cube2 > cube1
-    assert not cube2 <= cube1
-    assert cube2 >= cube1
+    assert     cube2 != cube1
+    assert     cube2 < cube1
+    assert not cube2 > cube1
+    assert     cube2 <= cube1
+    assert not cube2 >= cube1
 
     assert not cube2 == cube3
-    assert cube2 != cube3
-    assert cube2 < cube3
-    assert not cube2 > cube3
-    assert cube2 <= cube3
-    assert not cube2 >= cube3
+    assert     cube2 != cube3
+    assert not cube2 < cube3
+    assert     cube2 > cube3
+    assert not cube2 <= cube3
+    assert     cube2 >= cube3
     
     assert not cube3 == cube1
-    assert cube3 != cube1
-    assert not cube3 < cube1
-    assert cube3 > cube1
-    assert not cube3 <= cube1
-    assert cube3 >= cube1
+    assert     cube3 != cube1
+    assert     cube3 < cube1
+    assert not cube3 > cube1
+    assert     cube3 <= cube1
+    assert not cube3 >= cube1
 
     assert not cube3 == cube2
-    assert cube3 != cube2
-    assert not cube3 < cube2
-    assert cube3 > cube2
-    assert not cube3 <= cube2
-    assert cube3 >= cube2
+    assert     cube3 != cube2
+    assert     cube3 < cube2
+    assert not cube3 > cube2
+    assert     cube3 <= cube2
+    assert not cube3 >= cube2
 
 def test_compare_bad():
     ni = 100

@@ -116,25 +116,6 @@ def test_check_containment_bad():
         cube1.check_containment(cube2)
     with pytest.raises(ValueError) as e:
         cube2.check_containment(cube1)
-
-def test_check_intersect():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit2, lit3])
-    cube2 = SopCube(ni, literal_list=[lit1, lit2])
-
-    assert cube1.check_intersect(cube2)
-    assert cube2.check_intersect(cube1)
-
-    cube3 = SopCube(ni, literal_list=[Literal(0, inv=True)])
-
-    assert not cube1.check_intersect(cube3)
-    assert not cube2.check_intersect(cube3)
-    assert not cube3.check_intersect(cube1)
-    assert not cube3.check_intersect(cube2)
     
 def test_cube_product1():
     ni = 10
@@ -287,120 +268,6 @@ def test_lit_product_int2():
     lit_list = cube1.literal_list()
     assert len(lit_list) == 0
 
-def test_cube_cube_quotient1():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit1, lit2, lit3])
-    cube2 = SopCube(ni, literal_list=[lit1, lit3])
-
-    cube3 = cube1 / cube2
-
-    lit_list = cube3.literal_list()
-    assert len(lit_list) == 1
-    assert lit_list[0] == lit2
-
-def test_cube_cube_quotient2():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit1, lit2])
-    cube2 = SopCube(ni, literal_list=[lit3])
-
-    cube3 = cube1 / cube2
-
-    lit_list = cube3.literal_list()
-    assert len(lit_list) == 0
-
-def test_cube_lit_quotient1():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit1, lit2, lit3])
-
-    cube3 = cube1 / lit1
-
-    lit_list = cube3.literal_list()
-    assert len(lit_list) == 2
-    assert lit_list[0] == lit2
-    assert lit_list[1] == lit3
-
-def test_cube_lit_quotient2():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit2, lit3])
-
-    cube3 = cube1 / lit1
-
-    lit_list = cube3.literal_list()
-    assert len(lit_list) == 0
-
-def test_cube_quotient_int1():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit1, lit2, lit3])
-    cube2 = SopCube(ni, literal_list=[lit1, lit3])
-
-    cube1 /= cube2
-
-    lit_list = cube1.literal_list()
-    assert len(lit_list) == 1
-    assert lit_list[0] == lit2
-
-def test_cube_quotient_int2():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit1, lit2])
-    cube2 = SopCube(ni, literal_list=[lit3])
-
-    cube1 /= cube2
-
-    lit_list = cube1.literal_list()
-    assert len(lit_list) == 0
-
-def test_lit_quotient_int1():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit1, lit2, lit3])
-
-    cube1 /= lit1
-
-    lit_list = cube1.literal_list()
-    assert len(lit_list) == 2
-    assert lit_list[0] == lit2
-    assert lit_list[1] == lit3
-
-def test_lit_quotient_int2():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = SopCube(ni, literal_list=[lit2, lit3])
-
-    cube1 /= lit1
-
-    lit_list = cube1.literal_list()
-    assert len(lit_list) == 0
-
 def test_compare1():
     ni = 100
 
@@ -412,50 +279,50 @@ def test_compare1():
     cube3 = SopCube(ni, literal_list=[~lit0,  lit1])
     cube4 = SopCube(ni, literal_list=[ lit0,  lit1])
 
-    assert cube1 == cube4
+    assert     cube1 == cube4
     assert not cube1 != cube4
     
     assert not cube1 == cube2
-    assert cube1 != cube2
-    assert cube1 < cube2
-    assert not cube1 > cube2
-    assert cube1 <= cube2
-    assert not cube1 >= cube2
+    assert     cube1 != cube2
+    assert not cube1 < cube2
+    assert     cube1 > cube2
+    assert not cube1 <= cube2
+    assert     cube1 >= cube2
 
     assert not cube1 == cube3
-    assert cube1 != cube3
-    assert cube1 < cube3
-    assert not cube1 > cube3
-    assert cube1 <= cube3
-    assert not cube1 >= cube3
+    assert     cube1 != cube3
+    assert not cube1 < cube3
+    assert     cube1 > cube3
+    assert not cube1 <= cube3
+    assert     cube1 >= cube3
 
     assert not cube2 == cube1
-    assert cube2 != cube1
-    assert not cube2 < cube1
-    assert cube2 > cube1
-    assert not cube2 <= cube1
-    assert cube2 >= cube1
+    assert     cube2 != cube1
+    assert     cube2 < cube1
+    assert not cube2 > cube1
+    assert     cube2 <= cube1
+    assert not cube2 >= cube1
 
     assert not cube2 == cube3
-    assert cube2 != cube3
-    assert cube2 < cube3
-    assert not cube2 > cube3
-    assert cube2 <= cube3
-    assert not cube2 >= cube3
+    assert     cube2 != cube3
+    assert not cube2 < cube3
+    assert     cube2 > cube3
+    assert not cube2 <= cube3
+    assert     cube2 >= cube3
     
     assert not cube3 == cube1
-    assert cube3 != cube1
-    assert not cube3 < cube1
-    assert cube3 > cube1
-    assert not cube3 <= cube1
-    assert cube3 >= cube1
+    assert     cube3 != cube1
+    assert     cube3 < cube1
+    assert not cube3 > cube1
+    assert     cube3 <= cube1
+    assert not cube3 >= cube1
 
     assert not cube3 == cube2
-    assert cube3 != cube2
-    assert not cube3 < cube2
-    assert cube3 > cube2
-    assert not cube3 <= cube2
-    assert cube3 >= cube2
+    assert     cube3 != cube2
+    assert     cube3 < cube2
+    assert not cube3 > cube2
+    assert     cube3 <= cube2
+    assert not cube3 >= cube2
 
 def test_compare_bad():
     ni = 100

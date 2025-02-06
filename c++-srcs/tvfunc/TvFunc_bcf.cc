@@ -15,7 +15,7 @@ BEGIN_NAMESPACE_YM
 
 BEGIN_NONAMESPACE
 
-bool debug = true;
+const bool debug = false;
 
 // キューブが R と交差する時 true を返す．
 bool
@@ -63,35 +63,31 @@ bcf_sub(
   SizeType var
 )
 {
-  if ( debug ) {
-    cout << "**bcf_sub: " << f << ": " << var << endl;
-  }
-
   auto ni = f.input_num();
 
   if ( f.is_zero() ) {
     if ( debug ) {
-      cout << "bcf_sub: " << f << ": " << var << endl;
-      cout << " ==> 0" << endl;
+      cout << "bcf_sub(" << var << "): " << f << endl;
+      cout << " ==> " << endl;
     }
     return vector<SopCube>{};
   }
   if ( f.is_one() ) {
     if ( debug ) {
-      cout << "bcf_sub: " << f << ": " << var << endl;
-      cout << " ==> 1" << endl;
+      cout << "bcf_sub(" << var << "): " << f << endl;
+      cout << " ==> {}" << endl;
     }
     return vector<SopCube>{SopCube{ni}};
   }
 
-  ASSERT_COND( var < ni );
-
   // コファクターに対して再帰する．
   // ただし，共通部分を求めて3分割する．
+  ASSERT_COND( var < ni );
   auto f0 = f.cofactor(var, true);
   auto f1 = f.cofactor(var, false);
   auto fc = f0 & f1;
   if ( debug ) {
+    cout << "bcf_sub(" << var << "): " << f << endl;
     cout << "  fc: " << fc << endl;
     cout << "  f0: " << f0 << endl;
     cout << "  f1: " << f1 << endl;
@@ -100,6 +96,7 @@ bcf_sub(
   auto c0 = bcf_sub(f0, var + 1);
   auto c1 = bcf_sub(f1, var + 1);
   if ( debug ) {
+    cout << "*bcf_sub(" << var << "): " << f << endl;
     cout << "  cc: ";
     for ( auto& cube: cc ) {
       cout << " " << cube;
@@ -133,10 +130,12 @@ bcf_sub(
   }
 
   if ( debug ) {
-    cout << "bcf_sub: " << f << ": " << var << endl;
+    cout << "**bcf_sub(" << var << "): " << f << endl;
     cout << " ==> ";
+    const char* spc = "";
     for ( auto& cube: cc ) {
-      cout << " " << cube;
+      cout << spc << cube;
+      spc = ", ";
     }
     cout << endl;
   }
@@ -151,7 +150,6 @@ SopCover
 TvFunc::BCF() const
 {
   auto cov = bcf_sub(*this, 0);
-  std::sort(cov.begin(), cov.end());
   return SopCover{input_num(), cov};
 }
 

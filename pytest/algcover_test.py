@@ -1181,4 +1181,17 @@ def test_to_expr():
     expr = cover1.expr()
     expr_str = str(expr)
     assert expr_str == "( ( 0 & 1 ) | ~2 )"
+
+def test_to_expr2():
+    ni = 10
+
+    lit0 = Literal(0)
+    lit1 = Literal(1)
+    lit2 = Literal(2)
+
+    cover1 = AlgCover(ni, cube_list=[[~lit2], [lit1, lit0]])
+
+    expr = cover1.expr()
+    expr_str = str(expr)
+    assert expr_str == "( ( 0 & 1 ) | ~2 )"
     
