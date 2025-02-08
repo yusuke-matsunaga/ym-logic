@@ -893,7 +893,6 @@ private:
   ) const
   {
     if ( src.input_num() != input_num() ) {
-      abort();
       throw std::invalid_argument{"input_num() mismatch"};
     }
   }
