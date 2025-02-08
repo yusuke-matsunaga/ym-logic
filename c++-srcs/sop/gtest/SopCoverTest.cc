@@ -888,6 +888,20 @@ TEST_F(SopTest, sort3)
   }
 }
 
+TEST_F(SopTest, to_expr_zero)
+{
+  auto cover1 = SopCover{0};
+  auto expr1 = cover1.expr();
+  EXPECT_TRUE( expr1.is_zero() );
+}
+
+TEST_F(SopTest, to_expr_one)
+{
+  auto cover1 = SopCover{0, vector<vector<Literal>>{{}} };
+  auto expr1 = cover1.expr();
+  EXPECT_TRUE( expr1.is_one() );
+}
+
 TEST_F(SopTest, to_expr1)
 {
   auto cube1 = SopCube{3, {lit0, lit1}};

@@ -5,15 +5,11 @@
 /// @brief TvFunc のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2016-2017, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
 #include "ym/Literal.h"
-#include "ym/SopCover.h"
-#include "ym/BddMgr.h"
-#include "ym/Bdd.h"
-#include "ym/BddVar.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
 
@@ -191,6 +187,30 @@ public:
     return TvFunc{ni, varid, true};
   }
 
+  /// @brief カバーに対応した関数を作る．
+  /// @return 生成したオブジェクトを返す．
+  static
+  TvFunc
+  cover(
+    SizeType ni,                             ///< [in] 入力数
+    const vector<vector<Literal>>& cube_list ///< [in] キューブのリスト
+  )
+  {
+    return TvFunc{ni, cube_list};
+  }
+
+  /// @brief キューブに対応した関数を作る．
+  /// @return 生成したオブジェクトを返す．
+  static
+  TvFunc
+  cube(
+    SizeType ni,                    ///< [in] 入力数
+    const vector<Literal>& lit_list ///< [in] リテラルのリスト
+  )
+  {
+    return TvFunc{ni, lit_list};
+  }
+
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -202,13 +222,6 @@ public:
   invert() const
   {
     return TvFunc{*this}.invert_int();
-  }
-
-  /// @brief invert() の別名
-  TvFunc
-  operator~() const
-  {
-    return invert();
   }
 
   /// @brief 論理積を返す．
@@ -243,6 +256,47 @@ public:
   {
     return TvFunc{*this}.xor_int(right);
   }
+
+  /// @brief コファクターを返す．
+  ///
+  /// lit.varid() が範囲外の時は std::out_of_range 例外が送出される．
+  TvFunc
+  cofactor(
+    Literal lit    ///< [in] リテラル
+  ) const
+  {
+    return TvFunc{*this}.cofactor_int(lit);
+  }
+
+  /// @brief コファクターを返す．
+  ///
+  /// var が範囲外の時は std::out_of_range 例外が送出される．
+  TvFunc
+  cofactor(
+    SizeType var, ///< [in] 変数番号 ( 0 <= var < input_num() )
+    bool inv      ///< [in] 極性
+                  ///<  - false: 反転なし (正極性)
+                  ///<  - true:  反転あり (負極性)
+  ) const
+  {
+    return TvFunc{*this}.cofactor_int(var, inv);
+  }
+
+  /// @brief 共通部分を持つ時 true を返す．
+  ///
+  /// right の入力数が異なる時は std::invalid_argument 例外が送出される．
+  bool
+  check_intersect(
+    const TvFunc& right
+  ) const;
+
+  /// @brief right に包含されている時 true を返す．
+  ///
+  /// right の入力数が異なる時は std::invalid_argument 例外が送出される．
+  bool
+  check_containment(
+    const TvFunc& right
+  ) const;
 
 
 public:
@@ -308,8 +362,24 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // intern 演算のオーバーロード定義
+  // 論理演算のオーバーロード定義
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief invert() の別名
+  TvFunc
+  operator~() const
+  {
+    return invert();
+  }
+
+  /// @brief 論理積を求める．
+  TvFunc
+  operator&(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return and_op(right);
+  }
 
   /// @brief src1 との論理積を計算し自分に代入する．
   /// @return 自身への参照を返す．
@@ -321,6 +391,15 @@ public:
   )
   {
     return and_int(src1);
+  }
+
+  /// @brief 論理和を求める．
+  TvFunc
+  operator|(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return or_op(right);
   }
 
   /// @brief src1 との論理和を計算し自分に代入する．
@@ -335,6 +414,15 @@ public:
     return or_int(src1);
   }
 
+  /// @brief 排他的論理和を求める．
+  TvFunc
+  operator^(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return xor_op(right);
+  }
+
   /// @brief src1 との排他的論理和を計算し自分に代入する．
   /// @return 自身への参照を返す．
   ///
@@ -345,6 +433,86 @@ public:
   )
   {
     return xor_int(src1);
+  }
+
+  /// @brief 等価比較
+  ///
+  /// 入力数の異なる関数間の比較は false となる．
+  bool
+  operator==(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    if ( input_num() != right.input_num() ) {
+      return false;
+    }
+    return _compare(right) == 0;
+  }
+
+  /// @brief 非等価比較
+  ///
+  /// 入力数の異なる関数間の比較は true となる．
+  bool
+  operator!=(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return !operator==(right);
+  }
+
+  /// @brief 大小比較(小なり)
+  ///
+  /// 入力数の異なる関数間の比較は std::invalid_argument 例外を送出する．
+  bool
+  operator<(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return _compare(right) == -1;
+  }
+
+  /// @brief 大小比較(大なり)
+  ///
+  /// 入力数の異なる関数間の比較はまず入力数で比較する．
+  bool
+  operator>(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return right.operator<(*this);
+  }
+
+  /// @brief 大小比較(小なりイコール)
+  ///
+  /// 入力数の異なる関数間の比較はまず入力数で比較する．
+  bool
+  operator<=(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return !operator>(right);
+  }
+
+  /// @brief 大小比較(大なりイコール)
+  ///
+  /// 入力数の異なる関数間の比較はまず入力数で比較する．
+  bool
+  operator>=(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return !operator<(right);
+  }
+
+  /// @brief 交差チェック
+  ///
+  /// 入力数の異なる関数間の比較は false を返す．
+  bool
+  operator&&(
+    const TvFunc& right ///< [in] 第2オペランド
+  ) const
+  {
+    return check_intersect(right);
   }
 
 
@@ -506,38 +674,6 @@ public:
     bool inv = false ///< [in] 反転属性
   ) const;
 
-  /// @brief Blake's Cannonical Form を求める．
-  SopCover
-  BCF() const;
-
-  /// @brief Blake's Cannonical Form を表す Expr を求める．
-  Expr
-  BCF_expr() const;
-
-  /// @brief Merge With Containment を行って積和系論理式を得る．
-  SopCover
-  MWC() const;
-
-  /// @brief Merge With Containment を行って Expr を得る．
-  Expr
-  MWC_expr() const;
-
-  /// @brief BDD に変換する．
-  Bdd
-  bdd(
-    BddMgr& mgr ///< [in] BDDマネージャ
-  ) const;
-
-  /// @brief BDD に変換する．
-  ///
-  /// - var_list.size() >= input_num() でなければ
-  ///   std::invalid_argument 例外を送出する．
-  Bdd
-  bdd(
-    BddMgr& mgr,                   ///< [in] BDDマネージャ
-    const vector<BddVar>& var_list ///< [in] 変数リスト
-  ) const;
-
   /// @brief 内容を表す文字列を返す．
   ///
   /// この値はコンストラクタで用いることができる．
@@ -593,34 +729,8 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // 演算
-  // 多くは演算子のオーバーロードになっているのでここは少ない．
+  // その他の演算
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief コファクターを返す．
-  ///
-  /// lit.varid() が範囲外の時は std::out_of_range 例外が送出される．
-  TvFunc
-  cofactor(
-    Literal lit    ///< [in] リテラル
-  ) const
-  {
-    return TvFunc{*this}.cofactor_int(lit);
-  }
-
-  /// @brief コファクターを返す．
-  ///
-  /// var が範囲外の時は std::out_of_range 例外が送出される．
-  TvFunc
-  cofactor(
-    SizeType var, ///< [in] 変数番号 ( 0 <= var < input_num() )
-    bool inv      ///< [in] 極性
-                  ///<  - false: 反転なし (正極性)
-                  ///<  - true:  反転あり (負極性)
-  ) const
-  {
-    return TvFunc{*this}.cofactor_int(var, inv);
-  }
 
   /// @brief npnmap に従った変換を行う．
   /// @return 変換した関数を返す．
@@ -682,27 +792,6 @@ public:
   constexpr SizeType kMaxNi = 20;
 
 
-public:
-  //////////////////////////////////////////////////////////////////////
-  // フレンド関数の定義
-  // ここの public に意味はない
-  //////////////////////////////////////////////////////////////////////
-
-  friend
-  int
-  compare(
-    const TvFunc& left,
-    const TvFunc& right
-  );
-
-  friend
-  bool
-  operator&&(
-    const TvFunc& left,
-    const TvFunc& right
-  );
-
-
 private:
   //////////////////////////////////////////////////////////////////////
   // 内部で使われる関数
@@ -717,9 +806,6 @@ private:
   );
 
   /// @brief リテラル関数を作るコンストラクタ
-  /// @param[in] ni
-  /// @param[in] varid 変数番号
-  /// @param[in] inv 極性
   TvFunc(
     SizeType ni,    ///< [in] 入力数
     SizeType varid, ///< [in] 変数
@@ -728,13 +814,28 @@ private:
                     ///< - true:  反転あり (負極性)
   );
 
-  /// @brief bdd() の下請け関数
-  Bdd
-  bdd_sub(
-    SizeType top,                 ///< [in] 変数
-    SizeType start,               ///< [in] 開始位置
-    SizeType end,                 ///< [in] 終了位置
-    const vector<SizeType>& order ///< [in] 変数順
+  /// @brief カバー関数を作るコンストラクタ
+  TvFunc(
+    SizeType ni,                             ///< [in] 入力数
+    const vector<vector<Literal>>& cube_list ///< [in] キューブのリスト
+  );
+
+  /// @brief キューブ関数を作るコンストラクタ
+  TvFunc(
+    SizeType ni,                    ///< [in] 入力数
+    const vector<Literal>& lit_list ///< [in] リテラルのリスト
+  );
+
+  /// @brief 比較関数
+  /// @retval -1 left < right
+  /// @retval  0 left = right
+  /// @retval  1 left > right
+  ///
+  /// 入力数の異なる関数間の比較は false となる．
+  /// 入力数の異なる関数間の比較はまず入力数で比較する．
+  int
+  _compare(
+    const TvFunc& right ///< [in] 第2オペランド
   ) const;
 
   /// @brief コファクターマスクを得る．
@@ -787,18 +888,19 @@ private:
 
   /// @brief 同じサイズの関数かチェックする．
   void
-  check_size(
+  _check_size(
     const TvFunc& src
-  )
+  ) const
   {
     if ( src.input_num() != input_num() ) {
+      abort();
       throw std::invalid_argument{"input_num() mismatch"};
     }
   }
 
   /// @brief varid が適切かチェックする．
   void
-  check_varid(
+  _check_varid(
     SizeType varid,
     const string& varname = "varid"
   ) const
@@ -833,29 +935,6 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /// @relates TvFunc
-/// @brief 否定を求める
-inline
-TvFunc
-operator~(
-  TvFunc&& right ///< [in] オペランド
-)
-{
-  return TvFunc{right}.invert_int();
-}
-
-/// @relates TvFunc
-/// @brief 論理積を求める．
-inline
-TvFunc
-operator&(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return TvFunc{left}.and_op(right);
-}
-
-/// @relates TvFunc
 /// @brief 論理積を求める．
 inline
 TvFunc
@@ -864,7 +943,7 @@ operator&(
   const TvFunc& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc{left}.and_int(right);
+  return TvFunc{std::move(left)}.and_int(right);
 }
 
 /// @relates TvFunc
@@ -876,7 +955,7 @@ operator&(
   TvFunc&& right      ///< [in] 第2オペランド
 )
 {
-  return TvFunc{right}.and_int(left);
+  return TvFunc{std::move(right)}.and_int(left);
 }
 
 /// @relates TvFunc
@@ -888,19 +967,7 @@ operator&(
   TvFunc&& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc{left}.and_int(right);
-}
-
-/// @relates TvFunc
-/// @brief 論理和を求める．
-inline
-TvFunc
-operator|(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return TvFunc{left}.or_op(right);
+  return TvFunc{std::move(left)}.and_int(right);
 }
 
 /// @relates TvFunc
@@ -912,7 +979,7 @@ operator|(
   const TvFunc& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).or_int(right);
+  return TvFunc{std::move(left)}.or_int(right);
 }
 
 /// @relates TvFunc
@@ -924,7 +991,7 @@ operator|(
   TvFunc&& right      ///< [in] 第2オペランド
 )
 {
-  return TvFunc(right).or_int(left);
+  return TvFunc{std::move(right)}.or_int(left);
 }
 
 /// @relates TvFunc
@@ -936,19 +1003,7 @@ operator|(
   TvFunc&& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).or_int(right);
-}
-
-/// @relates TvFunc
-/// @brief 排他的論理和を求める．
-inline
-TvFunc
-operator^(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return TvFunc{left}.xor_op(right);
+  return TvFunc{std::move(left)}.or_int(right);
 }
 
 /// @relates TvFunc
@@ -960,7 +1015,7 @@ operator^(
   const TvFunc& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).xor_int(right);
+  return TvFunc{std::move(left)}.xor_int(right);
 }
 
 /// @relates TvFunc
@@ -972,7 +1027,7 @@ operator^(
   TvFunc&& right      ///< [in] 第2オペランド
 )
 {
-  return TvFunc(right).xor_int(left);
+  return TvFunc{std::move(right)}.xor_int(left);
 }
 
 /// @relates TvFunc
@@ -984,115 +1039,8 @@ operator^(
   TvFunc&& right ///< [in] 第2オペランド
 )
 {
-  return TvFunc(left).xor_int(right);
+  return TvFunc{std::move(left)}.xor_int(right);
 }
-
-/// @relates TvFunc
-/// @brief 比較関数
-/// @retval -1 left < right
-/// @retval  0 left = right
-/// @retval  1 left > right
-///
-/// 入力数の異なる関数間の比較はまず入力数で比較する．
-int
-compare(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-);
-
-/// @relates TvFunc
-/// @brief 等価比較
-///
-/// 入力数の異なる関数間の比較は false となる．
-inline
-bool
-operator==(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) == 0;
-}
-
-/// @relates TvFunc
-/// @brief 非等価比較
-///
-/// 入力数の異なる関数間の比較は true となる．
-inline
-bool
-operator!=(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return !operator==(left, right);
-}
-
-/// @relates TvFunc
-/// @brief 大小比較(小なり)
-///
-/// 入力数の異なる関数間の比較はまず入力数で比較する．
-inline
-bool
-operator<(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return compare(left, right) == -1;
-}
-
-/// @relates TvFunc
-/// @brief 大小比較(大なり)
-///
-/// 入力数の異なる関数間の比較はまず入力数で比較する．
-inline
-bool
-operator>(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return operator<(right, left);
-}
-
-/// @relates TvFunc
-/// @brief 大小比較(小なりイコール)
-///
-/// 入力数の異なる関数間の比較はまず入力数で比較する．
-inline
-bool
-operator<=(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return !operator<(right, left);
-}
-
-/// @relates TvFunc
-/// @brief 大小比較(大なりイコール)
-///
-/// 入力数の異なる関数間の比較はまず入力数で比較する．
-inline
-bool
-operator>=(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-)
-{
-  return !operator<(left, right);
-}
-
-/// @relates TvFunc
-/// @brief 交差チェック
-///
-/// 入力数の異なる関数間の比較は false を返す．
-bool
-operator&&(
-  const TvFunc& left, ///< [in] 第1オペランド
-  const TvFunc& right ///< [in] 第2オペランド
-);
 
 /// @relates TvFunc
 /// @brief ストリームに対する出力

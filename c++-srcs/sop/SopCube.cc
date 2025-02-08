@@ -272,6 +272,31 @@ SopCube::expr() const
   return _to_expr(1, chunk());
 }
 
+// @brief TvFunc に変換する．
+TvFunc
+SopCube::tvfunc() const
+{
+  return TvFunc::cube(variable_num(), literal_list());
+}
+
+// @brief キューブのリスト（カバー）を TvFunc に変換する．
+TvFunc
+SopCube::tvfunc(
+  const vector<SopCube>& cube_list
+)
+{
+  if ( cube_list.empty() ) {
+    return TvFunc{};
+  }
+  SizeType ni = cube_list.front().variable_num();
+  vector<vector<Literal>> lits_list;
+  lits_list.reserve(cube_list.size());
+  for ( auto& cube: cube_list ) {
+    lits_list.push_back(cube.literal_list());
+  }
+  return TvFunc::cover(ni, lits_list);
+}
+
 // @brief ハッシュ値を返す．
 SizeType
 SopCube::hash() const

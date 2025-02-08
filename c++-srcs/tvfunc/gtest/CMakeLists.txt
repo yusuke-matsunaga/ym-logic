@@ -42,8 +42,8 @@ ym_add_gtest ( logic_TvFunc_analyze_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
-ym_add_gtest ( logic_TvFunc_bcf_test
-  TvFuncTest_bcf.cc
+ym_add_gtest ( logic_Tv2Sop_test
+  Tv2SopTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )

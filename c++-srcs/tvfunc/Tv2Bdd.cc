@@ -3,53 +3,55 @@
 /// @brief Tv2Bdd の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/TvFunc.h"
-#include "Tv2Bdd.h"
+#include "ym/Tv2Bdd.h"
+#include "BddGen.h"
 
 
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-// クラス TvFunc
+// クラス Tv2Bdd
 //////////////////////////////////////////////////////////////////////
 
-// @brief BDD に変換する．
+// @brief TvFunc を BDD に変換する．
 Bdd
-TvFunc::bdd(
+Tv2Bdd::gen_bdd(
+  const TvFunc& f,
   BddMgr& mgr
-) const
+)
 {
-  auto ni = input_num();
+  auto ni = f.input_num();
   vector<BddVar> var_list(ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
     var_list[i] = mgr.variable(ni - i - 1);
   }
-  return bdd(mgr, var_list);
+  return gen_bdd(f, mgr, var_list);
 }
 
-// @brief BDD に変換する．
+// @brief TvFunc を BDD に変換する．
 Bdd
-TvFunc::bdd(
+Tv2Bdd::gen_bdd(
+  const TvFunc& f,
   BddMgr& mgr,
   const vector<BddVar>& var_list
-) const
+)
 {
-  Tv2Bdd tv2bdd{mgr, *this, var_list};
-  auto r = tv2bdd.run();
+  BddGen gen{f, mgr, var_list};
+  auto r = gen.run();
   return r;
 }
 
 
 //////////////////////////////////////////////////////////////////////
-// クラス Tv2Bdd
+// クラス BddGen
 //////////////////////////////////////////////////////////////////////
 
 // @brief BDD を作る．
 Bdd
-Tv2Bdd::run()
+BddGen::run()
 {
   SizeType ni = mFunc.input_num();
   SizeType nexp = 1UL << ni;
@@ -58,7 +60,7 @@ Tv2Bdd::run()
 
 // @brief run() の下請け関数
 Bdd
-Tv2Bdd::decomp_step(
+BddGen::decomp_step(
   SizeType var,
   SizeType start,
   SizeType end

@@ -12,6 +12,7 @@
 #include "pym/PyPrimType.h"
 #include "pym/PySopCover.h"
 #include "pym/PyModule.h"
+#include "ym/Tv2Sop.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -699,7 +700,7 @@ TvFunc_bcf(
 )
 {
   auto& func = PyTvFunc::Get(self);
-  auto cov = func.BCF();
+  auto cov = Tv2Sop::BCF(func);
   return PySopCover::ToPyObject(cov);
 }
 
@@ -710,7 +711,7 @@ TvFunc_mwc(
 )
 {
   auto& func = PyTvFunc::Get(self);
-  auto cov = func.MWC();
+  auto cov = Tv2Sop::MWC(func);
   return PySopCover::ToPyObject(cov);
 }
 

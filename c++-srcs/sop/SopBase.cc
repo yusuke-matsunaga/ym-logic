@@ -150,6 +150,15 @@ SopBase::_to_expr(
   const Chunk& chunk
 ) const
 {
+  // 特例
+  if ( _cube_size() == 0 ) {
+    if ( cube_num == 0 ) {
+      return Expr::zero();
+    }
+    else {
+      return Expr::one();
+    }
+  }
   auto ans = Expr::zero();
   auto cube_list = _cube_list(chunk, 0, cube_num);
   for ( auto cube: cube_list ) {
@@ -196,6 +205,7 @@ SopBase::_print(
 ) const
 {
   const char* spc = "";
+  bool empty = true;
   for ( SizeType var = 0; var < variable_num(); ++ var ) {
     string varname;
     if ( varname_list.size() > var ) {
@@ -210,11 +220,16 @@ SopBase::_print(
     if ( pat == SopPat::_1 ) {
       s << spc << varname;
       spc = " ";
+      empty = false;
     }
     else if ( pat == SopPat::_0 ) {
       s << spc << varname << "'";
       spc = " ";
+      empty = false;
     }
+  }
+  if ( empty ) {
+    s << "{}";
   }
 }
 

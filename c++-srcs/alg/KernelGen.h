@@ -26,10 +26,10 @@ class KernelGen
 public:
 
   /// @brief コンストラクタ
-  KernelGen();
+  KernelGen() = default;
 
   /// @brief デストラクタ
-  ~KernelGen();
+  ~KernelGen() = default;
 
 
 public:
@@ -106,7 +106,16 @@ private:
   hash_add(
     AlgCover&& kernel,
     const AlgCube& cokernel
-  );
+  )
+  {
+    if ( mKernelDict.count(kernel) == 0 ) {
+      mKernelDict.emplace(std::move(kernel), AlgCover{cokernel});
+    }
+    else {
+      auto& cokernels = mKernelDict.at(kernel);
+      cokernels += cokernel;
+    }
+  }
 
 
 private:

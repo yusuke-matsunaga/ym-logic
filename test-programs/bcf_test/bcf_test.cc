@@ -8,6 +8,7 @@
 
 #include <libgen.h>
 #include "ym/TvFunc.h"
+#include "ym/Tv2Sop.h"
 #include "ym/Range.h"
 #include <random>
 
@@ -73,7 +74,7 @@ bcf_test(
       }
     }
     auto func = TvFunc{ni, values};
-    auto cov = func.BCF();
+    auto cov = Tv2Sop::BCF(func);
     cout << "BCF = ";
     cov.print(cout);
     cout << endl;

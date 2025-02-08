@@ -126,7 +126,7 @@ def test_cube_product1():
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
     cube2 = SopCube(ni, literal_list=[lit1, lit2])
 
-    cube3 = cube1 * cube2
+    cube3 = cube1 & cube2
 
     lit_list = cube3.literal_list()
     assert len(lit_list) == 3
@@ -144,7 +144,7 @@ def test_cube_product2():
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
     cube2 = SopCube(ni, literal_list=[lit1, lit4])
 
-    cube3 = cube1 * cube2
+    cube3 = cube1 & cube2
 
     lit_list = cube3.literal_list()
     assert len(lit_list) == 0
@@ -158,7 +158,7 @@ def test_cube_product_int1():
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
     cube2 = SopCube(ni, literal_list=[lit1, lit2])
 
-    cube1 *= cube2
+    cube1 &= cube2
 
     lit_list = cube1.literal_list()
     assert len(lit_list) == 3
@@ -176,7 +176,7 @@ def test_cube_product_int2():
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
     cube2 = SopCube(ni, literal_list=[lit1, lit4])
 
-    cube1 *= cube2
+    cube1 &= cube2
 
     lit_list = cube1.literal_list()
     assert len(lit_list) == 0
@@ -189,7 +189,7 @@ def test_lit_cube_product1():
 
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
 
-    cube3 = lit1 * cube1
+    cube3 = lit1 & cube1
 
     lit_list = cube3.literal_list()
     assert len(lit_list) == 3
@@ -205,7 +205,7 @@ def test_lit_cube_product2():
 
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
 
-    cube3 = lit1 * cube1
+    cube3 = lit1 & cube1
 
     lit_list = cube3.literal_list()
     assert len(lit_list) == 0
@@ -218,7 +218,7 @@ def test_cube_lit_product1():
 
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
 
-    cube3 = cube1 * lit1
+    cube3 = cube1 & lit1
 
     lit_list = cube3.literal_list()
     assert len(lit_list) == 3
@@ -234,7 +234,7 @@ def test_cube_lit_product2():
 
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
 
-    cube3 = cube1 * lit1
+    cube3 = cube1 & lit1
 
     lit_list = cube3.literal_list()
     assert len(lit_list) == 0
@@ -247,7 +247,7 @@ def test_lit_product_int1():
 
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
 
-    cube1 *= lit1
+    cube1 &= lit1
 
     lit_list = cube1.literal_list()
     assert len(lit_list) == 3
@@ -263,7 +263,7 @@ def test_lit_product_int2():
 
     cube1 = SopCube(ni, literal_list=[lit2, lit3])
 
-    cube1 *= lit1
+    cube1 &= lit1
 
     lit_list = cube1.literal_list()
     assert len(lit_list) == 0

@@ -253,6 +253,13 @@ SopCover::expr() const
   return _to_expr(cube_num(), chunk());
 }
 
+// @brief TvFunc に変換する．
+TvFunc
+SopCover::tvfunc() const
+{
+  return TvFunc::cover(variable_num(), literal_list());
+}
+
 // @brief ハッシュ値を返す．
 SizeType
 SopCover::hash() const

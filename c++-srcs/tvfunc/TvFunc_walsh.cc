@@ -269,7 +269,7 @@ TvFunc::walsh_1(
     return 0;
   }
 
-  check_varid(varid);
+  _check_varid(varid);
 
   switch ( input_num() ) {
   case 0: ASSERT_NOT_REACHED;
@@ -305,8 +305,8 @@ TvFunc::walsh_2(
     return 0;
   }
 
-  check_varid(var1, "var1");
-  check_varid(var2, "var2");
+  _check_varid(var1, "var1");
+  _check_varid(var2, "var2");
 
   if ( var1 == var2 ) {
     return 0;

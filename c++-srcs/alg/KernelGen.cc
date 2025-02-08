@@ -40,16 +40,6 @@ AlgCover::best_kernel() const
 // クラス KernelGen
 //////////////////////////////////////////////////////////////////////
 
-// @brief コンストラクタ
-KernelGen::KernelGen()
-{
-}
-
-// @brief デストラクタ
-KernelGen::~KernelGen()
-{
-}
-
 // @brief カーネルとコカーネルを列挙する．
 vector<pair<AlgCover, AlgCover>>
 KernelGen::all_kernels(
@@ -218,22 +208,6 @@ KernelGen::kern_sub(
 
     // cover1/ccube1 を記録．
     hash_add(std::move(cover1), ccube1);
-  }
-}
-
-// @brief ハッシュ表に登録する．
-void
-KernelGen::hash_add(
-  AlgCover&& kernel,
-  const AlgCube& cokernel
-)
-{
-  if ( mKernelDict.count(kernel) == 0 ) {
-    mKernelDict.emplace(std::move(kernel), AlgCover{cokernel});
-  }
-  else {
-    auto& cokernels = mKernelDict.at(kernel);
-    cokernels += cokernel;
   }
 }
 

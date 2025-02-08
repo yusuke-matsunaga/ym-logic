@@ -149,6 +149,15 @@ AlgBase::_to_expr(
   const Chunk& chunk
 ) const
 {
+  // 特例
+  if ( _cube_size() == 0 ) {
+    if ( cube_num == 0 ) {
+      return Expr::zero();
+    }
+    else {
+      return Expr::one();
+    }
+  }
   auto ans = Expr::zero();
   auto cube_list = _cube_list(chunk, 0, cube_num);
   for ( auto cube: cube_list ) {

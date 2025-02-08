@@ -1,11 +1,11 @@
-#ifndef TV2BDD_H
-#define TV2BDD_H
+#ifndef BDDGEN_H
+#define BDDGEN_H
 
-/// @file Tv2Bdd.h
-/// @brief Tv2Bdd のヘッダファイル
+/// @file BddGen.h
+/// @brief BddGen のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
@@ -17,26 +17,26 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class Tv2Bdd Tv2Bdd.h "Tv2Bdd.h"
-/// @brief TvFunc を Bdd に変換するためのクラス
+/// @class BddGen BddGen.h "BddGen.h"
+/// @brief Tv2Bdd の実際の処理を行うクラス
 //////////////////////////////////////////////////////////////////////
-class Tv2Bdd
+class BddGen
 {
 public:
 
   /// @brief コンストラクタ
-  Tv2Bdd(
-    BddMgr& mgr,                   ///< [in] BDD マネージャ
+  BddGen(
     const TvFunc& func,            ///< [in] 対象の関数
+    BddMgr& mgr,                   ///< [in] BDD マネージャ
     const vector<BddVar>& var_list ///< [in] 変数リスト
-  ) : mMgr{mgr},
-      mFunc{func},
+  ) : mFunc{func},
+      mMgr{mgr},
       mVarList{var_list}
   {
   }
 
   /// @brief デストラクタ
-  ~Tv2Bdd() = default;
+  ~BddGen() = default;
 
 
 public:
@@ -68,11 +68,11 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // BDD マネージャ
-  BddMgr& mMgr;
-
   // 対象の関数
   const TvFunc& mFunc;
+
+  // BDD マネージャ
+  BddMgr& mMgr;
 
   // 変数のリスト
   vector<BddVar> mVarList;
@@ -81,4 +81,4 @@ private:
 
 END_NAMESPACE_YM
 
-#endif // TV2BDD_H
+#endif // BDDGEN_H

@@ -208,6 +208,106 @@ TEST_P(TvFuncTestWithParam, nega_literal)
   }
 }
 
+TEST_P(TvFuncTestWithParam, cube1)
+{
+  init_values();
+  SizeType ni = GetParam();
+  SizeType ni_exp = 1U << ni;
+  for ( SizeType i: Range(ni) ) {
+    for ( auto lit: {Literal{i, false}, Literal{i, true}} ) {
+      auto lit_list = {lit};
+      auto f1 = TvFunc::cube(ni, lit_list);
+      for ( int p: Range(ni_exp) ) {
+	auto pval = lit.is_positive() ? 1 : 0;
+	auto nval = lit.is_positive() ? 0 : 1;
+	if ( p & (1U << i) ) {
+	  mValues[p] = pval;
+	}
+	else {
+	  mValues[p] = nval;
+	}
+      }
+      ostringstream buf1;
+      buf1 << "TvFunc::cube(" << ni << ", {" << lit << "})";
+      check_func(f1, mValues, false, buf1.str());
+    }
+  }
+}
+
+TEST_P(TvFuncTestWithParam, cube2)
+{
+  init_values();
+  SizeType ni = GetParam();
+  SizeType ni_exp = 1U << ni;
+  SizeType nsample = ni < 13 ? 100 : ni < 14 ? 20 : 5;
+  std::uniform_int_distribution<SizeType> rd(0, ni - 1);
+  for ( SizeType i: Range(ni) ) {
+    for ( SizeType c: Range(nsample) ) {
+      // リテラル数
+      SizeType nlit = rd(mRandGen) + 1;
+      vector<Literal> lit_list(nlit);
+      for ( SizeType i = 0; i < nlit; ++ i ) {
+	auto varid = rd(mRandGen);
+	auto inv = mRandDist(mRandGen) ? true : false;
+	auto lit = Literal{varid, inv};
+	lit_list[i] = lit;
+      }
+      auto f1 = TvFunc::cube(ni, lit_list);
+      // 期待値は TvFunc::Literal() から作る．
+      auto exp_f = TvFunc::one(ni);
+      for ( auto lit: lit_list ) {
+	auto lit_f = TvFunc::literal(ni, lit);
+	exp_f &= lit_f;
+      }
+      ostringstream buf1;
+      buf1 << "TvFunc::cube(" << ni << ", {";
+      const char* comma = "";
+      for ( auto lit: lit_list ) {
+	buf1 << comma << lit;
+	comma = ", ";
+      }
+      buf1 << "})";
+      EXPECT_EQ( exp_f, f1 ) << buf1.str();
+    }
+  }
+}
+
+TEST_P(TvFuncTestWithParam, cover1)
+{
+  init_values();
+  SizeType ni = GetParam();
+  SizeType ni_exp = 1U << ni;
+  SizeType nsample = ni < 13 ? 100 : ni < 14 ? 20 : 5;
+  std::uniform_int_distribution<SizeType> rd(0, ni - 1);
+  for ( SizeType i: Range(ni) ) {
+    for ( SizeType c: Range(nsample) ) {
+      // キューブ数は２
+      SizeType nlit1 = rd(mRandGen) + 1;
+      vector<Literal> lit_list1(nlit1);
+      for ( SizeType i = 0; i < nlit1; ++ i ) {
+	auto varid = rd(mRandGen);
+	auto inv = mRandDist(mRandGen) ? true : false;
+	auto lit = Literal{varid, inv};
+	lit_list1[i] = lit;
+      }
+      SizeType nlit2 = rd(mRandGen) + 1;
+      vector<Literal> lit_list2(nlit2);
+      for ( SizeType i = 0; i < nlit2; ++ i ) {
+	auto varid = rd(mRandGen);
+	auto inv = mRandDist(mRandGen) ? true : false;
+	auto lit = Literal{varid, inv};
+	lit_list2[i] = lit;
+      }
+      auto f1 = TvFunc::cover(ni, {lit_list1, lit_list2});
+      // 期待値
+      auto cube1 = TvFunc::cube(ni, lit_list1);
+      auto cube2 = TvFunc::cube(ni, lit_list2);
+      auto exp_f = cube1 | cube2;
+      EXPECT_EQ( exp_f, f1 );
+    }
+  }
+}
+
 TEST_P(TvFuncTestWithParam, random_func)
 {
   init_values();

@@ -1,15 +1,14 @@
 
-/// @file TvFuncTest_bcf.cc
-/// @brief TvFunc::BCF() のテストプログラム
+/// @file Tv2SopTest.cc
+/// @brief Tv2Sop のテストプログラム
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "gtest/gtest.h"
-#include "ym/TvFunc.h"
+#include "ym/Tv2Sop.h"
 #include "ym/Range.h"
-#include "ym/SopCube.h"
 #include "TvFuncTest.h"
 
 
@@ -107,11 +106,9 @@ prime_cover(
 
 TEST(TvFuncTest, bcf1)
 {
-  vector<int> vect{0, 1, 1, 1};
-  TvFunc f{2, vect};
-
-  auto cov = f.BCF();
-
+  auto vect = vector<int>{0, 1, 1, 1};
+  auto f = TvFunc{2, vect};
+  auto cov = Tv2Sop::BCF(f);
   auto exp_cov = prime_cover(f);
   EXPECT_EQ( exp_cov, cov );
 
@@ -122,11 +119,9 @@ TEST(TvFuncTest, bcf1)
 
 TEST(TvFuncTest, bcf2)
 {
-  vector<int> vect{0, 0, 0, 1, 0, 1, 1, 1};
-  TvFunc f{3, vect};
-
-  auto cov = f.BCF();
-
+  auto vect = vector<int>{0, 0, 0, 1, 0, 1, 1, 1};
+  auto f = TvFunc{3, vect};
+  auto cov = Tv2Sop::BCF(f);
   auto exp_cov = prime_cover(f);
   EXPECT_EQ( exp_cov, cov );
 
@@ -137,11 +132,9 @@ TEST(TvFuncTest, bcf2)
 
 TEST(TvFuncTest, bcf3)
 {
-  vector<int> vect{1, 1, 1, 1, 0, 1, 0, 0};
-  TvFunc f{3, vect};
-
-  auto cov = f.BCF();
-
+  auto vect = vector<int>{1, 1, 1, 1, 0, 1, 0, 0};
+  auto f = TvFunc{3, vect};
+  auto cov = Tv2Sop::BCF(f);
   auto exp_cov = prime_cover(f);
   EXPECT_EQ( exp_cov, cov );
 }
@@ -169,7 +162,7 @@ TEST_P(TvFuncTestWithParam, bcf)
     return;
   }
 
-  vector<int> values(ni_exp, 0);
+  auto values = vector<int>(ni_exp, 0);
   for ( SizeType c: Range(n) ) {
     for ( auto p: Range(ni_exp) ) {
       if ( ni <= 4 ) {
@@ -190,10 +183,114 @@ TEST_P(TvFuncTestWithParam, bcf)
       }
     }
     auto func = TvFunc{ni, values};
-    auto cov = func.BCF();
+    auto cov = Tv2Sop::BCF(func);
     // 正解を計算する．
     auto exp_cov = prime_cover(func);
     EXPECT_EQ( exp_cov, cov );
+  }
+}
+
+TEST_P(TvFuncTestWithParam, mwc)
+{
+  SizeType ni = GetParam();
+  auto ni_exp = 1 << ni;
+
+  // テストのサンプル数
+  SizeType n;
+  if ( ni < 1 ) {
+    return;
+  }
+  else if ( ni <= 4 ) {
+    n = (1 << ni_exp);
+  }
+  else if ( ni < 7 ) {
+    n = 1000;
+  }
+  else if ( ni < 10 ) {
+    n =100;
+  }
+  else {
+    return;
+  }
+
+  auto values = vector<int>(ni_exp, 0);
+  for ( SizeType c: Range(n) ) {
+    for ( auto p: Range(ni_exp) ) {
+      if ( ni <= 4 ) {
+	if ( c & (1 << p) ) {
+	  values[p] = 1;
+	}
+	else {
+	  values[p] = 0;
+	}
+      }
+      else {
+	if ( mRandDist(mRandGen) ) {
+	  values[p] = 1;
+	}
+	else {
+	  values[p] = 0;
+	}
+      }
+    }
+    auto func = TvFunc{ni, values};
+    auto cov = Tv2Sop::MWC(func);
+    // TvFunc に再変換して func と等しいか調べる．
+    // ヒューリスティックの簡単化なので正解はない．
+    auto exp_func = cov.tvfunc();
+    EXPECT_EQ( exp_func, func );
+  }
+}
+
+TEST_P(TvFuncTestWithParam, isop)
+{
+  SizeType ni = GetParam();
+  auto ni_exp = 1 << ni;
+
+  // テストのサンプル数
+  SizeType n;
+  if ( ni < 1 ) {
+    return;
+  }
+  else if ( ni <= 4 ) {
+    n = (1 << ni_exp);
+  }
+  else if ( ni < 7 ) {
+    n = 1000;
+  }
+  else if ( ni < 10 ) {
+    n =100;
+  }
+  else {
+    return;
+  }
+
+  auto values = vector<int>(ni_exp, 0);
+  for ( SizeType c: Range(n) ) {
+    for ( auto p: Range(ni_exp) ) {
+      if ( ni <= 4 ) {
+	if ( c & (1 << p) ) {
+	  values[p] = 1;
+	}
+	else {
+	  values[p] = 0;
+	}
+      }
+      else {
+	if ( mRandDist(mRandGen) ) {
+	  values[p] = 1;
+	}
+	else {
+	  values[p] = 0;
+	}
+      }
+    }
+    auto func = TvFunc{ni, values};
+    auto cov = Tv2Sop::ISOP(func);
+    // TvFunc に再変換して func と等しいか調べる．
+    // ヒューリスティックの簡単化なので正解はない．
+    auto exp_func = cov.tvfunc();
+    EXPECT_EQ( exp_func, func );
   }
 }
 

@@ -2658,6 +2658,20 @@ TEST_F(AlgTest, common_cube)
   EXPECT_FALSE( cube1.check_literal(~lit9) );
 };
 
+TEST_F(AlgTest, to_expr_zero)
+{
+  auto cover1 = AlgCover{0};
+  auto expr1 = cover1.expr();
+  EXPECT_TRUE( expr1.is_zero() );
+}
+
+TEST_F(AlgTest, to_expr_one)
+{
+  auto cover1 = AlgCover{0, vector<vector<Literal>>{{}} };
+  auto expr1 = cover1.expr();
+  EXPECT_TRUE( expr1.is_one() );
+}
+
 TEST_F(AlgTest, to_expr1)
 {
   auto cube1 = AlgCube{3, {lit0, lit1}};

@@ -143,12 +143,74 @@ TvFunc::TvFunc(
     mBlockNum{nblock(ni)},
     mVector{new TvFunc::WordType[mBlockNum]}
 {
-  check_varid(varid);
+  _check_varid(varid);
 
   for ( SizeType b: Range(mBlockNum) ) {
     TvFunc::WordType pat = lit_pat(varid, b);
     if ( inv ) {
       pat = ~pat;
+    }
+    mVector[b] = pat;
+  }
+  mVector[0] &= vec_mask(ni);
+}
+
+// @brief カバーに対応した関数を作るコンストラクタ
+TvFunc::TvFunc(
+  SizeType ni,
+  const vector<vector<Literal>>& cube_list
+) : mInputNum{ni},
+    mBlockNum{nblock(ni)},
+    mVector{new TvFunc::WordType[mBlockNum]}
+{
+  for ( auto& cube: cube_list ) {
+    for ( auto lit: cube ) {
+      _check_varid(lit.varid());
+    }
+  }
+
+  for ( SizeType b: Range(mBlockNum) ) {
+    TvFunc::WordType pat0 = 0x0000000000000000ULL;
+    for ( auto& cube: cube_list ) {
+      TvFunc::WordType pat1 = 0xFFFFFFFFFFFFFFFFULL;
+      for ( auto lit: cube ) {
+	auto varid = lit.varid();
+	auto inv = lit.is_negative();
+	auto pat2 = lit_pat(varid, b);
+	if ( inv ) {
+	  pat2 = ~pat2;
+	}
+	pat1 &= pat2;
+      }
+      pat0 |= pat1;
+    }
+    mVector[b] = pat0;
+  }
+  mVector[0] &= vec_mask(ni);
+}
+
+// @brief キューブに対応した関数を作るコンストラクタ
+TvFunc::TvFunc(
+  SizeType ni,
+  const vector<Literal>& lit_list
+) : mInputNum{ni},
+    mBlockNum{nblock(ni)},
+    mVector{new TvFunc::WordType[mBlockNum]}
+{
+  for ( auto lit: lit_list ) {
+    _check_varid(lit.varid());
+  }
+
+  for ( SizeType b: Range(mBlockNum) ) {
+    TvFunc::WordType pat = 0xFFFFFFFFFFFFFFFFULL;
+    for ( auto lit: lit_list ) {
+      auto varid = lit.varid();
+      auto inv = lit.is_negative();
+      auto pat1 = lit_pat(varid, b);
+      if ( inv ) {
+	pat1 = ~pat1;
+      }
+      pat &= pat1;
     }
     mVector[b] = pat;
   }
@@ -330,7 +392,7 @@ TvFunc::and_int(
 )
 {
   if ( is_valid() ) {
-    check_size(src1);
+    _check_size(src1);
     for ( SizeType b: Range(mBlockNum) ) {
       mVector[b] &= src1.mVector[b];
     }
@@ -345,7 +407,7 @@ TvFunc::or_int(
 )
 {
   if ( is_valid() ) {
-    check_size(src1);
+    _check_size(src1);
     for ( SizeType b: Range(mBlockNum) ) {
       mVector[b] |= src1.mVector[b];
     }
@@ -360,7 +422,7 @@ TvFunc::xor_int(
 )
 {
   if ( is_valid() ) {
-    check_size(src1);
+    _check_size(src1);
     for ( SizeType b: Range(mBlockNum) ) {
       mVector[b] ^= src1.mVector[b];
     }
@@ -376,7 +438,7 @@ TvFunc::cofactor_int(
 )
 {
   if ( is_valid() ) {
-    check_varid(varid);
+    _check_varid(varid);
 
     SizeType pos = varid;
     if ( pos < NIPW ) {
@@ -469,7 +531,7 @@ TvFunc::check_sup(
     return false;
   }
 
-  check_varid(var);
+  _check_varid(var);
 
   SizeType i = var;
   if ( i < NIPW ) {
@@ -507,7 +569,7 @@ TvFunc::check_unate(
     return 3;
   }
 
-  check_varid(varid);
+  _check_varid(varid);
 
   SizeType i = varid;
   bool positive_unate = true;
@@ -584,8 +646,8 @@ TvFunc::check_sym(
     return true;
   }
 
-  check_varid(var1, "var1");
-  check_varid(var2, "var2");
+  _check_varid(var1, "var1");
+  _check_varid(var2, "var2");
 
   SizeType i = var1;
   SizeType j = var2;
@@ -813,23 +875,16 @@ TvFunc::hash() const
 
 // 比較関数
 int
-compare(
-  const TvFunc& func1,
+TvFunc::_compare(
   const TvFunc& func2
-)
+) const
 {
-  // まず入力数を比較する．
-  if ( func1.mInputNum < func2.mInputNum ) {
-    return -1;
-  }
-  if ( func1.mInputNum > func2.mInputNum ) {
-    return 1;
-  }
+  _check_size(func2);
 
   // 以降は入力数が等しい場合
-  SizeType n = func1.mBlockNum;
+  SizeType n = mBlockNum;
   for ( SizeType b: Range(n) ) {
-    TvFunc::WordType w1 = func1.mVector[n - b - 1];
+    TvFunc::WordType w1 = mVector[n - b - 1];
     TvFunc::WordType w2 = func2.mVector[n - b - 1];
     if ( w1 < w2 ) {
       return -1;
@@ -841,27 +896,42 @@ compare(
   return 0;
 }
 
-// @relates TvFunc
 // @brief 交差チェック
 bool
-operator&&(
-  const TvFunc& func1,
+TvFunc::check_intersect(
   const TvFunc& func2
-)
+) const
 {
-  if ( func1.mInputNum != func2.mInputNum ) {
-    return false;
-  }
+  _check_size(func2);
 
-  SizeType n = func1.mBlockNum;
+  SizeType n = mBlockNum;
   for ( SizeType b: Range(n) ) {
-    TvFunc::WordType w1 = func1.mVector[n - b - 1];
+    TvFunc::WordType w1 = mVector[n - b - 1];
     TvFunc::WordType w2 = func2.mVector[n - b - 1];
     if ( (w1 & w2) != 0U ) {
       return true;
     }
   }
   return false;
+}
+
+// @brief 包含チェック
+bool
+TvFunc::check_containment(
+  const TvFunc& func2
+) const
+{
+  _check_size(func2);
+
+  SizeType n = mBlockNum;
+  for ( SizeType b: Range(n) ) {
+    TvFunc::WordType w1 = mVector[n - b - 1];
+    TvFunc::WordType w2 = func2.mVector[n - b - 1];
+    if ( (w1 & ~w2) != 0U ) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // 内容の出力

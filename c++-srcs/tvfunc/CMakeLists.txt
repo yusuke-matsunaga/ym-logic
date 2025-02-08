@@ -26,9 +26,9 @@ add_subdirectory(gtest)
 set (tvfunc_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/TvFunc.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/TvFunc_analyze.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/TvFunc_bcf.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/TvFunc_walsh.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/TvFuncM.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Tv2Sop.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/Tv2Bdd.cc
   PARENT_SCOPE
   )

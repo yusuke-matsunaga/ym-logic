@@ -116,25 +116,6 @@ def test_check_containment_bad():
         cube1.check_containment(cube2)
     with pytest.raises(ValueError) as e:
         cube2.check_containment(cube1)
-
-def test_check_intersect():
-    ni = 10
-    lit1 = Literal(0, inv=False)
-    lit2 = Literal(5, inv=True)
-    lit3 = Literal(7, inv=True)
-
-    cube1 = AlgCube(ni, literal_list=[lit2, lit3])
-    cube2 = AlgCube(ni, literal_list=[lit1, lit2])
-
-    assert cube1.check_intersect(cube2)
-    assert cube2.check_intersect(cube1)
-
-    cube3 = AlgCube(ni, literal_list=[Literal(0, inv=True)])
-
-    assert not cube1.check_intersect(cube3)
-    assert not cube2.check_intersect(cube3)
-    assert not cube3.check_intersect(cube1)
-    assert not cube3.check_intersect(cube2)
     
 def test_cube_product1():
     ni = 10

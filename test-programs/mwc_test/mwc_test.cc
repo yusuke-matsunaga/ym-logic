@@ -3,11 +3,12 @@
 /// @brief mwc_test の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include <libgen.h>
 #include "ym/TvFunc.h"
+#include "ym/Tv2Sop.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -30,9 +31,10 @@ mwc_test(
     vector<TvFunc> func_list;
     SizeType lit_num = 0;
     while ( getline(s, buf) ) {
-      TvFunc f{buf};
+      auto f = TvFunc{buf};
       func_list.push_back(f);
-      auto expr = f.MWC_expr();
+      auto cov = Tv2Sop::MWC(f);
+      auto expr = cov.expr();
       auto f_expr = expr.to_tv(f.input_num());
       if ( f != f_expr ) {
 	bad_outputs.push_back(func_list.size() - 1);

@@ -1,13 +1,13 @@
 
 /// @file Tv2BddTest.cc
-/// @brief Tv2BddTest の実装ファイル
+/// @brief Tv2Bdd のテストプログラム
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include <gtest/gtest.h>
-#include "Tv2Bdd.h"
+#include "ym/Tv2Bdd.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -34,7 +34,7 @@ Tv2BddTest::check_func(
   const TvFunc& func
 )
 {
-  auto bdd = func.bdd(mMgr);
+  auto bdd = Tv2Bdd::gen_bdd(func, mMgr);
 
   SizeType ni = func.input_num();
   SizeType ni_exp = 1UL << ni;
