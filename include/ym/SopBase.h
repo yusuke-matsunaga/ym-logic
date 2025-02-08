@@ -294,8 +294,8 @@ protected:
 
     SizeType blk = _block_pos(var);
     SizeType sft = _shift_num(var);
-    auto p = cube + blk;
-    return static_cast<SopPat>((*p >> sft) & 3ULL);
+    auto word = _get_word(cube, blk);
+    return static_cast<SopPat>((word >> sft) & 3ULL);
   }
 
   /// @brief リテラル数を数える．
@@ -325,21 +325,63 @@ protected:
     const Chunk& chunk, ///< [in] 本体のビットベクタ
     SizeType varid,     ///< [in] 変数番号
     bool inv            ///< [in] 反転属性
-  ) const;
+  ) const
+  {
+    auto blk = _block_pos(varid);
+    auto mask = _get_mask(varid, inv);
+    SizeType ans = 0;
+    auto cube_list = _cube_list(chunk, 0, cube_num);
+    for ( auto cube: cube_list ) {
+      if ( _cube_check_literal(cube, varid, inv) ) {
+	++ ans;
+      }
+    }
+    return ans;
+  }
 
   /// @brief 内容をリテラルのリストのリストに変換する．
   vector<vector<Literal>>
   _literal_list(
     SizeType cube_num, ///< [in] キューブ数
     const Chunk& chunk ///< [in] 本体のビットベクタ
-  ) const;
+  ) const
+  {
+    vector<vector<Literal>> ans_list;
+    ans_list.reserve(cube_num);
+
+    auto cube_list = _cube_list(chunk, 0, cube_num);
+    for ( auto cube: cube_list ) {
+      auto lit_list = _cube_literal_list(cube);
+      ans_list.push_back(lit_list);
+    }
+
+    return ans_list;
+  }
 
   /// @brief ビットベクタからハッシュ値を計算する．
   SizeType
   _hash(
     SizeType cube_num, ///< [in] キューブ数
     const Chunk& chunk ///< [in] 本体のビットベクタ
-  ) const;
+  ) const
+  {
+    // キューブは常にソートされているので
+    // 順番は考慮する必要はない．
+    // ただおなじキューブの中のビットに関しては
+    // 本当は区別しなければならないがどうしようもないので
+    // 16ビットに区切って単純に XOR を取る．
+    SizeType ans = 0;
+    auto begin = _cube(chunk);
+    auto end = _cube(chunk, cube_num);
+    for ( auto p = begin; p != end; ++ p ) {
+      auto pat = *p;
+      ans ^= (pat & 0xFFFFULL); pat >>= 16;
+      ans ^= (pat & 0xFFFFULL); pat >>= 16;
+      ans ^= (pat & 0xFFFFULL); pat >>= 16;
+      ans ^= pat;
+    }
+    return ans;
+  }
 
   /// @brief Expr に変換する．
   Expr
@@ -414,6 +456,45 @@ public:
     }
   }
 
+  /// @brief キューブのリテラル数を返す．
+  SizeType
+  _cube_literal_num(
+    Cube src_cube ///< [in] キューブ
+  ) const;
+
+  /// @brief キューブが指定されたリテラルを含むか調べる．
+  bool
+  _cube_check_literal(
+    Cube src_cube,  ///< [in] キューブ
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 反転属性
+  ) const
+  {
+    auto blk = _block_pos(varid);
+    auto mask = _get_mask(varid, inv);
+    auto word = _get_word(src_cube, blk);
+    if ( (word | mask) == mask ) {
+      return true;
+    }
+    return false;
+  }
+
+  /// @brief キューブの内容をリテラルのリストのリストに変換する．
+  vector<Literal>
+  _cube_literal_list(
+    Cube cube ///< [in] キューブ
+  ) const
+  {
+    vector<Literal> lit_list;
+    lit_list.reserve(_cube_literal_num(cube));
+    auto cube_end = _cube_end(cube);
+    SizeType base = 0;
+    for ( ; cube != cube_end; ++ cube, base += 32 ) {
+      _word_literal_list(*cube, base, lit_list);
+    }
+    return lit_list;
+  }
+
   /// @brief キューブにリテラルをセットする．
   void
   _cube_set_literal(
@@ -472,7 +553,16 @@ public:
   bool
   _cube_check_null(
     Cube cube ///< [in] 対象のビットベクタ
-  ) const;
+  ) const
+  {
+    auto cube_end = _cube_end(cube);
+    for ( ; cube != cube_end; ++ cube ) {
+      if ( *cube != 0UL ) {
+	return false;
+      }
+    }
+    return true;
+  }
 
   /// @brief 2つのキューブの積を計算する．
   /// @retval true 積が空でなかった．
@@ -482,7 +572,19 @@ public:
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
     Cube cube1,       ///< [in] 1つめのキューブを表すビットベクタ
     Cube cube2        ///< [in] 2つめのキューブを表すビットベクタ
-  ) const;
+  ) const
+  {
+    auto dst_end = _cube_end(dst_cube);
+    for ( ; dst_cube != dst_end;
+	  ++ dst_cube, ++ cube1, ++ cube2 ) {
+      auto tmp = *cube1 & *cube2;
+      if ( _word_check_conflict(tmp) ) {
+	return false;
+      }
+      *dst_cube = tmp;
+    }
+    return true;
+  }
 
   /// @brief 2つのキューブの積を計算する．
   /// @retval true 積が空でなかった．
@@ -491,7 +593,18 @@ public:
   _cube_product_int(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
     Cube cube2        ///< [in] 2つめのキューブを表すビットベクタ
-  ) const;
+  ) const
+  {
+    auto dst_end = _cube_end(dst_cube);
+    for ( ; dst_cube != dst_end;
+	  ++ dst_cube, ++ cube2 ) {
+      *dst_cube &= *cube2;
+      if ( _word_check_conflict(*dst_cube) ) {
+	return false;
+      }
+    }
+    return true;
+  }
 
   /// @brief キューブとリテラルの積を計算する．
   /// @retval true 積が空でなかった．
@@ -499,9 +612,28 @@ public:
   bool
   _cube_product(
     DstCube dst_cube,  ///< [in] コピー先のビットベクタ
-    Cube cube1,        ///< [in] 1つめのキューブを表すビットベクタ
+    Cube src_cube,     ///< [in] 1つめのキューブを表すビットベクタ
     Literal lit        ///< [in] リテラル
-  ) const;
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    auto blk = _block_pos(varid);
+    auto sft = _shift_num(varid);
+    auto pat1 = _get_mask(varid, inv);
+    auto mask = 3UL << sft;
+
+    // 単純には答の積項数は2つの積項数の積だが
+    // 相反するリテラルを含む積は数えない．
+    auto tmp = _get_word(src_cube, blk) & pat1;
+    if ( (tmp & mask) == 0ULL ) {
+      // 相反するリテラルがあった．
+      return false;
+    }
+    _cube_copy(dst_cube, src_cube);
+    _set_word(dst_cube, blk, tmp);
+    return true;
+  }
 
   /// @brief キューブとリテラルの積を計算する．
   /// @retval true 積が空でなかった．
@@ -510,7 +642,26 @@ public:
   _cube_product_int(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
     Literal lit       ///< [in] リテラル
-  ) const;
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    auto blk = _block_pos(varid);
+    auto sft = _shift_num(varid);
+    auto pat1 = _get_mask(varid, inv);
+    auto mask = 3UL << sft;
+
+    // 単純には答の積項数は2つの積項数の積だが
+    // 相反するリテラルを含む積は数えない．
+    auto dst_p = dst_cube + blk;
+    *dst_p &= pat1;
+    auto tmp = *dst_p;
+    if ( (tmp & mask) == 0ULL ) {
+      // 相反するリテラルがあった．
+      return false;
+    }
+    return true;
+  }
 
   /// @brief キューブによるコファクターを求める．
   /// @return 正しく割ることができたら true を返す．
@@ -522,7 +673,21 @@ public:
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
     Cube cube1,       ///< [in] 被除数を表すビットベクタ
     Cube cube2        ///< [in] 除数を表すビットベクタ
-  ) const;
+  ) const
+  {
+    auto dst_end = _cube_end(dst_cube);
+    for ( ; dst_cube != dst_end;
+	  ++ dst_cube, ++ cube1, ++ cube2 ) {
+      auto pat1 = *cube1;
+      auto pat2 = *cube2;
+      if ( _word_check_conflict(pat1 & pat2) ) {
+	// この場合の dst の値は不定
+	return false;
+      }
+      *dst_cube = pat1 | ~pat2;
+    }
+    return true;
+  }
 
   /// @brief リテラルによるコファクターを求める．
   /// @return 正しく割ることができたら true を返す．
@@ -532,9 +697,25 @@ public:
   bool
   _cube_cofactor(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
-    Cube cube1,       ///< [in] 被除数を表すビットベクタ
+    Cube src_cube,    ///< [in] 被除数を表すビットベクタ
     Literal lit       ///< [in] リテラル
-  ) const;
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    auto blk = _block_pos(varid);
+    auto sft = _shift_num(varid);
+    auto pat = static_cast<SopPatWord>(_bitpat(!inv)) << sft;
+    auto mask = 3UL << sft;
+    auto src_p = src_cube + blk;
+    if ( (*src_p & mask) == pat ) {
+      return false;
+    }
+    _cube_copy(dst_cube, src_cube);
+    auto dst_p = dst_cube + blk;
+    *dst_p |= mask;
+    return true;
+  }
 
   /// @brief キューブ(を表すビットベクタ)の比較を行う．
   /// @retval -1 bv1 <  bv2
@@ -544,7 +725,21 @@ public:
   _cube_compare(
     Cube cube1, ///< [in] 1つめのキューブを表すビットベクタ
     Cube cube2  ///< [in] 2つめのキューブを表すビットベクタ
-  ) const;
+  ) const
+  {
+    auto src1_end = _cube_end(cube1);
+    for ( ; cube1 != src1_end; ++ cube1, ++ cube2 ) {
+      auto pat1 = *cube1;
+      auto pat2 = *cube2;
+      if ( pat1 > pat2 ) {
+	return -1;
+      }
+      else if ( pat1 < pat2 ) {
+	return 1;
+      }
+    }
+    return 0;
+  }
 
 
 protected:
@@ -627,10 +822,31 @@ protected:
   }
 
   /// @brief ワード中にコンフリクトがあるか調べる．
+  static
   bool
   _word_check_conflict(
     SopPatWord word ///< [in] 対象のワード
-  ) const;
+  )
+  {
+    const SopPatWord mask1 = 0x5555555555555555ULL;
+    const SopPatWord mask2 = 0xAAAAAAAAAAAAAAAAULL;
+    auto tmp1 = word & mask1;
+    auto tmp2 = word & mask2;
+    if ( (tmp1 | (tmp2 >> 1)) != mask1 ) {
+      // 同じ変数の異なる極性のリテラルがあった．
+      return true;
+    }
+    return false;
+  }
+
+  /// @brief ワード中のリテラルをリストに追加する．
+  static
+  void
+  _word_literal_list(
+    SopPatWord word,          ///< [in] 対象のワード
+    SizeType base,            ///< [in] 変数番号の開始位置
+    vector<Literal>& lit_list ///< [out] リテラルを格納するリスト
+  );
 
   /// @brief ブロック位置を計算する．
   static

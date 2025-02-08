@@ -41,58 +41,94 @@ public:
   /// * 空のキューブを作る．
   explicit
   SopCube(
-    SizeType variable_num = 0 ///< [in] 変数の数
-  );
+    SizeType var_num = 0 ///< [in] 変数の数
+  ) : SopBase{var_num},
+      mChunk(_cube_size(), SOP_ALL1)
+  {
+  }
 
   /// @brief コンストラクタ
   ///
   /// * 単一のリテラルからなるキューブを作る．
   SopCube(
-    SizeType variable_num, ///< [in] 変数の数
-    Literal lit            ///< [in] リテラル
-  );
+    SizeType var_num, ///< [in] 変数の数
+    Literal lit       ///< [in] リテラル
+  ) : SopCube{var_num}
+  {
+    _cube_set_literal(mChunk.begin(), lit);
+  }
 
   /// @brief コンストラクタ
   SopCube(
-    SizeType variable_num,          ///< [in] 変数の数
+    SizeType var_num,               ///< [in] 変数の数
     const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
-  );
+  ) : SopCube{var_num}
+  {
+    _cube_set_literals(mChunk.begin(), lit_list);
+  }
 
   /// @brief コンストラクタ
   SopCube(
-    SizeType variable_num,              ///< [in] 変数の数
-    initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト初期化子
-  );
+    SizeType var_num,                   ///< [in] 変数の数
+    initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラル
+                                        ///<      のリスト初期化子
+  ) : SopCube{var_num}
+  {
+    _cube_set_literals(mChunk.begin(), lit_list);
+  }
 
   /// @brief コピーコンストラクタ
   SopCube(
     const SopCube& src ///< [in] コピー元のオブジェクト
-  );
+  ) : SopBase{src.variable_num()},
+    mChunk{src.mChunk}
+  {
+  }
 
   /// @brief コピー代入演算子
   /// @return 代入後の自身への参照を返す．
   SopCube&
   operator=(
     const SopCube& src ///< [in] コピー元のオブジェクト
-  );
+  )
+  {
+    if ( this != &src ) {
+      SopBase::operator=(src);
+      mChunk = src.mChunk;
+    }
+
+    return *this;
+  }
 
   /// @brief ムーブコンストラクタ
   SopCube(
     SopCube&& src ///< [in] ムーブ元のオブジェクト
-  );
+  ) : SopBase{src.variable_num()},
+      mChunk{std::move(src.mChunk)}
+  {
+  }
 
   /// @brief ムーブ代入演算子
   /// @return 代入後の自身への参照を返す．
   SopCube&
   operator=(
     SopCube&& src ///< [in] ムーブ元のオブジェクト
-  );
+  )
+  {
+    SopBase::operator=(src);
+    std::swap(mChunk, src.mChunk);
+
+    return *this;
+  }
 
   /// @brief 内容を指定するコンストラクタ
   SopCube(
-    SizeType variable_num, ///< [in] 変数の数
-    Chunk&& body           ///< [in] キューブのパタンを表す本体
-  );
+    SizeType var_num, ///< [in] 変数の数
+    Chunk&& chunk     ///< [in] キューブのパタンを表す本体
+  ) : SopBase{var_num},
+      mChunk{chunk}
+  {
+  }
 
   /// @brief デストラクタ
   ~SopCube() = default;
@@ -110,11 +146,23 @@ public:
 
   /// @brief リテラル数を返す．
   SizeType
-  literal_num() const;
+  literal_num() const
+  {
+    if ( chunk().empty() ) {
+      return 0;
+    }
+    return _literal_num(1, chunk());
+  }
 
   /// @brief 空のキューブの時 true を返す．
   bool
-  is_tautology() const;
+  is_tautology() const
+  {
+    if ( chunk().empty() ) {
+      return true;
+    }
+    return _cube_check_null(_cube());
+  }
 
   /// @brief 指定した変数のパタンを読み出す．
   /// @retval SopPat::_X その変数は現れない．
@@ -123,7 +171,10 @@ public:
   SopPat
   get_pat(
     SizeType var ///< [in] 変数( 0 <= var_id.val() < variable_num() )
-  ) const;
+  ) const
+  {
+    return _get_pat(chunk().begin(), var);
+  }
 
   /// @brief 指定したリテラルを含んでいたら true を返す．
   bool
@@ -141,11 +192,17 @@ public:
   check_literal(
     SizeType varid, ///< [in] 変数番号
     bool inv        ///< [in] 反転属性
-  ) const;
+  ) const
+  {
+    return _cube_check_literal(_cube(), varid, inv);
+  }
 
   /// @brief 内容をリテラルのリストに変換する．
   vector<Literal>
-  literal_list() const;
+  literal_list() const
+  {
+    return _cube_literal_list(_cube());
+  }
 
   /// @brief オペランドのキューブに含まれていたら true を返す．
   ///
@@ -154,22 +211,57 @@ public:
   bool
   check_containment(
     const SopCube& right ///< [in] オペランドのキューブ
-  ) const;
+  ) const
+  {
+    _check_variable_num(right);
+    auto cube1 = _cube();
+    auto end1 = _cube_end(cube1);
+    auto cube2 = right._cube();
+    for ( ; cube1 != end1; ++ cube1, ++ cube2 ) {
+      auto pat1 = *cube1;
+      auto pat2 = *cube2;
+      if ( (pat1 & pat2) != pat1 ) {
+	return false;
+      }
+    }
+    return true;
+  }
 
   /// @brief Expr に変換する．
   Expr
-  expr() const;
+  expr() const
+  {
+    return _to_expr(1, chunk());
+  }
 
   /// @brief TvFunc に変換する．
   TvFunc
-  tvfunc() const;
+  tvfunc() const
+  {
+    return TvFunc::cube(variable_num(), literal_list());
+  }
 
   /// @brief キューブのリスト（カバー）を TvFunc に変換する．
+  ///
+  /// cube_list が空リストの場合は入力数0の定数0関数が返される．
+  /// 入力数の指定をすることはできない．
   static
   TvFunc
   tvfunc(
     const vector<SopCube>& cube_list
-  );
+  )
+  {
+    if ( cube_list.empty() ) {
+      return TvFunc{};
+    }
+    SizeType ni = cube_list.front().variable_num();
+    vector<vector<Literal>> lits_list;
+    lits_list.reserve(cube_list.size());
+    for ( auto& cube: cube_list ) {
+      lits_list.push_back(cube.literal_list());
+    }
+    return TvFunc::cover(ni, lits_list);
+  }
 
   /// @brief 本体のビットベクタを返す．
   const Chunk&
@@ -187,14 +279,20 @@ public:
 
   /// @brief ハッシュ値を返す．
   SizeType
-  hash() const;
+  hash() const
+  {
+    return _hash(1, chunk());
+  }
 
   /// @brief 内容をわかりやすい形で出力する．
   void
   print(
     ostream& s,                             ///< [in] 出力先のストリーム
     const vector<string>& varname_list = {} ///< [in] 変数名のリスト
-  ) const;
+  ) const
+  {
+    _print(s, chunk(), 0, 1, varname_list);
+  }
 
   //////////////////////////////////////////////////////////////////////
   /// @}
@@ -214,7 +312,18 @@ public:
   SopCube
   operator&(
     const SopCube& right ///< [in] オペランド
-  ) const;
+  ) const
+  {
+    _check_variable_num(right);
+    auto dst_chunk = _new_chunk(1);
+    auto dst_cube = SopBase::_dst_cube(dst_chunk);
+    auto cube1 = _cube();
+    auto cube2 = right._cube();
+    if ( !_cube_product(dst_cube, cube1, cube2) ) {
+      _cube_clear(dst_cube);
+    }
+    return SopCube{variable_num(), std::move(dst_chunk)};
+  }
 
   /// @brief 論理積を計算し自身に代入する．
   /// @return 演算後の自身の参照を返す．
@@ -223,7 +332,16 @@ public:
   SopCube&
   operator&=(
     const SopCube& right ///< [in] オペランドのキューブ
-  );
+  )
+  {
+    _check_variable_num(right);
+    auto dst_cube = _dst_cube();
+    auto src_cube = right._cube();
+    if ( !_cube_product_int(dst_cube, src_cube) ) {
+      _cube_clear(dst_cube);
+    }
+    return *this;
+  }
 
   /// @brief キューブとリテラルの論理積を計算する
   /// @return 論理積のキューブを返す．
@@ -232,7 +350,16 @@ public:
   SopCube
   operator&(
     Literal right ///< [in] オペランドのリテラル
-  ) const;
+  ) const
+  {
+    auto dst_chunk = _new_chunk(1);
+    auto dst_cube = SopBase::_dst_cube(dst_chunk);
+    auto src_cube = _cube();
+    if ( !_cube_product(dst_cube, src_cube, right) ) {
+      _cube_clear(dst_cube);
+    }
+    return SopCube{variable_num(), std::move(dst_chunk)};
+  }
 
   /// @brief リテラルとの論理積を計算し自身に代入する．
   /// @return 演算後の自身の参照を返す．
@@ -241,7 +368,14 @@ public:
   SopCube&
   operator&=(
     Literal right ///< [in] オペランドのリテラル
-  );
+  )
+  {
+    auto dst_cube = _dst_cube();
+    if ( !_cube_product_int(dst_cube, right) ) {
+      _cube_clear(dst_cube);
+    }
+    return *this;
+  }
 
   /// @brief SopCubeの比較演算子(EQ)
   /// @retval true  left == right
@@ -309,6 +443,13 @@ public:
     return _compare(right) >= 0;
   }
 
+  friend
+  int
+  compare(
+    const SopCube& left, ///< [in] 第1オペランド
+    const SopCube& right ///< [in] 第2オペランド
+  );
+
   //////////////////////////////////////////////////////////////////////
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -321,24 +462,40 @@ private:
 
   /// @brief 内部で用いられるキューブを得る．
   Cube
-  _cube() const;
+  _cube() const
+  {
+    return SopBase::_cube(chunk());
+  }
 
   /// @brief 内部で用いられるキューブを得る．
   DstCube
-  _dst_cube();
+  _dst_cube()
+  {
+    return SopBase::_dst_cube(chunk());
+  }
 
   /// @brief 比較関数(rich compare)
   int
   _compare(
     const SopCube& right ///< [in] 第2オペランド
-  ) const;
+  ) const
+  {
+    _check_variable_num(right);
+    auto cube1 = _cube();
+    auto cube2 = right._cube();
+    return _cube_compare(cube1, cube2);
+  }
 
-  friend
-  int
-  compare(
-    const SopCube& left, ///< [in] 第1オペランド
-    const SopCube& right ///< [in] 第2オペランド
-  );
+  /// @brief オペランドの入力数が等しいかチェックする．
+  void
+  _check_variable_num(
+    const SopCube& right
+  ) const
+  {
+    if ( variable_num() != right.variable_num() ) {
+      throw std::invalid_argument("variable_num() is different from each other");
+    }
+  }
 
 
 private:

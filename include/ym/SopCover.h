@@ -42,16 +42,19 @@ public:
   /// * 空のカバーとなる．
   explicit
   SopCover(
-    SizeType variable_num = 0 ///< [in] 変数の数
-  );
+    SizeType var_num = 0 ///< [in] 変数の数
+  ) : SopBase{var_num},
+    mCubeNum{0}
+  {
+  }
 
   /// @brief コンストラクタ
   ///
-  /// * cube_list 中の各キューブのサイズは variable_num
+  /// * cube_list 中の各キューブのサイズは var_num
   ///   と等しくなければならない．
   /// * キューブの順番は変わる可能性がある．
   SopCover(
-    SizeType variable_num,           ///< [in] 変数の数
+    SizeType var_num,                ///< [in] 変数の数
     const vector<SopCube>& cube_list ///< [in] キューブのリスト
   );
 
@@ -59,41 +62,125 @@ public:
   ///
   /// * キューブの順番は変わる可能性がある．
   SopCover(
-    SizeType variable_num,                   ///< [in] 変数の数
-    const vector<vector<Literal>>& cube_list ///< [in] カバーを表すリテラルのリストのリスト
-  );
+    SizeType var_num,                        ///< [in] 変数の数
+    const vector<vector<Literal>>& cube_list ///< [in] カバーを表すリテラル
+                                             ///<      のリストのリスト
+  ) : SopBase{var_num},
+      mCubeNum{cube_list.size()},
+      mChunk(_cube_size() * cube_num(), SOP_ALL1)
+  {
+    // cube_list の中のリテラル番号が var_num に収まるがチェック
+    for ( auto& lits: cube_list ) {
+      for ( auto lit: lits ) {
+	if ( lit.varid() >= variable_num() ) {
+	  throw std::out_of_range{"literal is out of range"};
+	}
+      }
+    }
+
+    // mChunk に内容をコピーする．
+    auto dst_list = _cube_list(chunk());
+    for ( auto& lits: cube_list ) {
+      auto dst_cube = dst_list.back();
+      _cube_set_literals(dst_cube, lits);
+      dst_list.inc();
+    }
+    _sort();
+  }
 
   /// @brief コンストラクタ
   ///
   /// * キューブの順番は変わる可能性がある．
   SopCover(
-    SizeType variable_num, ///< [in] 変数の数
+    SizeType var_num,      ///< [in] 変数の数
     initializer& cube_list ///< [in] カバーを表すリテラルのリストのリスト
-  );
+  ) : SopBase{var_num},
+      mCubeNum{cube_list.size()},
+      mChunk(_cube_size() * cube_list.size(), SOP_ALL1)
+  {
+    // cube_list の中のリテラル番号が var_num に収まるがチェック
+    for ( auto& lits: cube_list ) {
+      for ( auto lit: lits ) {
+	if ( lit.varid() >= variable_num() ) {
+	  throw std::out_of_range{"literal is out of range"};
+	}
+      }
+    }
+
+    // mChunk に内容をコピーする．
+    auto dst_list = _cube_list(chunk());
+    for ( auto& lits: cube_list ) {
+      auto dst_cube = dst_list.back();
+      _cube_set_literals(dst_cube, lits);
+      dst_list.inc();
+    }
+    _sort();
+  }
 
   /// @brief コピーコンストラクタ
   SopCover(
     const SopCover& src ///< [in] コピー元のオブジェクト
-  );
+  ) : SopBase{src.variable_num()},
+      mCubeNum{src.mCubeNum},
+      mChunk(_cube_size() * cube_num(), SOP_ALL1)
+  {
+    // mChunk に内容をコピーする．
+    // mChunk の容量は余分に確保されている可能性があるので
+    // _cube_size() に基づいて必要なぶんだけコピーする．
+    auto src_begin = src.chunk().begin();
+    auto src_end = src_begin + _cube_size() * cube_num();
+    auto dst_begin = mChunk.begin();
+    std::copy(src_begin, src_end, dst_begin);
+  }
 
   /// @brief コピー代入演算子
   /// @return 代入後の自身の参照を返す．
   SopCover&
   operator=(
     const SopCover& src ///< [in] コピー元のオブジェクト
-  );
+  )
+  {
+    if ( this != &src ) {
+      SopBase::operator=(src);
+      mCubeNum = src.mCubeNum;
+      // mChunk に内容をコピーする．
+      // mChunk の容量は余分に確保されている可能性があるので
+      // _cube_size() に基づいて必要なぶんだけコピーする．
+      SizeType size = _cube_size() * cube_num();
+      auto src_begin = src.chunk().begin();
+      auto src_end = src_begin + size;
+      mChunk.resize(size, SOP_ALL1);
+      auto dst_begin = mChunk.begin();
+      std::copy(src_begin, src_end, dst_begin);
+    }
+
+    return *this;
+  }
 
   /// @brief ムーブコンストラクタ
   SopCover(
     SopCover&& src ///< [in] ムーブ元のオブジェクト
-  );
+  ) : SopBase{src},
+    mCubeNum{src.mCubeNum},
+    mChunk{std::move(src.mChunk)}
+  {
+    src.mCubeNum = 0;
+  }
 
   /// @brief ムーブ代入演算子
   /// @return 代入後の自身の参照を返す．
   SopCover&
   operator=(
     SopCover&& src ///< [in] ムーブ元のオブジェクト
-  );
+  )
+  {
+    SopBase::operator=(src);
+    mCubeNum = src.mCubeNum;
+    src.mCubeNum = 0;
+    std::swap(mChunk, src.mChunk);
+
+    return *this;
+  }
 
   /// @brief キューブからのコピー変換コンストラクタ
   ///
@@ -132,24 +219,36 @@ public:
 
   /// @brief リテラル数を返す．
   SizeType
-  literal_num() const;
+  literal_num() const
+  {
+    return _literal_num(cube_num(), chunk());
+  }
 
   /// @brief 指定されたリテラルの出現回数を返す．
   SizeType
   literal_num(
     Literal lit ///< [in] 対象のリテラル
-  ) const;
+  ) const
+  {
+    return _literal_num(cube_num(), chunk(), lit);
+  }
 
   /// @brief 指定されたリテラルの出現回数を返す．
   SizeType
   literal_num(
     SizeType varid, ///< [in] 変数番号
     bool inv        ///< [in] 反転属性
-  ) const;
+  ) const
+  {
+    return _literal_num(cube_num(), chunk(), varid, inv);
+  }
 
   /// @brief 内容をリテラルのリストのリストに変換する．
   vector<vector<Literal>>
-  literal_list() const;
+  literal_list() const
+  {
+    return _literal_list(cube_num(), chunk());
+  }
 
   /// @brief キューブを取り出す．
   SopCube
@@ -169,11 +268,17 @@ public:
 
   /// @brief Expr に変換する．
   Expr
-  expr() const;
+  expr() const
+  {
+    return _to_expr(cube_num(), chunk());
+  }
 
   /// @brief TvFunc に変換する．
   TvFunc
-  tvfunc() const;
+  tvfunc() const
+  {
+    return TvFunc::cover(variable_num(), literal_list());
+  }
 
   /// @brief 内容を取り出す．
   Chunk&
@@ -191,20 +296,29 @@ public:
 
   /// @brief ハッシュ値を返す．
   SizeType
-  hash() const;
+  hash() const
+  {
+    return _hash(cube_num(), chunk());
+  }
 
   /// @brief 内容をわかりやすい形で出力する．
   void
   print(
     ostream& s,                             ///< [in] 出力先のストリーム
     const vector<string>& varname_list = {} ///< [in] 変数名のリスト
-  ) const;
+  ) const
+  {
+    _print(s, chunk(), 0, cube_num(), varname_list);
+  }
 
   /// @brief 内容をデバッグ用に出力する．
   void
   debug_print(
     ostream& s ///< [in] 出力先のストリーム
-  ) const;
+  ) const
+  {
+    _debug_print(s, cube_num(), chunk());
+  }
 
   //////////////////////////////////////////////////////////////////////
   /// @}
@@ -335,8 +449,12 @@ private:
   SopCover(
     SizeType variable_num, ///< [in] 変数の数
     SizeType cube_num,     ///< [in] キューブ数
-    Chunk&& body           ///< [in] 内容のパタンを表す本体
-  );
+    Chunk&& chunk          ///< [in] 内容のパタンを表す本体
+  ) : SopBase{variable_num},
+      mCubeNum{cube_num},
+      mChunk{std::move(chunk)}
+  {
+  }
 
   /// @brief ソートする．
   void
