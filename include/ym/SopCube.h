@@ -26,6 +26,8 @@ BEGIN_NAMESPACE_YM_SOP
 /// * 常に固定サイズのビット配列として実装する．
 /// * そのため初期化の際に変数の数が必要となる．
 /// * 1つの変数につき2ビットを使用する．
+/// * 相反するリテラルの論理積の結果は不正なキューブとなる．
+/// * 不正なキューブを使った演算結果はすべて不正なキューブとなる．
 //////////////////////////////////////////////////////////////////////
 class SopCube:
   public SopBase
@@ -147,24 +149,38 @@ public:
   /// @{
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief リテラル数を返す．
-  SizeType
-  literal_num() const
+  /// @brief 適正なキューブの時 true を返す．
+  bool
+  is_valid() const
+  {
+    return !is_invalid();
+  }
+
+  /// @brief 不正なキューブの時 true を返す．
+  bool
+  is_invalid() const
   {
     if ( chunk().empty() ) {
-      return 0;
+      return true;
     }
-    return _literal_num(1, chunk());
+    return _cube_is_invalid(_cube());
   }
 
   /// @brief 空のキューブの時 true を返す．
   bool
   is_tautology() const
   {
-    if ( chunk().empty() ) {
-      return true;
-    }
     return _cube_check_null(_cube());
+  }
+
+  /// @brief リテラル数を返す．
+  SizeType
+  literal_num() const
+  {
+    if ( is_invalid() ) {
+      return 0;
+    }
+    return _literal_num(1, chunk());
   }
 
   /// @brief 指定した変数のパタンを読み出す．
@@ -254,13 +270,18 @@ public:
   static
   TvFunc
   tvfunc(
-    const vector<SopCube>& cube_list
+    SizeType ni,                     ///< [in] 変数の数
+    const vector<SopCube>& cube_list ///< [in] キューブのリスト
   )
   {
     if ( cube_list.empty() ) {
-      return TvFunc{};
+      return TvFunc{ni};
     }
-    SizeType ni = cube_list.front().variable_num();
+    for ( auto& cube: cube_list ) {
+      if ( cube.variable_num() != ni ) {
+	throw std::invalid_argument{"variable_num() mismatch"};
+      }
+    }
     vector<vector<Literal>> lits_list;
     lits_list.reserve(cube_list.size());
     for ( auto& cube: cube_list ) {
@@ -326,7 +347,7 @@ public:
     auto cube1 = _cube();
     auto cube2 = right._cube();
     if ( !_cube_product(dst_cube, cube1, cube2) ) {
-      _cube_clear(dst_cube);
+      _cube_make_invalid(dst_cube);
     }
     return SopCube{variable_num(), std::move(dst_chunk)};
   }
@@ -344,7 +365,7 @@ public:
     auto dst_cube = _dst_cube();
     auto src_cube = right._cube();
     if ( !_cube_product_int(dst_cube, src_cube) ) {
-      _cube_clear(dst_cube);
+      _cube_make_invalid(dst_cube);
     }
     return *this;
   }
@@ -363,7 +384,7 @@ public:
     auto dst_cube = SopBase::_dst_cube(dst_chunk);
     auto src_cube = _cube();
     if ( !_cube_product(dst_cube, src_cube, right) ) {
-      _cube_clear(dst_cube);
+      _cube_make_invalid(dst_cube);
     }
     return SopCube{variable_num(), std::move(dst_chunk)};
   }
@@ -380,7 +401,7 @@ public:
     _check_lit(right);
     auto dst_cube = _dst_cube();
     if ( !_cube_product_int(dst_cube, right) ) {
-      _cube_clear(dst_cube);
+      _cube_make_invalid(dst_cube);
     }
     return *this;
   }
@@ -457,12 +478,18 @@ public:
     return _compare(right) >= 0;
   }
 
-  friend
+  /// @relates SopCube
+  /// @brief 比較関数(rich compare)
+  static
   int
   compare(
     const SopCube& left, ///< [in] 第1オペランド
     const SopCube& right ///< [in] 第2オペランド
-  );
+  )
+  {
+    left._check_size(right);
+    return left._compare(right);
+  }
 
   //////////////////////////////////////////////////////////////////////
   /// @}
@@ -592,18 +619,6 @@ operator&(
 {
   // 交換則を用いる．
   return SopCube{std::move(right)}.operator&=(left);
-}
-
-/// @relates SopCube
-/// @brief 比較関数(rich compare)
-inline
-int
-compare(
-  const SopCube& left, ///< [in] 第1オペランド
-  const SopCube& right ///< [in] 第2オペランド
-)
-{
-  return left._compare(right);
 }
 
 /// @relates SopCube

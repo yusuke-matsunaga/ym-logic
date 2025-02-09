@@ -11,6 +11,7 @@
 #include "ym/logic.h"
 #include "ym/AlgBase.h"
 #include "ym/Expr.h"
+#include "ym/TvFunc.h"
 #include "ym/Literal.h"
 
 
@@ -232,6 +233,13 @@ public:
   expr() const
   {
     return _to_expr(1, chunk());
+  }
+
+  /// @brief TvFunc に変換する．
+  TvFunc
+  tvfunc() const
+  {
+    return TvFunc::cube(variable_num(), literal_list());
   }
 
   /// @brief 本体のビットベクタを返す．

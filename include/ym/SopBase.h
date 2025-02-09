@@ -440,18 +440,6 @@ protected:
     std::copy(src_cube, src_end, dst_cube);
   }
 
-  /// @brief キューブ(を表すビットベクタ)をクリアする．
-  void
-  _cube_clear(
-    DstCube dst_cube ///< [in] 対象のビットベクタ
-  ) const
-  {
-    auto end = _cube_end(dst_cube);
-    for ( ; dst_cube != end; ++ dst_cube ) {
-      *dst_cube = SOP_ALL1;
-    }
-  }
-
   /// @brief キューブのリテラル数を返す．
   SizeType
   _cube_literal_num(
@@ -543,6 +531,24 @@ protected:
     for ( auto lit: lit_list ) {
       _cube_set_literal(dst_cube, lit);
     }
+  }
+
+  /// @brief 不正なキューブにする．
+  void
+  _cube_make_invalid(
+    DstCube dst_cube ///< [in] 対象のビットベクタ
+  ) const
+  {
+    *dst_cube = SOP_ALL0;
+  }
+
+  /// @brief 不正なキューブかどうか調べる．
+  bool
+  _cube_is_invalid(
+    Cube cube ///< [in] 対象のビットベクタ
+  ) const
+  {
+    return ( *cube == SOP_ALL0 );
   }
 
   /// @brief 空キューブかどうか調べる．

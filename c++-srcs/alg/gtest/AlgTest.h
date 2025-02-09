@@ -42,6 +42,7 @@ public:
   Literal lit8{var8, false};
   Literal lit9{var9, false};
 
+  Literal lit100{100, false};
 };
 
 END_NAMESPACE_YM

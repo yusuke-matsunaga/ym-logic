@@ -295,6 +295,13 @@ public:
     return _to_expr(cube_num(), chunk());
   }
 
+  /// @brief TvFunc に変換する．
+  TvFunc
+  tvfunc() const
+  {
+    return TvFunc::cover(variable_num(), literal_list());
+  }
+
   /// @brief 内容を取り出す．
   Chunk&
   chunk()

@@ -80,6 +80,11 @@ TEST_F(AlgTest, constructor2)
 
 };
 
+TEST_F(AlgTest, constructor2_bad)
+{
+  EXPECT_THROW( (AlgCube{nv, lit100}), std::out_of_range );
+}
+
 TEST_F(AlgTest, constructor3)
 {
   vector<Literal> lit_list{~lit5, lit0};
@@ -117,6 +122,12 @@ TEST_F(AlgTest, constructor3)
 
 };
 
+TEST_F(AlgTest, constructor3_bad)
+{
+  vector<Literal> lit_list{~lit5, lit100};
+  EXPECT_THROW( (AlgCube{nv, lit_list}), std::out_of_range );
+}
+
 TEST_F(AlgTest, constructor4)
 {
   auto cube1 = AlgCube{nv, {~lit5, lit0}};
@@ -152,6 +163,12 @@ TEST_F(AlgTest, constructor4)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 
 };
+
+TEST_F(AlgTest, constructor4_bad)
+{
+  EXPECT_THROW( (AlgCube{nv, {~lit5, lit100}}),
+		std::out_of_range );
+}
 
 TEST_F(AlgTest, copy_constructor)
 {
@@ -329,8 +346,10 @@ TEST_F(AlgTest, check_containment_bad)
   auto cube1 = AlgCube{nv, {~lit5, lit0}};
   auto cube2 = AlgCube{nv + 1, {~lit5}};
 
-  ASSERT_THROW( cube1.check_containment(cube2), std::invalid_argument );
-  ASSERT_THROW( cube2.check_containment(cube1), std::invalid_argument );
+  EXPECT_THROW( cube1.check_containment(cube2),
+		std::invalid_argument );
+  EXPECT_THROW( cube2.check_containment(cube1),
+		std::invalid_argument );
 };
 
 TEST_F(AlgTest, cube_cube_product1)
@@ -396,7 +415,8 @@ TEST_F(AlgTest, cube_cube_product_bad)
   auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   auto cube2 = AlgCube{nv + 1, {lit0, ~lit5}};
 
-  ASSERT_THROW( cube1 * cube2, std::invalid_argument );
+  EXPECT_THROW( cube1 * cube2,
+		std::invalid_argument );
 }
 
 TEST_F(AlgTest, Rcube_cube_product1)
@@ -516,6 +536,12 @@ TEST_F(AlgTest, lit_cube_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
+TEST_F(AlgTest, lit_cube_product1_bad)
+{
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  EXPECT_THROW( lit100 * cube1, std::out_of_range );
+}
+
 TEST_F(AlgTest, lit_Rcube_product1)
 {
   auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
@@ -598,6 +624,12 @@ TEST_F(AlgTest, cube_lit_product1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
+
+TEST_F(AlgTest, cube_lit_product1_bad)
+{
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  EXPECT_THROW( cube1 * lit100, std::out_of_range );
+}
 
 TEST_F(AlgTest, Rcube_lit_product1)
 {
@@ -711,7 +743,7 @@ TEST_F(AlgTest, Scube_cube_product2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, Scube_literal_product1)
+TEST_F(AlgTest, Scube_lit_product1)
 {
   auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 = cube1 * lit0;
@@ -738,7 +770,7 @@ TEST_F(AlgTest, Scube_literal_product1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, Scube_literal_product2)
+TEST_F(AlgTest, Scube_lit_product2)
 {
   auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 = cube1 * lit5;
@@ -765,7 +797,7 @@ TEST_F(AlgTest, Scube_literal_product2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, literal_Scube_product1)
+TEST_F(AlgTest, lit_Scube_product1)
 {
   auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 = lit0 * cube1;
@@ -792,7 +824,7 @@ TEST_F(AlgTest, literal_Scube_product1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, literal_Scube_product2)
+TEST_F(AlgTest, lit_Scube_product2)
 {
   auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 = lit5 * cube1;
@@ -875,7 +907,7 @@ TEST_F(AlgTest, Icube_cube_product2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, Icube_literal_product1)
+TEST_F(AlgTest, Icube_lit_product1)
 {
   auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 *= lit0;
@@ -902,7 +934,13 @@ TEST_F(AlgTest, Icube_literal_product1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, Icube_literal_product2)
+TEST_F(AlgTest, Icube_lit_product1_bad)
+{
+  auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
+  EXPECT_THROW( cube1 *= lit100, std::out_of_range );
+}
+
+TEST_F(AlgTest, Icube_lit_product2)
 {
   auto cube1 = AlgCube{nv, {~lit5, ~lit7}};
   cube1 *= lit5;
@@ -956,6 +994,13 @@ TEST_F(AlgTest, cube_cube_quotient1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
+
+TEST_F(AlgTest, cube_cube_quotient1_bad)
+{
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv + 1, {lit0, ~lit7}};
+  EXPECT_THROW( cube1 / cube2, std::invalid_argument );
+}
 
 TEST_F(AlgTest, Rcube_cube_quotient1)
 {
@@ -1015,14 +1060,6 @@ TEST_F(AlgTest, cube_cube_quotient2)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, cube_cube_quotient_bad)
-{
-  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
-  auto cube2 = AlgCube{nv + 1, {lit0, ~lit7}};
-
-  ASSERT_THROW( cube1 / cube2, std::invalid_argument );
-}
-
 TEST_F(AlgTest, cube_lit_quotient1)
 {
   auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
@@ -1049,6 +1086,12 @@ TEST_F(AlgTest, cube_lit_quotient1)
   EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
   EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
 };
+
+TEST_F(AlgTest, cube_lit_quotient1_bad)
+{
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  EXPECT_THROW( cube1 / lit100, std::out_of_range );
+}
 
 TEST_F(AlgTest, Rcube_lit_quotient1)
 {
@@ -1162,7 +1205,7 @@ TEST_F(AlgTest, Scube_cube_quotient2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, Scube_literal_quotient1)
+TEST_F(AlgTest, Scube_lit_quotient1)
 {
   auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
   cube1 = cube1 / lit0;
@@ -1189,7 +1232,7 @@ TEST_F(AlgTest, Scube_literal_quotient1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, Scube_literal_quotient2)
+TEST_F(AlgTest, Scube_lit_quotient2)
 {
   auto cube1 = AlgCube{nv, {lit4, ~lit5, ~lit7}};
   cube1 = cube1 / lit5;
@@ -1244,6 +1287,13 @@ TEST_F(AlgTest, Icube_cube_quotient1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
+TEST_F(AlgTest, Icube_cube_quotient1_bad)
+{
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = AlgCube{nv + 1, {lit0, ~lit7}};
+  EXPECT_THROW( cube1 /= cube2, std::invalid_argument );
+}
+
 TEST_F(AlgTest, Icube_cube_quotient2)
 {
   auto cube1 = AlgCube{nv, {lit0, ~lit5}};
@@ -1272,7 +1322,7 @@ TEST_F(AlgTest, Icube_cube_quotient2)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, Icube_literal_quotient1)
+TEST_F(AlgTest, Icube_lit_quotient1)
 {
   auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
   cube1 /= lit0;
@@ -1299,7 +1349,13 @@ TEST_F(AlgTest, Icube_literal_quotient1)
   EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
 };
 
-TEST_F(AlgTest, Icube_literal_quotient2)
+TEST_F(AlgTest, Icube_lit_quotient1_bad)
+{
+  auto cube1 = AlgCube{nv, {lit0, ~lit5, ~lit7}};
+  EXPECT_THROW( cube1 /= lit100, std::out_of_range );
+}
+
+TEST_F(AlgTest, Icube_lit_quotient2)
 {
   auto cube1 = AlgCube{nv, {~lit5, lit1, lit2}};
 
@@ -1429,20 +1485,46 @@ TEST_F(AlgTest, compare_bad)
   auto cube1 = AlgCube{nv1, { lit0,  lit1}};
   auto cube2 = AlgCube{nv1 + 1, { lit0, ~lit1}};
 
-  ASSERT_THROW( auto r = (cube1 == cube2), std::invalid_argument );
-  ASSERT_THROW( auto r = (cube1 < cube2), std::invalid_argument );
-  ASSERT_THROW( auto r = (cube1 > cube2), std::invalid_argument );
-  ASSERT_THROW( auto r = (cube1 <= cube2), std::invalid_argument );
-  ASSERT_THROW( auto r = (cube1 >= cube2), std::invalid_argument );
+  EXPECT_THROW( auto r = (cube1 == cube2), std::invalid_argument );
+  EXPECT_THROW( auto r = (cube1 < cube2), std::invalid_argument );
+  EXPECT_THROW( auto r = (cube1 > cube2), std::invalid_argument );
+  EXPECT_THROW( auto r = (cube1 <= cube2), std::invalid_argument );
+  EXPECT_THROW( auto r = (cube1 >= cube2), std::invalid_argument );
 }
 
-TEST_F(AlgTest, to_expr1)
+TEST_F(AlgTest, expr)
 {
-  auto cube1 = AlgCube{3, {lit0, lit1, ~lit2}};
+  SizeType nv = 3;
 
-  auto expr = cube1.expr();
-  auto expr_str = expr.to_string();
-  EXPECT_EQ( "( 0 & 1 & ~2 )", expr_str );
+  auto cube0 = AlgCube{nv};
+  auto expr0 = cube0.expr();
+  EXPECT_TRUE( expr0.is_one() );
+
+  auto cube1 = AlgCube{nv, {lit0, lit1, ~lit2}};
+  auto expr1 = cube1.expr();
+  auto expr1_str = expr1.to_string();
+  EXPECT_EQ( "( 0 & 1 & ~2 )", expr1_str );
+}
+
+TEST_F(AlgTest, tvfunc)
+{
+  SizeType nv = 3;
+
+  auto cube0 = AlgCube{nv};
+  auto func0 = cube0.tvfunc();
+  EXPECT_TRUE( func0.is_one() );
+
+  auto cube1 = AlgCube{nv, {lit0, lit1, ~lit2}};
+
+  auto func1 = cube1.tvfunc();
+  EXPECT_EQ( 0, func1.value(0) );
+  EXPECT_EQ( 0, func1.value(1) );
+  EXPECT_EQ( 0, func1.value(2) );
+  EXPECT_EQ( 1, func1.value(3) );
+  EXPECT_EQ( 0, func1.value(4) );
+  EXPECT_EQ( 0, func1.value(5) );
+  EXPECT_EQ( 0, func1.value(6) );
+  EXPECT_EQ( 0, func1.value(7) );
 }
 
 END_NAMESPACE_YM

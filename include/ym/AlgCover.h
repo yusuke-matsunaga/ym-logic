@@ -12,6 +12,7 @@
 #include "ym/AlgBase.h"
 #include "ym/AlgCube.h"
 #include "ym/Expr.h"
+#include "ym/TvFunc.h"
 #include "ym/Literal.h"
 
 
@@ -317,6 +318,13 @@ public:
   expr() const
   {
     return _to_expr(cube_num(), chunk());
+  }
+
+  /// @brief TvFunc に変換する．
+  TvFunc
+  tvfunc() const
+  {
+    return TvFunc::cover(variable_num(), literal_list());
   }
 
   /// @brief ハッシュ値を返す．

@@ -2658,29 +2658,49 @@ TEST_F(AlgTest, common_cube)
   EXPECT_FALSE( cube1.check_literal(~lit9) );
 };
 
-TEST_F(AlgTest, to_expr_zero)
+TEST_F(AlgTest, expr)
 {
-  auto cover1 = AlgCover{0};
+  SizeType nv = 3;
+
+  auto cover1 = AlgCover{nv};
   auto expr1 = cover1.expr();
   EXPECT_TRUE( expr1.is_zero() );
+
+  auto cover2 = AlgCover{nv, vector<vector<Literal>>{{}} };
+  auto expr2 = cover2.expr();
+  EXPECT_TRUE( expr2.is_one() );
+
+  auto cover3 = AlgCover{nv, {{lit0, lit1}, {~lit2}}};
+  auto expr3 = cover3.expr();
+  auto expr3_str = expr3.to_string();
+  EXPECT_EQ( "( ( 0 & 1 ) | ~2 )", expr3_str );
 }
 
-TEST_F(AlgTest, to_expr_one)
+TEST_F(AlgTest, tvfunc)
 {
-  auto cover1 = AlgCover{0, vector<vector<Literal>>{{}} };
-  auto expr1 = cover1.expr();
-  EXPECT_TRUE( expr1.is_one() );
-}
+  SizeType nv = 3;
 
-TEST_F(AlgTest, to_expr1)
-{
-  auto cube1 = AlgCube{3, {lit0, lit1}};
-  auto cube2 = AlgCube{3, {~lit2}};
-  auto cover1 = AlgCover{3, {cube1, cube2}};
+  auto cover1 = AlgCover{nv};
+  auto func1 = cover1.tvfunc();
+  EXPECT_EQ( nv, func1.input_num() );
+  EXPECT_TRUE( func1.is_zero() );
 
-  auto expr = cover1.expr();
-  auto expr_str = expr.to_string();
-  EXPECT_EQ( "( ( 0 & 1 ) | ~2 )", expr_str );
+  auto cover2 = AlgCover{nv, vector<vector<Literal>>{{}} };
+  auto func2 = cover2.tvfunc();
+  EXPECT_EQ( nv, func2.input_num() );
+  EXPECT_TRUE( func2.is_one() );
+
+  auto cover3 = AlgCover{nv, {{lit0, lit1}, {~lit2}}};
+  auto func3 = cover3.tvfunc();
+  EXPECT_EQ( nv, func3.input_num() );
+  EXPECT_EQ( 1, func3.value(0) );
+  EXPECT_EQ( 1, func3.value(1) );
+  EXPECT_EQ( 1, func3.value(2) );
+  EXPECT_EQ( 1, func3.value(3) );
+  EXPECT_EQ( 0, func3.value(4) );
+  EXPECT_EQ( 0, func3.value(5) );
+  EXPECT_EQ( 0, func3.value(6) );
+  EXPECT_EQ( 1, func3.value(7) );
 }
 
 TEST_F(AlgTest, all_kernels1)

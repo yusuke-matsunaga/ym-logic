@@ -15,6 +15,7 @@
 
 BEGIN_NAMESPACE_YM
 
+// SopCover(SizeType) のテスト
 TEST_F(SopTest, constructor1)
 {
   auto cover1 = SopCover{nv};
@@ -44,11 +45,11 @@ TEST_F(SopTest, constructor1)
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 };
 
+// SopCover{SizeType, const vector<SopCube>} のテスト
 TEST_F(SopTest, constructor2)
 {
   auto cube1 = SopCube{nv, {lit0, lit1}};
   auto cube2 = SopCube{nv, {lit2, lit3}};
-
   vector<SopCube> cube_list{cube1, cube2};
 
   auto cover1 = SopCover{nv, cube_list};
@@ -88,6 +89,8 @@ TEST_F(SopTest, constructor2)
 
 };
 
+// SopCover{SizeType, const vector<SopCube>} のテスト
+// 変数の数が合わないのでエラーとなる．
 TEST_F(SopTest, constructor2_bad)
 {
   auto cube1 = SopCube{nv + 1, {lit0, lit1}};
@@ -95,12 +98,14 @@ TEST_F(SopTest, constructor2_bad)
 
   vector<SopCube> cube_list{cube1, cube2};
 
-  ASSERT_THROW( (SopCover{nv, cube_list}), std::invalid_argument );
+  EXPECT_THROW( (SopCover{nv, cube_list}), std::invalid_argument );
 }
 
+// SopCover(SizeType, vector<vector<Literal>>) のテスト
 TEST_F(SopTest, constructor3)
 {
-  vector<vector<Literal>> cube_list{ {lit0, lit1}, {lit2, lit3} };
+  vector<vector<Literal>> cube_list{ {lit0, lit1},
+				     {lit2, lit3} };
   auto cover1 = SopCover{nv, cube_list};
 
   EXPECT_EQ( nv, cover1.variable_num() );
@@ -138,9 +143,21 @@ TEST_F(SopTest, constructor3)
 
 };
 
+// SopCover(SizeType, vector<vector<Literal>>) のテスト
+// リテラルが範囲外なのでエラーとなる．
+TEST_F(SopTest, constructor3_bad)
+{
+  vector<vector<Literal>> cube_list{ {lit100, lit1},
+				     {lit2, lit3} };
+  EXPECT_THROW( (SopCover{nv, cube_list}),
+		std::out_of_range );
+}
+
+// SopCover(SizeType, initializer_list<initializer_list<Literal>>) のテスト
 TEST_F(SopTest, constructor4)
 {
-  auto cover1 = SopCover{nv, { {lit0, lit1}, {lit2, lit3} }};
+  auto cover1 = SopCover{nv, { {lit0, lit1},
+			       {lit2, lit3} }};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -177,9 +194,20 @@ TEST_F(SopTest, constructor4)
 
 };
 
+// SopCover(SizeType, initializer_list<initializer_list<Literal>>) のテスト
+// リテラルが範囲外なのでエラーとなる．
+TEST_F(SopTest, constructor4_bad)
+{
+  EXPECT_THROW( (SopCover{nv, { {lit100, lit1},
+				{lit2, lit3} }}),
+    std::out_of_range );
+}
+
+// コピーコンストラクタのテスト
 TEST_F(SopTest, copy_constructor)
 {
-  auto src_cover = SopCover{nv, { {lit0, lit1}, {lit2, lit3} }};
+  auto src_cover = SopCover{nv, { {lit0, lit1},
+				  {lit2, lit3} }};
 
   auto cover1 = SopCover{src_cover};
 
@@ -218,9 +246,11 @@ TEST_F(SopTest, copy_constructor)
 
 };
 
+// コピー代入演算のテスト
 TEST_F(SopTest, copy_assignment)
 {
-  auto src_cover = SopCover{nv, { {lit0, lit1}, {lit2, lit3} }};
+  auto src_cover = SopCover{nv, { {lit0, lit1},
+				  {lit2, lit3} }};
 
   auto cover1 = src_cover;
 
@@ -259,9 +289,11 @@ TEST_F(SopTest, copy_assignment)
 
 };
 
+// ムーブコンストラクタのテスト
 TEST_F(SopTest, move_constructor)
 {
-  auto src_cover = SopCover{nv, { {lit0, lit1}, {lit2, lit3} }};
+  auto src_cover = SopCover{nv, { {lit0, lit1},
+				  {lit2, lit3} }};
 
   auto cover1 = SopCover{std::move(src_cover)};
 
@@ -302,9 +334,11 @@ TEST_F(SopTest, move_constructor)
 
 };
 
+// ムーブ代入演算のテスト
 TEST_F(SopTest, move_assignment)
 {
-  auto src_cover = SopCover{nv, { {lit0, lit1}, {lit2, lit3} }};
+  auto src_cover = SopCover{nv, { {lit0, lit1},
+				  {lit2, lit3} }};
 
   auto cover1 = std::move(src_cover);
 
@@ -345,6 +379,7 @@ TEST_F(SopTest, move_assignment)
 
 };
 
+// SopCover(SopCube) のテスト
 TEST_F(SopTest, cube_constructor)
 {
   auto src_cube = SopCube{nv, {lit0, lit1}};
@@ -383,48 +418,7 @@ TEST_F(SopTest, cube_constructor)
 
 };
 
-#if 0
-TEST_F(SopTest, cube_move_constructor)
-{
-  auto src_cube = SopCube{nv, {lit0, lit1}};
-
-  auto cover1 = SopCover{std::move(src_cube)};
-
-  EXPECT_EQ( 0, src_cube.literal_num() );
-
-  EXPECT_EQ( nv, cover1.variable_num() );
-  EXPECT_EQ(  1, cover1.cube_num() );
-  EXPECT_EQ(  2, cover1.literal_num() );
-  EXPECT_EQ(  1, cover1.literal_num( lit0) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit0) );
-  EXPECT_EQ(  1, cover1.literal_num( lit1) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit1) );
-  EXPECT_EQ(  0, cover1.literal_num( lit2) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit2) );
-  EXPECT_EQ(  0, cover1.literal_num( lit3) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit3) );
-  EXPECT_EQ(  0, cover1.literal_num( lit4) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit4) );
-  EXPECT_EQ(  0, cover1.literal_num( lit5) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit5) );
-  EXPECT_EQ(  0, cover1.literal_num( lit6) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit6) );
-  EXPECT_EQ(  0, cover1.literal_num( lit7) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit7) );
-  EXPECT_EQ(  0, cover1.literal_num( lit8) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit8) );
-  EXPECT_EQ(  0, cover1.literal_num( lit9) );
-  EXPECT_EQ(  0, cover1.literal_num(~lit9) );
-
-  auto cube_list1 = cover1.literal_list();
-  EXPECT_EQ( 1, cube_list1.size() );
-  EXPECT_EQ( 2, cube_list1[0].size() );
-  EXPECT_EQ( lit0, cube_list1[0][0] );
-  EXPECT_EQ( lit1, cube_list1[0][1] );
-
-};
-#endif
-
+// SopCover | SopCover のテスト
 TEST_F(SopTest, cover_cover_sum)
 {
   auto src1 = SopCover{nv, { {lit0, lit1} } };
@@ -467,14 +461,18 @@ TEST_F(SopTest, cover_cover_sum)
 
 };
 
+// SopCover | SopCover のテスト
+// 変数の数が合わないのでエラーとなる．
 TEST_F(SopTest, cover_cover_sum_bad)
 {
   auto src1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
-  ASSERT_THROW( src1 | src2, std::invalid_argument );
+  EXPECT_THROW( src1 | src2,
+		std::invalid_argument );
 }
 
+// SopCover | SopCube のテスト
 TEST_F(SopTest, cover_cube_sum)
 {
   auto src1 = SopCover{nv, { {lit0, lit1} } };
@@ -517,14 +515,17 @@ TEST_F(SopTest, cover_cube_sum)
 
 };
 
+// SopCover | SopCube のテスト
+// 変数の数が合わないのでエラーとなる．
 TEST_F(SopTest, cover_cube_sum_bad)
 {
   auto src1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCube{nv + 1, {lit2, lit3} };
 
-  ASSERT_THROW( src1 | src2, std::invalid_argument );
+  EXPECT_THROW( src1 | src2, std::invalid_argument );
 }
 
+// SopCube | SopCover のテスト
 TEST_F(SopTest, cube_cover_sum)
 {
   auto src1 = SopCube{nv, {lit0, lit1} };
@@ -567,14 +568,18 @@ TEST_F(SopTest, cube_cover_sum)
 
 };
 
+// SopCube | SopCover のテスト
+// 変数の数が合わないのでエラーとなる．
 TEST_F(SopTest, cube_cover_sum_bad)
 {
   auto src1 = SopCube{nv, {lit0, lit1} };
   auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
-  ASSERT_THROW( src1 | src2, std::invalid_argument );
+  EXPECT_THROW( src1 | src2, std::invalid_argument );
 }
 
+// SopCover | SopCover のテスト
+// 左辺と第1オペランドが同じ
 TEST_F(SopTest, Scover_cover_sum)
 {
   auto cover1 = SopCover{nv, { {lit0, lit1} } };
@@ -617,6 +622,8 @@ TEST_F(SopTest, Scover_cover_sum)
 
 };
 
+// SopCover | SopCube のテスト
+// 左辺と第1オペランドが等しいケース
 TEST_F(SopTest, Scover_cube_sum1)
 {
   auto cover1 = SopCover{nv, { {lit0, lit1} }};
@@ -659,6 +666,8 @@ TEST_F(SopTest, Scover_cube_sum1)
 
 };
 
+// SopCube | SopCover のテスト
+// 左辺と第2オペランドが等しいケース
 TEST_F(SopTest, cube_Scover_sum)
 {
   auto src1 = SopCube{nv, {lit0, lit1} };
@@ -701,6 +710,7 @@ TEST_F(SopTest, cube_Scover_sum)
 
 };
 
+// SopCover |= SopCover のテスト
 TEST_F(SopTest, Icover_cover_sum)
 {
   auto cover1 = SopCover{nv, { {lit0, lit1} } };
@@ -743,14 +753,17 @@ TEST_F(SopTest, Icover_cover_sum)
 
 };
 
+// SopCover |= SopCover のテスト
+// 変数の数が合わないのでエラーとなる．
 TEST_F(SopTest, Icover_cover_sum_bad)
 {
   auto cover1 = SopCover{nv, { {lit0, lit1} } };
   auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
-  ASSERT_THROW( cover1 |= src2, std::invalid_argument );
+  EXPECT_THROW( cover1 |= src2, std::invalid_argument );
 }
 
+// SopCover |= SopCube のテスト
 TEST_F(SopTest, Icover_cube_sum)
 {
   auto cover1 = SopCover{nv, { {lit0, lit1} }};
@@ -793,6 +806,8 @@ TEST_F(SopTest, Icover_cube_sum)
 
 };
 
+// SopCover |= SopCube のテスト
+// 変数の数が合わないのでエラーとなる．
 TEST_F(SopTest, Icover_cube_sum_bad)
 {
   auto cover1 = SopCover{nv, { {lit0, lit1} }};
@@ -801,6 +816,7 @@ TEST_F(SopTest, Icover_cube_sum_bad)
   ASSERT_THROW( cover1 |= src2, std::invalid_argument );
 }
 
+// ソートのテスト
 TEST_F(SopTest, sort1)
 {
   auto cover1 = SopCover{3, { {~lit1,  lit2},
@@ -817,6 +833,8 @@ TEST_F(SopTest, sort1)
   EXPECT_EQ( expr_str, str );
 }
 
+// ソートのテスト
+// 重複したキューブが取り除かれるかのテスト
 TEST_F(SopTest, sort2)
 {
   auto cover1 = SopCover{3, { {~lit1,  lit2},
@@ -833,6 +851,8 @@ TEST_F(SopTest, sort2)
   EXPECT_EQ( expr_str, str );
 }
 
+// ソートのテスト
+// ランダムに生成したカバーを用いる．
 TEST_F(SopTest, sort3)
 {
   // サンプル数
@@ -888,29 +908,47 @@ TEST_F(SopTest, sort3)
   }
 }
 
-TEST_F(SopTest, to_expr_zero)
+// expr() のテスト
+TEST_F(SopTest, expr)
 {
-  auto cover1 = SopCover{0};
+  auto cover1 = SopCover{3};
   auto expr1 = cover1.expr();
   EXPECT_TRUE( expr1.is_zero() );
-}
 
-TEST_F(SopTest, to_expr_one)
-{
-  auto cover1 = SopCover{0, vector<vector<Literal>>{{}} };
-  auto expr1 = cover1.expr();
-  EXPECT_TRUE( expr1.is_one() );
-}
+  auto cover2 = SopCover{3, vector<vector<Literal>>{{}} };
+  auto expr2 = cover2.expr();
+  EXPECT_TRUE( expr2.is_one() );
 
-TEST_F(SopTest, to_expr1)
-{
   auto cube1 = SopCube{3, {lit0, lit1}};
   auto cube2 = SopCube{3, {~lit2}};
-  auto cover1 = SopCover{3, {cube1, cube2}};
+  auto cover3 = SopCover{3, {cube1, cube2}};
 
-  auto expr = cover1.expr();
-  auto expr_str = expr.to_string();
-  EXPECT_EQ( "( ( 0 & 1 ) | ~2 )", expr_str );
+  auto expr3 = cover3.expr();
+  auto expr3_str = expr3.to_string();
+  EXPECT_EQ( "( ( 0 & 1 ) | ~2 )", expr3_str );
+}
+
+// tvfunc() のテスト
+TEST_F(SopTest, tvfunc)
+{
+  SizeType nv = 2;
+  auto cover1 = SopCover{nv};
+  auto func1 = cover1.tvfunc();
+  EXPECT_EQ( nv, func1.input_num() );
+  EXPECT_TRUE( func1.is_zero() );
+
+  auto cover2 = SopCover{nv, vector<vector<Literal>>{{}} };
+  auto func2 = cover2.tvfunc();
+  EXPECT_EQ( nv, func2.input_num() );
+  EXPECT_TRUE( func2.is_one() );
+
+  auto cover3 = SopCover{nv, {{lit0}, {~lit1}} };
+  auto func3 = cover3.tvfunc();
+  EXPECT_EQ( nv, func3.input_num() );
+  EXPECT_EQ( 1, func3.value(0) );
+  EXPECT_EQ( 1, func3.value(1) );
+  EXPECT_EQ( 0, func3.value(2) );
+  EXPECT_EQ( 1, func3.value(3) );
 }
 
 END_NAMESPACE_YM
