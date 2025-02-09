@@ -23,11 +23,9 @@ AlgCover::operator*(
   const AlgCover& right
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = product(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _product(right.cube_num(), right.chunk(), dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -37,11 +35,9 @@ AlgCover::operator*=(
   const AlgCover& right
 )
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = product(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _product(right.cube_num(), right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
@@ -52,11 +48,9 @@ AlgCover::operator*(
   const AlgCube& right
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = product(1, right.chunk(), dst_num);
+  auto dst_chunk = _product(1, right.chunk(), dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -66,11 +60,9 @@ AlgCover::operator*=(
   const AlgCube& right
 )
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = product(1, right.chunk(), dst_num);
+  auto dst_chunk = _product(1, right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
@@ -81,8 +73,9 @@ AlgCover::operator*(
   Literal right
 ) const
 {
+  _check_lit(right);
   SizeType dst_num;
-  auto dst_chunk = product(right, dst_num);
+  auto dst_chunk = _product(right, dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -92,15 +85,16 @@ AlgCover::operator*=(
   Literal right
 )
 {
+  _check_lit(right);
   SizeType dst_num;
-  auto dst_chunk = product(right, dst_num);
+  auto dst_chunk = _product(right, dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
 
 // @brief 2つのカバーの論理積を計算する．
 AlgBase::Chunk
-AlgCover::product(
+AlgCover::_product(
   SizeType num2,
   const Chunk& chunk2,
   SizeType& dst_num
@@ -129,7 +123,7 @@ AlgCover::product(
 
 // @brief カバーとリテラルとの論理積を計算する．
 AlgBase::Chunk
-AlgCover::product(
+AlgCover::_product(
   Literal lit,
   SizeType& dst_num
 ) const

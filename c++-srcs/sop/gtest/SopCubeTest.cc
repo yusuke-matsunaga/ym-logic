@@ -1095,7 +1095,7 @@ TEST_F(SopCubeTest, compare_bad)
   auto lit1 = Literal{var80, false};
 
   auto cube1 = SopCube{nv1, { lit0,  lit1}};
-  auto cube2 = SopCube{nv, { lit0, ~lit1}};
+  auto cube2 = SopCube{nv1 + 1, { lit0, ~lit1}};
 
   ASSERT_THROW( auto r = (cube1 == cube2), std::invalid_argument );
   ASSERT_THROW( auto r = (cube1 < cube2), std::invalid_argument );

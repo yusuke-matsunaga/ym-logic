@@ -25,9 +25,6 @@ add_subdirectory(gtest)
 
 set (alg_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/AlgBase.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgBase_cube.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCube.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_compare.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_concate.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_sort.cc

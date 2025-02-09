@@ -55,6 +55,7 @@ public:
     Literal lit       ///< [in] リテラル
   ) : SopCube{var_num}
   {
+    _check_lit(lit);
     _cube_set_literal(mChunk.begin(), lit);
   }
 
@@ -64,6 +65,7 @@ public:
     const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
   ) : SopCube{var_num}
   {
+    _check_lits(lit_list);
     _cube_set_literals(mChunk.begin(), lit_list);
   }
 
@@ -74,6 +76,7 @@ public:
                                         ///<      のリスト初期化子
   ) : SopCube{var_num}
   {
+    _check_lits(lit_list);
     _cube_set_literals(mChunk.begin(), lit_list);
   }
 
@@ -173,6 +176,7 @@ public:
     SizeType var ///< [in] 変数( 0 <= var_id.val() < variable_num() )
   ) const
   {
+    _check_var(var);
     return _get_pat(chunk().begin(), var);
   }
 
@@ -182,9 +186,10 @@ public:
     Literal lit ///< [in] 対象のリテラル
   ) const
   {
+    _check_lit(lit);
     auto varid = lit.varid();
     auto inv = lit.is_negative();
-    return check_literal(varid, inv);
+    return _cube_check_literal(_cube(), varid, inv);
   }
 
   /// @brief 指定したリテラルを含んでいたら true を返す．
@@ -194,6 +199,7 @@ public:
     bool inv        ///< [in] 反転属性
   ) const
   {
+    _check_var(varid);
     return _cube_check_literal(_cube(), varid, inv);
   }
 
@@ -213,7 +219,7 @@ public:
     const SopCube& right ///< [in] オペランドのキューブ
   ) const
   {
-    _check_variable_num(right);
+    _check_size(right);
     auto cube1 = _cube();
     auto end1 = _cube_end(cube1);
     auto cube2 = right._cube();
@@ -314,7 +320,7 @@ public:
     const SopCube& right ///< [in] オペランド
   ) const
   {
-    _check_variable_num(right);
+    _check_size(right);
     auto dst_chunk = _new_chunk(1);
     auto dst_cube = SopBase::_dst_cube(dst_chunk);
     auto cube1 = _cube();
@@ -334,7 +340,7 @@ public:
     const SopCube& right ///< [in] オペランドのキューブ
   )
   {
-    _check_variable_num(right);
+    _check_size(right);
     auto dst_cube = _dst_cube();
     auto src_cube = right._cube();
     if ( !_cube_product_int(dst_cube, src_cube) ) {
@@ -352,6 +358,7 @@ public:
     Literal right ///< [in] オペランドのリテラル
   ) const
   {
+    _check_lit(right);
     auto dst_chunk = _new_chunk(1);
     auto dst_cube = SopBase::_dst_cube(dst_chunk);
     auto src_cube = _cube();
@@ -370,6 +377,7 @@ public:
     Literal right ///< [in] オペランドのリテラル
   )
   {
+    _check_lit(right);
     auto dst_cube = _dst_cube();
     if ( !_cube_product_int(dst_cube, right) ) {
       _cube_clear(dst_cube);
@@ -385,6 +393,7 @@ public:
     const SopCube& right ///< [in] 第2オペランド
   ) const
   {
+    _check_size(right);
     return _compare(right) == 0;
   }
 
@@ -396,6 +405,7 @@ public:
     const SopCube& right ///< [in] 第2オペランド
   ) const
   {
+    _check_size(right);
     return _compare(right) != 0;
   }
 
@@ -407,6 +417,7 @@ public:
     const SopCube& right ///< [in] 第2オペランド
   ) const
   {
+    _check_size(right);
     return _compare(right) < 0;
   }
 
@@ -418,6 +429,7 @@ public:
     const SopCube& right ///< [in] 第2オペランド
   ) const
   {
+    _check_size(right);
     return _compare(right) > 0;
   }
 
@@ -429,6 +441,7 @@ public:
     const SopCube& right ///< [in] 第2オペランド
   ) const
   {
+    _check_size(right);
     return _compare(right) <= 0;
   }
 
@@ -440,6 +453,7 @@ public:
     const SopCube& right ///< [in] 第2オペランド
   ) const
   {
+    _check_size(right);
     return _compare(right) >= 0;
   }
 
@@ -480,21 +494,9 @@ private:
     const SopCube& right ///< [in] 第2オペランド
   ) const
   {
-    _check_variable_num(right);
     auto cube1 = _cube();
     auto cube2 = right._cube();
     return _cube_compare(cube1, cube2);
-  }
-
-  /// @brief オペランドの入力数が等しいかチェックする．
-  void
-  _check_variable_num(
-    const SopCube& right
-  ) const
-  {
-    if ( variable_num() != right.variable_num() ) {
-      throw std::invalid_argument("variable_num() is different from each other");
-    }
   }
 
 

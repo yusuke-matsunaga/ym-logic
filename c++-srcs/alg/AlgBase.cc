@@ -66,80 +66,132 @@ AlgBase::_literal_num(
   return ans;
 }
 
-// @brief ビットベクタ上の特定のリテラルの出現頻度を数える．
+// @brief キューブのリテラル数を数える．
 SizeType
-AlgBase::_literal_num(
-  SizeType cube_num,
-  const Chunk& chunk,
-  SizeType varid,
-  bool inv
+AlgBase::_cube_literal_num(
+  Cube src_cube
 ) const
 {
-  auto blk = _block_pos(varid);
-  auto mask = _get_mask(varid, inv);
+  // 8 ビットごとに区切って表引きで計算する．
   SizeType ans = 0;
-  auto cube_list = _cube_list(chunk, 0, cube_num);
-  for ( auto cube: cube_list ) {
-    auto word = _get_word(cube, blk);
-    if ( (word & mask) == mask ) {
-      ++ ans;
-    }
-  }
-  return ans;
-}
-
-// @brief 内容をリテラルのリストのリストに変換する．
-vector<vector<Literal>>
-AlgBase::_literal_list(
-  SizeType cube_num,
-  const Chunk& chunk
-) const
-{
-  vector<vector<Literal>> ans_list;
-  ans_list.reserve(cube_num);
-
-  auto cube_list = _cube_list(chunk, 0, cube_num);
-  for ( auto cube: cube_list ) {
-    vector<Literal> tmp_list;
-    tmp_list.reserve(variable_num());
-    for ( SizeType var = 0; var < variable_num(); ++ var ) {
-      auto pat = _get_pat(cube, var);
-      if ( pat == AlgPat::_1 ) {
-	tmp_list.push_back(Literal{var, false});
-      }
-      else if ( pat == AlgPat::_0 ) {
-	tmp_list.push_back(Literal{var, true});
-      }
-    }
-    ans_list.push_back(tmp_list);
-  }
-
-  return ans_list;
-}
-
-// @brief ビットベクタからハッシュ値を計算する．
-SizeType
-AlgBase::_hash(
-  SizeType cube_num,
-  const Chunk& chunk
-) const
-{
-  // キューブは常にソートされているので
-  // 順番は考慮する必要はない．
-  // ただおなじキューブの中のビットに関しては
-  // 本当は区別しなければならないがどうしようもないので
-  // 16ビットに区切って単純に XOR を取る．
-  SizeType ans = 0;
-  auto begin = _cube(chunk);
-  auto end = _cube(chunk, cube_num);
-  for ( auto p = begin; p != end; ++ p ) {
+  auto end = _cube_end(src_cube);
+  for ( auto p = src_cube; p != end; ++ p ) {
     auto pat = *p;
-    ans ^= (pat & 0xFFFFULL); pat >>= 16;
-    ans ^= (pat & 0xFFFFULL); pat >>= 16;
-    ans ^= (pat & 0xFFFFULL); pat >>= 16;
-    ans ^= pat;
+    auto p1 = pat & 0xFFUL;
+    ans += _count(p1);
+    auto p2 = (pat >> 8) & 0xFFUL;
+    ans += _count(p2);
+    auto p3 = (pat >> 16) & 0xFFUL;
+    ans += _count(p3);
+    auto p4 = (pat >> 24) & 0xFFUL;
+    ans += _count(p4);
+    auto p5 = (pat >> 32) & 0xFFUL;
+    ans += _count(p5);
+    auto p6 = (pat >> 40) & 0xFFUL;
+    ans += _count(p6);
+    auto p7 = (pat >> 48) & 0xFFUL;
+    ans += _count(p7);
+    auto p8 = (pat >> 56);
+    ans += _count(p8);
   }
   return ans;
+}
+
+BEGIN_NONAMESPACE
+
+// @brief バイト中のリテラルをリストに追加する．
+inline
+void
+byte_literal_list(
+  std::uint8_t byte,
+  SizeType base,
+  vector<Literal>& lit_list
+)
+{
+  static const int table[] = {
+    // utils/gen_alglbit_tbl.py で生成
+#include "alglbit_tbl.h"
+  };
+
+  while ( byte != 0x00U ) {
+    auto pos = table[byte];
+    SizeType varid = (pos >> 1) + base;
+    bool inv = (pos % 2) == 1 ? true : false;
+    auto lit = Literal{varid, inv};
+    lit_list.push_back(lit);
+    byte &= ~(1 << (7 - pos));
+  }
+}
+
+END_NONAMESPACE
+
+// @brief ワード中のリテラルをリストに追加する．
+void
+AlgBase::_word_literal_list(
+  AlgPatWord word,
+  SizeType base,
+  vector<Literal>& lit_list
+)
+{
+  const AlgPatWord H32MASK  = 0xFFFFFFFF00000000ULL;
+  const AlgPatWord L32MASK  = 0x00000000FFFFFFFFULL;
+  const AlgPatWord HH16MASK = 0xFFFF000000000000ULL;
+  const AlgPatWord HL16MASK = 0x0000FFFF00000000ULL;
+  const AlgPatWord LH16MASK = 0x00000000FFFF0000ULL;
+  const AlgPatWord LL16MASK = 0x000000000000FFFFULL;
+  const AlgPatWord HHH8MASK = 0xFF00000000000000ULL;
+  const AlgPatWord HHL8MASK = 0x00FF000000000000ULL;
+  const AlgPatWord HLH8MASK = 0x0000FF0000000000ULL;
+  const AlgPatWord HLL8MASK = 0x000000FF00000000ULL;
+  const AlgPatWord LHH8MASK = 0x00000000FF000000ULL;
+  const AlgPatWord LHL8MASK = 0x0000000000FF0000ULL;
+  const AlgPatWord LLH8MASK = 0x000000000000FF00ULL;
+  const AlgPatWord LLL8MASK = 0x00000000000000FFULL;
+  // 2分探索で非ゼロの8ビットを取り出して処理する．
+  if ( (word & H32MASK) != ALG_ALL0 ) {
+    if ( (word & HH16MASK) != ALG_ALL0 ) {
+      if ( (word & HHH8MASK) != ALG_ALL0 ) {
+	auto byte = static_cast<std::uint8_t>((word >> 56) & 0xFFU);
+	byte_literal_list(byte, base, lit_list);
+      }
+      if ( (word & HHL8MASK) != ALG_ALL0 ) {
+	auto byte = static_cast<std::uint8_t>((word >> 48) & 0xFFU);
+	byte_literal_list(byte, base + 4, lit_list);
+      }
+    }
+    if ( (word & HL16MASK) != ALG_ALL0 ) {
+      if ( (word & HLH8MASK) != ALG_ALL0 ) {
+	auto byte = static_cast<std::uint8_t>((word >> 40) & 0xFFU);
+	byte_literal_list(byte, base + 8, lit_list);
+      }
+      if ( (word & HLL8MASK) != ALG_ALL0 ) {
+	auto byte = static_cast<std::uint8_t>((word >> 32) & 0xFFU);
+	byte_literal_list(byte, base + 12, lit_list);
+      }
+    }
+  }
+  if ( (word & L32MASK) != ALG_ALL0 ) {
+    if ( (word & LH16MASK) != ALG_ALL0 ) {
+      if ( (word & LHH8MASK) != ALG_ALL0 ) {
+	auto byte = static_cast<std::uint8_t>((word >> 24) & 0xFFU);
+	byte_literal_list(byte, base + 16, lit_list);
+      }
+      if ( (word & LHL8MASK) != ALG_ALL0 ) {
+	auto byte = static_cast<std::uint8_t>((word >> 16) & 0xFFU);
+	byte_literal_list(byte, base + 20, lit_list);
+      }
+    }
+    if ( (word & LL16MASK) != ALG_ALL0 ) {
+      if ( (word & LLH8MASK) != ALG_ALL0 ) {
+	auto byte = static_cast<std::uint8_t>((word >> 8) & 0xFFU);
+	byte_literal_list(byte, base + 24, lit_list);
+      }
+      if ( (word & LLL8MASK) != ALG_ALL0 ) {
+	auto byte = static_cast<std::uint8_t>((word >> 0) & 0xFFU);
+	byte_literal_list(byte, base + 28, lit_list);
+      }
+    }
+  }
 }
 
 // @brief Expr に変換する．

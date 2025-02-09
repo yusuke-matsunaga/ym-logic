@@ -8,11 +8,21 @@
 
 #include "gtest/gtest.h"
 #include "ym/Tv2Sop.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 #include "ym/Range.h"
 #include "TvFuncTest.h"
 
 
 BEGIN_NAMESPACE_YM
+
+SopCover
+BCF(
+  const TvFunc& func
+)
+{
+  return SopCover{func.input_num(), Tv2Sop::all_primes(func)};
+}
 
 // 検証用に主項のリストを作る．
 SopCover
@@ -108,7 +118,7 @@ TEST(TvFuncTest, bcf1)
 {
   auto vect = vector<int>{0, 1, 1, 1};
   auto f = TvFunc{2, vect};
-  auto cov = Tv2Sop::BCF(f);
+  auto cov = BCF(f);
   auto exp_cov = prime_cover(f);
   EXPECT_EQ( exp_cov, cov );
 
@@ -121,7 +131,7 @@ TEST(TvFuncTest, bcf2)
 {
   auto vect = vector<int>{0, 0, 0, 1, 0, 1, 1, 1};
   auto f = TvFunc{3, vect};
-  auto cov = Tv2Sop::BCF(f);
+  auto cov = BCF(f);
   auto exp_cov = prime_cover(f);
   EXPECT_EQ( exp_cov, cov );
 
@@ -134,7 +144,7 @@ TEST(TvFuncTest, bcf3)
 {
   auto vect = vector<int>{1, 1, 1, 1, 0, 1, 0, 0};
   auto f = TvFunc{3, vect};
-  auto cov = Tv2Sop::BCF(f);
+  auto cov = BCF(f);
   auto exp_cov = prime_cover(f);
   EXPECT_EQ( exp_cov, cov );
 }
@@ -183,7 +193,7 @@ TEST_P(TvFuncTestWithParam, bcf)
       }
     }
     auto func = TvFunc{ni, values};
-    auto cov = Tv2Sop::BCF(func);
+    auto cov = BCF(func);
     // 正解を計算する．
     auto exp_cov = prime_cover(func);
     EXPECT_EQ( exp_cov, cov );
@@ -237,7 +247,7 @@ TEST_P(TvFuncTestWithParam, mwc)
     auto cov = Tv2Sop::MWC(func);
     // TvFunc に再変換して func と等しいか調べる．
     // ヒューリスティックの簡単化なので正解はない．
-    auto exp_func = cov.tvfunc();
+    auto exp_func = TvFunc::cover(ni, cov);
     EXPECT_EQ( exp_func, func );
   }
 }
@@ -289,7 +299,7 @@ TEST_P(TvFuncTestWithParam, isop)
     auto cov = Tv2Sop::ISOP(func);
     // TvFunc に再変換して func と等しいか調べる．
     // ヒューリスティックの簡単化なので正解はない．
-    auto exp_func = cov.tvfunc();
+    auto exp_func = TvFunc::cover(ni, cov);
     EXPECT_EQ( exp_func, func );
   }
 }

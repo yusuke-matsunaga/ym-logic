@@ -26,7 +26,7 @@ SopCover::operator|(
     throw std::invalid_argument("variable_num() is different from each other");
   }
   SizeType dst_num;
-  auto dst_chunk = concate(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _concate(right.cube_num(), right.chunk(), dst_num);
   return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -40,7 +40,7 @@ SopCover::operator|=(
     throw std::invalid_argument("variable_num() is different from each other");
   }
   SizeType dst_num;
-  auto dst_chunk = concate(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _concate(right.cube_num(), right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
@@ -55,7 +55,7 @@ SopCover::operator|(
     throw std::invalid_argument("variable_num() is different from each other");
   }
   SizeType dst_num;
-  auto dst_chunk = concate(1, right.chunk(), dst_num);
+  auto dst_chunk = _concate(1, right.chunk(), dst_num);
   return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -69,14 +69,14 @@ SopCover::operator|=(
     throw std::invalid_argument("variable_num() is different from each other");
   }
   SizeType dst_num;
-  auto dst_chunk = concate(1, right.chunk(), dst_num);
+  auto dst_chunk = _concate(1, right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
 
 // @brief concate の共通処理
 SopBase::Chunk
-SopCover::concate(
+SopCover::_concate(
   SizeType num2,
   const Chunk& chunk2,
   SizeType& dst_num

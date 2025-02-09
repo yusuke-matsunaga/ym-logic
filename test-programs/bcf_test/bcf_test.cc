@@ -74,9 +74,22 @@ bcf_test(
       }
     }
     auto func = TvFunc{ni, values};
-    auto cov = Tv2Sop::BCF(func);
+    auto cov = Tv2Sop::all_primes(func);
     cout << "BCF = ";
-    cov.print(cout);
+    const char* delim = "";
+    for ( auto& cube: cov ) {
+      cout << delim;
+      delim = " | ";
+      const char* spc = "";
+      for ( auto lit: cube ) {
+	cout << spc;
+	spc = " ";
+	cout << "v" << lit.varid();
+	if ( lit.is_negative() ) {
+	  cout << "'";
+	}
+      }
+    }
     cout << endl;
   }
 

@@ -10,8 +10,8 @@
 
 #include "ym/logic.h"
 #include "ym/SopBase.h"
+#include "ym/SopCube.h"
 #include "ym/Expr.h"
-#include "ym/TvFunc.h"
 #include "ym/Literal.h"
 
 
@@ -44,7 +44,7 @@ public:
   SopCover(
     SizeType var_num = 0 ///< [in] 変数の数
   ) : SopBase{var_num},
-    mCubeNum{0}
+      mCubeNum{0}
   {
   }
 
@@ -56,7 +56,25 @@ public:
   SopCover(
     SizeType var_num,                ///< [in] 変数の数
     const vector<SopCube>& cube_list ///< [in] キューブのリスト
-  );
+  ) : SopBase{var_num},
+      mCubeNum{cube_list.size()},
+      mChunk(_cube_size() * cube_num(), SOP_ALL1)
+  {
+    // cube_list のキューブのサイズが正しいかチェック
+    for ( auto& cube: cube_list ) {
+      _check_size(cube);
+    }
+
+    // mChunk に内容をコピーする．
+    auto dst_list = _cube_list(chunk());
+    for ( auto& cube: cube_list ) {
+      auto src_cube = _cube(cube.chunk());
+      auto dst_cube = dst_list.back();
+      _cube_copy(dst_cube, src_cube);
+      dst_list.inc();
+    }
+    _sort();
+  }
 
   /// @brief コンストラクタ
   ///
@@ -71,11 +89,7 @@ public:
   {
     // cube_list の中のリテラル番号が var_num に収まるがチェック
     for ( auto& lits: cube_list ) {
-      for ( auto lit: lits ) {
-	if ( lit.varid() >= variable_num() ) {
-	  throw std::out_of_range{"literal is out of range"};
-	}
-      }
+      _check_lits(lits);
     }
 
     // mChunk に内容をコピーする．
@@ -100,11 +114,7 @@ public:
   {
     // cube_list の中のリテラル番号が var_num に収まるがチェック
     for ( auto& lits: cube_list ) {
-      for ( auto lit: lits ) {
-	if ( lit.varid() >= variable_num() ) {
-	  throw std::out_of_range{"literal is out of range"};
-	}
-      }
+      _check_lits(lits);
     }
 
     // mChunk に内容をコピーする．
@@ -126,7 +136,7 @@ public:
   {
     // mChunk に内容をコピーする．
     // mChunk の容量は余分に確保されている可能性があるので
-    // _cube_size() に基づいて必要なぶんだけコピーする．
+    // _cube_size() に基づいて必要な分だけコピーする．
     auto src_begin = src.chunk().begin();
     auto src_end = src_begin + _cube_size() * cube_num();
     auto dst_begin = mChunk.begin();
@@ -161,8 +171,8 @@ public:
   SopCover(
     SopCover&& src ///< [in] ムーブ元のオブジェクト
   ) : SopBase{src},
-    mCubeNum{src.mCubeNum},
-    mChunk{std::move(src.mChunk)}
+      mCubeNum{src.mCubeNum},
+      mChunk{std::move(src.mChunk)}
   {
     src.mCubeNum = 0;
   }
@@ -188,15 +198,11 @@ public:
   explicit
   SopCover(
     const SopCube& cube ///< [in] 対象のキューブ
-  );
-
-  /// @brief キューブからのムーブ変換コンストラクタ
-  ///
-  /// 指定されたキューブのみのカバーとなる．
-  explicit
-  SopCover(
-    SopCube&& cube ///< [in] 対象のキューブ
-  );
+  ) : SopBase{cube.variable_num()},
+      mCubeNum{1},
+      mChunk{cube.chunk()}
+  {
+  }
 
   /// @brief デストラクタ
   ///
@@ -230,6 +236,7 @@ public:
     Literal lit ///< [in] 対象のリテラル
   ) const
   {
+    _check_lit(lit);
     return _literal_num(cube_num(), chunk(), lit);
   }
 
@@ -240,6 +247,7 @@ public:
     bool inv        ///< [in] 反転属性
   ) const
   {
+    _check_var(varid);
     return _literal_num(cube_num(), chunk(), varid, inv);
   }
 
@@ -254,7 +262,15 @@ public:
   SopCube
   get_cube(
     SizeType cube_id ///< [in] キューブ番号 ( 0 <= cube_id < cube_num() )
-  ) const;
+  ) const
+  {
+    _check_cube_id(cube_id);
+    auto dst_chunk = _new_chunk(1);
+    auto dst_cube = SopBase::_dst_cube(dst_chunk);
+    auto src_cube = _cube(chunk(), cube_id);
+    _cube_copy(dst_cube, src_cube);
+    return SopCube{variable_num(), std::move(dst_chunk)};
+  }
 
   /// @brief パタンを返す．
   /// @retval SopPat::_X その変数は現れない．
@@ -264,20 +280,19 @@ public:
   get_pat(
     SizeType cube_id, ///< [in] キューブ番号 ( 0 <= cube_id < cube_num() )
     SizeType var_id   ///< [in] 変数( 0 <= var_id.val() < variable_num() )
-  ) const;
+  ) const
+  {
+    _check_cube_id(cube_id);
+    _check_var(var_id);
+    auto src_cube = _cube(chunk(), cube_id);
+    return _get_pat(src_cube, var_id);
+  }
 
   /// @brief Expr に変換する．
   Expr
   expr() const
   {
     return _to_expr(cube_num(), chunk());
-  }
-
-  /// @brief TvFunc に変換する．
-  TvFunc
-  tvfunc() const
-  {
-    return TvFunc::cover(variable_num(), literal_list());
   }
 
   /// @brief 内容を取り出す．
@@ -380,7 +395,8 @@ public:
     const SopCover& right ///< [in] 第2オペランド
   ) const
   {
-    return compare(right) == 0;
+    _check_size(right);
+    return _compare(right) == 0;
   }
 
   /// @brief 比較演算子 (NE)
@@ -390,7 +406,8 @@ public:
     const SopCover& right ///< [in] 第2オペランド
   )
   {
-    return compare(right) != 0;
+    _check_size(right);
+    return _compare(right) != 0;
   }
 
   /// @brief 比較演算子 (LT)
@@ -400,7 +417,8 @@ public:
     const SopCover& right ///< [in] 第2オペランド
   ) const
   {
-    return compare(right) < 0;
+    _check_size(right);
+    return _compare(right) < 0;
   }
 
   /// @brief 比較演算子 (GT)
@@ -410,7 +428,8 @@ public:
     const SopCover& right ///< [in] 第2オペランド
   ) const
   {
-    return compare(right) > 0;
+    _check_size(right);
+    return _compare(right) > 0;
   }
 
   /// @brief 比較演算子 (LE)
@@ -420,7 +439,8 @@ public:
     const SopCover& right ///< [in] 第2オペランド
   ) const
   {
-    return compare(right) <= 0;
+    _check_size(right);
+    return _compare(right) <= 0;
   }
 
   /// @brief 比較演算子 (GE)
@@ -430,7 +450,8 @@ public:
     const SopCover& right ///< [in] 第2オペランド
   ) const
   {
-    return compare(right) >= 0;
+    _check_size(right);
+    return _compare(right) >= 0;
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -465,13 +486,13 @@ private:
   ///
   /// 比較方法はキューブごとの辞書式順序
   int
-  compare(
+  _compare(
     const SopCover& right ///< [in] 第2オペランド
   ) const;
 
   /// @brief concate の共通処理
   Chunk
-  concate(
+  _concate(
     SizeType num2,       ///< [in] 第2オペランドのキューブ数
     const Chunk& chunk2, ///< [in] 第2オペランドキューブ本体
     SizeType& dst_num    ///< [out] 結果のキューブ数
@@ -486,6 +507,17 @@ private:
   {
     mCubeNum = num;
     std::swap(mChunk, chunk);
+  }
+
+  /// @brief キューブ番号が範囲内か調べる．
+  void
+  _check_cube_id(
+    SizeType cube_id
+  ) const
+  {
+    if ( cube_id >= cube_num() ) {
+      throw std::out_of_range{"cube_id is out of range"};
+    }
   }
 
 

@@ -34,12 +34,13 @@ mwc_test(
       auto f = TvFunc{buf};
       func_list.push_back(f);
       auto cov = Tv2Sop::MWC(f);
-      auto expr = cov.expr();
-      auto f_expr = expr.to_tv(f.input_num());
-      if ( f != f_expr ) {
+      auto exp_f = TvFunc::cover(f.input_num(), cov);
+      if ( exp_f != f ) {
 	bad_outputs.push_back(func_list.size() - 1);
       }
-      lit_num += expr.literal_num();
+      for ( auto& lits: cov ) {
+	lit_num += lits.size();
+      }
     }
     SizeType no = func_list.size();
     SizeType ni = no > 0 ? func_list[0].input_num() : 0;

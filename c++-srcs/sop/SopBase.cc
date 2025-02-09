@@ -210,18 +210,12 @@ SopBase::_to_expr(
       return Expr::one();
     }
   }
+  auto cube_list = _literal_list(cube_num, chunk);
   auto ans = Expr::zero();
-  auto cube_list = _cube_list(chunk, 0, cube_num);
-  for ( auto cube: cube_list ) {
+  for ( auto lits: cube_list ) {
     auto prod = Expr::one();
-    for ( SizeType var = 0; var < variable_num(); ++ var ) {
-      auto pat = _get_pat(cube, var);
-      if ( pat == SopPat::_1 ) {
-	prod &= Expr::posi_literal(var);
-      }
-      else if ( pat == SopPat::_0 ) {
-	prod &= Expr::nega_literal(var);
-      }
+    for ( auto lit: lits ) {
+      prod &= Expr::literal(lit);
     }
     ans |= prod;
   }
@@ -255,32 +249,30 @@ SopBase::_print(
   const vector<string>& varname_list
 ) const
 {
-  const char* spc = "";
-  bool empty = true;
-  for ( SizeType var = 0; var < variable_num(); ++ var ) {
-    string varname;
-    if ( varname_list.size() > var ) {
-      varname = varname_list[var];
-    }
-    else {
-      ostringstream buf;
-      buf << "v" << var;
-      varname = buf.str();
-    }
-    auto pat = _get_pat(cube, var);
-    if ( pat == SopPat::_1 ) {
+  auto lit_list = _cube_literal_list(cube);
+  if ( lit_list.empty() ) {
+    s << "{}";
+  }
+  else {
+    const char* spc = "";
+    for ( auto lit: lit_list ) {
+      auto var = lit.varid();
+      auto inv = lit.is_negative();
+      string varname;
+      if ( varname_list.size() > var ) {
+	varname = varname_list[var];
+      }
+      else {
+	ostringstream buf;
+	buf << "v" << var;
+	varname = buf.str();
+      }
       s << spc << varname;
       spc = " ";
-      empty = false;
+      if ( lit.is_negative() ) {
+	s << "'";
+      }
     }
-    else if ( pat == SopPat::_0 ) {
-      s << spc << varname << "'";
-      spc = " ";
-      empty = false;
-    }
-  }
-  if ( empty ) {
-    s << "{}";
   }
 }
 

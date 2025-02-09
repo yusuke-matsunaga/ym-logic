@@ -16,14 +16,10 @@ BEGIN_NAMESPACE_YM_SOP
 //////////////////////////////////////////////////////////////////////
 
 int
-SopCover::compare(
+SopCover::_compare(
   const SopCover& right
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
-
   auto cube1_list = _cube_list(chunk(), 0, cube_num());
   auto cube1_iter = cube1_list.begin();
   auto cube1_end = cube1_list.end();

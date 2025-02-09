@@ -18,6 +18,9 @@ BEGIN_NAMESPACE_YM_ALG
 /// @brief AlgPat をパックしたワード型
 using AlgPatWord = std::uint64_t;
 
+/// @brief オール0
+const AlgPatWord ALG_ALL0 = 0x0000000000000000ULL;
+
 //////////////////////////////////////////////////////////////////////
 /// @class AlgBase AlgBase.h "ym/AlgBase.h"
 /// @brief AlgCube, AlgCover の共通な基底クラス
@@ -281,9 +284,7 @@ protected:
     SizeType var ///< [in] 変数 ( 0 <= var_id.val() < variable_num() )
   ) const
   {
-    if ( var >= variable_num() ) {
-      throw std::out_of_range{"var is out of range"};
-    }
+    _check_var(var);
 
     auto blk = _block_pos(var);
     auto sft = _shift_num(var);
@@ -318,21 +319,63 @@ protected:
     const Chunk& chunk, ///< [in] 本体のビットベクタ
     SizeType varid,     ///< [in] 変数番号
     bool inv            ///< [in] 反転属性
-  ) const;
+  ) const
+  {
+    auto blk = _block_pos(varid);
+    auto mask = _get_mask(varid, inv);
+    SizeType ans = 0;
+    auto cube_list = _cube_list(chunk, 0, cube_num);
+    for ( auto cube: cube_list ) {
+      if ( _cube_check_literal(cube, varid, inv) ) {
+	++ ans;
+      }
+    }
+    return ans;
+  }
 
   /// @brief 内容をリテラルのリストのリストに変換する．
   vector<vector<Literal>>
   _literal_list(
     SizeType cube_num, ///< [in] キューブ数
     const Chunk& chunk ///< [in] 本体のビットベクタ
-  ) const;
+  ) const
+  {
+    vector<vector<Literal>> ans_list;
+    ans_list.reserve(cube_num);
+
+    auto cube_list = _cube_list(chunk, 0, cube_num);
+    for ( auto cube: cube_list ) {
+      auto lit_list = _cube_literal_list(cube);
+      ans_list.push_back(lit_list);
+    }
+
+    return ans_list;
+  }
 
   /// @brief ビットベクタからハッシュ値を計算する．
   SizeType
   _hash(
     SizeType cube_num, ///< [in] キューブ数
     const Chunk& chunk ///< [in] 本体のビットベクタ
-  ) const;
+  ) const
+  {
+    // キューブは常にソートされているので
+    // 順番は考慮する必要はない．
+    // ただおなじキューブの中のビットに関しては
+    // 本当は区別しなければならないがどうしようもないので
+    // 16ビットに区切って単純に XOR を取る．
+    SizeType ans = 0;
+    auto begin = _cube(chunk);
+    auto end = _cube(chunk, cube_num);
+    for ( auto p = begin; p != end; ++ p ) {
+      auto pat = *p;
+      ans ^= (pat & 0xFFFFULL); pat >>= 16;
+      ans ^= (pat & 0xFFFFULL); pat >>= 16;
+      ans ^= (pat & 0xFFFFULL); pat >>= 16;
+      ans ^= pat;
+    }
+    return ans;
+  }
 
   /// @brief Expr に変換する．
   Expr
@@ -384,7 +427,7 @@ protected:
   ) const;
 
 
-public:
+protected:
   //////////////////////////////////////////////////////////////////////
   // キューブに対する処理
   // 基本的にはキューブはビットベクタの先頭アドレスで表す．
@@ -410,8 +453,47 @@ public:
   {
     auto end = _cube_end(dst_cube);
     for ( ; dst_cube != end; ++ dst_cube ) {
-      *dst_cube = 0UL;
+      *dst_cube = ALG_ALL0;
     }
+  }
+
+  /// @brief キューブのリテラル数を返す．
+  SizeType
+  _cube_literal_num(
+    Cube src_cube ///< [in] キューブ
+  ) const;
+
+  /// @brief キューブが指定されたリテラルを含むか調べる．
+  bool
+  _cube_check_literal(
+    Cube src_cube,  ///< [in] キューブ
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 反転属性
+  ) const
+  {
+    auto blk = _block_pos(varid);
+    auto mask = _get_mask(varid, inv);
+    auto word = _get_word(src_cube, blk);
+    if ( (word & mask) == mask ) {
+      return true;
+    }
+    return false;
+  }
+
+  /// @brief キューブの内容をリテラルのリストのリストに変換する．
+  vector<Literal>
+  _cube_literal_list(
+    Cube cube ///< [in] キューブ
+  ) const
+  {
+    vector<Literal> lit_list;
+    lit_list.reserve(_cube_literal_num(cube));
+    auto cube_end = _cube_end(cube);
+    SizeType base = 0;
+    for ( ; cube != cube_end; ++ cube, base += 32 ) {
+      _word_literal_list(*cube, base, lit_list);
+    }
+    return lit_list;
   }
 
   /// @brief キューブにリテラルをセットする．
@@ -472,7 +554,16 @@ public:
   bool
   _cube_check_null(
     Cube cube ///< [in] 対象のビットベクタ
-  ) const;
+  ) const
+  {
+    auto cube_end = _cube_end(cube);
+    for ( ; cube != cube_end; ++ cube ) {
+      if ( *cube != ALG_ALL0 ) {
+	return false;
+      }
+    }
+    return true;
+  }
 
   /// @brief 2つのキューブの積を計算する．
   /// @retval true 積が空でなかった．
@@ -480,9 +571,20 @@ public:
   bool
   _cube_product(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
-    Cube src1_cube,   ///< [in] 1つめのキューブを表すビットベクタ
-    Cube src2_cube    ///< [in] 2つめのキューブを表すビットベクタ
-  ) const;
+    Cube cube1,       ///< [in] 1つめのキューブを表すビットベクタ
+    Cube cube2        ///< [in] 2つめのキューブを表すビットベクタ
+  ) const
+  {
+    auto dst_end = _cube_end(dst_cube);
+    for ( ; dst_cube != dst_end; ++ dst_cube, ++ cube1, ++ cube2 ) {
+      auto tmp = *cube1 | *cube2;
+      if ( _word_check_conflict(tmp) ) {
+	return false;
+      }
+      *dst_cube = tmp;
+    }
+    return true;
+  }
 
   /// @brief キューブとリテラルの積を計算する．
   /// @retval true 積が空でなかった．
@@ -490,9 +592,28 @@ public:
   bool
   _cube_product(
     DstCube dst_cube,  ///< [in] コピー先のビットベクタ
-    Cube src1_cube,    ///< [in] 1つめのキューブを表すビットベクタ
+    Cube src_cube,     ///< [in] 1つめのキューブを表すビットベクタ
     Literal lit        ///< [in] リテラル
-  ) const;
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    auto blk = _block_pos(varid);
+    auto sft = _shift_num(varid);
+    auto pat1 = _get_mask(varid, inv);
+    auto mask = 3UL << sft;
+
+    // 単純には答の積項数は2つの積項数の積だが
+    // 相反するリテラルを含む積は数えない．
+    auto tmp = _get_word(src_cube, blk) | pat1;
+    if ( (tmp & mask) == mask ) {
+      // 相反するリテラルがあった．
+      return false;
+    }
+    _cube_copy(dst_cube, src_cube);
+    _set_word(dst_cube, blk, tmp);
+    return true;
+  }
 
   /// @brief キューブとリテラルの積を計算する．
   /// @retval true 積が空でなかった．
@@ -501,25 +622,73 @@ public:
   _cube_product_int(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
     Literal lit       ///< [in] リテラル
-  ) const;
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    auto blk = _block_pos(varid);
+    auto sft = _shift_num(varid);
+    auto pat1 = _get_mask(varid, inv);
+    auto mask = 3UL << sft;
+
+    // 単純には答の積項数は2つの積項数の積だが
+    // 相反するリテラルを含む積は数えない．
+    auto tmp = _get_word(dst_cube, blk) | pat1;
+    if ( (tmp & mask) == mask ) {
+      // 相反するリテラルがあった．
+      return false;
+    }
+    _set_word(dst_cube, blk, tmp);
+    return true;
+  }
 
   /// @brief キューブによる商を求める．
   /// @return 正しく割ることができたら true を返す．
   bool
   _cube_quotient(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
-    Cube src1_cube,   ///< [in] 被除数を表すビットベクタ
-    Cube src2_cube    ///< [in] 除数を表すビットベクタ
-  ) const;
+    Cube cube1,       ///< [in] 被除数を表すビットベクタ
+    Cube cube2        ///< [in] 除数を表すビットベクタ
+  ) const
+  {
+    auto dst_end = _cube_end(dst_cube);
+    for ( ; dst_cube != dst_end; ++ dst_cube, ++ cube1, ++ cube2 ) {
+      auto pat1 = *cube1;
+      auto pat2 = *cube2;
+      if ( (~pat1 & pat2) != ALG_ALL0 ) {
+	// この場合の dst の値は不定
+	return false;
+      }
+      *dst_cube = pat1 & ~pat2;
+    }
+    return true;
+  }
 
   /// @brief リテラルによる商を求める．
   /// @return 正しく割ることができたら true を返す．
   bool
   _cube_quotient(
     DstCube dst_cube, ///< [in] コピー先のビットベクタ
-    Cube src1_cube,   ///< [in] 被除数を表すビットベクタ
+    Cube src_cube,    ///< [in] 被除数を表すビットベクタ
     Literal lit       ///< [in] リテラル
-  ) const;
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    auto blk = _block_pos(varid);
+    auto sft = _shift_num(varid);
+    auto pat1 = _get_mask(varid, inv);
+    auto mask = 3UL << sft;
+    auto nmask = ~mask;
+    auto src_p = src_cube + blk;
+    if ( (*src_p & mask) == pat1 ) {
+      _cube_copy(dst_cube, src_cube);
+      auto dst_p = dst_cube + blk;
+      *dst_p &= nmask;
+      return true;
+    }
+    return false;
+  }
 
   /// @brief キューブ(を表すビットベクタ)の比較を行う．
   /// @retval -1 bv1 <  bv2
@@ -527,9 +696,23 @@ public:
   /// @retval  1 bv1 >  bv2
   int
   _cube_compare(
-    Cube src1_cube, ///< [in] 1つめのキューブを表すビットベクタ
-    Cube src2_cube  ///< [in] 2つめのキューブを表すビットベクタ
-  ) const;
+    Cube cube1, ///< [in] 1つめのキューブを表すビットベクタ
+    Cube cube2  ///< [in] 2つめのキューブを表すビットベクタ
+  ) const
+  {
+    auto src1_end = _cube_end(cube1);
+    for ( ; cube1 != src1_end; ++ cube1, ++ cube2 ) {
+      auto pat1 = *cube1;
+      auto pat2 = *cube2;
+      if ( pat1 < pat2 ) {
+	return -1;
+      }
+      else if ( pat1 > pat2 ) {
+	return 1;
+      }
+    }
+    return 0;
+  }
 
 
 protected:
@@ -544,7 +727,7 @@ protected:
   ) const
   {
     auto size = _cube_size() * cube_num;
-    return Chunk(size, 0UL);
+    return Chunk(size, ALG_ALL0);
   }
 
   /// @brief キューブのリストを返す．
@@ -637,6 +820,33 @@ protected:
     return static_cast<AlgPat>(inv ? AlgPat::_0 : AlgPat::_1);
   }
 
+  /// @brief ワード中にコンフリクトがあるか調べる．
+  static
+  bool
+  _word_check_conflict(
+    AlgPatWord word ///< [in] 対象のワード
+  )
+  {
+    const AlgPatWord mask1 = 0x5555555555555555ULL;
+    const AlgPatWord mask2 = 0xAAAAAAAAAAAAAAAAULL;
+    auto tmp1 = word & mask1;
+    auto tmp2 = word & mask2;
+    if ( (tmp1 & (tmp2 >> 1)) != ALG_ALL0 ) {
+      // 同じ変数の異なる極性のリテラルがあった．
+      return true;
+    }
+    return false;
+  }
+
+  /// @brief ワード中のリテラルをリストに追加する．
+  static
+  void
+  _word_literal_list(
+    AlgPatWord word,          ///< [in] 対象のワード
+    SizeType base,            ///< [in] 変数番号の開始位置
+    vector<Literal>& lit_list ///< [out] リテラルを格納するリスト
+  );
+
   /// @brief リテラルからブロック番号を得る．
   SizeType
   _block_pos(
@@ -669,6 +879,61 @@ protected:
     auto pat = _bitpat(inv);
     auto mask = static_cast<AlgPatWord>(pat) << sft;
     return mask;
+  }
+
+  /// @brief 入力数が同じかチェックする．
+  void
+  _check_size(
+    const AlgBase& right
+  ) const
+  {
+    if ( variable_num() != right.variable_num() ) {
+      throw std::invalid_argument("variable_num() is different from each other");
+    }
+  }
+
+  /// @brief リテラルが範囲内かチェックする．
+  void
+  _check_lit(
+    Literal lit
+  ) const
+  {
+    if ( lit.varid() >= variable_num() ) {
+      throw std::out_of_range{"literal is out of range"};
+    }
+  }
+
+  /// @brief リテラルが範囲内かチェックする．
+  void
+  _check_lits(
+    const vector<Literal>& lit_list
+  ) const
+  {
+    for ( auto lit: lit_list ) {
+      _check_lit(lit);
+    }
+  }
+
+  /// @brief リテラルが範囲内かチェックする．
+  void
+  _check_lits(
+    std::initializer_list<Literal>& lit_list
+  ) const
+  {
+    for ( auto lit: lit_list ) {
+      _check_lit(lit);
+    }
+  }
+
+  /// @brief 変数が範囲内かチェックする．
+  void
+  _check_var(
+    SizeType var
+  ) const
+  {
+    if ( var >= variable_num() ) {
+      throw std::out_of_range{"var is out of range"};
+    }
   }
 
 

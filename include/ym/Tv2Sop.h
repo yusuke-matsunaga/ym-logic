@@ -9,9 +9,7 @@
 /// All rights reserved.
 
 #include "ym/TvFunc.h"
-#include "ym/SopCover.h"
-#include "ym/SopCube.h"
-#include "ym/Expr.h"
+#include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -31,14 +29,14 @@ public:
 
   /// @brief 主項を列挙する．
   static
-  vector<SopCube>
+  vector<vector<Literal>>
   all_primes(
     const TvFunc& f ///< [in] 対象の関数
   );
 
   /// @brief 主項を列挙する．
   static
-  vector<SopCube>
+  vector<vector<Literal>>
   all_primes(
     const TvFunc& f, ///< [in] 対象の関数
     const TvFunc& dc ///< [in] ドントケアの関数
@@ -48,35 +46,16 @@ public:
     return all_primes(f | dc);
   }
 
-  /// @brief BCF(Blake's Cannonical Form)を求める．
-  static
-  SopCover
-  BCF(
-    const TvFunc& f ///< [in] 対象の関数
-  );
-
-  /// @brief BCF(Blake's Cannonical Form)を求める．
-  static
-  SopCover
-  BCF(
-    const TvFunc& f, ///< [in] 対象の関数
-    const TvFunc& dc ///< [in] ドントケアの関数
-  )
-  {
-    // 主項にとってはドントケアはオンセットと同じ
-    return BCF(f | dc);
-  }
-
   /// @brief MWC(Merge With Containment) を行って積和形論理式を求める．
   static
-  SopCover
+  vector<vector<Literal>>
   MWC(
     const TvFunc& f ///< [in] 対象の関数
   );
 
   /// @brief 単純なシャノン展開を行ってで非冗長積和形を求める．
   static
-  SopCover
+  vector<vector<Literal>>
   ISOP(
     const TvFunc& f ///< [in] 対象の関数
   );
@@ -85,7 +64,7 @@ public:
   ///
   /// dc の入力数は f の入力数と等しくなければならない．
   static
-  SopCover
+  vector<vector<Literal>>
   ISOP(
     const TvFunc& f, ///< [in] 対象の関数
     const TvFunc& dc ///< [in] ドントケアの関数

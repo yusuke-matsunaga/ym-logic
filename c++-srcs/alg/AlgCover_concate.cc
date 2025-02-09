@@ -22,11 +22,9 @@ AlgCover::operator+(
   const AlgCover& right ///< [in] オペランド
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = concate(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _concate(right.cube_num(), right.chunk(), dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -36,11 +34,9 @@ AlgCover::operator+=(
   const AlgCover& right ///< [in] オペランド
 )
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = concate(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _concate(right.cube_num(), right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
@@ -51,11 +47,9 @@ AlgCover::operator+(
   const AlgCube& right ///< [in] オペランド
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = concate(1, right.chunk(), dst_num);
+  auto dst_chunk = _concate(1, right.chunk(), dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -65,18 +59,16 @@ AlgCover::operator+=(
   const AlgCube& right ///< [in] オペランド
 )
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = concate(1, right.chunk(), dst_num);
+  auto dst_chunk = _concate(1, right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
 
 // @brief concate の共通処理
 AlgBase::Chunk
-AlgCover::concate(
+AlgCover::_concate(
   SizeType num2,
   const Chunk& chunk2,
   SizeType& dst_num

@@ -288,10 +288,6 @@ protected:
     SizeType var ///< [in] 変数 ( 0 <= var_id.val() < variable_num() )
   ) const
   {
-    if ( var >= variable_num() ) {
-      throw std::out_of_range{"var is out of range"};
-    }
-
     SizeType blk = _block_pos(var);
     SizeType sft = _shift_num(var);
     auto word = _get_word(cube, blk);
@@ -426,7 +422,7 @@ protected:
   ) const;
 
 
-public:
+protected:
   //////////////////////////////////////////////////////////////////////
   // キューブに対する処理
   // 基本的にはキューブはビットベクタの先頭アドレスで表す．
@@ -557,7 +553,7 @@ public:
   {
     auto cube_end = _cube_end(cube);
     for ( ; cube != cube_end; ++ cube ) {
-      if ( *cube != 0UL ) {
+      if ( *cube != SOP_ALL1 ) {
 	return false;
       }
     }
@@ -921,6 +917,61 @@ protected:
     auto pat = _bitpat(!inv);
     auto mask = static_cast<SopPatWord>(pat) << sft;
     return ~mask;
+  }
+
+  /// @brief 入力数が同じかチェックする．
+  void
+  _check_size(
+    const SopBase& right
+  ) const
+  {
+    if ( variable_num() != right.variable_num() ) {
+      throw std::invalid_argument("variable_num() is different from each other");
+    }
+  }
+
+  /// @brief リテラルが範囲内かチェックする．
+  void
+  _check_lit(
+    Literal lit
+  ) const
+  {
+    if ( lit.varid() >= variable_num() ) {
+      throw std::out_of_range{"literal is out of range"};
+    }
+  }
+
+  /// @brief リテラルが範囲内かチェックする．
+  void
+  _check_lits(
+    const vector<Literal>& lit_list
+  ) const
+  {
+    for ( auto lit: lit_list ) {
+      _check_lit(lit);
+    }
+  }
+
+  /// @brief リテラルが範囲内かチェックする．
+  void
+  _check_lits(
+    std::initializer_list<Literal>& lit_list
+  ) const
+  {
+    for ( auto lit: lit_list ) {
+      _check_lit(lit);
+    }
+  }
+
+  /// @brief 変数が範囲内かチェックする．
+  void
+  _check_var(
+    SizeType var
+  ) const
+  {
+    if ( var >= variable_num() ) {
+      throw std::out_of_range{"var is out of range"};
+    }
   }
 
 

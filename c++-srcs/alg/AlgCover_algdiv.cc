@@ -22,11 +22,9 @@ AlgCover::operator/(
   const AlgCover& right
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = algdiv(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _algdiv(right.cube_num(), right.chunk(), dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -36,11 +34,9 @@ AlgCover::operator/=(
   const AlgCover& right
 )
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = algdiv(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _algdiv(right.cube_num(), right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
@@ -51,11 +47,9 @@ AlgCover::operator/(
   const AlgCube& right
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = algdiv(right.chunk(), dst_num);
+  auto dst_chunk = _algdiv(right.chunk(), dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -65,11 +59,9 @@ AlgCover::operator/=(
   const AlgCube& right
 )
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = algdiv(right.chunk(), dst_num);
+  auto dst_chunk = _algdiv(right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
@@ -80,8 +72,9 @@ AlgCover::operator/(
   Literal lit
 ) const
 {
+  _check_lit(lit);
   SizeType dst_num;
-  auto dst_chunk = algdiv(lit, dst_num);
+  auto dst_chunk = _algdiv(lit, dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -91,15 +84,16 @@ AlgCover::operator/=(
   Literal lit
 )
 {
+  _check_lit(lit);
   SizeType dst_num;
-  auto dst_chunk = algdiv(lit, dst_num);
+  auto dst_chunk = _algdiv(lit, dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
 
 // @brief カバーの代数的除算を行う．
 AlgBase::Chunk
-AlgCover::algdiv(
+AlgCover::_algdiv(
   SizeType num2,
   const Chunk& chunk2,
   SizeType& dst_num
@@ -174,7 +168,7 @@ AlgCover::algdiv(
 
 // @brief カバーをキューブで割る．
 AlgBase::Chunk
-AlgCover::algdiv(
+AlgCover::_algdiv(
   const Chunk& chunk2,
   SizeType& dst_num
 ) const
@@ -196,7 +190,7 @@ AlgCover::algdiv(
 
 // @brief カバーをリテラルで割る．
 AlgBase::Chunk
-AlgCover::algdiv(
+AlgCover::_algdiv(
   Literal lit,
   SizeType& dst_num
 ) const

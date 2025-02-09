@@ -22,11 +22,9 @@ AlgCover::operator-(
   const AlgCover& right ///< [in] オペランド
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = diff(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _diff(right.cube_num(), right.chunk(), dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -36,11 +34,9 @@ AlgCover::operator-=(
   const AlgCover& right ///< [in] オペランド
 )
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = diff(right.cube_num(), right.chunk(), dst_num);
+  auto dst_chunk = _diff(right.cube_num(), right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
@@ -51,11 +47,9 @@ AlgCover::operator-(
   const AlgCube& right ///< [in] オペランド
 ) const
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = diff(1, right.chunk(), dst_num);
+  auto dst_chunk = _diff(1, right.chunk(), dst_num);
   return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
@@ -65,18 +59,16 @@ AlgCover::operator-=(
   const AlgCube& right ///< [in] オペランド
 )
 {
-  if ( variable_num() != right.variable_num() ) {
-    throw std::invalid_argument("variable_num() is different from each other");
-  }
+  _check_size(right);
   SizeType dst_num;
-  auto dst_chunk = diff(1, right.chunk(), dst_num);
+  auto dst_chunk = _diff(1, right.chunk(), dst_num);
   _set(dst_num, std::move(dst_chunk));
   return *this;
 }
 
 // @brief diff の共通処理
 AlgBase::Chunk
-AlgCover::diff(
+AlgCover::_diff(
   SizeType num2,
   const Chunk& chunk2,
   SizeType& dst_num

@@ -693,6 +693,7 @@ TvFunc_analyze(
   return PyPrimType::ToPyObject(ptype);
 }
 
+#if 0
 PyObject*
 TvFunc_bcf(
   PyObject* self,
@@ -700,7 +701,7 @@ TvFunc_bcf(
 )
 {
   auto& func = PyTvFunc::Get(self);
-  auto cov = Tv2Sop::BCF(func);
+  auto cov = Tv2Sop::all_primes(func);
   return PySopCover::ToPyObject(cov);
 }
 
@@ -714,6 +715,7 @@ TvFunc_mwc(
   auto cov = Tv2Sop::MWC(func);
   return PySopCover::ToPyObject(cov);
 }
+#endif
 
 // メソッド定義
 PyMethodDef TvFunc_methods[] = {
@@ -798,12 +800,14 @@ PyMethodDef TvFunc_methods[] = {
   {"analyze", TvFunc_analyze,
    METH_NOARGS,
    PyDoc_STR("check if this function is a primitive function")},
+#if 0
   {"bcf", TvFunc_bcf,
    METH_NOARGS,
    PyDoc_STR("get Blake's Cannonical Form")},
   {"mwc", TvFunc_mwc,
    METH_NOARGS,
    PyDoc_STR("get minimal cover using Merge With Containment")},
+#endif
   {nullptr, nullptr, 0, nullptr}
 };
 
