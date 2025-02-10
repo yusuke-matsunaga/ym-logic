@@ -9,6 +9,7 @@
 #include "pym/PySopCube.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyExpr.h"
+#include "pym/PyTvFunc.h"
 #include "pym/PyModule.h"
 
 
@@ -241,6 +242,17 @@ SopCube_expr(
   return PyExpr::ToPyObject(expr);
 }
 
+PyObject*
+SopCube_tvfunc(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& cube = PySopCube::Get(self);
+  auto func = cube.tvfunc();
+  return PyTvFunc::ToPyObject(func);
+}
+
 // メソッド定義
 PyMethodDef SopCube_methods[] = {
   {"copy", SopCube_copy,
@@ -270,6 +282,9 @@ PyMethodDef SopCube_methods[] = {
   {"expr", SopCube_expr,
    METH_NOARGS,
    PyDoc_STR("convert to 'Expr'")},
+  {"tvfunc", SopCube_tvfunc,
+   METH_NOARGS,
+   PyDoc_STR("convert to 'TvFunc'")},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -326,9 +341,9 @@ SopCube_richcmpfunc(
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-// 乗算
+// 論理積
 PyObject*
-SopCube_mul(
+SopCube_and(
   PyObject* self,
   PyObject* other
 )
@@ -355,9 +370,9 @@ SopCube_mul(
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-// 乗算つき代入
+// 論理積つき代入
 PyObject*
-SopCube_imul(
+SopCube_iand(
   PyObject* self,
   PyObject* other
 )
@@ -380,10 +395,60 @@ SopCube_imul(
   Py_RETURN_NOTIMPLEMENTED;
 }
 
+// 代数的除算
+PyObject*
+SopCube_algdiv(
+  PyObject* self,
+  PyObject* other
+)
+{
+  if ( PySopCube::Check(self) ) {
+    auto& val1 = PySopCube::Get(self);
+    if ( PySopCube::Check(other) ) {
+      auto& val2 = PySopCube::Get(other);
+      auto val3 = val1 / val2;
+      return PySopCube::ToPyObject(val3);
+    }
+    if ( PyLiteral::Check(other) ) {
+      auto val2 = PyLiteral::Get(other);
+      auto val3 = val1 / val2;
+      return PySopCube::ToPyObject(val3);
+    }
+  }
+  Py_RETURN_NOTIMPLEMENTED;
+}
+
+// 代数的除算つき代入
+PyObject*
+SopCube_ialgdiv(
+  PyObject* self,
+  PyObject* other
+)
+{
+  if ( PySopCube::Check(self) ) {
+    auto& val1 = PySopCube::Get(self);
+    if ( PySopCube::Check(other) ) {
+      auto& val2 = PySopCube::Get(other);
+      val1 /= val2;
+      Py_IncRef(self);
+      return self;
+    }
+    if ( PyLiteral::Check(other) ) {
+      auto val2 = PyLiteral::Get(other);
+      val1 /= val2;
+      Py_IncRef(self);
+      return self;
+    }
+  }
+  Py_RETURN_NOTIMPLEMENTED;
+}
+
 // 数値演算メソッド定義
 PyNumberMethods SopCube_number = {
-  .nb_and = SopCube_mul,
-  .nb_inplace_and = SopCube_imul,
+  .nb_and = SopCube_and,
+  .nb_inplace_and = SopCube_iand,
+  .nb_true_divide = SopCube_algdiv,
+  .nb_inplace_true_divide = SopCube_ialgdiv,
 };
 
 // ハッシュ関数

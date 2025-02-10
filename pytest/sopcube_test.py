@@ -268,6 +268,120 @@ def test_lit_product_int2():
 
     assert cube1.is_invalid()
 
+def test_cube_cube_quotient1():
+    ni = 10
+    lit1 = Literal(0, inv=False)
+    lit2 = Literal(5, inv=True)
+    lit3 = Literal(7, inv=True)
+
+    cube1 = SopCube(ni, literal_list=[lit1, lit2, lit3])
+    cube2 = SopCube(ni, literal_list=[lit1, lit3])
+
+    cube3 = cube1 / cube2
+
+    assert cube3.is_valid()
+    lit_list = cube3.literal_list()
+    assert len(lit_list) == 1
+    assert lit_list[0] == lit2
+
+def test_cube_cube_quotient2():
+    ni = 10
+    lit1 = Literal(0, inv=False)
+    lit2 = Literal(5, inv=True)
+    lit3 = Literal(7, inv=True)
+
+    cube1 = SopCube(ni, literal_list=[lit1, lit2])
+    cube2 = SopCube(ni, literal_list=[lit3])
+
+    cube3 = cube1 / cube2
+
+    assert cube3.is_invalid()
+
+def test_cube_lit_quotient1():
+    ni = 10
+    lit1 = Literal(0, inv=False)
+    lit2 = Literal(5, inv=True)
+    lit3 = Literal(7, inv=True)
+
+    cube1 = SopCube(ni, literal_list=[lit1, lit2, lit3])
+
+    cube3 = cube1 / lit1
+
+    assert cube3.is_valid()
+    lit_list = cube3.literal_list()
+    assert len(lit_list) == 2
+    assert lit_list[0] == lit2
+    assert lit_list[1] == lit3
+
+def test_cube_lit_quotient2():
+    ni = 10
+    lit1 = Literal(0, inv=False)
+    lit2 = Literal(5, inv=True)
+    lit3 = Literal(7, inv=True)
+
+    cube1 = SopCube(ni, literal_list=[lit2, lit3])
+
+    cube3 = cube1 / lit1
+
+    assert cube3.is_invalid()
+
+def test_cube_quotient_int1():
+    ni = 10
+    lit1 = Literal(0, inv=False)
+    lit2 = Literal(5, inv=True)
+    lit3 = Literal(7, inv=True)
+
+    cube1 = SopCube(ni, literal_list=[lit1, lit2, lit3])
+    cube2 = SopCube(ni, literal_list=[lit1, lit3])
+
+    cube1 /= cube2
+
+    assert cube1.is_valid()
+    lit_list = cube1.literal_list()
+    assert len(lit_list) == 1
+    assert lit_list[0] == lit2
+
+def test_cube_quotient_int2():
+    ni = 10
+    lit1 = Literal(0, inv=False)
+    lit2 = Literal(5, inv=True)
+    lit3 = Literal(7, inv=True)
+
+    cube1 = SopCube(ni, literal_list=[lit1, lit2])
+    cube2 = SopCube(ni, literal_list=[lit3])
+
+    cube1 /= cube2
+
+    assert cube1.is_invalid()
+
+def test_lit_quotient_int1():
+    ni = 10
+    lit1 = Literal(0, inv=False)
+    lit2 = Literal(5, inv=True)
+    lit3 = Literal(7, inv=True)
+
+    cube1 = SopCube(ni, literal_list=[lit1, lit2, lit3])
+
+    cube1 /= lit1
+
+    assert cube1.is_valid()
+    lit_list = cube1.literal_list()
+    assert len(lit_list) == 2
+    assert lit_list[0] == lit2
+    assert lit_list[1] == lit3
+
+def test_lit_quotient_int2():
+    ni = 10
+    lit1 = Literal(0, inv=False)
+    lit2 = Literal(5, inv=True)
+    lit3 = Literal(7, inv=True)
+
+    cube1 = SopCube(ni, literal_list=[lit2, lit3])
+
+    cube1 /= lit1
+
+    assert cube1.is_invalid()
+
 def test_compare1():
     ni = 100
 

@@ -10,6 +10,7 @@
 #include "pym/PySopCube.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyExpr.h"
+#include "pym/PyTvFunc.h"
 #include "pym/PyModule.h"
 
 
@@ -221,7 +222,6 @@ SopCover_get_pat(
   return Py_BuildValue("s", ans_str);
 }
 
-#if 0
 PyObject*
 SopCover_common_cube(
   PyObject* self,
@@ -232,7 +232,6 @@ SopCover_common_cube(
   auto cc = cov.common_cube();
   return PySopCube::ToPyObject(cc);
 }
-#endif
 
 PyObject*
 SopCover_expr(
@@ -243,6 +242,17 @@ SopCover_expr(
   auto& cov = PySopCover::Get(self);
   auto expr = cov.expr();
   return PyExpr::ToPyObject(expr);
+}
+
+PyObject*
+SopCover_tvfunc(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& cov = PySopCover::Get(self);
+  auto func = cov.tvfunc();
+  return PyTvFunc::ToPyObject(func);
 }
 
 // メソッド定義
@@ -259,14 +269,15 @@ PyMethodDef SopCover_methods[] = {
   {"get_pat", reinterpret_cast<PyCFunction>(SopCover_get_pat),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("get the pattern('-', '0', or '1') of the specified position")},
-#if 0
   {"common_cube", SopCover_common_cube,
    METH_NOARGS,
    PyDoc_STR("return the common cube")},
-#endif
   {"expr", SopCover_expr,
    METH_NOARGS,
    PyDoc_STR("convert to 'Expr'")},
+  {"tvfunc", SopCover_tvfunc,
+   METH_NOARGS,
+   PyDoc_STR("convert to 'TvFunc'")},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -402,10 +413,9 @@ SopCover_iadd(
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-#if 0
 // 減算
 PyObject*
-SopCover_sub(
+SopCover_diff(
   PyObject* self,
   PyObject* other
 )
@@ -438,7 +448,7 @@ SopCover_sub(
 
 // 減算つき代入
 PyObject*
-SopCover_isub(
+SopCover_idiff(
   PyObject* self,
   PyObject* other
 )
@@ -470,12 +480,11 @@ SopCover_isub(
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
-#endif
 
-#if 0
-// 乗算
+
+// 論理積
 PyObject*
-SopCover_mult(
+SopCover_and(
   PyObject* self,
   PyObject* other
 )
@@ -489,7 +498,7 @@ SopCover_mult(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      auto val3 = val1 * val2;
+      auto val3 = val1 & val2;
       return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
@@ -499,12 +508,12 @@ SopCover_mult(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      auto val3 = val1 * val2;
+      auto val3 = val1 & val2;
       return PySopCover::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      auto val3 = val1 * val2;
+      auto val3 = val1 & val2;
       return PySopCover::ToPyObject(val3);
     }
   }
@@ -517,21 +526,21 @@ SopCover_mult(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      auto val3 = val1 * val2;
+      auto val3 = val1 & val2;
       return PySopCover::ToPyObject(val3);
     }
     if ( PyLiteral::Check(self) ) {
       auto val1 = PyLiteral::Get(self);
-      auto val3 = val1 * val2;
+      auto val3 = val1 & val2;
       return PySopCover::ToPyObject(val3);
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-// 乗算つき代入
+// 論理世紀つき代入
 PyObject*
-SopCover_imult(
+SopCover_iand(
   PyObject* self,
   PyObject* other
 )
@@ -545,7 +554,7 @@ SopCover_imult(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      val1 *= val2;
+      val1 &= val2;
       Py_IncRef(self);
       return self;
     }
@@ -556,13 +565,13 @@ SopCover_imult(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      val1 *= val2;
+      val1 &= val2;
       Py_IncRef(self);
       return self;
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      val1 *= val2;
+      val1 &= val2;
       Py_IncRef(self);
       return self;
     }
@@ -586,7 +595,7 @@ SopCover_div(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      auto val3 = val1 / val2;
+      auto val3 = val1.algdiv(val2);
       return PySopCover::ToPyObject(val3);
     }
     if ( PySopCube::Check(other) ) {
@@ -596,12 +605,12 @@ SopCover_div(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      auto val3 = val1 / val2;
+      auto val3 = val1.algdiv(val2);
       return PySopCover::ToPyObject(val3);
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      auto val3 = val1 / val2;
+      auto val3 = val1.algdiv(val2);
       return PySopCover::ToPyObject(val3);
     }
   }
@@ -624,7 +633,7 @@ SopCover_idiv(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      val1 /= val2;
+      val1.algdiv_int(val2);
       Py_IncRef(self);
       return self;
     }
@@ -635,31 +644,30 @@ SopCover_idiv(
 			"variable_num() is different from each other");
 	return nullptr;
       }
-      val1 /= val2;
+      val1.algdiv_int(val2);
       Py_IncRef(self);
       return self;
     }
     if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::Get(other);
-      val1 /= val2;
+      val1.algdiv_int(val2);
       Py_IncRef(self);
       return self;
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
-#endif
 
 // 数値演算メソッド定義
 PyNumberMethods SopCover_number = {
   .nb_add = SopCover_add,
-  //.nb_subtract = SopCover_sub,
-  //.nb_multiply = SopCover_mult,
+  .nb_subtract = SopCover_diff,
+  .nb_and = SopCover_and,
   .nb_inplace_add = SopCover_iadd,
-  //.nb_inplace_subtract = SopCover_isub,
-  //.nb_inplace_multiply = SopCover_mult,
-  //.nb_true_divide = SopCover_div,
-  //.nb_inplace_true_divide = SopCover_idiv
+  .nb_inplace_subtract = SopCover_idiff,
+  .nb_inplace_and = SopCover_and,
+  .nb_true_divide = SopCover_div,
+  .nb_inplace_true_divide = SopCover_idiv
 };
 
 // ハッシュ関数
