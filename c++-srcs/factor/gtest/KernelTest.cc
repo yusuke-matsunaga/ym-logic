@@ -11,7 +11,7 @@
 #include "ym/Range.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 class KernelTest:
 public ::testing::Test
@@ -43,7 +43,7 @@ public:
 
   void
   check(
-    const AlgCover& cover,
+    const SopCover& cover,
     const vector<string>& exp_list
   )
   {
@@ -67,7 +67,7 @@ public:
 
 TEST_F(KernelTest, test1)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit1, lit2} }};
 
   vector<string> exp_list{
@@ -79,7 +79,7 @@ TEST_F(KernelTest, test1)
 
 TEST_F(KernelTest, test2)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit1, lit2},
 			       {lit0, lit3},
 			       {lit1, lit3} }};
@@ -96,7 +96,7 @@ TEST_F(KernelTest, test2)
 TEST_F(KernelTest, test3)
 {
   // adf + aef + bdf + bef + cdf + cef + bfg + h
-  auto cover1 = AlgCover{nv, { { lit0, lit3, lit5 },
+  auto cover1 = SopCover{nv, { { lit0, lit3, lit5 },
 			       { lit0, lit4, lit5 },
 			       { lit1, lit3, lit5 },
 			       { lit1, lit4, lit5 },
@@ -116,4 +116,4 @@ TEST_F(KernelTest, test3)
   check(cover1, exp_list);
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

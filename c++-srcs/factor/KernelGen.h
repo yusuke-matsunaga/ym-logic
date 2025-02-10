@@ -9,11 +9,11 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 class LitSet;
 
@@ -39,15 +39,15 @@ public:
 
   /// @brief カーネルとコカーネルを列挙する．
   /// @return カーネルとコカーネル集合のペアのリストを返す．
-  vector<pair<AlgCover, AlgCover>>
+  vector<pair<SopCover, vector<SopCube>>>
   all_kernels(
-    const AlgCover& cover ///< [in] 対象のカバー
+    const SopCover& cover ///< [in] 対象のカバー
   );
 
   /// @brief 価値の最も高いカーネルを求める．
-  AlgCover
+  SopCover
   best_kernel(
-    const AlgCover& cover ///< [in] 対象のカバー
+    const SopCover& cover ///< [in] 対象のカバー
   );
 
 
@@ -59,22 +59,22 @@ private:
   /// @brief カーネルとコカーネルを列挙する．
   void
   generate(
-    const AlgCover& cover ///< [in] 対象のカバー
+    const SopCover& cover ///< [in] 対象のカバー
   );
 
   /// @brief カーネルを求める下請け関数
   void
   kern_sub(
-    const AlgCover& cover,             ///< [in] 対象のカバー
+    const SopCover& cover,             ///< [in] 対象のカバー
     vector<Literal>::const_iterator p, ///< [in] 次のリテラルの位置
-    const AlgCube& ccube,              ///< [in] 今までに括りだされた共通のキューブ
+    const SopCube& ccube,              ///< [in] 今までに括りだされた共通のキューブ
     const LitSet& plits                ///< [in] すでに括られたリテラルの集合
   );
 
   /// @brief 出現頻度の昇順にならべたリテラルのリストを作る．
   vector<Literal>
   gen_literal_list(
-    const AlgCover& cover ///< [in] 対象のカバー
+    const SopCover& cover ///< [in] 対象のカバー
   );
 
 
@@ -93,8 +93,8 @@ private:
   /// @brief ハッシュ表に登録する．
   void
   hash_add(
-    const AlgCover& kernel,
-    const AlgCube& cokernel
+    const SopCover& kernel,
+    const SopCube& cokernel
   )
   {
     auto tmp_kernel = kernel;
@@ -104,16 +104,16 @@ private:
   /// @brief ハッシュ表に登録する．
   void
   hash_add(
-    AlgCover&& kernel,
-    const AlgCube& cokernel
+    SopCover&& kernel,
+    const SopCube& cokernel
   )
   {
     if ( mKernelDict.count(kernel) == 0 ) {
-      mKernelDict.emplace(std::move(kernel), AlgCover{cokernel});
+      mKernelDict.emplace(std::move(kernel), vector<SopCube>{cokernel});
     }
     else {
       auto& cokernels = mKernelDict.at(kernel);
-      cokernels += cokernel;
+      cokernels.push_back(cokernel);
     }
   }
 
@@ -128,10 +128,10 @@ private:
 
   // ハッシュ表
   // カーネルをキーにしてコカーネルのリストを格納する．
-  std::unordered_map<AlgCover, AlgCover> mKernelDict;
+  std::unordered_map<SopCover, vector<SopCube>> mKernelDict;
 
 };
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR
 
 #endif // KERNELGEN_H

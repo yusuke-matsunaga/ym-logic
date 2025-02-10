@@ -1,10 +1,5 @@
 # ===================================================================
-# ym-logic のための CMakeLists.txt
-# ===================================================================
-
-
-# ===================================================================
-# パッケージの検査
+# alg/gtest のための CMakeLists.txt
 # ===================================================================
 
 
@@ -12,39 +7,42 @@
 # インクルードパスの設定
 # ===================================================================
 
+
 # ===================================================================
 # サブディレクトリの設定
 # ===================================================================
-
-add_subdirectory(gtest)
 
 
 # ===================================================================
 #  ソースファイルの設定
 # ===================================================================
 
-set (alg_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgBase.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_compare.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_concate.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_sort.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_diff.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_commoncube.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_algdiv.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlgCover_product.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/KernelGen.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/LitSet.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/BestKernel.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/OneLevel0Kernel.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/WeakDivision.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/GenFactor.cc
-  PARENT_SCOPE
-  )
-
 
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
+
+ym_add_gtest ( logic_Kernel_test
+  KernelTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_Kernel_test
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  )
+
+ym_add_gtest ( logic_GenFactor_test
+  GenFactorTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_GenFactor_test
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  )
 
 
 # ===================================================================

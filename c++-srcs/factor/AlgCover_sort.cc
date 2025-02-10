@@ -1,27 +1,27 @@
 
-/// @file AlgCover.cc
-/// @brief AlgCover の sort 関係の実装ファイル
+/// @file SopCover.cc
+/// @brief SopCover の sort 関係の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
-#include "AlgSorter.h"
+#include "ym/SopCover.h"
+#include "SopSorter.h"
 
 #define VERIFY 1
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgCover
+// クラス SopCover
 //////////////////////////////////////////////////////////////////////
 
 // @brief ソートする．
 void
-AlgCover::_sort()
+SopCover::_sort()
 {
-  AlgSorter sorter{variable_num()};
+  SopSorter sorter{variable_num()};
   sorter.sort(cube_num(), chunk());
 
   // 重複したキューブを削除する．
@@ -47,12 +47,12 @@ AlgCover::_sort()
 
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgSorter
+// クラス SopSorter
 //////////////////////////////////////////////////////////////////////
 
 // @brief ソートする．
 void
-AlgSorter::sort(
+SopSorter::sort(
   SizeType cube_num,
   Chunk& chunk
 )
@@ -66,7 +66,7 @@ AlgSorter::sort(
 
 // @brief マージソートを行う下請け関数
 void
-AlgSorter::sort_sub(
+SopSorter::sort_sub(
   Chunk& chunk,
   SizeType begin,
   SizeType end
@@ -261,4 +261,4 @@ AlgSorter::sort_sub(
 #endif
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

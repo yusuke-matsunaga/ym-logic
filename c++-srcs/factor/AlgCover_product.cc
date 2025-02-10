@@ -1,38 +1,38 @@
 
-/// @file AlgCover_product.cc
-/// @brief AlgCover の product 関係の実装ファイル
+/// @file SopCover_product.cc
+/// @brief SopCover の product 関係の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
-#include "AlgSorter.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
+#include "SopSorter.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgCover
+// クラス SopCover
 //////////////////////////////////////////////////////////////////////
 
 // @brief 論理積を計算する．
-AlgCover
-AlgCover::operator*(
-  const AlgCover& right
+SopCover
+SopCover::operator*(
+  const SopCover& right
 ) const
 {
   _check_size(right);
   SizeType dst_num;
   auto dst_chunk = _product(right.cube_num(), right.chunk(), dst_num);
-  return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
+  return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
 // @brief 論理積を計算して代入する．
-AlgCover&
-AlgCover::operator*=(
-  const AlgCover& right
+SopCover&
+SopCover::operator*=(
+  const SopCover& right
 )
 {
   _check_size(right);
@@ -43,21 +43,21 @@ AlgCover::operator*=(
 }
 
 // @brief 論理積を計算する(キューブ版)．
-AlgCover
-AlgCover::operator*(
-  const AlgCube& right
+SopCover
+SopCover::operator*(
+  const SopCube& right
 ) const
 {
   _check_size(right);
   SizeType dst_num;
   auto dst_chunk = _product(1, right.chunk(), dst_num);
-  return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
+  return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
 // @brief 論理積を計算して代入する(キューブ版)．
-AlgCover&
-AlgCover::operator*=(
-  const AlgCube& right
+SopCover&
+SopCover::operator*=(
+  const SopCube& right
 )
 {
   _check_size(right);
@@ -68,20 +68,20 @@ AlgCover::operator*=(
 }
 
 // @brief 論理積を計算する(リテラル版)．
-AlgCover
-AlgCover::operator*(
+SopCover
+SopCover::operator*(
   Literal right
 ) const
 {
   _check_lit(right);
   SizeType dst_num;
   auto dst_chunk = _product(right, dst_num);
-  return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
+  return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
 // @brief 論理積を計算して代入する(リテラル版)．
-AlgCover&
-AlgCover::operator*=(
+SopCover&
+SopCover::operator*=(
   Literal right
 )
 {
@@ -93,8 +93,8 @@ AlgCover::operator*=(
 }
 
 // @brief 2つのカバーの論理積を計算する．
-AlgBase::Chunk
-AlgCover::_product(
+SopBase::Chunk
+SopCover::_product(
   SizeType num2,
   const Chunk& chunk2,
   SizeType& dst_num
@@ -116,14 +116,14 @@ AlgCover::_product(
     }
   }
   dst_num = dst_list.num();
-  AlgSorter sorter{variable_num()};
+  SopSorter sorter{variable_num()};
   sorter.sort(dst_num, dst_chunk);
   return dst_chunk;
 }
 
 // @brief カバーとリテラルとの論理積を計算する．
-AlgBase::Chunk
-AlgCover::_product(
+SopBase::Chunk
+SopCover::_product(
   Literal lit,
   SizeType& dst_num
 ) const
@@ -156,4 +156,4 @@ AlgCover::_product(
   return dst_chunk;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

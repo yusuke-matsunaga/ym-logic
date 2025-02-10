@@ -1,37 +1,37 @@
 
-/// @file AlgCover_algdiv.cc
-/// @brief Algcover の algdiv 関係の実装ファイル
+/// @file SopCover_algdiv.cc
+/// @brief Sopcover の algdiv 関係の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgCover
+// クラス SopCover
 //////////////////////////////////////////////////////////////////////
 
 // @brief algebraic division を計算する．
-AlgCover
-AlgCover::operator/(
-  const AlgCover& right
+SopCover
+SopCover::operator/(
+  const SopCover& right
 ) const
 {
   _check_size(right);
   SizeType dst_num;
   auto dst_chunk = _algdiv(right.cube_num(), right.chunk(), dst_num);
-  return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
+  return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
 // @brief algebraic division を行って代入する．
-AlgCover&
-AlgCover::operator/=(
-  const AlgCover& right
+SopCover&
+SopCover::operator/=(
+  const SopCover& right
 )
 {
   _check_size(right);
@@ -42,21 +42,21 @@ AlgCover::operator/=(
 }
 
 // @brief キューブによる商を計算する．
-AlgCover
-AlgCover::operator/(
-  const AlgCube& right
+SopCover
+SopCover::operator/(
+  const SopCube& right
 ) const
 {
   _check_size(right);
   SizeType dst_num;
   auto dst_chunk = _algdiv(right.chunk(), dst_num);
-  return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
+  return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
 // @brief キューブによる商を計算する．
-AlgCover&
-AlgCover::operator/=(
-  const AlgCube& right
+SopCover&
+SopCover::operator/=(
+  const SopCube& right
 )
 {
   _check_size(right);
@@ -67,20 +67,20 @@ AlgCover::operator/=(
 }
 
 // @brief リテラルによる商を計算する．
-AlgCover
-AlgCover::operator/(
+SopCover
+SopCover::operator/(
   Literal lit
 ) const
 {
   _check_lit(lit);
   SizeType dst_num;
   auto dst_chunk = _algdiv(lit, dst_num);
-  return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
+  return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
 // @brief リテラルによる商を計算して代入する．
-AlgCover&
-AlgCover::operator/=(
+SopCover&
+SopCover::operator/=(
   Literal lit
 )
 {
@@ -92,8 +92,8 @@ AlgCover::operator/=(
 }
 
 // @brief カバーの代数的除算を行う．
-AlgBase::Chunk
-AlgCover::_algdiv(
+SopBase::Chunk
+SopCover::_algdiv(
   SizeType num2,
   const Chunk& chunk2,
   SizeType& dst_num
@@ -167,8 +167,8 @@ AlgCover::_algdiv(
 }
 
 // @brief カバーをキューブで割る．
-AlgBase::Chunk
-AlgCover::_algdiv(
+SopBase::Chunk
+SopCover::_algdiv(
   const Chunk& chunk2,
   SizeType& dst_num
 ) const
@@ -189,8 +189,8 @@ AlgCover::_algdiv(
 }
 
 // @brief カバーをリテラルで割る．
-AlgBase::Chunk
-AlgCover::_algdiv(
+SopBase::Chunk
+SopCover::_algdiv(
   Literal lit,
   SizeType& dst_num
 ) const
@@ -221,4 +221,4 @@ AlgCover::_algdiv(
   return dst_chunk;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

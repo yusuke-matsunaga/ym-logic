@@ -1,37 +1,37 @@
 
-/// @file AlgCover_concate.cc
-/// @brief AlgCover の concate の実装ファイル
+/// @file SopCover_concate.cc
+/// @brief SopCover の concate の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgCover
+// クラス SopCover
 //////////////////////////////////////////////////////////////////////
 
 // @brief 論理和を計算する．
-AlgCover
-AlgCover::operator+(
-  const AlgCover& right ///< [in] オペランド
+SopCover
+SopCover::operator+(
+  const SopCover& right ///< [in] オペランド
 ) const
 {
   _check_size(right);
   SizeType dst_num;
   auto dst_chunk = _concate(right.cube_num(), right.chunk(), dst_num);
-  return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
+  return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
 // @brief 論理和を計算して代入する．
-AlgCover&
-AlgCover::operator+=(
-  const AlgCover& right ///< [in] オペランド
+SopCover&
+SopCover::operator+=(
+  const SopCover& right ///< [in] オペランド
 )
 {
   _check_size(right);
@@ -42,21 +42,21 @@ AlgCover::operator+=(
 }
 
 // @brief 論理和を計算する(キューブ版)．
-AlgCover
-AlgCover::operator+(
-  const AlgCube& right ///< [in] オペランド
+SopCover
+SopCover::operator+(
+  const SopCube& right ///< [in] オペランド
 ) const
 {
   _check_size(right);
   SizeType dst_num;
   auto dst_chunk = _concate(1, right.chunk(), dst_num);
-  return AlgCover{variable_num(), dst_num, std::move(dst_chunk)};
+  return SopCover{variable_num(), dst_num, std::move(dst_chunk)};
 }
 
 // @brief 論理和を計算して代入する(キューブ版)．
-AlgCover&
-AlgCover::operator+=(
-  const AlgCube& right ///< [in] オペランド
+SopCover&
+SopCover::operator+=(
+  const SopCube& right ///< [in] オペランド
 )
 {
   _check_size(right);
@@ -67,8 +67,8 @@ AlgCover::operator+=(
 }
 
 // @brief concate の共通処理
-AlgBase::Chunk
-AlgCover::_concate(
+SopBase::Chunk
+SopCover::_concate(
   SizeType num2,
   const Chunk& chunk2,
   SizeType& dst_num
@@ -118,4 +118,4 @@ AlgCover::_concate(
   return dst_chunk;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

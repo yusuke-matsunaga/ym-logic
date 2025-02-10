@@ -17,10 +17,10 @@
 # ===================================================================
 
 add_subdirectory(expr)
-add_subdirectory(sop)
-add_subdirectory(alg)
 add_subdirectory(tvfunc)
 add_subdirectory(npn)
+add_subdirectory(sop)
+add_subdirectory(factor)
 add_subdirectory(aig)
 add_subdirectory(dd)
 add_subdirectory(gtest)
@@ -34,10 +34,10 @@ set (ym_logic_SOURCES
   ${aig_SOURCES}
   ${dd_SOURCES}
   ${expr_SOURCES}
+  ${tvfunc_SOURCES}
   ${npn_SOURCES}
   ${sop_SOURCES}
-  ${alg_SOURCES}
-  ${tvfunc_SOURCES}
+  ${factor_SOURCES}
   )
 
 

@@ -8,10 +8,10 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
+#include "ym/SopCover.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 /// @class WeakDivision WeakDivision.h "WeakDivision.h"
@@ -27,14 +27,14 @@ public:
   /// @brief 除算を行う．
   /// @return 商q と余りr の pair を返す．
   static
-  pair<AlgCover, AlgCover>
+  pair<SopCover, SopCover>
   divide(
-    const AlgCover& f, ///< [in] 被除数
-    const AlgCover& d  ///< [in] 除数
+    const SopCover& f, ///< [in] 被除数
+    const SopCover& d  ///< [in] 除数
   );
 
 };
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR
 
 #endif // WEAKDIVISION_H

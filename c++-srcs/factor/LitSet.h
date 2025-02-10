@@ -9,21 +9,21 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/AlgBase.h"
+#include "ym/SopBase.h"
 #include "ym/Literal.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 /// @class LitSet LitSet.h "LitSet.h"
 /// @brief Literal の集合を表すクラス
 ///
-/// AlgCube と異なり，相反するリテラル(x と x')を同時に含んでも良い．
+/// SopCube と異なり，相反するリテラル(x と x')を同時に含んでも良い．
 /// Kernel の列挙用に使うだけなので使用する演算も限られている．
 //////////////////////////////////////////////////////////////////////
 class LitSet:
-  public AlgBase
+  public SopBase
 {
 public:
 
@@ -111,7 +111,7 @@ public:
   /// @brief 引数のキューブ中のリテラルをひとつでも含んでいたら true を返す．
   bool
   check_intersect(
-    const AlgCube& right ///< [in] 対象のキューブ
+    const SopCube& right ///< [in] 対象のキューブ
   ) const;
 
 
@@ -197,6 +197,6 @@ operator+(
   return LitSet{std::move(lit_set)}.operator+=(lit);
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR
 
 #endif // LITSET_H

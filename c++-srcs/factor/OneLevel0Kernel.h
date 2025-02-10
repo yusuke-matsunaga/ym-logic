@@ -1,23 +1,23 @@
-#ifndef BESTKERNEL_H
-#define BESTKERNEL_H
+#ifndef ONELEVEL0KERNEL_H
+#define ONELEVEL0KERNEL_H
 
-/// @file BestKernel.h
-/// @brief BestKernel のヘッダファイル
+/// @file OneLevel0Kernel.h
+/// @brief OneLevel0Kernel のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
+#include "ym/SopCover.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-/// @class BestKernel BestKernel.h "BestKernel.h"
-/// @brief 'best_kernel' を求める Divisor 型のクラス
+/// @class OneLevel0Kernel OneLevel0Kernel.h "OneLevel0Kernel.h"
+/// @brief 'one_level0_kernel' を求める Divisor 型のクラス
 //////////////////////////////////////////////////////////////////////
-class BestKernel
+class OneLevel0Kernel
 {
 public:
   //////////////////////////////////////////////////////////////////////
@@ -27,13 +27,13 @@ public:
   /// @brief 除数を求める．
   /// @return 除数を表す論理式を返す．
   static
-  AlgCover
+  SopCover
   divisor(
-    const AlgCover& f ///< [in] 対象の論理式
+    const SopCover& f ///< [in] 対象の論理式
   );
 
 };
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR
 
-#endif // BESTKERNEL_H
+#endif // ONELEVEL0KERNEL_H

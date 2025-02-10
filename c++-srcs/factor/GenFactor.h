@@ -8,12 +8,12 @@
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 #include "ym/Expr.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 /// @class GenFactor GenFactor.h "GenFactor.h"
@@ -30,7 +30,7 @@ public:
   /// @brief ファクタリングを行う．
   Expr
   operator()(
-    const AlgCover& f
+    const SopCover& f
   )
   {
     return factor(f);
@@ -45,7 +45,7 @@ private:
   /// @brief ファクタリングを行う．
   Expr
   factor(
-    const AlgCover& f
+    const SopCover& f
   )
   {
     auto d = Divisor::divisor(f);
@@ -53,8 +53,8 @@ private:
       return cov_to_expr(f);
     }
     auto p = Divide::divide(f, d);
-    const AlgCover& q = p.first;
-    const AlgCover& r = p.second;
+    auto& q = p.first;
+    auto& r = p.second;
     if ( q.cube_num() == 1 ) {
       auto cube_list = q.literal_list();
       ASSERT_COND( cube_list.size() == 1 );
@@ -62,10 +62,10 @@ private:
     }
     else {
       auto cc = q.common_cube();
-      auto q1 = q / cc;
+      auto q1 = q.algdiv(cc);
       auto p = Divide::divide(f, q1);
-      const AlgCover& d1 = p.first;
-      const AlgCover& r1 = p.second;
+      auto& d1 = p.first;
+      auto& r1 = p.second;
       auto cc1 = d1.common_cube();
       if ( cc1.literal_num() == 0 ) {
 	auto q_expr = factor(q1);
@@ -83,7 +83,7 @@ private:
   /// @brief 'LF' を行う．
   Expr
   literal_factor(
-    const AlgCover& f,
+    const SopCover& f,
     const vector<Literal>& lit_list
   )
   {
@@ -97,18 +97,18 @@ private:
 	l = lit;
       }
     }
-    auto q = f / l;
-    auto r = f - q * l;
+    auto q = f.algdiv(l);
+    auto r = f - q & l;
     auto q_expr = factor(q);
     auto d_expr = Expr::literal(l);
     auto r_expr = factor(r);
     return (q_expr & d_expr) | r_expr;
   }
 
-  /// @brief AlgCover をそのまま Expr に変換する．
+  /// @brief SopCover をそのまま Expr に変換する．
   Expr
   cov_to_expr(
-    const AlgCover& f
+    const SopCover& f
   )
   {
     auto cube_list = f.literal_list();
@@ -135,6 +135,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR
 
 #endif // GENFACTOR_H

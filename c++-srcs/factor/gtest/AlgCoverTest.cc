@@ -1,23 +1,23 @@
 
-/// @file AlgCoverTest.cc
-/// @brief AlgCoverTest の実装ファイル
+/// @file SopCoverTest.cc
+/// @brief SopCoverTest の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include <gtest/gtest.h>
-#include "AlgTest.h"
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "SopTest.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 #include <random>
 
 
 BEGIN_NAMESPACE_YM
 
-TEST_F(AlgTest, constructor1)
+TEST_F(SopTest, constructor1)
 {
-  auto cover1 = AlgCover{nv};
+  auto cover1 = SopCover{nv};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  0, cover1.cube_num() );
@@ -44,14 +44,14 @@ TEST_F(AlgTest, constructor1)
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 };
 
-TEST_F(AlgTest, constructor2)
+TEST_F(SopTest, constructor2)
 {
-  auto cube1 = AlgCube{nv, {lit0, lit1}};
-  auto cube2 = AlgCube{nv, {lit2, lit3}};
+  auto cube1 = SopCube{nv, {lit0, lit1}};
+  auto cube2 = SopCube{nv, {lit2, lit3}};
 
-  auto cube_list = vector<AlgCube>{cube1, cube2};
+  auto cube_list = vector<SopCube>{cube1, cube2};
 
-  auto cover1 = AlgCover{nv, cube_list};
+  auto cover1 = SopCover{nv, cube_list};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -88,21 +88,21 @@ TEST_F(AlgTest, constructor2)
 
 };
 
-TEST_F(AlgTest, constructor2_bad)
+TEST_F(SopTest, constructor2_bad)
 {
-  auto cube1 = AlgCube{nv + 1, {lit0, lit1}};
-  auto cube2 = AlgCube{nv, {lit2, lit3}};
+  auto cube1 = SopCube{nv + 1, {lit0, lit1}};
+  auto cube2 = SopCube{nv, {lit2, lit3}};
 
-  auto cube_list = vector<AlgCube>{cube1, cube2};
+  auto cube_list = vector<SopCube>{cube1, cube2};
 
-  ASSERT_THROW( (AlgCover{nv, cube_list}), std::invalid_argument );
+  ASSERT_THROW( (SopCover{nv, cube_list}), std::invalid_argument );
 }
 
-TEST_F(AlgTest, constructor3)
+TEST_F(SopTest, constructor3)
 {
   auto cube_list = vector<vector<Literal>>{ {lit0, lit1},
 					    {lit2, lit3} };
-  auto cover1 = AlgCover{nv, cube_list};
+  auto cover1 = SopCover{nv, cube_list};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -139,9 +139,9 @@ TEST_F(AlgTest, constructor3)
 
 };
 
-TEST_F(AlgTest, constructor4)
+TEST_F(SopTest, constructor4)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1},
+  auto cover1 = SopCover{nv, { {lit0, lit1},
 			       {lit2, lit3} }};
 
   EXPECT_EQ( nv, cover1.variable_num() );
@@ -179,12 +179,12 @@ TEST_F(AlgTest, constructor4)
 
 };
 
-TEST_F(AlgTest, copy_constructor)
+TEST_F(SopTest, copy_constructor)
 {
-  auto src_cover = AlgCover{nv, { {lit0, lit1},
+  auto src_cover = SopCover{nv, { {lit0, lit1},
 				  {lit2, lit3} }};
 
-  auto cover1 = AlgCover{src_cover};
+  auto cover1 = SopCover{src_cover};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  2, cover1.cube_num() );
@@ -221,9 +221,9 @@ TEST_F(AlgTest, copy_constructor)
 
 };
 
-TEST_F(AlgTest, copy_assignment)
+TEST_F(SopTest, copy_assignment)
 {
-  auto src_cover = AlgCover{nv,{ {lit0, lit1},
+  auto src_cover = SopCover{nv,{ {lit0, lit1},
 				 {lit2, lit3} }};
 
   auto cover1 = src_cover;
@@ -263,12 +263,12 @@ TEST_F(AlgTest, copy_assignment)
 
 };
 
-TEST_F(AlgTest, move_constructor)
+TEST_F(SopTest, move_constructor)
 {
-  auto src_cover = AlgCover{nv, { {lit0, lit1},
+  auto src_cover = SopCover{nv, { {lit0, lit1},
 				  {lit2, lit3} }};
 
-  auto cover1 = AlgCover{std::move(src_cover)};
+  auto cover1 = SopCover{std::move(src_cover)};
 
   EXPECT_EQ(  0, src_cover.cube_num() );
 
@@ -307,9 +307,9 @@ TEST_F(AlgTest, move_constructor)
 
 };
 
-TEST_F(AlgTest, move_assignment)
+TEST_F(SopTest, move_assignment)
 {
-  auto src_cover = AlgCover{nv, { {lit0, lit1},
+  auto src_cover = SopCover{nv, { {lit0, lit1},
 				  {lit2, lit3} }};
 
   auto cover1 = std::move(src_cover);
@@ -351,11 +351,11 @@ TEST_F(AlgTest, move_assignment)
 
 };
 
-TEST_F(AlgTest, cube_constructor)
+TEST_F(SopTest, cube_constructor)
 {
-  auto src_cube = AlgCube{nv, {lit0, lit1}};
+  auto src_cube = SopCube{nv, {lit0, lit1}};
 
-  auto cover1 = AlgCover{src_cube};
+  auto cover1 = SopCover{src_cube};
 
   EXPECT_EQ( nv, cover1.variable_num() );
   EXPECT_EQ(  1, cover1.cube_num() );
@@ -389,10 +389,10 @@ TEST_F(AlgTest, cube_constructor)
 
 };
 
-TEST_F(AlgTest, cover_cover_sum)
+TEST_F(SopTest, cover_cover_sum)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1} } };
-  auto src2 = AlgCover{nv, { {lit2, lit3} } };
+  auto src1 = SopCover{nv, { {lit0, lit1} } };
+  auto src2 = SopCover{nv, { {lit2, lit3} } };
 
   auto cover1 = src1 + src2;
 
@@ -431,18 +431,18 @@ TEST_F(AlgTest, cover_cover_sum)
 
 };
 
-TEST_F(AlgTest, cover_cover_sum_bad)
+TEST_F(SopTest, cover_cover_sum_bad)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1} } };
-  auto src2 = AlgCover{nv + 1, { {lit2, lit3} } };
+  auto src1 = SopCover{nv, { {lit0, lit1} } };
+  auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
   ASSERT_THROW( src1 + src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, cover_cube_sum)
+TEST_F(SopTest, cover_cube_sum)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1} } };
-  auto src2 = AlgCube{nv, {lit2, lit3} };
+  auto src1 = SopCover{nv, { {lit0, lit1} } };
+  auto src2 = SopCube{nv, {lit2, lit3} };
 
   auto cover1 = src1 + src2;
 
@@ -481,18 +481,18 @@ TEST_F(AlgTest, cover_cube_sum)
 
 };
 
-TEST_F(AlgTest, cover_cube_sum_bad)
+TEST_F(SopTest, cover_cube_sum_bad)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1} } };
-  auto src2 = AlgCube{nv + 1, {lit2, lit3} };
+  auto src1 = SopCover{nv, { {lit0, lit1} } };
+  auto src2 = SopCube{nv + 1, {lit2, lit3} };
 
   ASSERT_THROW( src1 + src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, cube_cover_sum)
+TEST_F(SopTest, cube_cover_sum)
 {
-  auto src1 = AlgCube{nv, {lit0, lit1} };
-  auto src2 = AlgCover{nv, { {lit2, lit3} } };
+  auto src1 = SopCube{nv, {lit0, lit1} };
+  auto src2 = SopCover{nv, { {lit2, lit3} } };
 
   auto cover1 = src1 + src2;
 
@@ -531,18 +531,18 @@ TEST_F(AlgTest, cube_cover_sum)
 
 };
 
-TEST_F(AlgTest, cube_cover_sum_bad)
+TEST_F(SopTest, cube_cover_sum_bad)
 {
-  auto src1 = AlgCube{nv, {lit0, lit1} };
-  auto src2 = AlgCover{nv + 1, { {lit2, lit3} } };
+  auto src1 = SopCube{nv, {lit0, lit1} };
+  auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
   ASSERT_THROW( src1 + src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Scover_cover_sum)
+TEST_F(SopTest, Scover_cover_sum)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1} } };
-  auto src2 = AlgCover{nv, { {lit2, lit3} } };
+  auto cover1 = SopCover{nv, { {lit0, lit1} } };
+  auto src2 = SopCover{nv, { {lit2, lit3} } };
 
   cover1 = cover1 + src2;
 
@@ -581,10 +581,10 @@ TEST_F(AlgTest, Scover_cover_sum)
 
 };
 
-TEST_F(AlgTest, Scover_cube_sum1)
+TEST_F(SopTest, Scover_cube_sum1)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1} }};
-  auto src2 = AlgCube{nv, {lit2, lit3}};
+  auto cover1 = SopCover{nv, { {lit0, lit1} }};
+  auto src2 = SopCube{nv, {lit2, lit3}};
 
   cover1 = cover1 + src2;
 
@@ -623,10 +623,10 @@ TEST_F(AlgTest, Scover_cube_sum1)
 
 };
 
-TEST_F(AlgTest, cube_Scover_sum)
+TEST_F(SopTest, cube_Scover_sum)
 {
-  auto src1 = AlgCube{nv, {lit0, lit1} };
-  auto cover1 = AlgCover{nv, { {lit2, lit3} } };
+  auto src1 = SopCube{nv, {lit0, lit1} };
+  auto cover1 = SopCover{nv, { {lit2, lit3} } };
 
   cover1 = src1 + cover1;
 
@@ -665,10 +665,10 @@ TEST_F(AlgTest, cube_Scover_sum)
 
 };
 
-TEST_F(AlgTest, Icover_cover_sum)
+TEST_F(SopTest, Icover_cover_sum)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1} } };
-  auto src2 = AlgCover{nv, { {lit2, lit3} } };
+  auto cover1 = SopCover{nv, { {lit0, lit1} } };
+  auto src2 = SopCover{nv, { {lit2, lit3} } };
 
   cover1 += src2;
 
@@ -707,18 +707,18 @@ TEST_F(AlgTest, Icover_cover_sum)
 
 };
 
-TEST_F(AlgTest, Icover_cover_sum_bad)
+TEST_F(SopTest, Icover_cover_sum_bad)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1} } };
-  auto src2 = AlgCover{nv + 1, { {lit2, lit3} } };
+  auto cover1 = SopCover{nv, { {lit0, lit1} } };
+  auto src2 = SopCover{nv + 1, { {lit2, lit3} } };
 
   ASSERT_THROW( cover1 += src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Icover_cube_sum)
+TEST_F(SopTest, Icover_cube_sum)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1} }};
-  auto src2 = AlgCube{nv, {lit2, lit3}};
+  auto cover1 = SopCover{nv, { {lit0, lit1} }};
+  auto src2 = SopCube{nv, {lit2, lit3}};
 
   cover1 += src2;
 
@@ -757,19 +757,19 @@ TEST_F(AlgTest, Icover_cube_sum)
 
 };
 
-TEST_F(AlgTest, Icover_cube_sum_bad)
+TEST_F(SopTest, Icover_cube_sum_bad)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1} }};
-  auto src2 = AlgCube{nv + 1, {lit2, lit3}};
+  auto cover1 = SopCover{nv, { {lit0, lit1} }};
+  auto src2 = SopCube{nv + 1, {lit2, lit3}};
 
   ASSERT_THROW( cover1 += src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, cover_cover_diff)
+TEST_F(SopTest, cover_cover_diff)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1},
+  auto src1 = SopCover{nv, { {lit0, lit1},
 			     {lit2, lit3} } };
-  auto src2 = AlgCover{nv, { {lit3, lit2},
+  auto src2 = SopCover{nv, { {lit3, lit2},
 			     {lit0, ~lit1} } };
 
   auto cover1 = src1 - src2;
@@ -806,21 +806,21 @@ TEST_F(AlgTest, cover_cover_diff)
 
 };
 
-TEST_F(AlgTest, cover_cover_diff_bad)
+TEST_F(SopTest, cover_cover_diff_bad)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1},
+  auto src1 = SopCover{nv, { {lit0, lit1},
 			     {lit2, lit3} } };
-  auto src2 = AlgCover{nv + 1, { {lit3, lit2},
+  auto src2 = SopCover{nv + 1, { {lit3, lit2},
 				 {lit0, ~lit1} } };
 
   ASSERT_THROW( src1 - src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Rcover_cover_diff)
+TEST_F(SopTest, Rcover_cover_diff)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1},
+  auto src1 = SopCover{nv, { {lit0, lit1},
 			     {lit2, lit3} } };
-  auto src2 = AlgCover{nv, { {lit3, lit2},
+  auto src2 = SopCover{nv, { {lit3, lit2},
 			     {lit0, ~lit1} } };
 
   auto cover1 = std::move(src1) - src2;
@@ -859,11 +859,11 @@ TEST_F(AlgTest, Rcover_cover_diff)
 
 };
 
-TEST_F(AlgTest, cover_cube_diff)
+TEST_F(SopTest, cover_cube_diff)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1},
+  auto src1 = SopCover{nv, { {lit0, lit1},
 			     {lit2, lit3} } };
-  auto src2 = AlgCube{nv, {lit3, lit2} };
+  auto src2 = SopCube{nv, {lit3, lit2} };
 
   auto cover1 = src1 - src2;
 
@@ -899,20 +899,20 @@ TEST_F(AlgTest, cover_cube_diff)
 
 };
 
-TEST_F(AlgTest, cover_cube_diff_bad)
+TEST_F(SopTest, cover_cube_diff_bad)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit1},
+  auto src1 = SopCover{nv, { {lit0, lit1},
 			     {lit2, lit3} } };
-  auto src2 = AlgCube{nv + 1, {lit3, lit2} };
+  auto src2 = SopCube{nv + 1, {lit3, lit2} };
 
   ASSERT_THROW( src1 - src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Scover_cover_diff)
+TEST_F(SopTest, Scover_cover_diff)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1},
+  auto cover1 = SopCover{nv, { {lit0, lit1},
 			       {lit2, lit3} } };
-  auto src2 = AlgCover{nv, { {lit3, lit2},
+  auto src2 = SopCover{nv, { {lit3, lit2},
 			     {lit0, ~lit1} } };
 
   cover1 = cover1 - src2;
@@ -949,11 +949,11 @@ TEST_F(AlgTest, Scover_cover_diff)
 
 };
 
-TEST_F(AlgTest, Scover_cube_diff)
+TEST_F(SopTest, Scover_cube_diff)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1},
+  auto cover1 = SopCover{nv, { {lit0, lit1},
 			       {lit2, lit3} } };
-  auto src2 = AlgCube{nv, {lit3, lit2} };
+  auto src2 = SopCube{nv, {lit3, lit2} };
 
   cover1 = cover1 - src2;
 
@@ -989,11 +989,11 @@ TEST_F(AlgTest, Scover_cube_diff)
 
 };
 
-TEST_F(AlgTest, Icover_cover_diff)
+TEST_F(SopTest, Icover_cover_diff)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1},
+  auto cover1 = SopCover{nv, { {lit0, lit1},
 			       {lit2, lit3} } };
-  auto src2 = AlgCover{nv, { {lit3, lit2},
+  auto src2 = SopCover{nv, { {lit3, lit2},
 			     {lit0, ~lit1} } };
 
   cover1 -= src2;
@@ -1030,21 +1030,21 @@ TEST_F(AlgTest, Icover_cover_diff)
 
 };
 
-TEST_F(AlgTest, Icover_cover_diff_bad)
+TEST_F(SopTest, Icover_cover_diff_bad)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1},
+  auto cover1 = SopCover{nv, { {lit0, lit1},
 			       {lit2, lit3} } };
-  auto src2 = AlgCover{nv + 1, { {lit3, lit2},
+  auto src2 = SopCover{nv + 1, { {lit3, lit2},
 				 {lit0, ~lit1} } };
 
   ASSERT_THROW( cover1 -= src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Icover_cube_diff)
+TEST_F(SopTest, Icover_cube_diff)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1},
+  auto cover1 = SopCover{nv, { {lit0, lit1},
 			       {lit2, lit3} } };
-  auto src2 = AlgCube{nv, {lit3, lit2} };
+  auto src2 = SopCube{nv, {lit3, lit2} };
 
   cover1 -= src2;
 
@@ -1080,19 +1080,19 @@ TEST_F(AlgTest, Icover_cube_diff)
 
 };
 
-TEST_F(AlgTest, Icover_cube_diff_bad)
+TEST_F(SopTest, Icover_cube_diff_bad)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit1},
+  auto cover1 = SopCover{nv, { {lit0, lit1},
 			       {lit2, lit3} } };
-  auto src2 = AlgCube{nv + 1, {lit3, lit2} };
+  auto src2 = SopCube{nv + 1, {lit3, lit2} };
 
   ASSERT_THROW( cover1 -= src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, cover_cover_product)
+TEST_F(SopTest, cover_cover_product)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCover{nv, { {lit2}, {lit3} } };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv, { {lit2}, {lit3} } };
 
   auto cover1 = src1 * src2;
 
@@ -1137,18 +1137,18 @@ TEST_F(AlgTest, cover_cover_product)
 
 };
 
-TEST_F(AlgTest, cover_cover_product_bad)
+TEST_F(SopTest, cover_cover_product_bad)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCover{nv + 1, { {lit2}, {lit3} } };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv + 1, { {lit2}, {lit3} } };
 
   ASSERT_THROW( src1 * src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, cover_cube_product)
+TEST_F(SopTest, cover_cube_product)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCube{nv,  {lit2} };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCube{nv,  {lit2} };
 
   auto cover1 = src1 * src2;
 
@@ -1187,18 +1187,18 @@ TEST_F(AlgTest, cover_cube_product)
 
 };
 
-TEST_F(AlgTest, cover_cube_product_bad)
+TEST_F(SopTest, cover_cube_product_bad)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCube{nv + 1,  {lit2} };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCube{nv + 1,  {lit2} };
 
   ASSERT_THROW( src1 * src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Rcover_cube_product)
+TEST_F(SopTest, Rcover_cube_product)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCube{nv,  {lit2} };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCube{nv,  {lit2} };
 
   auto cover1 = std::move(src1) * src2;
 
@@ -1239,10 +1239,10 @@ TEST_F(AlgTest, Rcover_cube_product)
 
 };
 
-TEST_F(AlgTest, cube_cover_product)
+TEST_F(SopTest, cube_cover_product)
 {
-  auto src1 = AlgCube{nv,  {lit2} };
-  auto src2 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src1 = SopCube{nv,  {lit2} };
+  auto src2 = SopCover{nv, { {lit0}, {lit1} } };
 
   auto cover1 = src1 * src2;
 
@@ -1281,18 +1281,18 @@ TEST_F(AlgTest, cube_cover_product)
 
 };
 
-TEST_F(AlgTest, cube_cover_product_bad)
+TEST_F(SopTest, cube_cover_product_bad)
 {
-  auto src1 = AlgCube{nv,  {lit2} };
-  auto src2 = AlgCover{nv + 1, { {lit0}, {lit1} } };
+  auto src1 = SopCube{nv,  {lit2} };
+  auto src2 = SopCover{nv + 1, { {lit0}, {lit1} } };
 
   ASSERT_THROW( src1 * src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, cube_Rcover_product)
+TEST_F(SopTest, cube_Rcover_product)
 {
-  auto src1 = AlgCube{nv,  {lit2} };
-  auto src2 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src1 = SopCube{nv,  {lit2} };
+  auto src2 = SopCover{nv, { {lit0}, {lit1} } };
 
   auto cover1 = src1 * std::move(src2);
 
@@ -1333,9 +1333,9 @@ TEST_F(AlgTest, cube_Rcover_product)
 
 };
 
-TEST_F(AlgTest, cover_literal_product)
+TEST_F(SopTest, cover_literal_product)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
 
   auto cover1 = src1 * lit2;
 
@@ -1374,9 +1374,9 @@ TEST_F(AlgTest, cover_literal_product)
 
 };
 
-TEST_F(AlgTest, Rcover_literal_product)
+TEST_F(SopTest, Rcover_literal_product)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
 
   auto cover1 = std::move(src1) * lit2;
 
@@ -1417,9 +1417,9 @@ TEST_F(AlgTest, Rcover_literal_product)
 
 };
 
-TEST_F(AlgTest, literal_cover_product)
+TEST_F(SopTest, literal_cover_product)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
 
   auto cover1 = lit2 * src1;
 
@@ -1458,9 +1458,9 @@ TEST_F(AlgTest, literal_cover_product)
 
 };
 
-TEST_F(AlgTest, literal_Rcover_product)
+TEST_F(SopTest, literal_Rcover_product)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
 
   auto cover1 = lit2 * std::move(src1);
 
@@ -1501,10 +1501,10 @@ TEST_F(AlgTest, literal_Rcover_product)
 
 };
 
-TEST_F(AlgTest, Scover_cover_product)
+TEST_F(SopTest, Scover_cover_product)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCover{nv, { {lit2}, {lit3} } };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv, { {lit2}, {lit3} } };
 
   cover1 = cover1 * src2;
 
@@ -1549,10 +1549,10 @@ TEST_F(AlgTest, Scover_cover_product)
 
 };
 
-TEST_F(AlgTest, cover_Scover_product)
+TEST_F(SopTest, cover_Scover_product)
 {
-  auto src1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto cover1 = AlgCover{nv, { {lit2}, {lit3} } };
+  auto src1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto cover1 = SopCover{nv, { {lit2}, {lit3} } };
 
   cover1 = src1 * cover1;
 
@@ -1597,10 +1597,10 @@ TEST_F(AlgTest, cover_Scover_product)
 
 };
 
-TEST_F(AlgTest, Scover_cube_product)
+TEST_F(SopTest, Scover_cube_product)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCube{nv,  {lit2} };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCube{nv,  {lit2} };
 
   cover1 = cover1 * src2;
 
@@ -1639,10 +1639,10 @@ TEST_F(AlgTest, Scover_cube_product)
 
 };
 
-TEST_F(AlgTest, cube_Scover_product)
+TEST_F(SopTest, cube_Scover_product)
 {
-  auto src1 = AlgCube{nv,  {lit2} };
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src1 = SopCube{nv,  {lit2} };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
 
   cover1 = src1 * cover1;
 
@@ -1681,9 +1681,9 @@ TEST_F(AlgTest, cube_Scover_product)
 
 };
 
-TEST_F(AlgTest, Scover_literal_product)
+TEST_F(SopTest, Scover_literal_product)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
 
   cover1 = cover1 * lit2;
 
@@ -1722,9 +1722,9 @@ TEST_F(AlgTest, Scover_literal_product)
 
 };
 
-TEST_F(AlgTest, literal_Scover_product)
+TEST_F(SopTest, literal_Scover_product)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
 
   cover1 = lit2 * cover1;
 
@@ -1763,10 +1763,10 @@ TEST_F(AlgTest, literal_Scover_product)
 
 };
 
-TEST_F(AlgTest, Icover_cover_product)
+TEST_F(SopTest, Icover_cover_product)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCover{nv, { {lit2}, {lit3} } };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv, { {lit2}, {lit3} } };
 
   cover1 *= src2;
 
@@ -1811,18 +1811,18 @@ TEST_F(AlgTest, Icover_cover_product)
 
 };
 
-TEST_F(AlgTest, Icover_cover_product_bad)
+TEST_F(SopTest, Icover_cover_product_bad)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCover{nv + 1, { {lit2}, {lit3} } };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv + 1, { {lit2}, {lit3} } };
 
   ASSERT_THROW( cover1 *= src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Icover_cube_product)
+TEST_F(SopTest, Icover_cube_product)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCube{nv,  {lit2} };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCube{nv,  {lit2} };
 
   cover1 *= src2;
 
@@ -1861,17 +1861,17 @@ TEST_F(AlgTest, Icover_cube_product)
 
 };
 
-TEST_F(AlgTest, Icover_cube_product_bad)
+TEST_F(SopTest, Icover_cube_product_bad)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
-  auto src2 = AlgCube{nv + 1,  {lit2} };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCube{nv + 1,  {lit2} };
 
   ASSERT_THROW( cover1 *= src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Icover_literal_product)
+TEST_F(SopTest, Icover_literal_product)
 {
-  auto cover1 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto cover1 = SopCover{nv, { {lit0}, {lit1} } };
 
   cover1 *= lit2;
 
@@ -1910,13 +1910,13 @@ TEST_F(AlgTest, Icover_literal_product)
 
 };
 
-TEST_F(AlgTest, cover_cover_quotient)
+TEST_F(SopTest, cover_cover_quotient)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit1, lit2},
 			     {lit1, lit3} } };
-  auto src2 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv, { {lit0}, {lit1} } };
 
   auto cover1 = src1 / src2;
 
@@ -1953,24 +1953,24 @@ TEST_F(AlgTest, cover_cover_quotient)
 
 };
 
-TEST_F(AlgTest, cover_cover_quotient_bad)
+TEST_F(SopTest, cover_cover_quotient_bad)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit1, lit2},
 			     {lit1, lit3} } };
-  auto src2 = AlgCover{nv + 1, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv + 1, { {lit0}, {lit1} } };
 
   ASSERT_THROW( src1 / src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, cover_cube_quotient)
+TEST_F(SopTest, cover_cube_quotient)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit1, lit2},
 			     {lit1, lit3} } };
-  auto src2 = AlgCube{nv, {lit0} };
+  auto src2 = SopCube{nv, {lit0} };
 
   auto cover1 = src1 / src2;
 
@@ -2007,20 +2007,20 @@ TEST_F(AlgTest, cover_cube_quotient)
 
 };
 
-TEST_F(AlgTest, cover_cube_quotient_bad)
+TEST_F(SopTest, cover_cube_quotient_bad)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit1, lit2},
 			     {lit1, lit3} } };
-  auto src2 = AlgCube{nv + 1, {lit0} };
+  auto src2 = SopCube{nv + 1, {lit0} };
 
   ASSERT_THROW( src1 / src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, cover_literal_quotient)
+TEST_F(SopTest, cover_literal_quotient)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit1, lit2},
 			     {lit1, lit3} } };
@@ -2060,13 +2060,13 @@ TEST_F(AlgTest, cover_literal_quotient)
 
 };
 
-TEST_F(AlgTest, Rcover_cover_quotient)
+TEST_F(SopTest, Rcover_cover_quotient)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit1, lit2},
 			     {lit1, lit3} } };
-  auto src2 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv, { {lit0}, {lit1} } };
 
   auto cover1 = std::move(src1) / src2;
 
@@ -2105,13 +2105,13 @@ TEST_F(AlgTest, Rcover_cover_quotient)
 
 };
 
-TEST_F(AlgTest, Rcover_cube_quotient)
+TEST_F(SopTest, Rcover_cube_quotient)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit1, lit2},
 			     {lit1, lit3} } };
-  auto src2 = AlgCube{nv, {lit0} };
+  auto src2 = SopCube{nv, {lit0} };
 
   auto cover1 = std::move(src1) / src2;
 
@@ -2150,9 +2150,9 @@ TEST_F(AlgTest, Rcover_cube_quotient)
 
 };
 
-TEST_F(AlgTest, Rcover_literal_quotient)
+TEST_F(SopTest, Rcover_literal_quotient)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit1, lit2},
 			     {lit1, lit3} } };
@@ -2194,13 +2194,13 @@ TEST_F(AlgTest, Rcover_literal_quotient)
 
 };
 
-TEST_F(AlgTest, Scover_cover_quotient)
+TEST_F(SopTest, Scover_cover_quotient)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit1, lit2},
 			       {lit1, lit3} } };
-  auto src2 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv, { {lit0}, {lit1} } };
 
   cover1 = cover1 / src2;
 
@@ -2237,13 +2237,13 @@ TEST_F(AlgTest, Scover_cover_quotient)
 
 };
 
-TEST_F(AlgTest, Scover_cube_quotient)
+TEST_F(SopTest, Scover_cube_quotient)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit1, lit2},
 			       {lit1, lit3} } };
-  auto src2 = AlgCube{nv, {lit0} };
+  auto src2 = SopCube{nv, {lit0} };
 
   cover1 = cover1 / src2;
 
@@ -2280,9 +2280,9 @@ TEST_F(AlgTest, Scover_cube_quotient)
 
 };
 
-TEST_F(AlgTest, Scover_literal_quotient)
+TEST_F(SopTest, Scover_literal_quotient)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit1, lit2},
 			       {lit1, lit3} } };
@@ -2322,13 +2322,13 @@ TEST_F(AlgTest, Scover_literal_quotient)
 
 };
 
-TEST_F(AlgTest, Icover_cover_quotient)
+TEST_F(SopTest, Icover_cover_quotient)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit1, lit2},
 			       {lit1, lit3} } };
-  auto src2 = AlgCover{nv, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv, { {lit0}, {lit1} } };
 
   cover1 /= src2;
 
@@ -2365,24 +2365,24 @@ TEST_F(AlgTest, Icover_cover_quotient)
 
 };
 
-TEST_F(AlgTest, Icover_cover_quotient_bad)
+TEST_F(SopTest, Icover_cover_quotient_bad)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit1, lit2},
 			       {lit1, lit3} } };
-  auto src2 = AlgCover{nv + 1, { {lit0}, {lit1} } };
+  auto src2 = SopCover{nv + 1, { {lit0}, {lit1} } };
 
   ASSERT_THROW( cover1 /= src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Icover_cube_quotient)
+TEST_F(SopTest, Icover_cube_quotient)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit1, lit2},
 			       {lit1, lit3} } };
-  auto src2 = AlgCube{nv, {lit0} };
+  auto src2 = SopCube{nv, {lit0} };
 
   cover1 /= src2;
 
@@ -2419,20 +2419,20 @@ TEST_F(AlgTest, Icover_cube_quotient)
 
 };
 
-TEST_F(AlgTest, Icover_cube_quotient_bad)
+TEST_F(SopTest, Icover_cube_quotient_bad)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit1, lit2},
 			       {lit1, lit3} } };
-  auto src2 = AlgCube{nv + 1, {lit0} };
+  auto src2 = SopCube{nv + 1, {lit0} };
 
   ASSERT_THROW( cover1 /= src2, std::invalid_argument );
 }
 
-TEST_F(AlgTest, Icover_literal_quotient)
+TEST_F(SopTest, Icover_literal_quotient)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit1, lit2},
 			       {lit1, lit3} } };
@@ -2472,12 +2472,12 @@ TEST_F(AlgTest, Icover_literal_quotient)
 
 };
 
-TEST_F(AlgTest, comp1)
+TEST_F(SopTest, comp1)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit0, ~lit4} } };
-  auto cover2 = AlgCover{nv, { {lit0, lit2},
+  auto cover2 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit0, ~lit4} } };
 
@@ -2490,12 +2490,12 @@ TEST_F(AlgTest, comp1)
   EXPECT_TRUE( cover1 >= cover2 );
 }
 
-TEST_F(AlgTest, comp2)
+TEST_F(SopTest, comp2)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit0, ~lit4} } };
-  auto cover2 = AlgCover{nv, { {lit0, lit2},
+  auto cover2 = SopCover{nv, { {lit0, lit2},
 			       {lit1, lit3},
 			       {lit0, ~lit4} } };
 
@@ -2508,12 +2508,12 @@ TEST_F(AlgTest, comp2)
   EXPECT_TRUE( cover1 >= cover2 );
 }
 
-TEST_F(AlgTest, comp3)
+TEST_F(SopTest, comp3)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3},
 			       {lit0, ~lit4} } };
-  auto cover2 = AlgCover{nv, { {lit0, lit2},
+  auto cover2 = SopCover{nv, { {lit0, lit2},
 			       {lit0, lit3} } };
 
   EXPECT_NE( cover1, cover2 );
@@ -2525,9 +2525,9 @@ TEST_F(AlgTest, comp3)
   EXPECT_TRUE( cover1 >= cover2 );
 }
 
-TEST_F(AlgTest, sort1)
+TEST_F(SopTest, sort1)
 {
-  auto cover1 = AlgCover{3, { {~lit1,  lit2},
+  auto cover1 = SopCover{3, { {~lit1,  lit2},
 			      { lit1, ~lit2},
 			      {~lit0,  lit2},
 			      {~lit0,  lit1},
@@ -2541,9 +2541,9 @@ TEST_F(AlgTest, sort1)
   EXPECT_EQ( expr_str, str );
 }
 
-TEST_F(AlgTest, sort2)
+TEST_F(SopTest, sort2)
 {
-  auto cover1 = AlgCover{3, { {~lit1,  lit2},
+  auto cover1 = SopCover{3, { {~lit1,  lit2},
 			      { lit1, ~lit2},
 			      {~lit0,  lit2},
 			      {~lit0,  lit2},
@@ -2557,7 +2557,7 @@ TEST_F(AlgTest, sort2)
   EXPECT_EQ( expr_str, str );
 }
 
-TEST_F(AlgTest, sort3)
+TEST_F(SopTest, sort3)
 {
   // サンプル数
   SizeType nsample = 1000;
@@ -2601,7 +2601,7 @@ TEST_F(AlgTest, sort3)
       }
       cube_list.push_back(lit_list2);
     }
-    auto cover = AlgCover{nv, cube_list};
+    auto cover = SopCover{nv, cube_list};
 
     auto nc = cover.cube_num();
     for ( SizeType i = 1; i < nc; ++ i ) {
@@ -2612,10 +2612,10 @@ TEST_F(AlgTest, sort3)
   }
 }
 
-TEST_F(AlgTest, comp4)
+TEST_F(SopTest, comp4)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2} } };
-  auto cover2 = AlgCover{nv, { {lit0, lit3} } };
+  auto cover1 = SopCover{nv, { {lit0, lit2} } };
+  auto cover2 = SopCover{nv, { {lit0, lit3} } };
 
   EXPECT_NE( cover1, cover2 );
   EXPECT_FALSE( cover1 == cover2 );
@@ -2626,9 +2626,9 @@ TEST_F(AlgTest, comp4)
   EXPECT_TRUE( cover1 >= cover2 );
 }
 
-TEST_F(AlgTest, common_cube)
+TEST_F(SopTest, common_cube)
 {
-  auto src1 = AlgCover{nv, { {lit0, lit2},
+  auto src1 = SopCover{nv, { {lit0, lit2},
 			     {lit0, lit3},
 			     {lit0, ~lit4} } };
 
@@ -2658,39 +2658,39 @@ TEST_F(AlgTest, common_cube)
   EXPECT_FALSE( cube1.check_literal(~lit9) );
 };
 
-TEST_F(AlgTest, expr)
+TEST_F(SopTest, expr)
 {
   SizeType nv = 3;
 
-  auto cover1 = AlgCover{nv};
+  auto cover1 = SopCover{nv};
   auto expr1 = cover1.expr();
   EXPECT_TRUE( expr1.is_zero() );
 
-  auto cover2 = AlgCover{nv, vector<vector<Literal>>{{}} };
+  auto cover2 = SopCover{nv, vector<vector<Literal>>{{}} };
   auto expr2 = cover2.expr();
   EXPECT_TRUE( expr2.is_one() );
 
-  auto cover3 = AlgCover{nv, {{lit0, lit1}, {~lit2}}};
+  auto cover3 = SopCover{nv, {{lit0, lit1}, {~lit2}}};
   auto expr3 = cover3.expr();
   auto expr3_str = expr3.to_string();
   EXPECT_EQ( "( ( 0 & 1 ) | ~2 )", expr3_str );
 }
 
-TEST_F(AlgTest, tvfunc)
+TEST_F(SopTest, tvfunc)
 {
   SizeType nv = 3;
 
-  auto cover1 = AlgCover{nv};
+  auto cover1 = SopCover{nv};
   auto func1 = cover1.tvfunc();
   EXPECT_EQ( nv, func1.input_num() );
   EXPECT_TRUE( func1.is_zero() );
 
-  auto cover2 = AlgCover{nv, vector<vector<Literal>>{{}} };
+  auto cover2 = SopCover{nv, vector<vector<Literal>>{{}} };
   auto func2 = cover2.tvfunc();
   EXPECT_EQ( nv, func2.input_num() );
   EXPECT_TRUE( func2.is_one() );
 
-  auto cover3 = AlgCover{nv, {{lit0, lit1}, {~lit2}}};
+  auto cover3 = SopCover{nv, {{lit0, lit1}, {~lit2}}};
   auto func3 = cover3.tvfunc();
   EXPECT_EQ( nv, func3.input_num() );
   EXPECT_EQ( 1, func3.value(0) );
@@ -2703,9 +2703,9 @@ TEST_F(AlgTest, tvfunc)
   EXPECT_EQ( 1, func3.value(7) );
 }
 
-TEST_F(AlgTest, all_kernels1)
+TEST_F(SopTest, all_kernels1)
 {
-  auto cover1 = AlgCover{nv, { {lit0, lit2},
+  auto cover1 = SopCover{nv, { {lit0, lit2},
 			       {lit1, lit2} }};
   auto kernel_list = cover1.all_kernels();
 
@@ -2726,7 +2726,7 @@ TEST_F(AlgTest, all_kernels1)
   }
 }
 
-TEST_F(AlgTest, all_kernels2)
+TEST_F(SopTest, all_kernels2)
 {
   auto lit_a = Literal(var0, false);
   auto lit_b = Literal(var1, false);
@@ -2740,7 +2740,7 @@ TEST_F(AlgTest, all_kernels2)
   auto lit_j = Literal(var9, false);
 
   // adf + aef + bdf + bef + cdf + cef + bfg + h
-  auto cover1 = AlgCover{nv,
+  auto cover1 = SopCover{nv,
 			 { { lit_a, lit_d, lit_f },
 			   { lit_a, lit_e, lit_f },
 			   { lit_b, lit_d, lit_f },

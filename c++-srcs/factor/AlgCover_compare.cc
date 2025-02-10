@@ -1,23 +1,23 @@
 
-/// @file AlgCover_compare.cc
-/// @brief AlgCover の比較演算の実装ファイル
+/// @file SopCover_compare.cc
+/// @brief SopCover の比較演算の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
+#include "ym/SopCover.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgCover
+// クラス SopCover
 //////////////////////////////////////////////////////////////////////
 
 int
-AlgCover::_compare(
-  const AlgCover& right
+SopCover::_compare(
+  const SopCover& right
 ) const
 {
   auto cube1_list = _cube_list(chunk(), 0, cube_num());
@@ -48,4 +48,4 @@ AlgCover::_compare(
   return 0;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

@@ -32,8 +32,6 @@ set ( py_ymlogic_SOURCES
   PyBddVarSet.cc
   PySopCover.cc
   PySopCube.cc
-  PyAlgCover.cc
-  PyAlgCube.cc
   PyAigHandle.cc
   PyAigMgr.cc
   ymlogic_module.cc

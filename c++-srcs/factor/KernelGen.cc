@@ -11,45 +11,46 @@
 #include "ym/Range.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgCover
+// クラス SopCover
 //////////////////////////////////////////////////////////////////////
 
 // @brief すべてのカーネルとコカーネルペアを列挙する．
-vector<pair<AlgCover, AlgCover>>
-AlgCover::all_kernels() const
+vector<pair<SopCover, vector<SopCube>>>
+SopCover::all_kernels() const
 {
-  vector<pair<AlgCover, AlgCover>> ans_list;
-
-  KernelGen kg;
+  nsFactor::KernelGen kg;
   return kg.all_kernels(*this);
 }
 
 // @brief 最も価値の高いカーネルを求める．
-AlgCover
-AlgCover::best_kernel() const
+SopCover
+SopCover::best_kernel() const
 {
-  KernelGen kg;
+  nsFactor::KernelGen kg;
   return kg.best_kernel(*this);
 }
 
+END_NAMESPACE_YM_SOP
+
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 // クラス KernelGen
 //////////////////////////////////////////////////////////////////////
 
 // @brief カーネルとコカーネルを列挙する．
-vector<pair<AlgCover, AlgCover>>
+vector<pair<SopCover, vector<SopCube>>>
 KernelGen::all_kernels(
-  const AlgCover& cover
+  const SopCover& cover
 )
 {
   generate(cover);
 
   // kernel_list に設定する．
-  vector<pair<AlgCover, AlgCover>> kernel_list;
+  vector<pair<SopCover, vector<SopCube>>> kernel_list;
   kernel_list.reserve(mKernelDict.size());
 
   // この処理は破壊的なので以降は mKernelDict は使えない．
@@ -66,17 +67,20 @@ KernelGen::all_kernels(
 }
 
 // @brief 最も価値の高いカーネルを返す．
-AlgCover
+SopCover
 KernelGen::best_kernel(
-  const AlgCover& cover
+  const SopCover& cover
 )
 {
   generate(cover);
 
   // 特例: 自身がレベル０カーネルの場合は空のカバーを返す．
-  if ( mKernelDict.size() == 1 &&
-       mKernelDict.begin()->second.literal_num() == 0 ) {
-    return AlgCover{cover.variable_num()};
+  if ( mKernelDict.size() == 1 ) {
+    auto& cokernels = mKernelDict.begin()->second;
+    if ( cokernels.size() == 1 &&
+	 cokernels.front().literal_num() == 0 ) {
+      return SopCover{cover.variable_num()};
+    }
   }
 
   // 価値の最も大きいカーネルを求める．
@@ -89,7 +93,7 @@ KernelGen::best_kernel(
     auto& cokernels = p->second;
     auto k_nc = kernel.cube_num();
     auto k_nl = kernel.literal_num();
-    auto c_nc = cokernels.cube_num();
+    auto c_nc = cokernels.size();
     auto c_nl = cokernels.literal_num();
     int value = (k_nc - 1) * c_nl + (c_nc - 1) * k_nl;
     if ( max_value < value ) {
@@ -105,7 +109,7 @@ KernelGen::best_kernel(
 // @brief カーネルとコカーネルを列挙する．
 void
 KernelGen::generate(
-  const AlgCover& cover
+  const SopCover& cover
 )
 {
   // 2回以上現れるリテラルの（出現頻度でソートされた）リストを作る．
@@ -115,7 +119,7 @@ KernelGen::generate(
   hash_clear();
 
   SizeType nv = cover.variable_num();
-  auto ccube0 = AlgCube{nv}; // 空のキューブ
+  auto ccube0 = SopCube{nv}; // 空のキューブ
   auto plits = LitSet{nv}; // 空集合
   kern_sub(cover, literal_list.begin(), ccube0, plits);
 
@@ -129,7 +133,7 @@ KernelGen::generate(
 // @brief 出現頻度の昇順にならべたリテラルのリストを作る．
 vector<Literal>
 KernelGen::gen_literal_list(
-  const AlgCover& cover ///< [in] 対象のカバー
+  const SopCover& cover ///< [in] 対象のカバー
 )
 {
   // cover に2回以上現れるリテラルとその出現頻度のリストを作る．
@@ -166,9 +170,9 @@ KernelGen::gen_literal_list(
 // @brief カーネルを求める下請け関数
 void
 KernelGen::kern_sub(
-  const AlgCover& cover,
+  const SopCover& cover,
   vector<Literal>::const_iterator p,
-  const AlgCube& ccube,
+  const SopCube& ccube,
   const LitSet& plits
 )
 {
@@ -183,7 +187,7 @@ KernelGen::kern_sub(
     }
 
     // まず lit で割る．
-    auto cover1 = cover / lit;
+    auto cover1 = cover.algdiv(lit);
     // 共通なキューブを求める．
     auto ccube1 = cover1.common_cube();
     if ( plits1.check_intersect(ccube1) ) {
@@ -194,11 +198,11 @@ KernelGen::kern_sub(
     }
 
     // cover1 を cube-free にする．
-    cover1 /= ccube1;
+    cover1.algdiv(ccube1);
 
     // ccube1 を cover1 を導出したキューブにする．
-    ccube1 *= ccube;
-    ccube1 *= lit;
+    ccube1 &= ccube;
+    ccube1 &= lit;
 
     // plits1 を更新する．
     plits1 += lit;
@@ -211,4 +215,4 @@ KernelGen::kern_sub(
   }
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

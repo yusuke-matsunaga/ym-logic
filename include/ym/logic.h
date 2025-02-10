@@ -139,34 +139,20 @@ END_NAMESPACE_YM
 BEGIN_NAMESPACE_YM_SOP
 
 // クラス名の前方参照用宣言
-class SopBlock;
-class SopMgr;
 class SopCube;
 class SopCover;
 
+/// @brief FACTOR 用の名前空間の開始
+#define BEGIN_NAMESPACE_YM_FACTOR \
+BEGIN_NAMESPACE_YM_SOP \
+BEGIN_NAMESPACE(nsFactor)
+
+/// @brief FACTOR 用の名前空間の終了
+#define END_NAMESPACE_YM_FACTOR \
+END_NAMESPACE(nsFactor) \
 END_NAMESPACE_YM_SOP
 
-/// @brief ALG 用の名前空間の開始
-#define BEGIN_NAMESPACE_YM_ALG \
-BEGIN_NAMESPACE_YM \
-BEGIN_NAMESPACE(nsAlg)
-
-/// @brief ALG 用の名前空間の終了
-#define END_NAMESPACE_YM_ALG \
-END_NAMESPACE(nsAlg) \
-END_NAMESPACE_YM
-
-
-BEGIN_NAMESPACE_YM_ALG
-
-// クラス名の前方参照用宣言
-class AlgBlock;
-class AlgMgr;
-class AlgCube;
-class AlgCover;
-
-END_NAMESPACE_YM_ALG
-
+END_NAMESPACE_YM_SOP
 
 BEGIN_NAMESPACE_YM
 
@@ -224,36 +210,6 @@ operator<<(
 
 using nsSop::SopCube;
 using nsSop::SopCover;
-
-/// @brief AlgCover/AlgCube 中パタンを表す列挙型
-enum class AlgPat : std::uint8_t {
-  _X = 0, ///< なし
-  _0 = 1, ///< 負極性
-  _1 = 2, ///< 正極性
-  __ = 3  ///< 未使用
-};
-
-/// @relates AlgPat
-/// @brief AlgPat のストリーム出力
-/// @return s を返す．
-inline
-ostream&
-operator<<(
-  ostream& s, ///< [in] ストリーム
-  AlgPat pat  ///< [in] パタン
-)
-{
-  switch ( pat ) {
-  case AlgPat::_X: s << 'X'; break;
-  case AlgPat::_0: s << '0'; break;
-  case AlgPat::_1: s << '1'; break;
-  case AlgPat::__: s << '_'; break;
-  }
-  return s;
-}
-
-using nsAlg::AlgCube;
-using nsAlg::AlgCover;
 
 END_NAMESPACE_YM
 

@@ -7,10 +7,10 @@
 /// All rights reserved.
 
 #include "LitSet.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 // クラス LitSet
@@ -19,7 +19,7 @@ BEGIN_NAMESPACE_YM_ALG
 // @brief コンストラクタ
 LitSet::LitSet(
   SizeType var_num
-) : AlgBase{var_num},
+) : SopBase{var_num},
     mChunk(_cube_size(), 0ULL)
 {
 }
@@ -57,7 +57,7 @@ LitSet::LitSet(
 // @brief コピーコンストラクタ
 LitSet::LitSet(
   const LitSet& src
-) : AlgBase{src},
+) : SopBase{src},
     mChunk{src.mChunk}
 {
 }
@@ -69,7 +69,7 @@ LitSet::operator=(
 )
 {
   if ( &src != this ) {
-    AlgBase::operator=(src);
+    SopBase::operator=(src);
     mChunk = src.mChunk;
   }
 
@@ -79,7 +79,7 @@ LitSet::operator=(
 // @brief ムーブコンストラクタ
 LitSet::LitSet(
   LitSet&& src
-) : AlgBase{std::move(src)},
+) : SopBase{std::move(src)},
     mChunk{std::move(src.mChunk)}
 {
 }
@@ -90,7 +90,7 @@ LitSet::operator=(
   LitSet&& src
 )
 {
-  AlgBase::operator=(std::move(src));
+  SopBase::operator=(std::move(src));
   std::swap(mChunk, src.mChunk);
 
   return *this;
@@ -144,7 +144,7 @@ LitSet::is_in(
 // @brief 引数のキューブ中のリテラルをひとつでも含んでいたら true を返す．
 bool
 LitSet::check_intersect(
-  const AlgCube& right
+  const SopCube& right
 ) const
 {
   if ( variable_num() != right.variable_num() ) {
@@ -162,4 +162,4 @@ LitSet::check_intersect(
   return false;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

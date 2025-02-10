@@ -11,12 +11,12 @@
 #include "OneLevel0Kernel.h"
 #include "BestKernel.h"
 #include "WeakDivision.h"
-#include "ym/AlgCover.h"
+#include "ym/SopCover.h"
 #include "ym/Expr.h"
 #include "ym/Range.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 TEST(GenFactorTest, quick_factor)
 {
@@ -45,7 +45,7 @@ TEST(GenFactorTest, quick_factor)
   Literal lit_j(var9, false);
 
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  auto cover1 = AlgCover{nv, { { lit_a, lit_b, lit_g },
+  auto cover1 = SopCover{nv, { { lit_a, lit_b, lit_g },
 			       { lit_a, lit_c, lit_g },
 			       { lit_a, lit_d, lit_f },
 			       { lit_a, lit_f, lit_g },
@@ -114,7 +114,7 @@ TEST(GenFactorTest, good_factor)
   Literal lit_j(var9, false);
 
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  auto cover1 = AlgCover{nv, { { lit_a, lit_b, lit_g },
+  auto cover1 = SopCover{nv, { { lit_a, lit_b, lit_g },
 			       { lit_a, lit_c, lit_g },
 			       { lit_a, lit_d, lit_f },
 			       { lit_a, lit_f, lit_g },
@@ -156,4 +156,4 @@ TEST(GenFactorTest, good_factor)
 #endif
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

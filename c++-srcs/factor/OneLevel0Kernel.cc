@@ -7,10 +7,10 @@
 /// All rights reserved.
 
 #include "OneLevel0Kernel.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 // クラス OneLevel0Kernel
@@ -23,7 +23,7 @@ BEGIN_NONAMESPACE
 inline
 Literal
 find_literal(
-  const AlgCover& f
+  const SopCover& f
 )
 {
   int nv = f.variable_num();
@@ -41,15 +41,15 @@ find_literal(
 END_NONAMESPACE
 
 // @brief 除数を求める．
-AlgCover
+SopCover
 OneLevel0Kernel::divisor(
-  const AlgCover& f
+  const SopCover& f
 )
 {
   if ( f.cube_num() < 2 ) {
     // f をこれ以上割ることはできない．
     // 空の論理式を返す．
-    return AlgCover{f.variable_num()};
+    return SopCover{f.variable_num()};
   }
 
   // f に2回以上現れるリテラルを求める．
@@ -57,17 +57,17 @@ OneLevel0Kernel::divisor(
   if ( lit == Literal::x() ) {
     // f をこれ以上割ることはできない．
     // 空の論理式を返す．
-    return AlgCover{f.variable_num()};
+    return SopCover{f.variable_num()};
   }
 
   auto f1 = f;
   do {
-    f1 /= lit;
+    f1.algdiv_int(lit);
     auto cc = f1.common_cube();
-    f1 /= cc;
+    f1.algdiv_int(cc);
     lit = find_literal(f1);
   } while ( lit != Literal::x() );
   return f1;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

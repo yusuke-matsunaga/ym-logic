@@ -1,18 +1,18 @@
 
-/// @file AlgBase.cc
-/// @brief AlgBase の実装ファイル
+/// @file SopBase.cc
+/// @brief SopBase の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgBase.h"
+#include "ym/SopBase.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgBase
+// クラス SopBase
 //////////////////////////////////////////////////////////////////////
 
 BEGIN_NONAMESPACE
@@ -20,7 +20,7 @@ BEGIN_NONAMESPACE
 // 表引きを使ってリテラル数の計算を行う．
 int
 _count(
-  AlgPatWord pat
+  SopPatWord pat
 )
 {
   static const int table[] = {
@@ -35,7 +35,7 @@ END_NONAMESPACE
 
 // @brief ビットベクタ上のリテラル数を数える．
 SizeType
-AlgBase::_literal_num(
+SopBase::_literal_num(
   SizeType cube_num,
   const Chunk& chunk
 ) const
@@ -68,7 +68,7 @@ AlgBase::_literal_num(
 
 // @brief キューブのリテラル数を数える．
 SizeType
-AlgBase::_cube_literal_num(
+SopBase::_cube_literal_num(
   Cube src_cube
 ) const
 {
@@ -127,26 +127,26 @@ END_NONAMESPACE
 
 // @brief ワード中のリテラルをリストに追加する．
 void
-AlgBase::_word_literal_list(
-  AlgPatWord word,
+SopBase::_word_literal_list(
+  SopPatWord word,
   SizeType base,
   vector<Literal>& lit_list
 )
 {
-  const AlgPatWord H32MASK  = 0xFFFFFFFF00000000ULL;
-  const AlgPatWord L32MASK  = 0x00000000FFFFFFFFULL;
-  const AlgPatWord HH16MASK = 0xFFFF000000000000ULL;
-  const AlgPatWord HL16MASK = 0x0000FFFF00000000ULL;
-  const AlgPatWord LH16MASK = 0x00000000FFFF0000ULL;
-  const AlgPatWord LL16MASK = 0x000000000000FFFFULL;
-  const AlgPatWord HHH8MASK = 0xFF00000000000000ULL;
-  const AlgPatWord HHL8MASK = 0x00FF000000000000ULL;
-  const AlgPatWord HLH8MASK = 0x0000FF0000000000ULL;
-  const AlgPatWord HLL8MASK = 0x000000FF00000000ULL;
-  const AlgPatWord LHH8MASK = 0x00000000FF000000ULL;
-  const AlgPatWord LHL8MASK = 0x0000000000FF0000ULL;
-  const AlgPatWord LLH8MASK = 0x000000000000FF00ULL;
-  const AlgPatWord LLL8MASK = 0x00000000000000FFULL;
+  const SopPatWord H32MASK  = 0xFFFFFFFF00000000ULL;
+  const SopPatWord L32MASK  = 0x00000000FFFFFFFFULL;
+  const SopPatWord HH16MASK = 0xFFFF000000000000ULL;
+  const SopPatWord HL16MASK = 0x0000FFFF00000000ULL;
+  const SopPatWord LH16MASK = 0x00000000FFFF0000ULL;
+  const SopPatWord LL16MASK = 0x000000000000FFFFULL;
+  const SopPatWord HHH8MASK = 0xFF00000000000000ULL;
+  const SopPatWord HHL8MASK = 0x00FF000000000000ULL;
+  const SopPatWord HLH8MASK = 0x0000FF0000000000ULL;
+  const SopPatWord HLL8MASK = 0x000000FF00000000ULL;
+  const SopPatWord LHH8MASK = 0x00000000FF000000ULL;
+  const SopPatWord LHL8MASK = 0x0000000000FF0000ULL;
+  const SopPatWord LLH8MASK = 0x000000000000FF00ULL;
+  const SopPatWord LLL8MASK = 0x00000000000000FFULL;
   // 2分探索で非ゼロの8ビットを取り出して処理する．
   if ( (word & H32MASK) != ALG_ALL0 ) {
     if ( (word & HH16MASK) != ALG_ALL0 ) {
@@ -196,7 +196,7 @@ AlgBase::_word_literal_list(
 
 // @brief Expr に変換する．
 Expr
-AlgBase::_to_expr(
+SopBase::_to_expr(
   SizeType cube_num,
   const Chunk& chunk
 ) const
@@ -216,10 +216,10 @@ AlgBase::_to_expr(
     auto prod = Expr::one();
     for ( SizeType var = 0; var < variable_num(); ++ var ) {
       auto pat = _get_pat(cube, var);
-      if ( pat == AlgPat::_1 ) {
+      if ( pat == SopPat::_1 ) {
 	prod &= Expr::posi_literal(var);
       }
-      else if ( pat == AlgPat::_0 ) {
+      else if ( pat == SopPat::_0 ) {
 	prod &= Expr::nega_literal(var);
       }
     }
@@ -230,7 +230,7 @@ AlgBase::_to_expr(
 
 // @brief カバー/キューブの内容を出力する．
 void
-AlgBase::_print(
+SopBase::_print(
   ostream& s,
   const Chunk& chunk,
   SizeType begin,
@@ -249,7 +249,7 @@ AlgBase::_print(
 
 // @brief キューブの内容を出力する．
 void
-AlgBase::_print(
+SopBase::_print(
   ostream& s,
   Cube cube,
   const vector<string>& varname_list
@@ -267,11 +267,11 @@ AlgBase::_print(
       varname = buf.str();
     }
     auto pat = _get_pat(cube, var);
-    if ( pat == AlgPat::_1 ) {
+    if ( pat == SopPat::_1 ) {
       s << spc << varname;
       spc = " ";
     }
-    else if ( pat == AlgPat::_0 ) {
+    else if ( pat == SopPat::_0 ) {
       s << spc << varname << "'";
       spc = " ";
     }
@@ -280,7 +280,7 @@ AlgBase::_print(
 
 // @brief 内容を出力する(デバッグ用)．
 void
-AlgBase::_debug_print(
+SopBase::_debug_print(
   ostream& s,
   SizeType cube_num,
   const Chunk& chunk
@@ -294,7 +294,7 @@ AlgBase::_debug_print(
 
 // @brief 内容を出力する(デバッグ用)．
 void
-AlgBase::_debug_print(
+SopBase::_debug_print(
   ostream& s,
   Cube cube
 ) const
@@ -303,9 +303,9 @@ AlgBase::_debug_print(
     s << " ";
     auto pat = _get_pat(cube, var);
     switch ( pat ) {
-    case AlgPat::_X: s << "00"; break;
-    case AlgPat::_0: s << "01"; break;
-    case AlgPat::_1: s << "10"; break;
+    case SopPat::_X: s << "00"; break;
+    case SopPat::_0: s << "01"; break;
+    case SopPat::_1: s << "10"; break;
     default:         s << "--"; break;
     }
   }
@@ -314,7 +314,7 @@ AlgBase::_debug_print(
 
 // @brief 内容を出力する(デバッグ用)．
 void
-AlgBase::_debug_print(
+SopBase::_debug_print(
   ostream& s,
   DstCube cube
 ) const
@@ -323,13 +323,13 @@ AlgBase::_debug_print(
     s << " ";
     auto pat = _get_pat(cube, var);
     switch ( pat ) {
-    case AlgPat::_X: s << "00"; break;
-    case AlgPat::_0: s << "01"; break;
-    case AlgPat::_1: s << "10"; break;
+    case SopPat::_X: s << "00"; break;
+    case SopPat::_0: s << "01"; break;
+    case SopPat::_1: s << "10"; break;
     default:         s << "--"; break;
     }
   }
   s << endl;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

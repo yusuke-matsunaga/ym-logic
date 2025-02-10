@@ -10,16 +10,16 @@
 #include "KernelGen.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 // クラス BestKernel
 //////////////////////////////////////////////////////////////////////
 
 // @brief 除数を求める．
-AlgCover
+SopCover
 BestKernel::divisor(
-  const AlgCover& f
+  const SopCover& f
 )
 {
   KernelGen kernel_gen;
@@ -27,4 +27,4 @@ BestKernel::divisor(
   return kernel;
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

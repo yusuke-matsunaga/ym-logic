@@ -1,39 +1,39 @@
 #ifndef ALGSORTER_H
 #define ALGSORTER_H
 
-/// @file AlgSorter.h
-/// @brief AlgSorter のヘッダファイル
+/// @file SopSorter.h
+/// @brief SopSorter のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/AlgBase.h"
+#include "ym/SopBase.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-/// @class AlgSorter AlgSorter.h "AlgSorter.h"
-/// @brief AlgCover をソートするためのクラス
+/// @class SopSorter SopSorter.h "SopSorter.h"
+/// @brief SopCover をソートするためのクラス
 ///
 /// 一時バッファを持つ．
 //////////////////////////////////////////////////////////////////////
-class AlgSorter :
-  public AlgBase
+class SopSorter :
+  public SopBase
 {
 public:
 
   /// @brief コンストラクタ
-  AlgSorter(
+  SopSorter(
     SizeType var_num ///< [in] 変数の数
-  ) : AlgBase{var_num}
+  ) : SopBase{var_num}
   {
   }
 
   /// @brief デストラクタ
-  ~AlgSorter() = default;
+  ~SopSorter() = default;
 
 
 public:
@@ -163,6 +163,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR
 
 #endif // ALGSORTER_H

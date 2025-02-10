@@ -9,22 +9,22 @@
 #include "WeakDivision.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 // クラス WeakDivision
 //////////////////////////////////////////////////////////////////////
 
 // @brief 除算を行う．
-pair<AlgCover, AlgCover>
+pair<SopCover, SopCover>
 WeakDivision::divide(
-  const AlgCover& f,
-  const AlgCover& d
+  const SopCover& f,
+  const SopCover& d
 )
 {
-  auto q = f / d;
-  auto r = f - (q * d);
+  auto q = f.algdiv(d);
+  auto r = f - (q & d);
   return make_pair(std::move(q), std::move(r));
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

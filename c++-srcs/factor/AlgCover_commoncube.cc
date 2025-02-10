@@ -1,24 +1,24 @@
 
-/// @file AlgCover_commoncube.cc
-/// @brief AlgCover の common_cube 関係の実装ファイル
+/// @file SopCover_commoncube.cc
+/// @brief SopCover の common_cube 関係の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AlgCover.h"
-#include "ym/AlgCube.h"
+#include "ym/SopCover.h"
+#include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_ALG
+BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
-// クラス AlgCover
+// クラス SopCover
 //////////////////////////////////////////////////////////////////////
 
 // @brief 共通なキューブを返す．
-AlgCube
-AlgCover::common_cube() const
+SopCube
+SopCover::common_cube() const
 {
   auto dst_chunk = _new_chunk(1);
   auto dst_cube = dst_chunk.begin();
@@ -36,7 +36,7 @@ AlgCover::common_cube() const
   for ( ; src_iter != src_end; ++ src_iter ) {
     auto src_cube = *src_iter;
 
-    AlgPatWord tmp = 0ULL;
+    SopPatWord tmp = 0ULL;
     auto src_p = src_cube;
     auto src_pend = _cube_end(src_cube);
     auto dst_p = dst_cube;
@@ -50,7 +50,7 @@ AlgCover::common_cube() const
       break;
     }
   }
-  return AlgCube{variable_num(), std::move(dst_chunk)};
+  return SopCube{variable_num(), std::move(dst_chunk)};
 }
 
-END_NAMESPACE_YM_ALG
+END_NAMESPACE_YM_FACTOR

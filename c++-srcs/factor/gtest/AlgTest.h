@@ -1,8 +1,8 @@
 #ifndef SOPTEST_H
 #define SOPTEST_H
 
-/// @file AlgTest.h
-/// @brief AlgTest 用のテストフィクスチャ
+/// @file SopTest.h
+/// @brief SopTest 用のテストフィクスチャ
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2023 Yusuke Matsunaga
@@ -14,7 +14,7 @@
 
 BEGIN_NAMESPACE_YM
 
-class AlgTest :
+class SopTest :
 public ::testing::Test
 {
 public:
