@@ -25,9 +25,13 @@ add_subdirectory(gtest)
 
 set (sop_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/SopBase.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_algdiv.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_commoncube.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_concate.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_cofactor.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_compare.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_diff.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_product.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_sort.cc
   PARENT_SCOPE
   )

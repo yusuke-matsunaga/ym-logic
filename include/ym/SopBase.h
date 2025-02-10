@@ -628,7 +628,7 @@ protected:
     // 単純には答の積項数は2つの積項数の積だが
     // 相反するリテラルを含む積は数えない．
     auto tmp = _get_word(src_cube, blk) & pat1;
-    if ( (tmp & mask) == 0ULL ) {
+    if ( (tmp & mask) == SOP_ALL0 ) {
       // 相反するリテラルがあった．
       return false;
     }
@@ -658,7 +658,7 @@ protected:
     auto dst_p = dst_cube + blk;
     *dst_p &= pat1;
     auto tmp = *dst_p;
-    if ( (tmp & mask) == 0ULL ) {
+    if ( (tmp & mask) == SOP_ALL0 ) {
       // 相反するリテラルがあった．
       return false;
     }
@@ -716,6 +716,57 @@ protected:
     _cube_copy(dst_cube, src_cube);
     auto dst_p = dst_cube + blk;
     *dst_p |= mask;
+    return true;
+  }
+
+  /// @brief キューブによる商を求める．
+  /// @return 正しく割ることができたら true を返す．
+  bool
+  _cube_algdiv(
+    DstCube dst_cube, ///< [in] コピー先のビットベクタ
+    Cube cube1,       ///< [in] 被除数を表すビットベクタ
+    Cube cube2        ///< [in] 除数を表すビットベクタ
+  ) const
+  {
+    auto dst_end = _cube_end(dst_cube);
+    for ( ; dst_cube != dst_end;
+	  ++ dst_cube, ++ cube1, ++ cube2 ) {
+      auto pat1 = *cube1;
+      auto pat2 = *cube2;
+      if ( (pat1 & ~pat2) != SOP_ALL0 ) {
+	// この場合の dst の値は不定
+	return false;
+      }
+      *dst_cube = pat1 | ~pat2;
+    }
+    return true;
+  }
+
+  /// @brief リテラルによる商を求める．
+  /// @return 正しく割ることができたら true を返す．
+  bool
+  _cube_algdiv(
+    DstCube dst_cube, ///< [in] コピー先のビットベクタ
+    Cube src_cube,    ///< [in] 被除数を表すビットベクタ
+    Literal lit       ///< [in] リテラル
+  ) const
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    auto blk = _block_pos(varid);
+    auto sft = _shift_num(varid);
+    auto pat1 = _get_mask(varid, inv);
+    auto npat1 = ~pat1;
+    auto mask = 3UL << sft;
+    auto nmask = ~mask;
+    auto word = _get_word(src_cube, blk);
+    if ( (word & npat1) != SOP_ALL0 ) {
+      // この場合の dst の値は不定
+      return false;
+    }
+    _cube_copy(dst_cube, src_cube);
+    auto dst_p = dst_cube + blk;
+    *dst_p |= npat1;
     return true;
   }
 

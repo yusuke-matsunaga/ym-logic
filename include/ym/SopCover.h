@@ -12,6 +12,7 @@
 #include "ym/SopBase.h"
 #include "ym/SopCube.h"
 #include "ym/Expr.h"
+#include "ym/TvFunc.h"
 #include "ym/Literal.h"
 
 
@@ -381,6 +382,128 @@ public:
     const SopCube& right ///< [in] オペランド
   );
 
+  /// @brief 差分を計算する．
+  /// @return 計算結果を返す．
+  ///
+  /// right のみに含まれる要素があっても無視される．
+  SopCover
+  operator-(
+    const SopCover& right ///< [in] オペランド
+  ) const;
+
+  /// @brief 差分を計算して代入する．
+  /// @return 演算後の自身への参照を返す．
+  SopCover&
+  operator-=(
+    const SopCover& right ///< [in] オペランド
+  );
+
+  /// @brief 差分を計算する(キューブ版)．
+  /// @return 計算結果を返す．
+  ///
+  /// right のみに含まれる要素があっても無視される．
+  SopCover
+  operator-(
+    const SopCube& right ///< [in] オペランド
+  ) const;
+
+  /// @brief 差分を計算して代入する(キューブ版)．
+  /// @return 演算後の自身への参照を返す．
+  SopCover&
+  operator-=(
+    const SopCube& right ///< [in] オペランド
+  );
+
+  /// @brief 論理積を計算する．
+  /// @return 計算結果を返す．
+  SopCover
+  operator&(
+    const SopCover& right ///< [in] オペランド
+  ) const;
+
+  /// @brief 論理積を計算して代入する．
+  /// @return 演算後の自身への参照を返す．
+  SopCover&
+  operator&=(
+    const SopCover& right ///< [in] オペランド
+  );
+
+  /// @brief 論理積を計算する(キューブ版)．
+  /// @return 計算結果を返す．
+  SopCover
+  operator&(
+    const SopCube& right ///< [in] オペランド
+  ) const;
+
+  /// @brief 論理積を計算して代入する(キューブ版)．
+  /// @return 演算後の自身への参照を返す．
+  SopCover&
+  operator&=(
+    const SopCube& right ///< [in] オペランド
+  );
+
+  /// @brief 論理積を計算する(リテラル版)．
+  /// @return 計算結果を返す．
+  SopCover
+  operator&(
+    Literal right ///< [in] オペランド
+  ) const;
+
+  /// @brief 論理積を計算して代入する(リテラル版)．
+  /// @return 演算後の自身への参照を返す．
+  SopCover&
+  operator&=(
+    Literal right ///< [in] オペランド
+  );
+
+  /// @brief algebraic division を計算する．
+  /// @return 計算結果を返す．
+  SopCover
+  algdiv(
+    const SopCover& right ///< [in] オペランド
+  ) const;
+
+  /// @brief algebraic division を行って代入する．
+  /// @return 演算後の自身への参照を返す．
+  SopCover&
+  algdiv_int(
+    const SopCover& right ///< [in] オペランド
+  );
+
+  /// @brief キューブによる商を計算する．
+  /// @return 計算結果を返す．
+  SopCover
+  algdiv(
+    const SopCube& cube ///< [in] 対象のキューブ
+  ) const;
+
+  /// @brief キューブによる商を計算して代入する．
+  /// @return 演算後の自身への参照を返す．
+  SopCover&
+  algdiv_int(
+    const SopCube& cube ///< [in] 対象のキューブ
+  );
+
+  /// @brief リテラルによる商を計算する．
+  /// @return 計算結果を返す．
+  SopCover
+  algdiv(
+    Literal lit ///< [in] 対象のリテラル
+  ) const;
+
+  /// @brief リテラルによる商を計算して代入する．
+  /// @return 演算後の自身への参照を返す．
+  SopCover&
+  algdiv_int(
+    Literal lit ///< [in] 対象のリテラル
+  );
+
+  /// @brief 共通なキューブを返す．
+  ///
+  /// 共通なキューブがない場合には不正なキューブを返す．
+  SopCube
+  common_cube() const;
+
   /// @brief コファクターを計算する．
   /// @return 計算結果を返す．
   SopCover
@@ -388,12 +511,26 @@ public:
     const SopCube& right ///< [in] オペランド
   ) const;
 
+  /// @brief コファクターを計算し自身に代入する．
+  /// @return 自身への参照を返す．
+  SopCover&
+  cofactor_int(
+    const SopCube& right ///< [in] オペランド
+  );
+
   /// @brief コファクターを計算する．
   /// @return 計算結果を返す．
   SopCover
   cofactor(
     Literal lit ///< [in] オペランド
   ) const;
+
+  /// @brief コファクターを計算し自身に代入する．
+  /// @return 自身への参照を返す．
+  SopCover&
+  cofactor_int(
+    Literal lit ///< [in] オペランド
+  );
 
   /// @brief 比較演算子 (EQ)
   /// @return 等しい時に true を返す．
@@ -482,6 +619,7 @@ private:
       mCubeNum{cube_num},
       mChunk{std::move(chunk)}
   {
+    _sort();
   }
 
   /// @brief ソートする．
@@ -505,6 +643,65 @@ private:
     SizeType& dst_num    ///< [out] 結果のキューブ数
   ) const;
 
+  /// @brief 集合差演算の本体
+  Chunk
+  _diff(
+    SizeType num2,
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 論理積演算の本体
+  Chunk
+  _product(
+    SizeType num2,
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 論理積演算の本体
+  Chunk
+  _product(
+    Literal lit,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 代数的除算の本体
+  Chunk
+  _algdiv(
+    SizeType num2,
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 代数的除算の本体
+  Chunk
+  _algdiv(
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief 代数的除算の本体
+  Chunk
+  _algdiv(
+    Literal lit,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief コファクターの本体
+  Chunk
+  _cofactor(
+    const Chunk& chunk2,
+    SizeType& dst_num
+  ) const;
+
+  /// @brief コファクターの本体
+  Chunk
+  _cofactor(
+    Literal lit,
+    SizeType& dst_num
+  ) const;
+
   /// @brief 内容をセットする．
   void
   _set(
@@ -514,6 +711,7 @@ private:
   {
     mCubeNum = num;
     std::swap(mChunk, chunk);
+    _sort();
   }
 
   /// @brief キューブ番号が範囲内か調べる．
@@ -553,6 +751,114 @@ operator|(
 {
   // 交換則を用いる．
   return right.operator|(left);
+}
+
+/// @relates SopCover
+/// @brief カバーの減算
+/// @return 結果を返す．
+inline
+SopCover
+operator-(
+  SopCover&& left,      ///< [in] 第1オペランド(ムーブ参照)
+  const SopCover& right ///< [in] 第2オペランド
+)
+{
+  return SopCover{std::move(left)}.operator-=(right);
+}
+
+/// @relates SopCover
+/// @brief カバーとキューブの減算
+/// @return 結果を返す．
+inline
+SopCover
+operator-(
+  SopCover&& left,     ///< [in] 第1オペランド(ムーブ参照)
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return SopCover{std::move(left)}.operator-=(right);
+}
+
+/// @relates SopCover, SopCube
+/// @brief カバーとキューブの乗算
+/// @return 結果を返す．
+inline
+SopCover
+operator&(
+  SopCover&& left,     ///< [in] 第1オペランド(ムーブ参照)
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return SopCover{std::move(left)}.operator&=(right);
+}
+
+/// @relates SopCover, SopCube
+/// @brief キューブとカバーの乗算
+/// @return 結果を返す．
+inline
+SopCover
+operator&(
+  const SopCube& left,  ///< [in] 第1オペランド
+  const SopCover& right ///< [in] 第2オペランド
+)
+{
+  // 交換則を用いる．
+  return right.operator&(left);
+}
+
+/// @relates SopCover, SopCube
+/// @brief キューブとカバーの乗算
+/// @return 結果を返す．
+inline
+SopCover
+operator&(
+  const SopCube& left, ///< [in] 第1オペランド
+  SopCover&& right     ///< [in] 第2オペランド(ムーブ参照)
+)
+{
+  // 交換則を用いる．
+  return SopCover{std::move(right)}.operator&=(left);
+}
+
+/// @relates SopCover, Literal
+/// @brief カバーとリテラルの乗算
+/// @return 結果を返す．
+inline
+SopCover
+operator&(
+  SopCover&& left, ///< [in] 第1オペランド(ムーブ参照)
+  Literal right	   ///< [in] 第2オペランド
+)
+{
+  return SopCover{std::move(left)}.operator&=(right);
+}
+
+/// @relates SopCover, Literal
+/// @brief リテラルとカバーの乗算
+/// @return 結果を返す．
+inline
+SopCover
+operator&(
+  Literal left,         ///< [in] 第1オペランド
+  const SopCover& right ///< [in] 第2オペランド
+)
+{
+  // 交換則を用いる．
+  return right.operator&(left);
+}
+
+/// @relates SopCover, Literal
+/// @brief リテラルとカバーの乗算
+/// @return 結果を返す．
+inline
+SopCover
+operator&(
+  Literal left,    ///< [in] 第1オペランド
+  SopCover&& right ///< [in] 第2オペランド(ムーブ参照)
+)
+{
+  // 交換則を用いる．
+  return SopCover{std::move(right)}.operator&=(left);
 }
 
 /// @relates SopCover

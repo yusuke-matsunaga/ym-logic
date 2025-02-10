@@ -135,6 +135,18 @@ public:
   {
   }
 
+  /// @brief 不正なキューブを作るクラスメソッド
+  static
+  SopCube
+  invalid(
+    SizeType var_num ///< [in] 変数の数
+  )
+  {
+    auto cube = SopCube{var_num};
+    cube._cube_make_invalid(cube._dst_cube());
+    return cube;
+  }
+
   /// @brief デストラクタ
   ~SopCube() = default;
 
@@ -226,29 +238,6 @@ public:
     return _cube_literal_list(_cube());
   }
 
-  /// @brief オペランドのキューブに含まれていたら true を返す．
-  ///
-  /// * ここではキューブの表す論理関数の含意を考える．
-  /// * だからリテラル集合としてはオペランドのキューブを含むことになる．
-  bool
-  check_containment(
-    const SopCube& right ///< [in] オペランドのキューブ
-  ) const
-  {
-    _check_size(right);
-    auto cube1 = _cube();
-    auto end1 = _cube_end(cube1);
-    auto cube2 = right._cube();
-    for ( ; cube1 != end1; ++ cube1, ++ cube2 ) {
-      auto pat1 = *cube1;
-      auto pat2 = *cube2;
-      if ( (pat1 & pat2) != pat1 ) {
-	return false;
-      }
-    }
-    return true;
-  }
-
   /// @brief Expr に変換する．
   Expr
   expr() const
@@ -265,8 +254,8 @@ public:
 
   /// @brief キューブのリスト（カバー）を TvFunc に変換する．
   ///
-  /// cube_list が空リストの場合は入力数0の定数0関数が返される．
-  /// 入力数の指定をすることはできない．
+  /// - キューブの入力数は ni と等しくなければならない．
+  /// - cube_list が空リストの場合は定数0関数が返される．
   static
   TvFunc
   tvfunc(
@@ -335,7 +324,7 @@ public:
   /// @brief キューブの論理積を計算する
   /// @return 論理積のキューブを返す．
   ///
-  /// 相反するリテラルが含まれていたら空キューブとなる．
+  /// 相反するリテラルが含まれていたら不正なキューブとなる．
   SopCube
   operator&(
     const SopCube& right ///< [in] オペランド
@@ -355,7 +344,7 @@ public:
   /// @brief 論理積を計算し自身に代入する．
   /// @return 演算後の自身の参照を返す．
   ///
-  /// 相反するリテラルとの積があったら答は空のキューブとなる．
+  /// 相反するリテラルとの積があったら答は不正なキューブとなる．
   SopCube&
   operator&=(
     const SopCube& right ///< [in] オペランドのキューブ
@@ -373,7 +362,7 @@ public:
   /// @brief キューブとリテラルの論理積を計算する
   /// @return 論理積のキューブを返す．
   ///
-  /// 相反するリテラルが含まれていたら空キューブとなる．
+  /// 相反するリテラルが含まれていたら不正なキューブとなる．
   SopCube
   operator&(
     Literal right ///< [in] オペランドのリテラル
@@ -392,7 +381,7 @@ public:
   /// @brief リテラルとの論理積を計算し自身に代入する．
   /// @return 演算後の自身の参照を返す．
   ///
-  /// 相反するリテラルとの積があったら答は空のキューブとなる．
+  /// 相反するリテラルとの積があったら答は不正なキューブとなる．
   SopCube&
   operator&=(
     Literal right ///< [in] オペランドのリテラル
@@ -404,6 +393,105 @@ public:
       _cube_make_invalid(dst_cube);
     }
     return *this;
+  }
+
+  /// @brief キューブによる商を計算する
+  ///
+  /// リテラル集合として考えると集合差を計算することになる<br>
+  /// ただし，right のみに含まれるリテラルがあったら結果は不正となる．
+  SopCube
+  operator/(
+    const SopCube& right ///< [in] オペランド
+  ) const
+  {
+    _check_size(right);
+    auto dst_chunk = _new_chunk(1);
+    auto dst_cube = SopBase::_dst_cube(dst_chunk);
+    auto cube1 = _cube();
+    auto cube2 = right._cube();
+    if ( !_cube_algdiv(dst_cube, cube1, cube2) ) {
+      _cube_make_invalid(dst_cube);
+    }
+    return SopCube{variable_num(), std::move(dst_chunk)};
+  }
+
+  /// @brief キューブによる商を計算し自身に代入する．
+  /// @return 演算後の自身の参照を返す．
+  ///
+  /// リテラル集合として考えると集合差を計算することになる<br>
+  /// ただし，right のみに含まれるリテラルがあったら結果は不正となる．
+  SopCube&
+  operator/=(
+    const SopCube& right ///< [in] オペランドのキューブ
+  )
+  {
+    _check_size(right);
+    auto dst_cube = _dst_cube();
+    auto cube2 = right._cube();
+    if ( !_cube_algdiv(dst_cube, dst_cube, cube2) ) {
+      _cube_make_invalid(dst_cube);
+    }
+    return *this;
+  }
+
+  /// @brief リテラルによる商を計算する
+  ///
+  /// リテラル集合として考えると集合差を計算することになる<br>
+  /// ただし，right のみに含まれるリテラルがあったら結果は不正となる．
+  SopCube
+  operator/(
+    Literal right ///< [in] オペランドのリテラル
+  ) const
+  {
+    _check_lit(right);
+    auto dst_chunk = _new_chunk(1);
+    auto dst_cube = SopBase::_dst_cube(dst_chunk);
+    auto cube1 = _cube();
+    if ( !_cube_algdiv(dst_cube, cube1, right) ) {
+      _cube_make_invalid(dst_cube);
+    }
+    return SopCube{variable_num(), std::move(dst_chunk)};
+  }
+
+  /// @brief リテラルによる商を計算し自身に代入する．
+  /// @return 演算後の自身の参照を返す．
+  ///
+  /// リテラル集合として考えると集合差を計算することになる<br>
+  /// ただし，right のみに含まれるリテラルがあったら結果は不正となる．
+  SopCube&
+  operator/=(
+    Literal right ///< [in] オペランドのリテラル
+  )
+  {
+    _check_lit(right);
+    auto dst_cube = _dst_cube();
+    if ( !_cube_algdiv(dst_cube, dst_cube, right) ) {
+      _cube_make_invalid(dst_cube);
+    }
+    return *this;
+  }
+
+  /// @brief オペランドのキューブに含まれていたら true を返す．
+  ///
+  /// * ここではキューブの表す論理関数の含意を考える．
+  /// * だからリテラル集合としてはオペランドのキューブを含むことになる．
+  bool
+  check_containment(
+    const SopCube& right ///< [in] オペランドのキューブ
+  ) const
+  {
+    _check_size(right);
+    auto cube1 = _cube();
+    auto end1 = _cube_end(cube1);
+    auto cube2 = right._cube();
+    for ( ; cube1 != end1; ++ cube1, ++ cube2 ) {
+      auto pat1 = *cube1;
+      auto pat2 = *cube2;
+      if ( (pat1 & pat2) != pat1 ) {
+	return false;
+      }
+    }
+    return true;
   }
 
   /// @brief SopCubeの比較演算子(EQ)
@@ -619,6 +707,34 @@ operator&(
 {
   // 交換則を用いる．
   return SopCube{std::move(right)}.operator&=(left);
+}
+
+/// @relates SopCube
+/// @brief キューブの除算を計算する
+///
+/// リテラル集合としてみると集合差となる<br>
+inline
+SopCube
+operator/(
+  SopCube&& left,      ///< [in] 第1オペランド(ムーブ参照)
+  const SopCube& right ///< [in] 第2オペランド
+)
+{
+  return SopCube{std::move(left)}.operator/=(right);
+}
+
+/// @relates SopCube
+/// @brief キューブとリテラルの除算を計算する
+///
+/// リテラル集合としてみると集合差となる<br>
+inline
+SopCube
+operator/(
+  SopCube&& left, ///< [in] 第1オペランド(ムーブ参照)
+  Literal right	  ///< [in] 第2オペランド
+)
+{
+  return SopCube{std::move(left)}.operator/=(right);
 }
 
 /// @relates SopCube

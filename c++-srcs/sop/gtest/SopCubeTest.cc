@@ -352,6 +352,15 @@ TEST_F(SopTest, move_assignment)
 
 };
 
+// invalid() のテスト
+TEST_F(SopTest, invalid)
+{
+  auto cube1 = SopCube::invalid(nv);
+
+  EXPECT_EQ( nv, cube1.variable_num() );
+  EXPECT_TRUE( cube1.is_invalid() );
+}
+
 // is_tautology() のテスト
 TEST_F(SopTest, is_tautology)
 {
@@ -923,6 +932,316 @@ TEST_F(SopTest, Icube_literal_product2)
   cube1 &= lit5;
 
   EXPECT_TRUE(  cube1.is_invalid() );
+};
+
+TEST_F(SopTest, cube_cube_algdiv1)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = SopCube{nv, {lit0, ~lit7}};
+  auto cube3 = cube1 / cube2;
+
+  EXPECT_TRUE( cube3.is_valid() );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
+};
+
+TEST_F(SopTest, cube_cube_algdiv1_bad)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = SopCube{nv + 1, {lit0, ~lit7}};
+  EXPECT_THROW( cube1 / cube2, std::invalid_argument );
+}
+
+TEST_F(SopTest, Rcube_cube_algdiv1)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = SopCube{nv, {lit0, ~lit7}};
+  auto cube3 = std::move(cube1) / cube2;
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
+  EXPECT_TRUE( cube3.is_valid() );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
+};
+
+TEST_F(SopTest, cube_cube_algdiv2)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5}};
+  auto cube2 = SopCube{nv, {~lit7}};
+  auto cube3 = cube1 / cube2;
+
+  EXPECT_TRUE( cube3.is_invalid() );
+};
+
+TEST_F(SopTest, cube_lit_algdiv1)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube3 = cube1 / lit0;
+
+  EXPECT_TRUE( cube3.is_valid() );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
+};
+
+TEST_F(SopTest, cube_lit_algdiv1_bad)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  EXPECT_THROW( cube1 / lit100, std::out_of_range );
+}
+
+TEST_F(SopTest, Rcube_lit_algdiv1)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube3 = std::move(cube1) / lit0;
+
+  EXPECT_EQ( 0, cube1.literal_num() );
+
+  EXPECT_TRUE( cube3.is_valid() );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube3.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube3.check_literal(Literal(var9, true)) );
+};
+
+TEST_F(SopTest, cube_lit_algdiv2)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube3 = cube1 / lit5;
+
+  EXPECT_TRUE( cube3.is_invalid() );
+};
+
+TEST_F(SopTest, Scube_cube_algdiv1)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = SopCube{nv, {lit0, ~lit7}};
+  cube1 = cube1 / cube2;
+
+  EXPECT_TRUE( cube1.is_valid() );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
+};
+
+TEST_F(SopTest, Scube_cube_algdiv2)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5}};
+  auto cube2 = SopCube{nv, {~lit7}};
+  cube1 = cube1 / cube2;
+
+  EXPECT_TRUE( cube1.is_invalid() );
+};
+
+TEST_F(SopTest, Scube_lit_algdiv1)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  cube1 = cube1 / lit0;
+
+  EXPECT_TRUE( cube1.is_valid() );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
+};
+
+TEST_F(SopTest, Scube_lit_algdiv2)
+{
+  auto cube1 = SopCube{nv, {lit4, ~lit5, ~lit7}};
+  cube1 = cube1 / lit5;
+
+  EXPECT_TRUE( cube1.is_invalid() );
+};
+
+TEST_F(SopTest, Icube_cube_algdiv1)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = SopCube{nv, {lit0, ~lit7}};
+  cube1 /= cube2;
+
+  EXPECT_TRUE( cube1.is_valid() );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
+};
+
+TEST_F(SopTest, Icube_cube_algdiv1_bad)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  auto cube2 = SopCube{nv + 1, {lit0, ~lit7}};
+  EXPECT_THROW( cube1 /= cube2, std::invalid_argument );
+}
+
+TEST_F(SopTest, Icube_cube_algdiv2)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5}};
+  auto cube2 = SopCube{nv, {~lit7}};
+  cube1 /= cube2;
+
+  EXPECT_TRUE( cube1.is_invalid() );
+};
+
+TEST_F(SopTest, Icube_lit_algdiv1)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  cube1 /= lit0;
+
+  EXPECT_TRUE( cube1.is_valid() );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var0, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var1, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var2, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var3, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var4, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var5, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var5, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var6, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var7, false)) );
+  EXPECT_TRUE(  cube1.check_literal(Literal(var7, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var8, true)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, false)) );
+  EXPECT_FALSE( cube1.check_literal(Literal(var9, true)) );
+};
+
+TEST_F(SopTest, Icube_lit_algdiv1_bad)
+{
+  auto cube1 = SopCube{nv, {lit0, ~lit5, ~lit7}};
+  EXPECT_THROW( cube1 /= lit100, std::out_of_range );
+}
+
+TEST_F(SopTest, Icube_lit_algdiv2)
+{
+  auto cube1 = SopCube{nv, {~lit5, lit1, lit2}};
+
+  cube1 /= lit5;
+
+  EXPECT_TRUE( cube1.is_invalid() );
 };
 
 // compare() のテスト
