@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/TvFunc.h"
-#include "ym/Literal.h"
+#include "ym/SopCube.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -29,14 +29,14 @@ public:
 
   /// @brief 主項を列挙する．
   static
-  vector<vector<Literal>>
+  vector<SopCube>
   all_primes(
     const TvFunc& f ///< [in] 対象の関数
   );
 
   /// @brief 主項を列挙する．
   static
-  vector<vector<Literal>>
+  vector<SopCube>
   all_primes(
     const TvFunc& f, ///< [in] 対象の関数
     const TvFunc& dc ///< [in] ドントケアの関数
@@ -46,26 +46,19 @@ public:
     return all_primes(f | dc);
   }
 
-  /// @brief MWC(Merge With Containment) を行って積和形論理式を求める．
+  /// @brief 単純なシャノン展開を行って非冗長積和形を求める．
   static
-  vector<vector<Literal>>
-  MWC(
+  vector<SopCube>
+  isop(
     const TvFunc& f ///< [in] 対象の関数
   );
 
-  /// @brief 単純なシャノン展開を行ってで非冗長積和形を求める．
-  static
-  vector<vector<Literal>>
-  ISOP(
-    const TvFunc& f ///< [in] 対象の関数
-  );
-
-  /// @brief 単純なシャノン展開で非冗長積和形を求める．
+  /// @brief 単純なシャノン展開を行って非冗長積和形を求める．
   ///
   /// dc の入力数は f の入力数と等しくなければならない．
   static
-  vector<vector<Literal>>
-  ISOP(
+  vector<SopCube>
+  isop(
     const TvFunc& f, ///< [in] 対象の関数
     const TvFunc& dc ///< [in] ドントケアの関数
   );

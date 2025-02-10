@@ -200,6 +200,7 @@ TEST_P(TvFuncTestWithParam, bcf)
   }
 }
 
+#if 0
 TEST_P(TvFuncTestWithParam, mwc)
 {
   SizeType ni = GetParam();
@@ -251,6 +252,7 @@ TEST_P(TvFuncTestWithParam, mwc)
     EXPECT_EQ( exp_func, func );
   }
 }
+#endif
 
 TEST_P(TvFuncTestWithParam, isop)
 {
@@ -296,7 +298,7 @@ TEST_P(TvFuncTestWithParam, isop)
       }
     }
     auto func = TvFunc{ni, values};
-    auto cov = Tv2Sop::ISOP(func);
+    auto cov = Tv2Sop::isop(func);
     // TvFunc に再変換して func と等しいか調べる．
     // ヒューリスティックの簡単化なので正解はない．
     auto exp_func = TvFunc::cover(ni, cov);

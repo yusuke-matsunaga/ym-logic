@@ -623,19 +623,19 @@ def test_cofactor_int2_bad():
     with pytest.raises(ValueError) as e:
         f.cofactor_int(lit)
     
-def test_bcf():
+def test_all_primes():
     f = TvFunc.from_string("0111")
 
-    cov = f.bcf()
+    cov = TvFunc.all_primes(f)
 
     assert str(cov.expr()) == "( ~0 | ~1 )"
 
-def test_mwc():
+def test_isop():
     f = TvFunc.from_string("10010110")
 
-    cov = f.mwc()
+    cov = TvFunc.isop(f)
 
-    assert str(cov.expr()) == "( ( ~0 & ~1 & 2 ) | ( ~0 & 1 & ~2 ) | ( 0 & ~1 & ~2 ) | ( 0 & 1 & 2 ) )"
+    assert str(cov.expr()) == "( ( 0 & 1 & 2 ) | ( 0 & ~1 & ~2 ) | ( ~0 & 1 & ~2 ) | ( ~0 & ~1 & 2 ) )"
 
 def test_xform():
     f = TvFunc.from_string("10000000")

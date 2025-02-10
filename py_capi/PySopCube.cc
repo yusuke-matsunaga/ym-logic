@@ -97,6 +97,28 @@ SopCube_copy(
 }
 
 PyObject*
+SopCube_is_valid(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& cube = PySopCube::Get(self);
+  auto ans = cube.is_valid();
+  return PyBool_FromLong(ans);
+}
+
+PyObject*
+SopCube_is_invalid(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& cube = PySopCube::Get(self);
+  auto ans = cube.is_invalid();
+  return PyBool_FromLong(ans);
+}
+
+PyObject*
 SopCube_is_tautology(
   PyObject* self,
   PyObject* Py_UNUSED(args)
@@ -224,6 +246,12 @@ PyMethodDef SopCube_methods[] = {
   {"copy", SopCube_copy,
    METH_NOARGS,
    PyDoc_STR("return copy of this object")},
+  {"is_valid", SopCube_is_valid,
+   METH_NOARGS,
+   PyDoc_STR("return True if valid")},
+  {"is_invalid", SopCube_is_invalid,
+   METH_NOARGS,
+   PyDoc_STR("return True if invalid")},
   {"is_tautology", SopCube_is_tautology,
    METH_NOARGS,
    PyDoc_STR("return True if tautology")},

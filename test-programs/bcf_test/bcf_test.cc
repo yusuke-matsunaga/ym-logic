@@ -81,7 +81,7 @@ bcf_test(
       cout << delim;
       delim = " | ";
       const char* spc = "";
-      for ( auto lit: cube ) {
+      for ( auto lit: cube.literal_list() ) {
 	cout << spc;
 	spc = " ";
 	cout << "v" << lit.varid();

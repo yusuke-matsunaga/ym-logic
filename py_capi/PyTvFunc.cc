@@ -693,29 +693,73 @@ TvFunc_analyze(
   return PyPrimType::ToPyObject(ptype);
 }
 
-#if 0
 PyObject*
-TvFunc_bcf(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
+TvFunc_all_primes(
+  PyObject* Py_UNUSED(self),
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  auto& func = PyTvFunc::Get(self);
-  auto cov = Tv2Sop::all_primes(func);
-  return PySopCover::ToPyObject(cov);
+  static const char* kw_list[] = {
+    "f",
+    "dc",
+    nullptr
+  };
+  PyObject* f_obj = nullptr;
+  PyObject* dc_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!|O!",
+				    const_cast<char**>(kw_list),
+				    PyTvFunc::_typeobject(), &f_obj,
+				    PyTvFunc::_typeobject(), &dc_obj) ) {
+    return nullptr;
+  }
+  auto& func = PyTvFunc::Get(f_obj);
+  if ( dc_obj == nullptr ) {
+    auto cube_list = Tv2Sop::all_primes(func);
+    auto cover = SopCover{func.input_num(), cube_list};
+    return PySopCover::ToPyObject(cover);
+  }
+  else {
+    auto& dc_func = PyTvFunc::Get(dc_obj);
+    auto cube_list = Tv2Sop::all_primes(func, dc_func);
+    auto cover = SopCover{func.input_num(), cube_list};
+    return PySopCover::ToPyObject(cover);
+  }
 }
 
 PyObject*
-TvFunc_mwc(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
+TvFunc_isop(
+  PyObject* Py_UNUSED(self),
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  auto& func = PyTvFunc::Get(self);
-  auto cov = Tv2Sop::MWC(func);
-  return PySopCover::ToPyObject(cov);
+  static const char* kw_list[] = {
+    "f",
+    "dc",
+    nullptr
+  };
+  PyObject* f_obj = nullptr;
+  PyObject* dc_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!|O!",
+				    const_cast<char**>(kw_list),
+				    PyTvFunc::_typeobject(), &f_obj,
+				    PyTvFunc::_typeobject(), &dc_obj) ) {
+    return nullptr;
+  }
+  auto& func = PyTvFunc::Get(f_obj);
+  if ( dc_obj == nullptr ) {
+    auto cube_list = Tv2Sop::isop(func);
+    auto cover = SopCover{func.input_num(), cube_list};
+    return PySopCover::ToPyObject(cover);
+  }
+  else {
+    auto& dc_func = PyTvFunc::Get(dc_obj);
+    auto cube_list = Tv2Sop::isop(func, dc_func);
+    auto cover = SopCover{func.input_num(), cube_list};
+    return PySopCover::ToPyObject(cover);
+  }
 }
-#endif
 
 // メソッド定義
 PyMethodDef TvFunc_methods[] = {
@@ -800,14 +844,12 @@ PyMethodDef TvFunc_methods[] = {
   {"analyze", TvFunc_analyze,
    METH_NOARGS,
    PyDoc_STR("check if this function is a primitive function")},
-#if 0
-  {"bcf", TvFunc_bcf,
-   METH_NOARGS,
-   PyDoc_STR("get Blake's Cannonical Form")},
-  {"mwc", TvFunc_mwc,
-   METH_NOARGS,
-   PyDoc_STR("get minimal cover using Merge With Containment")},
-#endif
+  {"all_primes", reinterpret_cast<PyCFunction>(TvFunc_all_primes),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("enumerate all prime implicants")},
+  {"isop", reinterpret_cast<PyCFunction>(TvFunc_isop),
+   METH_STATIC | METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("get irredundant sum of products form")},
   {nullptr, nullptr, 0, nullptr}
 };
 

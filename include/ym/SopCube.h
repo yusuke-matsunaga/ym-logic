@@ -204,6 +204,9 @@ public:
     SizeType var ///< [in] 変数( 0 <= var_id.val() < variable_num() )
   ) const
   {
+    if ( is_invalid() ) {
+      return SopPat::_X;
+    }
     _check_var(var);
     return _get_pat(chunk().begin(), var);
   }
@@ -214,6 +217,9 @@ public:
     Literal lit ///< [in] 対象のリテラル
   ) const
   {
+    if ( is_invalid() ) {
+      return false;
+    }
     _check_lit(lit);
     auto varid = lit.varid();
     auto inv = lit.is_negative();
@@ -227,6 +233,9 @@ public:
     bool inv        ///< [in] 反転属性
   ) const
   {
+    if ( is_invalid() ) {
+      return false;
+    }
     _check_var(varid);
     return _cube_check_literal(_cube(), varid, inv);
   }
@@ -235,6 +244,9 @@ public:
   vector<Literal>
   literal_list() const
   {
+    if ( is_invalid() ) {
+      return vector<Literal>{};
+    }
     return _cube_literal_list(_cube());
   }
 
@@ -242,6 +254,9 @@ public:
   Expr
   expr() const
   {
+    if ( is_invalid() ) {
+      return Expr{};
+    }
     return _to_expr(1, chunk());
   }
 
@@ -249,6 +264,9 @@ public:
   TvFunc
   tvfunc() const
   {
+    if ( is_invalid() ) {
+      return TvFunc{};
+    }
     return TvFunc::cube(variable_num(), literal_list());
   }
 

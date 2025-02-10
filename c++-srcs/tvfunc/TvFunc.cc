@@ -8,6 +8,7 @@
 
 #include "ym/TvFunc.h"
 #include "ym/NpnMap.h"
+#include "ym/SopCube.h"
 #include "ym/Range.h"
 #include "npn/NpnMgr.h"
 
@@ -174,6 +175,40 @@ TvFunc::TvFunc(
     for ( auto& cube: cube_list ) {
       TvFunc::WordType pat1 = 0xFFFFFFFFFFFFFFFFULL;
       for ( auto lit: cube ) {
+	auto varid = lit.varid();
+	auto inv = lit.is_negative();
+	auto pat2 = lit_pat(varid, b);
+	if ( inv ) {
+	  pat2 = ~pat2;
+	}
+	pat1 &= pat2;
+      }
+      pat0 |= pat1;
+    }
+    mVector[b] = pat0;
+  }
+  mVector[0] &= vec_mask(ni);
+}
+
+// @brief カバー関数を作るコンストラクタ
+TvFunc::TvFunc(
+  SizeType ni,
+  const vector<SopCube>& cube_list
+) : mInputNum{ni},
+    mBlockNum{nblock(ni)},
+    mVector{new TvFunc::WordType[mBlockNum]}
+{
+  for ( auto& cube: cube_list ) {
+    if ( cube.variable_num() != ni ) {
+      throw std::invalid_argument{"input_num mismatch"};
+    }
+  }
+
+  for ( SizeType b: Range(mBlockNum) ) {
+    TvFunc::WordType pat0 = 0x0000000000000000ULL;
+    for ( auto& cube: cube_list ) {
+      TvFunc::WordType pat1 = 0xFFFFFFFFFFFFFFFFULL;
+      for ( auto lit: cube.literal_list() ) {
 	auto varid = lit.varid();
 	auto inv = lit.is_negative();
 	auto pat2 = lit_pat(varid, b);

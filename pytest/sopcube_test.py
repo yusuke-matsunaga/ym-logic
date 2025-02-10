@@ -128,6 +128,7 @@ def test_cube_product1():
 
     cube3 = cube1 & cube2
 
+    assert cube3.is_valid()
     lit_list = cube3.literal_list()
     assert len(lit_list) == 3
     assert lit_list[0] == lit1
@@ -146,8 +147,7 @@ def test_cube_product2():
 
     cube3 = cube1 & cube2
 
-    lit_list = cube3.literal_list()
-    assert len(lit_list) == 0
+    assert cube3.is_invalid()
     
 def test_cube_product_int1():
     ni = 10
@@ -160,6 +160,7 @@ def test_cube_product_int1():
 
     cube1 &= cube2
 
+    assert cube1.is_valid()
     lit_list = cube1.literal_list()
     assert len(lit_list) == 3
     assert lit_list[0] == lit1
@@ -178,8 +179,7 @@ def test_cube_product_int2():
 
     cube1 &= cube2
 
-    lit_list = cube1.literal_list()
-    assert len(lit_list) == 0
+    assert cube1.is_invalid()
 
 def test_lit_cube_product1():
     ni = 10
@@ -191,6 +191,7 @@ def test_lit_cube_product1():
 
     cube3 = lit1 & cube1
 
+    assert cube3.is_valid()
     lit_list = cube3.literal_list()
     assert len(lit_list) == 3
     assert lit_list[0] == lit1
@@ -207,8 +208,7 @@ def test_lit_cube_product2():
 
     cube3 = lit1 & cube1
 
-    lit_list = cube3.literal_list()
-    assert len(lit_list) == 0
+    assert cube3.is_invalid()
 
 def test_cube_lit_product1():
     ni = 10
@@ -220,6 +220,7 @@ def test_cube_lit_product1():
 
     cube3 = cube1 & lit1
 
+    assert cube3.is_valid()
     lit_list = cube3.literal_list()
     assert len(lit_list) == 3
     assert lit_list[0] == lit1
@@ -236,8 +237,7 @@ def test_cube_lit_product2():
 
     cube3 = cube1 & lit1
 
-    lit_list = cube3.literal_list()
-    assert len(lit_list) == 0
+    assert cube3.is_invalid()
 
 def test_lit_product_int1():
     ni = 10
@@ -249,6 +249,7 @@ def test_lit_product_int1():
 
     cube1 &= lit1
 
+    assert cube1.is_valid()
     lit_list = cube1.literal_list()
     assert len(lit_list) == 3
     assert lit_list[0] == lit1
@@ -265,8 +266,7 @@ def test_lit_product_int2():
 
     cube1 &= lit1
 
-    lit_list = cube1.literal_list()
-    assert len(lit_list) == 0
+    assert cube1.is_invalid()
 
 def test_compare1():
     ni = 100

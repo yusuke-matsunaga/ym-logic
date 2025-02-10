@@ -199,6 +199,18 @@ public:
     return TvFunc{ni, cube_list};
   }
 
+  /// @brief カバーに対応した関数を作る．
+  /// @return 生成したオブジェクトを返す．
+  static
+  TvFunc
+  cover(
+    SizeType ni,                     ///< [in] 入力数
+    const vector<SopCube>& cube_list ///< [in] キューブのリスト
+  )
+  {
+    return TvFunc{ni, cube_list};
+  }
+
   /// @brief キューブに対応した関数を作る．
   /// @return 生成したオブジェクトを返す．
   static
@@ -818,6 +830,12 @@ private:
   TvFunc(
     SizeType ni,                             ///< [in] 入力数
     const vector<vector<Literal>>& cube_list ///< [in] キューブのリスト
+  );
+
+  /// @brief カバー関数を作るコンストラクタ
+  TvFunc(
+    SizeType ni,                     ///< [in] 入力数
+    const vector<SopCube>& cube_list ///< [in] キューブのリスト
   );
 
   /// @brief キューブ関数を作るコンストラクタ
