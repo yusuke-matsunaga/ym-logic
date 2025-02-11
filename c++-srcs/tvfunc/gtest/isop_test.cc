@@ -45,6 +45,12 @@ public:
     for ( auto& cube: cube_list ) {
       check_prime(cube, r);
     }
+
+    // cube_list の各キューブが f1 と交差しているかのテスト
+    for ( auto& cube: cube_list ) {
+      auto cube_f = cube.tvfunc();
+      EXPECT_TRUE( cube_f && f1 );
+    }
   }
 
 
