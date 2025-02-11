@@ -254,6 +254,70 @@ TEST_P(TvFuncTestWithParam, mwc)
 }
 #endif
 
+TEST(Tv2SopTest, isop0)
+{
+  SizeType ni = 3;
+  auto var0 = TvFunc::literal(ni, 0);
+  auto var1 = TvFunc::literal(ni, 1);
+  auto var2 = TvFunc::literal(ni, 2);
+  auto f = var0 & var1 | var0 & var2;
+  auto d = ~(var1 | var2);
+
+  auto cov = SopCover{ni, Tv2Sop::isop(f, d)};
+
+  auto cov_func = cov.tvfunc();
+  EXPECT_EQ( var0, cov_func );
+}
+
+TEST(Tv2SopTest, isop0_1)
+{
+  SizeType ni = 3;
+  auto var0 = TvFunc::literal(ni, 0);
+  auto var1 = TvFunc::literal(ni, 1);
+  auto var2 = TvFunc::literal(ni, 2);
+  auto f = var1 & var2 | var0 & var2;
+  auto d = ~(var0 | var1);
+
+  auto cov = SopCover{ni, Tv2Sop::isop(f, d)};
+
+  auto cov_func = cov.tvfunc();
+  EXPECT_EQ( var2, cov_func );
+}
+
+TEST(Tv2SopTest, isop1)
+{
+  SizeType ni = 4;
+  auto var0 = TvFunc::literal(ni, 0);
+  auto var1 = TvFunc::literal(ni, 1);
+  auto var2 = TvFunc::literal(ni, 2);
+  auto var3 = TvFunc::literal(ni, 3);
+  auto func = var0 & var2 | var0 & var3 | var1 & var2 | var1 & var3;
+  auto dc = ~(var2 | var3);
+
+  auto cov = SopCover{ni, Tv2Sop::isop(func, dc)};
+
+  auto cov_func = cov.tvfunc();
+  EXPECT_TRUE( func.check_containment(cov_func) );
+  EXPECT_TRUE( cov_func.check_containment(func | dc) );
+}
+
+TEST(Tv2SopTest, isop2)
+{
+  SizeType ni = 4;
+  auto var0 = TvFunc::literal(ni, 0);
+  auto var1 = TvFunc::literal(ni, 1);
+  auto var2 = TvFunc::literal(ni, 2);
+  auto var3 = TvFunc::literal(ni, 3);
+  auto func = var0 & var2 | var0 & var3 | var1 & var2 | var1 & var3;
+  auto dc = ~(var0 | var1);
+
+  auto cov = SopCover{ni, Tv2Sop::isop(func, dc)};
+
+  auto cov_func = cov.tvfunc();
+  EXPECT_TRUE( func.check_containment(cov_func) );
+  EXPECT_TRUE( cov_func.check_containment(func | dc) );
+}
+
 TEST_P(TvFuncTestWithParam, isop)
 {
   SizeType ni = GetParam();
