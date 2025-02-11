@@ -966,7 +966,7 @@ def test_tv1():
 
     expr = (lit0 & lit3) | (~lit1 & lit2)
 
-    f = expr.to_tv()
+    f = expr.tvfunc()
 
     for p in range(16):
         val = [True if p & (1 << i) else False for i in range(4)]

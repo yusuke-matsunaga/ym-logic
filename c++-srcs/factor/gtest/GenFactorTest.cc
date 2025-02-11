@@ -9,45 +9,52 @@
 #include <gtest/gtest.h>
 #include "ym/SopCover.h"
 #include "ym/Expr.h"
+#include "ym/TvFunc.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
 
-TEST(GenFactorTest, quick_factor)
+class GenFactorTest:
+  public ::testing::Test
 {
-  const int nv = 10;
+public:
 
-  SizeType var0{0};
-  SizeType var1{1};
-  SizeType var2{2};
-  SizeType var3{3};
-  SizeType var4{4};
-  SizeType var5{5};
-  SizeType var6{6};
-  SizeType var7{7};
-  SizeType var8{8};
-  SizeType var9{9};
+  void
+  check(
+    const SopCover& cover,
+    const Expr& expr
+  )
+  {
+    SizeType ni = cover.variable_num();
+    auto cover_f = cover.tvfunc();
+    auto expr_f = expr.tvfunc(ni);
+    EXPECT_EQ( cover_f, expr_f );
+  }
 
-  Literal lit_a(var0, false);
-  Literal lit_b(var1, false);
-  Literal lit_c(var2, false);
-  Literal lit_d(var3, false);
-  Literal lit_e(var4, false);
-  Literal lit_f(var5, false);
-  Literal lit_g(var6, false);
-  Literal lit_h(var7, false);
-  Literal lit_i(var8, false);
-  Literal lit_j(var9, false);
+  Literal lit_a{0, false};
+  Literal lit_b{1, false};
+  Literal lit_c{2, false};
+  Literal lit_d{3, false};
+  Literal lit_e{4, false};
+  Literal lit_f{5, false};
+  Literal lit_g{6, false};
+  Literal lit_h{7, false};
+  Literal lit_i{8, false};
+  Literal lit_j{9, false};
 
+};
+
+TEST_F(GenFactorTest, quick_factor)
+{
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  auto cover1 = SopCover{nv, { { lit_a, lit_b, lit_g },
-			       { lit_a, lit_c, lit_g },
-			       { lit_a, lit_d, lit_f },
-			       { lit_a, lit_f, lit_g },
-			       { lit_b, lit_d },
-			       { lit_c, lit_e },
-			       { lit_b, lit_e },
-			       { lit_c, lit_d } } };
+  auto cover1 = SopCover{7, { { lit_a, lit_b, lit_g },
+			      { lit_a, lit_c, lit_g },
+			      { lit_a, lit_d, lit_f },
+			      { lit_a, lit_f, lit_g },
+			      { lit_b, lit_d },
+			      { lit_c, lit_e },
+			      { lit_b, lit_e },
+			      { lit_c, lit_d } } };
 
   auto expr1 = cover1.quick_factor();
 
@@ -80,41 +87,17 @@ TEST(GenFactorTest, quick_factor)
 #endif
 }
 
-TEST(GenFactorTest, good_factor)
+TEST_F(GenFactorTest, good_factor)
 {
-  const int nv = 10;
-
-  SizeType var0{0};
-  SizeType var1{1};
-  SizeType var2{2};
-  SizeType var3{3};
-  SizeType var4{4};
-  SizeType var5{5};
-  SizeType var6{6};
-  SizeType var7{7};
-  SizeType var8{8};
-  SizeType var9{9};
-
-  Literal lit_a(var0, false);
-  Literal lit_b(var1, false);
-  Literal lit_c(var2, false);
-  Literal lit_d(var3, false);
-  Literal lit_e(var4, false);
-  Literal lit_f(var5, false);
-  Literal lit_g(var6, false);
-  Literal lit_h(var7, false);
-  Literal lit_i(var8, false);
-  Literal lit_j(var9, false);
-
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  auto cover1 = SopCover{nv, { { lit_a, lit_b, lit_g },
-			       { lit_a, lit_c, lit_g },
-			       { lit_a, lit_d, lit_f },
-			       { lit_a, lit_f, lit_g },
-			       { lit_b, lit_d },
-			       { lit_c, lit_e },
-			       { lit_b, lit_e },
-			       { lit_c, lit_d } } };
+  auto cover1 = SopCover{7, { { lit_a, lit_b, lit_g },
+			      { lit_a, lit_c, lit_g },
+			      { lit_a, lit_d, lit_f },
+			      { lit_a, lit_f, lit_g },
+			      { lit_b, lit_d },
+			      { lit_c, lit_e },
+			      { lit_b, lit_e },
+			      { lit_c, lit_d } } };
 
   auto expr1 = cover1.good_factor();
 
@@ -147,13 +130,9 @@ TEST(GenFactorTest, good_factor)
 #endif
 }
 
-TEST(GenFactorTest, bool_factor0)
+TEST_F(GenFactorTest, bool_factor0)
 {
   auto nv = 4U;
-  auto lit_a = Literal{0, false};
-  auto lit_b = Literal{1, false};
-  auto lit_c = Literal{2, false};
-  auto lit_d = Literal{3, false};
 
   auto cover1 = SopCover{nv, { {lit_a, lit_c},
 			       {lit_a, lit_d},
@@ -164,41 +143,17 @@ TEST(GenFactorTest, bool_factor0)
   cout << expr1 << endl;
 }
 
-TEST(GenFactorTest, bool_factor)
+TEST_F(GenFactorTest, bool_factor)
 {
-  const int nv = 10;
-
-  SizeType var0{0};
-  SizeType var1{1};
-  SizeType var2{2};
-  SizeType var3{3};
-  SizeType var4{4};
-  SizeType var5{5};
-  SizeType var6{6};
-  SizeType var7{7};
-  SizeType var8{8};
-  SizeType var9{9};
-
-  Literal lit_a(var0, false);
-  Literal lit_b(var1, false);
-  Literal lit_c(var2, false);
-  Literal lit_d(var3, false);
-  Literal lit_e(var4, false);
-  Literal lit_f(var5, false);
-  Literal lit_g(var6, false);
-  Literal lit_h(var7, false);
-  Literal lit_i(var8, false);
-  Literal lit_j(var9, false);
-
   // abg + acg + adf + aef + afg + bd + ce + be + cd
-  auto cover1 = SopCover{nv, { { lit_a, lit_b, lit_g },
-			       { lit_a, lit_c, lit_g },
-			       { lit_a, lit_d, lit_f },
-			       { lit_a, lit_f, lit_g },
-			       { lit_b, lit_d },
-			       { lit_c, lit_e },
-			       { lit_b, lit_e },
-			       { lit_c, lit_d } } };
+  auto cover1 = SopCover{7, { { lit_a, lit_b, lit_g },
+			      { lit_a, lit_c, lit_g },
+			      { lit_a, lit_d, lit_f },
+			      { lit_a, lit_f, lit_g },
+			      { lit_b, lit_d },
+			      { lit_c, lit_e },
+			      { lit_b, lit_e },
+			      { lit_c, lit_d } } };
 
   auto expr1 = cover1.bool_factor();
 

@@ -3,7 +3,7 @@
 /// @brief ExprNode の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2010, 2014, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ExprNode.h"
@@ -30,7 +30,7 @@ posi_equiv(
     return false;
   }
 
-  SizeType n{node0->child_num()};
+  auto n = node0->child_num();
   for ( SizeType i = 0; i < n; ++ i ) {
     auto chd0 = node0->child(i);
     auto chd1 = node1->child(i);
@@ -67,7 +67,7 @@ nega_equiv(
     return node1->is_posiliteral() && node0->varid() == node1->varid();
   }
 
-  SizeType n{node0->child_num()};
+  auto n = node0->child_num();
   if ( node1->child_num() != n ) {
     return false;
   }
@@ -141,10 +141,10 @@ ExprNode::eval(
     return ~vals[varid()] & mask;
   }
 
-  SizeType nc = child_num();
+  auto nc = child_num();
   ASSERT_COND( nc > 0 );
 
-  BitVectType ans{child(0)->eval(vals, mask)};
+  auto ans = child(0)->eval(vals, mask);
   if ( is_and() ) {
     for ( SizeType i = 1; i < nc; ++ i ) {
       ans &= child(i)->eval(vals, mask);
@@ -186,10 +186,10 @@ ExprNode::make_tv(
   }
 
   // あとは AND/OR/XOR のみ
-  SizeType nc = child_num();
+  auto nc = child_num();
   ASSERT_COND( nc > 0 );
 
-  TvFunc ans{child(0)->make_tv(ni)};
+  auto ans = child(0)->make_tv(ni);
   if ( is_and() ) {
     for ( SizeType i = 1; i < nc; ++ i ) {
       ans &= child(i)->make_tv(ni);
@@ -343,14 +343,14 @@ ExprNode::soplit(
 ) const
 {
   if ( is_literal() ) {
-    return SopLit(1, 1);
+    return SopLit{1, 1};
   }
 
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or && inverted) ) {
-    SopLit l{1, 0};
+    auto l = SopLit{1, 0};
     for ( auto child: child_list() ) {
-      auto l1{child->soplit(inverted)};
+      auto l1 = child->soplit(inverted);
       l *= l1;
     }
     return l;
@@ -358,9 +358,9 @@ ExprNode::soplit(
 
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
-    SopLit l{0, 0};
+    auto l = SopLit{0, 0};
     for ( auto child: child_list() ) {
-      SopLit l1 = child->soplit(inverted);
+      auto l1 = child->soplit(inverted);
       l += l1;
     }
     return l;
@@ -369,7 +369,7 @@ ExprNode::soplit(
   if ( type() == ExprNode::Xor ) {
     auto chd = child(0);
     auto lp = chd->soplit(inverted);
-    auto ln = chd->soplit(inverted);
+    auto ln = chd->soplit(!inverted);
     SizeType nc = child_num();
     for ( SizeType i = 1; i < nc; ++ i ) {
       auto chd = child(i);
@@ -383,7 +383,7 @@ ExprNode::soplit(
     return lp;
   }
 
-  return SopLit{0, 0};
+  return SopLit::zero();
 }
 
 // SOP形式の積項数とリテラル数を計算する．
@@ -395,16 +395,16 @@ ExprNode::soplit(
 {
   if ( is_literal() ) {
     if ( varid() == id ) {
-      return SopLit(1, 1);
+      return SopLit{1, 1};
     }
     else {
-      return SopLit(1, 0);
+      return SopLit{1, 0};
     }
   }
 
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or  && inverted) ) {
-    SopLit l{1, 0};
+    auto l = SopLit{1, 0};
     for ( auto child: child_list() ) {
       auto l1 = child->soplit(inverted, id);
       l *= l1;
@@ -414,7 +414,7 @@ ExprNode::soplit(
 
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
-    SopLit l{0, 0};
+    auto l = SopLit{0, 0};
     for ( auto child: child_list() ) {
       auto l1 = child->soplit(inverted, id);
       l += l1;
@@ -461,7 +461,7 @@ ExprNode::soplit(
 
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or && inverted) ) {
-    SopLit l{1, 0};
+    auto l = SopLit{1, 0};
     for ( auto child: child_list() ) {
       auto l1 = child->soplit(inverted, id, inv);
       l *= l1;
@@ -471,7 +471,7 @@ ExprNode::soplit(
 
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
-    SopLit l{0, 0};
+    auto l = SopLit{0, 0};
     for ( auto child: child_list() ) {
       auto l1 = child->soplit(inverted, id, inv);
       l += l1;
@@ -480,7 +480,7 @@ ExprNode::soplit(
   }
 
   if ( type() == ExprNode::Xor ) {
-    SizeType n = child_num();
+    auto n = child_num();
     auto chd = child(0);
     auto lp = chd->soplit(inverted);
     auto ln = chd->soplit(inverted);

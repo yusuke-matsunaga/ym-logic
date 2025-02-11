@@ -129,7 +129,7 @@ Expr::and_op(
 )
 {
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
   return Expr{mgr.and_op(begin)};
@@ -146,7 +146,7 @@ Expr::and_op(
   }
 
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -161,7 +161,7 @@ Expr::or_op(
 )
 {
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
   return Expr{mgr.or_op(begin)};
@@ -178,7 +178,7 @@ Expr::or_op(
   }
 
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -193,7 +193,7 @@ Expr::xor_op(
 )
 {
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
   return Expr{mgr.xor_op(begin)};
@@ -208,7 +208,7 @@ Expr::xor_op(
   ASSERT_COND( chd_list.size() > 0 );
 
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
   }
@@ -221,13 +221,12 @@ Expr::from_string(
   const string& expr_str
 )
 {
-  string err_msg;
   try {
-    ExprParser p(expr_str);
+    ExprParser p{expr_str};
     return p.get_expr(ExprToken::END);
   }
   catch ( SyntaxError e ) {
-    err_msg = e.mMsg;
+    auto err_msg = e.mMsg;
     throw std::invalid_argument{err_msg};
   }
 }
@@ -268,7 +267,7 @@ Expr::operator&=(
 )
 {
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.and_op(begin));
@@ -282,7 +281,7 @@ Expr::operator|=(
 )
 {
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.or_op(begin));
@@ -296,7 +295,7 @@ Expr::operator^=(
 )
 {
   auto& mgr = ExprMgr::the_obj();
-  SizeType begin{mgr.nodestack_top()};
+  auto begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
   set_root(mgr.xor_op(begin));
@@ -391,14 +390,14 @@ Expr::eval(
 
 // @brief 真理値表の作成
 TvFunc
-Expr::to_tv(
+Expr::tvfunc(
   SizeType ni
 ) const
 {
   if ( is_invalid() ) {
     return TvFunc::invalid();
   }
-  SizeType ni2{input_size()};
+  auto ni2 = input_size();
   if ( ni < ni2 ) {
     ni = ni2;
   }
@@ -578,9 +577,11 @@ vector<Expr>
 Expr::operand_list() const
 {
   SizeType n = operand_num();
-  vector<Expr> ans_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    ans_list[i] = Expr{root()->child(i)};
+  vector<Expr> ans_list;
+  ans_list.reserve(n);
+  for ( auto child: root()->child_list() ) {
+    auto expr1 = Expr{child};
+    ans_list.push_back(expr1);
   }
   return ans_list;
 }
@@ -689,7 +690,7 @@ Expr::sop_cube_num() const
   if ( is_invalid() ) {
     return 0;
   }
-  SopLit l = root()->soplit(false);
+  auto l = root()->soplit(false);
   return l.np();
 }
 
@@ -700,7 +701,7 @@ Expr::sop_literal_num() const
   if ( is_invalid() ) {
     return 0;
   }
-  SopLit l = root()->soplit(false);
+  auto l = root()->soplit(false);
   return l.nl();
 }
 
@@ -713,7 +714,7 @@ Expr::sop_literal_num(
   if ( is_invalid() ) {
     return 0;
   }
-  SopLit l = root()->soplit(false, varid);
+  auto l = root()->soplit(false, varid);
   return l.nl();
 }
 
@@ -741,9 +742,10 @@ restore_operand_list(
 )
 {
   SizeType nc = s.read_64();
-  vector<Expr> opr_list(nc);
+  vector<Expr> opr_list;
+  opr_list.reserve(nc);
   for ( SizeType i = 0; i < nc; ++ i ) {
-    opr_list[i] = Expr::restore(s);
+    opr_list.push_back(Expr::restore(s));
   }
   return opr_list;
 }

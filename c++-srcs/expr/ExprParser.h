@@ -5,7 +5,7 @@
 /// @brief ExprParser のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Expr.h"
@@ -57,7 +57,11 @@ class SyntaxError :
 {
 public:
 
-  SyntaxError(const char* msg) : mMsg{msg} { }
+  SyntaxError(
+    const char* msg
+  ) : mMsg{msg}
+  {
+  }
 
   /// @brief エラーメッセージ
   const char* mMsg;

@@ -5,7 +5,7 @@
 /// @brief RepStringParser のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Expr.h"
@@ -40,11 +40,29 @@ public:
 
   /// @brief 一文字読み出す．
   char
-  read_char();
+  read_char()
+  {
+    ASSERT_COND( mPos < mString.size() );
+    auto c = mString[mPos];
+    ++ mPos;
+    return c;
+  }
 
   /// @brief 整数を読み出す．
   int
-  read_int();
+  read_int()
+  {
+    int ans = 0;
+    while ( mPos < mString.size() ) {
+      char c = read_char();
+      if ( !isdigit(c) ) {
+	-- mPos;
+	break;
+      }
+      ans = ans * 10 + static_cast<int>(c) - static_cast<int>('0');
+    }
+    return ans;
+  }
 
 
 private:

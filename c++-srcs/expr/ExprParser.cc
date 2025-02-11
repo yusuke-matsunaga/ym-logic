@@ -3,7 +3,7 @@
 /// @brief ExprParser の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2010, 2014, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ExprParser.h"
@@ -170,7 +170,7 @@ ExprParser::get_literal()
   // ここに来る可能性のあるのは NUM, NOT, LP のみ
   // それ以外はエラー
   SizeType id;
-  auto token{get_token(id)};
+  auto token = get_token(id);
 
   if ( token == ExprToken::ZERO ) {
     return Expr::zero();
@@ -213,7 +213,7 @@ Expr
 ExprParser::get_product()
 {
   // まず第一項めを取り出す．
-  auto expr{get_literal()};
+  auto expr = get_literal();
 
   for ( ; ; ) {
     // 次のトークンが AND かどうかを調べる．
@@ -222,7 +222,7 @@ ExprParser::get_product()
       return expr;
     }
     // 次のリテラルを取り出す．
-    auto expr1{get_literal()};
+    auto expr1 = get_literal();
 
     // 積項を作る．
     expr &= expr1;
@@ -233,25 +233,27 @@ ExprParser::get_product()
 // OR もしくは XOR でつながった積項をとって来る．
 // 最後は end_token で終らなければ false を返す．
 Expr
-ExprParser::get_expr(ExprToken end_token)
+ExprParser::get_expr(
+  ExprToken end_token
+)
 {
   // まず第一項めを取り出す．
-  auto expr{get_product()};
+  auto expr = get_product();
 
   for ( ; ; ) {
     // 次のトークンを調べる．
     SizeType dummy;
-    auto token{get_token(dummy)};
+    auto token = get_token(dummy);
     if ( token == end_token ) {
       return expr;
     }
-    if ( token != ExprToken::OR && token != ExprToken::XOR ) {
+    if ( token != ExprToken::OR &&
+	 token != ExprToken::XOR ) {
       // OR か XOR で無ければならない．
       throw SyntaxError{"syntax error"};
     }
     // 次の積項を取り出す．
-    auto expr1{get_product()};
-
+    auto expr1 = get_product();
     if ( token == ExprToken::OR ) {
       // 和項を作る．
       expr |= expr1;
@@ -266,8 +268,10 @@ ExprParser::get_expr(ExprToken end_token)
 
 // @brief トークンを出力する．主にデバッグ用
 ostream&
-operator<<(ostream& s,
-	   ExprToken token)
+operator<<(
+  ostream& s,
+  ExprToken token
+)
 {
   switch (token) {
   case ExprToken::END:  s << "TokenEND"; break;

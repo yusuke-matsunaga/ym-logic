@@ -365,7 +365,7 @@ public:
   ///
   /// ni が省略された場合には input_size() が用いられる．
   TvFunc
-  to_tv(
+  tvfunc(
     SizeType ni = 0 ///< [in] 入力数
   ) const;
 

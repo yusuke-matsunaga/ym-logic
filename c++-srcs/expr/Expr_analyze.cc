@@ -3,7 +3,7 @@
 /// @brief FuncAnalyzer の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Expr.h"
@@ -79,7 +79,7 @@ Expr::analyze() const
   auto input_num = input_size();
   if ( input_num <= 10 ) {
     // 10入力以下の場合は一旦 TvFunc に変換する．
-    auto tv = to_tv(input_num);
+    auto tv = tvfunc(input_num);
     return tv.analyze();
   }
 

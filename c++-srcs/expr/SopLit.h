@@ -5,9 +5,8 @@
 /// @brief SopLit のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
-
 
 #include "ym/Expr.h"
 
@@ -21,37 +20,82 @@ BEGIN_NAMESPACE_YM_LOGIC
 class SopLit
 {
 public:
+
   /// コンストラクタ
-  SopLit(SizeType np = 0,
-	 SizeType nl = 0);
+  explicit
+  SopLit(
+    SizeType np = 0,
+    SizeType nl = 0
+  ) : mNp{np},
+      mNl{nl}
+  {
+  }
+
+  /// @brief ゼロのオブジェクトを作るクラスメソッド
+  static
+  SopLit
+  zero()
+  {
+    return SopLit{0, 0};
+  }
 
   /// 積項数を得る．
   SizeType
-  np() const;
+  np() const
+  {
+    return mNp;
+  }
 
   /// リテラル数を得る．
   SizeType
-  nl() const;
+  nl() const
+  {
+    return mNl;
+  }
 
   /// 和を取って代入する．
   SopLit&
-  operator+=(const SopLit& src);
+  operator+=(
+    const SopLit& src
+  )
+  {
+    mNp += src.mNp;
+    mNl += src.mNl;
+    return *this;
+  }
 
   /// 積を取って代入する．
   SopLit&
-  operator*=(const SopLit& src);
+  operator*=(
+    const SopLit& src
+  )
+  {
+    SizeType old_np = mNp;
+    mNp *= src.mNp;
+    mNl = mNl * src.mNp + src.mNl * old_np;
+    return *this;
+  }
 
   /// 2つの積項の和
-  friend
   SopLit
-  operator+(const SopLit& src1,
-	    const SopLit& src2);
+  operator+(
+    const SopLit& src2
+  ) const
+  {
+    return SopLit{mNp + src2.mNp,
+		  mNl + src2.mNl};
+  }
 
   /// 2つの積項の積
-  friend
   SopLit
-  operator*(const SopLit& src1,
-	    const SopLit& src2);
+  operator*(
+    const SopLit& src2
+  ) const
+  {
+    return SopLit{mNp * src2.mNp,
+		  mNl * src2.mNp + src2.mNl * mNp};
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -63,71 +107,8 @@ private:
 
   // リテラル数
   SizeType mNl;
+
 };
-
-
-
-//////////////////////////////////////////////////////////////////////
-// インライン関数の定義
-//////////////////////////////////////////////////////////////////////
-
-inline
-SopLit::SopLit(SizeType np,
-	       SizeType nl) :
-  mNp{np},
-  mNl{nl}
-{
-}
-
-inline
-SizeType
-SopLit::np() const
-{
-  return mNp;
-}
-
-inline
-SizeType
-SopLit::nl() const
-{
-  return mNl;
-}
-
-inline
-SopLit&
-SopLit::operator+=(const SopLit& src)
-{
-  mNp += src.mNp;
-  mNl += src.mNl;
-  return *this;
-}
-
-inline
-SopLit&
-SopLit::operator*=(const SopLit& src)
-{
-  SizeType old_np = mNp;
-  mNp *= src.mNp;
-  mNl = mNl * src.mNp + src.mNl * old_np;
-  return *this;
-}
-
-inline
-SopLit
-operator+(const SopLit& src1,
-	  const SopLit& src2)
-{
-  return SopLit(src1.mNp + src2.mNp, src1.mNl + src2.mNl);
-}
-
-inline
-SopLit
-operator*(const SopLit& src1,
-	  const SopLit& src2)
-{
-  return SopLit(src1.mNp * src2.mNp,
-		src1.mNl * src2.mNp + src2.mNl * src1.mNp);
-}
 
 END_NAMESPACE_YM_LOGIC
 

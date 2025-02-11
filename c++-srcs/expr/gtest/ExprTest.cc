@@ -1251,11 +1251,11 @@ TEST_F(ExprTest, inv1)
     EXPECT_EQ( string("1"), oss.str() );
   }
 
-  auto lit = lit0p & lit1n;
-  auto lit_n = ~lit;
+  auto prod = lit0p & lit1n;
+  auto prod_n = ~prod;
   {
     ostringstream oss;
-    oss << lit_n;
+    oss << prod_n;
     EXPECT_EQ( string("( ~0 | 1 )"), oss.str() );
   }
 }
@@ -1445,7 +1445,7 @@ TEST_F(ExprTest, eval1)
   EXPECT_EQ( exp_val, val );
 }
 
-TEST_F(ExprTest, to_tv1)
+TEST_F(ExprTest, tvfunc1)
 {
   auto lit0p = Expr::posi_literal(var0);
   auto lit1p = Expr::posi_literal(var1);
@@ -1454,7 +1454,7 @@ TEST_F(ExprTest, to_tv1)
   auto lit3p = Expr::posi_literal(var3);
 
   auto expr = (lit0p & lit3p) | (lit1n & lit2p);
-  auto f = expr.to_tv();
+  auto f = expr.tvfunc();
 
   for ( int p = 0; p < 16; ++ p ) {
     bool val[4];

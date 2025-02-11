@@ -112,16 +112,15 @@ ExprMgr::and_op(
   mTmpNodeList.clear();
   mTmpNodeList.reserve(end - begin);
   for ( SizeType i = begin; i < end; ++ i ) {
-    auto node{mNodeStack[i]};
-    auto type{node->type()};
+    auto node = mNodeStack[i];
+    auto type = node->type();
     if ( type == ExprNode::Const0 ) {
       const0 = true;
       break;
     }
     if ( type == ExprNode::And ) {
-      SizeType ni{node->child_num()};
-      for ( SizeType j = 0; j < ni; ++ j ) {
-	ExprNodePtr node1{node->child(j)};
+      for ( auto child: node->child_list() ) {
+	auto node1 = ExprNodePtr{child};
 	if ( check_node(node1) ) {
 	  // 逆相の入力があったら答は0
 	  const0 = true;
@@ -145,7 +144,7 @@ ExprMgr::and_op(
   }
   nodestack_pop(begin);
 
-  SizeType n{mTmpNodeList.size()};
+  auto n = mTmpNodeList.size();
   ExprNodePtr node;
   if ( const0 ) {
     node = zero();
@@ -173,20 +172,19 @@ ExprMgr::or_op(
   ASSERT_COND( begin >= 0 && begin < nodestack_top() );
 
   bool const1 = false;
-  SizeType end{nodestack_top()};
+  auto end = nodestack_top();
   mTmpNodeList.clear();
   mTmpNodeList.reserve(end - begin);
   for ( SizeType i = begin; i < end; ++ i ) {
-    auto node{mNodeStack[i]};
-    auto type{node->type()};
+    auto node = mNodeStack[i];
+    auto type = node->type();
     if ( type == ExprNode::Const1 ) {
       const1 = true;
       break;
     }
     if ( type == ExprNode::Or ) {
-      SizeType ni{node->child_num()};
-      for ( SizeType j = 0; j < ni; ++ j ) {
-	ExprNodePtr node1{node->child(j)};
+      for ( auto child: node->child_list() ) {
+	auto node1 = ExprNodePtr{child};
 	if ( check_node(node1) ) {
 	  // 逆相の入力があったら答は1
 	  const1 = true;
@@ -211,7 +209,7 @@ ExprMgr::or_op(
   nodestack_pop(begin);
 
   ExprNodePtr node;
-  SizeType n{mTmpNodeList.size()};
+  auto n = mTmpNodeList.size();
   if ( const1 ) {
     node = one();
   }
@@ -238,19 +236,18 @@ ExprMgr::xor_op(
   ASSERT_COND( begin >= 0 && begin < nodestack_top() );
 
   bool inv = false;
-  SizeType end{nodestack_top()};
+  auto end = nodestack_top();
   mTmpNodeList.clear();
   mTmpNodeList.reserve(end - begin);
   for ( SizeType i = begin; i < end; ++ i ) {
-    auto node{mNodeStack[i]};
-    auto type{node->type()};
+    auto node = mNodeStack[i];
+    auto type = node->type();
     if ( type == ExprNode::Const1 ) {
       inv = !inv;
     }
     else if ( type == ExprNode::Xor ) {
-      SizeType ni{node->child_num()};
-      for ( SizeType j = 0; j < ni; ++ j ) {
-	ExprNodePtr node1{node->child(j)};
+      for ( auto child: node->child_list() ) {
+	auto node1 = ExprNodePtr{child};
 	if ( check_node2(node1) ) {
 	  inv = !inv;
 	}
@@ -267,7 +264,7 @@ ExprMgr::xor_op(
   nodestack_pop(begin);
 
   ExprNodePtr node;
-  SizeType n{mTmpNodeList.size()};
+  auto n = mTmpNodeList.size();
   if ( n == 0 ) {
     node = zero();
   }
@@ -388,7 +385,7 @@ ExprMgr::check_node2(
 )
 {
   for ( auto p = mTmpNodeList.begin(); p != mTmpNodeList.end(); ) {
-    auto node1{*p};
+    auto node1 = *p;
     // ループ中で削除する場合があるので反復子をコピーしてから進めておく
     auto q = p;
     ++ p;
@@ -449,15 +446,16 @@ ExprMgr::complement(
   default: break;
   }
 
-  SizeType n{node->child_num()};
-  SizeType begin{nodestack_top()};
-  for ( SizeType i = 0; i < n; ++ i ) {
+  auto begin = nodestack_top();
+  bool first = true;
+  for ( auto child: node->child_list() ) {
     // child の型を ExprNode* にすると途中で削除されてしまうおそれがある．
-    ExprNodePtr child{node->child(i)};
-    if ( node->type() != ExprNode::Xor || i == 0 ) {
-      child = complement(child);
+    auto child_ptr = ExprNodePtr{child};
+    if ( node->type() != ExprNode::Xor || first ) {
+      child_ptr = complement(child_ptr);
     }
-    nodestack_push(child);
+    first = false;
+    nodestack_push(child_ptr);
   }
 
   switch ( node->type() ) {
@@ -501,15 +499,14 @@ ExprMgr::compose(
     break;
   }
 
-  SizeType n{node->child_num()};
-  SizeType begin{nodestack_top()};
+  auto begin = nodestack_top();
   bool ident = true;
-  for ( SizeType i = 0; i < n; ++ i ) {
-    ExprNodePtr chd{compose(node->child(i), id, sub)};
-    if ( chd != node->child(i) ) {
+  for ( auto child: node->child_list() ) {
+    auto new_child = ExprNodePtr{compose(child, id, sub)};
+    if ( new_child != child ) {
       ident = false;
     }
-    nodestack_push(chd);
+    nodestack_push(new_child);
   }
   if ( ident ) {
     nodestack_pop(begin);
@@ -541,14 +538,14 @@ ExprMgr::compose(
 
   case ExprNode::PosiLiteral:
     if ( comp_map.count(node->varid()) > 0 ) {
-      auto ans{comp_map.at(node->varid())};
+      auto ans = comp_map.at(node->varid());
       return ans.root();
     }
     return node;
 
   case ExprNode::NegaLiteral:
     if ( comp_map.count(node->varid()) > 0 ) {
-      auto ans{comp_map.at(node->varid())};
+      auto ans = comp_map.at(node->varid());
       return complement(ans.root());
     }
     return node;
@@ -557,15 +554,14 @@ ExprMgr::compose(
     break;
   }
 
-  SizeType n{node->child_num()};
-  SizeType begin{nodestack_top()};
+  auto begin = nodestack_top();
   bool ident = true;
-  for ( SizeType i = 0; i < n; ++ i ) {
-    ExprNodePtr chd{compose(node->child(i), comp_map)};
-    if ( chd != node->child(i) ) {
+  for ( auto child: node->child_list() ) {
+    auto new_child = ExprNodePtr{compose(child, comp_map)};
+    if ( new_child != child ) {
       ident = false;
     }
-    nodestack_push(chd);
+    nodestack_push(new_child);
   }
   if ( ident ) {
     nodestack_pop(begin);
@@ -612,15 +608,15 @@ ExprMgr::remap_var(
   default: break;
   }
 
-  SizeType n{node->child_num()};
-  SizeType begin{nodestack_top()};
+  auto n = node->child_num();
+  auto begin = nodestack_top();
   bool ident = true;
-  for ( SizeType i = 0; i < n; ++ i ) {
-    ExprNodePtr chd{remap_var(node->child(i), varmap)};
-    if ( chd != node->child(i) ) {
+  for ( auto child: node->child_list() ) {
+    auto new_child = ExprNodePtr{remap_var(child, varmap)};
+    if ( new_child != child ) {
       ident = false;
     }
-    nodestack_push(chd);
+    nodestack_push(new_child);
   }
   if ( ident ) {
     nodestack_pop(begin);
@@ -655,15 +651,14 @@ ExprMgr::simplify(
     break;
   }
 
-  SizeType n{node->child_num()};
-  SizeType begin{nodestack_top()};
+  auto begin = nodestack_top();
   bool ident = true;
-  for ( SizeType i = 0; i < n; ++ i ) {
-    ExprNodePtr chd{simplify(node->child(i))};
-    if ( chd != node->child(i) ) {
+  for ( auto child: node->child_list() ) {
+    auto new_child = ExprNodePtr{simplify(child)};
+    if ( new_child != child ) {
       ident = false;
     }
-    nodestack_push(chd);
+    nodestack_push(new_child);
   }
   if ( ident ) {
     nodestack_pop(begin);
@@ -696,14 +691,14 @@ ExprMgr::make_literals(
   SizeType id
 )
 {
-  SizeType last = mLiteralArray.size() / 2;
+  auto last = mLiteralArray.size() / 2;
   while ( last <= id ) {
-    auto posi{alloc_node(ExprNode::PosiLiteral)};
+    auto posi = alloc_node(ExprNode::PosiLiteral);
     posi->mNc = last;
     mLiteralArray.push_back(posi);
     ++ mStuckNodeNum;
 
-    auto nega{alloc_node(ExprNode::NegaLiteral)};
+    auto nega = alloc_node(ExprNode::NegaLiteral);
     nega->mNc = last;
     mLiteralArray.push_back(nega);
     ++ mStuckNodeNum;
@@ -723,13 +718,15 @@ ExprMgr::alloc_node(
   }
 
   SizeType nc = 0;
-  if ( type == ExprNode::And || type == ExprNode::Or || type == ExprNode::Xor ) {
+  if ( type == ExprNode::And ||
+       type == ExprNode::Or ||
+       type == ExprNode::Xor ) {
     nc = mTmpNodeList.size();
   }
 
-  SizeType req_size{calc_size(nc)};
-  void* p{new char[req_size]};
-  auto node{new (p) ExprNode};
+  auto req_size = calc_size(nc);
+  void* p = new char[req_size];
+  auto node = new (p) ExprNode;
   node->mRefType = static_cast<int>(type);
   node->mNc = nc;
   for ( SizeType i = 0; i < nc; ++ i ) {
@@ -745,9 +742,9 @@ ExprMgr::free_node(
   ExprNode* node
 )
 {
-  SizeType n{node->child_num()};
-  for ( SizeType i = 0; i < n; ++ i ) {
-    node->child(i)->dec_ref();
+  auto n = node->child_num();
+  for ( auto child: node->child_list() ) {
+    child->dec_ref();
   }
 
   -- mNodeNum;
@@ -763,37 +760,6 @@ ExprMgr::calc_size(
 )
 {
   return sizeof(ExprNode) + sizeof(ExprNode*) * (nc - 1);
-}
-
-
-//////////////////////////////////////////////////////////////////////
-// RepStringParser
-//////////////////////////////////////////////////////////////////////
-
-// @brief 一文字読み出す．
-char
-RepStringParser::read_char()
-{
-  ASSERT_COND( mPos < mString.size() );
-  auto c = mString[mPos];
-  ++ mPos;
-  return c;
-}
-
-// @brief 整数を読み出す．
-int
-RepStringParser::read_int()
-{
-  int ans = 0;
-  while ( mPos < mString.size() ) {
-    char c = read_char();
-    if ( !isdigit(c) ) {
-      -- mPos;
-      break;
-    }
-    ans = ans * 10 + static_cast<int>(c) - static_cast<int>('0');
-  }
-  return ans;
 }
 
 END_NAMESPACE_YM_LOGIC

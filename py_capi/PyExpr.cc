@@ -428,7 +428,7 @@ Expr_eval(
 }
 
 PyObject*
-Expr_to_tv(
+Expr_tvfunc(
   PyObject* self,
   PyObject* args
 )
@@ -438,7 +438,7 @@ Expr_to_tv(
     return nullptr;
   }
   auto& expr = PyExpr::Get(self);
-  auto func = expr.to_tv(ni);
+  auto func = expr.tvfunc(ni);
   return PyTvFunc::ToPyObject(std::move(func));
 }
 
@@ -813,7 +813,7 @@ PyMethodDef Expr_methods[] = {
   {"eval", reinterpret_cast<PyCFunction>(Expr_eval),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("evaluate")},
-  {"to_tv", Expr_to_tv,
+  {"tvfunc", Expr_tvfunc,
    METH_VARARGS,
    PyDoc_STR("convert to TvFunc")},
   {"is_valid", Expr_is_valid,
