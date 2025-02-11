@@ -29,6 +29,7 @@ set (factor_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/BestKernel.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/OneLevel0Kernel.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/WeakDivision.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/BoolDivision.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/GenFactor.cc
   PARENT_SCOPE
   )

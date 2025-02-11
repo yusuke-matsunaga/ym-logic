@@ -1,8 +1,8 @@
-#ifndef WEAKDIVISION_H
-#define WEAKDIVISION_H
+#ifndef BOOLDIVISION_H
+#define BOOLDIVISION_H
 
-/// @file WeakDivision.h
-/// @brief WeakDivision のヘッダファイル
+/// @file BoolDivision.h
+/// @brief BoolDivision のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2023 Yusuke Matsunaga
@@ -14,10 +14,10 @@
 BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
-/// @class WeakDivision WeakDivision.h "WeakDivision.h"
-/// @brief 'weak_division' を行う Divide 型のクラス
+/// @class BoolDivision BoolDivision.h "BoolDivision.h"
+/// @brief 'bool_division' を行う Divide 型のクラス
 //////////////////////////////////////////////////////////////////////
-class WeakDivision
+class BoolDivision
 {
 public:
   //////////////////////////////////////////////////////////////////////
@@ -37,4 +37,4 @@ public:
 
 END_NAMESPACE_YM_SOP
 
-#endif // WEAKDIVISION_H
+#endif // BOOLDIVISION_H

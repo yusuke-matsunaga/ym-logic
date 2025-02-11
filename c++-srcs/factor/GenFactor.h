@@ -13,7 +13,9 @@
 #include "ym/Expr.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
+
+const int debug = 0;
 
 //////////////////////////////////////////////////////////////////////
 /// @class GenFactor GenFactor.h "GenFactor.h"
@@ -48,17 +50,40 @@ private:
     const SopCover& f
   )
   {
+    if ( debug ) {
+      cout << "factor(" << f << ")" << endl;
+    }
+    if ( f.cube_num() == 0 ) {
+      if ( debug ) {
+	cout << " => 0" << endl;
+      }
+      return Expr::zero();
+    }
     auto d = Divisor::divisor(f);
     if ( d.cube_num() == 0 ) {
-      return cov_to_expr(f);
+      auto expr = cov_to_expr(f);
+      if ( debug ) {
+	cout << " => " << expr << endl;
+      }
+      return expr;
     }
     auto p = Divide::divide(f, d);
     auto& q = p.first;
     auto& r = p.second;
+    if ( debug ) {
+      cout << "d = " << d << endl
+	   << "q = " << q << endl
+	   << "r = " << r << endl;
+    }
     if ( q.cube_num() == 1 ) {
       auto cube_list = q.literal_list();
       ASSERT_COND( cube_list.size() == 1 );
-      return literal_factor(f, cube_list[0]);
+      auto expr = literal_factor(f, cube_list[0]);
+      if ( debug ) {
+	cout << "*factor(" << f << ")" << endl
+	     << " => " << expr << endl;
+      }
+      return expr;
     }
     else {
       auto cc = q.common_cube();
@@ -66,16 +91,31 @@ private:
       auto p = Divide::divide(f, q1);
       auto& d1 = p.first;
       auto& r1 = p.second;
+      if ( debug ) {
+	cout << "d1 = " << q1 << endl
+	     << "q1 = " << d1 << endl
+	     << "r1 = " << r1 << endl;
+      }
       auto cc1 = d1.common_cube();
       if ( cc1.literal_num() == 0 ) {
 	auto q_expr = factor(q1);
 	auto d_expr = factor(d1);
 	auto r_expr = factor(r1);
-	return (q_expr & d_expr) | r_expr;
+	auto expr = (q_expr & d_expr) | r_expr;
+	if ( debug ) {
+	  cout << "*factor(" << f << ")" << endl
+	       << " => " << expr << endl;
+	}
+	return expr;
       }
       else {
 	auto lit_list = cc1.literal_list();
-	return literal_factor(f, lit_list);
+	auto expr = literal_factor(f, lit_list);
+	if ( debug ) {
+	  cout << "*factor(" << f << ")" << endl
+	       << " => " << expr << endl;
+	}
+	return expr;
       }
     }
   }
@@ -98,7 +138,7 @@ private:
       }
     }
     auto q = f.algdiv(l);
-    auto r = f - q & l;
+    auto r = f - (q & l);
     auto q_expr = factor(q);
     auto d_expr = Expr::literal(l);
     auto r_expr = factor(r);
@@ -135,6 +175,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP
 
 #endif // GENFACTOR_H

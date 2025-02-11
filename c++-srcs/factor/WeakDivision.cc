@@ -9,7 +9,7 @@
 #include "WeakDivision.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 // クラス WeakDivision
@@ -27,4 +27,4 @@ WeakDivision::divide(
   return make_pair(std::move(q), std::move(r));
 }
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP

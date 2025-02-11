@@ -11,7 +11,7 @@
 #include "ym/Range.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
 
 class KernelTest:
 public ::testing::Test
@@ -57,7 +57,12 @@ public:
       auto& kernel = ki.first;
       auto& cokernels = ki.second;
       ostringstream tmp;
-      tmp << kernel << ", " << cokernels;
+      tmp << kernel << "| ";
+      const char* delim = "";
+      for ( auto& cube: cokernels ) {
+	tmp << delim << cube;
+	delim = ", ";
+      }
       auto tmp_str = tmp.str();
       EXPECT_EQ( exp_list[i], tmp_str );
     }
@@ -71,7 +76,7 @@ TEST_F(KernelTest, test1)
 			       {lit1, lit2} }};
 
   vector<string> exp_list{
-    "v0 + v1, v2"
+    "v0 + v1| v2"
   };
 
   check(cover1, exp_list);
@@ -85,9 +90,9 @@ TEST_F(KernelTest, test2)
 			       {lit1, lit3} }};
 
   vector<string> exp_list{
-    "v2 + v3, v0 + v1",
-    "v0 + v1, v2 + v3",
-    "v0 v2 + v0 v3 + v1 v2 + v1 v3, "
+    "v2 + v3| v0, v1",
+    "v0 + v1| v2, v3",
+    "v0 v2 + v0 v3 + v1 v2 + v1 v3| {}"
   };
 
   check(cover1, exp_list);
@@ -106,14 +111,14 @@ TEST_F(KernelTest, test3)
 			       { lit7 } } };
 
   vector<string> exp_list{
-    "v3 + v4, v0 v5 + v2 v5",
-    "v3 + v4 + v6, v1 v5",
-    "v0 + v1 + v2, v3 v5 + v4 v5",
-    "v0 v3 + v0 v4 + v1 v3 + v1 v4 + v1 v6 + v2 v3 + v2 v4, v5",
-    "v0 v3 v5 + v0 v4 v5 + v1 v3 v5 + v1 v4 v5 + v1 v5 v6 + v2 v3 v5 + v2 v4 v5 + v7, "
+    "v3 + v4| v0 v5, v2 v5",
+    "v3 + v4 + v6| v1 v5",
+    "v0 + v1 + v2| v3 v5, v4 v5",
+    "v0 v3 + v0 v4 + v1 v3 + v1 v4 + v1 v6 + v2 v3 + v2 v4| v5",
+    "v0 v3 v5 + v0 v4 v5 + v1 v3 v5 + v1 v4 v5 + v1 v5 v6 + v2 v3 v5 + v2 v4 v5 + v7| {}"
   };
 
   check(cover1, exp_list);
 }
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP

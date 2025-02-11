@@ -33,6 +33,17 @@ target_include_directories( logic_Kernel_test
   ${CMAKE_CURRENT_SOURCE_DIR}/..
   )
 
+ym_add_gtest ( logic_BoolDivision_test
+  BoolDivisionTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  )
+
+target_include_directories( logic_BoolDivision_test
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  )
+
 ym_add_gtest ( logic_GenFactor_test
   GenFactorTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>

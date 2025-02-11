@@ -10,7 +10,7 @@
 #include "KernelGen.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 // クラス BestKernel
@@ -27,4 +27,4 @@ BestKernel::divisor(
   return kernel;
 }
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP

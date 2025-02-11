@@ -500,7 +500,7 @@ public:
 
   /// @brief 共通なキューブを返す．
   ///
-  /// 共通なキューブがない場合には不正なキューブを返す．
+  /// 共通なキューブがない場合には空のキューブを返す．
   SopCube
   common_cube() const;
 
@@ -623,6 +623,10 @@ public:
   /// @brief "good factor" を行う．
   Expr
   good_factor() const;
+
+  /// @brief "bool factor" を行う．
+  Expr
+  bool_factor() const;
 
   //////////////////////////////////////////////////////////////////////
   /// @}

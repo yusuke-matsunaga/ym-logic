@@ -13,7 +13,7 @@
 #include "ym/Literal.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class LitSet LitSet.h "LitSet.h"
@@ -197,6 +197,6 @@ operator+(
   return LitSet{std::move(lit_set)}.operator+=(lit);
 }
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP
 
 #endif // LITSET_H

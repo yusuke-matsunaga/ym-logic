@@ -10,7 +10,7 @@
 #include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 // クラス LitSet
@@ -162,4 +162,4 @@ LitSet::check_intersect(
   return false;
 }
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP

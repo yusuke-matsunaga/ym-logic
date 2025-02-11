@@ -994,6 +994,7 @@ protected:
   ) const
   {
     if ( lit.varid() >= variable_num() ) {
+      abort();
       throw std::out_of_range{"literal is out of range"};
     }
   }

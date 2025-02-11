@@ -13,7 +13,7 @@
 #include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
 
 class LitSet;
 
@@ -38,7 +38,6 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief カーネルとコカーネルを列挙する．
-  /// @return カーネルとコカーネル集合のペアのリストを返す．
   vector<pair<SopCover, vector<SopCube>>>
   all_kernels(
     const SopCover& cover ///< [in] 対象のカバー
@@ -132,6 +131,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP
 
 #endif // KERNELGEN_H

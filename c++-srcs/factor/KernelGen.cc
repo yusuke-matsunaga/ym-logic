@@ -21,7 +21,7 @@ BEGIN_NAMESPACE_YM_SOP
 vector<pair<SopCover, vector<SopCube>>>
 SopCover::all_kernels() const
 {
-  nsFactor::KernelGen kg;
+  KernelGen kg;
   return kg.all_kernels(*this);
 }
 
@@ -29,13 +29,9 @@ SopCover::all_kernels() const
 SopCover
 SopCover::best_kernel() const
 {
-  nsFactor::KernelGen kg;
+  KernelGen kg;
   return kg.best_kernel(*this);
 }
-
-END_NAMESPACE_YM_SOP
-
-BEGIN_NAMESPACE_YM_FACTOR
 
 //////////////////////////////////////////////////////////////////////
 // クラス KernelGen
@@ -66,6 +62,23 @@ KernelGen::all_kernels(
   return kernel_list;
 }
 
+BEGIN_NONAMESPACE
+
+inline
+int
+literal_num(
+  const vector<SopCube>& cube_list
+)
+{
+  int ans = 0;
+  for ( auto& cube: cube_list ) {
+    ans += cube.literal_num();
+  }
+  return ans;
+}
+
+END_NONAMESPACE
+
 // @brief 最も価値の高いカーネルを返す．
 SopCover
 KernelGen::best_kernel(
@@ -94,7 +107,7 @@ KernelGen::best_kernel(
     auto k_nc = kernel.cube_num();
     auto k_nl = kernel.literal_num();
     auto c_nc = cokernels.size();
-    auto c_nl = cokernels.literal_num();
+    auto c_nl = literal_num(cokernels);
     int value = (k_nc - 1) * c_nl + (c_nc - 1) * k_nl;
     if ( max_value < value ) {
       max_value = value;
@@ -198,7 +211,7 @@ KernelGen::kern_sub(
     }
 
     // cover1 を cube-free にする．
-    cover1.algdiv(ccube1);
+    cover1.algdiv_int(ccube1);
 
     // ccube1 を cover1 を導出したキューブにする．
     ccube1 &= ccube;
@@ -215,4 +228,4 @@ KernelGen::kern_sub(
   }
 }
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP

@@ -10,7 +10,7 @@
 #include "ym/SopCube.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 // クラス OneLevel0Kernel
@@ -26,9 +26,8 @@ find_literal(
   const SopCover& f
 )
 {
-  int nv = f.variable_num();
-  for ( int var = 0; var < nv; ++ var ) {
-    for ( auto lit: {Literal(var, false), Literal(var, true)} ) {
+  for ( auto& lits: f.literal_list() ) {
+    for ( auto lit: lits ) {
       int n = f.literal_num(lit);
       if ( n >= 2 ) {
 	return lit;
@@ -70,4 +69,4 @@ OneLevel0Kernel::divisor(
   return f1;
 }
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP

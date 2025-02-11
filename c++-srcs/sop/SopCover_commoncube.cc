@@ -47,7 +47,7 @@ SopCover::common_cube() const
     }
     if ( tmp == SOP_ALL1 ) {
       // 空になった．
-      return SopCube::invalid(variable_num());
+      return SopCube{variable_num()};
     }
   }
   return SopCube{variable_num(), std::move(dst_chunk)};

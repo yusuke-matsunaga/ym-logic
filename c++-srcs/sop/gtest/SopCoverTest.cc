@@ -2433,7 +2433,7 @@ TEST_F(SopTest, common_cube2)
 
   auto cube1 = cover1.common_cube();
 
-  EXPECT_TRUE( cube1.is_invalid() );
+  EXPECT_TRUE( cube1.is_tautology() );
 };
 
 TEST_F(SopTest, cofactor_cube1)

@@ -11,6 +11,7 @@
 #include "OneLevel0Kernel.h"
 #include "BestKernel.h"
 #include "WeakDivision.h"
+#include "BoolDivision.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
@@ -23,18 +24,24 @@ BEGIN_NAMESPACE_YM_SOP
 Expr
 SopCover::quick_factor() const
 {
-  using namespace nsFactor;
-  GenFactor<OneLevel0Kernel, WeakDivision> qf;
-  return qf(*this);
+  GenFactor<OneLevel0Kernel, WeakDivision> factor;
+  return factor(*this);
 }
 
 // @brief "good factor" を行う．
 Expr
 SopCover::good_factor() const
 {
-  using namespace nsFactor;
-  GenFactor<BestKernel, WeakDivision> gf;
-  return gf(*this);
+  GenFactor<BestKernel, WeakDivision> factor;
+  return factor(*this);
+}
+
+// @brief "bool factor" を行う．
+Expr
+SopCover::bool_factor() const
+{
+  GenFactor<BestKernel, BoolDivision> factor;
+  return factor(*this);
 }
 
 END_NAMESPACE_YM_SOP

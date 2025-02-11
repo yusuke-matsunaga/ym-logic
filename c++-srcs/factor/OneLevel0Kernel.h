@@ -11,7 +11,7 @@
 #include "ym/SopCover.h"
 
 
-BEGIN_NAMESPACE_YM_FACTOR
+BEGIN_NAMESPACE_YM_SOP
 
 //////////////////////////////////////////////////////////////////////
 /// @class OneLevel0Kernel OneLevel0Kernel.h "OneLevel0Kernel.h"
@@ -34,6 +34,6 @@ public:
 
 };
 
-END_NAMESPACE_YM_FACTOR
+END_NAMESPACE_YM_SOP
 
 #endif // ONELEVEL0KERNEL_H
