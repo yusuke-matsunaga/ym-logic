@@ -5,7 +5,7 @@
 /// @brief Expr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017-2018, 2020-2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
@@ -32,6 +32,10 @@ class ExprNode;
 ///
 /// このクラスでは表現としての論理式を扱っているので論理関数としての
 /// 処理は行っていない．
+///
+/// 実装は ExprNode の shared_ptr を持っているのでコピーのコストは
+/// 高くない．
+/// そのためムーブ演算は対応していない．
 /// @sa Literal
 //////////////////////////////////////////////////////////////////////
 class Expr
@@ -43,8 +47,23 @@ public:
   // このクラスで用いられる型の定義
   //////////////////////////////////////////////////////////////////////
 
+  // ExprNode の shared_ptr
+  using NodePtr = std::shared_ptr<ExprNode>;
+
   /// @brief eval() で用いられるビットベクタの型
   using BitVectType = std::uint64_t;
+
+  /// @brief compose() で用いる辞書の型
+  using ComposeMap = std::unordered_map<SizeType, Expr>;
+
+  /// @brief compose() で用いるリストの型
+  using ComposeList = std::vector<std::pair<SizeType, Expr>>;
+
+  /// @brief remap_var() で用いる辞書の型
+  using VarMap = std::unordered_map<SizeType, SizeType>;
+
+  /// @brief remap_var() で用いるリストの型
+  using VarList = std::vector<std::pair<SizeType, SizeType>>;
 
 
 public:
@@ -55,22 +74,22 @@ public:
   /// @brief 空のデフォルトコンストラクタ
   ///
   /// - 不正な値になる．
-  Expr();
+  Expr() = default;
 
   /// @brief コピーコンストラクタ
   Expr(
     const Expr& src ///< [in] コピー元のオブジェクト
-  );
+  ) = default;
 
   /// @brief 代入演算子
   /// @return 自分自身
   Expr&
   operator=(
     const Expr& src ///< [in] コピー元のオブジェクト
-  );
+  ) = default;
 
   /// @brief デストラクタ
-  ~Expr();
+  ~Expr() = default;
 
   /// @brief エラーオブジェクトの生成
   /// @return 不適正なオブジェクトを返す．
@@ -78,7 +97,10 @@ public:
   /// 返されたオブジェクトは is_valid() == false となる．
   static
   Expr
-  invalid();
+  invalid()
+  {
+    return Expr{};
+  }
 
   /// @brief 恒偽関数の生成
   /// @return 生成したオブジェクト
@@ -204,13 +226,6 @@ public:
     const string& rep_str ///< [in] 論理式を表す文字列
   );
 
-  /// @brief 確保していたメモリを開放する．
-  ///
-  /// メモリリークチェックのための関数なので通常は使用しない．
-  static
-  void
-  __clear_memory();
-
   /// @}
   //////////////////////////////////////////////////////////////////////
 
@@ -307,8 +322,8 @@ public:
   /// 一度に複数の置き換えを行う
   Expr
   compose(
-    const unordered_map<SizeType, Expr>& comp_map ///< [in] 置き換える変数をキーにして置き換える先の
-                                                  ///< 論理式を値とした連想配列
+    const ComposeMap& comp_map ///< [in] 置き換える変数をキーにして置き換える先の
+                               ///< 論理式を値とした連想配列
   ) const;
 
   /// @brief 複数変数の compose 演算
@@ -318,8 +333,8 @@ public:
   /// - comp_list 中に変数の重複が有った場合の動作は不定となる．
   Expr
   compose(
-    const vector<pair<SizeType, Expr>>& comp_list ///< [in] 置き換える変数と置き換える先の
-                                                  ///<  論理式をペアとしてリスト
+    const ComposeList& comp_list ///< [in] 置き換える変数と置き換える先の
+                                 ///<  論理式をペアとしてリスト
   ) const;
 
   /// @brief 変数番号を再マップする．
@@ -328,8 +343,8 @@ public:
   /// varmap に登録されていない場合には不変とする．
   Expr
   remap_var(
-    const unordered_map<SizeType, SizeType>& varmap ///< [in] 置き換え元の変数番号をキーとして
-                                                    ///< 置き換え先の変数番号を値とした連想配列
+    const VarMap& varmap ///< [in] 置き換え元の変数番号をキーとして
+                         ///< 置き換え先の変数番号を値とした連想配列
   ) const;
 
   /// @brief 変数番号を再マップする．
@@ -339,7 +354,8 @@ public:
   /// - varlist 中に変数の重複が有った場合の動作は不定となる．
   Expr
   remap_var(
-    const vector<pair<SizeType, SizeType>>& varlist ///< [in] 置き換え元の変数番号と置き換え先の変数番号をペアとしたリスト
+    const VarList& varlist ///< [in] 置き換え元の変数番号と置き換え先の変数番号
+                           ///<      をペアとしたリスト
   ) const;
 
   /// @brief 簡単化
@@ -381,14 +397,14 @@ public:
   bool
   is_valid() const
   {
-    return mRootPtr != nullptr;
+    return !is_invalid();
   }
 
   /// @brief 適正な値を持っていない時 true を返す．
   bool
   is_invalid() const
   {
-    return !is_valid();
+    return mRoot.get() == nullptr;
   }
 
   /// @brief 恒偽関数のチェック
@@ -687,18 +703,17 @@ private:
   // @brief 内部で用いるコンストラクタ
   explicit
   Expr(
-    const ExprNode* node ///< [in] 根のノード
-  );
-
-  // 根のノードをセットする．
-  void
-  set_root(
-    const ExprNode* node ///< [in] 根のノード
-  );
+    NodePtr node ///< [in] 根のノード
+  ) : mRoot{node}
+  {
+  }
 
   /// @brief 根のノートを得る．
-  const ExprNode*
-  root() const;
+  NodePtr
+  root() const
+  {
+    return mRoot;
+  }
 
 
 private:
@@ -707,7 +722,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 根のノード
-  const ExprNode* mRootPtr{nullptr};
+  NodePtr mRoot{nullptr};
 
 };
 

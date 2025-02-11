@@ -3,13 +3,13 @@
 /// @brief Expr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2016, 2018, 2022 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Expr.h"
 
-#include "ExprMgr.h"
 #include "ExprNode.h"
+#include "ExprMgr.h"
 #include "ExprParser.h"
 #include "SopLit.h"
 #include "ym/TvFunc.h"
@@ -18,89 +18,18 @@
 
 BEGIN_NAMESPACE_YM_LOGIC
 
-// 根のノードを指定したコンストラクタ
-Expr::Expr(
-  const ExprNode* node
-)
-{
-  set_root(node);
-}
-
-// デフォルトコンストラクタ
-Expr::Expr()
-{
-  // 不正値
-  set_root(nullptr);
-}
-
-// コピーコンストラクタ
-Expr::Expr(
-  const Expr& src
-)
-{
-  set_root(src.root());
-}
-
-// @brief 根のノードを得る．
-const ExprNode*
-Expr::root() const
-{
-  return mRootPtr;
-}
-
-// 代入演算子
-Expr&
-Expr::operator=(
-  const Expr& src
-)
-{
-  set_root(src.root());
-  return *this;
-}
-
-// デストラクタ
-Expr::~Expr()
-{
-  set_root(nullptr);
-}
-
-// 根のノードをセットする．
-void
-Expr::set_root(
-  const ExprNode* node
-)
-{
-  if ( node ) {
-    node->inc_ref();
-  }
-  if ( mRootPtr ) {
-    mRootPtr->dec_ref();
-  }
-  mRootPtr = node;
-}
-
-// @brief エラーオブジェクトの生成
-// @return 不適正なオブジェクトを返す．
-//
-// 返されたオブジェクトは is_valid() == false となる．
-Expr
-Expr::invalid()
-{
-  return Expr{nullptr};
-}
-
 // 定数 0 の論理式を作る
 Expr
 Expr::zero()
 {
-  return Expr{ExprMgr::the_obj().zero()};
+  return Expr{ExprNode::new_zero()};
 }
 
 // 定数 1 の論理式を作る
 Expr
 Expr::one()
 {
-  return Expr{ExprMgr::the_obj().one()};
+  return Expr{ExprNode::new_one()};
 }
 
 // 肯定のリテラルを作る．
@@ -109,7 +38,7 @@ Expr::posi_literal(
   SizeType varid
 )
 {
-  return Expr{ExprMgr::the_obj().posi_literal(varid)};
+  return Expr{ExprNode::new_literal(varid, false)};
 }
 
 // 否定のリテラルを作る．
@@ -118,7 +47,7 @@ Expr::nega_literal(
   SizeType varid
 )
 {
-  return Expr{ExprMgr::the_obj().nega_literal(varid)};
+  return Expr{ExprNode::new_literal(varid, true)};
 }
 
 // 与えられた論理式を部分論理式に持つ 2 入力ANDの論理式を作るクラス・メソッド
@@ -128,7 +57,7 @@ Expr::and_op(
   const Expr& chd2
 )
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
@@ -141,11 +70,14 @@ Expr::and_op(
   const vector<Expr>& chd_list
 )
 {
-  if ( chd_list.size() == 0 ) {
+  auto n = chd_list.size();
+  if ( n == 0 ) {
     return one();
   }
-
-  auto& mgr = ExprMgr::the_obj();
+  if ( n == 1 ) {
+    return chd_list.front();
+  }
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
@@ -160,7 +92,7 @@ Expr::or_op(
   const Expr& chd2
 )
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
@@ -173,11 +105,14 @@ Expr::or_op(
   const vector<Expr>& chd_list
 )
 {
-  if ( chd_list.size() == 0 ) {
+  auto n = chd_list.size();
+  if ( n == 0 ) {
     return zero();
   }
-
-  auto& mgr = ExprMgr::the_obj();
+  if ( n == 1 ) {
+    return chd_list.front();
+  }
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
@@ -192,7 +127,7 @@ Expr::xor_op(
   const Expr& chd2
 )
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   mgr.nodestack_push(chd1.root());
   mgr.nodestack_push(chd2.root());
@@ -205,9 +140,14 @@ Expr::xor_op(
   const vector<Expr>& chd_list
 )
 {
-  ASSERT_COND( chd_list.size() > 0 );
-
-  auto& mgr = ExprMgr::the_obj();
+  auto n = chd_list.size();
+  if ( n == 0 ) {
+    return zero();
+  }
+  if ( n == 1 ) {
+    return chd_list.front();
+  }
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   for ( auto expr: chd_list ) {
     mgr.nodestack_push(expr.root());
@@ -240,23 +180,16 @@ Expr::from_rep_string(
   if ( rep_str == string{} ) {
     return Expr{};
   }
+  ExprMgr mgr;
   RepStringParser parser{rep_str};
-  return Expr{ExprMgr::the_obj().from_rep_string(parser)};
-}
-
-// @brief 確保していたメモリを開放する．
-// @note メモリリークチェックのための関数なので通常は使用しない．
-void
-Expr::__clear_memory()
-{
-  ExprMgr::clear_memory();
+  return Expr{mgr.from_rep_string(parser)};
 }
 
 // @brief operator~() の別名
 Expr
 Expr::invert() const
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   return Expr{mgr.complement(root())};
 }
 
@@ -266,11 +199,11 @@ Expr::operator&=(
   const Expr& src
 )
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
-  set_root(mgr.and_op(begin));
+  mRoot = mgr.and_op(begin);
   return *this;
 }
 
@@ -280,11 +213,11 @@ Expr::operator|=(
   const Expr& src
 )
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
-  set_root(mgr.or_op(begin));
+  mRoot = mgr.or_op(begin);
   return *this;
 }
 
@@ -294,11 +227,11 @@ Expr::operator^=(
   const Expr& src
 )
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   auto begin = mgr.nodestack_top();
   mgr.nodestack_push(root());
   mgr.nodestack_push(src.root());
-  set_root(mgr.xor_op(begin));
+  mRoot = mgr.xor_op(begin);
   return *this;
 }
 
@@ -309,7 +242,7 @@ Expr::compose(
   const Expr& src
 ) const
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   return Expr{mgr.compose(root(), varid, src.root())};
 }
 
@@ -319,7 +252,7 @@ Expr::compose(
   const unordered_map<SizeType, Expr>& comp_map
 ) const
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   return Expr{mgr.compose(root(), comp_map)};
 }
 
@@ -339,7 +272,7 @@ Expr::compose(
   for ( auto p: comp_list ) {
     comp_map.emplace(p.first, p.second);
   }
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   return Expr{mgr.compose(root(), comp_map)};
 }
 
@@ -349,7 +282,7 @@ Expr::remap_var(
   const unordered_map<SizeType, SizeType>& varmap
 ) const
 {
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   return Expr{mgr.remap_var(root(), varmap)};
 }
 
@@ -363,7 +296,7 @@ Expr::remap_var(
   for ( auto p: varlist ) {
     varmap.emplace(p.first, p.second);
   }
-  auto& mgr = ExprMgr::the_obj();
+  ExprMgr mgr;
   return Expr{mgr.remap_var(root(), varmap)};
 }
 
@@ -371,8 +304,8 @@ Expr::remap_var(
 Expr&
 Expr::simplify()
 {
-  auto& mgr = ExprMgr::the_obj();
-  set_root(mgr.simplify(root()));
+  ExprMgr mgr;
+  mRoot = mgr.simplify(root());
   return *this;
 }
 
@@ -535,7 +468,7 @@ Expr::operator==(
   if ( is_invalid() || right.is_invalid() ) {
     return false;
   }
-  return posi_equiv(root(), right.root());
+  return ExprNode::posi_equiv(root(), right.root());
 }
 
 // src1 と src2 の根のタイプが同じとき true を返す．
@@ -559,7 +492,7 @@ Expr::operand_num() const
   if ( is_invalid() ) {
     return 0;
   }
-  return root()->child_num();
+  return root()->operand_num();
 }
 
 // pos 番目のオペランドを返す．
@@ -568,8 +501,10 @@ Expr::operand(
   SizeType pos
 ) const
 {
-  ASSERT_COND( 0 <= pos && pos < operand_num() );
-  return Expr{root()->child(pos)};
+  if ( pos >= operand_num() ) {
+    throw std::out_of_range{"pos is out of range"};
+  }
+  return Expr{root()->operand(pos)};
 }
 
 // @brief オペランドのリストの取得
@@ -579,8 +514,8 @@ Expr::operand_list() const
   SizeType n = operand_num();
   vector<Expr> ans_list;
   ans_list.reserve(n);
-  for ( auto child: root()->child_list() ) {
-    auto expr1 = Expr{child};
+  for ( auto& opr: root()->operand_list() ) {
+    auto expr1 = Expr{opr};
     ans_list.push_back(expr1);
   }
   return ans_list;

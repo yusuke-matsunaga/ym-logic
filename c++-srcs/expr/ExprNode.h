@@ -5,7 +5,7 @@
 /// @brief ExprNode のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2018, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Expr.h"
@@ -19,14 +19,12 @@ class SopLit;
 //////////////////////////////////////////////////////////////////////
 /// @class ExprNode ExprNode.h "ExprNode.h"
 /// @brief 論理式を形作るノードのクラス
-/// 効率化のためにコピーはポインタのコピーを用いる．
-/// そのために参照回数を持つ．
 //////////////////////////////////////////////////////////////////////
 class ExprNode
 {
-  friend class Expr;
-  friend class ExprNodePtr;
-  friend class ExprMgr;
+public:
+
+  using NodePtr = Expr::NodePtr;
 
 public:
 
@@ -46,8 +44,89 @@ public:
     Xor         = 6
   };
 
+
 public:
 
+  /// @brief コンストラクタ
+  ExprNode() = default;
+
+  /// @brief Const0/Const1 用のコンストラクタ
+  ExprNode(
+    Type type ///< [in] タイプ
+  ) : mTypeVarId{static_cast<SizeType>(type)}
+  {
+    if ( type != Const0 && type != Const1 ) {
+      throw std::invalid_argument{"type mismatch"};
+    }
+  }
+
+  /// @brief PosiLiteral/NegaLiteral 用のコンストラクタ
+  ExprNode(
+    Type type,     ///< [in] タイプ
+    SizeType varid ///< [in] 変数番号
+  ) : mTypeVarId{static_cast<SizeType>(type) | (varid << 3)}
+  {
+    if ( type != PosiLiteral && type != NegaLiteral ) {
+      throw std::invalid_argument{"type mismatch"};
+    }
+  }
+
+  /// @brief And/Or/Xor 用のコンストラクタ
+  ExprNode(
+    Type type,                          ///< [in] タイプ
+    const vector<NodePtr>& operand_list ///< [in] オペランドのリスト
+  ) : mTypeVarId{static_cast<SizeType>(type)},
+      mOperandList{operand_list}
+  {
+    if ( type != And && type != Or && type != Xor ) {
+      throw std::invalid_argument{"type mismtach"};
+    }
+  }
+
+  /// @brief デストラクタ
+  ~ExprNode() = default;
+
+  /// @brief 0 のノードを返す．
+  static
+  NodePtr
+  new_zero();
+
+  /// @brief 1 のノードを返す．
+  static
+  NodePtr
+  new_one();
+
+  /// @brief リテラルのノードを返す．
+  static
+  NodePtr
+  new_literal(
+    SizeType varid, ///< [in] 変数番号
+    bool inv        ///< [in] 反転属性
+  );
+
+  /// @brief ANDノードを返す．
+  static
+  NodePtr
+  new_and(
+    const vector<NodePtr>& operand_list ///< [in] オペランドのリスト
+  );
+
+  /// @brief ORノードを返す．
+  static
+  NodePtr
+  new_or(
+    const vector<NodePtr>& operand_list ///< [in] オペランドのリスト
+  );
+
+  /// @brief XORノードを返す．
+  static
+  NodePtr
+  new_xor(
+    const vector<NodePtr>& operand_list ///< [in] オペランドのリスト
+  );
+
+
+public:
   //////////////////////////////////////////////////////////////////////
   /// @name 内部の情報を読み出す関数
   /// @{
@@ -56,7 +135,7 @@ public:
   Type
   type() const
   {
-    return static_cast<Type>(mRefType & 7U);
+    return static_cast<Type>(mTypeVarId & 7U);
   }
 
   /// @brief 恒偽関数を表している時に真となる．
@@ -78,7 +157,7 @@ public:
   is_constant() const
   {
     // ちょっときたないコード
-    return static_cast<Type>(mRefType & 6U) == ExprNode::Const0;
+    return static_cast<Type>(mTypeVarId & 6U) == ExprNode::Const0;
   }
 
   /// @brief 肯定のリテラルを表している時に真となる．
@@ -100,7 +179,7 @@ public:
   is_literal() const
   {
     // ちょっとキタナイコード．
-    return static_cast<Type>(mRefType & 6U) == ExprNode::PosiLiteral;
+    return static_cast<Type>(mTypeVarId & 6U) == ExprNode::PosiLiteral;
   }
 
   /// @brief type がリテラルで極性が inv の時に真となる．
@@ -116,7 +195,10 @@ public:
   SizeType
   varid() const
   {
-    return is_literal() ? mNc : BAD_VARID;
+    if ( is_literal() ) {
+      return mTypeVarId >> 3;
+    }
+    return BAD_VARID;
   }
 
   /// @brief リテラルの取得
@@ -126,10 +208,11 @@ public:
   Literal
   literal() const
   {
-    for ( bool inv: {false, true} ) {
-      if ( is_literal(inv) ) {
-	return Literal(mNc, inv);
-      }
+    if ( is_posiliteral() ) {
+      return Literal{varid()};
+    }
+    if ( is_negaliteral() ) {
+      return Literal{varid(), true};
     }
     return Literal::x();
   }
@@ -162,48 +245,42 @@ public:
   is_op() const
   {
     // ちょっときたないコード
-    return (mRefType & 4U) == 4U;
+    return (mTypeVarId & 4U) == 4U;
   }
 
-  /// @brief 演算子ノードの場合に項の数を返す．
+  /// @brief 演算子ノードの場合にオペランドの数を返す．
   SizeType
-  child_num() const
+  operand_num() const
   {
-    return is_op() ? mNc : 0;
+    return mOperandList.size();
   }
 
-  /// @brief 演算子ノードの場合に子供のノードを返す．
+  /// @brief 演算子ノードの場合にオペランドを返す．
   ///
-  /// 演算子ノード以外の場合と pos が範囲外の場合には定数0を返す．
-  /// 通常は定数ノードが子供に含まれることはないのでエラーとわかる．
-  const ExprNode*
-  child(
+  /// 演算子ノード以外の場合と pos が範囲外の場合には例外を送出する．
+  const NodePtr&
+  operand(
     SizeType pos ///< [in] 取り出す子供の位置
   ) const
   {
-    ASSERT_COND( pos >= 0 && pos < child_num() );
-
-    return mChildArray[pos];
+    if ( pos >= operand_num() ) {
+      throw std::out_of_range{"pos is out of range"};
+    }
+    return mOperandList[pos];
   }
 
   /// @brief 演算子ノードの場合に子供のノードのリストを返す．
-  Array<const ExprNode*>
-  child_list() const
+  const vector<NodePtr>&
+  operand_list() const
   {
-    if ( is_op() ) {
-      auto arrayptr = const_cast<const ExprNode**>(mChildArray);
-      return Array<const ExprNode*>{arrayptr, 0, mNc};
-    }
-    else {
-      return Array<const ExprNode*>{nullptr, 0, 0};
-    }
+    return mOperandList;
   }
 
   /// @brief vals の値にしたがった評価を行う．
   BitVectType
   eval(
-    const vector<BitVectType>& vals,
-    BitVectType mask
+    const vector<BitVectType>& vals, ///< [in] 値のベクタ
+    BitVectType mask                 ///< [in] マスク
   ) const;
 
   /// @brief 真理値表を作成する．
@@ -299,42 +376,21 @@ public:
     ostream& s ///< [in] 出力先のストリーム
   ) const;
 
-  /// @}
-  //////////////////////////////////////////////////////////////////////
+  /// @brief node0 と node1 が式として等価のときに true を返す．
+  static
+  bool
+  posi_equiv(
+    const NodePtr& node0,
+    const NodePtr& node1
+  );
 
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  /// @name 参照回数の制御
-  /// @{
-
-  // 参照回数を1つ増やす．
-  void
-  inc_ref() const
-  {
-    // MAX の時は増やさない．
-    if ( ref() < kRefMax ) {
-      auto node = const_cast<ExprNode*>(this);
-      node->mRefType += 8;
-    }
-  }
-
-  // 参照回数を1つ減らす．
-  // 結果0になれば自分自身を削除する．
-  void
-  dec_ref() const
-  {
-    SizeType r = ref();
-    auto node = const_cast<ExprNode*>(this);
-    if ( r == 1 ) {
-      // これが最後の参照だった．
-      node->suicide();
-    }
-    else if ( r < kRefMax ) {
-      node->mRefType -= 8;
-    }
-    // MAX の時は減らさない．
-  }
+  /// @brief node0 と node1 が式として否定の関係にあるときに true を返す．
+  static
+  bool
+  nega_equiv(
+    const NodePtr& node0,
+    const NodePtr& node1
+  );
 
   /// @}
   //////////////////////////////////////////////////////////////////////
@@ -344,43 +400,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // プライベートメンバ関数
   //////////////////////////////////////////////////////////////////////
-
-  // コンストラクタ/デストラクタはむやみに使ってはだめなので
-  // private にしている．
-public:
-
-  // コンストラクタ
-  ExprNode() = default;
-
-  // デストラクタ
-  ~ExprNode() = default;
-
-
-private:
-
-  // 参照回数を得る．
-  SizeType
-  ref() const
-  {
-    return static_cast<int>(mRefType >> 3);
-  }
-
-  // 参照回数をセットする．
-  void
-  ref(
-    SizeType ref ///< [in] 参照回数
-  ) const
-  {
-    auto node = const_cast<ExprNode*>(this);
-    // 昔の参照回数を落とす．
-    node->mRefType &= 7;
-    // ref をセットする．
-    node->mRefType |= (ref << 3);
-  }
-
-  // 自殺する．
-  void
-  suicide();
 
   // 子供が全てリテラルの時に true を返す．
   bool
@@ -392,36 +411,13 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 参照回数＋ノードタイプ(3ビット)
-  SizeType mRefType;
+  // ノードタイプ(3ビット)と変数番号
+  SizeType mTypeVarId;
 
-  // 子供の数 もしくは 変数番号
-  SizeType mNc;
-
-  // 子を指すポインタの配列
-  const ExprNode* mChildArray[1];
-
-  // 参照回数の最大値
-  static const SizeType kRefMax{1UL << (sizeof(SizeType) * 8 - 4)};
+  // オペランドのリスト
+  vector<NodePtr> mOperandList;
 
 };
-
-/// @relates ExprNode
-/// @brief node0 と node1 が式として等価のときに true を返す．
-bool
-posi_equiv(
-  const ExprNode* node0,
-  const ExprNode* node1
-);
-
-
-/// @relates ExprNode
-/// @brief node0 と node1 が式として否定の関係にあるときに true を返す．
-bool
-nega_equiv(
-  const ExprNode* node0,
-  const ExprNode* node1
-);
 
 END_NAMESPACE_YM_LOGIC
 

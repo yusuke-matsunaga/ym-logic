@@ -3,7 +3,7 @@
 /// @brief ExprMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2010, 2014, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ExprMgr.h"
@@ -17,90 +17,10 @@ BEGIN_NAMESPACE_YM_LOGIC
 // クラス ExprMgr
 //////////////////////////////////////////////////////////////////////
 
-// 唯一のオブジェクト
-static ExprMgr* mTheObj = nullptr;
-
-// @brief 唯一のインスタンスを返す．
-ExprMgr&
-ExprMgr::the_obj()
-{
-  if ( mTheObj == nullptr ) {
-    mTheObj = new ExprMgr;
-  }
-  return *mTheObj;
-}
-
-// @brief コンストラクタ
-ExprMgr::ExprMgr(
-) : mNodeNum{0},
-    mMaxNodeNum{0},
-    mStuckNodeNum{0}
-{
-}
-
-// デストラクタ
-ExprMgr::~ExprMgr()
-{
-}
-
-// @brief 確保したメモリを開放する．
-void
-ExprMgr::clear_memory()
-{
-  delete mTheObj;
-  mTheObj = nullptr;
-}
-
-// 恒偽関数を作る．
-ExprNodePtr
-ExprMgr::zero()
-{
-  if ( !mConst0 ) {
-    mConst0 = alloc_node(ExprNode::Const0);
-    ++ mStuckNodeNum;
-  }
-  return mConst0;
-}
-
-// 恒真関数を作る．
-ExprNodePtr
-ExprMgr::one()
-{
-  if ( !mConst1 ) {
-    mConst1 = alloc_node(ExprNode::Const1);
-    ++ mStuckNodeNum;
-  }
-  return mConst1;
-}
-
-// 肯定のリテラルを作る．
-ExprNodePtr
-ExprMgr::posi_literal(
-  SizeType id
-)
-{
-  make_literals(id);
-  SizeType idx = id << 1;
-  ASSERT_COND( idx < mLiteralArray.size() );
-  return mLiteralArray[idx];
-}
-
-// 否定のリテラルを作る．
-ExprNodePtr
-ExprMgr::nega_literal(
-  SizeType id
-)
-{
-  make_literals(id);
-  SizeType idx = id << 1 | 1;
-  ASSERT_COND( idx < mLiteralArray.size() );
-  return mLiteralArray[idx];
-}
-
 // chd_list の要素を子供とする AND ノードを作る．
 // 子供も AND ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::and_op(
   SizeType begin
 )
@@ -108,7 +28,7 @@ ExprMgr::and_op(
   ASSERT_COND( begin >= 0 && begin < nodestack_top() );
 
   bool const0 = false;
-  SizeType end = nodestack_top();
+  auto end = nodestack_top();
   mTmpNodeList.clear();
   mTmpNodeList.reserve(end - begin);
   for ( SizeType i = begin; i < end; ++ i ) {
@@ -119,9 +39,8 @@ ExprMgr::and_op(
       break;
     }
     if ( type == ExprNode::And ) {
-      for ( auto child: node->child_list() ) {
-	auto node1 = ExprNodePtr{child};
-	if ( check_node(node1) ) {
+      for ( auto& opr: node->operand_list() ) {
+	if ( check_node(opr) ) {
 	  // 逆相の入力があったら答は0
 	  const0 = true;
 	  break;
@@ -145,18 +64,18 @@ ExprMgr::and_op(
   nodestack_pop(begin);
 
   auto n = mTmpNodeList.size();
-  ExprNodePtr node;
+  Expr::NodePtr node;
   if ( const0 ) {
-    node = zero();
+    node = ExprNode::new_zero();
   }
   else if ( n == 0 ) {
-    node = one();
+    node = ExprNode::new_one();
   }
   else if ( n == 1 ) {
     node = mTmpNodeList.front();
   }
   else {
-    node = alloc_node(ExprNode::And);
+    node = ExprNode::new_and(mTmpNodeList);
   }
   return node;
 }
@@ -164,7 +83,7 @@ ExprMgr::and_op(
 // chd_list の要素を子供に持つ OR を表す式を作る．
 // 子供も OR ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::or_op(
   SizeType begin
 )
@@ -183,9 +102,8 @@ ExprMgr::or_op(
       break;
     }
     if ( type == ExprNode::Or ) {
-      for ( auto child: node->child_list() ) {
-	auto node1 = ExprNodePtr{child};
-	if ( check_node(node1) ) {
+      for ( auto& opr: node->operand_list() ) {
+	if ( check_node(opr) ) {
 	  // 逆相の入力があったら答は1
 	  const1 = true;
 	  break;
@@ -208,19 +126,19 @@ ExprMgr::or_op(
   }
   nodestack_pop(begin);
 
-  ExprNodePtr node;
+  Expr::NodePtr node;
   auto n = mTmpNodeList.size();
   if ( const1 ) {
-    node = one();
+    node = ExprNode::new_one();
   }
   else if ( n == 0 ) {
-    node = zero();
+    node = ExprNode::new_zero();
   }
   else if ( n == 1 ) {
     node = mTmpNodeList.front();
   }
   else {
-    node = alloc_node(ExprNode::Or);
+    node = ExprNode::new_or(mTmpNodeList);
   }
   return node;
 }
@@ -228,7 +146,7 @@ ExprMgr::or_op(
 // chd_list の要素を子供に持つ XOR を表す式を作る．
 // 子供も XOR ノードの場合にはマージする．
 // 子供が定数ノードの場合には値に応じた簡単化を行う．
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::xor_op(
   SizeType begin
 )
@@ -246,9 +164,8 @@ ExprMgr::xor_op(
       inv = !inv;
     }
     else if ( type == ExprNode::Xor ) {
-      for ( auto child: node->child_list() ) {
-	auto node1 = ExprNodePtr{child};
-	if ( check_node2(node1) ) {
+      for ( auto& opr: node->operand_list() ) {
+	if ( check_node2(opr) ) {
 	  inv = !inv;
 	}
       }
@@ -263,18 +180,16 @@ ExprMgr::xor_op(
   }
   nodestack_pop(begin);
 
-  ExprNodePtr node;
+  Expr::NodePtr node;
   auto n = mTmpNodeList.size();
   if ( n == 0 ) {
-    node = zero();
+    node = ExprNode::new_zero();
+  }
+  else if ( n == 1 ) {
+    node = mTmpNodeList.front();
   }
   else {
-    if ( n == 1 ) {
-      node = mTmpNodeList.front();
-    }
-    else {
-      node = alloc_node(ExprNode::Xor);
-    }
+    node = ExprNode::new_xor(mTmpNodeList);
   }
   if ( inv ) {
     return complement(node);
@@ -285,7 +200,7 @@ ExprMgr::xor_op(
 }
 
 // @brief rep_string 形式の文字列を読み込む．
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::from_rep_string(
   RepStringParser& parser
 )
@@ -296,26 +211,26 @@ ExprMgr::from_rep_string(
   case 'C':
     c = parser.read_char();
     if ( c == '0' ) {
-      return zero();
+      return ExprNode::new_zero();
     }
     if ( c == '1' ) {
-      return one();
+      return ExprNode::new_one();
     }
     // エラー
     break;
   case 'P':
     val = parser.read_int();
-    return posi_literal(val);
+    return ExprNode::new_literal(val, false);
   case 'N':
     val = parser.read_int();
-    return nega_literal(val);
+    return ExprNode::new_literal(val, true);
   case 'A':
     {
       SizeType n = parser.read_int();
       SizeType begin = nodestack_top();
       for ( SizeType i = 0; i < n; ++ i ) {
-	auto child_expr = from_rep_string(parser);
-	nodestack_push(child_expr);
+	auto opr = from_rep_string(parser);
+	nodestack_push(opr);
       }
       return and_op(begin);
     }
@@ -325,8 +240,8 @@ ExprMgr::from_rep_string(
       SizeType n = parser.read_int();
       SizeType begin = nodestack_top();
       for ( SizeType i = 0; i < n; ++ i ) {
-	auto child_expr = from_rep_string(parser);
-	nodestack_push(child_expr);
+	auto opr = from_rep_string(parser);
+	nodestack_push(opr);
       }
       return or_op(begin);
     }
@@ -336,8 +251,8 @@ ExprMgr::from_rep_string(
       SizeType n = parser.read_int();
       SizeType begin = nodestack_top();
       for ( SizeType i = 0; i < n; ++ i ) {
-	auto child_expr = from_rep_string(parser);
-	nodestack_push(child_expr);
+	auto opr = from_rep_string(parser);
+	nodestack_push(opr);
       }
       return xor_op(begin);
     }
@@ -355,15 +270,15 @@ ExprMgr::from_rep_string(
 // false を返す．
 bool
 ExprMgr::check_node(
-  const ExprNode* node
+  const Expr::NodePtr& node
 )
 {
-  for ( auto node1: mTmpNodeList ) {
-    if ( posi_equiv(node, node1) ) {
+  for ( auto& node1: mTmpNodeList ) {
+    if ( ExprNode::posi_equiv(node, node1) ) {
       // 同相で重なっていた場合
       return false;
     }
-    if ( nega_equiv(node, node1) ) {
+    if ( ExprNode::nega_equiv(node, node1) ) {
       // 逆相で重なっていた場合
       return true;
     }
@@ -381,7 +296,7 @@ ExprMgr::check_node(
 // false を返す．
 bool
 ExprMgr::check_node2(
-  const ExprNode* node
+  const Expr::NodePtr& node
 )
 {
   for ( auto p = mTmpNodeList.begin(); p != mTmpNodeList.end(); ) {
@@ -390,12 +305,12 @@ ExprMgr::check_node2(
     auto q = p;
     ++ p;
 
-    if ( posi_equiv(node, node1) ) {
+    if ( ExprNode::posi_equiv(node, node1) ) {
       // 同相で重なっていたら両方取り除く
       mTmpNodeList.erase(q);
       return false;
     }
-    if ( nega_equiv(node, node1) ) {
+    if ( ExprNode::nega_equiv(node, node1) ) {
       // 逆相で重なっていたら両方取り除く
       mTmpNodeList.erase(q);
       return true;
@@ -408,7 +323,7 @@ ExprMgr::check_node2(
 // @brief ノードスタックにノードを入れる．
 void
 ExprMgr::nodestack_push(
-  const ExprNode* node
+  const Expr::NodePtr& node
 )
 {
   mNodeStack.push_back(node);
@@ -433,29 +348,31 @@ ExprMgr::nodestack_pop(
 }
 
 // 否定形を返す．
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::complement(
-  const ExprNode* node
+  const Expr::NodePtr& node
 )
 {
   switch ( node->type() ) {
-  case ExprNode::Const0:      return one();
-  case ExprNode::Const1:      return zero();
-  case ExprNode::PosiLiteral: return nega_literal(node->varid());
-  case ExprNode::NegaLiteral: return posi_literal(node->varid());
+  case ExprNode::Const0:      return ExprNode::new_one();
+  case ExprNode::Const1:      return ExprNode::new_zero();
+  case ExprNode::PosiLiteral: return ExprNode::new_literal(node->varid(), true);
+  case ExprNode::NegaLiteral: return ExprNode::new_literal(node->varid(), false);
   default: break;
   }
 
   auto begin = nodestack_top();
   bool first = true;
-  for ( auto child: node->child_list() ) {
-    // child の型を ExprNode* にすると途中で削除されてしまうおそれがある．
-    auto child_ptr = ExprNodePtr{child};
+  for ( auto& opr: node->operand_list() ) {
+    Expr::NodePtr new_opr;
     if ( node->type() != ExprNode::Xor || first ) {
-      child_ptr = complement(child_ptr);
+      new_opr = complement(opr);
+    }
+    else {
+      new_opr = opr;
     }
     first = false;
-    nodestack_push(child_ptr);
+    nodestack_push(new_opr);
   }
 
   switch ( node->type() ) {
@@ -472,11 +389,11 @@ ExprMgr::complement(
 }
 
 // id 番目の変数を sub に置き換える．
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::compose(
-  const ExprNode* node,
+  const Expr::NodePtr& node,
   SizeType id,
-  const ExprNodePtr& sub
+  const Expr::NodePtr& sub
 )
 {
   switch ( node->type() ) {
@@ -501,12 +418,12 @@ ExprMgr::compose(
 
   auto begin = nodestack_top();
   bool ident = true;
-  for ( auto child: node->child_list() ) {
-    auto new_child = ExprNodePtr{compose(child, id, sub)};
-    if ( new_child != child ) {
+  for ( auto& opr: node->operand_list() ) {
+    auto new_opr = compose(opr, id, sub);
+    if ( new_opr != opr ) {
       ident = false;
     }
-    nodestack_push(new_child);
+    nodestack_push(new_opr);
   }
   if ( ident ) {
     nodestack_pop(begin);
@@ -525,10 +442,10 @@ ExprMgr::compose(
 }
 
 // comp_map にしたがってリテラルを式に置き換える．
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::compose(
-  const ExprNode* node,
-  const unordered_map<SizeType, Expr>& comp_map
+  const Expr::NodePtr& node,
+  const Expr::ComposeMap& comp_map
 )
 {
   switch ( node->type() ) {
@@ -556,12 +473,12 @@ ExprMgr::compose(
 
   auto begin = nodestack_top();
   bool ident = true;
-  for ( auto child: node->child_list() ) {
-    auto new_child = ExprNodePtr{compose(child, comp_map)};
-    if ( new_child != child ) {
+  for ( auto& opr: node->operand_list() ) {
+    auto new_opr = compose(opr, comp_map);
+    if ( new_opr != opr ) {
       ident = false;
     }
-    nodestack_push(new_child);
+    nodestack_push(new_opr);
   }
   if ( ident ) {
     nodestack_pop(begin);
@@ -580,10 +497,10 @@ ExprMgr::compose(
 }
 
 // 変数番号をマッピングし直す
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::remap_var(
-  const ExprNode* node,
-  const unordered_map<SizeType, SizeType>& varmap
+  const Expr::NodePtr& node,
+  const Expr::VarMap& varmap
 )
 {
   switch ( node->type() ) {
@@ -594,29 +511,28 @@ ExprMgr::remap_var(
   case ExprNode::PosiLiteral:
     if ( varmap.count(node->varid()) > 0 ) {
       auto ans = varmap.at(node->varid());
-      return posi_literal(ans);
+      return ExprNode::new_literal(ans, false);
     }
     return node;
 
   case ExprNode::NegaLiteral:
     if ( varmap.count(node->varid()) > 0 ) {
       auto ans = varmap.at(node->varid());
-      return nega_literal(ans);
+      return ExprNode::new_literal(ans, true);
     }
     return node;
 
   default: break;
   }
 
-  auto n = node->child_num();
   auto begin = nodestack_top();
   bool ident = true;
-  for ( auto child: node->child_list() ) {
-    auto new_child = ExprNodePtr{remap_var(child, varmap)};
-    if ( new_child != child ) {
+  for ( auto& opr: node->operand_list() ) {
+    auto new_opr = remap_var(opr, varmap);
+    if ( new_opr != opr ) {
       ident = false;
     }
-    nodestack_push(new_child);
+    nodestack_push(new_opr);
   }
   if ( ident ) {
     nodestack_pop(begin);
@@ -635,9 +551,9 @@ ExprMgr::remap_var(
 }
 
 // 簡単化を行う．
-ExprNodePtr
+Expr::NodePtr
 ExprMgr::simplify(
-  const ExprNode* node
+  const Expr::NodePtr& node
 )
 {
   switch ( node->type() ) {
@@ -653,12 +569,12 @@ ExprMgr::simplify(
 
   auto begin = nodestack_top();
   bool ident = true;
-  for ( auto child: node->child_list() ) {
-    auto new_child = ExprNodePtr{simplify(child)};
-    if ( new_child != child ) {
+  for ( auto& opr: node->operand_list() ) {
+    auto new_opr = simplify(opr);
+    if ( new_opr != opr ) {
       ident = false;
     }
-    nodestack_push(new_child);
+    nodestack_push(new_opr);
   }
   if ( ident ) {
     nodestack_pop(begin);
@@ -676,90 +592,6 @@ ExprMgr::simplify(
   ASSERT_NOT_REACHED;
 
   return nullptr;
-}
-
-// @brief 使用されているノード数を返す．
-SizeType
-ExprMgr::node_num()
-{
-  return mNodeNum;
-}
-
-// id 番めまでのリテラルノードを作る．
-void
-ExprMgr::make_literals(
-  SizeType id
-)
-{
-  auto last = mLiteralArray.size() / 2;
-  while ( last <= id ) {
-    auto posi = alloc_node(ExprNode::PosiLiteral);
-    posi->mNc = last;
-    mLiteralArray.push_back(posi);
-    ++ mStuckNodeNum;
-
-    auto nega = alloc_node(ExprNode::NegaLiteral);
-    nega->mNc = last;
-    mLiteralArray.push_back(nega);
-    ++ mStuckNodeNum;
-    ++ last;
-  }
-}
-
-// ExprNode を確保して内容を設定する．
-ExprNode*
-ExprMgr::alloc_node(
-  ExprNode::Type type
-)
-{
-  ++ mNodeNum;
-  if ( mMaxNodeNum < mNodeNum ) {
-    mMaxNodeNum = mNodeNum;
-  }
-
-  SizeType nc = 0;
-  if ( type == ExprNode::And ||
-       type == ExprNode::Or ||
-       type == ExprNode::Xor ) {
-    nc = mTmpNodeList.size();
-  }
-
-  auto req_size = calc_size(nc);
-  void* p = new char[req_size];
-  auto node = new (p) ExprNode;
-  node->mRefType = static_cast<int>(type);
-  node->mNc = nc;
-  for ( SizeType i = 0; i < nc; ++ i ) {
-    node->mChildArray[i] = mTmpNodeList[i];
-    node->child(i)->inc_ref();
-  }
-  return node;
-}
-
-// ExprNode を削除する．
-void
-ExprMgr::free_node(
-  ExprNode* node
-)
-{
-  auto n = node->child_num();
-  for ( auto child: node->child_list() ) {
-    child->dec_ref();
-  }
-
-  -- mNodeNum;
-
-  char* p = reinterpret_cast<char*>(node);
-  delete [] p;
-}
-
-// ExprNode の入力数から必要なサイズを計算する．
-SizeType
-ExprMgr::calc_size(
-  SizeType nc
-)
-{
-  return sizeof(ExprNode) + sizeof(ExprNode*) * (nc - 1);
 }
 
 END_NAMESPACE_YM_LOGIC

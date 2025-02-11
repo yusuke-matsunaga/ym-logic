@@ -5,12 +5,11 @@
 /// @brief ExprMgr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2020, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/Expr.h"
 #include "ExprNode.h"
-#include "ExprNodePtr.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -20,35 +19,18 @@ class RepStringParser;
 //////////////////////////////////////////////////////////////////////
 /// @class ExprMgr ExprMgr.h "ExprMgr.h"
 /// @brief ExprNode の管理を行うクラス
+///
+/// 演算子ノードを作る時の一時的なスタックを提供する．
 //////////////////////////////////////////////////////////////////////
 class ExprMgr
 {
-  friend class ExprNode;
-
-private:
+public:
 
   /// @brief コンストラクタ
-  ExprMgr();
+  ExprMgr() = default;
 
   /// @brief デストラクタ
-  ~ExprMgr();
-
-
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 静的関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief 唯一のインスタンスを返す．
-  static
-  ExprMgr&
-  the_obj();
-
-  /// @brief 確保したメモリを開放する．
-  /// @note メモリリークチェックのための関数
-  static
-  void
-  clear_memory();
+  ~ExprMgr() = default;
 
 
 public:
@@ -56,32 +38,12 @@ public:
   /// @name ExprNode を作る基本演算
   /// @{
 
-  /// @brief 恒偽関数を作る．
-  ExprNodePtr
-  zero();
-
-  /// @brief 恒真関数を作る．
-  ExprNodePtr
-  one();
-
-  /// @brief 肯定のリテラルを作る．
-  ExprNodePtr
-  posi_literal(
-    SizeType varid ///< [in] 変数番号
-  );
-
-  /// @brief 否定のリテラルを作る．
-  ExprNodePtr
-  nega_literal(
-    SizeType varid ///< [in] 変数番号
-  );
-
   /// @brief AND ノードの生成
   ///
   /// - 子供も AND ノードの場合にはマージする．
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には重複を取り除く
-  ExprNodePtr
+  Expr::NodePtr
   and_op(
     SizeType begin ///< [in] ノードスタック中の開始位置
   );
@@ -91,7 +53,7 @@ public:
   /// - 子供も OR ノードの場合にはマージする．
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には重複を取り除く
-  ExprNodePtr
+  Expr::NodePtr
   or_op(
     SizeType begin ///< [in] ノードスタック中の開始位置
   );
@@ -101,7 +63,7 @@ public:
   /// - 子供も XOR ノードの場合にはマージする．
   /// - 子供が定数ノードの場合には値に応じた簡単化を行う．
   /// - 同一の子供ノードがあった場合には個数の偶奇に応じた処理を行う．
-  ExprNodePtr
+  Expr::NodePtr
   xor_op(
     SizeType begin ///< [in] ノードスタック中の開始位置
   );
@@ -109,7 +71,7 @@ public:
   /// @brief ノードスタックにノードを入れる．
   void
   nodestack_push(
-    const ExprNode* node ///< [in] 対象のノード
+    const Expr::NodePtr& node ///< [in] 対象のノード
   );
 
   /// @brief ノードスタックの先頭位置を返す．
@@ -126,7 +88,7 @@ public:
   );
 
   /// @brief rep_string 形式の文字列を読み込む．
-  ExprNodePtr
+  Expr::NodePtr
   from_rep_string(
     RepStringParser& parser
   );
@@ -142,9 +104,9 @@ public:
   /// @{
 
   /// @brief 否定の形(双対形)を返す．
-  ExprNodePtr
+  Expr::NodePtr
   complement(
-    const ExprNode* node ///< [in] ノード
+    const Expr::NodePtr& node ///< [in] ノード
   );
 
   /// @brief リテラルを論理式に置き換える．
@@ -152,73 +114,37 @@ public:
   /// sub の中に varid 番目のリテラルが含まれている場合でも
   /// 正常に処理を行う．
   /// sub の中のリテラルは展開しない
-  ExprNodePtr
+  Expr::NodePtr
   compose(
-    const ExprNode* node,  ///< [in] ノード
-    SizeType varid,        ///< [in] 置き換え対象の変数番号
-    const ExprNodePtr& sub ///< [in] 置き換え先の論理式
+    const Expr::NodePtr& node,  ///< [in] ノード
+    SizeType varid,             ///< [in] 置き換え対象の変数番号
+    const Expr::NodePtr& sub    ///< [in] 置き換え先の論理式
   );
 
   /// @brief 一度に複数の置き換えを行う．
-  /// @param[in] compmap
-  ExprNodePtr
+  Expr::NodePtr
   compose(
-    const ExprNode* node,                        ///< [in] ノード
-    const unordered_map<SizeType, Expr>& compmap ///< [in] 置き換え対象の変数番号と置き換え先の論理式
-                                                 /// を入れた連想配列
+    const Expr::NodePtr& node,      ///< [in] ノード
+    const Expr::ComposeMap& compmap ///< [in] 置き換え対象の変数番号と置き換え先の論理式
+                                    ///<      を入れた連想配列
   );
 
   /// @brief 変数番号をマッピングし直す
-  ExprNodePtr
+  Expr::NodePtr
   remap_var(
-    const ExprNode* node,                           ///< [in] ノード
-    const unordered_map<SizeType, SizeType>& varmap ///< [in] 置き換え元と置き換え先の変数番号を入れた連想配列
+    const Expr::NodePtr& node, ///< [in] ノード
+    const Expr::VarMap& varmap ///< [in] 置き換え元と置き換え先の変数番号を
+                               ///<      入れた連想配列
   );
 
   /// @brief 簡単化を行う．
-  ExprNodePtr
+  Expr::NodePtr
   simplify(
-    const ExprNode* node ///< [in] ノード
+    const Expr::NodePtr& node ///< [in] ノード
   );
 
   /// @}
   //////////////////////////////////////////////////////////////////////
-
-
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 統計情報を取り出す関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief 使用されているメモリ量を返す．
-  SizeType
-  used_size();
-
-  /// @brief 使用されているノード数を返す．
-  SizeType
-  node_num();
-
-  /// @brief used_size() の最大値を返す．
-  SizeType
-  max_used_size();
-
-  /// @brief nodenum() の最大値を返す．
-  SizeType
-  max_node_num();
-
-  /// @brief 実際に確保したメモリ量を返す．
-  SizeType
-  allocated_size();
-
-  /// @brief 実際に確保した回数を返す．
-  SizeType
-  allocated_count();
-
-  /// @brief 内部状態を出力する．
-  void
-  print_stats(
-    ostream& s ///< [in] 出力ストリーム
-  );
 
 
 private:
@@ -234,7 +160,7 @@ private:
   // false を返す．
   bool
   check_node(
-    const ExprNode* node ///< [in] ノード
+    const Expr::NodePtr& node ///< [in] ノード
   );
 
   // xor_op() 用のサブルーティン
@@ -247,38 +173,7 @@ private:
   // false を返す．
   bool
   check_node2(
-    const ExprNode* node ///< [in] ノード
-  );
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 内部で用いられる関数
-  //////////////////////////////////////////////////////////////////////
-
-  // id 番めまでのリテラルノードを作る．
-  void
-  make_literals(
-    SizeType id ///< [in] ID
-  );
-
-  // ExprNode を確保して内容を設定する．
-  ExprNode*
-  alloc_node(
-    ExprNode::Type type ///< [in] タイプ
-  );
-
-  // ExprNode を削除する．
-  void
-  free_node(
-    ExprNode* node ///< [in] ノード
-  );
-
-  // ExprNode の入力数から必要なサイズを計算する．
-  static
-  SizeType
-  calc_size(
-    SizeType nc ///< [in] 子供のオペランド数
+    const Expr::NodePtr& node ///< [in] ノード
   );
 
 
@@ -287,29 +182,11 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 唯一の定数0ノード
-  ExprNodePtr mConst0;
-
-  // 唯一の定数1ノード
-  ExprNodePtr mConst1;
-
-  // リテラルを表すノードの配列
-  vector<ExprNodePtr> mLiteralArray;
-
   // 作業領域として使われるノードの配列
-  ExprNodeList mTmpNodeList;
+  vector<Expr::NodePtr> mTmpNodeList;
 
   // 再帰関数のなかで作業領域として使われるノードの配列
-  ExprNodeList mNodeStack;
-
-  // 使用中のノード数
-  SizeType mNodeNum;
-
-  // 使用した最大のノード数
-  SizeType mMaxNodeNum;
-
-  // 絶対に開放されないノード数
-  SizeType mStuckNodeNum;
+  vector<Expr::NodePtr> mNodeStack;
 
 };
 

@@ -7,7 +7,6 @@
 /// All rights reserved.
 
 #include "ExprNode.h"
-#include "ExprMgr.h"
 #include "SopLit.h"
 #include "ym/TvFunc.h"
 
@@ -18,23 +17,81 @@ BEGIN_NAMESPACE_YM_LOGIC
 // クラス ExprNode
 //////////////////////////////////////////////////////////////////////
 
+// 0 のノードを返す．
+Expr::NodePtr
+ExprNode::new_zero()
+{
+  auto node = new ExprNode{ExprNode::Const0};
+  return NodePtr{node};
+}
+
+// 1 のノードを返す．
+Expr::NodePtr
+ExprNode::new_one()
+{
+  auto node = new ExprNode{ExprNode::Const1};
+  return NodePtr{node};
+}
+
+// リテラルのノードを返す．
+Expr::NodePtr
+ExprNode::new_literal(
+  SizeType varid,
+  bool inv
+)
+{
+  auto type = inv ? NegaLiteral : PosiLiteral;
+  auto node = new ExprNode{type, varid};
+  return NodePtr{node};
+}
+
+// @brief ANDノードを返す．
+Expr::NodePtr
+ExprNode::new_and(
+  const vector<NodePtr>& operand_list
+)
+{
+  auto node = new ExprNode{And, operand_list};
+  return NodePtr{node};
+}
+
+// @brief ORノードを返す．
+Expr::NodePtr
+ExprNode::new_or(
+  const vector<NodePtr>& operand_list
+)
+{
+  auto node = new ExprNode{Or, operand_list};
+  return NodePtr{node};
+}
+
+// @brief XORノードを返す．
+Expr::NodePtr
+ExprNode::new_xor(
+  const vector<NodePtr>& operand_list
+)
+{
+  auto node = new ExprNode{Xor, operand_list};
+  return NodePtr{node};
+}
+
 // 同一の式を表していたら true を返す．
 bool
-posi_equiv(
-  const ExprNode* node0,
-  const ExprNode* node1
+ExprNode::posi_equiv(
+  const NodePtr& node0,
+  const NodePtr& node1
 )
 {
   if ( node0->type() != node1->type() ||
-       node0->child_num() != node1->child_num() ) {
+       node0->operand_num() != node1->operand_num() ) {
     return false;
   }
 
-  auto n = node0->child_num();
+  auto n = node0->operand_num();
   for ( SizeType i = 0; i < n; ++ i ) {
-    auto chd0 = node0->child(i);
-    auto chd1 = node1->child(i);
-    if ( !posi_equiv(chd0, chd1) ) {
+    auto& op0 = node0->operand(i);
+    auto& op1 = node1->operand(i);
+    if ( !posi_equiv(op0, op1) ) {
       return false;
     }
   }
@@ -49,9 +106,9 @@ posi_equiv(
 
 // 互いに否定の関係にある式を表していたら true を返す．
 bool
-nega_equiv(
-  const ExprNode* node0,
-  const ExprNode* node1
+ExprNode::nega_equiv(
+  const NodePtr& node0,
+  const NodePtr& node1
 )
 {
   if ( node0->is_one() ) {
@@ -67,8 +124,8 @@ nega_equiv(
     return node1->is_posiliteral() && node0->varid() == node1->varid();
   }
 
-  auto n = node0->child_num();
-  if ( node1->child_num() != n ) {
+  auto n = node0->operand_num();
+  if ( node1->operand_num() != n ) {
     return false;
   }
 
@@ -77,26 +134,25 @@ nega_equiv(
       return false;
     }
     for ( SizeType i = 0; i < n; ++ i ) {
-      auto chd0 = node0->child(i);
-      auto chd1 = node1->child(i);
-      if ( !nega_equiv(chd0, chd1) ) {
+      auto& op0 = node0->operand(i);
+      auto& op1 = node1->operand(i);
+      if ( !nega_equiv(op0, op1) ) {
 	return false;
       }
     }
     return true;
   }
-  else if ( node0->is_or() ) {
+  if ( node0->is_or() ) {
     if ( !node1->is_and() ) {
       return false;
     }
     for ( SizeType i = 0; i < n; ++ i ) {
-      auto chd0 = node0->child(i);
-      auto chd1 = node1->child(i);
-      if ( !nega_equiv(chd0, chd1) ) {
+      auto& op0 = node0->operand(i);
+      auto& op1 = node1->operand(i);
+      if ( !nega_equiv(op0, op1) ) {
 	return false;
       }
     }
-    return true;
   }
   else if ( node0->is_xor() ) {
     if ( !node1->is_xor() ) {
@@ -104,12 +160,12 @@ nega_equiv(
     }
     bool inv = false;
     for ( SizeType i = 0; i < n; ++ i ) {
-      auto chd0 = node0->child(i);
-      auto chd1 = node1->child(i);
-      if ( !nega_equiv(chd0, chd1) ) {
+      auto& op0 = node0->operand(i);
+      auto& op1 = node1->operand(i);
+      if ( !nega_equiv(op0, op1) ) {
 	inv = !inv;
       }
-      else if ( !posi_equiv(chd0, chd1) ) {
+      else if ( !posi_equiv(op0, op1) ) {
 	return false;
       }
     }
@@ -141,23 +197,23 @@ ExprNode::eval(
     return ~vals[varid()] & mask;
   }
 
-  auto nc = child_num();
-  ASSERT_COND( nc > 0 );
+  auto nop = operand_num();
+  ASSERT_COND( nop > 0 );
 
-  auto ans = child(0)->eval(vals, mask);
+  auto ans = operand(0)->eval(vals, mask);
   if ( is_and() ) {
-    for ( SizeType i = 1; i < nc; ++ i ) {
-      ans &= child(i)->eval(vals, mask);
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      ans &= operand(i)->eval(vals, mask);
     }
   }
   else if ( is_or() ) {
-    for ( SizeType i = 1; i < nc; ++ i ) {
-      ans |= child(i)->eval(vals, mask);
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      ans |= operand(i)->eval(vals, mask);
     }
   }
   else if ( is_xor() ) {
-    for ( SizeType i = 1; i < nc; ++ i ) {
-      ans ^= child(i)->eval(vals, mask);
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      ans ^= operand(i)->eval(vals, mask);
     }
   }
   else {
@@ -186,23 +242,23 @@ ExprNode::make_tv(
   }
 
   // あとは AND/OR/XOR のみ
-  auto nc = child_num();
-  ASSERT_COND( nc > 0 );
+  auto nop = operand_num();
+  ASSERT_COND( nop > 0 );
 
-  auto ans = child(0)->make_tv(ni);
+  auto ans = operand(0)->make_tv(ni);
   if ( is_and() ) {
-    for ( SizeType i = 1; i < nc; ++ i ) {
-      ans &= child(i)->make_tv(ni);
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      ans &= operand(i)->make_tv(ni);
     }
   }
   else if ( is_or() ) {
-    for ( SizeType i = 1; i < nc; ++ i ) {
-      ans |= child(i)->make_tv(ni);
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      ans |= operand(i)->make_tv(ni);
     }
   }
   else if ( is_xor() ) {
-    for ( SizeType i = 1; i < nc; ++ i ) {
-      ans ^= child(i)->make_tv(ni);
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      ans ^= operand(i)->make_tv(ni);
     }
   }
   else {
@@ -215,8 +271,8 @@ ExprNode::make_tv(
 bool
 ExprNode::is_simple_op() const
 {
-  for ( auto child: child_list() ) {
-    if ( !child->is_literal() ) {
+  for ( auto& opr: operand_list() ) {
+    if ( !opr->is_literal() ) {
       return false;
     }
   }
@@ -237,8 +293,8 @@ ExprNode::is_sop() const
     return false;
   }
 
-  for ( auto child: child_list() ){
-    if ( !child->is_literal() && !child->is_simple_and() ) {
+  for ( auto& opr: operand_list() ){
+    if ( !opr->is_literal() && !opr->is_simple_and() ) {
       return false;
     }
   }
@@ -255,14 +311,12 @@ ExprNode::litnum() const
   }
 
   SizeType num = 0;
-
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
-    for ( auto child: child_list() ) {
-      num += child->litnum();
+    for ( auto& opr: operand_list() ) {
+      num += opr->litnum();
     }
   }
-
   return num;
 }
 
@@ -278,15 +332,12 @@ ExprNode::litnum(
   }
 
   SizeType num = 0;
-
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
-    for ( auto child: child_list() ) {
-      num += child->litnum(id);
+    for ( auto& opr: operand_list() ) {
+      num += opr->litnum(id);
     }
-    return num;
   }
-
   return num;
 }
 
@@ -303,14 +354,12 @@ ExprNode::litnum(
   }
 
   SizeType num = 0;
-
   if ( is_op() ) {
     // AND/OR/XOR ノードなら子供のリテラル数の和を返す．
-    for ( auto child: child_list() ) {
-      num += child->litnum(id, inv);
+    for ( auto& opr: operand_list() ) {
+      num += opr->litnum(id, inv);
     }
   }
-
   return num;
 }
 
@@ -323,16 +372,12 @@ ExprNode::input_size() const
   }
 
   SizeType ans = 0;
-
   if ( is_op() ) {
-    for ( auto child: child_list() ) {
-      SizeType ans1{child->input_size()};
-      if ( ans < ans1 ) {
-	ans = ans1;
-      }
+    for ( auto& opr: operand_list() ) {
+      auto ans1 = opr->input_size();
+      ans = std::max(ans, ans1);
     }
   }
-
   return ans;
 }
 
@@ -349,8 +394,8 @@ ExprNode::soplit(
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or && inverted) ) {
     auto l = SopLit{1, 0};
-    for ( auto child: child_list() ) {
-      auto l1 = child->soplit(inverted);
+    for ( auto& opr: operand_list() ) {
+      auto l1 = opr->soplit(inverted);
       l *= l1;
     }
     return l;
@@ -359,24 +404,24 @@ ExprNode::soplit(
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
     auto l = SopLit{0, 0};
-    for ( auto child: child_list() ) {
-      auto l1 = child->soplit(inverted);
+    for ( auto& opr: operand_list() ) {
+      auto l1 = opr->soplit(inverted);
       l += l1;
     }
     return l;
   }
 
   if ( type() == ExprNode::Xor ) {
-    auto chd = child(0);
-    auto lp = chd->soplit(inverted);
-    auto ln = chd->soplit(!inverted);
-    SizeType nc = child_num();
-    for ( SizeType i = 1; i < nc; ++ i ) {
-      auto chd = child(i);
+    auto& opr = operand(0);
+    auto lp = opr->soplit(inverted);
+    auto ln = opr->soplit(!inverted);
+    auto nop = operand_num();
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      auto& opr = operand(i);
       auto l1p = lp;
       auto l1n = ln;
-      auto l2p = chd->soplit(false);
-      auto l2n = chd->soplit(true);
+      auto l2p = opr->soplit(false);
+      auto l2n = opr->soplit(true);
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
@@ -405,8 +450,8 @@ ExprNode::soplit(
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or  && inverted) ) {
     auto l = SopLit{1, 0};
-    for ( auto child: child_list() ) {
-      auto l1 = child->soplit(inverted, id);
+    for ( auto& opr: operand_list() ) {
+      auto l1 = opr->soplit(inverted, id);
       l *= l1;
     }
     return l;
@@ -415,31 +460,31 @@ ExprNode::soplit(
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
     auto l = SopLit{0, 0};
-    for ( auto child: child_list() ) {
-      auto l1 = child->soplit(inverted, id);
+    for ( auto& opr: operand_list() ) {
+      auto l1 = opr->soplit(inverted, id);
       l += l1;
     }
     return l;
   }
 
   if ( type() == ExprNode::Xor ) {
-    auto chd = child(0);
-    auto lp = chd->soplit(inverted);
-    auto ln = chd->soplit(inverted);
-    SizeType nc = child_num();
-    for ( SizeType i = 1; i < nc; ++ i ) {
-      auto chd = child(i);
+    auto& opr = operand(0);
+    auto lp = opr->soplit(inverted);
+    auto ln = opr->soplit(inverted);
+    auto nop = operand_num();
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      auto& opr = operand(i);
       auto l1p = lp;
       auto l1n = ln;
-      auto l2p = chd->soplit(false, id);
-      auto l2n = chd->soplit(true, id);
+      auto l2p = opr->soplit(false, id);
+      auto l2n = opr->soplit(true, id);
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
     return lp;
   }
 
-  return SopLit(0, 0);
+  return SopLit::zero();
 }
 
 // SOP形式の積項数とリテラル数を計算する．
@@ -462,8 +507,8 @@ ExprNode::soplit(
   if ( (type() == ExprNode::And && !inverted) ||
        (type() == ExprNode::Or && inverted) ) {
     auto l = SopLit{1, 0};
-    for ( auto child: child_list() ) {
-      auto l1 = child->soplit(inverted, id, inv);
+    for ( auto& opr: operand_list() ) {
+      auto l1 = opr->soplit(inverted, id, inv);
       l *= l1;
     }
     return l;
@@ -472,31 +517,31 @@ ExprNode::soplit(
   if ( (type() == ExprNode::Or && !inverted) ||
        (type() == ExprNode::And && inverted) ) {
     auto l = SopLit{0, 0};
-    for ( auto child: child_list() ) {
-      auto l1 = child->soplit(inverted, id, inv);
+    for ( auto& opr: operand_list() ) {
+      auto l1 = opr->soplit(inverted, id, inv);
       l += l1;
     }
     return l;
   }
 
   if ( type() == ExprNode::Xor ) {
-    auto n = child_num();
-    auto chd = child(0);
-    auto lp = chd->soplit(inverted);
-    auto ln = chd->soplit(inverted);
-    for ( SizeType i = 1; i < n; ++ i ) {
-      auto chd = child(i);
+    auto nop = operand_num();
+    auto& opr = operand(0);
+    auto lp = opr->soplit(inverted);
+    auto ln = opr->soplit(!inverted);
+    for ( SizeType i = 1; i < nop; ++ i ) {
+      auto& opr = operand(i);
       auto l1p = lp;
       auto l1n = ln;
-      auto l2p = chd->soplit(false, id);
-      auto l2n = chd->soplit(true, id);
+      auto l2p = opr->soplit(false, id);
+      auto l2n = opr->soplit(true, id);
       lp = l1p * l2n + l1n * l2p;
       ln = l1p * l2p + l1n * l2n;
     }
     return lp;
   }
 
-  return SopLit{0, 0};
+  return SopLit::zero();
 }
 
 // @brief 内容を表す文字列を返す．
@@ -510,12 +555,12 @@ ExprNode::rep_string() const
   case ExprNode::Const1:      buf << "C1"; break;
   case ExprNode::PosiLiteral: buf << "P" << varid(); break;
   case ExprNode::NegaLiteral: buf << "N" << varid(); break;
-  case ExprNode::And:         buf << "A" << child_num(); break;
-  case ExprNode::Or:          buf << "O" << child_num(); break;
-  case ExprNode::Xor:         buf << "X" << child_num(); break;
+  case ExprNode::And:         buf << "A" << operand_num(); break;
+  case ExprNode::Or:          buf << "O" << operand_num(); break;
+  case ExprNode::Xor:         buf << "X" << operand_num(); break;
   }
-  for ( auto child: child_list() ) {
-    buf << child->rep_string();
+  for ( auto& opr: operand_list() ) {
+    buf << opr->rep_string();
   }
   return buf.str();
 }
@@ -533,31 +578,21 @@ ExprNode::print(
   case ExprNode::NegaLiteral: s << "N" << varid(); return;
   default: break;
   }
-  const char* op = "";
-  const char* op1 = "";
+  const char* op_str = "";
+  const char* op1_str = "";
   s << "(";
   switch ( type() ) {
-  case ExprNode::And: op1 = " & "; break;
-  case ExprNode::Or:  op1 = " | "; break;
-  case ExprNode::Xor: op1 = " ^ "; break;
+  case ExprNode::And: op1_str = " & "; break;
+  case ExprNode::Or:  op1_str = " | "; break;
+  case ExprNode::Xor: op1_str = " ^ "; break;
   default: break;
   }
-  for ( auto child: child_list() ) {
-    s << op;
-    child->print(s);
-    op = op1;
+  for ( auto& opr: operand_list() ) {
+    s << op_str;
+    opr->print(s);
+    op_str = op1_str;
   }
   s << ")";
-}
-
-// 自殺する．
-void
-ExprNode::suicide()
-{
-  // なんでこれだけのコードを別の関数にするかというと，
-  // これを ExprNode.h に書くと ExprMgr.h をインクルードしなければ
-  // ならなくなるので．
-  ExprMgr::the_obj().free_node(this);
 }
 
 END_NAMESPACE_YM_LOGIC

@@ -5,7 +5,7 @@
 /// @brief ExprWriter のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2017, 2022 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
@@ -21,6 +21,11 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 class ExprWriter
 {
+public:
+
+  /// @breif 変数名の辞書
+  using VarNameDict = std::unordered_map<SizeType, string>;
+
 public:
 
   /// @brief コンストラクタ
@@ -44,11 +49,11 @@ public:
   /// @return s
   ostream&
   dump(
-    ostream& s,                                      ///< [in] 出力ストリーム
-    const Expr& expr,                                ///< [in] 式
-    const unordered_map<SizeType, string>& var_names ///< [in] 各変数から変数名への写像
-                                                     ///<  var の変数名として var_names[var] を用いる．
-                                                     ///<  登録されていなければデフォルトの表記を用いる．
+    ostream& s,                  ///< [in] 出力ストリーム
+    const Expr& expr,            ///< [in] 式
+    const VarNameDict& var_names ///< [in] 各変数から変数名への写像
+                                 ///<      var の変数名として var_names[var] を用いる．
+                                 ///<      登録されていなければデフォルトの表記を用いる．
   ) const;
 
   /// @brief 内容を文字列にする．
@@ -62,11 +67,10 @@ public:
   /// @return 式の内容を表す文字列
   string
   dump_to_string(
-    const Expr& expr,                                ///< [in] 出力ストリーム
-    const unordered_map<SizeType, string>& var_names ///< [in] 式
-						     ///< [in] 各変数から変数名への写像
-						     ///<  var の変数名として var_names[var] を用いる．
-                                                     ///<  登録されていなければデフォルトの表記を
+    const Expr& expr,            ///< [in] 出力ストリーム
+    const VarNameDict& var_names ///< [in] 各変数から変数名への写像
+                                 ///<      var の変数名として var_names[var] を用いる．
+                                 ///<      登録されていなければデフォルトの表記を用いる．
   ) const;
 
 
@@ -116,7 +120,7 @@ private:
   dump_sub(
     ostream& s,
     const Expr& expr,
-    const unordered_map<SizeType, string>& var_names
+    const VarNameDict& var_names
   ) const;
 
 
