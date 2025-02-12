@@ -944,7 +944,7 @@ private:
   SizeType mBlockNum;
 
   // パックされた真理値ベクトル
-  WordType* mVector;
+  vector<WordType> mVector;
 
 };
 

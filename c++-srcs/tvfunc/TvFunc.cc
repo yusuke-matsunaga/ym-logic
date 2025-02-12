@@ -103,7 +103,7 @@ END_NONAMESPACE
 TvFunc::TvFunc(
 ) : mInputNum{0},
     mBlockNum{0},
-    mVector{nullptr}
+    mVector(0)
 {
 }
 
@@ -113,11 +113,8 @@ TvFunc::TvFunc(
   SizeType ni
 ) : mInputNum{ni},
     mBlockNum{nblock(ni)},
-    mVector{new TvFunc::WordType[mBlockNum]}
+    mVector(mBlockNum, 0ULL)
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] = 0UL;
-  }
 }
 
 // 恒真関数を作るコンストラクタ
@@ -127,12 +124,8 @@ TvFunc::TvFunc(
   int dummy
 ) : mInputNum{ni},
     mBlockNum{nblock(ni)},
-    mVector{new TvFunc::WordType[mBlockNum]}
+    mVector(mBlockNum, vec_mask(ni))
 {
-  TvFunc::WordType mask = vec_mask(ni);
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] = mask;
-  }
 }
 
 // リテラル関数を作るコンストラクタ
@@ -140,9 +133,7 @@ TvFunc::TvFunc(
   SizeType ni,
   SizeType varid,
   bool inv
-) : mInputNum{ni},
-    mBlockNum{nblock(ni)},
-    mVector{new TvFunc::WordType[mBlockNum]}
+) : TvFunc{ni}
 {
   _check_varid(varid);
 
@@ -160,9 +151,7 @@ TvFunc::TvFunc(
 TvFunc::TvFunc(
   SizeType ni,
   const vector<vector<Literal>>& cube_list
-) : mInputNum{ni},
-    mBlockNum{nblock(ni)},
-    mVector{new TvFunc::WordType[mBlockNum]}
+) : TvFunc{ni}
 {
   for ( auto& cube: cube_list ) {
     for ( auto lit: cube ) {
@@ -194,9 +183,7 @@ TvFunc::TvFunc(
 TvFunc::TvFunc(
   SizeType ni,
   const vector<SopCube>& cube_list
-) : mInputNum{ni},
-    mBlockNum{nblock(ni)},
-    mVector{new TvFunc::WordType[mBlockNum]}
+) : TvFunc{ni}
 {
   for ( auto& cube: cube_list ) {
     if ( cube.variable_num() != ni ) {
@@ -228,9 +215,7 @@ TvFunc::TvFunc(
 TvFunc::TvFunc(
   SizeType ni,
   const vector<Literal>& lit_list
-) : mInputNum{ni},
-    mBlockNum{nblock(ni)},
-    mVector{new TvFunc::WordType[mBlockNum]}
+) : TvFunc{ni}
 {
   for ( auto lit: lit_list ) {
     _check_varid(lit.varid());
@@ -256,9 +241,7 @@ TvFunc::TvFunc(
 TvFunc::TvFunc(
   SizeType ni,
   const vector<int>& values
-) : mInputNum{ni},
-    mBlockNum{nblock(ni)},
-    mVector{new TvFunc::WordType[mBlockNum]}
+) : TvFunc{ni}
 {
   SizeType ni_pow = 1 << ni;
   if ( values.size() != ni_pow ) {
@@ -287,8 +270,10 @@ TvFunc::TvFunc(
   }
 }
 
-// @brief 文字列からの変換コンストラクタ
-TvFunc::TvFunc(
+BEGIN_NONAMESPACE
+
+SizeType
+get_ni(
   const string& str
 )
 {
@@ -309,13 +294,21 @@ TvFunc::TvFunc(
     auto emsg = "the data length is expected to be the power of 2";
     throw std::invalid_argument(emsg);
   }
+  return ni;
+}
 
-  mInputNum = ni;
-  mBlockNum = nblock(ni);
-  mVector = new TvFunc::WordType[mBlockNum];
+END_NONAMESPACE
+
+// @brief 文字列からの変換コンストラクタ
+TvFunc::TvFunc(
+  const string& str
+) : TvFunc{get_ni(str)}
+{
   SizeType base = 0;
   TvFunc::WordType bitpat = 0ULL;
   TvFunc::WordType bitmask = 1ULL;
+  // 文字列はLSBが右になるようになっている．
+  SizeType n = str.size();
   for ( SizeType i = 0; i < n; ++ i ) {
     char c = str[n - i - 1];
     if ( c == '1' ) {
@@ -331,9 +324,7 @@ TvFunc::TvFunc(
   }
   if ( bitmask != 1ULL ) {
     mVector[base] = bitpat;
-    ++ base;
   }
-
 }
 
 // コピーコンストラクタ
@@ -341,11 +332,8 @@ TvFunc::TvFunc(
   const TvFunc& src
 ) : mInputNum{src.mInputNum},
     mBlockNum{src.mBlockNum},
-    mVector{new TvFunc::WordType[mBlockNum]}
+    mVector{src.mVector}
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] = src.mVector[b];
-  }
 }
 
 // @brief ムーブコンストラクタ
@@ -353,11 +341,10 @@ TvFunc::TvFunc(
   TvFunc&& src
 ) : mInputNum{src.mInputNum},
     mBlockNum{src.mBlockNum},
-    mVector{src.mVector}
+    mVector{std::move(src.mVector)}
 {
   src.mInputNum = 0;
   src.mBlockNum = 0;
-  src.mVector = nullptr;
 }
 
 // コピー代入演算子
@@ -366,17 +353,11 @@ TvFunc::operator=(
   const TvFunc& src
 )
 {
-  if ( mBlockNum != src.mBlockNum ) {
-    delete [] mVector;
+  if ( &src != this ) {
+    mInputNum = src.mInputNum;
     mBlockNum = src.mBlockNum;
-    mVector = new TvFunc::WordType[mBlockNum];
+    mVector = src.mVector;
   }
-  mInputNum = src.mInputNum;
-
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] = src.mVector[b];
-  }
-
   return *this;
 }
 
@@ -386,17 +367,12 @@ TvFunc::operator=(
   TvFunc&& src
 )
 {
-  if ( mVector != nullptr ) {
-    delete [] mVector;
-  }
-
   mInputNum = src.mInputNum;
   mBlockNum = src.mBlockNum;
-  mVector = src.mVector;
+  std::swap(mVector, src.mVector);
 
   src.mInputNum = 0;
   src.mBlockNum = 0;
-  src.mVector = nullptr;
 
   return *this;
 }
@@ -404,7 +380,6 @@ TvFunc::operator=(
 // デストラクタ
 TvFunc::~TvFunc()
 {
-  delete [] mVector;
 }
 
 // 自分自身を否定する．
@@ -1036,9 +1011,9 @@ TvFunc::dump(
   }
   else {
     s.write_64(mInputNum);
-    auto ptr = reinterpret_cast<const std::uint8_t*>(mVector);
-    auto n = mBlockNum * sizeof(WordType);
-    s.write_block(ptr, n);
+    for ( auto b: Range(mBlockNum) ) {
+      s.write_64(mVector[b]);
+    }
   }
 }
 
@@ -1053,20 +1028,17 @@ TvFunc::restore(
     // 不正値
     mInputNum = 0;
     mBlockNum = 0;
-    if ( mVector != nullptr ) {
-      delete [] mVector;
-    }
-    mVector = nullptr;
+    mVector.clear();
   }
   else {
     SizeType nblk = nblock(mInputNum);
     if ( mBlockNum != nblk ) {
-      delete [] mVector;
       mBlockNum = nblk;
-      mVector = new TvFunc::WordType[mBlockNum];
+      mVector.resize(nblk);
     }
-    auto n = mBlockNum * sizeof(WordType);
-    s.read_block(reinterpret_cast<std::uint8_t*>(mVector), n);
+    for ( auto b: Range(mBlockNum) ) {
+      mVector[b] = s.read_64();
+    }
   }
 }
 

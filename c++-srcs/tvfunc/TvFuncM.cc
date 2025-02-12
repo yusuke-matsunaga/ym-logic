@@ -3,7 +3,7 @@
 /// @brief TvFuncM の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2014, 2018, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/TvFuncM.h"
@@ -77,7 +77,6 @@ END_NONAMESPACE
 //////////////////////////////////////////////////////////////////////
 
 // 入力数と出力数のみ指定したコンストラクタ
-// 中身は恒偽関数
 TvFuncM::TvFuncM(
   SizeType ni,
   SizeType no
@@ -85,16 +84,11 @@ TvFuncM::TvFuncM(
     mOutputNum{no},
     mBlockNum1{nblock(ni)},
     mBlockNum{mBlockNum1 * no},
-    mVector{new WordType[mBlockNum]}
+    mVector(mBlockNum, 0ULL)
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] = 0ULL;
-  }
 }
 
 // @brief TvFunc を用いたコンストラクタ
-// @param[in] src_list 各出力の論理関数
-// @note src_list の関数の入力数は等しくなければならない．
 TvFuncM::TvFuncM(
   const vector<TvFunc>& src_list
 )
@@ -112,7 +106,7 @@ TvFuncM::TvFuncM(
   mOutputNum = no;
   mBlockNum1 = nblock(ni);
   mBlockNum = mBlockNum1 * no;
-  mVector = new TvFuncM::WordType[mBlockNum];
+  mVector = vector<WordType>(mBlockNum);
   for ( SizeType i: Range(no) ) {
     SizeType offset = i * mBlockNum1;
     const TvFunc& src1 = src_list[i];
@@ -129,11 +123,8 @@ TvFuncM::TvFuncM(
     mOutputNum{src.mOutputNum},
     mBlockNum1{src.mBlockNum1},
     mBlockNum{src.mBlockNum},
-    mVector{new WordType[mBlockNum]}
+    mVector{src.mVector}
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] = src.mVector[b];
-  }
 }
 
 // ムーブコンストラクタ
@@ -143,13 +134,12 @@ TvFuncM::TvFuncM(
     mOutputNum{src.mOutputNum},
     mBlockNum1{src.mBlockNum1},
     mBlockNum{src.mBlockNum},
-    mVector{src.mVector}
+    mVector{std::move(src.mVector)}
 {
   src.mInputNum = 0;
-  src.mOutputNum = 1;
+  src.mOutputNum = 0;
   src.mBlockNum1 = 0;
   src.mBlockNum = 0;
-  src.mVector = nullptr;
 }
 
 // @brief TvFunc からの変換用コンストラクタ
@@ -159,11 +149,8 @@ TvFuncM::TvFuncM(
     mOutputNum{1},
     mBlockNum1{nblock(mInputNum)},
     mBlockNum{mBlockNum1},
-    mVector{new TvFuncM::WordType[mBlockNum]}
+    mVector{src.mVector}
 {
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] = src.raw_data(b);
-  }
 }
 
 // @brief TvFunc からの変換用ムーブコンストラクタ
@@ -173,11 +160,10 @@ TvFuncM::TvFuncM(
     mOutputNum{1},
     mBlockNum1{nblock(mInputNum)},
     mBlockNum{mBlockNum1},
-    mVector{src.mVector}
+    mVector{std::move(src.mVector)}
 {
   src.mInputNum = 0;
   src.mBlockNum = 0;
-  src.mVector = nullptr;
 }
 
 // コピー代入演算子
@@ -186,17 +172,12 @@ TvFuncM::operator=(
   const TvFuncM& src
 )
 {
-  if ( mBlockNum != src.mBlockNum ) {
-    delete [] mVector;
+  if ( &src != this ) {
+    mInputNum = src.mInputNum;
+    mOutputNum = src.mOutputNum;
     mBlockNum1 = src.mBlockNum1;
     mBlockNum = src.mBlockNum;
-    mVector = new TvFuncM::WordType[mBlockNum];
-  }
-  mInputNum = src.mInputNum;
-  mOutputNum = src.mOutputNum;
-
-  for ( SizeType b: Range(mBlockNum) ) {
-    mVector[b] = src.mVector[b];
+    mVector = src.mVector;
   }
 
   return *this;
@@ -212,13 +193,12 @@ TvFuncM::operator=(
   mOutputNum = src.mOutputNum;
   mBlockNum1 = src.mBlockNum1;
   mBlockNum = src.mBlockNum;
-  mVector = src.mVector;
+  std::swap(mVector, src.mVector);
 
   src.mInputNum = 0;
-  src.mOutputNum = 1;
+  src.mOutputNum = 0;
   src.mBlockNum1 = 0;
   src.mBlockNum = 0;
-  src.mVector = nullptr;
 
   return *this;
 }
@@ -226,7 +206,6 @@ TvFuncM::operator=(
 // デストラクタ
 TvFuncM::~TvFuncM()
 {
-  delete [] mVector;
 }
 
 // 自分自身を否定する．
@@ -653,7 +632,7 @@ TvFuncM::print(
   SizeType ni_pow = 1UL << mInputNum;
   const SizeType wordsize = sizeof(TvFuncM::WordType) * 8;
   if ( mode == 2 ) {
-    TvFuncM::WordType* bp = mVector;
+    auto bp = mVector.begin();
     TvFuncM::WordType tmp = *bp;
     const char* del = "";
     for ( int o: Range(mOutputNum) ) {
@@ -678,7 +657,7 @@ TvFuncM::print(
   }
   else if ( mode == 16 ) {
     SizeType ni_pow4 = ni_pow / 4;
-    TvFuncM::WordType* bp = mVector;
+    auto  bp = mVector.begin();
     TvFuncM::WordType tmp = *bp;
     for ( int o: Range(mOutputNum) ) {
       const char* del = "";
@@ -721,7 +700,9 @@ TvFuncM::dump(
 {
   s.write_64(mInputNum);
   s.write_64(mOutputNum);
-  s.write_block(reinterpret_cast<const std::uint8_t*>(mVector), mBlockNum * sizeof(WordType));
+  for ( auto b: Range(mBlockNum) ) {
+    s.write_64(mVector[b]);
+  }
 }
 
 // @brief バイナリファイルの読み込み
@@ -734,13 +715,11 @@ TvFuncM::restore(
   mInputNum = s.read_64();
   mOutputNum = s.read_64();
   mBlockNum1 = nblock(mInputNum);
-  int nblk = mBlockNum1 * mOutputNum;
-  if ( mBlockNum != nblk ) {
-    delete [] mVector;
-    mBlockNum = nblk;
-    mVector = new TvFuncM::WordType[mBlockNum];
+  mBlockNum = mBlockNum1 * mOutputNum;
+  mVector.resize(mBlockNum);
+  for ( auto b: Range(mBlockNum) ) {
+    mVector[b] = s.read_64();
   }
-  s.read_block(reinterpret_cast<std::uint8_t*>(mVector), mBlockNum * sizeof(WordType));
 }
 
 END_NAMESPACE_YM
