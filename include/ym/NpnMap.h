@@ -199,12 +199,48 @@ public:
     return static_cast<bool>(mNiPol & 1U);
   }
 
+public:
+  //////////////////////////////////////////////////////////////////////
+  // NpnMap に関連する関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 逆写像を求める．
+  ///
+  /// 1対1写像でなければ答えは不定．
+  NpnMap
+  inverse() const;
+
+  /// @brief inverse() の別名
+  NpnMap
+  operator~() const
+  {
+    return inverse();
+  }
+
+  /// @brief 合成を求める．
+  ///
+  /// this の値域とsrc2の定義域は一致していな
+  /// ければならない．そうでなければ答えは不定．
+  NpnMap
+  operator*(
+    const NpnMap& src2  ///< [in] 右側のオペランド
+  ) const;
+
   /// @brief 内容が等しいか調べる．
   /// @return 自分自身と src が等しいときに true を返す．
   bool
   operator==(
     const NpnMap& src ///< [in] 比較対象のマップ
   ) const;
+
+  /// @return src1 と src2 が等しくないときに true を返す．
+  bool
+  operator!=(
+    const NpnMap& src2  ///< [in] 右側のオペランド
+  ) const
+  {
+    return !operator==(src2);
+  }
 
 
 public:
@@ -256,45 +292,6 @@ private:
   NpnVmap mImap[TvFunc::kMaxNi];
 
 };
-
-
-//////////////////////////////////////////////////////////////////////
-// NpnMap に関連する関数
-//////////////////////////////////////////////////////////////////////
-
-/// @relates NpnMap
-/// @brief 逆写像を求める．
-/// @return src の逆写像
-///
-/// 1対1写像でなければ答えは不定．
-NpnMap
-inverse(
-  const NpnMap& src ///< [in] 入力となるマップ
-);
-
-/// @relates NpnMap
-/// @brief 合成を求める．
-/// @return src1 と src2 を合成したもの
-///
-/// src1の値域とsrc2の定義域は一致していな
-/// ければならない．そうでなければ答えは不定．
-NpnMap
-operator*(
-  const NpnMap& src1, ///< [in] 左側のオペランド
-  const NpnMap& src2  ///< [in] 右側のオペランド
-);
-
-/// @brief 非等価演算子
-/// @return src1 と src2 が等しくないときに true を返す．
-inline
-bool
-operator!=(
-  const NpnMap& src1, ///< [in] 左側のオペランド
-  const NpnMap& src2  ///< [in] 右側のオペランド
-)
-{
-  return !src1.operator==(src2);
-}
 
 /// @relates NpnMap
 /// @brief 内容を表示する(主にデバッグ用)．

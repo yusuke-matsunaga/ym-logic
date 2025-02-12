@@ -318,7 +318,7 @@ NpnMap_invert(
 {
   if ( PyNpnMap::Check(self) ) {
     auto& val = PyNpnMap::Get(self);
-    return PyNpnMap::ToPyObject(inverse(val));
+    return PyNpnMap::ToPyObject(~val);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }

@@ -95,7 +95,29 @@ TEST(NpnMapTest, inverse)
   map1.set(3, 0, true);
   map1.set(4, 2, false);
 
-  NpnMap imap = inverse(map1);
+  NpnMap imap = map1.inverse();
+
+  NpnMap map2 = map1 * imap;
+
+  NpnMap ident(5);
+  EXPECT_EQ( ident, map2 );
+
+  NpnMap map3 = imap * map1;
+  EXPECT_EQ( ident, map3);
+}
+
+TEST(NpnMapTest, inverse_op)
+{
+  // (3', 1, 4, 2', 0)'
+  NpnMap map1(5);
+  map1.set_oinv(true);
+  map1.set(0, 4, false);
+  map1.set(1, 1, false);
+  map1.set(2, 3, true);
+  map1.set(3, 0, true);
+  map1.set(4, 2, false);
+
+  NpnMap imap = ~map1;
 
   NpnMap map2 = map1 * imap;
 

@@ -5,11 +5,12 @@
 /// @brief NpnMapM のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2005-2011, 2016, 2017, 2018, 2019, 2021 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
 #include "ym/NpnVmap.h"
+#include "ym/NpnMap.h"
 
 
 BEGIN_NAMESPACE_YM_LOGIC
@@ -17,7 +18,7 @@ BEGIN_NAMESPACE_YM_LOGIC
 //////////////////////////////////////////////////////////////////////
 /// @class NpnMapM NpnMapM.h "ym/NpnMapM.h"
 /// @ingroup LogicGroup
-/// @brief 他出力のNPN変換の情報を入れるクラス
+/// @brief 多出力のNPN変換の情報を入れるクラス
 ///
 /// @sa NpnVmap
 //////////////////////////////////////////////////////////////////////
@@ -36,19 +37,35 @@ public:
   NpnMapM(
     SizeType ni, ///< [in] 入力数
     SizeType no  ///< [in] 出力数
-  );
+  ) : mInputNum{ni},
+      mOutputNum{no},
+      mMapArray(mInputNum + mOutputNum, NpnVmap::invalid())
+  {
+  }
 
   /// @brief コピーコンストラクタ
   NpnMapM(
     const NpnMapM& src ///< [in] コピー元のオブジェクト
-  );
+  ) : mInputNum{src.mInputNum},
+      mOutputNum{src.mOutputNum},
+      mMapArray{src.mMapArray}
+  {
+  }
 
   /// @brief 代入演算子
   /// @return 自分自身への定数参照を返す．
   NpnMapM&
   operator=(
     const NpnMapM& src ///< [in] コピー元のオブジェクト
-  );
+  )
+  {
+    if ( &src != this ) {
+      mInputNum = src.mInputNum;
+      mOutputNum = src.mOutputNum;
+      mMapArray = src.mMapArray;
+    }
+    return *this;
+  }
 
   /// @brief NpnMap からの変換コンストラクタ
   ///
@@ -56,10 +73,18 @@ public:
   explicit
   NpnMapM(
     const NpnMap& src ///< [in] コピー元のオブジェクト
-  );
+  ) : mInputNum{src.input_num()},
+      mOutputNum{1},
+      mMapArray(mInputNum)
+  {
+    for ( SizeType i = 0; i < mInputNum; ++ i ) {
+      mMapArray[i] = src.imap(i);
+    }
+    set_omap(0, 0, src.oinv());
+  }
 
   /// @brief デストラクタ
-  ~NpnMapM();
+  ~NpnMapM() = default;
 
 
 public:
@@ -71,7 +96,13 @@ public:
   ///
   /// 各変数の変換内容は不正な値になる．
   void
-  clear();
+  clear()
+  {
+    auto n = mMapArray.size();
+    for ( SizeType i = 0; i < n; ++ i ) {
+      mMapArray[i] = NpnVmap::invalid();
+    }
+  }
 
   /// @brief 入力数と出力数を再設定する．
   ///
@@ -80,14 +111,29 @@ public:
   resize(
     SizeType ni, ///< [in] 入力数
     SizeType no  ///< [in] 出力数
-  );
+  )
+  {
+    mInputNum = ni;
+    mOutputNum = no;
+    mMapArray.clear();
+    mMapArray.resize(mInputNum + mOutputNum, NpnVmap::invalid());
+  }
 
   /// @brief 恒等変換を表すように設定する．
   void
   set_identity(
     SizeType ni, ///< [in] 入力数
     SizeType no  ///< [in] 出力数
-  );
+  )
+  {
+    resize(ni, no);
+    for ( SizeType i = 0; i < ni; ++ i ) {
+      set_imap(i, i, false);
+    }
+    for ( SizeType i = 0; i < no; ++ i ) {
+      set_omap(i, i, false);
+    }
+  }
 
   /// @brief 入力の変換内容の設定
   void
@@ -108,7 +154,13 @@ public:
   set_imap(
     SizeType var, ///< [in] 入力番号
     NpnVmap imap  ///< [in] 変換情報(変換先の入力番号と極性)
-  );
+  )
+  {
+    if ( var >= input_num() ) {
+      throw std::out_of_range{"var is out of range"};
+    }
+    mMapArray[var] = imap;
+  }
 
   /// @brief 出力の変換内容の設定
   void
@@ -129,7 +181,13 @@ public:
   set_omap(
     SizeType var, ///< [in] 出力番号
     NpnVmap omap  ///< [in] 変換情報(変換先の出力番号と極性)
-  );
+  )
+  {
+    if ( var >= output_num() ) {
+      throw std::out_of_range{"var is out of range"};
+    }
+    mMapArray[var + input_num()] = omap;
+  }
 
 
 public:
@@ -184,6 +242,34 @@ public:
     return NpnVmap::invalid();
   }
 
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // NpnMapM の演算
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 逆写像を求める．
+  ///
+  /// 1対1写像でなければ答えは不定．
+  NpnMapM
+  inverse() const;
+
+  /// @brief inverse() の別名
+  NpnMapM
+  operator~() const
+  {
+    return inverse();
+  }
+
+  /// @brief 合成を求める．
+  ///
+  /// this の値域とsrc2の定義域は一致していなければならない．
+  /// そうでなければ答えは不定．
+  NpnMapM
+  operator*(
+    const NpnMapM& right ///< [in] 右側のオペランド
+  ) const;
+
   /// @brief 内容が等しいか調べる．
   /// @return 自分自身と src が等しいときに true を返す．
   bool
@@ -234,37 +320,16 @@ private:
   SizeType mOutputNum{0};
 
   // 入力と出力のマッピング情報
-  NpnVmap* mMapArray{nullptr};
+  vector<NpnVmap> mMapArray;
 
 };
 
 
 //////////////////////////////////////////////////////////////////////
 // NpnMapM に関連した関数
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
 
-/// @relates NpnMapM
-/// @brief 逆写像を求める．
-/// @return src の逆写像
 ///
-/// 1対1写像でなければ答えは不定．
-NpnMapM
-inverse(
-  const NpnMapM& src ///< [in] 入力となるマップ
-);
-
-/// @relates NpnMapM
-/// @brief 合成を求める．
-/// @return src1 と src2 を合成したもの
-///
-/// src1の値域とsrc2の定義域は一致していなければならない．
-/// そうでなければ答えは不定．
-NpnMapM
-operator*(
-  const NpnMapM& src1, ///< [in] 左側のオペランド
-  const NpnMapM& src2  ///< [in] 右側のオペランド
-);
-
 /// @relates NpnMapM
 /// @brief 内容を表示する(主にデバッグ用)．
 ///

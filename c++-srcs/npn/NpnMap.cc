@@ -161,34 +161,32 @@ NpnMap::operator==(
 
 // 逆写像を求める．1対1写像でなければ答えは不定
 NpnMap
-inverse(
-  const NpnMap& src
-)
+NpnMap::inverse() const
 {
   if ( debug_npn_map ) {
     cerr << "inverse :" << endl
-	 << src
+	 << *this
 	 << endl;
   }
 
-  SizeType src_ni = src.input_num();
-  SizeType dst_ni = src.input_num2();
+  SizeType src_ni = input_num();
+  SizeType dst_ni = input_num2();
   NpnMap dst_map(dst_ni, src_ni);
   for ( SizeType src_var = 0; src_var < src_ni; ++ src_var ) {
-    NpnVmap imap = src.imap(src_var);
-    if ( !imap.is_invalid() ) {
-      auto dst_var = imap.var();
+    NpnVmap imap1 = imap(src_var);
+    if ( !imap1.is_invalid() ) {
+      auto dst_var = imap1.var();
       if ( dst_var >= dst_ni ) {
 	if ( debug_npn_map ) {
 	  cerr << "inverse(src): srcの値域と定義域が一致しません．";
 	}
 	return NpnMap{};
       }
-      bool inv = imap.inv();
+      bool inv = imap1.inv();
       dst_map.set(dst_var, src_var, inv);
     }
   }
-  dst_map.set_oinv(src.oinv());
+  dst_map.set_oinv(oinv());
 
   if ( debug_npn_map ) {
     cerr << "--->" << endl
@@ -201,20 +199,19 @@ inverse(
 
 // 合成を求める．src1の値域とsrc2の定義域は一致していなければならない．
 NpnMap
-operator*(
-  const NpnMap& src1,
+NpnMap::operator*(
   const NpnMap& src2
-)
+) const
 {
   if ( debug_npn_map ) {
     cerr << "compose :"	 << endl
-	 << src1	 << endl
+	 << *this	 << endl
 	 << "with"	 << endl
 	 << src2	 << endl;
   }
 
-  SizeType ni1 = src1.input_num();
-  SizeType ni1_2 = src1.input_num2();
+  SizeType ni1 = input_num();
+  SizeType ni1_2 = input_num2();
   SizeType ni2 = src2.input_num();
   SizeType ni2_2 = src2.input_num2();
   if ( ni1_2 != ni2 ) {
@@ -225,9 +222,9 @@ operator*(
   }
 
   NpnMap dst_map(ni1, ni2_2);
-  dst_map.set_oinv(src1.oinv() ^ src2.oinv());
+  dst_map.set_oinv(oinv() ^ src2.oinv());
   for ( SizeType var1 = 0; var1 < ni1; ++ var1 ) {
-    auto imap1 = src1.imap(var1);
+    auto imap1 = imap(var1);
     if ( imap1.is_invalid() ) {
       dst_map.set(var1, NpnVmap::invalid());
     }
