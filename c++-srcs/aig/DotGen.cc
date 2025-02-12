@@ -157,7 +157,7 @@ void
 DotGen::write(
   ostream& s,
   const vector<AigEdge>& root_list,
-  const vector<AigNode*>& node_list
+  const vector<std::unique_ptr<AigNode>>& node_list
 )
 {
   DotWriter writer{s};
@@ -180,7 +180,7 @@ DotGen::write(
 
   // ノードの定義
   SizeType input_num = 0;
-  for ( auto node: node_list ) {
+  for ( auto& node: node_list ) {
     auto name = node_name(node);
     if ( node->is_input() ) {
       auto attr_list = mTerminalAttrList;
@@ -205,7 +205,7 @@ DotGen::write(
   }
 
   // 枝の定義
-  for ( auto node: node_list ) {
+  for ( auto& node: node_list ) {
     if ( node->is_and() ) {
       auto name = node_name(node);
       write_edge(writer, name, node->fanin0());
@@ -227,7 +227,7 @@ DotGen::write(
   {
     vector<string> name_list;
     name_list.reserve(input_num);
-    for ( auto node: node_list ) {
+    for ( auto& node: node_list ) {
       if ( node->is_input() ) {
 	auto name = node_name(node);
 	name_list.push_back(name);

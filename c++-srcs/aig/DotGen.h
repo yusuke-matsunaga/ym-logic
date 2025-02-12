@@ -46,7 +46,7 @@ public:
   write(
     ostream& s,                        ///< [in] 出力ストリーム
     const vector<AigEdge>& root_list,  ///< [in] 根の枝のリスト
-    const vector<AigNode*>& node_list  ///< [in] ノードのリスト
+    const vector<std::unique_ptr<AigNode>>& node_list  ///< [in] ノードのリスト
   );
 
 
@@ -74,6 +74,15 @@ private:
   root_name(
     SizeType i ///< [in] 番号
   );
+
+  /// @brief ノード名を返す．
+  string
+  node_name(
+    const std::unique_ptr<AigNode>& node ///< [in] ノード
+  )
+  {
+    return node_name(node.get());
+  }
 
   /// @brief ノード名を返す．
   string

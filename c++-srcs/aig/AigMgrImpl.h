@@ -105,7 +105,7 @@ public:
     auto id = mNodeArray.size();
     auto input_id = mInputArray.size();
     auto node = new AigNode{id, input_id};
-    mNodeArray.push_back(node);
+    mNodeArray.push_back(std::unique_ptr<AigNode>{node});
     mInputArray.push_back(node);
     return AigEdge{node, false};
   }
@@ -142,7 +142,7 @@ public:
     // step3: 新しいノードを作る．
     auto id = mNodeArray.size();
     auto node = new AigNode{id, fanin0, fanin1};
-    mNodeArray.push_back(node);
+    mNodeArray.push_back(std::unique_ptr<AigNode>{node});
     mAndTable.insert(node);
     return AigEdge{node, false};
   }
@@ -285,7 +285,8 @@ private:
   SizeType mRefCount{0};
 
   // ID番号をキーにして AigNode を収めた配列
-  vector<AigNode*> mNodeArray;
+  // AigNode の所有権を持つ．
+  vector<std::unique_ptr<AigNode>> mNodeArray;
 
   // 入力番号をキーにして入力ノードを収めた配列
   vector<AigNode*> mInputArray;

@@ -40,6 +40,7 @@ BEGIN_NAMESPACE_YM_AIG
 
 class AigHandle;
 class AigMgr;
+class AigMgrImpl;
 
 END_NAMESPACE_YM_AIG
 

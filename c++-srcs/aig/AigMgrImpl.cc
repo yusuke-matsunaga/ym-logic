@@ -27,9 +27,6 @@ AigMgrImpl::AigMgrImpl()
 // @brief デストラクタ
 AigMgrImpl::~AigMgrImpl()
 {
-  for ( auto node: mNodeArray ) {
-    delete node;
-  }
 }
 
 // @brief 論理シミュレーションを行う．
@@ -79,7 +76,7 @@ AigMgrImpl::eval_sub(
   // ノードの評価を行う．
   // AIG はノードの作り方から mNodeArray が
   // かならずトロポジカルソートされている性質がある．
-  for ( auto node: mNodeArray ) {
+  for ( auto& node: mNodeArray ) {
     AigBitVect bv;
     if ( node->is_input() ) {
       bv = input_vals[node->input_id()];
@@ -91,7 +88,7 @@ AigMgrImpl::eval_sub(
       auto bv1 = val_array.get_val(h1);
       bv = bv0 & bv1;
     }
-    val_array.put_val(node, bv);
+    val_array.put_val(node.get(), bv);
   }
 }
 
