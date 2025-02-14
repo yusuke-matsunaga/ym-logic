@@ -31,11 +31,6 @@ public:
     auto cube_list = Tv2Sop::isop(f, d);
     auto cov = SopCover{f.input_num(), cube_list};
 
-    {
-      cout << "F: " << f << endl;
-      cout << "D: " << d << endl;
-      cout << "isop: " << cov << endl;
-    }
     // cof_f が [f: f + d] の範囲に入っているかテスト
     auto cov_f = cov.tvfunc();
     ostringstream buf;
@@ -74,7 +69,9 @@ public:
     }
     for ( SizeType i = 0; i < nc; ++ i ) {
       auto f1 = fl_list[i] | fu_list[i];
-      EXPECT_NE( f1, f );
+      ostringstream buf;
+      buf << cube_list[i] << " is redundant";
+      EXPECT_NE( f1, f ) << buf.str();
     }
   }
 
@@ -168,6 +165,40 @@ TEST_F(IsopTest, isop4)
   auto var3 = TvFunc::literal(ni, 3);
   auto f = var0 & var3;
   auto d = ~var0 & ~var1 & ~var2;
+
+  check(f, d);
+}
+
+TEST_F(IsopTest, isop5)
+{
+  SizeType ni = 3;
+  auto var0 = TvFunc::literal(ni, 0);
+  auto var1 = TvFunc::literal(ni, 1);
+  auto var2 = TvFunc::literal(ni, 2);
+  auto f = var0 & var2;
+  auto d = ~var0 & ~var1;
+
+  check(f, d);
+}
+
+TEST_F(IsopTest, isop6)
+{
+  SizeType ni = 2;
+  auto var0 = TvFunc::literal(ni, 0);
+  auto var1 = TvFunc::literal(ni, 1);
+  auto f = var0;
+  auto d = ~var0 & var1;
+
+  check(f, d);
+}
+
+TEST_F(IsopTest, isop7)
+{
+  SizeType ni = 2;
+  auto var0 = TvFunc::literal(ni, 0);
+  auto var1 = TvFunc::literal(ni, 1);
+  auto f = var0 | var1;
+  auto d = var0 & var1;
 
   check(f, d);
 }

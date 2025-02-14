@@ -129,13 +129,6 @@ KernelGen::best_kernel(
     auto& kernel = p->first;
     auto& cokernels = p->second;
     int value = eval_func(kernel, cokernels);
-    {
-      cout << "kernel: " << kernel << endl
-	   << "cokernsl: ";
-      SopCube::print(cout, cokernels);
-      cout << endl;
-      cout << "value: " << value << endl;
-    }
     if ( max_value < value ) {
       max_value = value;
       max_p = p;
