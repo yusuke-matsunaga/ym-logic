@@ -195,6 +195,20 @@ public:
     return _literal_num(1, chunk());
   }
 
+  /// @brief キューブの集合のリテラル数を返す．
+  static
+  SizeType
+  literal_num(
+    const vector<SopCube>& cube_list ///< [in] キューブのリスト
+  )
+  {
+    SizeType ans = 0;
+    for ( auto& cube: cube_list ) {
+      ans += cube.literal_num();
+    }
+    return ans;
+  }
+
   /// @brief 指定した変数のパタンを読み出す．
   /// @retval SopPat::_X その変数は現れない．
   /// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
@@ -282,19 +296,14 @@ public:
   )
   {
     if ( cube_list.empty() ) {
-      return TvFunc{ni};
+      return TvFunc::zero(ni);
     }
     for ( auto& cube: cube_list ) {
       if ( cube.variable_num() != ni ) {
 	throw std::invalid_argument{"variable_num() mismatch"};
       }
     }
-    vector<vector<Literal>> lits_list;
-    lits_list.reserve(cube_list.size());
-    for ( auto& cube: cube_list ) {
-      lits_list.push_back(cube.literal_list());
-    }
-    return TvFunc::cover(ni, lits_list);
+    return TvFunc::cover(ni, cube_list);
   }
 
   /// @brief 本体のビットベクタを返す．

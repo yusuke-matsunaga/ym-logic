@@ -36,6 +36,10 @@ BoolDivision::divide(
   const SopCover& d
 )
 {
+  {
+    cout << "F: " << f << endl;
+    cout << "D: " << d << endl;
+  }
   SizeType ni = f.variable_num();
   auto f_func = f.tvfunc();
   auto d_func = d.tvfunc();

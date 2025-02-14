@@ -33,6 +33,17 @@ SopCover::best_kernel() const
   return kg.best_kernel(*this);
 }
 
+// @brief 最も価値の高いカーネルを求める．
+SopCover
+SopCover::best_kernel(
+  std::function<int(const SopCover&, const vector<SopCube>&)> eval_func
+) const
+{
+  KernelGen kg;
+  return kg.best_kernel(*this, eval_func);
+}
+
+
 //////////////////////////////////////////////////////////////////////
 // クラス KernelGen
 //////////////////////////////////////////////////////////////////////
@@ -64,25 +75,38 @@ KernelGen::all_kernels(
 
 BEGIN_NONAMESPACE
 
-inline
+// デフォルトの評価関数
 int
-literal_num(
-  const vector<SopCube>& cube_list
+eval_func(
+  const SopCover& kernel,
+  const vector<SopCube>& cokernels
 )
 {
-  int ans = 0;
-  for ( auto& cube: cube_list ) {
-    ans += cube.literal_num();
-  }
-  return ans;
+  auto k_nc = kernel.cube_num();
+  auto k_nl = kernel.literal_num();
+  auto c_nc = cokernels.size();
+  auto c_nl = SopCube::literal_num(cokernels);
+  int value = (k_nc - 1) * c_nl + (c_nc - 1) * k_nl;
+  return value;
 }
 
 END_NONAMESPACE
+
 
 // @brief 最も価値の高いカーネルを返す．
 SopCover
 KernelGen::best_kernel(
   const SopCover& cover
+)
+{
+  return best_kernel(cover, eval_func);
+}
+
+// @brief 最も価値の高いカーネルを返す．
+SopCover
+KernelGen::best_kernel(
+  const SopCover& cover,
+  std::function<int(const SopCover&, const vector<SopCube>&)> eval_func
 )
 {
   generate(cover);
@@ -104,19 +128,22 @@ KernelGen::best_kernel(
 	p != mKernelDict.end(); ++ p ) {
     auto& kernel = p->first;
     auto& cokernels = p->second;
-    auto k_nc = kernel.cube_num();
-    auto k_nl = kernel.literal_num();
-    auto c_nc = cokernels.size();
-    auto c_nl = literal_num(cokernels);
-    int value = (k_nc - 1) * c_nl + (c_nc - 1) * k_nl;
+    int value = eval_func(kernel, cokernels);
+    {
+      cout << "kernel: " << kernel << endl
+	   << "cokernsl: ";
+      SopCube::print(cout, cokernels);
+      cout << endl;
+      cout << "value: " << value << endl;
+    }
     if ( max_value < value ) {
       max_value = value;
       max_p = p;
     }
   }
 
-  auto& best_kernel = max_p->first;
-  return best_kernel;
+  auto& kernel = max_p->first;
+  return kernel;
 }
 
 // @brief カーネルとコカーネルを列挙する．

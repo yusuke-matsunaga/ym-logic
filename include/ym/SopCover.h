@@ -273,6 +273,18 @@ public:
     return SopCube{variable_num(), std::move(dst_chunk)};
   }
 
+  /// @brief 内容をキューブのリストに変換する
+  vector<SopCube>
+  cube_list() const
+  {
+    vector<SopCube> ans_list;
+    ans_list.reserve(cube_num());
+    for ( SizeType i = 0; i < cube_num(); ++ i ) {
+      ans_list.push_back(get_cube(i));
+    }
+    return ans_list;
+  }
+
   /// @brief パタンを返す．
   /// @retval SopPat::_X その変数は現れない．
   /// @retval SopPat::_1 その変数が肯定のリテラルとして現れる．
@@ -615,6 +627,13 @@ public:
   /// @brief 最も価値の高いカーネルを求める．
   SopCover
   best_kernel() const;
+
+  /// @brief 最も価値の高いカーネルを求める．
+  SopCover
+  best_kernel(
+    std::function<int(const SopCover&,
+		      const vector<SopCube>&)> eval_func ///< [in] 評価関数
+  ) const;
 
   /// @brief "quick factor" を行う．
   Expr

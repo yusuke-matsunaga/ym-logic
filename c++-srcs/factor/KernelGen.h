@@ -49,6 +49,13 @@ public:
     const SopCover& cover ///< [in] 対象のカバー
   );
 
+  /// @brief 価値の最も高いカーネルを求める．
+  SopCover
+  best_kernel(
+    const SopCover& cover, ///< [in] 対象のカバー
+    std::function<int(const SopCover&, const vector<SopCube>&)> eval_func ///< [in] 評価関数
+  );
+
 
 private:
   //////////////////////////////////////////////////////////////////////

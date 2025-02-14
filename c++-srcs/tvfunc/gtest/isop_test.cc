@@ -31,6 +31,11 @@ public:
     auto cube_list = Tv2Sop::isop(f, d);
     auto cov = SopCover{f.input_num(), cube_list};
 
+    {
+      cout << "F: " << f << endl;
+      cout << "D: " << d << endl;
+      cout << "isop: " << cov << endl;
+    }
     // cof_f が [f: f + d] の範囲に入っているかテスト
     auto cov_f = cov.tvfunc();
     ostringstream buf;
@@ -50,6 +55,26 @@ public:
     for ( auto& cube: cube_list ) {
       auto cube_f = cube.tvfunc();
       EXPECT_TRUE( cube_f && f1 );
+    }
+
+    // cube_list の各キューブが非冗長かどうかのテスト
+    auto nc = cube_list.size();
+    vector<TvFunc> fl_list(nc);
+    vector<TvFunc> fu_list(nc);
+    auto fl = TvFunc::zero(f.input_num());
+    for ( SizeType i = 0; i < nc; ++ i ) {
+      fl_list[i] = fl;
+      fl |= cube_list[i].tvfunc();
+    }
+    auto fu = TvFunc::zero(f.input_num());
+    for ( SizeType i = 0; i < nc; ++ i ) {
+      auto j = nc - i - 1;
+      fu_list[j] = fu;
+      fu |= cube_list[j].tvfunc();
+    }
+    for ( SizeType i = 0; i < nc; ++ i ) {
+      auto f1 = fl_list[i] | fu_list[i];
+      EXPECT_NE( f1, f );
     }
   }
 
@@ -134,7 +159,20 @@ TEST_F(IsopTest, isop3)
   check(f, d);
 }
 
-TEST_P(IsopTest, isop4)
+TEST_F(IsopTest, isop4)
+{
+  SizeType ni = 4;
+  auto var0 = TvFunc::literal(ni, 0);
+  auto var1 = TvFunc::literal(ni, 1);
+  auto var2 = TvFunc::literal(ni, 2);
+  auto var3 = TvFunc::literal(ni, 3);
+  auto f = var0 & var3;
+  auto d = ~var0 & ~var1 & ~var2;
+
+  check(f, d);
+}
+
+TEST_P(IsopTest, isop_p)
 {
   SizeType ni = GetParam();
   auto ni_exp = 1 << ni;
