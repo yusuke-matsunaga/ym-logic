@@ -18,6 +18,17 @@ BEGIN_NAMESPACE_YM_SOP
 // クラス BoolDivision
 //////////////////////////////////////////////////////////////////////
 
+inline
+SizeType
+calc_lit(
+  const SopCover& q,
+  const SopCover& d,
+  const SopCover& r
+)
+{
+  return q.literal_num() + d.literal_num() + r.literal_num();
+}
+
 // @brief 除算を行う．
 pair<SopCover, SopCover>
 BoolDivision::divide(
@@ -28,20 +39,19 @@ BoolDivision::divide(
   SizeType ni = f.variable_num();
   auto f_func = f.tvfunc();
   auto d_func = d.tvfunc();
-  auto dc = ~d_func;
-  // ~d をドントケアにして q を求める．
-  auto q_list = Tv2Sop::isop(f_func, dc);
-  auto q_func = SopCube::tvfunc(ni, q_list);
-  // 元のカバーから q & d でカバーされた部分をドントケアにして
-  // r のカバーを求める．
-  auto r_list = Tv2Sop::isop(f_func, d_func & q_func);
-  auto q = SopCover{ni, q_list};
-  auto r = SopCover{ni, r_list};
+  // d をドントケアにして r を求める．
+  auto r_list = Tv2Sop::isop(f_func, d_func);
+  auto r_func = SopCube::tvfunc(ni, r_list);
+  // ~d | r をドントケアにして q を求める．
+  auto q_list = Tv2Sop::isop(f_func, ~d_func | r_func);
+  auto q = SopCover(ni, q_list);
+  auto r = SopCover(ni, r_list);
   // 安全策で WeakDivision の結果も求めておく．
   auto p = WeakDivision::divide(f, d);
   auto& q1 = p.first;
   auto& r1 = p.second;
-  if ( q1.cube_num() < q.cube_num() ) {
+  // リテラル数の少ない方を答とする．
+  if ( calc_lit(q, d, r) > calc_lit(q1, d, r1) ) {
     return make_pair(std::move(q1), std::move(r1));
   }
   else {

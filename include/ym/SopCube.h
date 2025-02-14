@@ -328,6 +328,23 @@ public:
     _print(s, chunk(), 0, 1, varname_list);
   }
 
+  /// @brief 内容をわかりやすい形で出力する．
+  static
+  void
+  print(
+    ostream& s,                             ///< [in] 出力先のストリーム
+    const vector<SopCube>& cube_list,       ///< [in] キューブのリスト
+    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
+  )
+  {
+    const char* delim = "";
+    for ( auto& cube: cube_list ) {
+      s << delim;
+      delim = " | ";
+      cube.print(s, varname_list);
+    }
+  }
+
   //////////////////////////////////////////////////////////////////////
   /// @}
   //////////////////////////////////////////////////////////////////////
