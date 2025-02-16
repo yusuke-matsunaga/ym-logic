@@ -45,14 +45,18 @@ print_func(
 void
 print_cover(
   ostream& s,
-  const vector<SopCube>& cover
+  const vector<vector<Literal>>& cover
 )
 {
   const char* delim = "";
-  for ( auto cube: cover ) {
+  for ( auto& cube: cover ) {
     s << delim;
-    delim = " | ";
-    cube.print(s);
+    delim = " + ";
+    const char* spc = "";
+    for ( auto lit: cube ) {
+      s << spc << lit;
+      spc = " ";
+    }
   }
   cout << endl;
 }
@@ -61,12 +65,12 @@ print_cover(
 inline
 bool
 check_intersect(
-  const SopCube& cube,
+  const vector<Literal>& cube,
   const TvFunc& R
 )
 {
   // cube を TvFunc に変換する．
-  auto f_cube = cube.tvfunc();
+  auto f_cube = TvFunc::cube(R.input_num(), cube);
   return f_cube && R;
 }
 
@@ -85,51 +89,52 @@ check_intersect(
 // f にとっても主項である．
 // c0/c1 のキューブは fc に含まれない部分が
 // ある場合のみ ~var/var を付加したものを加える．
-vector<SopCube>
+vector<vector<Literal>>
 prime_sub(
-  const TvFunc& f,
-  SizeType var
+  const TvFunc& f
 )
 {
   if ( f.is_zero() ) {
     if ( debug & debug_bcf ) {
-      cout << "prime_sub(" << var << "): " << f << endl;
+      cout << "prime_sub: " << f << endl;
       cout << " ==> " << endl;
     }
-    return vector<SopCube>{};
+    return vector<vector<Literal>>{};
   }
   if ( f.is_one() ) {
     if ( debug & debug_bcf ) {
-      cout << "prime_sub(" << var << "): " << f << endl;
+      cout << "prime_sub: " << f << endl;
       cout << " ==> {}" << endl;
     }
-    SizeType ni = f.input_num();
-    return vector<SopCube>{SopCube{ni}};
+    return vector<vector<Literal>>{{}};
   }
 
-  // 次に分解する変数を求める．
-  while ( !f.check_sup(var) ) {
-    ++ var;
+  // 分解する．
+  TvFunc f0;
+  TvFunc f1;
+  f.decompose(f0, f1);
+
+  if ( f0 == f1 ) {
+    return prime_sub(f0);
   }
-  auto lit0 = Literal{var, true};
-  auto lit1 = Literal{var, false};
+  SizeType var = f0.input_num();
+  auto lit0 = Literal(var, true);
+  auto lit1 = Literal(var, false);
 
   // コファクターに対して再帰する．
   // ただし，共通部分を求めて3分割する．
-  auto f0 = f.cofactor(lit0);
-  auto f1 = f.cofactor(lit1);
   auto fc = f0 & f1;
   if ( debug & debug_bcf ) {
-    cout << "prime_sub(" << var << "): " << f << endl;
+    cout << "prime_sub: " << f << endl;
     cout << "  fc: " << fc << endl;
     cout << "  f0: " << f0 << endl;
     cout << "  f1: " << f1 << endl;
   }
-  auto cube_list = prime_sub(fc, var + 1);
-  auto cube0_list = prime_sub(f0, var + 1);
-  auto cube1_list = prime_sub(f1, var + 1);
+  auto cube_list = prime_sub(fc);
+  auto cube0_list = prime_sub(f0);
+  auto cube1_list = prime_sub(f1);
   if ( debug & debug_bcf ) {
-    cout << "*prime_sub(" << var << "): " << f << endl;
+    cout << "*prime_sub: " << f << endl;
     cout << "  cc: ";
     print_cover(cout, cube_list);
     cout << "  c0: ";
@@ -145,17 +150,21 @@ prime_sub(
   auto R = ~fc;
   for ( auto& cube: cube0_list ) {
     if ( check_intersect(cube, R) ) {
-      cube_list.push_back(cube & lit0);
+      auto new_cube = cube;
+      new_cube.push_back(lit0);
+      cube_list.push_back(new_cube);
     }
   }
   for ( auto& cube: cube1_list ) {
     if ( check_intersect(cube, R) ) {
-      cube_list.push_back(cube & lit1);
+      auto new_cube = cube;
+      new_cube.push_back(lit1);
+      cube_list.push_back(new_cube);
     }
   }
 
   if ( debug & debug_bcf ) {
-    cout << "**prime_sub(" << var << "): " << f << endl;
+    cout << "**prime_sub: " << f << endl;
     cout << " ==> ";
     print_cover(cout, cube_list);
   }
@@ -171,8 +180,14 @@ Tv2Sop::all_primes(
   const TvFunc& f
 )
 {
-  auto cube_list = prime_sub(f, 0);
-  return cube_list;
+  auto cube_list = prime_sub(f);
+  vector<SopCube> ans_list;
+  SizeType ni = f.input_num();
+  for ( auto& lits: cube_list ) {
+    auto cube = SopCube(ni, lits);
+    ans_list.push_back(cube);
+  }
+  return ans_list;
 }
 
 #if 0
@@ -333,121 +348,65 @@ Tv2Sop::MWC(
 
 BEGIN_NONAMESPACE
 
-// ISOP() の下請け関数
-vector<SopCube>
+// isop() の下請け関数
+vector<vector<Literal>>
 isop_sub(
   const TvFunc& f,
-  const TvFunc& d,
-  SizeType var
+  const TvFunc& d
 )
 {
   if ( f.check_containment(d) ) {
     // f が 0
     // 結果は 0
     if ( debug & debug_isop ) {
-      cout << "isop_sub(" << var << "): ";
+      cout << "isop_sub: ";
       print_func(cout, f, d);
       cout << endl;
       cout << " ==> 0" << endl;
     }
-    return vector<SopCube>{};
+    return vector<vector<Literal>>{};
   }
   if ( (~f).check_containment(d) ) {
     // r が 0
     // 結果は 1
     if ( debug & debug_isop ) {
-      cout << "isop_sub(" << var << "): ";
+      cout << "isop_sub: ";
       print_func(cout, f, d);
       cout << endl;
       cout << " ==> {}" << endl;
     }
-    auto ni = f.input_num();
-    return vector<SopCube>{SopCube{ni}};
+    return vector<vector<Literal>>{{}};
   }
 
-  // 次に分解する変数を求める．
-  while ( !f.check_sup(var) &&
-	  !d.check_sup(var) ) {
-    ++ var;
+  // f と r を分解する．
+  TvFunc f0;
+  TvFunc f1;
+  f.decompose(f0, f1);
+  TvFunc d0;
+  TvFunc d1;
+  d.decompose(d0, d1);
+  if ( f0 == f1 && d0 == d1 ) {
+    return isop_sub(f0, d0);
   }
-  auto lit0 = Literal{var, true};
-  auto lit1 = Literal{var, false};
-
-  // f と r を var で分解する．
-  auto f0 = f.cofactor(lit0);
-  auto d0 = d.cofactor(lit0);
-
-  auto f1 = f.cofactor(lit1);
-  auto d1 = d.cofactor(lit1);
 
   if ( d0.is_one() ) {
-    return isop_sub(f1, d1, var + 1);
+    return isop_sub(f1, d1);
   }
   if ( d1.is_one() ) {
-    return isop_sub(f0, d0, var + 1);
-  }
-
-#if 0
-  // var と無関係な部分を求める．
-  auto fc = (f0 | d0) & (f1 | d1);
-  auto dc = d0 & d1;
-
-  if ( debug & debug_isop ) {
-    cout << "isop_sub(" << var << "): " << f
-	 << ", " << d << endl;
-    cout << "  f0: " << f0 << ", " << d0 << endl;
-    cout << "  f1: " << f1 << ", " << d1 << endl;
-    cout << "  fc: " << fc << ", " << dc << endl;
-  }
-
-  // 共通部分のカバーを求める．
-  auto cube_list = isop_sub(fc, dc, var + 1);
-
-  // cube_list の部分をドントケアにする．
-  if ( !cube_list.empty() ) {
-    auto ni = f.input_num();
-    auto dc_new = TvFunc::cover(ni, cube_list);
-    d0 |= dc_new;
-    d1 |= dc_new;
-  }
-
-  if ( debug & debug_isop ) {
-    cout << "*isop_sub(" << var << "): ";
-    print_func(cout, f, d);
-    cout << endl;
-    cout << "  cube_list: ";
-    print_cover(cout, cube_list);
-    cout << " F0: " << f0 << ", " << d0 << endl
-	 << " F1: " << f1 << ", " << d1 << endl;
+    return isop_sub(f0, d0);
   }
 
   // 再帰する．
-  auto cube0_list = isop_sub(f0, d0, var + 1);
-  auto cube1_list = isop_sub(f1, d1, var + 1);
-
-  if ( debug & debug_isop ) {
-    cout << "*isop_sub(" << var << "): ";
-    print_func(cout, f, d);
-    cout << endl;
-    cout << "  cube_list: ";
-    print_cover(cout, cube_list);
-    cout << "  cube0_list: ";
-    print_cover(cout, cube0_list);
-    cout << "  cube1_list: ";
-    print_cover(cout, cube1_list);
-  }
-#else
-  // 再帰する．
   auto fc = (f0 | d0) & (f1 | d1);
-  auto cube0_list = isop_sub(f0, d0 | fc, var + 1);
-  auto cube1_list = isop_sub(f1, d1 | fc, var + 1);
-  auto ni = f.input_num();
+  auto cube0_list = isop_sub(f0, d0 | fc);
+  auto cube1_list = isop_sub(f1, d1 | fc);
+  auto ni = f.input_num() - 1;
   auto f0_new = TvFunc::cover(ni, cube0_list);
   auto f1_new = TvFunc::cover(ni, cube1_list);
   auto dc = (d0 | f0_new) & (d1 | f1_new);
-  auto cube_list = isop_sub(fc, dc, var + 1);
+  auto cube_list = isop_sub(fc, dc);
   if ( debug & debug_isop ) {
-    cout << "*isop_sub(" << var << "): ";
+    cout << "*isop_sub: ";
     print_func(cout, f, d);
     cout << endl;
     cout << "  cube0_list: ";
@@ -460,20 +419,23 @@ isop_sub(
     cout << "  cube_list: ";
     print_cover(cout, cube_list);
   }
-#endif
 
   // マージする．
   auto size = cube_list.size() + cube0_list.size() + cube1_list.size();
   cube_list.reserve(size);
-  for ( auto& cube: cube0_list ) {
-    cube_list.push_back(cube & lit0);
+  auto lit1 = Literal(ni, false);
+  auto lit0 = ~lit1;
+  for ( auto cube: cube0_list ) {
+    cube.push_back(lit0);
+    cube_list.push_back(cube);
   }
-  for ( auto& cube: cube1_list ) {
-    cube_list.push_back(cube & lit1);
+  for ( auto cube: cube1_list ) {
+    cube.push_back(lit1);
+    cube_list.push_back(cube);
   }
 
   if ( debug & debug_isop ) {
-    cout << "**isop_sub(" << var << "): ";
+    cout << "**isop_sub: ";
     print_func(cout, f, d);
     cout << endl;
     cout << " ==> ";
@@ -485,7 +447,7 @@ isop_sub(
 
 END_NONAMESPACE
 
-// @brief 単純なシャノン展開を行ってで非冗長積和形を求める．
+// @brief 単純なシャノン展開を行って非冗長積和形を求める．
 vector<SopCube>
 Tv2Sop::isop(
   const TvFunc& f ///< [in] 対象の関数
@@ -507,8 +469,13 @@ Tv2Sop::isop(
   if ( ni != d.input_num() ) {
     throw std::invalid_argument{"input_num() mismatch"};
   }
-  auto cube_list = isop_sub(f, d, 0);
-  return cube_list;
+  auto cube_list = isop_sub(f, d);
+  vector<SopCube> ans_list;
+  for ( auto& lits: cube_list ) {
+    auto cube = SopCube(ni, lits);
+    ans_list.push_back(cube);
+  }
+  return ans_list;
 }
 
 END_NAMESPACE_YM
