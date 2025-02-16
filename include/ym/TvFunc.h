@@ -312,6 +312,16 @@ public:
     const TvFunc& right
   ) const;
 
+  /// @brief 外側の変数で分割する．
+  ///
+  /// cofactor() と異なり func0, func1 の入力数は
+  /// もとの関数の入力数より1少ない．
+  void
+  decompose(
+    TvFunc& func0, ///< [out] 0 のコファクター
+    TvFunc& func1  ///< [out] 1 のコファクター
+  ) const;
+
 
 public:
   //////////////////////////////////////////////////////////////////////
