@@ -137,11 +137,30 @@ class RcMatrix
 {
 public:
 
+  /// @brief 空のコンストラクタ
+  RcMatrix()
+  {
+  }
+
   /// @brief コンストラクタ
   RcMatrix(
-    SizeType row_size, ///< [in] 行数
-    SizeType col_size  ///< [in] 列数
-  );
+    const vector<SizeType> row_costs, ///< [in] 行のコストの配列
+    const vector<SizeType> col_costs  ///< [in] 列のコストの配列
+  )
+  {
+    auto row_size = row_costs.size();
+    mRowHeadArray.reserve(row_size);
+    mRowCostArray.reserve(row_size);
+    for ( auto cost: row_costs ) {
+      insert_row(cost);
+    }
+    auto col_size = col_costs.size();
+    mColHeadArray.reserve(col_size);
+    mColCostArray.reserve(col_size);
+    for ( auto cost: col_costs ) {
+      insert_col(cost);
+    }
+  }
 
   /// @brief デストラクタ
   ~RcMatrix() = default;
@@ -152,26 +171,49 @@ public:
   // 設定用のインターフェイス
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 行を追加する．
+  void
+  insert_row(
+    SizeType cost ///< [in] 行のコスト
+  )
+  {
+    auto head = _new_elem(row_size(), -1);
+    mRowHeadArray.push_back(head);
+    mRowCostArray.push_back(cost);
+  }
+
+  /// @brief 列を追加する．
+  void
+  insert_col(
+    SizeType cost ///< [in] 列のコスト
+  )
+  {
+    auto head = _new_elem(-1, col_size());
+    mColHeadArray.push_back(head);
+    mColCostArray.push_back(cost);
+  }
+
   /// @brief 要素を追加する．
-  /// @return 要素番号を返す．
-  SizeType
+  void
   add_elem(
+    SizeType id,  ///< [in] 要素番号
     SizeType row, ///< [in] 行番号
     SizeType col  ///< [in] 列番号
-  );
-
-  /// @brief 行方向に要素のリストを追加する．
-  /// @return 追加された要素番号のリストを返す．
-  vector<SizeType>
-  add_row_elem(
-    SizeType row,                    ///< [in] 行番号
-    const vector<SizeType>& col_list ///< [in] 列番号のリスト
-  );
+  )
+  {
+    _check_row(row);
+    _check_col(col);
+    auto elem = _new_elem(id, row, col);
+    auto row_head = mRowHeadArray[row];
+    _row_insert(row_head, elem);
+    auto col_head = mColHeadArray[col];
+    _col_insert(col_head, elem);
+  }
 
 
 public:
   //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
+  // 情報取得用の外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 行数を返す．
@@ -188,6 +230,26 @@ public:
     return mColHeadArray;
   }
 
+  /// @brief 行のヘッダを取得する．
+  const RcElem*
+  row_head(
+    SizeType row ///< [in] 行番号
+  ) const
+  {
+    _check_row(row);
+    return mRowHeadArray[row];
+  }
+
+  /// @brief 列のヘッダを取得する．
+  const RcElem*
+  col_head(
+    SizeType col ///< [in] 列番号
+  ) const
+  {
+    _check_col(col);
+    return mColHeadArray[col];
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -199,7 +261,12 @@ private:
   _new_elem(
     SizeType row, ///< [in] 行番号
     SizeType col  ///< [in] 列番号
-  );
+  )
+  {
+    auto elem = new RcElem(id, row, col);
+    mElemList.push_back(std::unique_ptr<RcElem>{elem});
+    return elem;
+  }
 
   /// @brief 行方向に要素を挿入する．
   void
@@ -208,15 +275,18 @@ private:
     RcElem* elem      ///< [in] 追加する要素
   );
 
-  /// @brief 行方向の接続を行う．
+  /// @brief 行方向の挿入を行う．
   void
   _row_connect(
-    RcElem* left, ///< [in] 左の要素
-    RcElem* right ///< [in] 右の要素
+    RcElem* left,  ///< [in] 左の要素
+    RcElem* elem   ///< [in] 挿入する要素
   )
   {
-    left->mRight = right;
-    right->mLeft = left;
+    auto right = left->mRight;
+    left->mRight = elem;
+    elem->mLeft = left;
+    elem->mRight = right;
+    right->mLeft = elem;
   }
 
   /// @brief 列方向に要素を挿入する．
@@ -230,11 +300,14 @@ private:
   void
   _col_connect(
     SizeType up,  ///< [in] 上の要素
-    SizeType down ///< [in] 下の要素
+    SizeType elem ///< [in] 挿入する要素
   )
   {
-    up->mDown = down;
-    down->mUp = up;
+    auto down = up->mDown;
+    up->mDown = elem;
+    elem->mUp = up;
+    elem->mDown = down;
+    down->mUp = elem;
   }
 
   /// @brief 行番号が適正かチェックする．
@@ -271,8 +344,14 @@ private:
   // 行のヘッダを表す要素の配列
   vector<RcElem*> mRowHeadArray;
 
+  // 行のコストの配列
+  vector<SizeType> mRowCostArray;
+
   // 列のヘッダを表す要素の配列
   vector<RcElem*> mColHeadArray;
+
+  // 列のコストの配列
+  vector<SizeType> mColCostArray;
 
 };
 

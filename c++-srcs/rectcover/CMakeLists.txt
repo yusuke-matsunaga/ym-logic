@@ -16,39 +16,22 @@
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(expr)
-add_subdirectory(tvfunc)
-add_subdirectory(npn)
-add_subdirectory(sop)
-add_subdirectory(factor)
-add_subdirectory(rectcover)
-add_subdirectory(aig)
-add_subdirectory(dd)
-add_subdirectory(gtest)
+#add_subdirectory(gtest)
 
 
 # ===================================================================
 #  ソースファイルの設定
 # ===================================================================
 
-set (ym_logic_SOURCES
-  ${aig_SOURCES}
-  ${dd_SOURCES}
-  ${expr_SOURCES}
-  ${tvfunc_SOURCES}
-  ${npn_SOURCES}
-  ${sop_SOURCES}
-  ${factor_SOURCES}
+set ( rectcover_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/RcMatrix.cc
+  PARENT_SCOPE
   )
 
 
 # ===================================================================
 #  ターゲットの設定
 # ===================================================================
-
-ym_add_object_library ( ym_logic
-  ${ym_logic_SOURCES}
-  )
 
 
 # ===================================================================

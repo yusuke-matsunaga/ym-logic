@@ -135,7 +135,6 @@ BEGIN_NAMESPACE(nsSop)
 END_NAMESPACE(nsSop) \
 END_NAMESPACE_YM
 
-
 BEGIN_NAMESPACE_YM_SOP
 
 // クラス名の前方参照用宣言
@@ -143,6 +142,16 @@ class SopCube;
 class SopCover;
 
 END_NAMESPACE_YM_SOP
+
+/// @brief RectCover 用の名前空間の開始
+#define BEGIN_NAMESPACE_YM_RC \
+BEGIN_NAMESPACE_YM \
+BEGIN_NAMESPACE(nsRectCover)
+
+/// @brief SOP 用の名前空間の終了
+#define END_NAMESPACE_YM_RC \
+END_NAMESPACE(nsRectCover) \
+END_NAMESPACE_YM
 
 BEGIN_NAMESPACE_YM
 

@@ -15,75 +15,6 @@ BEGIN_NAMESPACE_YM_RC
 // クラス RcMatrix
 //////////////////////////////////////////////////////////////////////
 
-// @brief コンストラクタ
-RcMatrix::RcMatrix(
-  SizeType row_size,
-  SizeType col_size
-) : mRowHeadArray(row_size, nullptr),
-    mColHeadArray(col_size, nullptr)
-{
-  for ( SizeType i = 0; i < row_size; ++ i ) {
-    auto head = _new_elem(i, -1);
-    mRowHeadArray[i] = head;
-  }
-  for ( SizeType i = 0; i < col_size; ++ i ) {
-    auto head = _new_elem(-1, i);
-    mColHeadArray[i] = head;
-  }
-}
-
-// @brief 要素を追加する．
-SizeType
-RcMatrix::add_elem(
-  SizeType row,
-  SizeType col
-)
-{
-  _check_row(row);
-  _check_col(col);
-  auto elem = _new_elem(row, col);
-  auto row_head = mRowHeadArray[row];
-  _row_insert(row_head, elem);
-  auto col_head = mColHeadArray[col];
-  _col_insert(col_head, elem);
-  return elem->id();
-}
-
-// @brief 行方向に要素のリストを追加する．
-vector<SizeType>
-RcMatrix::add_row_elem(
-  SizeType row,
-  const vector<SizeType>& col_list
-)
-{
-  _check_row(row);
-  auto row_head = mRowHeadArray[row];
-  vector<SizeType> id_list;
-  id_list.reserve(col_list.size());
-  for ( auto col: col_list ) {
-    _check_col(col);
-    auto col_head = mColHeadArray[col];
-    auto elem = _new_elem(row, col);
-    _row_insert(row_head, elem);
-    _col_insert(col_head, elem);
-    id_list.push_back(elem->id());
-  }
-  return id_list;
-}
-
-// @brief 要素を確保する．
-RcElem*
-RcMatrix::_new_elem(
-  SizeType row,
-  SizeType col
-)
-{
-  auto id = mElemList.size();
-  auto elem = new RcElem(id, row, col);
-  mElemList.push_back(std::unique_ptr<RcElem>{elem});
-  return elem;
-}
-
 // @brief 行方向に要素を挿入する．
 void
 RcMatrix::_row_insert(
@@ -91,30 +22,41 @@ RcMatrix::_row_insert(
   RcElem* elem
 )
 {
-  // 最初に末尾を確かめる．
+  auto top = row_head->mRight;
   auto last = row_head->mLeft;
   if ( last == row_head ) {
     // 空だった．
     _row_connect(row_head, elem);
-    _row_connect(elem, row_head);
   }
   else if ( last->col() < elem->col() ) {
     // 末尾に追加する．
     _row_connect(last, elem);
-    _row_connect(elem, row_head);
+  }
+  else if ( last->col() == elem->col() ) {
+    throw std::invalid_argument{"duplicate row insertion"};
+  }
+  else if ( top->col() > elem->col() ) {
+    // 先頭に追加する．
+    _row_connect(row_head, elem);
+  }
+  else if ( top->col() == elem->col() ) {
+    throw std::invalid_argument{"duplicate row insertion"};
   }
   else {
-    auto top = row_head->mRight;
-    if ( top->col() > elem->col() ) {
-      // 先頭に追加する．
-      _row_connect(row_head, elem);
-      _row_connect(elem, top);
-    }
-    else {
-      // 挿入位置を探す．
-      for ( auto left = top; left != row_head; left = left->mRight ) {
-	if (
+    // ここに来たということは top->col() < elem->col() < last->col()
+    // left->col() < elem->col() <= left->right()->col() となるような挿入位置を探す．
+    // ただし重複した要素の追加はエラーとする．
+    for ( auto left = top; left != row_head; left = left->mRight ) {
+      auto right = left->mRight;
+      if ( elem->col() < right->col() ) {
+	// 見つけた
+	_row_connect(left,  elem);
+	break;
       }
+      if ( elem->col() == right->col() ) {
+	throw std::invalid_argument{"duplicate row insertion"};
+      }
+    }
   }
 }
 
@@ -125,6 +67,42 @@ RcMatrix::_col_insert(
   RcElem* elem
 )
 {
+  auto top = col_head->mDown;
+  auto last = col_head->mUp;
+  if ( last == col_head ) {
+    // 空だった．
+    _col_connect(col_head, elem);
+  }
+  else if ( last->row() < elem->row() ) {
+    // 末尾に追加する．
+    _col_connect(last, elem);
+  }
+  else if ( last->row() == elem->row() ) {
+    throw std::invalid_argument{"duplicate col insertion"};
+  }
+  else if ( top->row() > elem->row() ) {
+    // 先頭に追加する．
+    _col_connect(col_head, elem);
+  }
+  else if ( top->row() == elem->row() ) {
+    throw std::invalid_argument{"duplicate col insertion"};
+  }
+  else {
+    // ここに来たということは top->row() < elem->row() < last->row()
+    // left->row() < elem->row() <= left->right()->row() となるような挿入位置を探す．
+    // ただし重複した要素の追加はエラーとする．
+    for ( auto left = top; left != row_head; left = left->mRight ) {
+      auto right = left->mRight;
+      if ( elem->row() < right->row() ) {
+	// 見つけた
+	_col_connect(left,  elem);
+	break;
+      }
+      if ( elem->row() == right->row() ) {
+	throw std::invalid_argument{"duplicate col insertion"};
+      }
+    }
+  }
 }
 
 END_NAMESPACE_YM_RC
