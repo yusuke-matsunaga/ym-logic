@@ -13,9 +13,13 @@
 
 BEGIN_NAMESPACE_YM_RC
 
+const SizeType BAD_ID = static_cast<SizeType>(-1);
+
 //////////////////////////////////////////////////////////////////////
 /// @class RcElem RcMatrix.h "RcMatrix.h"
 /// @brief RcMatrix の要素を表すクラス
+///
+/// 各々の要素は行番号，列番号の他に価値番号を持つ
 //////////////////////////////////////////////////////////////////////
 class RcElem
 {
@@ -25,10 +29,10 @@ public:
 
   /// @brief コンストラクタ
   RcElem(
-    SizeType id,  ///< [in] ID番号
-    SizeType row, ///< [in] 行番号
-    SizeType col  ///< [in] 列番号
-  ) : mId{id},
+    SizeType val_id, ///< [in] 価値番号
+    SizeType row,    ///< [in] 行番号
+    SizeType col     ///< [in] 列番号
+  ) : mValId{val_id},
       mRow{row},
       mCol{col}
   {
@@ -44,11 +48,11 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief ID番号を返す．
+  /// @brief 価値番号を返す．
   SizeType
-  id() const
+  val_id() const
   {
-    return mId;
+    return mValId;
   }
 
   /// @brief 行番号を反す．
@@ -105,8 +109,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // ID番号
-  SizeType mId;
+  // 価値番号
+  SizeType mValId;
 
   // 行番号
   SizeType mRow;
@@ -132,6 +136,24 @@ private:
 //////////////////////////////////////////////////////////////////////
 /// @class RcMatrix RcMatrix.h "RcMatrix.h"
 /// @brief 矩形被覆問題の行列を表すクラス
+///
+/// 行列と言っても行列演算は行わない．ただ単に二次元に配置された
+/// 要素の集合を表す．
+/// 通常，意味のある要素が疎らなのでスパース行列の手法を用いている．
+///
+/// 各要素は隣接する非ゼロの要素とリンクポインタでつながっているため，
+/// 非ゼロ要素をたどる処理は効率良く行える．
+/// 一方，行番号と列番号を指定して要素を取り出す処理は行や列上の要素数に
+/// 比例した時間を必要とする．
+/// 要素の追加も同様であるが，行方向は上から下に，列方向は左から右の順
+/// に追加を行う限り O(1) で追加が行える．
+///
+/// 矩形被覆問題独特の特徴として，同じ価値を共有する複数の行列要素
+/// があるという点がある．
+/// そのため，行列要素に価値番号をもたせて，価値番号から価値を取得
+/// するようにしている．
+/// 被覆された要素の価値は0となるが，同じ価値番号を共有する要素の
+/// 価値も同時に0となる．
 //////////////////////////////////////////////////////////////////////
 class RcMatrix
 {
@@ -150,12 +172,14 @@ public:
   {
     auto row_size = row_costs.size();
     mRowHeadArray.reserve(row_size);
+    mRowNumArray.reserve(row_size);
     mRowCostArray.reserve(row_size);
     for ( auto cost: row_costs ) {
       insert_row(cost);
     }
     auto col_size = col_costs.size();
     mColHeadArray.reserve(col_size);
+    mColNumArray.reserve(col_size);
     mColCostArray.reserve(col_size);
     for ( auto cost: col_costs ) {
       insert_col(cost);
@@ -177,8 +201,9 @@ public:
     SizeType cost ///< [in] 行のコスト
   )
   {
-    auto head = _new_elem(row_size(), -1);
+    auto head = _new_elem(BAD_ID, row_size(), BAD_ID);
     mRowHeadArray.push_back(head);
+    mRowNumArray.push_back(0);
     mRowCostArray.push_back(cost);
   }
 
@@ -188,26 +213,53 @@ public:
     SizeType cost ///< [in] 列のコスト
   )
   {
-    auto head = _new_elem(-1, col_size());
+    auto head = _new_elem(BAD_ID, BAD_ID, col_size());
     mColHeadArray.push_back(head);
+    mColNumArray.push_back(0);
     mColCostArray.push_back(cost);
+  }
+
+  /// @brief 価値を登録する．
+  /// @return 価値番号を返す．
+  SizeType
+  add_value(
+    SizeType value ///< [in] 価値
+  )
+  {
+    auto id = mValArray.size();
+    mValArray.push_back(id);
+    return id;
+  }
+
+  /// @brief 価値を変更する．
+  void
+  set_value(
+    SizeType val_id,   ///< [in] 価値番号
+    SizeType new_value ///< [in] 新しい価値
+  )
+  {
+    _check_val(val_id);
+    mValArray[val_id] = new_value;
   }
 
   /// @brief 要素を追加する．
   void
   add_elem(
-    SizeType id,  ///< [in] 要素番号
-    SizeType row, ///< [in] 行番号
-    SizeType col  ///< [in] 列番号
+    SizeType val_id, ///< [in] 価値番号
+    SizeType row,    ///< [in] 行番号
+    SizeType col     ///< [in] 列番号
   )
   {
+    _check_val(val_id);
     _check_row(row);
     _check_col(col);
-    auto elem = _new_elem(id, row, col);
+    auto elem = _new_elem(val_id, row, col);
     auto row_head = mRowHeadArray[row];
     _row_insert(row_head, elem);
+    ++ mRowNumArray[row];
     auto col_head = mColHeadArray[col];
     _col_insert(col_head, elem);
+    ++ mColNumArray[col];
   }
 
 
@@ -215,6 +267,26 @@ public:
   //////////////////////////////////////////////////////////////////////
   // 情報取得用の外部インターフェイス
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief 価値配列のサイズを得る．
+  SizeType
+  val_size() const
+  {
+    return mValArray.size();
+  }
+
+  /// @brief 価値を返す．
+  SizeType
+  value(
+    SizeType val_id ///< [in] 価値番号 ( 0 <= val_id < val_size() )
+  ) const
+  {
+    _check_val(val_id);
+    if ( val_id == BAD_ID ) {
+      return 0;
+    }
+    return mValArray[val_id];
+  }
 
   /// @brief 行数を返す．
   SizeType
@@ -250,6 +322,26 @@ public:
     return mColHeadArray[col];
   }
 
+  /// @brief 行の要素数を取得する．
+  SizeType
+  row_num(
+    SizeType row ///< [in] 行番号
+  ) const
+  {
+    _check_row(row);
+    return mRowNumArray[row];
+  }
+
+  /// @brief 列の要素数を取得する．
+  SizeType
+  col_num(
+    SizeType col ///< [in] 列番号
+  ) const
+  {
+    _check_col(col);
+    return mColNumArray[col];
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -259,11 +351,12 @@ private:
   /// @brief 要素を確保する．
   RcElem*
   _new_elem(
-    SizeType row, ///< [in] 行番号
-    SizeType col  ///< [in] 列番号
+    SizeType val_id, ///< [in] 価値番号
+    SizeType row,    ///< [in] 行番号
+    SizeType col     ///< [in] 列番号
   )
   {
-    auto elem = new RcElem(id, row, col);
+    auto elem = new RcElem(val_id, row, col);
     mElemList.push_back(std::unique_ptr<RcElem>{elem});
     return elem;
   }
@@ -310,6 +403,17 @@ private:
     down->mUp = elem;
   }
 
+  /// @brief 価値番号が適正かチェックする．
+  void
+  _check_val(
+    SizeType val_id
+  ) const
+  {
+    if ( val_id != BAD_ID && val_id >= mValArray.size() ) {
+      throw std::out_of_range{"val_id is out of range"};
+    }
+  }
+
   /// @brief 行番号が適正かチェックする．
   void
   _check_row(
@@ -338,17 +442,26 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
+  // 価値の配列
+  vector<SizeType> mValueArray;
+
   // 要素の所有権管理用のリスト
   vector<std::unique_ptr<RcElem>> mElemList;
 
   // 行のヘッダを表す要素の配列
   vector<RcElem*> mRowHeadArray;
 
+  // 行の要素数の配列
+  vector<SizeType> mRowNumArray;
+
   // 行のコストの配列
   vector<SizeType> mRowCostArray;
 
   // 列のヘッダを表す要素の配列
   vector<RcElem*> mColHeadArray;
+
+  // 列の要素数の配列
+  vector<SizeType> mColNumArray;
 
   // 列のコストの配列
   vector<SizeType> mColCostArray;
