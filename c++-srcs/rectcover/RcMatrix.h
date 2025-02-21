@@ -226,8 +226,8 @@ public:
     SizeType value ///< [in] 価値
   )
   {
-    auto id = mValArray.size();
-    mValArray.push_back(id);
+    auto id = mValueArray.size();
+    mValueArray.push_back(value);
     return id;
   }
 
@@ -239,7 +239,7 @@ public:
   )
   {
     _check_val(val_id);
-    mValArray[val_id] = new_value;
+    mValueArray[val_id] = new_value;
   }
 
   /// @brief 要素を追加する．
@@ -272,7 +272,7 @@ public:
   SizeType
   val_size() const
   {
-    return mValArray.size();
+    return mValueArray.size();
   }
 
   /// @brief 価値を返す．
@@ -285,21 +285,14 @@ public:
     if ( val_id == BAD_ID ) {
       return 0;
     }
-    return mValArray[val_id];
+    return mValueArray[val_id];
   }
 
   /// @brief 行数を返す．
   SizeType
   row_size() const
   {
-    return mRowHeadArray;
-  }
-
-  /// @brief 列数を返す．
-  SizeType
-  col_size() const
-  {
-    return mColHeadArray;
+    return mRowHeadArray.size();
   }
 
   /// @brief 行のヘッダを取得する．
@@ -312,16 +305,6 @@ public:
     return mRowHeadArray[row];
   }
 
-  /// @brief 列のヘッダを取得する．
-  const RcElem*
-  col_head(
-    SizeType col ///< [in] 列番号
-  ) const
-  {
-    _check_col(col);
-    return mColHeadArray[col];
-  }
-
   /// @brief 行の要素数を取得する．
   SizeType
   row_num(
@@ -332,6 +315,33 @@ public:
     return mRowNumArray[row];
   }
 
+  /// @brief 行のコストを取得する．
+  SizeType
+  row_cost(
+    SizeType row ///< [in] 行番号
+  ) const
+  {
+    _check_row(row);
+    return mRowCostArray[row];
+  }
+
+  /// @brief 列数を返す．
+  SizeType
+  col_size() const
+  {
+    return mColHeadArray.size();
+  }
+
+  /// @brief 列のヘッダを取得する．
+  const RcElem*
+  col_head(
+    SizeType col ///< [in] 列番号
+  ) const
+  {
+    _check_col(col);
+    return mColHeadArray[col];
+  }
+
   /// @brief 列の要素数を取得する．
   SizeType
   col_num(
@@ -340,6 +350,16 @@ public:
   {
     _check_col(col);
     return mColNumArray[col];
+  }
+
+  /// @brief 列のコストを取得する．
+  SizeType
+  col_cost(
+    SizeType col ///< [in] 列番号
+  ) const
+  {
+    _check_col(col);
+    return mColCostArray[col];
   }
 
 
@@ -392,8 +412,8 @@ private:
   /// @brief 列方向の接続を行う．
   void
   _col_connect(
-    SizeType up,  ///< [in] 上の要素
-    SizeType elem ///< [in] 挿入する要素
+    RcElem* up,  ///< [in] 上の要素
+    RcElem* elem ///< [in] 挿入する要素
   )
   {
     auto down = up->mDown;
@@ -409,7 +429,7 @@ private:
     SizeType val_id
   ) const
   {
-    if ( val_id != BAD_ID && val_id >= mValArray.size() ) {
+    if ( val_id != BAD_ID && val_id >= val_size() ) {
       throw std::out_of_range{"val_id is out of range"};
     }
   }

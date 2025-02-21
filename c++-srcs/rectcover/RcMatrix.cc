@@ -91,7 +91,7 @@ RcMatrix::_col_insert(
     // ここに来たということは top->row() < elem->row() < last->row()
     // left->row() < elem->row() <= left->right()->row() となるような挿入位置を探す．
     // ただし重複した要素の追加はエラーとする．
-    for ( auto left = top; left != row_head; left = left->mRight ) {
+    for ( auto left = top; left != col_head; left = left->mRight ) {
       auto right = left->mRight;
       if ( elem->row() < right->row() ) {
 	// 見つけた
