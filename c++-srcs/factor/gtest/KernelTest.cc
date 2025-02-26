@@ -30,16 +30,16 @@ public:
   SizeType var8{8};
   SizeType var9{9};
 
-  Literal lit0{var0, false};
-  Literal lit1{var1, false};
-  Literal lit2{var2, false};
-  Literal lit3{var3, false};
-  Literal lit4{var4, false};
-  Literal lit5{var5, false};
-  Literal lit6{var6, false};
-  Literal lit7{var7, false};
-  Literal lit8{var8, false};
-  Literal lit9{var9, false};
+  Literal v0{var0, false};
+  Literal v1{var1, false};
+  Literal v2{var2, false};
+  Literal v3{var3, false};
+  Literal v4{var4, false};
+  Literal v5{var5, false};
+  Literal v6{var6, false};
+  Literal v7{var7, false};
+  Literal v8{var8, false};
+  Literal v9{var9, false};
 
   void
   check(
@@ -72,8 +72,8 @@ public:
 
 TEST_F(KernelTest, test1)
 {
-  auto cover1 = SopCover{nv, { {lit0, lit2},
-			       {lit1, lit2} }};
+  auto cover1 = SopCover{nv, { {v0, v2},
+			       {v1, v2} }};
 
   vector<string> exp_list{
     "v0 + v1| v2"
@@ -84,10 +84,10 @@ TEST_F(KernelTest, test1)
 
 TEST_F(KernelTest, test2)
 {
-  auto cover1 = SopCover{nv, { {lit0, lit2},
-			       {lit1, lit2},
-			       {lit0, lit3},
-			       {lit1, lit3} }};
+  auto cover1 = SopCover{nv, { {v0, v2},
+			       {v1, v2},
+			       {v0, v3},
+			       {v1, v3} }};
 
   vector<string> exp_list{
     "v2 + v3| v0, v1",
@@ -101,14 +101,14 @@ TEST_F(KernelTest, test2)
 TEST_F(KernelTest, test3)
 {
   // adf + aef + bdf + bef + cdf + cef + bfg + h
-  auto cover1 = SopCover{nv, { { lit0, lit3, lit5 },
-			       { lit0, lit4, lit5 },
-			       { lit1, lit3, lit5 },
-			       { lit1, lit4, lit5 },
-			       { lit2, lit3, lit5 },
-			       { lit2, lit4, lit5 },
-			       { lit1, lit5, lit6 },
-			       { lit7 } } };
+  auto cover1 = SopCover{nv, { { v0, v3, v5 },
+			       { v0, v4, v5 },
+			       { v1, v3, v5 },
+			       { v1, v4, v5 },
+			       { v2, v3, v5 },
+			       { v2, v4, v5 },
+			       { v1, v5, v6 },
+			       { v7 } } };
 
   vector<string> exp_list{
     "v3 + v4| v0 v5, v2 v5",
@@ -119,6 +119,38 @@ TEST_F(KernelTest, test3)
   };
 
   check(cover1, exp_list);
+}
+
+TEST_F(KernelTest, test4)
+{
+  // af + bf + ag + cg + ade + bde + cde
+  auto a = Literal(0);
+  auto b = Literal(1);
+  auto c = Literal(2);
+  auto d = Literal(3);
+  auto e = Literal(4);
+  auto f = Literal(5);
+  auto g = Literal(6);
+
+  auto F = SopCover(7,
+		    { {a, f},
+		      {b, f},
+		      {a, g},
+		      {c, g},
+		      {a, d, e},
+		      {b, d, e},
+		      {c, d, e} });
+  vector<string> exp_list{
+    "v3 v4 + v6| v2",
+    "v3 v4 + v5| v1",
+    "v3 v4 + v5 + v6| v0",
+    "v0 + v2| v6",
+    "v0 + v1| v5",
+    "v0 + v1 + v2| v3 v4",
+    "v0 v3 v4 + v0 v5 + v0 v6 + v1 v3 v4 + v1 v5 + v2 v3 v4 + v2 v6| {}"
+  };
+
+  check(F, exp_list);
 }
 
 END_NAMESPACE_YM_SOP

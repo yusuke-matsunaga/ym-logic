@@ -20,10 +20,10 @@ TEST(RcMatrixTest, empty1)
   EXPECT_EQ( 0, mtx.row_size() );
   EXPECT_EQ( 0, mtx.col_size() );
   EXPECT_THROW( mtx.value(0), std::out_of_range );
-  EXPECT_THROW( mtx.row_head(0), std::out_of_range );
+  EXPECT_THROW( mtx.row_list(0), std::out_of_range );
   EXPECT_THROW( mtx.row_num(0), std::out_of_range );
   EXPECT_THROW( mtx.row_cost(0), std::out_of_range );
-  EXPECT_THROW( mtx.col_head(0), std::out_of_range );
+  EXPECT_THROW( mtx.col_list(0), std::out_of_range );
   EXPECT_THROW( mtx.col_num(0), std::out_of_range );
   EXPECT_THROW( mtx.col_cost(0), std::out_of_range );
 }
@@ -62,10 +62,9 @@ TEST(RcMatrixTest, insert_row)
   EXPECT_THROW( mtx.col_num(0), std::out_of_range );
   EXPECT_THROW( mtx.col_cost(0), std::out_of_range );
 
-  auto head = mtx.row_head(0);
-  EXPECT_EQ( head, head->right() );
-  EXPECT_EQ( head, head->left() );
-  EXPECT_EQ( 0, head->row() );
+  auto row_list = mtx.row_list(0);
+  EXPECT_EQ( 0, row_list.size() );
+  EXPECT_EQ( row_list.end(), row_list.begin() );
 }
 
 TEST(RcMatrixTest, insert_col)
@@ -85,10 +84,9 @@ TEST(RcMatrixTest, insert_col)
   EXPECT_THROW( mtx.row_num(0), std::out_of_range );
   EXPECT_THROW( mtx.row_cost(0), std::out_of_range );
 
-  auto head = mtx.col_head(0);
-  EXPECT_EQ( head, head->down() );
-  EXPECT_EQ( head, head->up() );
-  EXPECT_EQ( 0, head->col() );
+  auto col_list = mtx.col_list(0);
+  EXPECT_EQ( 0, col_list.size() );
+  EXPECT_EQ( col_list.end(), col_list.end() );
 }
 
 TEST(RcMatrixTest, costr1)
@@ -102,19 +100,15 @@ TEST(RcMatrixTest, costr1)
   for ( SizeType i = 0; i < mtx.row_size(); ++ i ) {
     EXPECT_EQ( 0, mtx.row_num(i) );
     EXPECT_EQ( row_costs[i], mtx.row_cost(i) );
-    auto head = mtx.row_head(i);
-    EXPECT_EQ( head, head->right() );
-    EXPECT_EQ( head, head->left() );
-    EXPECT_EQ( i, head->row() );
+    auto row_list = mtx.row_list(i);
+    EXPECT_EQ( row_list.end(), row_list.begin() );
   }
   EXPECT_EQ( col_costs.size(), mtx.col_size() );
   for ( SizeType i = 0; i < mtx.col_size(); ++ i ) {
     EXPECT_EQ( 0, mtx.col_num(i) );
     EXPECT_EQ( col_costs[i], mtx.col_cost(i) );
-    auto head = mtx.col_head(i);
-    EXPECT_EQ( head, head->down() );
-    EXPECT_EQ( head, head->up() );
-    EXPECT_EQ( i, head->col() );
+    auto col_list = mtx.col_list(i);
+    EXPECT_EQ( col_list.end(), col_list.begin() );
   }
 }
 
@@ -135,24 +129,28 @@ TEST(RcMatrixTest, add_elem1)
   EXPECT_EQ( 1, mtx.row_num(r0) );
   EXPECT_EQ( 1, mtx.col_num(c0) );
 
-  auto row_head = mtx.row_head(r0);
-  auto elem1 = row_head->right();
-  EXPECT_EQ( row_head, elem1->right() );
-  EXPECT_EQ( row_head, elem1->left() );
-  EXPECT_EQ( elem1, row_head->left() );
+  auto row_list = mtx.row_list(r0);
+  EXPECT_EQ( 1, row_list.size() );
+  auto iter1 = row_list.begin();
+  auto elem1 = *iter1;
   EXPECT_EQ( r0, elem1->row() );
   EXPECT_EQ( c0, elem1->col() );
   EXPECT_EQ( vid0, elem1->val_id() );
+  auto iter2 = iter1;
+  ++ iter2;
+  EXPECT_EQ( row_list.end(), iter2 );
 
-  auto col_head = mtx.col_head(c0);
-  auto elem2 = col_head->down();
+  auto col_list = mtx.col_list(c0);
+  EXPECT_EQ( 1, col_list.size() );
+  auto iter3 = col_list.begin();
+  auto elem2 = *iter3;
   EXPECT_EQ( elem1, elem2 );
-  EXPECT_EQ( col_head, elem2->down() );
-  EXPECT_EQ( col_head, elem2->up() );
-  EXPECT_EQ( elem2, col_head->up() );
   EXPECT_EQ( r0, elem2->row() );
   EXPECT_EQ( c0, elem2->col() );
   EXPECT_EQ( vid0, elem2->val_id() );
+  auto iter4 = iter3;
+  ++ iter3;
+  EXPECT_EQ( col_list.end(), iter3 );
 }
 
 TEST(RcMatrixTest, add_elem2)
@@ -197,17 +195,15 @@ TEST(RcMatrixTest, add_elem2)
   EXPECT_EQ( 0, mtx.col_num(2) );
   EXPECT_EQ( 2, mtx.col_num(3) );
 
-  auto row_head0 = mtx.row_head(0);
-  EXPECT_EQ( row_head0, row_head0->right() );
-  EXPECT_EQ( row_head0, row_head0->left() );
+  auto row_list0 = mtx.row_list(0);
+  EXPECT_EQ( 0, row_list0.size() );
 
-  auto row_head1 = mtx.row_head(1);
-  auto elem1 = row_head1->right();
-  auto elem2 = elem1->right();
-  EXPECT_EQ( row_head1, elem1->left() );
-  EXPECT_EQ( elem1, elem2->left() );
-  EXPECT_EQ( row_head1, elem2->right() );
-  EXPECT_EQ( elem2, row_head1->left() );
+  auto row_list1 = mtx.row_list(1);
+  ASSERT_EQ( 2, row_list1.size() );
+  auto iter1 = row_list1.begin();
+  auto elem1 = *iter1; ++ iter1;
+  auto elem2 = *iter1; ++ iter1;
+  EXPECT_EQ( row_list1.end(), iter1 );
 
   EXPECT_EQ( 1, elem1->row() );
   EXPECT_EQ( 0, elem1->col() );
@@ -217,41 +213,38 @@ TEST(RcMatrixTest, add_elem2)
   EXPECT_EQ( 3, elem2->col() );
   EXPECT_EQ( vid0, elem2->val_id() );
 
-  auto row_head2 = mtx.row_head(2);
-  auto elem3 = row_head2->right();
-  EXPECT_EQ( row_head2, elem3->left() );
-  EXPECT_EQ( row_head2, elem3->right() );
-  EXPECT_EQ( elem3, row_head2->left() );
+  auto row_list2 = mtx.row_list(2);
+  ASSERT_EQ( 1, row_list2.size() );
+  auto iter2 = row_list2.begin();
+  auto elem3 = *iter2; ++ iter2;
+  EXPECT_EQ( row_list2.end(), iter2 );
 
   EXPECT_EQ( 2, elem3->row() );
   EXPECT_EQ( 3, elem3->col() );
   EXPECT_EQ( vid2, elem3->val_id() );
 
-  auto col_head0 = mtx.col_head(0);
-  auto elem4 = col_head0->down();
-  EXPECT_EQ( col_head0, elem4->down() );
-  EXPECT_EQ( col_head0, elem4->up() );
-  EXPECT_EQ( elem4, col_head0->up() );
+  auto col_list0 = mtx.col_list(0);
+  ASSERT_EQ( 1, col_list0.size() );
+  auto iter4 = col_list0.begin();
+  auto elem4 = *iter4; ++ iter4;
+  EXPECT_EQ( col_list0.end(), iter4 );
 
   EXPECT_EQ( 1, elem4->row() );
   EXPECT_EQ( 0, elem4->col() );
   EXPECT_EQ( vid1, elem4->val_id() );
 
-  auto col_head1 = mtx.col_head(1);
-  EXPECT_EQ( col_head1, col_head1->down() );
-  EXPECT_EQ( col_head1, col_head1->up() );
+  auto col_list1 = mtx.col_list(1);
+  EXPECT_EQ( 0, col_list1.size() );
 
-  auto col_head2 = mtx.col_head(2);
-  EXPECT_EQ( col_head2, col_head2->down() );
-  EXPECT_EQ( col_head2, col_head2->up() );
+  auto col_list2 = mtx.col_list(2);
+  EXPECT_EQ( 0, col_list2.size() );
 
-  auto col_head3 = mtx.col_head(3);
-  auto elem5 = col_head3->down();
-  auto elem6 = elem5->down();
-  EXPECT_EQ( col_head3, elem5->up() );
-  EXPECT_EQ( elem5, elem6->up() );
-  EXPECT_EQ( col_head3, elem6->down() );
-  EXPECT_EQ( elem6, col_head3->up() );
+  auto col_list3 = mtx.col_list(3);
+  ASSERT_EQ( 2, col_list3.size() );
+  auto iter5 = col_list3.begin();
+  auto elem5 = *iter5; ++ iter5;
+  auto elem6 = *iter5; ++ iter5;
+  EXPECT_EQ( col_list3.end(), iter5 );
 
   EXPECT_EQ( 1, elem5->row() );
   EXPECT_EQ( 3, elem5->col() );

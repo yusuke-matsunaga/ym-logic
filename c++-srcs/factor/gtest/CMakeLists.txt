@@ -22,15 +22,16 @@
 #  ターゲットの設定
 # ===================================================================
 
-ym_add_gtest ( logic_Kernel_test
-  KernelTest.cc
+ym_add_gtest ( logic_LitSet_test
+  LitSetTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
-target_include_directories( logic_Kernel_test
-  PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/..
+ym_add_gtest ( logic_Kernel_test
+  KernelTest.cc
+  $<TARGET_OBJECTS:ym_base_obj_d>
+  $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
 ym_add_gtest ( logic_BoolDivision_test
@@ -39,20 +40,10 @@ ym_add_gtest ( logic_BoolDivision_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   )
 
-target_include_directories( logic_BoolDivision_test
-  PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/..
-  )
-
 ym_add_gtest ( logic_GenFactor_test
   GenFactorTest.cc
   $<TARGET_OBJECTS:ym_base_obj_d>
   $<TARGET_OBJECTS:ym_logic_obj_d>
-  )
-
-target_include_directories( logic_GenFactor_test
-  PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/..
   )
 
 

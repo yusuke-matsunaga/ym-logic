@@ -30,6 +30,10 @@ add_subdirectory(gtest)
 
 set ( rectcover_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/RcMatrix.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/FindRect.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/EnumRect.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/CkMatrix.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/KIX.cc
   PARENT_SCOPE
   )
 

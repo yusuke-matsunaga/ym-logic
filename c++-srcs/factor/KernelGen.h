@@ -53,7 +53,8 @@ public:
   SopCover
   best_kernel(
     const SopCover& cover, ///< [in] 対象のカバー
-    std::function<int(const SopCover&, const vector<SopCube>&)> eval_func ///< [in] 評価関数
+    std::function<int(const SopCover&,
+		      const vector<SopCube>&)> eval_func ///< [in] 評価関数
   );
 
 
@@ -103,19 +104,8 @@ private:
     const SopCube& cokernel
   )
   {
-    auto tmp_kernel = kernel;
-    hash_add(std::move(tmp_kernel), cokernel);
-  }
-
-  /// @brief ハッシュ表に登録する．
-  void
-  hash_add(
-    SopCover&& kernel,
-    const SopCube& cokernel
-  )
-  {
     if ( mKernelDict.count(kernel) == 0 ) {
-      mKernelDict.emplace(std::move(kernel), vector<SopCube>{cokernel});
+      mKernelDict.emplace(kernel, vector<SopCube>{cokernel});
     }
     else {
       auto& cokernels = mKernelDict.at(kernel);

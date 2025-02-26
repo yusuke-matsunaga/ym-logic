@@ -797,6 +797,51 @@ protected:
 
 protected:
   //////////////////////////////////////////////////////////////////////
+  // LitSet 用の関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief リテラルを追加する．
+  void
+  _litset_add_literal(
+    DstCube dst_cube, ///< [in] 対象のキューブ(LitSet)
+    Literal lit       ///< [in] 追加するリテラル
+  )
+  {
+    auto varid = lit.varid();
+    auto inv = lit.is_negative();
+    auto blk = _block_pos(varid);
+    auto mask = ~_get_mask(varid, inv);
+    auto dst_p = dst_cube + blk;
+    *dst_p |= mask;
+  }
+
+  /// @brief リテラルの集合を追加する．
+  void
+  _litset_add_literals(
+    DstCube dst_cube,               ///< [in] 対象のキューブ(LitSet)
+    const vector<Literal>& lit_list ///< [in] 追加するリテラルのリスト
+  )
+  {
+    for ( auto lit: lit_list ) {
+      _litset_add_literal(dst_cube, lit);
+    }
+  }
+
+  /// @brief リテラルの集合を追加する．
+  void
+  _litset_add_literals(
+    DstCube dst_cube,                        ///< [in] 対象のキューブ(LitSet)
+    std::initializer_list<Literal>& lit_list ///< [in] 追加するリテラルのリスト
+  )
+  {
+    for ( auto lit: lit_list ) {
+      _litset_add_literal(dst_cube, lit);
+    }
+  }
+
+
+protected:
+  //////////////////////////////////////////////////////////////////////
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 

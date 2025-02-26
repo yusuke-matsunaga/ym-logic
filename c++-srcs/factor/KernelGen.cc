@@ -210,9 +210,8 @@ KernelGen::kern_sub(
 )
 {
   auto plits1 = plits;
-  while ( p != mEnd ) {
+  for ( ; p != mEnd; ++ p ) {
     auto lit = *p;
-    ++ p;
 
     if ( cover.literal_num(lit) <= 1 ) {
       // 2回以上現れていなければスキップする．
@@ -241,7 +240,7 @@ KernelGen::kern_sub(
     plits1 += lit;
 
     // 再帰する．
-    kern_sub(cover1, p, ccube1, plits1);
+    kern_sub(cover1, p + 1, ccube1, plits1);
 
     // cover1/ccube1 を記録．
     hash_add(std::move(cover1), ccube1);

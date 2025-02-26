@@ -301,10 +301,10 @@ SopBase::_debug_print(
     s << " ";
     auto pat = _get_pat(cube, var);
     switch ( pat ) {
-    case SopPat::_X: s << "--"; break;
+    case SopPat::__: s << "00"; break;
     case SopPat::_0: s << "01"; break;
     case SopPat::_1: s << "10"; break;
-    default:         s << "**"; break;
+    case SopPat::_X: s << "11"; break;
     }
   }
   s << endl;

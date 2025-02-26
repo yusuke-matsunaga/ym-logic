@@ -9,8 +9,8 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/SopBase.h"
 #include "ym/Literal.h"
+#include "ym/SopBase.h"
 
 
 BEGIN_NAMESPACE_YM_SOP
@@ -114,6 +114,12 @@ public:
     const SopCube& right ///< [in] 対象のキューブ
   ) const;
 
+  /// @brief 内容を出力する．
+  void
+  print(
+    ostream& s ///< [in] 出力先のストリーム
+  ) const;
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -195,6 +201,18 @@ operator+(
 )
 {
   return LitSet{std::move(lit_set)}.operator+=(lit);
+}
+
+/// @brief ストリーム演算
+inline
+ostream&
+operator<<(
+  ostream& s,
+  const LitSet& lit_set ///< [in] リテラル集合の本体
+)
+{
+  lit_set.print(s);
+  return s;
 }
 
 END_NAMESPACE_YM_SOP

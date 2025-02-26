@@ -19,7 +19,7 @@ BEGIN_NAMESPACE_YM_SOP
 // @brief コンストラクタ
 LitSet::LitSet(
   SizeType var_num
-) : SopBase{var_num},
+) : SopBase(var_num),
     mChunk(_cube_size(), 0ULL)
 {
 }
@@ -28,36 +28,36 @@ LitSet::LitSet(
 LitSet::LitSet(
   SizeType var_num,
   Literal lit
-) : LitSet{var_num}
+) : LitSet(var_num)
 {
   auto cube = mChunk.begin();
-  _cube_set_literal(cube, lit);
+  _litset_add_literal(cube, lit);
 }
 
 // @brief コンストラクタ
 LitSet::LitSet(
   SizeType var_num,
   const vector<Literal>& lit_list
-) : LitSet{var_num}
+) : LitSet(var_num)
 {
   auto cube = mChunk.begin();
-  _cube_set_literals(cube, lit_list);
+  _litset_add_literals(cube, lit_list);
 }
 
 // @brief コンストラクタ
 LitSet::LitSet(
   SizeType var_num,
   std::initializer_list<Literal>& lit_list
-) : LitSet{var_num}
+) : LitSet(var_num)
 {
   auto cube = mChunk.begin();
-  _cube_set_literals(cube, lit_list);
+  _litset_add_literals(cube, lit_list);
 }
 
 // @brief コピーコンストラクタ
 LitSet::LitSet(
   const LitSet& src
-) : SopBase{src},
+) : SopBase(src),
     mChunk{src.mChunk}
 {
 }
@@ -79,7 +79,7 @@ LitSet::operator=(
 // @brief ムーブコンストラクタ
 LitSet::LitSet(
   LitSet&& src
-) : SopBase{std::move(src)},
+) : SopBase(std::move(src)),
     mChunk{std::move(src.mChunk)}
 {
 }
@@ -103,7 +103,7 @@ LitSet::operator+=(
 )
 {
   auto cube = mChunk.begin();
-  _cube_set_literal(cube, lit);
+  _litset_add_literal(cube, lit);
   return *this;
 }
 
@@ -131,7 +131,7 @@ LitSet::is_in(
   auto varid = lit.varid();
   auto inv = lit.is_negative();
   auto blk = _block_pos(varid);
-  auto mask = _get_mask(varid, inv);
+  auto mask = ~_get_mask(varid, inv);
   auto cube = _cube(mChunk);
   if ( *(cube + blk) & mask ) {
     return true;
@@ -155,11 +155,29 @@ LitSet::check_intersect(
   auto end1 = _cube_end(cube1);
   auto cube2 = _cube(right.chunk());
   for ( ; cube1 != end1; ++ cube1, ++ cube2 ) {
-    if ( (*cube1 & *cube2) != 0ULL ) {
+    if ( (*cube1 & ~(*cube2)) != 0ULL ) {
       return true;
     }
   }
   return false;
+}
+
+// @brief 内容を出力する．
+void
+LitSet::print(
+  ostream& s
+) const
+{
+  const char* spc = "";
+  for ( SizeType i = 0; i < variable_num(); ++ i ) {
+    for ( auto inv: {false, true} ) {
+      auto lit = Literal(i, inv);
+      if ( is_in(lit) ) {
+	s << spc << lit;
+	spc = " ";
+      }
+    }
+  }
 }
 
 END_NAMESPACE_YM_SOP
