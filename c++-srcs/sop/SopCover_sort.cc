@@ -24,6 +24,16 @@ SopCover::_sort()
   SopSorter sorter{variable_num()};
   sorter.sort(cube_num(), chunk());
 
+  {
+    for ( auto& cube: literal_list() ) {
+      for ( auto lit: cube ) {
+	if ( lit.varid() >= variable_num() ) {
+	  throw std::logic_error{"lit is out of range"};
+	}
+      }
+    }
+  }
+
   // 重複したキューブを削除する．
   SizeType n = cube_num();
   if ( n > 0 ) {

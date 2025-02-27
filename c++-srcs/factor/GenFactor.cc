@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "ym/SopCover.h"
+#include "ym/Tv2Sop.h"
 #include "GenFactor.h"
 #include "OneLevel0Kernel.h"
 #include "BestKernel.h"
@@ -40,8 +41,10 @@ SopCover::good_factor() const
 Expr
 SopCover::bool_factor() const
 {
+  auto func = tvfunc();
+  auto new_cover = SopCover(variable_num(), Tv2Sop::isop(func));
   GenFactor<BestKernel, BoolDivision> factor;
-  return factor(*this);
+  return factor(new_cover);
 }
 
 END_NAMESPACE_YM_SOP

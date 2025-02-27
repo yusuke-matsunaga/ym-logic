@@ -109,14 +109,19 @@ KernelGen::best_kernel(
   std::function<int(const SopCover&, const vector<SopCube>&)> eval_func
 )
 {
+  // 特例1: cover が single cube の場合は空のカバーを返す．
+  if ( cover.cube_num() <= 1 ) {
+    return SopCover(cover.variable_num());
+  }
+
   generate(cover);
 
-  // 特例: 自身がレベル０カーネルの場合は空のカバーを返す．
+  // 特例2: 自身がレベル０カーネルの場合は空のカバーを返す．
   if ( mKernelDict.size() == 1 ) {
     auto& cokernels = mKernelDict.begin()->second;
     if ( cokernels.size() == 1 &&
 	 cokernels.front().literal_num() == 0 ) {
-      return SopCover{cover.variable_num()};
+      return SopCover(cover.variable_num());
     }
   }
 

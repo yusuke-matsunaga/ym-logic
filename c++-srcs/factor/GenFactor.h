@@ -77,8 +77,10 @@ private:
     }
     if ( q.cube_num() == 1 ) {
       auto cube_list = q.literal_list();
-      ASSERT_COND( cube_list.size() == 1 );
-      auto expr = literal_factor(f, cube_list[0]);
+      if ( cube_list.size() != 1 ) {
+	throw std::logic_error{"cube_list.size() != 1"};
+      }
+      auto expr = literal_factor(f, cube_list.front());
       if ( debug ) {
 	cout << "*factor(" << f << ")" << endl
 	     << " => " << expr << endl;
@@ -127,6 +129,9 @@ private:
     const vector<Literal>& lit_list
   )
   {
+    if ( lit_list.empty() ) {
+      throw std::logic_error{"lit_list is empty()"};
+    }
     // l <- lit_list に含まれるリテラルで最も出現回数の多いもの
     int max_n = 0;
     Literal l;

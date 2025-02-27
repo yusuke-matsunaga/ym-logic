@@ -89,6 +89,24 @@ TEST_F(SopTest, constructor2)
 
 };
 
+TEST_F(SopTest, constructor2_2)
+{
+  auto lit10 = Literal(10);
+  auto lit11 = Literal(11);
+  auto lit12 = Literal(12);
+  auto lit26 = Literal(26);
+  auto lit27 = Literal(27);
+  auto lit29 = Literal(29);
+  auto lit32 = Literal(32);
+  auto cover1 = SopCover(64, { { ~lit0, lit1, lit2, lit3, ~lit4, lit5, ~lit6, lit7, lit8, ~lit9, lit10, ~lit11, ~lit12, ~lit26, ~lit27, ~lit29, ~lit32 } });
+
+  auto lit_list = cover1.literal_list();
+  ASSERT_EQ( 1, lit_list.size() );
+  auto cube = lit_list.front();
+  ASSERT_EQ( 17, cube.size() );
+  EXPECT_EQ( ~lit0, cube.front() );
+}
+
 // SopCover{SizeType, const vector<SopCube>} のテスト
 // 変数の数が合わないのでエラーとなる．
 TEST_F(SopTest, constructor2_bad)

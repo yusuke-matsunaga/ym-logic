@@ -83,6 +83,22 @@ TEST_F(SopTest, constructor2)
 
 };
 
+TEST_F(SopTest, constructor2_2)
+{
+  auto lit10 = Literal(10);
+  auto lit11 = Literal(11);
+  auto lit12 = Literal(12);
+  auto lit26 = Literal(26);
+  auto lit27 = Literal(27);
+  auto lit29 = Literal(29);
+  auto lit32 = Literal(32);
+  auto cube1 = SopCube(64, { ~lit0, lit1, lit2, lit3, ~lit4, lit5, ~lit6, lit7, lit8, ~lit9, lit10, ~lit11, ~lit12, ~lit26, ~lit27, ~lit29, ~lit32 });
+
+  auto lit_list = cube1.literal_list();
+  ASSERT_EQ( 17, lit_list.size() );
+  EXPECT_EQ( ~lit0, lit_list.front() );
+}
+
 // 変数の数とリテラルを指定したコンストラクタのテスト
 // リテラルが範囲外でエラーとなる．
 TEST_F(SopTest, constructor2_bad)

@@ -475,6 +475,34 @@ protected:
     SizeType base = 0;
     for ( ; cube != cube_end; ++ cube, base += 32 ) {
       _word_literal_list(*cube, base, lit_list);
+      {
+	bool ng = false;
+	vector<Literal> err_lits;
+	for ( auto lit: lit_list ) {
+	  if ( lit.varid() >= variable_num() ) {
+	    ng = true;
+	    err_lits.push_back(lit);
+	  }
+	}
+	if ( ng ) {
+	  cout << "ERROR: variable_num() = " << variable_num() << endl;
+	  for ( auto lit: err_lits ) {
+	    cout << " " << lit;
+	  }
+	  cout << endl;
+	  for ( SizeType i = 0; i < 32; ++ i ) {
+	    auto pat = ((*cube) >> (30 - i * 2)) & 3U;
+	    switch ( pat ) {
+	    case 0: cout << "--"; break;
+	    case 1: cout << "01"; break;
+	    case 2: cout << "10"; break;
+	    case 3: cout << "11"; break;
+	    }
+	  }
+	  cout << endl;
+	  abort();
+	}
+      }
     }
     return lit_list;
   }
