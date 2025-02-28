@@ -44,7 +44,7 @@ public:
   explicit
   SopCube(
     SizeType var_num = 0 ///< [in] 変数の数
-  ) : SopBase{var_num},
+  ) : SopBase(var_num),
       mChunk(_cube_size(), SOP_ALL1)
   {
   }
@@ -55,7 +55,7 @@ public:
   SopCube(
     SizeType var_num, ///< [in] 変数の数
     Literal lit       ///< [in] リテラル
-  ) : SopCube{var_num}
+  ) : SopCube(var_num)
   {
     _check_lit(lit);
     _cube_set_literal(mChunk.begin(), lit);
@@ -65,7 +65,7 @@ public:
   SopCube(
     SizeType var_num,               ///< [in] 変数の数
     const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
-  ) : SopCube{var_num}
+  ) : SopCube(var_num)
   {
     _check_lits(lit_list);
     _cube_set_literals(mChunk.begin(), lit_list);
@@ -76,7 +76,7 @@ public:
     SizeType var_num,                   ///< [in] 変数の数
     initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラル
                                         ///<      のリスト初期化子
-  ) : SopCube{var_num}
+  ) : SopCube(var_num)
   {
     _check_lits(lit_list);
     _cube_set_literals(mChunk.begin(), lit_list);
@@ -85,8 +85,8 @@ public:
   /// @brief コピーコンストラクタ
   SopCube(
     const SopCube& src ///< [in] コピー元のオブジェクト
-  ) : SopBase{src.variable_num()},
-    mChunk{src.mChunk}
+  ) : SopBase(src.variable_num()),
+      mChunk{src.mChunk}
   {
   }
 
@@ -108,7 +108,7 @@ public:
   /// @brief ムーブコンストラクタ
   SopCube(
     SopCube&& src ///< [in] ムーブ元のオブジェクト
-  ) : SopBase{src.variable_num()},
+  ) : SopBase(src.variable_num()),
       mChunk{std::move(src.mChunk)}
   {
   }
@@ -130,7 +130,7 @@ public:
   SopCube(
     SizeType var_num, ///< [in] 変数の数
     Chunk&& chunk     ///< [in] キューブのパタンを表す本体
-  ) : SopBase{var_num},
+  ) : SopBase(var_num),
       mChunk{chunk}
   {
   }
@@ -142,7 +142,7 @@ public:
     SizeType var_num ///< [in] 変数の数
   )
   {
-    auto cube = SopCube{var_num};
+    auto cube = SopCube(var_num);
     cube._cube_make_invalid(cube._dst_cube());
     return cube;
   }
@@ -382,7 +382,7 @@ public:
     if ( !_cube_product(dst_cube, cube1, cube2) ) {
       _cube_make_invalid(dst_cube);
     }
-    return SopCube{variable_num(), std::move(dst_chunk)};
+    return SopCube(variable_num(), std::move(dst_chunk));
   }
 
   /// @brief 論理積を計算し自身に代入する．
@@ -419,7 +419,7 @@ public:
     if ( !_cube_product(dst_cube, src_cube, right) ) {
       _cube_make_invalid(dst_cube);
     }
-    return SopCube{variable_num(), std::move(dst_chunk)};
+    return SopCube(variable_num(), std::move(dst_chunk));
   }
 
   /// @brief リテラルとの論理積を計算し自身に代入する．
@@ -456,7 +456,7 @@ public:
     if ( !_cube_algdiv(dst_cube, cube1, cube2) ) {
       _cube_make_invalid(dst_cube);
     }
-    return SopCube{variable_num(), std::move(dst_chunk)};
+    return SopCube(variable_num(), std::move(dst_chunk));
   }
 
   /// @brief キューブによる商を計算し自身に代入する．
@@ -494,7 +494,7 @@ public:
     if ( !_cube_algdiv(dst_cube, cube1, right) ) {
       _cube_make_invalid(dst_cube);
     }
-    return SopCube{variable_num(), std::move(dst_chunk)};
+    return SopCube(variable_num(), std::move(dst_chunk));
   }
 
   /// @brief リテラルによる商を計算し自身に代入する．
@@ -680,7 +680,7 @@ operator&(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(left)}.operator&=(right);
+  return SopCube(std::move(left)).operator&=(right);
 }
 
 /// @relates SopCube
@@ -694,7 +694,7 @@ operator&(
   SopCube&& right      ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(right)}.operator&=(left);
+  return SopCube(std::move(right)).operator&=(left);
 }
 
 /// @relates SopCube
@@ -708,7 +708,7 @@ operator&(
   SopCube&& right ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(left)}.operator&=(right);
+  return SopCube(std::move(left)).operator&=(right);
 }
 
 /// @relates SopCube
@@ -722,7 +722,7 @@ operator&(
   Literal right	  ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(left)}.operator&=(right);
+  return SopCube(std::move(left)).operator&=(right);
 }
 
 /// @relates SopCube
@@ -750,7 +750,7 @@ operator&(
 )
 {
   // 交換則を用いる．
-  return SopCube{std::move(right)}.operator&=(left);
+  return SopCube(std::move(right)).operator&=(left);
 }
 
 /// @relates SopCube
@@ -764,7 +764,7 @@ operator/(
   const SopCube& right ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(left)}.operator/=(right);
+  return SopCube(std::move(left)).operator/=(right);
 }
 
 /// @relates SopCube
@@ -778,7 +778,7 @@ operator/(
   Literal right	  ///< [in] 第2オペランド
 )
 {
-  return SopCube{std::move(left)}.operator/=(right);
+  return SopCube(std::move(left)).operator/=(right);
 }
 
 /// @relates SopCube

@@ -475,34 +475,6 @@ protected:
     SizeType base = 0;
     for ( ; cube != cube_end; ++ cube, base += 32 ) {
       _word_literal_list(*cube, base, lit_list);
-      {
-	bool ng = false;
-	vector<Literal> err_lits;
-	for ( auto lit: lit_list ) {
-	  if ( lit.varid() >= variable_num() ) {
-	    ng = true;
-	    err_lits.push_back(lit);
-	  }
-	}
-	if ( ng ) {
-	  cout << "ERROR: variable_num() = " << variable_num() << endl;
-	  for ( auto lit: err_lits ) {
-	    cout << " " << lit;
-	  }
-	  cout << endl;
-	  for ( SizeType i = 0; i < 32; ++ i ) {
-	    auto pat = ((*cube) >> (30 - i * 2)) & 3U;
-	    switch ( pat ) {
-	    case 0: cout << "--"; break;
-	    case 1: cout << "01"; break;
-	    case 2: cout << "10"; break;
-	    case 3: cout << "11"; break;
-	    }
-	  }
-	  cout << endl;
-	  abort();
-	}
-      }
     }
     return lit_list;
   }
@@ -592,6 +564,55 @@ protected:
       }
     }
     return true;
+  }
+
+  /// @brief 正常なキューブかどうか調べる．
+  bool
+  _cube_sanity_check(
+    Cube cube ///< [in] 対象のビットベクタ
+  ) const
+  {
+    auto cube_end = _cube_end(cube);
+    for ( ; cube != cube_end; ++ cube ) {
+      if ( _word_check_conflict(*cube) ) {
+	// 不正なパタンがあった．
+	cout << "conflict pattern: " << hex << *cube << dec << endl;
+	goto error;
+      }
+    }
+    {
+      // 範囲外の部分がすべて SopPat::_X であるか調べる．
+      auto nv = variable_num();
+      if ( nv % 32 > 0 ) {
+	auto sft = _shift_num(nv);
+	auto mask = SOP_ALL1 << sft;
+	auto word = *(cube_end - 1);
+	word |= mask;
+	if ( word != SOP_ALL1 ) {
+	  cout << "invalid pat in outbound: " << hex << word << dec << endl;
+	  goto error;
+	}
+      }
+      return true;
+    }
+  error:
+    {
+      auto nv = _cube_size() * 32;
+      for ( SizeType i = 0; i < nv; ++ i ) {
+	if ( i == variable_num() ) {
+	  cout << "|";
+	}
+	auto pat = _get_pat(cube, i);
+	switch ( pat ) {
+	case SopPat::__: cout << "00"; break;
+	case SopPat::_0: cout << "01"; break;
+	case SopPat::_1: cout << "10"; break;
+	case SopPat::_X: cout << "11"; break;
+	}
+      }
+      cout << endl;
+    }
+    return false;
   }
 
   /// @brief 2つのキューブの積を計算する．
