@@ -1,8 +1,8 @@
-#ifndef AIGMGRPTR_H
-#define AIGMGRPTR_H
+#ifndef AIGMGRHOLDER_H
+#define AIGMGRHOLDER_H
 
-/// @file AigMgrPtr.h
-/// @brief AigMgrPtr のヘッダファイル
+/// @file AigMgrHolder.h
+/// @brief AigMgrHolder のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2024 Yusuke Matsunaga
@@ -16,46 +16,62 @@ BEGIN_NAMESPACE_YM_AIG
 class AigEdge;
 
 //////////////////////////////////////////////////////////////////////
-/// @class AigMgrPtr AigMgrPtr.h "AigMgrPtr.h"
+/// @class AigMgrHolder AigMgrHolder.h "AigMgrHolder.h"
 /// @brief AigMgrImpl のスマートポインタ
 ///
-/// friend class 以外から使われることはない．
+/// AigMgr と AigHandle の基底クラス
 //////////////////////////////////////////////////////////////////////
-class AigMgrPtr
+class AigMgrHolder
 {
-  friend class AigMgr;
-  friend class AigHandle;
-
-private:
+public:
 
   /// @brief 空のコンストラクタ
   ///
   /// 不正なポインタとなる．
-  AigMgrPtr() = default;
-
-  /// @brief 値を指定したコンストラクタ
-  AigMgrPtr(
-    AigMgrImpl* ptr
-  );
+  AigMgrHolder() = default;
 
   /// @brief コピーコンストラクタ
-  AigMgrPtr(
-    const AigMgrPtr& src
+  AigMgrHolder(
+    const AigMgrHolder& src ///< [in] コピー元のオブジェクト
   );
 
   /// @brief デストラクタ
-  ~AigMgrPtr();
+  ~AigMgrHolder();
 
 
-private:
+protected:
+
+  /// @brief 値を指定したコンストラクタ
+  explicit
+  AigMgrHolder(
+    AigMgrImpl* ptr ///< [in] マネージャのポインタ
+  );
+
+
+protected:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief 適正なポインタを持っている時 true を返す．
+  bool
+  is_valid() const
+  {
+    return mPtr != nullptr;
+  }
+
+  /// @brief 適正なポインタを持っていない時 true を返す．
+  bool
+  is_invalid() const
+  {
+    return !is_valid();
+  }
 
   /// @brief dereference 演算子
   AigMgrImpl*
   get() const
   {
+    _check_valid();
     return mPtr.get();
   }
 
@@ -66,26 +82,17 @@ private:
     return get();
   }
 
-  /// @brief 等価比較演算子
+  /// @brief 同じマネージャを持つかチェックする．
   bool
-  operator==(
-    const AigMgrPtr& right
+  check_mgr(
+    const AigMgrHolder& right
   ) const
   {
     return mPtr == right.mPtr;
   }
 
-  /// @brief 非等価比較演算子
-  bool
-  operator!=(
-    const AigMgrPtr& right
-  ) const
-  {
-    return !operator==(right);
-  }
 
-
-private:
+protected:
   //////////////////////////////////////////////////////////////////////
   // AigMgr/AigHandle 用の便利関数
   //////////////////////////////////////////////////////////////////////
@@ -111,7 +118,7 @@ private:
   ///
   /// 異なるマネージャのハンドルが含まれていたら例外を送出する．
   static
-  AigMgrPtr
+  AigMgrImpl*
   hlist_to_elist(
     const vector<AigHandle>& handle_list, ///< [in] ハンドルのリスト
     vector<AigEdge>& edge_list            ///< [out] 変換した枝のリスト
@@ -129,11 +136,14 @@ private:
     const vector<AigEdge>& edge_list ///< [in] 枝のリスト
   ) const;
 
-  /// @brief ハンドルが同じマネージャに属しているかチェックする．
+  /// @brief 適正なポインタを持っていない時，例外を送出する．
   void
-  _check_mgr(
-    const AigHandle& handle
-  ) const;
+  _check_valid() const
+  {
+    if ( is_invalid() ) {
+      throw std::logic_error{"mPtr is null"};
+    }
+  }
 
 
 private:
@@ -148,4 +158,4 @@ private:
 
 END_NAMESPACE_YM_AIG
 
-#endif // AIGMGRPTR_H
+#endif // AIGMGRHOLDER_H

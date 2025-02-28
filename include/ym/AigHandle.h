@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
-#include "ym/AigMgrPtr.h"
+#include "ym/AigMgrHolder.h"
 #include "ym/JsonValue.h"
 
 
@@ -26,9 +26,10 @@ class AigEdge;
 /// AigMgrImpl は参照回数を管理しており，最後の参照がなくなった時に
 /// 開放される．
 //////////////////////////////////////////////////////////////////////
-class AigHandle
+class AigHandle :
+  public AigMgrHolder
 {
-  friend class AigMgrPtr;
+  friend class AigMgrHolder;
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -68,9 +69,9 @@ public:
   AigMgr
   mgr() const;
 
-  /// @brief マネージャのポインタを返す．
-  AigMgrPtr
-  mgr_ptr() const;
+  /// @brief マネージャのホルダを返す．
+  AigMgrHolder
+  mgr_holder() const;
 
   /// @brief 反転属性を得る．
   bool
@@ -297,7 +298,7 @@ private:
 
   /// @brief 内容を指定したコンストラクタ
   AigHandle(
-    const AigMgrPtr& mgr, ///< [in] マネージャ
+    const AigMgrHolder& mgr, ///< [in] マネージャ
     AigEdge edge          ///< [in] 枝
   );
 
@@ -309,7 +310,7 @@ private:
   {
     if ( !is_const() &&
 	 !other.is_const() &&
-	 mMgr != other.mMgr ) {
+	 !check_mgr(other) ) {
       throw std::invalid_argument{"AigMgr mismatch"};
     }
   }
@@ -330,11 +331,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // マネージャの実装クラスのスマートポインタ
-  AigMgrPtr mMgr;
-
   // 枝
-  PtrIntType mEdge;
+  PtrIntType mEdge{0};
 
 };
 

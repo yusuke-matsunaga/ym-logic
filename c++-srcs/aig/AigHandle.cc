@@ -28,15 +28,17 @@ AigHandle::AigHandle(
 // @brief コピーコンストラクタ
 AigHandle::AigHandle(
   const AigHandle& src
-) : AigHandle{src.mMgr, src._edge()}
+) : AigHandle(src, src._edge())
 {
+  // delegate constructor パタン
+  // 下のコンストラクタを利用している．
 }
 
 // @brief 内容を指定したコンストラクタ
 AigHandle::AigHandle(
-  const AigMgrPtr& mgr,
+  const AigMgrHolder& holder,
   AigEdge edge
-) : mMgr{mgr}
+) : AigMgrHolder{holder}
 {
   _set_edge(edge);
 }
@@ -50,28 +52,28 @@ AigHandle::~AigHandle()
 AigHandle
 AigHandle::zero()
 {
-  return AigHandle{{}, AigEdge::zero()};
+  return AigHandle(AigMgrHolder(), AigEdge::zero());
 }
 
 // @brief 定数1のハンドルを返す．
 AigHandle
 AigHandle::one()
 {
-  return AigHandle{{}, AigEdge::one()};
+  return AigHandle(AigMgrHolder(), AigEdge::one());
 }
 
 // @brief マネージャを返す．
 AigMgr
 AigHandle::mgr() const
 {
-  return AigMgr{mMgr};
+  return AigMgr(*this);
 }
 
 // @brief マネージャのポインタを返す．
-AigMgrPtr
-AigHandle::mgr_ptr() const
+AigMgrHolder
+AigHandle::mgr_holder() const
 {
-  return mMgr;
+  return AigMgrHolder(*this);
 }
 
 // @brief 反転属性を得る．
@@ -129,21 +131,21 @@ AigHandle::fanin(
   SizeType pos
 ) const
 {
-  return mMgr.edge_to_handle(_edge().fanin(pos));
+  return edge_to_handle(_edge().fanin(pos));
 }
 
 // @brief ANDノードへのハンドルの時，ファンイン0のハンドルを返す．
 AigHandle
 AigHandle::fanin0() const
 {
-  return mMgr.edge_to_handle(_edge().fanin0());
+  return edge_to_handle(_edge().fanin0());
 }
 
 // @brief ANDノードへのハンドルの時，ファンイン1のハンドルを返す．
 AigHandle
 AigHandle::fanin1() const
 {
-  return mMgr.edge_to_handle(_edge().fanin1());
+  return edge_to_handle(_edge().fanin1());
 }
 
 // @brief ANDグループのファンインのリストを返す．
@@ -151,7 +153,7 @@ vector<AigHandle>
 AigHandle::ex_fanin_list() const
 {
   auto edge_list = _edge().ex_fanin_list();
-  return mMgr.elist_to_hlist(edge_list);
+  return elist_to_hlist(edge_list);
 }
 
 // @brief 論理シミュレーションを行う．
@@ -166,7 +168,7 @@ AigHandle::eval(
   if ( is_one() ) {
     return ~0UL;
   }
-  return mMgr->eval(input_vals, _edge());
+  return get()->eval(input_vals, _edge());
 }
 
 // @brief コファクター演算
@@ -178,9 +180,9 @@ AigHandle::cofactor(
   if ( is_const() ) {
     return *this;
   }
-  auto cedge_list = mMgr.hlist_to_elist(cube);
-  auto edge = mMgr->cofactor(cedge_list, _edge());
-  return mMgr.edge_to_handle(edge);
+  auto cedge_list = hlist_to_elist(cube);
+  auto edge = get()->cofactor(cedge_list, _edge());
+  return edge_to_handle(edge);
 }
 
 // @brief ユニークなインデックス値を返す．
@@ -195,7 +197,7 @@ SizeType
 AigHandle::hash() const
 {
   auto idx = index();
-  auto v = reinterpret_cast<SizeType>(mMgr.get());
+  auto v = reinterpret_cast<SizeType>(get());
   return ((v * v) >> 20) + idx;
 }
 
@@ -206,14 +208,14 @@ AigHandle::gen_dot(
   const JsonValue& option
 ) const
 {
-  mMgr->gen_dot(s, {_edge()}, option);
+  get()->gen_dot(s, {_edge()}, option);
 }
 
 // @brief 否定したハンドルを返す．
 AigHandle
 AigHandle::operator~() const
 {
-  return mMgr.edge_to_handle(~_edge());
+  return edge_to_handle(~_edge());
 }
 
 // @brief 反転属性との掛け算
@@ -222,21 +224,21 @@ AigHandle::operator*(
   bool inv
 ) const
 {
-  return mMgr.edge_to_handle(_edge() * inv);
+  return edge_to_handle(_edge() * inv);
 }
 
 // @brief 同じノードを指す反転なしのハンドルを返す．
 AigHandle
 AigHandle::positive_handle() const
 {
-  return mMgr.edge_to_handle(_edge().positive_edge());
+  return edge_to_handle(_edge().positive_edge());
 }
 
 // @brief 同じノードを指す反転ありのハンドルを返す．
 AigHandle
 AigHandle::negative_handle() const
 {
-  return mMgr.edge_to_handle(_edge().negative_edge());
+  return edge_to_handle(_edge().negative_edge());
 }
 
 // @brief 論理積
@@ -254,8 +256,8 @@ AigHandle::operator&(
   _check_mgr(right);
   auto e1 = _edge();
   auto e2 = right._edge();
-  auto ans = mMgr->and_op(e1, e2);
-  return mMgr.edge_to_handle(ans);
+  auto ans = get()->and_op(e1, e2);
+  return edge_to_handle(ans);
 }
 
 // @brief 論理積付き代入
@@ -272,7 +274,7 @@ AigHandle::operator&=(
       _check_mgr(right);
       auto e1 = _edge();
       auto e2 = right._edge();
-      auto ans = mMgr->and_op(e1, e2);
+      auto ans = get()->and_op(e1, e2);
       _set_edge(ans);
     }
   }
@@ -294,8 +296,8 @@ AigHandle::operator|(
   _check_mgr(right);
   auto e1 = _edge();
   auto e2 = right._edge();
-  auto ans = mMgr->or_op(e1, e2);
-  return mMgr.edge_to_handle(ans);
+  auto ans = get()->or_op(e1, e2);
+  return edge_to_handle(ans);
 }
 
 // @brief 論理和付き代入
@@ -312,7 +314,7 @@ AigHandle::operator|=(
       _check_mgr(right);
       auto e1 = _edge();
       auto e2 = right._edge();
-      auto ans = mMgr->or_op(e1, e2);
+      auto ans = get()->or_op(e1, e2);
       _set_edge(ans);
     }
   }
@@ -334,8 +336,8 @@ AigHandle::operator^(
   _check_mgr(right);
   auto e1 = _edge();
   auto e2 = right._edge();
-  auto ans = mMgr->xor_op(e1, e2);
-  return mMgr.edge_to_handle(ans);
+  auto ans = get()->xor_op(e1, e2);
+  return edge_to_handle(ans);
 }
 
 // @brief 排他的論理和付き代入
@@ -354,7 +356,7 @@ AigHandle::operator^=(
     _check_mgr(right);
     auto e1 = _edge();
     auto e2 = right._edge();
-    auto ans = mMgr->xor_op(e1, e2);
+    auto ans = get()->xor_op(e1, e2);
     _set_edge(ans);
   }
   return *this;
@@ -366,7 +368,7 @@ AigHandle::operator==(
   const AigHandle& right
 ) const
 {
-  if ( mMgr != right.mMgr ) {
+  if ( !AigMgrHolder::check_mgr(right) ) {
     return false;
   }
   return _edge() == right._edge();

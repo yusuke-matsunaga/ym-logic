@@ -22,14 +22,14 @@ END_NONAMESPACE
 
 // @brief コンストラクタ
 AigMgr::AigMgr(
-) : mMgr{new AigMgrImpl}
+) : AigMgrHolder(new AigMgrImpl)
 {
 }
 
 // @brief 内容を指定したコンストラクタ
 AigMgr::AigMgr(
-  const AigMgrPtr& ptr
-) : mMgr{ptr}
+  const AigMgrHolder& holder
+) : AigMgrHolder(holder)
 {
 }
 
@@ -42,14 +42,14 @@ AigMgr::~AigMgr()
 SizeType
 AigMgr::node_num() const
 {
-  return mMgr->node_num();
+  return get()->node_num();
 }
 
 // @brief 入力ノード数を返す．
 SizeType
 AigMgr::input_num() const
 {
-  return mMgr->input_num();
+  return get()->input_num();
 }
 
 // @brief 入力のハンドルを返す．
@@ -58,15 +58,15 @@ AigMgr::input(
   SizeType input_id
 )
 {
-  auto edge = mMgr->input(input_id);
-  return mMgr.edge_to_handle(edge);
+  auto edge = get()->input(input_id);
+  return edge_to_handle(edge);
 }
 
 // @brief ANDノード数を返す．
 SizeType
 AigMgr::and_num() const
 {
-  return mMgr->and_num();
+  return get()->and_num();
 }
 
 // @brief 論理シミュレーションを行う．
@@ -76,8 +76,8 @@ AigMgr::eval(
   const vector<AigHandle>& output_list
 ) const
 {
-  auto oedge_list = mMgr.hlist_to_elist(output_list);
-  return mMgr->eval(input_vals, oedge_list);
+  auto oedge_list = hlist_to_elist(output_list);
+  return get()->eval(input_vals, oedge_list);
 }
 
 // @brief dot 形式で出力する．
@@ -89,7 +89,7 @@ AigMgr::gen_dot(
 )
 {
   vector<AigEdge> oedge_list;
-  auto mgr = AigMgrPtr::hlist_to_elist(root_list, oedge_list);
+  auto mgr = hlist_to_elist(root_list, oedge_list);
   return mgr->gen_dot(s, oedge_list, option);
 }
 
@@ -97,7 +97,7 @@ AigMgr::gen_dot(
 AigHandle
 AigMgr::make_input()
 {
-  return mMgr.edge_to_handle(mMgr->make_input());
+  return edge_to_handle(get()->make_input());
 }
 
 // @brief 複数の入力の AND を表すハンドルを返す．
@@ -106,8 +106,8 @@ AigMgr::and_op(
   const vector<AigHandle>& fanin_list
 )
 {
-  auto edge_list = mMgr.hlist_to_elist(fanin_list);
-  return mMgr.edge_to_handle(mMgr->and_op(edge_list));
+  auto edge_list = hlist_to_elist(fanin_list);
+  return edge_to_handle(get()->and_op(edge_list));
 }
 
 // @brief 複数の入力の OR を表すハンドルを返す．
@@ -116,8 +116,8 @@ AigMgr::or_op(
   const vector<AigHandle>& fanin_list
 )
 {
-  auto edge_list = mMgr.hlist_to_elist(fanin_list);
-  return mMgr.edge_to_handle(mMgr->or_op(edge_list));
+  auto edge_list = hlist_to_elist(fanin_list);
+  return edge_to_handle(get()->or_op(edge_list));
 }
 
 // @brief 複数の入力の XOR を表すハンドルを返す．
@@ -126,8 +126,8 @@ AigMgr::xor_op(
   const vector<AigHandle>& fanin_list
 )
 {
-  auto edge_list = mMgr.hlist_to_elist(fanin_list);
-  return mMgr.edge_to_handle(mMgr->xor_op(edge_list));
+  auto edge_list = hlist_to_elist(fanin_list);
+  return edge_to_handle(get()->xor_op(edge_list));
 }
 
 // @brief Expr から変換する．
@@ -136,8 +136,8 @@ AigMgr::from_expr(
   const Expr& expr
 )
 {
-  auto edge = mMgr->from_expr(expr);
-  return mMgr.edge_to_handle(edge);
+  auto edge = get()->from_expr(expr);
+  return edge_to_handle(edge);
 }
 
 // @brief 複数の Expr から変換する．
@@ -146,8 +146,8 @@ AigMgr::from_expr_list(
   const vector<Expr>& expr_list
 )
 {
-  auto edge_list = mMgr->from_expr_list(expr_list);
-  return mMgr.elist_to_hlist(edge_list);
+  auto edge_list = get()->from_expr_list(expr_list);
+  return elist_to_hlist(edge_list);
 }
 
 // @brief コファクター演算
@@ -157,10 +157,10 @@ AigMgr::cofactor(
   const vector<AigHandle>& handle_list
 )
 {
-  auto cedge_list = mMgr.hlist_to_elist(cube);
-  auto edge_list = mMgr.hlist_to_elist(handle_list);
-  auto ans_list = mMgr->cofactor(cedge_list, edge_list);
-  return mMgr.elist_to_hlist(ans_list);
+  auto cedge_list = hlist_to_elist(cube);
+  auto edge_list = hlist_to_elist(handle_list);
+  auto ans_list = get()->cofactor(cedge_list, edge_list);
+  return elist_to_hlist(ans_list);
 }
 
 END_NAMESPACE_YM_AIG

@@ -1,12 +1,12 @@
 
-/// @file AigMgrPtr.cc
-/// @brief AigMgrPtr の実装ファイル
+/// @file AigMgrHolder.cc
+/// @brief AigMgrHolder の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2024 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/AigMgrPtr.h"
+#include "ym/AigMgrHolder.h"
 #include "ym/AigHandle.h"
 #include "AigMgrImpl.h"
 
@@ -14,41 +14,41 @@
 BEGIN_NAMESPACE_YM_AIG
 
 //////////////////////////////////////////////////////////////////////
-// クラス AigMgrPtr
+// クラス AigMgrHolder
 //////////////////////////////////////////////////////////////////////
 
 // @brief 値を指定したコンストラクタ
-AigMgrPtr::AigMgrPtr(
+AigMgrHolder::AigMgrHolder(
   AigMgrImpl* ptr
 ) : mPtr{ptr}
 {
 }
 
 // @brief コピーコンストラクタ
-AigMgrPtr::AigMgrPtr(
-  const AigMgrPtr& src
+AigMgrHolder::AigMgrHolder(
+  const AigMgrHolder& src
 ) : mPtr{src.mPtr}
 {
 }
 
 // @brief デストラクタ
-AigMgrPtr::~AigMgrPtr()
+AigMgrHolder::~AigMgrHolder()
 {
 }
 
 // @brief AigHandle を AigEdge に変換する．
 AigEdge
-AigMgrPtr::handle_to_edge(
+AigMgrHolder::handle_to_edge(
   AigHandle handle
 ) const
 {
-  _check_mgr(handle);
+  check_mgr(handle);
   return handle._edge();
 }
 
 // AigHandle のリストを AigEdge のリストに変換する．
 vector<AigEdge>
-AigMgrPtr::hlist_to_elist(
+AigMgrHolder::hlist_to_elist(
   const vector<AigHandle>& handle_list
 ) const
 {
@@ -63,8 +63,8 @@ AigMgrPtr::hlist_to_elist(
 }
 
 // AigHandle のリストを AigEdge のリストに変換する．
-AigMgrPtr
-AigMgrPtr::hlist_to_elist(
+AigMgrImpl*
+AigMgrHolder::hlist_to_elist(
   const vector<AigHandle>& handle_list,
   vector<AigEdge>& edge_list
 )
@@ -72,30 +72,30 @@ AigMgrPtr::hlist_to_elist(
   edge_list.clear();
   auto n = handle_list.size();
   if ( n == 0 ) {
-    return AigMgrPtr{};
+    return nullptr;
   }
   edge_list.reserve(n);
-  auto mgr = handle_list.front().mgr_ptr();
+  auto holder = handle_list.front().mgr_holder();
   for ( SizeType i = 0; i < n; ++ i ) {
     auto h = handle_list[i];
-    auto edge = mgr.handle_to_edge(h);
+    auto edge = holder.handle_to_edge(h);
     edge_list.push_back(edge);
   }
-  return mgr;
+  return holder.get();
 }
 
 // @brief AigEdge を AigHandle に変換する．
 AigHandle
-AigMgrPtr::edge_to_handle(
+AigMgrHolder::edge_to_handle(
   AigEdge edge
 ) const
 {
-  return AigHandle{*this, edge};
+  return AigHandle(*this, edge);
 }
 
 // @brief AigEdge のリストを AigHandle のリストに変換する．
 vector<AigHandle>
-AigMgrPtr::elist_to_hlist(
+AigMgrHolder::elist_to_hlist(
   const vector<AigEdge>& edge_list ///< [in] 枝のリスト
 ) const
 {
@@ -106,17 +106,6 @@ AigMgrPtr::elist_to_hlist(
     handle_list[i] = edge_to_handle(edge);
   }
   return handle_list;
-}
-
-// @brief ハンドルが同じマネージャに属しているかチェックする．
-void
-AigMgrPtr::_check_mgr(
-  const AigHandle& handle
-) const
-{
-  if ( !handle.is_const() && handle.mMgr != *this ) {
-    throw std::invalid_argument{"AigMgr mismatch"};
-  }
 }
 
 END_NAMESPACE_YM_AIG

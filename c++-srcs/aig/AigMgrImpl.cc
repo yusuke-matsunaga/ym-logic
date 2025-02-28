@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "AigMgrImpl.h"
-#include "ym/AigMgrPtr.h"
+//#include "ym/AigMgrHolder.h"
 #include "ym/AigHandle.h"
 #include "ValArray.h"
 #include "EdgeDict.h"

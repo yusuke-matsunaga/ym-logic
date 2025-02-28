@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
-#include "ym/AigMgrPtr.h"
+#include "ym/AigMgrHolder.h"
 #include "ym/AigHandle.h"
 #include "ym/Expr.h"
 #include "ym/JsonValue.h"
@@ -27,7 +27,8 @@ class AigEdge;
 /// 実装クラスは共有される．
 /// 実装クラスはすべての参照がなくなった時に開放される．
 //////////////////////////////////////////////////////////////////////
-class AigMgr
+class AigMgr :
+  public AigMgrHolder
 {
 public:
 
@@ -35,8 +36,9 @@ public:
   AigMgr();
 
   /// @brief 内容を指定したコンストラクタ
+  explicit
   AigMgr(
-    const AigMgrPtr& ptr
+    const AigMgrHolder& holder
   );
 
   /// @brief デストラクタ
@@ -172,7 +174,7 @@ public:
     const AigMgr& right
   ) const
   {
-    return mMgr == right.mMgr;
+    return check_mgr(right);
   }
 
   /// @brief 非等価比較演算子
@@ -183,15 +185,6 @@ public:
   {
     return !operator==(right);
   }
-
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // データメンバ
-  //////////////////////////////////////////////////////////////////////
-
-  // 実装クラスの共有ポインタ
-  AigMgrPtr mMgr;
 
 };
 
