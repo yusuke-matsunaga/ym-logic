@@ -70,6 +70,17 @@ private:
     auto p = Divide::divide(f, d);
     auto& q = p.first;
     auto& r = p.second;
+    if ( q.literal_num() == 0 ) {
+      // special case
+      auto d_expr = factor(d);
+      auto r_expr = factor(r);
+      auto expr = d_expr | r_expr;
+      if ( debug ) {
+	cout << "*factor(" << f << ")" << endl
+	     << " => " << expr << endl;
+      }
+      return expr;
+    }
     if ( debug ) {
       cout << "d = " << d << endl
 	   << "q = " << q << endl
@@ -93,6 +104,17 @@ private:
       auto p = Divide::divide(f, q1);
       auto& d1 = p.first;
       auto& r1 = p.second;
+      if ( d1.literal_num() == 0 ) {
+	// special case
+	auto q_expr = factor(q1);
+	auto r_expr = factor(r1);
+	auto expr = q_expr | r_expr;
+	if ( debug ) {
+	  cout << "*factor(" << f << ")" << endl
+	       << " => " << expr << endl;
+	}
+	return expr;
+      }
       if ( debug ) {
 	cout << "d1 = " << q1 << endl
 	     << "q1 = " << d1 << endl
