@@ -78,7 +78,7 @@ TvFunc::TvFunc(
   SizeType ni,
   SizeType varid,
   bool inv
-) : TvFunc{ni}
+) : TvFunc(ni)
 {
   _check_varid(varid);
 
@@ -96,7 +96,7 @@ TvFunc::TvFunc(
 TvFunc::TvFunc(
   SizeType ni,
   const vector<vector<Literal>>& cube_list
-) : TvFunc{ni}
+) : TvFunc(ni)
 {
   for ( auto& cube: cube_list ) {
     for ( auto lit: cube ) {
@@ -128,7 +128,7 @@ TvFunc::TvFunc(
 TvFunc::TvFunc(
   SizeType ni,
   const vector<SopCube>& cube_list
-) : TvFunc{ni}
+) : TvFunc(ni)
 {
   for ( auto& cube: cube_list ) {
     if ( cube.variable_num() != ni ) {
@@ -160,7 +160,7 @@ TvFunc::TvFunc(
 TvFunc::TvFunc(
   SizeType ni,
   const vector<Literal>& lit_list
-) : TvFunc{ni}
+) : TvFunc(ni)
 {
   for ( auto lit: lit_list ) {
     _check_varid(lit.varid());
@@ -186,7 +186,7 @@ TvFunc::TvFunc(
 TvFunc::TvFunc(
   SizeType ni,
   const vector<int>& values
-) : TvFunc{ni}
+) : TvFunc(ni)
 {
   SizeType ni_pow = 1 << ni;
   if ( values.size() != ni_pow ) {
@@ -247,7 +247,7 @@ END_NONAMESPACE
 // @brief 文字列からの変換コンストラクタ
 TvFunc::TvFunc(
   const string& str
-) : TvFunc{get_ni(str)}
+) : TvFunc(get_ni(str))
 {
   SizeType base = 0;
   TvFunc::WordType bitpat = 0ULL;
@@ -395,7 +395,7 @@ TvFunc::is_zero() const
   }
 
   for ( SizeType b: Range(mBlockNum) ) {
-    TvFunc::WordType word = mVector[b];
+    auto word = mVector[b];
     if ( word != 0UL ) {
       return false;
     }
@@ -412,13 +412,13 @@ TvFunc::is_one() const
     return false;
   }
 
-  TvFunc::WordType mask = vec_mask(mInputNum);
+  auto mask = vec_mask(mInputNum);
   if ( mInputNum < NIPW ) {
     return (mVector[0] & mask) == mask;
   }
   else {
     for ( SizeType b: Range(mBlockNum) ) {
-      TvFunc::WordType word = mVector[b];
+      auto word = mVector[b];
       if ( word != mask ) {
 	return false;
       }
@@ -463,7 +463,7 @@ TvFunc::xform(
   }
   TvFunc::WordType omask = npnmap.oinv() ? 1ULL : 0ULL;
 
-  TvFunc ans{new_ni};
+  TvFunc ans(new_ni);
   SizeType ni_pow = 1 << new_ni;
   for ( SizeType b: Range(ni_pow) ) {
     SizeType orig_b = 0;
@@ -580,8 +580,8 @@ TvFunc::_compare(
   // 以降は入力数が等しい場合
   SizeType n = mBlockNum;
   for ( SizeType b: Range(n) ) {
-    TvFunc::WordType w1 = mVector[n - b - 1];
-    TvFunc::WordType w2 = func2.mVector[n - b - 1];
+    auto w1 = mVector[n - b - 1];
+    auto w2 = func2.mVector[n - b - 1];
     if ( w1 < w2 ) {
       return -1;
     }
@@ -602,8 +602,8 @@ TvFunc::check_intersect(
 
   SizeType n = mBlockNum;
   for ( SizeType b: Range(n) ) {
-    TvFunc::WordType w1 = mVector[n - b - 1];
-    TvFunc::WordType w2 = func2.mVector[n - b - 1];
+    auto w1 = mVector[n - b - 1];
+    auto w2 = func2.mVector[n - b - 1];
     if ( (w1 & w2) != 0U ) {
       return true;
     }
@@ -621,8 +621,8 @@ TvFunc::check_containment(
 
   SizeType n = mBlockNum;
   for ( SizeType b: Range(n) ) {
-    TvFunc::WordType w1 = mVector[n - b - 1];
-    TvFunc::WordType w2 = func2.mVector[n - b - 1];
+    auto w1 = mVector[n - b - 1];
+    auto w2 = func2.mVector[n - b - 1];
     if ( (w1 & ~w2) != 0U ) {
       return false;
     }
