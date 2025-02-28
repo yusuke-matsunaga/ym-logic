@@ -2551,12 +2551,12 @@ TEST_F(SopTest, cofactor_int_lit_bad)
 // ソートのテスト
 TEST_F(SopTest, sort1)
 {
-  auto cover1 = SopCover{3, { {~lit1,  lit2},
+  auto cover1 = SopCover(3, { {~lit1,  lit2},
 			      { lit1, ~lit2},
 			      {~lit0,  lit2},
 			      {~lit0,  lit1},
 			      { lit0, ~lit2},
-			      { lit0, ~lit1} } };
+			      { lit0, ~lit1} });
   ostringstream buf;
   cover1.print(buf);
 
@@ -2569,23 +2569,128 @@ TEST_F(SopTest, sort1)
 // 重複したキューブが取り除かれるかのテスト
 TEST_F(SopTest, sort2)
 {
-  auto cover1 = SopCover{3, { {~lit1,  lit2},
+  auto cover1 = SopCover{7, { {~lit1,  lit2},
 			      { lit1, ~lit2},
 			      {~lit0,  lit2},
 			      {~lit0,  lit2},
+			      { lit3,  lit4},
+			      { lit5,  lit6},
 			      { lit0, ~lit2},
 			      { lit0, ~lit1} } };
   ostringstream buf;
   cover1.print(buf);
 
   auto str = buf.str();
-  auto expr_str = "v0 v1' + v0 v2' + v0' v2 + v1 v2' + v1' v2";
+  auto expr_str = "v0 v1' + v0 v2' + v0' v2 + v1 v2' + v1' v2 + v3 v4 + v5 v6";
   EXPECT_EQ( expr_str, str );
 }
 
 // ソートのテスト
-// ランダムに生成したカバーを用いる．
+// 3つの要素の全組み合わせを試す．
 TEST_F(SopTest, sort3)
+{
+  vector<vector<Literal>> cube_list = { {lit0}, {lit1}, {lit2} };
+  auto n = 3 * 3 * 3;
+  for ( SizeType b = 0; b < n; ++ b ) {
+    vector<vector<Literal>> lit_list(3);
+    auto tmp_b = b;
+    for ( SizeType i = 0; i < 3; ++ i ) {
+      auto idx = tmp_b % 3;
+      tmp_b /= 3;
+      lit_list[i] = cube_list[idx];
+    }
+    auto cover = SopCover(3, lit_list);;
+    auto nc = cover.cube_num();
+    for ( SizeType i = 1; i < nc; ++ i ) {
+      auto cube1 = cover.get_cube(i - 1);
+      auto cube2 = cover.get_cube(i);
+      EXPECT_TRUE( cube1 > cube2 );
+    }
+  }
+}
+
+// ソートのテスト
+// 4つの要素の全組み合わせを試す．
+TEST_F(SopTest, sort4)
+{
+  vector<vector<Literal>> cube_list = { {lit0}, {lit1}, {lit2}, {lit3} };
+  auto n = 1 << 8;
+  for ( SizeType b = 0; b < n; ++ b ) {
+    vector<vector<Literal>> lit_list(4);
+    for ( SizeType i = 0; i < 4; ++ i ) {
+      auto idx = (b >> (i * 2)) & 3;
+      lit_list[i] = cube_list[idx];
+    }
+    auto cover = SopCover(4, lit_list);;
+    auto nc = cover.cube_num();
+    for ( SizeType i = 1; i < nc; ++ i ) {
+      auto cube1 = cover.get_cube(i - 1);
+      auto cube2 = cover.get_cube(i);
+      EXPECT_TRUE( cube1 > cube2 );
+    }
+  }
+}
+
+// ソートのテスト
+// 5つの要素の全組み合わせを試す．
+TEST_F(SopTest, sort5)
+{
+  vector<vector<Literal>> cube_list = { {lit0}, {lit1}, {lit2}, {lit3}, {lit4} };
+  SizeType nv = 5;
+  auto n = 1;
+  for ( SizeType i = 0; i < nv; ++ i ) {
+    n *= nv;
+  }
+  for ( SizeType b = 0; b < n; ++ b ) {
+    vector<vector<Literal>> lit_list(nv);
+    auto tmp_b = b;
+    for ( SizeType i = 0; i < nv; ++ i ) {
+      auto idx = tmp_b % nv;
+      tmp_b /= nv;
+      lit_list[i] = cube_list[idx];
+    }
+    auto cover = SopCover(nv, lit_list);;
+    auto nc = cover.cube_num();
+    for ( SizeType i = 1; i < nc; ++ i ) {
+      auto cube1 = cover.get_cube(i - 1);
+      auto cube2 = cover.get_cube(i);
+      EXPECT_TRUE( cube1 > cube2 );
+    }
+  }
+}
+
+// ソートのテスト
+// 6つの要素の全組み合わせを試す．
+TEST_F(SopTest, sort6)
+{
+  vector<vector<Literal>> cube_list = { {lit0}, {lit1}, {lit2},
+					{lit3}, {lit4}, {lit5} };
+  SizeType nv = 6;
+  auto n = 1;
+  for ( SizeType i = 0; i < nv; ++ i ) {
+    n *= nv;
+  }
+  for ( SizeType b = 0; b < n; ++ b ) {
+    vector<vector<Literal>> lit_list(nv);
+    auto tmp_b = b;
+    for ( SizeType i = 0; i < nv; ++ i ) {
+      auto idx = tmp_b % nv;
+      tmp_b /= nv;
+      lit_list[i] = cube_list[idx];
+    }
+    auto cover = SopCover(nv, lit_list);;
+    auto nc = cover.cube_num();
+    for ( SizeType i = 1; i < nc; ++ i ) {
+      auto cube1 = cover.get_cube(i - 1);
+      auto cube2 = cover.get_cube(i);
+      EXPECT_TRUE( cube1 > cube2 );
+    }
+  }
+}
+
+// ソートのテスト
+// ランダムに生成したカバーを用いる．
+TEST_F(SopTest, sort_random)
 {
   // サンプル数
   SizeType nsample = 1000;
@@ -2594,19 +2699,21 @@ TEST_F(SopTest, sort3)
   SizeType ncube = 1000;
 
   // キューブあたりのリテラル数
-  SizeType nlit = 100;
+  SizeType nlit = 10;
 
   // 乱数生成器
   std::mt19937 rand_gen;
 
-  // int 型の一様分布生成器
-  std::uniform_int_distribution<int> rand_dist;
+  // 極性用の一様分布
+  std::uniform_int_distribution<int> pol_dist(0, 1);
 
   SizeType nv = 30;
   vector<Literal> lit_set(nv);
   for ( SizeType i = 0; i < nv; ++ i ) {
     lit_set[i] = Literal{i, false};
   }
+  // リテラル選択用の一様分布
+  std::uniform_int_distribution<int> lit_dist(0, nv - 1);
 
   for ( SizeType i = 0; i < nsample; ++ i ) {
     vector<vector<Literal>> cube_list;
@@ -2614,17 +2721,24 @@ TEST_F(SopTest, sort3)
     for ( SizeType j = 0; j < ncube; ++ j ) {
       vector<Literal> lit_list;
       lit_list.reserve(nlit);
-      std::sample(lit_set.begin(), lit_set.end(),
-		  std::back_inserter(lit_list),
-		  nlit, rand_gen);
+      for ( SizeType c = 0; c < nlit; ++ c ) {
+	auto idx = lit_dist(rand_gen);
+	auto lit = lit_set[idx];
+	lit_list.push_back(lit);
+      }
+      // 重複を取り除く
+      std::sort(lit_list.begin(), lit_list.end());
+      lit_list.erase(std::unique(lit_list.begin(), lit_list.end()),
+		     lit_list.end());
+      // 極性をランダムに付加する．
       vector<Literal> lit_list2;
       lit_list.reserve(nlit);
       for ( auto lit: lit_list ) {
-	if ( rand_dist(rand_gen) % 2 ) {
-	  lit_list2.push_back(lit);
+	if ( pol_dist(rand_gen) ) {
+	  lit_list2.push_back(~lit);
 	}
 	else {
-	  lit_list2.push_back(~lit);
+	  lit_list2.push_back(lit);
 	}
       }
       cube_list.push_back(lit_list2);

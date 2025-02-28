@@ -42,7 +42,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief ソートする．
-  void
+  SizeType
   sort(
     SizeType cube_num, ///< [in] キューブ数
     Chunk& chunk       ///< [in] 対象のビットベクタ
@@ -56,10 +56,56 @@ private:
 
   /// @brief sort() の下請け関数
   ///
-  /// chunk の [begin, end) の区間をソートする．
-  /// begin は含むが end は含まないことに注意
-  void
+  /// - chunk の [begin, end) の区間をソートする．
+  /// - begin は含むが end は含まないことに注意
+  /// - 重複した要素は削除するので新しい end を返す．
+  SizeType
   sort_sub(
+    Chunk& chunk,   ///< [in] 対象のビットベクタ
+    SizeType begin, ///< [in] 開始位置
+    SizeType end    ///< [in] 終了位置
+  );
+
+  /// @brief 要素数が2の場合のソート
+  SizeType
+  sort2(
+    Chunk& chunk,   ///< [in] 対象のビットベクタ
+    SizeType begin, ///< [in] 開始位置
+    SizeType end    ///< [in] 終了位置
+  )
+  {
+    // (0, 1) と (1, 0) と (0) の3通りだけ
+    auto cube0 = _dst_cube(chunk, begin + 0);
+    auto cube1 = _dst_cube(chunk, begin + 1);
+    auto res01 = _cube_compare(cube0, cube1);
+    if ( res01 < 0 ) {
+      // cube1 << cube0 だったので交換する．
+      _cube_swap(cube0, cube1);
+    }
+    else {
+      // そのまま
+      if ( res01 == 0 ) {
+	// cube0 == cube1 なので削除する．
+	-- end;
+      }
+    }
+#if VERIFY
+    _check(chunk, begin, end);
+#endif
+    return end;
+  }
+
+  /// @brief 要素数が3の場合のソート
+  SizeType
+  sort3(
+    Chunk& chunk,   ///< [in] 対象のビットベクタ
+    SizeType begin, ///< [in] 開始位置
+    SizeType end    ///< [in] 終了位置
+  );
+
+  /// @brief 要素数が3の場合のソート
+  SizeType
+  sort4(
     Chunk& chunk,   ///< [in] 対象のビットベクタ
     SizeType begin, ///< [in] 開始位置
     SizeType end    ///< [in] 終了位置
@@ -144,9 +190,18 @@ private:
       auto cube0 = _cube(chunk, i - 1);
       auto cube1 = _cube(chunk, i);
       if ( _cube_compare(cube0, cube1) < 0 ) {
-	cout << "order error" << endl;
-	_print(cout, chunk, begin, end);
-	cout << endl;
+	cout << "order error(" << begin
+	     << ": " << end
+	     << ")" << endl;
+	for ( SizeType i = begin; i < end; ++ i ) {
+	  cout << "#" << i << ": ";
+	  _print(cout, chunk, i, i + 1);
+	  cout << endl;
+	}
+	abort();
+      }
+      if ( !_cube_sanity_check(cube0) ) {
+	cout << "Cube#" << i << " is insane" << endl;
 	abort();
       }
     }
