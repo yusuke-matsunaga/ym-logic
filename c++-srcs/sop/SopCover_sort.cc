@@ -85,11 +85,10 @@ SopSorter::sort_sub(
   if ( n == 3 ) {
     return sort3(chunk, begin, end);
   }
-#if 1
   if ( n == 4 ) {
     return sort4(chunk, begin, end);
   }
-#endif
+
   // 半分に分割してそれぞれソートする．
   SizeType hn = (n + 1) / 2;
   SizeType begin1 = begin;
