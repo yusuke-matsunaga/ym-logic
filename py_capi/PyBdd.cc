@@ -131,7 +131,7 @@ Bdd_ite(
   auto then_bdd = PyBdd::Get(obj2);
   auto else_bdd = PyBdd::Get(obj3);
   try {
-    auto ans_bdd = ite(cond_bdd, then_bdd, else_bdd);
+    auto ans_bdd = Bdd::ite(cond_bdd, then_bdd, else_bdd);
     return PyBdd::ToPyObject(ans_bdd);
   }
   catch ( std::invalid_argument ) {
@@ -684,6 +684,62 @@ Bdd_gen_dot(
   Py_RETURN_NONE;
 }
 
+PyObject*
+Bdd_gen_dot2(
+  PyObject* Py_UNUSED(self),
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  const static char* kw_list[] = {
+    "filename",
+    "bdd_list",
+    "option",
+    nullptr
+  };
+  PyObject* bdd_list_obj = nullptr;
+  const char* filename = nullptr;
+  PyObject* option_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "sO|$O!",
+				    const_cast<char**>(kw_list),
+				    &filename,
+				    &bdd_list_obj,
+				    PyJsonValue::_typeobject(), &option_obj) ) {
+    return nullptr;
+  }
+
+  const char* emsg = "1st argument shuld be a list of Bdd";
+  if ( !PySequence_Check(bdd_list_obj) ) {
+    PyErr_SetString(PyExc_TypeError, emsg);
+    return nullptr;
+  }
+  auto n = PySequence_Size(bdd_list_obj);
+  vector<Bdd> bdd_list(n);
+  for ( SizeType i = 0; i < n; ++ i ) {
+    auto bdd_obj = PySequence_GetItem(bdd_list_obj, i);
+    if ( !PyBdd::Check(bdd_obj) ) {
+      PyErr_SetString(PyExc_TypeError, emsg);
+      return nullptr;
+    }
+    auto bdd = PyBdd::Get(bdd_obj);
+    Py_DECREF(bdd_obj);
+    bdd_list[i] = bdd;
+  }
+
+  ofstream ofs{filename};
+  if ( !ofs ) {
+    ostringstream buf;
+    buf << "Could not create file '" << filename << "'";
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
+  JsonValue option;
+  if ( option_obj != nullptr ) {
+    option = PyJsonValue::Get(option_obj);
+  }
+  Bdd::gen_dot(ofs, bdd_list, option);
+  Py_RETURN_NONE;
+}
 
 // メソッド定義
 PyMethodDef Bdd_methods[] = {
@@ -761,6 +817,9 @@ PyMethodDef Bdd_methods[] = {
    PyDoc_STR("convert to the truth-table string")},
   {"gen_dot", reinterpret_cast<PyCFunction>(Bdd_gen_dot),
    METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("generate DOT file")},
+  {"gen_dot2", reinterpret_cast<PyCFunction>(Bdd_gen_dot2),
+   METH_VARARGS | METH_KEYWORDS | METH_STATIC,
    PyDoc_STR("generate DOT file")},
   {nullptr, nullptr, 0, nullptr}
 };

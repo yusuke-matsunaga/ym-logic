@@ -25,10 +25,10 @@ Bdd::get_onepath() const
     edge = DdEdge::zero();
   }
   else {
-    BddOneOp op{mMgr.get()};
+    BddOneOp op(get());
     edge = op.op_step(root());
   }
-  return Bdd{mMgr, edge};
+  return _bdd(edge);
 }
 
 // @brief 0となるパスを求める．

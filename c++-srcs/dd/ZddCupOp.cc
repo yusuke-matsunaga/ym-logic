@@ -7,26 +7,23 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ym/ZddMgrPtr.h"
 #include "ZddCupOp.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 // @brief CUP 演算を行う．
-Zdd
-ZddMgrPtr::cup(
-  const Zdd& left,
+DdEdge
+Zdd::_cup(
   const Zdd& right
 ) const
 {
-  left._check_valid();
-  right._check_valid();
-  _check_mgr(left);
-  _check_mgr(right);
-  ZddCupOp op{get()};
-  auto edge = op.cup_step(left.root(), right.root());
-  return _zdd(edge);
+  _check_valid_mgr(right);
+  ZddCupOp op(get());
+  auto ledge = root();
+  auto redge = right.root();
+  auto edge = op.cup_step(ledge, redge);
+  return edge;
 }
 
 

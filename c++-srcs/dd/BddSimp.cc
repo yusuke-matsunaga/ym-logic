@@ -12,20 +12,18 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-// @brief 簡単化を行う．
+// @brief ドントケアを利用した簡単化を行う．
 Bdd
-BddMgrPtr::simplify(
+Bdd::simplify(
   const Bdd& on,
   const Bdd& dc
-) const
+)
 {
-  on._check_valid();
-  dc._check_valid();
-  _check_mgr(on.mMgr);
-  _check_mgr(dc.mMgr);
-  BddSimp op{get()};
+  on._check_valid_mgr(dc);
+  BddSimp op(on.get());
   auto edge = op.simp_step(on.root(), dc.root());
-  return _bdd(edge);
+  // on は Bdd ではなく BddMgrHolder として用いる．
+  return on._bdd(edge);
 }
 
 

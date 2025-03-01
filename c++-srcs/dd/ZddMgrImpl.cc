@@ -55,9 +55,12 @@ ZddMgrImpl::make_set(
   const vector<SizeType>& level_list
 )
 {
+  // ボトムアップに作るので逆順のリストを用意する．
+  auto tmp_list = level_list;
+  std::sort(tmp_list.begin(), tmp_list.end(), std::greater<>());
   auto f0 = DdEdge::zero();
   auto f1 = DdEdge::one();
-  for ( auto level: level_list ) {
+  for ( auto level: tmp_list ) {
     f1 = new_node(level, f0, f1);
   }
   return f1;

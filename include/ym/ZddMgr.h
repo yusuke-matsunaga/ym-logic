@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/ZddMgrPtr.h"
+#include "ym/ZddMgrHolder.h"
 #include "ym/JsonValue.h"
 #include "ym/BinEnc.h"
 #include "ym/BinDec.h"
@@ -18,28 +18,29 @@
 BEGIN_NAMESPACE_YM_DD
 
 class Zdd;
-class ZddMgrImpl;
 
 //////////////////////////////////////////////////////////////////////
 /// @class ZddMgr ZddMgr.h "ym/ZddMgr.h"
 /// @brief ZDD を管理するためのクラス
 ///
 /// 実体は ZddMgrImpl でこのクラスはただの shared pointer となっている．
-/// コピーしても同一の BddMgrImpl を持つインスタンスが生成される．
+/// コピーしても同一の ZddMgrImpl を持つインスタンスが生成される．
 ///
 /// ZddMgrImpl は内部で参照回数を持っており，参照回数がゼロになると
 /// 自動的に開放される．
 //////////////////////////////////////////////////////////////////////
-class ZddMgr
+class ZddMgr :
+  public ZddMgrHolder
 {
 public:
 
   /// @brief コンストラクタ
   ZddMgr();
 
-  /// @brief ZddMgrPtr を指定したコンストラクタ
+  /// @brief ZddMgrHolder を指定したコンストラクタ
+  explicit
   ZddMgr(
-    const ZddMgrPtr& ptr
+    const ZddMgrHolder& ptr
   );
 
   /// @brief コピーコンストラクタ
@@ -105,66 +106,6 @@ public:
   // ZDD の内容を出力する関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 複数のZDDのノード数を数える．
-  static
-  SizeType
-  zdd_size(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
-  );
-
-  /// @brief 複数のZDDの内容を出力する．
-  static
-  void
-  display(
-    ostream& s,                 ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
-  );
-
-  /// @brief 複数のZDDを dot 形式で出力する．
-  ///
-  /// - option は以下のようなキーを持った JSON オブジェクト
-  ///   * attr: dot の各種属性値を持った辞書
-  ///     属性値は <グループ名> ':' <属性名> で表す．
-  ///     グループ名は以下の通り
-  ///     - graph:     グラフ全体
-  ///     - root:      根のノード
-  ///     - node:      通常のノード
-  ///     - terminal:  終端ノード
-  ///     - terminal0: 定数0の終端ノード
-  ///     - terminal1: 定数1の終端ノード
-  ///     グループ名と ':' がない場合には全てのグループに対して同一の属性値
-  ///     を適用する．
-  ///     具体的な属性名と属性値については graphviz の使用を参照すること．
-  ///   * var_label: 変数ラベルを表す配列．配列のキーは変数番号
-  ///   * var_texlbl: TeX用の変数ラベルを表す配列．配列のキーは変数番号
-  ///   * var_label と var_texlbl は排他的となる．var_texlbl がある時，
-  ///     var_label は無視される．
-  static
-  void
-  gen_dot(
-    ostream& s,                  ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list, ///< [in] ZDDのリスト
-    const JsonValue& option      ///< [in] オプションを表す JSON オブジェクト
-    = JsonValue{}
-  );
-
-  /// @brief 構造を表す整数配列を作る．
-  static
-  vector<SizeType>
-  rep_data(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
-  );
-
-  /// @brief 複数のZDDを独自形式でバイナリダンプする．
-  ///
-  /// 復元には ZddMgr::restore() を用いる．
-  static
-  void
-  dump(
-    BinEnc& s,                  ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
-  );
-
   /// @brief バイナリダンプから復元する．
   /// @return 生成されたZDDのリストを返す．
   ///
@@ -214,7 +155,7 @@ public:
     const ZddMgr& right
   ) const
   {
-    return mImpl == right.mImpl;
+    return has_same_mgr(right);
   }
 
   /// @brief 非等価比較演算子
@@ -229,11 +170,20 @@ public:
 
 private:
   //////////////////////////////////////////////////////////////////////
-  // データメンバ
+  // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  // 本体
-  ZddMgrPtr mImpl;
+  /// @brief 枝のリストをZddのリストに変換する．
+  vector<Zdd>
+  conv_to_zddlist(
+    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+  ) const;
+
+  /// @brief 枝のリストを要素のリストに変換する．
+  vector<ZddItem>
+  conv_to_itemlist(
+    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+  ) const;
 
 };
 

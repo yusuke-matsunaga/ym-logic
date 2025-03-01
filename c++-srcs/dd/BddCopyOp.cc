@@ -6,7 +6,7 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/BddMgrPtr.h"
+#include "ym/BddMgr.h"
 #include "BddCopyOp.h"
 #include "BddMgrImpl.h"
 
@@ -14,20 +14,20 @@
 BEGIN_NAMESPACE_YM_DD
 
 //////////////////////////////////////////////////////////////////////
-// クラス BddMgrPtr
+// クラス BddMgrHolder
 //////////////////////////////////////////////////////////////////////
 
 // @brief BDD をコピーする．
 Bdd
-BddMgrPtr::copy(
+BddMgr::copy(
   const Bdd& src
-) const
+)
 {
   if ( src.is_invalid() ) {
     // 不正な ZDD はそのまま
     return src;
   }
-  if ( src.mMgr == *this ) {
+  if ( has_same_mgr(src) ) {
     // 自分自身に属している場合もそのまま
     return src;
   }
@@ -38,22 +38,10 @@ BddMgrPtr::copy(
     auto vid = var.id();
     (void) variable(vid);
   }
-  // var_list を変数順にしたがって並べ替える．
-  sort(var_list.begin(), var_list.end(),
-       [&](const BddVar& a, const BddVar& b) {
-	 auto level_a = a.level();
-	 auto level_b = b.level();
-	 return level_a < level_b;
-       });
-  // それを自身のレベルに変換する．
-  vector<SizeType> level_list;
-  level_list.reserve(var_list.size());
-  for ( auto& var: var_list ) {
-    auto vid = var.id();
-    auto level = mPtr->varid_to_level(vid);
-    level_list.push_back(level);
-  }
-  BddCopyOp op{get(), var_list, level_list};
+  // var_list のレベルを求める．
+  auto level_list = BddVar::conv_to_levellist(var_list);
+  std::sort(level_list.begin(), level_list.end());
+  BddCopyOp op(get(), var_list, level_list);
   auto edge = op.copy_step(src, 0);
   return _bdd(edge);
 }

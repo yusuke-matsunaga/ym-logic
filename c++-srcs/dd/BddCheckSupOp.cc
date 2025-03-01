@@ -21,7 +21,7 @@ Bdd::check_sup(
 ) const
 {
   auto level = var.level();
-  BddCheckSupOp op{level};
+  BddCheckSupOp op(level);
   return op.op_step(root());
 }
 

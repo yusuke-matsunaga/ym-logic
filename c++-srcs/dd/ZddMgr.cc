@@ -16,21 +16,21 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief コンストラクタ
 ZddMgr::ZddMgr(
-) : mImpl{new ZddMgrImpl}
+) : ZddMgrHolder(new ZddMgrImpl)
 {
 }
 
-// @brief ZddMgrPtr を指定したコンストラクタ
+// @brief ZddMgrHolder を指定したコンストラクタ
 ZddMgr::ZddMgr(
-  const ZddMgrPtr& impl
-) : mImpl{impl}
+  const ZddMgrHolder& holder
+) : ZddMgrHolder(holder)
 {
 }
 
 // @brief コピーコンストラクタ
 ZddMgr::ZddMgr(
   const ZddMgr& src
-) : mImpl{src.mImpl}
+) : ZddMgrHolder(src)
 {
 }
 
@@ -43,7 +43,7 @@ ZddMgr::~ZddMgr()
 SizeType
 ZddMgr::item_num() const
 {
-  return mImpl->item_num();
+  return get()->item_num();
 }
 
 // @brief 要素を返す．
@@ -52,37 +52,29 @@ ZddMgr::item(
   SizeType item_id
 )
 {
-  return mImpl.item(item_id);
+  auto edge = get()->item(item_id);
+  return _item(edge);
 }
 
 // @brief 要素のリストを返す．
 vector<ZddItem>
 ZddMgr::item_list() const
 {
-  return mImpl.item_list();
+  return conv_to_itemlist(get()->item_list());
 }
 
-// @brief ZDD をコピーする．
-Zdd
-ZddMgr::copy(
-  const Zdd& src
-)
-{
-  return mImpl.copy(src);
-}
-
-// @brief 恒儀関数を作る．
+// @brief 空集合を作る．
 Zdd
 ZddMgr::zero()
 {
-  return mImpl.zero();
+  return _zdd(DdEdge::zero());
 }
 
-// @brief 恒新関数を作る．
+// @brief ユニバースを作る．
 Zdd
 ZddMgr::one()
 {
-  return mImpl.one();
+  return _zdd(DdEdge::one());
 }
 
 // @brief 部分集合を作る．
@@ -91,81 +83,9 @@ ZddMgr::make_set(
   const vector<ZddItem> item_list
 )
 {
-  return mImpl.make_set(item_list);
-}
-
-// @brief 複数のZDDのノード数を数える．
-SizeType
-ZddMgr::zdd_size(
-  const vector<Zdd>& zdd_list
-)
-{
-  if ( zdd_list.empty() ) {
-    return 0;
-  }
-  auto zdd0 = zdd_list.front();
-  auto mgr = zdd0.mgr();
-  return mgr.mImpl.zdd_size(zdd_list);
-}
-
-// @brief 複数のZDDの内容を出力する．
-void
-ZddMgr::display(
-  ostream& s,
-  const vector<Zdd>& zdd_list
-)
-{
-  if ( zdd_list.empty() ) {
-    return;
-  }
-  auto zdd0 = zdd_list.front();
-  auto mgr = zdd0.mgr();
-  mgr.mImpl.display(s, zdd_list);
-}
-
-// @brief 複数のZDDを dot 形式で出力する．
-void
-ZddMgr::gen_dot(
-  ostream& s,
-  const vector<Zdd>& zdd_list,
-  const JsonValue& option
-)
-{
-  if ( zdd_list.empty() ) {
-    return;
-  }
-  auto zdd0 = zdd_list.front();
-  auto mgr = zdd0.mgr();
-  mgr.mImpl.gen_dot(s, zdd_list, option);
-}
-
-// @brief 構造を表す整数配列を作る．
-vector<SizeType>
-ZddMgr::rep_data(
-  const vector<Zdd>& zdd_list
-)
-{
-  if ( zdd_list.empty() ) {
-    return {};
-  }
-  auto zdd0 = zdd_list.front();
-  auto mgr = zdd0.mgr();
-  return mgr.mImpl.rep_data(zdd_list);
-}
-
-// @brief 複数のZDDを独自形式でバイナリダンプする．
-void
-ZddMgr::dump(
-  BinEnc& s,
-  const vector<Zdd>& zdd_list
-)
-{
-  if ( zdd_list.empty() ) {
-    return;
-  }
-  auto zdd0 = zdd_list.front();
-  auto mgr = zdd0.mgr();
-  mgr.mImpl.dump(s, zdd_list);
+  auto level_list = ZddItem::conv_to_levellist(item_list);
+  auto edge = get()->make_set(level_list);
+  return _zdd(edge);
 }
 
 // @brief バイナリダンプから復元する．
@@ -174,28 +94,29 @@ ZddMgr::restore(
   BinDec& s
 )
 {
-  return mImpl.restore(s);
+  auto edge_list = get()->restore(s);
+  return conv_to_zddlist(edge_list);
 }
 
 // @brief ガーベージコレクションを行う．
 void
 ZddMgr::garbage_collection()
 {
-  mImpl->garbage_collection();
+  get()->garbage_collection();
 }
 
 // @brief ノード数を返す．
 SizeType
 ZddMgr::node_num() const
 {
-  return mImpl->node_num();
+  return get()->node_num();
 }
 
 // @brief GC を起動するしきい値を返す．
 SizeType
 ZddMgr::gc_limit() const
 {
-  return mImpl->gc_limit();
+  return get()->gc_limit();
 }
 
 // @brief GC を起動するしきい値を設定する．
@@ -204,21 +125,51 @@ ZddMgr::set_gc_limit(
   SizeType limit
 )
 {
-  mImpl->set_gc_limit(limit);
+  get()->set_gc_limit(limit);
 }
 
 // @brief GC を許可する．
 void
 ZddMgr::enable_gc()
 {
-  mImpl->enable_gc();
+  get()->enable_gc();
 }
 
 // @brief GC を禁止する．
 void
 ZddMgr::disable_gc()
 {
-  mImpl->disable_gc();
+  get()->disable_gc();
+}
+
+// @brief 枝のリストをZddのリストに変換する．
+vector<Zdd>
+ZddMgr::conv_to_zddlist(
+  const vector<DdEdge>& edge_list
+) const
+{
+  vector<Zdd> zdd_list;
+  zdd_list.reserve(edge_list.size());
+  for ( auto edge: edge_list ) {
+    auto zdd = _zdd(edge);
+    zdd_list.push_back(zdd);
+  }
+  return zdd_list;
+}
+
+// @brief 枝のリストを要素のリストに変換する．
+vector<ZddItem>
+ZddMgr::conv_to_itemlist(
+  const vector<DdEdge>& edge_list
+) const
+{
+  vector<ZddItem> item_list;
+  item_list.reserve(edge_list.size());
+  for ( auto edge: edge_list ) {
+    auto item = _item(edge);
+    item_list.push_back(item);
+  }
+  return item_list;
 }
 
 END_NAMESPACE_YM_DD

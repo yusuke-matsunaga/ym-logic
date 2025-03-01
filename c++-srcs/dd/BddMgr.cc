@@ -3,7 +3,7 @@
 /// @brief BddMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/BddMgr.h"
@@ -15,21 +15,21 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief コンストラクタ
 BddMgr::BddMgr(
-) : mImpl{new BddMgrImpl}
+) : BddMgrHolder(new BddMgrImpl)
 {
 }
 
 // @brief BddMgrImpl を指定したコンストラクタ
 BddMgr::BddMgr(
-  const BddMgrPtr& impl
-) : mImpl{impl}
+  const BddMgrHolder& holder
+) : BddMgrHolder(holder)
 {
 }
 
 // @brief コピーコンストラクタ
 BddMgr::BddMgr(
   const BddMgr& src
-) : BddMgr{src.mImpl}
+) : BddMgrHolder(src)
 {
 }
 
@@ -42,7 +42,7 @@ BddMgr::~BddMgr()
 SizeType
 BddMgr::variable_num() const
 {
-  return mImpl->variable_num();
+  return get()->variable_num();
 }
 
 // @brief 変数を返す．
@@ -51,21 +51,24 @@ BddMgr::variable(
   SizeType varid
 )
 {
-  return mImpl.variable(varid);
+  auto edge = get()->variable(varid);
+  return _var(edge);
 }
 
 // @brief 変数のリストを返す．
 vector<BddVar>
 BddMgr::variable_list() const
 {
-  return mImpl.variable_list();
+  auto& edge_list = get()->variable_list();
+  return conv_to_varlist(edge_list);
 }
 
 // @brief 変数順を表す変数のリストを返す．
 vector<BddVar>
 BddMgr::variable_order() const
 {
-  return mImpl.variable_order();
+  auto edge_list = get()->variable_order();
+  return conv_to_varlist(edge_list);
 }
 
 // @brief 変数順を設定する．
@@ -74,150 +77,22 @@ BddMgr::set_variable_order(
   const vector<BddVar>& order_list
 )
 {
-  mImpl.set_variable_order(order_list);
-}
-
-// @brief BDD をコピーする．
-Bdd
-BddMgr::copy(
-  const Bdd& src
-)
-{
-  return mImpl.copy(src);
+  auto edge_list = BddVar::conv_to_edgelist(order_list);
+  get()->set_variable_order(edge_list);
 }
 
 // @brief 恒儀関数を作る．
 Bdd
 BddMgr::zero()
 {
-  return mImpl.zero();
+  return _bdd(DdEdge::zero());
 }
 
 // @brief 恒新関数を作る．
 Bdd
 BddMgr::one()
 {
-  return mImpl.one();
-}
-
-// @brief 真理値表形式の文字列からBDDを作る．
-Bdd
-BddMgr::from_truth(
-  const string& str,
-  const vector<BddVar>& var_list
-)
-{
-  return mImpl.from_truth(str, var_list);
-}
-
-// @brief ITE 演算を行う．
-Bdd
-BddMgr::ite(
-  const Bdd& e0,
-  const Bdd& e1,
-  const Bdd& e2
-)
-{
-  return mImpl.ite(e0, e1, e2);
-}
-
-// @brief 論理式から BDD を作る．
-Bdd
-BddMgr::from_expr(
-  const Expr& expr,
-  const vector<BddVar>& var_list
-)
-{
-  return mImpl.from_expr(expr, var_list);
-}
-
-// @brief ドントケアを利用した簡単化を行う．
-Bdd
-BddMgr::simplify(
-  const Bdd& on,  ///< [in] オンセット
-  const Bdd& dc   ///< [in] ドントケアセット
-)
-{
-  return mImpl.simplify(on, dc);
-}
-
-// @brief 複数のBDDのノード数を数える．
-SizeType
-BddMgr::bdd_size(
-  const vector<Bdd>& bdd_list
-)
-{
-  if ( bdd_list.empty() ) {
-    return 0;
-  }
-  auto bdd0 = bdd_list.front();
-  auto mgr = bdd0.mgr();
-  return mgr.mImpl.bdd_size(bdd_list);
-}
-
-// @brief 複数のBDDの内容を出力する．
-void
-BddMgr::display(
-  ostream& s,
-  const vector<Bdd>& bdd_list
-)
-{
-  if ( bdd_list.empty() ) {
-    return;
-  }
-  auto bdd0 = bdd_list.front();
-  auto mgr = bdd0.mgr();
-  mgr.mImpl.display(s, bdd_list);
-}
-
-// @brief 複数のBDDを dot 形式で出力する．
-void
-BddMgr::gen_dot(
-  ostream& s,
-  const vector<Bdd>& bdd_list,
-  const JsonValue& option
-)
-{
-  if ( bdd_list.empty() ) {
-    return;
-  }
-  auto bdd0 = bdd_list.front();
-  auto mgr = bdd0.mgr();
-  mgr.mImpl.gen_dot(s, bdd_list, option);
-}
-
-// @brief 構造を表す整数配列を作る．
-vector<SizeType>
-BddMgr::rep_data(
-  const vector<Bdd>& bdd_list
-)
-{
-  if ( bdd_list.empty() ) {
-    return {};
-  }
-  auto bdd0 = bdd_list.front();
-  auto mgr = bdd0.mgr();
-  return mgr.mImpl.rep_data(bdd_list);
-}
-
-// @brief BDD の内容をバイナリダンプする．
-void
-BddMgr::dump(
-  BinEnc& s,
-  const vector<Bdd>& bdd_list
-)
-{
-  if ( bdd_list.empty() ) {
-    return;
-  }
-
-  auto bdd0 = bdd_list.front();
-  auto mgr = bdd0.mgr();
-  // sanity check
-  for ( auto& bdd: bdd_list ) {
-    bdd._check_mgr(mgr.mImpl);
-  }
-  mgr.mImpl.dump(s, bdd_list);
+  return _bdd(DdEdge::one());
 }
 
 // @brief バイナリダンプから復元する．
@@ -226,28 +101,29 @@ BddMgr::restore(
   BinDec& s
 )
 {
-  return mImpl.restore(s);
+  auto edge_list = get()->restore(s);
+  return conv_to_bddlist(edge_list);
 }
 
 // @brief ガーベージコレクションを行う．
 void
 BddMgr::garbage_collection()
 {
-  mImpl->garbage_collection();
+  get()->garbage_collection();
 }
 
 // @brief ノード数を返す．
 SizeType
 BddMgr::node_num() const
 {
-  return mImpl->node_num();
+  return get()->node_num();
 }
 
 // @brief GC を起動するしきい値を返す．
 SizeType
 BddMgr::gc_limit() const
 {
-  return mImpl->gc_limit();
+  return get()->gc_limit();
 }
 
 // @brief GC を起動するしきい値を設定する．
@@ -256,21 +132,51 @@ BddMgr::set_gc_limit(
   SizeType limit
 )
 {
-  mImpl->set_gc_limit(limit);
+  get()->set_gc_limit(limit);
 }
 
 // @brief GC を許可する．
 void
 BddMgr::enable_gc()
 {
-  mImpl->enable_gc();
+  get()->enable_gc();
 }
 
 // @brief GC を禁止する．
 void
 BddMgr::disable_gc()
 {
-  mImpl->disable_gc();
+  get()->disable_gc();
+}
+
+// @brief 枝のリストをBddのリストに変換する．
+vector<Bdd>
+BddMgr::conv_to_bddlist(
+  const vector<DdEdge>& edge_list
+) const
+{
+  vector<Bdd> bdd_list;
+  bdd_list.reserve(edge_list.size());
+  for ( auto edge: edge_list ) {
+    auto bdd = _bdd(edge);
+    bdd_list.push_back(bdd);
+  }
+  return bdd_list;
+}
+
+// @brief 枝のリストを変数のリストに変換する．
+vector<BddVar>
+BddMgr::conv_to_varlist(
+  const vector<DdEdge>& edge_list
+) const
+{
+  vector<BddVar> var_list;
+  var_list.reserve(edge_list.size());
+  for ( auto edge: edge_list ) {
+    auto var = _var(edge);
+    var_list.push_back(var);
+  }
+  return var_list;
 }
 
 END_NAMESPACE_YM_DD

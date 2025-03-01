@@ -18,48 +18,51 @@
 BEGIN_NAMESPACE_YM_DD
 
 // @brief サポート集合のユニオンを計算して代入する．
-Bdd&
-Bdd::support_cup_int(
+DdEdge
+Bdd::support_cup(
   const Bdd& right
-)
+) const
 {
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{mMgr.get()};
-  auto e = op.cup_step(root(), right.root());
-  change_root(e);
-  return *this;
+  BddSupOp op(get());
+  auto ledge = root();
+  auto redge = right.root();
+  auto edge = op.cup_step(ledge, redge);
+  return edge;
 }
 
 // @brief サポート集合のインターセクションを計算して代入する．
-Bdd&
-Bdd::support_cap_int(
+DdEdge
+Bdd::support_cap(
   const Bdd& right
-)
+) const
 {
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{mMgr.get()};
-  auto e = op.cap_step(root(), right.root());
-  change_root(e);
-  return *this;
+  BddSupOp op(get());
+  auto ledge = root();
+  auto redge = right.root();
+  auto edge = op.cap_step(ledge, redge);
+  return edge;
 }
 
 // @brief サポート集合の差を計算して代入する．
-Bdd&
-Bdd::support_diff_int(
+DdEdge
+Bdd::support_diff(
   const Bdd& right
-)
+) const
 {
   _check_posicube();
   right._check_posicube();
 
-  BddSupOp op{mMgr.get()};
-  auto e = op.diff_step(root(), right.root());
-  change_root(e);
-  return *this;
+  BddSupOp op(get());
+  auto ledge = root();
+  auto redge = right.root();
+  auto edge = op.diff_step(ledge, redge);
+  return edge;
 }
 
 // @brief サポート集合が共通部分を持つか調べる．
@@ -153,9 +156,9 @@ Bdd::get_support() const
 {
   _check_valid();
 
-  BddSupOp op{mMgr.get()};
-  auto e = op.get_step(root());
-  return BddVarSet{Bdd{mMgr, e}};
+  BddSupOp op(get());
+  auto edge = op.get_step(root());
+  return BddVarSet(_bdd(edge));
 }
 
 // @brief サポート変数のリスト(vector)を得る．
@@ -176,7 +179,7 @@ Bdd::to_varlist() const
   vector<BddVar> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
-    auto var = mMgr.level_to_var(node->level());
+    auto var = _level_to_var(node->level());
     var_list.push_back(var);
     edge = node->edge1();
   }
@@ -197,7 +200,8 @@ Bdd::to_litlist() const
     auto inv = edge.inv();
     auto e0 = node->edge0() ^ inv;
     auto e1 = node->edge1() ^ inv;
-    auto var = mMgr.level_to_var(node->level());
+    auto edge = get()->new_node(node->level(), DdEdge::zero(), DdEdge::one());
+    auto var = _var(edge);
     if ( e0.is_zero() ) {
       lit_list.push_back(BddLit{var, false});
       edge = e1;

@@ -7,42 +7,33 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ym/ZddMgrPtr.h"
 #include "ZddCofactorOp.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 // @brief 変数を含む集合を求める．
-Zdd
-ZddMgrPtr::onset(
-  const Zdd& dd,
+DdEdge
+Zdd::_onset(
   const ZddItem& item
 ) const
 {
-  dd._check_valid();
-  item._check_valid();
-  _check_mgr(dd);
-  _check_mgr(item);
+  _check_valid_mgr(item);
   ZddCofactorOp op(get(), item.level(), true);
-  auto edge = op.cofactor_step(dd.root());
-  return _zdd(edge);
+  auto edge = op.cofactor_step(root());
+  return edge;
 }
 
 // @brief 変数を含まない集合を求める．
-Zdd
-ZddMgrPtr::offset(
-  const Zdd& dd,
+DdEdge
+Zdd::_offset(
   const ZddItem& item
 ) const
 {
-  dd._check_valid();
-  item._check_valid();
-  _check_mgr(dd);
-  _check_mgr(item);
+  _check_valid_mgr(item);
   ZddCofactorOp op(get(), item.level(), false);
-  auto edge = op.cofactor_step(dd.root());
-  return _zdd(edge);
+  auto edge = op.cofactor_step(root());
+  return edge;
 }
 
 

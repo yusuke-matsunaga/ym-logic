@@ -7,21 +7,19 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ym/ZddMgrPtr.h"
+#include "ym/ZddMgrHolder.h"
 #include "ZddInvOp.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 // @brief ZDD を反転する．
-Zdd
-ZddMgrPtr::invert(
-  const Zdd& src
-) const
+DdEdge
+Zdd::_invert() const
 {
-  ZddInvOp op{get()};
-  auto edge = op.inv_step(src.root());
-  return _zdd(edge);
+  ZddInvOp op(get());
+  auto edge = op.inv_step(root());
+  return edge;
 }
 
 

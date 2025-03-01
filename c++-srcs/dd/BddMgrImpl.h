@@ -150,6 +150,145 @@ public:
   }
 
 
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 演算を行う関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief リテラル関数を表すBDDを作る．
+  BddLit
+  literal(
+    const BddVar& var, ///< [in] 変数
+    bool inv = false   ///< [in] 反転フラグ
+  ) const;
+
+  /// @brief 肯定のリテラル関数を作る．
+  BddLit
+  posi_literal(
+    const BddVar& var ///< [in] 変数
+  ) const;
+
+  /// @brief 否定のリテラル関数を作る．
+  BddLit
+  nega_literal(
+    const BddVar& var ///< [in] 変数
+  ) const;
+
+  /// @brief AND 演算を行う．
+  Bdd
+  and_oop(
+    const Bdd& left,
+    const Bdd& right
+  ) const;
+
+  /// @brief OR 演算を行う．
+  Bdd
+  or_op(
+    const Bdd& left,
+    const Bdd& right
+  ) const;
+
+  /// @brief XOR 演算を行う．
+  Bdd
+  xor_op(
+    const Bdd& left,
+    const Bdd& right
+  ) const;
+
+  /// @brief ITE 演算を行う．
+  Bdd
+  ite(
+    const Bdd& e0,
+    const Bdd& e1,
+    const Bdd& e2
+  ) const;
+
+  /// @brief 真理値表形式の文字列からBDDを作る．
+  ///
+  /// str は '0' か '1' の文字列．
+  /// ただし，長さは var_list の長さのべき乗である必要がある．
+  /// for some reason, この文字列は big endian となっている．
+  /// 0文字目が(1, 1, 1, 1)に対応する
+  ///
+  /// 不正な形式の場合は std::invalid_argument 例外を送出する．
+  Bdd
+  from_truth(
+    const string& str,             ///< [in] 01の文字列
+    const vector<BddVar>& var_list ///< [in] 変数のリスト
+  ) const;
+
+  /// @brief 論理式から BDD を作る．
+  ///
+  /// - var_list が省略された場合は自動的に適切な変数リストを用いる．
+  Bdd
+  from_expr(
+    const Expr& expr,              ///< [in] 論理式
+    const vector<BddVar>& var_list ///< [in] 変数のリスト
+  );
+
+  /// @brief ドントケアを利用した簡単化を行う．
+  Bdd
+  simplify(
+    const Bdd& on,  ///< [in] オンセット
+    const Bdd& dc   ///< [in] ドントケアセット
+  ) const;
+
+  /// @brief コファクターを計算する．
+  /// @return 結果を返す．
+  Bdd
+  cofactor(
+    const Bdd& bdd,    ///< [in] 対象の BDD
+    const BddVar& var, ///< [in] 変数
+    bool inv           ///< [in] 反転フラグ
+                       ///<  - false: 反転なし (正極性)
+                       ///<  - true:  反転あり (負極性)
+  ) const;
+
+  /// @brief コファクターを計算する．
+  Bdd
+  cofactor(
+    const Bdd& bdd, ///< [in] 対象の BDD
+    const Bdd& cube ///< [in] コファクターのキューブ
+                    /// cube.is_cube() = true でなければならない．
+  ) const;
+
+  /// @brief compose 演算を行う．
+  Bdd
+  compose(
+    const Bdd& edge,
+    const BddVar& var,
+    const Bdd& cedge
+  ) const;
+
+  /// @brief 複合compose演算
+  Bdd
+  multi_compose(
+    const Bdd& bdd,                               ///< [in] 対象の BDD
+    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
+  ) const;
+
+  /// @brief 変数順を入れ替える演算
+  ///
+  /// 極性も入れ替え可能
+  Bdd
+  remap_vars(
+    const Bdd& bdd,                             ///< [in] 対象の BDD
+    const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
+  ) const;
+
+  /// @brief 変数のリストをレベルのリストに変換する．
+  vector<SizeType>
+  level_list(
+    const vector<BddVar>& var_list ///< [in] 変数リスト
+  ) const;
+
+  /// @brief 変数順を表す変数のリストを返す．
+  ///
+  /// レベルの昇順に並んでいる
+  vector<BddVar>
+  variable_order() const;
+
+
 private:
   //////////////////////////////////////////////////////////////////////
   // DdNodeMgr の仮想関数

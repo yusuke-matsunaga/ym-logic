@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/ZddMgrPtr.h"
+#include "ym/ZddMgrHolder.h"
 #include "ym/BinEnc.h"
 #include "ym/JsonValue.h"
 
@@ -22,9 +22,10 @@ class DdEdge;
 /// @class Zdd Zdd.h "ym/Zdd.h"
 /// @brief ZDD を表すクラス
 //////////////////////////////////////////////////////////////////////
-class Zdd
+class Zdd :
+  public ZddMgrHolder
 {
-  friend class ZddMgrPtr;
+  friend class ZddMgrHolder;
 
 public:
 
@@ -274,20 +275,6 @@ public:
   /// @{
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 適正な値を持っている時に true を返す．
-  bool
-  is_valid() const
-  {
-    return mMgr.get() != nullptr;
-  }
-
-  /// @brief 不正値の時に true を返す．
-  bool
-  is_invalid() const
-  {
-    return !is_valid();
-  }
-
   /// @brief 定数0の時 true を返す．
   bool
   is_zero() const;
@@ -442,6 +429,76 @@ public:
   //////////////////////////////////////////////////////////////////////
 
 
+public:
+  //////////////////////////////////////////////////////////////////////
+  /// @name 複数のZDDを扱うクラスメソッド
+  /// @{
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 複数のZDDのノード数を数える．
+  static
+  SizeType
+  zdd_size(
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+  );
+
+  /// @brief 複数のZDDの内容を出力する．
+  static
+  void
+  display(
+    ostream& s,                 ///< [in] 出力ストリーム
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+  );
+
+  /// @brief 複数のZDDを dot 形式で出力する．
+  ///
+  /// - option は以下のようなキーを持った JSON オブジェクト
+  ///   * attr: dot の各種属性値を持った辞書
+  ///     属性値は <グループ名> ':' <属性名> で表す．
+  ///     グループ名は以下の通り
+  ///     - graph:     グラフ全体
+  ///     - root:      根のノード
+  ///     - node:      通常のノード
+  ///     - terminal:  終端ノード
+  ///     - terminal0: 定数0の終端ノード
+  ///     - terminal1: 定数1の終端ノード
+  ///     グループ名と ':' がない場合には全てのグループに対して同一の属性値
+  ///     を適用する．
+  ///     具体的な属性名と属性値については graphviz の使用を参照すること．
+  ///   * var_label: 変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_texlbl: TeX用の変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_label と var_texlbl は排他的となる．var_texlbl がある時，
+  ///     var_label は無視される．
+  static
+  void
+  gen_dot(
+    ostream& s,                  ///< [in] 出力ストリーム
+    const vector<Zdd>& zdd_list, ///< [in] ZDDのリスト
+    const JsonValue& option      ///< [in] オプションを表す JSON オブジェクト
+    = JsonValue{}
+  );
+
+  /// @brief 構造を表す整数配列を作る．
+  static
+  vector<SizeType>
+  rep_data(
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+  );
+
+  /// @brief 複数のZDDを独自形式でバイナリダンプする．
+  ///
+  /// 復元には ZddMgr::restore() を用いる．
+  static
+  void
+  dump(
+    BinEnc& s,                  ///< [in] 出力ストリーム
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+  );
+
+  /// @}
+  //////////////////////////////////////////////////////////////////////
+
+
 protected:
   //////////////////////////////////////////////////////////////////////
   // 継承クラスで用いられる関数
@@ -449,16 +506,9 @@ protected:
 
   /// @brief 内容を指定したコンストラクタ
   Zdd(
-    const ZddMgrPtr& mgr,
+    const ZddMgrHolder& mgr,
     DdEdge root
   );
-
-  /// @brief マネージャを返す．
-  ZddMgrPtr
-  mgr_ptr() const
-  {
-    return mMgr;
-  }
 
   /// @brief 根の枝を返す．
   DdEdge
@@ -475,19 +525,6 @@ protected:
     }
   }
 
-  /// @brief オペランドが同じマネージャに属しているかチェックする．
-  ///
-  /// 異なるマネージャに属している場合には std::invalid_argument 例外を送出する．
-  void
-  _check_mgr(
-    const Zdd& obj ///< [in] 対象のオブジェクト
-  ) const
-  {
-    if ( mMgr != obj.mMgr ) {
-      throw std::invalid_argument{"ZddMgr mismatch"};
-    }
-  }
-
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -496,8 +533,77 @@ private:
 
   /// @brief 根の枝を変更する．
   void
-  change_root(
+  _change_root(
     DdEdge new_root ///< [in] 変更する枝
+  );
+
+  /// @brief onset() の下請け関数
+  DdEdge
+  _onset(
+    const ZddItem& item ///< [in] 要素
+  ) const;
+
+  /// @brief offset() の下請け関数
+  DdEdge
+  _offset(
+    const ZddItem& item ///< [in] 要素
+  ) const;
+
+  /// @brief 共通集合演算
+  /// @return 結果を返す．
+  DdEdge
+  _cap(
+    const Zdd& right ///< [in] オペランド
+  ) const;
+
+  /// @brief ユニオン演算
+  /// @return 結果を返す．
+  DdEdge
+  _cup(
+    const Zdd& right ///< [in] オペランド
+  ) const;
+
+  /// @brief 集合差演算
+  /// @return 結果を返す．
+  DdEdge
+  _diff(
+    const Zdd& right ///< [in] オペランド
+  ) const;
+
+  /// @brief 直積演算
+  /// @return 結果を返す．
+  DdEdge
+  _product(
+    const Zdd& right ///< [in] オペランド
+  ) const;
+
+  /// @brief 補集合演算
+  /// @return 結果を返す．
+  DdEdge
+  _invert() const;
+
+  /// @brief レベルに対応した要素を返す．
+  ZddItem
+  _level_to_item(
+    SizeType level
+  ) const;
+
+  /// @brief ZDDのリストからマネージャを取り出す．
+  ///
+  /// 異なるマネージャを持つZDDが混在している場合，
+  /// 例外を送出する．
+  /// 空リストの場合は nullptr を返す．
+  static
+  ZddMgrImpl*
+  _mgr(
+    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+  );
+
+  /// @brief ZDDのリストから枝のリストに変換する．
+  static
+  vector<DdEdge>
+  _conv_to_edgelist(
+    const vector<Zdd>& zdd_list ///< [in] BDDのリスト
   );
 
 
@@ -505,9 +611,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
-
-  // マネージャ
-  ZddMgrPtr mMgr;
 
   // 根の枝
   PtrIntType mRoot;

@@ -27,7 +27,7 @@ Bdd::check_sym(
   _check_mgr(var2);
   auto idx1 = var1.level();
   auto idx2 = var2.level();
-  BddCheckSymOp op{idx1, idx2, inv};
+  BddCheckSymOp op(idx1, idx2, inv);
   return op.op_step(root());
 }
 

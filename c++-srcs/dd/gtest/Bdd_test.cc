@@ -239,18 +239,14 @@ TEST_F(BddTest, and_op_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW( {
-      Bdd bdd = var1.and_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.and_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, and_op_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW( {
-      Bdd bdd = var1.and_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.and_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, and_op_invalid3)
@@ -259,27 +255,21 @@ TEST_F(BddTest, and_op_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW( {
-      Bdd bdd = var1.and_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.and_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, and_op2_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW( {
-      Bdd bdd = var1 & var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 & var2, std::logic_error );
 }
 
 TEST_F(BddTest, and_op2_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW( {
-      Bdd bdd = var1 & var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 & var2, std::logic_error );
 }
 
 TEST_F(BddTest, and_op2_invalid3)
@@ -287,9 +277,7 @@ TEST_F(BddTest, and_op2_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW( {
-      Bdd bdd = var1 & var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 & var2, std::logic_error );
 }
 
 TEST_F(BddTest, and_int1)
@@ -306,18 +294,14 @@ TEST_F(BddTest, and_int_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW( {
-      Bdd bdd = var1.and_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.and_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, and_int_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW( {
-      Bdd bdd = var1.and_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.and_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, and_int_invalid3)
@@ -325,9 +309,7 @@ TEST_F(BddTest, and_int_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW( {
-      Bdd bdd = var1.and_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.and_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, and_int2)
@@ -344,18 +326,14 @@ TEST_F(BddTest, and_int2_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW( {
-      Bdd bdd = var1 &= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 &= var2, std::logic_error );
 }
 
 TEST_F(BddTest, and_int2_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW( {
-      Bdd bdd = var1 &= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 &= var2, std::logic_error );
 }
 
 TEST_F(BddTest, and_int2_invalid3)
@@ -363,9 +341,7 @@ TEST_F(BddTest, and_int2_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW( {
-      Bdd bdd = var1 &= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 &= var2, std::logic_error );
 }
 
 TEST_F(BddTest, or_op1)
@@ -381,18 +357,14 @@ TEST_F(BddTest, or_op_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW({
-      Bdd bdd = var1.or_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.or_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, or_op_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW({
-      Bdd bdd = var1.or_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.or_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, or_op_invalid3)
@@ -400,9 +372,7 @@ TEST_F(BddTest, or_op_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = var1.or_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.or_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, or_int1)
@@ -419,18 +389,14 @@ TEST_F(BddTest, or_int_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW({
-      Bdd bdd = var1.or_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.or_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, or_int_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW({
-      Bdd bdd = var1.or_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.or_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, or_int_invalid3)
@@ -438,9 +404,7 @@ TEST_F(BddTest, or_int_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = var1.or_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.or_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, or_op2)
@@ -456,18 +420,14 @@ TEST_F(BddTest, or_op2_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW({
-      Bdd bdd = var1 | var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 | var2, std::logic_error );
 }
 
 TEST_F(BddTest, or_op2_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW({
-      Bdd bdd = var1 | var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 | var2, std::logic_error );
 }
 
 TEST_F(BddTest, or_op2_invalid3)
@@ -475,9 +435,7 @@ TEST_F(BddTest, or_op2_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = var1 | var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 | var2, std::logic_error );
 }
 
 TEST_F(BddTest, or_int2)
@@ -494,18 +452,14 @@ TEST_F(BddTest, or_int2_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW({
-      Bdd bdd = var1 |= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 |= var2, std::logic_error );
 }
 
 TEST_F(BddTest, or_int2_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW({
-      Bdd bdd = var1 |= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 |= var2, std::logic_error );
 }
 
 TEST_F(BddTest, or_int2_invalid3)
@@ -513,9 +467,7 @@ TEST_F(BddTest, or_int2_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = var1 |= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 |= var2, std::logic_error );
 }
 
 TEST_F(BddTest, xor_op1)
@@ -531,18 +483,14 @@ TEST_F(BddTest, xor_op_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW({
-      Bdd bdd = var1.xor_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.xor_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, xor_op_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW({
-      Bdd bdd = var1.xor_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.xor_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, xor_op_invalid3)
@@ -550,9 +498,7 @@ TEST_F(BddTest, xor_op_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = var1.xor_op(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.xor_op(var2), std::logic_error );
 }
 
 TEST_F(BddTest, xor_int1)
@@ -569,18 +515,14 @@ TEST_F(BddTest, xor_int_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW({
-      Bdd bdd = var1.xor_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.xor_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, xor_int_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW({
-      Bdd bdd = var1.xor_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.xor_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, xor_int_invalid3)
@@ -588,9 +530,7 @@ TEST_F(BddTest, xor_int_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = var1.xor_int(var2);
-    }, std::invalid_argument );
+  EXPECT_THROW( var1.xor_int(var2), std::logic_error );
 }
 
 TEST_F(BddTest, xor_op2)
@@ -606,18 +546,14 @@ TEST_F(BddTest, xor_op2_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW({
-      Bdd bdd = var1 ^ var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 ^ var2, std::logic_error );
 }
 
 TEST_F(BddTest, xor_op2_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW({
-      Bdd bdd = var1 ^ var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 ^ var2, std::logic_error );
 }
 
 TEST_F(BddTest, xor_op2_invalid3)
@@ -625,9 +561,7 @@ TEST_F(BddTest, xor_op2_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = var1 ^ var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 ^ var2, std::logic_error );
 }
 
 TEST_F(BddTest, xor_int2)
@@ -644,18 +578,14 @@ TEST_F(BddTest, xor_int2_invalid1)
 {
   Bdd var1; // 不正値
   Bdd var2 = literal(1);
-  EXPECT_THROW({
-      Bdd bdd = var1 ^= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 ^= var2, std::logic_error );
 }
 
 TEST_F(BddTest, xor_int2_invalid2)
 {
   Bdd var1 = literal(0);
   Bdd var2; // 不正値
-  EXPECT_THROW({
-      Bdd bdd = var1 ^= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 ^= var2, std::logic_error );
 }
 
 TEST_F(BddTest, xor_int2_invalid3)
@@ -663,9 +593,7 @@ TEST_F(BddTest, xor_int2_invalid3)
   Bdd var1 = literal(0);
   BddMgr mgr2;
   auto var2 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = var1 ^= var2;
-    }, std::invalid_argument );
+  EXPECT_THROW( var1 ^= var2, std::logic_error );
 }
 
 TEST_F(BddTest, xor3)
@@ -695,9 +623,7 @@ TEST_F(BddTest, complex_expr_invalid1)
   Bdd var3 = literal(2);
   BddMgr mgr2;
   auto var4 = mgr2.variable(1);
-  EXPECT_THROW({
-      Bdd bdd = (var1 & ~var2) | (var3 & ~var4);
-    }, std::invalid_argument );
+  EXPECT_THROW( (var1 & ~var2) | (var3 & ~var4), std::logic_error );
 }
 
 TEST_F(BddTest, ite1)
@@ -706,7 +632,7 @@ TEST_F(BddTest, ite1)
   Bdd bdd2 = from_truth("11001100");
   Bdd bdd3 = from_truth("11110000");
 
-  Bdd bdd = ite(bdd1, bdd2, bdd3);
+  Bdd bdd = Bdd::ite(bdd1, bdd2, bdd3);
 
   Bdd exp_bdd = bdd1 & bdd2 | ~bdd1 & bdd3;
   EXPECT_EQ( exp_bdd, bdd );
@@ -718,9 +644,7 @@ TEST_F(BddTest, ite_invalid1)
   Bdd bdd2 = from_truth("11001100");
   Bdd bdd3 = from_truth("11110000");
 
-  EXPECT_THROW( {
-      Bdd bdd = ite(bdd1, bdd2, bdd3);
-    }, std::invalid_argument );
+  EXPECT_THROW( Bdd::ite(bdd1, bdd2, bdd3), std::logic_error );
 }
 
 TEST_F(BddTest, ite_invalid2)
@@ -729,9 +653,7 @@ TEST_F(BddTest, ite_invalid2)
   Bdd bdd2; // 不正値
   Bdd bdd3 = from_truth("11110000");
 
-  EXPECT_THROW( {
-      Bdd bdd = ite(bdd1, bdd2, bdd3);
-    }, std::invalid_argument );
+  EXPECT_THROW( Bdd::ite(bdd1, bdd2, bdd3), std::logic_error );
 }
 
 TEST_F(BddTest, ite_invalid3)
@@ -740,9 +662,7 @@ TEST_F(BddTest, ite_invalid3)
   Bdd bdd2 = from_truth("11001100");
   Bdd bdd3; // 不正値
 
-  EXPECT_THROW( {
-      Bdd bdd = ite(bdd1, bdd2, bdd3);
-    }, std::invalid_argument );
+  EXPECT_THROW( Bdd::ite(bdd1, bdd2, bdd3), std::logic_error );
 }
 
 TEST_F(BddTest, cofactor1)
@@ -762,9 +682,7 @@ TEST_F(BddTest, cofactor1_invalid1)
   Bdd bdd; // 不正値
 
   auto var = variable(0);
-  EXPECT_THROW( {
-      Bdd bdd1 = bdd.cofactor(var, false);
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd.cofactor(var, false), std::logic_error );
 }
 
 TEST_F(BddTest, cofactor_int1)
@@ -785,9 +703,7 @@ TEST_F(BddTest, cofactor_int1_invalid1)
   Bdd bdd; // 不正値
 
   auto var = variable(0);
-  EXPECT_THROW( {
-      Bdd bdd1 = bdd.cofactor_int(var, false);
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd.cofactor_int(var, false), std::logic_error );
 }
 
 TEST_F(BddTest, cofactor2)
@@ -809,9 +725,7 @@ TEST_F(BddTest, cofactor2_invalid1)
 
   auto var = variable(0);
   auto lit = var.negalit();
-  EXPECT_THROW({
-      Bdd bdd1 = bdd.cofactor(lit);
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd.cofactor(lit), std::logic_error );
 }
 
 TEST_F(BddTest, cofactor2_invalid2)
@@ -824,9 +738,7 @@ TEST_F(BddTest, cofactor2_invalid2)
   auto var2 = mgr2.variable(2);
   Bdd cube = ~var1 & var2;
 
-  EXPECT_THROW({
-      Bdd bdd1 = bdd.cofactor(cube);
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd.cofactor(cube), std::logic_error );
 }
 
 TEST_F(BddTest, cofactor_int2)
@@ -849,9 +761,7 @@ TEST_F(BddTest, cofactor_int2_invalid1)
 
   auto var = variable(0);
   auto lit = var.negalit();
-  EXPECT_THROW({
-      Bdd bdd1 = bdd.cofactor_int(lit);
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd.cofactor_int(lit), std::logic_error );
 }
 
 TEST_F(BddTest, cofactor_int2_invalid2)
@@ -864,9 +774,7 @@ TEST_F(BddTest, cofactor_int2_invalid2)
   auto var2 = mgr2.variable(2);
   Bdd cube = ~var1 & var2;
 
-  EXPECT_THROW({
-      Bdd bdd1 = bdd.cofactor_int(cube);
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd.cofactor_int(cube), std::logic_error );
 }
 
 TEST_F(BddTest, cofactor3)
@@ -889,9 +797,7 @@ TEST_F(BddTest, cofactor3_invalid)
 
   auto var = variable(0);
   auto lit = var.negalit();
-  EXPECT_THROW({
-      Bdd bdd1 = bdd / lit;
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd / lit, std::logic_error );
 }
 
 TEST_F(BddTest, cofactor_int3)
@@ -914,9 +820,7 @@ TEST_F(BddTest, cofactor_int3_invalid)
 
   auto var = variable(0);
   auto lit = var.negalit();
-  EXPECT_THROW({
-      Bdd bdd1 = bdd /= lit;
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd /= lit, std::logic_error );
 }
 
 TEST_F(BddTest, cofactor4)
@@ -940,9 +844,7 @@ TEST_F(BddTest, cofactor4_invalid1)
   Bdd lit1 = literal(0);
   Bdd cube = lit1;
 
-  EXPECT_THROW({
-      Bdd bdd1 = bdd / cube;
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd / cube, std::logic_error );
 }
 
 TEST_F(BddTest, cofactor4_invalid2)
@@ -952,9 +854,7 @@ TEST_F(BddTest, cofactor4_invalid2)
 
   Bdd cube; // 不正値
 
-  EXPECT_THROW({
-      Bdd bdd1 = bdd / cube;
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd / cube, std::logic_error );
 }
 
 TEST_F(BddTest, cofactor4_invalid3)
@@ -964,9 +864,7 @@ TEST_F(BddTest, cofactor4_invalid3)
 
   Bdd not_cube = literal(0) ^ literal(1); // キューブでない．
 
-  EXPECT_THROW({
-      Bdd bdd1 = bdd / not_cube;
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd / not_cube, std::logic_error );
 }
 
 TEST_F(BddTest, cofactor_int4)
@@ -991,9 +889,7 @@ TEST_F(BddTest, cofactor_int4_invalid1)
   Bdd lit1 = literal(0);
   Bdd cube = lit1;
 
-  EXPECT_THROW({
-      Bdd bdd1 = bdd /= cube;
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd /= cube, std::logic_error );
 }
 
 TEST_F(BddTest, cofactor_int4_invalid2)
@@ -1003,9 +899,7 @@ TEST_F(BddTest, cofactor_int4_invalid2)
 
   Bdd cube; // 不正値
 
-  EXPECT_THROW({
-      Bdd bdd1 = bdd /= cube;
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd /= cube, std::logic_error );
 }
 
 TEST_F(BddTest, cofactor_int4_invalid3)
@@ -1015,9 +909,7 @@ TEST_F(BddTest, cofactor_int4_invalid3)
 
   Bdd not_cube = literal(0) ^ literal(1); // キューブでない．
 
-  EXPECT_THROW({
-      Bdd bdd1 = bdd /= not_cube;
-    }, std::invalid_argument );
+  EXPECT_THROW( bdd /= not_cube, std::logic_error );
 }
 
 TEST_F(BddTest, cofactor7)
@@ -1854,7 +1746,7 @@ TEST_F(BddTest, size4)
   EXPECT_EQ( 1, bdd1.size() );
   EXPECT_EQ( 1, bdd2.size() );
   EXPECT_EQ( 2, bdd3.size() );
-  EXPECT_EQ( 3, mMgr.bdd_size({bdd1, bdd2, bdd3}) );
+  EXPECT_EQ( 3, Bdd::bdd_size({bdd1, bdd2, bdd3}) );
 }
 
 TEST_F(BddTest, size_invalid1)
@@ -1913,7 +1805,7 @@ TEST_F(BddTest, dump_restore)
 
   ostringstream obuf;
   BinEnc enc{obuf};
-  mMgr.dump(enc, {bdd1, bdd2, bdd3});
+  Bdd::dump(enc, {bdd1, bdd2, bdd3});
   string tmp = obuf.str();
 
   istringstream ibuf{tmp};

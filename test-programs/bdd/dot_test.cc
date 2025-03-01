@@ -60,7 +60,7 @@ dot_test(
     option_dict.emplace("var_label", label_array_obj);
 #endif
     auto option = JsonValue{option_dict};
-    BddMgr::gen_dot(cout, func_list, option);
+    Bdd::gen_dot(cout, func_list, option);
   }
   return 0;
 }

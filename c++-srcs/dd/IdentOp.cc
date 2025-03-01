@@ -23,7 +23,7 @@ Bdd::is_identical(
   if ( is_invalid() || right.is_invalid() ) {
     return false;
   }
-  if ( mMgr == right.mMgr ) {
+  if ( get() == right.get() ) {
     return mRoot == right.mRoot;
   }
   IdentOp op;
@@ -40,7 +40,7 @@ Zdd::is_identical(
   if ( is_invalid() || right.is_invalid() ) {
     return false;
   }
-  if ( mMgr == right.mMgr ) {
+  if ( get() == right.get() ) {
     return mRoot == right.mRoot;
   }
   IdentOp op;

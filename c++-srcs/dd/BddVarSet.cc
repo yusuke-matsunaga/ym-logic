@@ -8,6 +8,7 @@
 
 #include "ym/BddVarSet.h"
 #include "ym/BddMgr.h"
+#include "DdEdge.h"
 
 
 BEGIN_NAMESPACE_YM_DD
@@ -19,11 +20,19 @@ Bdd::support_size() const
   return get_support().size();
 }
 
+// @brief 内容を指定したコンストラクタ
+BddVarSet::BddVarSet(
+  const BddMgrHolder& holder,
+  DdEdge root
+) : Bdd(holder, root)
+{
+}
+
 // @brief 要素のリストを指定したコンストラクタ
 BddVarSet::BddVarSet(
   BddMgr& mgr,
   const vector<BddVar>& var_set
-) : Bdd{mgr.one()}
+) : Bdd(mgr.one())
 {
   for ( auto var: var_set ) {
     and_int(var);
@@ -36,7 +45,8 @@ BddVarSet::operator+(
   const BddVarSet& right
 ) const
 {
-  return BddVarSet{*this}.operator+=(right);
+  auto edge = support_cup(right);
+  return BddVarSet(*this, edge);
 }
 
 // @brief 和集合を求め代入する．
@@ -45,7 +55,8 @@ BddVarSet::operator+=(
   const BddVarSet& right
 )
 {
-  support_cup_int(right);
+  auto edge = support_cup(right);
+  _change_root(edge);
   return *this;
 }
 
@@ -55,7 +66,8 @@ BddVarSet::operator-(
   const BddVarSet& right
 ) const
 {
-  return BddVarSet{*this}.operator-=(right);
+  auto edge = support_diff(right);
+  return BddVarSet(*this, edge);
 }
 
 // @brief 差集合を求め代入する．
@@ -64,7 +76,8 @@ BddVarSet::operator-=(
   const BddVarSet& right
 )
 {
-  support_diff_int(right);
+  auto edge = support_diff(right);
+  _change_root(edge);
   return *this;
 }
 
@@ -74,7 +87,8 @@ BddVarSet::operator&(
   const BddVarSet& right
 ) const
 {
-  return BddVarSet{*this}.operator&=(right);
+  auto edge = support_cap(right);
+  return BddVarSet(*this, edge);
 }
 
 // @brief 共通集合を求め代入する．
@@ -83,7 +97,8 @@ BddVarSet::operator&=(
   const BddVarSet& right
 )
 {
-  support_cap_int(right);
+  auto edge = support_cap(right);
+  _change_root(edge);
   return *this;
 }
 

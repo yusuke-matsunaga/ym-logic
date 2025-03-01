@@ -24,6 +24,11 @@ class DdInfoMgr
 {
 public:
 
+  /// @brief 空のコンストラクタ
+  ///
+  /// 空のデータを持つ．
+  DdInfoMgr() = default;
+
   /// @brief コンストラクタ
   DdInfoMgr(
     const vector<DdEdge>& root_list, ///< [in] 根の枝のリスト

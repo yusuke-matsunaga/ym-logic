@@ -5,13 +5,13 @@
 /// @brief BddMgr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
 #include "ym/Bdd.h"
 #include "ym/BddVar.h"
-#include "ym/BddMgrPtr.h"
+#include "ym/BddMgrHolder.h"
 #include "ym/JsonValue.h"
 #include "ym/BinDec.h"
 #include "ym/BinEnc.h"
@@ -35,16 +35,18 @@ BEGIN_NAMESPACE_YM_DD
 /// - BddMgrImpl は内部で参照回数を持っており，参照回数がゼロになると
 ///   自動的に開放される．
 //////////////////////////////////////////////////////////////////////
-class BddMgr
+class BddMgr :
+  public BddMgrHolder
 {
 public:
 
   /// @brief コンストラクタ
   BddMgr();
 
-  /// @brief BddMgrPtr を指定したコンストラクタ
+  /// @brief BddMgrHolder を指定したコンストラクタ
+  explicit
   BddMgr(
-    const BddMgrPtr& impl
+    const BddMgrHolder& holder
   );
 
   /// @brief コピーコンストラクタ
@@ -131,14 +133,6 @@ public:
     = {}
   );
 
-  /// @brief ITE 演算を行う．
-  Bdd
-  ite(
-    const Bdd& e0,
-    const Bdd& e1,
-    const Bdd& e2
-  );
-
   /// @brief 論理式から BDD を作る．
   ///
   /// - var_list が省略された場合は自動的に適切な変数リストを用いる．
@@ -149,88 +143,11 @@ public:
     = {}
   );
 
-  /// @brief ドントケアを利用した簡単化を行う．
-  Bdd
-  simplify(
-    const Bdd& on,  ///< [in] オンセット
-    const Bdd& dc   ///< [in] ドントケアセット
-  );
-
 
 public:
   //////////////////////////////////////////////////////////////////////
   // 複数の BDD の情報を取得する関数
   //////////////////////////////////////////////////////////////////////
-
-  /// @brief 複数のBDDのノード数を数える．
-  ///
-  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
-  static
-  SizeType
-  bdd_size(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
-
-  /// @brief 複数のBDDの内容を出力する．
-  ///
-  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
-  static
-  void
-  display(
-    ostream& s,                 ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
-
-  /// @brief 複数のBDDを dot 形式で出力する．
-  ///
-  /// - bdd_list 中の BDD は同一のマネージャに属していなければならない．
-  /// - option は以下のようなキーを持った JSON オブジェクト
-  ///   * attr: dot の各種属性値を持った辞書
-  ///     属性値は <グループ名> ':' <属性名> で表す．
-  ///     グループ名は以下の通り
-  ///     - graph:     グラフ全体
-  ///     - root:      根のノード
-  ///     - node:      通常のノード
-  ///     - terminal:  終端ノード
-  ///     - terminal0: 定数0の終端ノード
-  ///     - terminal1: 定数1の終端ノード
-  ///     - edge:      枝
-  ///     - edge0:     0-枝
-  ///     - edge1:     1-枝
-  ///     グループ名と ':' がない場合には全てのグループに対して同一の属性値
-  ///     を適用する．
-  ///     具体的な属性名と属性値については graphviz の仕様を参照すること．
-  ///   * var_label: 変数ラベルを表す配列．配列のキーは変数番号
-  ///   * var_texlbl: TeX用の変数ラベルを表す配列．配列のキーは変数番号
-  ///   * var_label と var_texlbl は排他的となる．var_texlbl がある時，
-  ///     var_label は無視される．
-  static
-  void
-  gen_dot(
-    ostream& s,                   ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list,  ///< [in] BDDのリスト
-    const JsonValue& option       ///< [in] オプションを表す JSON オブジェクト
-    = JsonValue{}
-  );
-
-  /// @brief 構造を表す整数配列を作る．
-  ///
-  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
-  static
-  vector<SizeType>
-  rep_data(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
-  );
-
-  /// @brief BDD の内容をバイナリダンプする．
-  ///
-  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
-  static
-  void
-  dump(
-    BinEnc& s,                  ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list ///< [in] 対象の BDDのリスト
-  );
 
   /// @brief バイナリダンプから復元する．
   /// @return 生成されたBDDのリストを返す．
@@ -281,7 +198,7 @@ public:
     const BddMgr& right
   ) const
   {
-    return mImpl == right.mImpl;
+    return get() == right.get();
   }
 
   /// @brief 非等価比較演算子
@@ -299,25 +216,17 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 同じマネージャの要素かチェックする．
-  ///
-  /// 異なる場合には std::invalid_argument 例外を送出する．
-  void
-  _check_mgr(
-    const Bdd& bdd
-  ) const
-  {
-    bdd._check_mgr(mImpl);
-  }
+  /// @brief 枝のリストをBddのリストに変換する．
+  vector<Bdd>
+  conv_to_bddlist(
+    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+  ) const;
 
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // データメンバ
-  //////////////////////////////////////////////////////////////////////
-
-  // 本体
-  BddMgrPtr mImpl;
+  /// @brief 枝のリストを変数のリストに変換する．
+  vector<BddVar>
+  conv_to_varlist(
+    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+  ) const;
 
 };
 

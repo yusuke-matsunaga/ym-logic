@@ -130,10 +130,16 @@ public:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 内容を指定したコンストラクタ
+  BddVarSet(
+    const BddMgrHolder& holder,
+    DdEdge root
+  );
+
   /// @brief メンバを指定したコンストラクタ
   BddVarSet(
     const Bdd& bdd
-  ) : Bdd{bdd}
+  ) : Bdd(bdd)
   {
   }
 

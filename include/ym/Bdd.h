@@ -5,11 +5,11 @@
 /// @brief Bdd のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023, 2024 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "ym/logic.h"
-#include "ym/BddMgrPtr.h"
+#include "ym/BddMgrHolder.h"
 #include "ym/BinEnc.h"
 #include "ym/JsonValue.h"
 
@@ -28,9 +28,10 @@ class DdEdge;
 /// - 異なる BddMgr に属する Bdd の演算は std::invalid_argument 例外を
 ///   送出する．
 //////////////////////////////////////////////////////////////////////
-class Bdd
+class Bdd :
+  public BddMgrHolder
 {
-  friend class BddMgrPtr;
+  friend class BddMgrHolder;
 
 public:
 
@@ -315,7 +316,7 @@ public:
   }
 
   /// @brief If-Then-Else 演算
-  friend
+  static
   Bdd
   ite(
     const Bdd& cond,   ///< [in] 条件
@@ -324,7 +325,7 @@ public:
   );
 
   /// @brief ドントケアを利用した簡単化を行う．
-  friend
+  static
   Bdd
   simplify(
     const Bdd& on,  ///< [in] オンセット
@@ -375,22 +376,22 @@ protected:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief サポート集合のユニオンを計算して代入する．
-  Bdd&
-  support_cup_int(
+  DdEdge
+  support_cup(
     const Bdd& right ///< [in] 第2オペランド
-  );
+  ) const;
 
   /// @brief サポート集合のインターセクションを計算して代入する．
-  Bdd&
-  support_cap_int(
+  DdEdge
+  support_cap(
     const Bdd& right ///< [in] 第2オペランド
-  );
+  ) const;
 
   /// @brief サポート集合の差を計算して代入する．
-  Bdd&
-  support_diff_int(
+  DdEdge
+  support_diff(
     const Bdd& right ///< [in] 第2オペランド
-  );
+  ) const;
 
   /// @brief サポート集合が共通部分を持つか調べる．
   bool
@@ -415,20 +416,6 @@ public:
   /// @brief 親のマネージャを返す．
   BddMgr
   mgr() const;
-
-  /// @brief 適正な値を持っている時に true を返す．
-  bool
-  is_valid() const
-  {
-    return mMgr.is_valid();
-  }
-
-  /// @brief 不正値の時に true を返す．
-  bool
-  is_invalid() const
-  {
-    return !is_valid();
-  }
 
   /// @brief 定数0の時 true を返す．
   bool
@@ -662,6 +649,82 @@ public:
 
 public:
   //////////////////////////////////////////////////////////////////////
+  // 複数の BDD の情報を取得する関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 複数のBDDのノード数を数える．
+  ///
+  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  static
+  SizeType
+  bdd_size(
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
+  /// @brief 複数のBDDの内容を出力する．
+  ///
+  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  static
+  void
+  display(
+    ostream& s,                 ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
+  /// @brief 複数のBDDを dot 形式で出力する．
+  ///
+  /// - bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  /// - option は以下のようなキーを持った JSON オブジェクト
+  ///   * attr: dot の各種属性値を持った辞書
+  ///     属性値は <グループ名> ':' <属性名> で表す．
+  ///     グループ名は以下の通り
+  ///     - graph:     グラフ全体
+  ///     - root:      根のノード
+  ///     - node:      通常のノード
+  ///     - terminal:  終端ノード
+  ///     - terminal0: 定数0の終端ノード
+  ///     - terminal1: 定数1の終端ノード
+  ///     - edge:      枝
+  ///     - edge0:     0-枝
+  ///     - edge1:     1-枝
+  ///     グループ名と ':' がない場合には全てのグループに対して同一の属性値
+  ///     を適用する．
+  ///     具体的な属性名と属性値については graphviz の仕様を参照すること．
+  ///   * var_label: 変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_texlbl: TeX用の変数ラベルを表す配列．配列のキーは変数番号
+  ///   * var_label と var_texlbl は排他的となる．var_texlbl がある時，
+  ///     var_label は無視される．
+  static
+  void
+  gen_dot(
+    ostream& s,                   ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list,  ///< [in] BDDのリスト
+    const JsonValue& option       ///< [in] オプションを表す JSON オブジェクト
+    = JsonValue{}
+  );
+
+  /// @brief 構造を表す整数配列を作る．
+  ///
+  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  static
+  vector<SizeType>
+  rep_data(
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
+  /// @brief BDD の内容をバイナリダンプする．
+  ///
+  /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
+  static
+  void
+  dump(
+    BinEnc& s,                  ///< [in] 出力ストリーム
+    const vector<Bdd>& bdd_list ///< [in] 対象の BDDのリスト
+  );
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
   /// @name 正常検査用の関数
   /// @{
   //////////////////////////////////////////////////////////////////////
@@ -699,28 +762,6 @@ public:
     }
   }
 
-  /// @brief オペランドが同じマネージャに属しているかチェックする．
-  ///
-  /// 異なるマネージャに属している場合には std::invalid_argument 例外を送出する．
-  void
-  _check_mgr(
-    const Bdd& obj ///< [in] 対象のオブジェクト
-  ) const
-  {
-    _check_mgr(obj.mMgr);
-  }
-
-  /// @brief オペランドが同じマネージャに属しているかチェックする．
-  ///
-  /// 異なるマネージャに属している場合には std::invalid_argument 例外を送出する．
-  void
-  _check_mgr(
-    const BddMgrPtr& ptr ///< [in] マネージャ
-  ) const
-  {
-    mMgr._check_mgr(ptr);
-  }
-
   /// @}
   //////////////////////////////////////////////////////////////////////
 
@@ -732,20 +773,19 @@ protected:
 
   /// @brief 内容を指定したコンストラクタ
   Bdd(
-    const BddMgrPtr& mgr,
+    const BddMgrHolder& holder,
     DdEdge root
   );
-
-  /// @brief マネージャを返す．
-  BddMgrPtr
-  mgr_ptr() const
-  {
-    return mMgr;
-  }
 
   /// @brief 根の枝を返す．
   DdEdge
   root() const;
+
+  /// @brief 根の枝を変更する．
+  void
+  _change_root(
+    DdEdge new_root ///< [in] 変更する枝
+  );
 
 
 private:
@@ -753,10 +793,76 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 根の枝を変更する．
-  void
-  change_root(
-    DdEdge new_root ///< [in] 変更する枝
+  /// @brief AND 演算の下請け関数
+  DdEdge
+  _and_op(
+    const Bdd& right
+  ) const;
+
+  /// @brief OR 演算の下請け関数
+  DdEdge
+  _or_op(
+    const Bdd& right
+  ) const;
+
+  /// @brief XOR 演算の下請け関数
+  DdEdge
+  _xor_op(
+    const Bdd& right
+  ) const;
+
+  /// @brief コファクターを計算する．
+  DdEdge
+  _cofactor(
+    const BddVar& var, ///< [in] 変数
+    bool inv           ///< [in] 反転フラグ
+                       ///<      - false: 反転なし (正極性)
+                       ///<      - true:  反転あり (負極性)
+  ) const;
+
+  /// @brief コファクターを計算する．
+  DdEdge
+  _cofactor(
+    const Bdd& cube ///< [in] コファクターのキューブ
+                    /// cube.is_cube() = true でなければならない．
+  ) const;
+
+  /// @brief 複合compose演算
+  DdEdge
+  _multi_compose(
+    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
+  ) const;
+
+  /// @brief 変数順を入れ替える演算
+  ///
+  /// 極性も入れ替え可能
+  DdEdge
+  _remap_vars(
+    const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
+  ) const;
+
+  /// @brief レベルを変数に変換する．
+  BddVar
+  _level_to_var(
+    SizeType level ///< [in] レベル
+  ) const;
+
+  /// @brief BDDのリストからマネージャを取り出す．
+  ///
+  /// 異なるマネージャを持つBDDが混在している場合，
+  /// 例外を送出する．
+  /// 空リストの場合は nullptr を返す．
+  static
+  BddMgrImpl*
+  _mgr(
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  );
+
+  /// @brief BDDのリストから枝のリストに変換する．
+  static
+  vector<DdEdge>
+  _conv_to_edgelist(
+    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
 
@@ -764,9 +870,6 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
-
-  // マネージャ
-  BddMgrPtr mMgr;
 
   // 根の枝(ポインタ+反転属性)
   PtrIntType mRoot{0};

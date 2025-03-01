@@ -25,7 +25,8 @@ class DdEdge;
 class BddVar :
   public Bdd
 {
-  friend class BddMgrPtr;
+  //friend class BddMgr;
+  friend class BddMgrHolder;
   friend class Bdd;
   friend class BddLit;
 
@@ -35,7 +36,7 @@ private:
   ///
   /// root は正のリテラル関数だけが正しい値
   BddVar(
-    const BddMgrPtr& mgr,
+    const BddMgrHolder& mgr,
     DdEdge root
   );
 
@@ -120,6 +121,20 @@ public:
   {
     return !operator==(right);
   }
+
+  /// @brief BddVar のリストから DdEdge のリストに変換する．
+  static
+  vector<DdEdge>
+  conv_to_edgelist(
+    const vector<BddVar>& var_list
+  );
+
+  /// @brief BddVar のリストからレベルのリストに変換する．
+  static
+  vector<SizeType>
+  conv_to_levellist(
+    const vector<BddVar>& var_list
+  );
 
 
 private:

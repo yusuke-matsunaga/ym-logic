@@ -7,26 +7,24 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ym/ZddMgrPtr.h"
+#include "ym/ZddMgrHolder.h"
 #include "ZddDiffOp.h"
 
 
 BEGIN_NAMESPACE_YM_DD
 
 // @brief DIFF演算を行う．
-Zdd
-ZddMgrPtr::diff(
-  const Zdd& left,
+DdEdge
+Zdd::_diff(
   const Zdd& right
 ) const
 {
-  left._check_valid();
-  right._check_valid();
-  _check_mgr(left);
-  _check_mgr(right);
-  ZddDiffOp op{get()};
-  auto e = op.diff_step(left.root(), right.root());
-  return _zdd(e);
+  _check_valid_mgr(right);
+  auto ledge = root();
+  auto redge = right.root();
+  ZddDiffOp op(get());
+  auto edge = op.diff_step(ledge, redge);
+  return edge;
 }
 
 

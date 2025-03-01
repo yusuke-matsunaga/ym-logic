@@ -25,8 +25,7 @@ class DdEdge;
 class ZddItem :
   public Zdd
 {
-  //friend class ZddMgrImpl;
-  friend class ZddMgrPtr;
+  friend class ZddMgrHolder;
   friend class Zdd;
 
 private:
@@ -35,8 +34,8 @@ private:
   ///
   /// root はシングルトンでなければならない．
   ZddItem(
-    const ZddMgrPtr& mgr, ///< [in] マネージャ
-    DdEdge root           ///< [in] 根の枝
+    const ZddMgrHolder& holder, ///< [in] マネージャ
+    DdEdge root                 ///< [in] 根の枝
   );
 
   /// @brief Zdd からのコピーコンストラクタ
@@ -109,6 +108,13 @@ public:
   {
     return !operator==(right);
   }
+
+  /// @brief レベルのリストに変換する．
+  static
+  vector<SizeType>
+  conv_to_levellist(
+    const vector<ZddItem>& item_list
+  );
 
 
 private:

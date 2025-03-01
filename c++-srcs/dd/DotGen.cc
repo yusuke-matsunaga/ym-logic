@@ -8,6 +8,8 @@
 
 #include "ym/Bdd.h"
 #include "ym/Zdd.h"
+#include "BddMgrImpl.h"
+#include "ZddMgrImpl.h"
 #include "DdEdge.h"
 #include "DdInfo.h"
 #include "DdInfoMgr.h"
@@ -16,29 +18,67 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-// @brief 複数のBDDを dot 形式で出力する．
+// @brief dot 形式で出力する．
 void
-BddMgrPtr::gen_dot(
+Bdd::gen_dot(
   ostream& s,
-  const vector<Bdd>& bdd_list,
   const JsonValue& option
 ) const
 {
-  DotGen dg{option};
-  auto info_mgr = node_info(bdd_list);
+  auto edge = root();
+  DdInfoMgr info_mgr({edge}, get());
+  DotGen dg(option);
+  dg.write(s, info_mgr);
+}
+
+// @brief 複数のBDDを dot 形式で出力する．
+void
+Bdd::gen_dot(
+  ostream& s,
+  const vector<Bdd>& bdd_list,
+  const JsonValue& option
+)
+{
+  if ( bdd_list.empty() ) {
+    // 空リストならなにもしない．
+    return;
+  }
+  auto mgr = _mgr(bdd_list);
+  auto edge_list = _conv_to_edgelist(bdd_list);
+  DdInfoMgr info_mgr(edge_list, mgr);
+  DotGen dg(option);
+  dg.write(s, info_mgr);
+}
+
+// @brief dot 形式で出力する．
+void
+Zdd::gen_dot(
+  ostream& s,
+  const JsonValue& option
+) const
+{
+  auto edge = root();
+  DdInfoMgr info_mgr({edge}, get());
+  DotGen dg(option);
   dg.write(s, info_mgr);
 }
 
 // @brief 複数のZDDを dot 形式で出力する．
 void
-ZddMgrPtr::gen_dot(
+Zdd::gen_dot(
   ostream& s,
   const vector<Zdd>& zdd_list,
   const JsonValue& option
-) const
+)
 {
-  DotGen dg{option};
-  auto info_mgr = node_info(zdd_list);
+  if ( zdd_list.empty() ) {
+    // 空リストならなにもしない．
+    return;
+  }
+  auto mgr = _mgr(zdd_list);
+  auto edge_list = _conv_to_edgelist(zdd_list);
+  DdInfoMgr info_mgr(edge_list, mgr);
+  DotGen dg(option);
   dg.write(s, info_mgr);
 }
 

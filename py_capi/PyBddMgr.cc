@@ -194,6 +194,7 @@ BddMgr_from_truth(
   }
 }
 
+#if 0
 PyObject*
 BddMgr_gen_dot(
   PyObject* Py_UNUSED(self),
@@ -250,6 +251,7 @@ BddMgr_gen_dot(
   BddMgr::gen_dot(ofs, bdd_list, option);
   Py_RETURN_NONE;
 }
+#endif
 
 PyObject*
 BddMgr_enable_gc(

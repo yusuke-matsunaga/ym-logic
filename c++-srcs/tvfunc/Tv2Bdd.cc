@@ -80,7 +80,7 @@ BddGen::decomp_step(
   auto r0 = decomp_step(var + 1, start, mid);
   auto r1 = decomp_step(var + 1, mid, end);
   auto v = mVarList[var];
-  auto r = ite(v, r1, r0);
+  auto r = Bdd::ite(v, r1, r0);
   return r;
 }
 

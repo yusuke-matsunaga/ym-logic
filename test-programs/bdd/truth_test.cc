@@ -41,7 +41,7 @@ truth_test(
       nsingle += f.size();
     }
     no = func_list.size();
-    nall = mgr.bdd_size(func_list);
+    nall = Bdd::bdd_size(func_list);
     cout << basename(argv[i]) << ": #i " << ni << ": #o " << no
 	 << ": #n " << nsingle << ": #a " << nall << endl;
   }

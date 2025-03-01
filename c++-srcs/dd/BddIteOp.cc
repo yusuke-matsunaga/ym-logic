@@ -12,66 +12,65 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-// @brief AND 演算を行う．
-Bdd
-BddMgrPtr::and_op(
-  const Bdd& left,
+// @brief 論理積を返す．
+DdEdge
+Bdd::_and_op(
   const Bdd& right
 ) const
 {
-  left._check_valid();
-  right._check_valid();
-  _check_mgr(left.mMgr);
-  _check_mgr(right.mMgr);
-  BddIteOp op{get()};
-  auto edge = op.and_step(left.root(), right.root());
-  return _bdd(edge);
+  _check_valid_mgr(right);
+  auto ledge = root();
+  auto redge = right.root();
+  BddIteOp op(get());
+  auto edge = op.and_step(ledge, redge);
+  return edge;
 }
 
-// @brief OR 演算を行う．
-Bdd
-BddMgrPtr::or_op(
-  const Bdd& left,
+// @brief 論理和を返す．
+DdEdge
+Bdd::_or_op(
   const Bdd& right
 ) const
 {
-  // DeMorgan's law
-  return ~and_op(~left, ~right);
+  _check_valid_mgr(right);
+  auto ledge = root();
+  auto redge = right.root();
+  BddIteOp op(get());
+  // De Morgan's Law
+  auto edge = op.and_step(~ledge, ~redge);
+  return ~edge;
 }
 
-// @brief XOR 演算を行う．
-Bdd
-BddMgrPtr::xor_op(
-  const Bdd& left,
+// @brief 排他的論理和を返す．
+DdEdge
+Bdd::_xor_op(
   const Bdd& right
 ) const
 {
-  left._check_valid();
-  right._check_valid();
-  _check_mgr(left);
-  _check_mgr(right);
-  BddIteOp op{get()};
-  auto edge = op.xor_step(left.root(), right.root());
-  return _bdd(edge);
+  _check_valid_mgr(right);
+  auto ledge = root();
+  auto redge = right.root();
+  BddIteOp op(get());
+  auto edge = op.xor_step(ledge, redge);
+  return edge;
 }
 
-// @brief ITE 演算を行う．
+// @brief If-Then-Else 演算
 Bdd
-BddMgrPtr::ite(
-  const Bdd& e0,
-  const Bdd& e1,
-  const Bdd& e2
-) const
+Bdd::ite(
+  const Bdd& cond,
+  const Bdd& then_f,
+  const Bdd& else_f
+)
 {
-  e0._check_valid();
-  e1._check_valid();
-  e2._check_valid();
-  _check_mgr(e0.mMgr);
-  _check_mgr(e1.mMgr);
-  _check_mgr(e2.mMgr);
-  BddIteOp op{get()};
-  auto edge = op.ite_step(e0.root(), e1.root(), e2.root());
-  return _bdd(edge);
+  cond._check_valid_mgr(then_f);
+  cond._check_mgr(else_f);
+  auto e0 = cond.root();
+  auto e1 = then_f.root();
+  auto e2 = else_f.root();
+  BddIteOp op(cond.get());
+  auto edge = op.ite_step(e0, e1, e2);
+  return cond._bdd(edge);
 }
 
 

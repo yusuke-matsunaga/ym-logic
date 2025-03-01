@@ -6,7 +6,7 @@
 /// Copyright (C) 2023 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/ZddMgrPtr.h"
+#include "ym/ZddMgr.h"
 #include "ZddMgrImpl.h"
 #include "ZddCopyOp.h"
 
@@ -19,15 +19,15 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief ZDD をコピーする．
 Zdd
-ZddMgrPtr::copy(
+ZddMgr::copy(
   const Zdd& src
-) const
+)
 {
   if ( src.is_invalid() ) {
     // 不正な ZDD はそのまま
     return src;
   }
-  if ( src.mMgr == *this ) {
+  if ( has_same_mgr(src) ) {
     // 自分自身に属している場合もそのまま
     return src;
   }
@@ -38,22 +38,11 @@ ZddMgrPtr::copy(
     auto vid = var.id();
     (void) item(vid);
   }
-  // item_list を変数順にしたがって並べ替える．
-  sort(item_list.begin(), item_list.end(),
-       [&](const ZddItem& a, const ZddItem& b){
-	 auto level_a = a.level();
-	 auto level_b = b.level();
-	 return level_a < level_b;
-       });
-  // それを自身のインデックスに変換する．
-  vector<SizeType> level_list;
-  level_list.reserve(item_list.size());
-  for ( auto& item: item_list ) {
-    auto vid = item.id();
-    auto level = mPtr->varid_to_level(vid);
-    level_list.push_back(level);
-  }
-  ZddCopyOp op{get(), item_list, level_list};
+  // item_list をレベルのリストに変換する．
+  auto level_list = ZddItem::conv_to_levellist(item_list);
+  // level_list を変数順にしたがって並べ替える．
+  std::sort(level_list.begin(), level_list.end());
+  ZddCopyOp op(get(), item_list, level_list);
   auto edge = op.copy_step(src, 0);
   return _zdd(edge);
 }

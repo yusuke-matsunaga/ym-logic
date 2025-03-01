@@ -7,7 +7,6 @@
 /// All rights reserved.
 
 #include "ym/Zdd.h"
-#include "ym/ZddMgrPtr.h"
 #include "ZddCapOp.h"
 
 
@@ -18,19 +17,17 @@ BEGIN_NAMESPACE_YM_DD
 //////////////////////////////////////////////////////////////////////
 
 // @brief CAP 演算を行う．
-Zdd
-ZddMgrPtr::cap(
-  const Zdd& left,
+DdEdge
+Zdd::_cap(
   const Zdd& right
 ) const
 {
-  left._check_valid();
-  right._check_valid();
-  _check_mgr(left);
-  _check_mgr(right);
-  ZddCapOp op{get()};
-  auto edge = op.cap_step(left.root(), right.root());
-  return _zdd(edge);
+  _check_valid_mgr(right);
+  ZddCapOp op(get());
+  auto ledge = root();
+  auto redge = right.root();
+  auto edge = op.cap_step(ledge, redge);
+  return edge;
 }
 
 

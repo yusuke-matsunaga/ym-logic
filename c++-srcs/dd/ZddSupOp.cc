@@ -20,12 +20,14 @@ Zdd::get_support_list() const
 {
   _check_valid();
 
-  ZddSupOp op{mMgr.get()};
+  ZddSupOp op(get());
   auto edge = op.get_step(root());
   vector<ZddItem> item_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
-    auto item = mMgr.level_to_item(node->level());
+    auto level = node->level();
+    auto edge = get()->new_node(level, DdEdge::zero(), DdEdge::one());
+    auto item = ZddItem(*this, edge);
     item_list.push_back(item);
     edge = node->edge1();
   }

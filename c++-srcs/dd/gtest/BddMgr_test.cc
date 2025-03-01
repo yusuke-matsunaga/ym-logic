@@ -245,7 +245,7 @@ TEST_F(BddTest, mgr_bdd_size1)
   auto bdd1 = from_truth("1000");
   auto bdd2 = from_truth("1110");
 
-  EXPECT_EQ( 3, mMgr.bdd_size({bdd1, bdd2}) );
+  EXPECT_EQ( 3, Bdd::bdd_size({bdd1, bdd2}) );
 }
 
 TEST_F(BddTest, mgr_display1)
@@ -257,7 +257,7 @@ TEST_F(BddTest, mgr_display1)
   auto bdd2 = var0 | var1;
 
   ostringstream os;
-  mMgr.display(os, {bdd1, bdd2});
+  Bdd::display(os, {bdd1, bdd2});
 
   static const char* exp_str =
     "     2      3 \n"
@@ -279,7 +279,7 @@ TEST_F(BddTest, mgr_display2)
   auto bdd2 = var0 | var1;
 
   ostringstream os;
-  mMgr.display(os, {bdd1, bdd2});
+  Bdd::display(os, {bdd1, bdd2});
 
   static const char* exp_str =
     "     2      3 \n"

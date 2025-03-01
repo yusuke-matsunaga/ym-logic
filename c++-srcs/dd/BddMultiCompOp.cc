@@ -9,7 +9,7 @@
 #include "ym/Bdd.h"
 #include "ym/BddVar.h"
 #include "ym/BddLit.h"
-#include "ym/BddMgrPtr.h"
+#include "ym/BddMgrHolder.h"
 #include "DdEdge.h"
 #include "DdNode.h"
 #include "BddMultiCompOp.h"
@@ -17,46 +17,13 @@
 
 BEGIN_NAMESPACE_YM_DD
 
-// @brief (単一)compose演算
-Bdd
-Bdd::compose(
-  const BddVar& var, ///< [in] 対象の変数
-  const Bdd& cfunc   ///< [in] 置き換える関数
-) const
-{
-  return multi_compose({{var, cfunc}});
-}
-
-// @brief (単一)compose演算を行って代入する．
-Bdd&
-Bdd::compose_int(
-  const BddVar& var, ///< [in] 対象の変数
-  const Bdd& cfunc   ///< [in] 置き換える関数
-)
-{
-  return multi_compose_int({{var, cfunc}});
-}
-
-// @brief compose 演算を行う．
-Bdd
-BddMgrPtr::compose(
-  const Bdd& bdd,
-  const BddVar& var,
-  const Bdd& cedge
-) const
-{
-  unordered_map<BddVar, Bdd> cmap{{var, cedge}};
-  return multi_compose(bdd, cmap);
-}
-
 // @brief 複合compose演算
-Bdd
-BddMgrPtr::multi_compose(
-  const Bdd& bdd,
+DdEdge
+Bdd::_multi_compose(
   const unordered_map<BddVar, Bdd>& compose_map
 ) const
 {
-  bdd._check_valid();
+  _check_valid();
   unordered_map<SizeType, DdEdge> cmap;
   for ( auto& p: compose_map ) {
     auto var = p.first;
@@ -66,30 +33,29 @@ BddMgrPtr::multi_compose(
     auto cedge = bdd.root();
     cmap.emplace(level, cedge);
   }
-  BddMultiCompOp op{get(), cmap};
-  auto edge = op.mcomp_op(bdd.root());
-  return _bdd(edge);
+  BddMultiCompOp op(get(), cmap);
+  auto edge = op.mcomp_op(root());
+  return edge;
 }
 
 // @brief 変数順を入れ替える演算
-Bdd
-BddMgrPtr::remap_vars(
-  const Bdd& bdd,
+DdEdge
+Bdd::_remap_vars(
   const unordered_map<BddVar, BddLit>& varmap
 ) const
 {
-  bdd._check_valid();
+  _check_valid();
   unordered_map<SizeType, DdEdge> cmap;
   for ( auto& p: varmap ) {
     auto var = p.first;
     auto level = var.level();
     auto lit = p.second;
-    DdEdge cedge = lit.root();
+    auto cedge = lit.root();
     cmap.emplace(level, cedge);
   }
-  BddMultiCompOp op{get(), cmap};
-  auto e = op.mcomp_op(bdd.root());
-  return _bdd(e);
+  BddMultiCompOp op(get(), cmap);
+  auto edge = op.mcomp_op(root());
+  return edge;
 }
 
 

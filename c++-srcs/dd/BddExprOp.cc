@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "BddExprOp.h"
+#include "ym/BddMgr.h"
 #include "ym/BddVar.h"
 #include "ym/Expr.h"
 
@@ -14,7 +15,7 @@
 BEGIN_NAMESPACE_YM_DD
 
 Bdd
-BddMgrPtr::from_expr(
+BddMgr::from_expr(
   const Expr& expr,
   const vector<BddVar>& var_list
 )
@@ -38,7 +39,8 @@ BddMgrPtr::from_expr(
     }
   }
 
-  BddExprOp op{get(), level_list(tmp_var_list)};
+  auto level_list = BddVar::conv_to_levellist(tmp_var_list);
+  BddExprOp op(get(), level_list);
   auto edge = op.op_step(expr);
   return _bdd(edge);
 }
