@@ -80,7 +80,39 @@ TEST_F(GenFactorTest, bool_factor0)
 			       {lit_b, lit_d} }};
   auto expr1 = cover1.bool_factor();
 
+  auto f1 = cover1.tvfunc();
+  auto f2 = expr1.tvfunc(nv);
+
+  EXPECT_EQ( f2, f1 );
+
   cout << expr1 << endl;
+}
+
+TEST_F(GenFactorTest, bool_factor1)
+{
+  Literal v0(0);
+  Literal v1(1);
+  Literal v2(2);
+  Literal v3(3);
+  Literal v4(4);
+  Literal v5(5);
+  Literal v6(6);
+  Literal v7(7);
+  Literal v8(8);
+
+  auto nv = 9U;
+  auto cover = SopCover(nv, { {v0, ~v1, v2, ~v3, ~v4, ~v5, ~v6},
+			      {v0, ~v2, v3, ~v8},
+			      {v0, ~v2, ~v3, v8},
+			      {~v0, v2, ~v3},
+			      {~v0, ~v2, v3, v7, ~v8},
+			      {~v0, ~v2, v3, ~v7, v8} });
+  auto expr = cover.bool_factor();
+
+  auto f1 = cover.tvfunc();
+  auto f2 = expr.tvfunc(nv);
+
+  EXPECT_EQ( f2, f1 );
 }
 
 END_NAMESPACE_YM_SOP

@@ -41,6 +41,10 @@ SopCover::good_factor() const
 Expr
 SopCover::bool_factor() const
 {
+  if ( variable_num() > 20 ) {
+    // 安全策
+    return good_factor();
+  }
   auto func = tvfunc();
   auto new_cover = SopCover(variable_num(), Tv2Sop::isop(func));
   GenFactor<BestKernel, BoolDivision> factor;

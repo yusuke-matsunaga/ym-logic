@@ -7,6 +7,7 @@
 /// All rights reserved.
 
 #include "ym/Tv2Sop.h"
+#include "ym/SopCover.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -34,6 +35,25 @@ print_func(
       s << "*";
     }
     else if ( v1 ) {
+      s << "1";
+    }
+    else {
+      s << "0";
+    }
+  }
+}
+
+void
+print_func(
+  ostream& s,
+  const TvFunc& f
+)
+{
+  SizeType ni = f.input_num();
+  SizeType ni_exp = 1 << ni;
+  for ( SizeType p = 0; p < ni_exp; ++ p ) {
+    auto v1 = f.value(p);
+    if ( v1 ) {
       s << "1";
     }
     else {
@@ -385,10 +405,11 @@ isop_sub(
   TvFunc d0;
   TvFunc d1;
   d.decompose(d0, d1);
+
+  // special cases
   if ( f0 == f1 && d0 == d1 ) {
     return isop_sub(f0, d0);
   }
-
   if ( d0.is_one() ) {
     return isop_sub(f1, d1);
   }
@@ -441,7 +462,6 @@ isop_sub(
     cout << " ==> ";
     print_cover(cout, cube_list);
   }
-
   return cube_list;
 }
 
