@@ -339,62 +339,6 @@ AigMgr_from_expr_list(
   return PyAigHandle::ToPyList(ans);
 }
 
-PyObject*
-AigMgr_gen_dot(
-  PyObject* Py_UNUSED(self),
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "filename",
-    "aig_list",
-    "option",
-    nullptr
-  };
-  const char* filename = nullptr;
-  PyObject* aig_list_obj = nullptr;
-  PyObject* option_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "sO|$O!",
-				    const_cast<char**>(kw_list),
-				    &filename,
-				    &aig_list_obj,
-				    PyJsonValue::_typeobject(), &option_obj) ) {
-    return nullptr;
-  }
-  const char* emsg = "'aig_list' shuld be a list of AigHandle";
-  if ( !PySequence_Check(aig_list_obj) ) {
-    PyErr_SetString(PyExc_TypeError, emsg);
-    return nullptr;
-  }
-  auto n = PySequence_Size(aig_list_obj);
-  vector<AigHandle> aig_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto aig_obj = PySequence_GetItem(aig_list_obj, i);
-    if ( !PyAigHandle::Check(aig_obj) ) {
-      PyErr_SetString(PyExc_TypeError, emsg);
-      return nullptr;
-    }
-    auto aig = PyAigHandle::Get(aig_obj);
-    aig_list[i] = aig;
-    Py_DECREF(aig_obj);
-  }
-
-  ofstream ofs{filename};
-  if ( !ofs ) {
-    ostringstream buf;
-    buf << "Could not create file '" << filename << "'";
-    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-    return nullptr;
-  }
-  JsonValue option;
-  if ( option_obj != nullptr ) {
-    option = PyJsonValue::Get(option_obj);
-  }
-  AigMgr::gen_dot(ofs, aig_list, option);
-  Py_RETURN_NONE;
-}
-
 // メソッド定義
 PyMethodDef AigMgr_methods[] = {
   {"eval", reinterpret_cast<PyCFunction>(AigMgr_eval),
@@ -427,9 +371,6 @@ PyMethodDef AigMgr_methods[] = {
   {"from_expr_list", reinterpret_cast<PyCFunction>(AigMgr_from_expr_list),
    METH_VARARGS | METH_KEYWORDS,
    PyDoc_STR("convert from a sequcence of Exprs")},
-  {"gen_dot", reinterpret_cast<PyCFunction>(AigMgr_gen_dot),
-   METH_VARARGS | METH_KEYWORDS | METH_STATIC,
-   PyDoc_STR("gen DOT file")},
   {nullptr, nullptr, 0, nullptr}
 };
 

@@ -80,19 +80,6 @@ AigMgr::eval(
   return get()->eval(input_vals, oedge_list);
 }
 
-// @brief dot 形式で出力する．
-void
-AigMgr::gen_dot(
-  ostream& s,
-  const vector<AigHandle>& root_list,
-  const JsonValue& option
-)
-{
-  vector<AigEdge> oedge_list;
-  auto mgr = hlist_to_elist(root_list, oedge_list);
-  return mgr->gen_dot(s, oedge_list, option);
-}
-
 // @brief 外部入力ノードを作る．
 AigHandle
 AigMgr::make_input()

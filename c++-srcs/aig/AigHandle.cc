@@ -211,6 +211,19 @@ AigHandle::gen_dot(
   get()->gen_dot(s, {_edge()}, option);
 }
 
+// @brief dot 形式で出力する．
+void
+AigHandle::gen_dot(
+  ostream& s,
+  const vector<AigHandle>& root_list,
+  const JsonValue& option
+)
+{
+  vector<AigEdge> oedge_list;
+  auto mgr = hlist_to_elist(root_list, oedge_list);
+  return mgr->gen_dot(s, oedge_list, option);
+}
+
 // @brief 否定したハンドルを返す．
 AigHandle
 AigHandle::operator~() const
