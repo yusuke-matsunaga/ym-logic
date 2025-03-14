@@ -155,6 +155,17 @@ public:
   SizeType
   hash() const;
 
+  /// @brief このノードを根とする部分グラフのサイズを返す．
+  SizeType
+  size() const;
+
+  /// @brief 指定された複数のノードを根とする部分グラフのサイズを返す．
+  static
+  SizeType
+  size(
+    const std::vector<AigHandle>& root_list
+  );
+
   /// @brief dot 形式で出力する．
   ///
   /// - option は以下のようなキーを持った JSON オブジェクト

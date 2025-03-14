@@ -92,6 +92,42 @@ AigMgrImpl::eval_sub(
   }
 }
 
+BEGIN_NONAMESPACE
+
+void
+dfs(
+  AigNode* node,
+  std::unordered_set<SizeType>& mark
+)
+{
+  if ( mark.count(node->id()) > 0 ) {
+    return;
+  }
+  mark.emplace(node->id());
+  if ( node->is_input() ) {
+    return;
+  }
+  dfs(node->fanin0_node(), mark);
+  dfs(node->fanin1_node(), mark);
+}
+
+END_NONAMESPACE
+
+// @brief ノード数を返す．
+SizeType
+AigMgrImpl::size(
+  const vector<AigEdge>& edge_list
+) const
+{
+  std::unordered_set<SizeType> mark;
+  for ( auto& edge: edge_list ) {
+    if ( !edge.is_const() ) {
+      dfs(edge.node(), mark);
+    }
+  }
+  return mark.size();
+}
+
 // @brief and_op() の下請け関数
 AigEdge
 AigMgrImpl::and_sub(
@@ -100,8 +136,10 @@ AigMgrImpl::and_sub(
   SizeType end
 )
 {
+  if ( begin >= end ) {
+    throw std::logic_error{"begin >= end"};
+  }
   auto n = end - begin;
-  ASSERT_COND( n > 0 );
   if ( n == 1 ) {
     return fanin_list[begin];
   }
@@ -110,7 +148,7 @@ AigMgrImpl::and_sub(
     auto e1 = fanin_list[begin + 1];
     return and_op(e0, e1);
   }
-  auto nh = n / 2;
+  auto nh = (begin + end) / 2;
   auto e0 = and_sub(fanin_list, begin, nh);
   auto e1 = and_sub(fanin_list, nh, end);
   return and_op(e0, e1);
@@ -124,8 +162,10 @@ AigMgrImpl::or_sub(
   SizeType end
 )
 {
+  if ( begin >= end ) {
+    throw std::logic_error{"begin >= end"};
+  }
   auto n = end - begin;
-  ASSERT_COND( n > 0 );
   if ( n == 1 ) {
     return fanin_list[begin];
   }
@@ -134,7 +174,7 @@ AigMgrImpl::or_sub(
     auto e1 = fanin_list[begin + 1];
     return or_op(e0, e1);
   }
-  auto nh = n / 2;
+  auto nh = (begin + end) / 2;
   auto e0 = or_sub(fanin_list, begin, nh);
   auto e1 = or_sub(fanin_list, nh, end);
   return or_op(e0, e1);
@@ -148,8 +188,10 @@ AigMgrImpl::xor_sub(
   SizeType end
 )
 {
+  if ( begin >= end ) {
+    throw std::logic_error{"begin >= end"};
+  }
   auto n = end - begin;
-  ASSERT_COND( n > 0 );
   if ( n == 1 ) {
     return fanin_list[begin];
   }
@@ -158,7 +200,7 @@ AigMgrImpl::xor_sub(
     auto e1 = fanin_list[begin + 1];
     return xor_op(e0, e1);
   }
-  auto nh = n / 2;
+  auto nh = (begin + end) / 2;
   auto e0 = xor_sub(fanin_list, begin, nh);
   auto e1 = xor_sub(fanin_list, nh, end);
   return xor_op(e0, e1);

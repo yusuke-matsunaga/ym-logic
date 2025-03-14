@@ -90,6 +90,12 @@ public:
     const vector<AigEdge>& output_list    ///< [in] 出力のリスト
   ) const;
 
+  /// @brief ノード数を返す．
+  SizeType
+  size(
+    const vector<AigEdge>& edge_list ///< [in] 根の枝のリスト
+  ) const;
+
   /// @brief dot 形式で出力する．
   void
   gen_dot(

@@ -201,6 +201,24 @@ AigHandle::hash() const
   return ((v * v) >> 20) + idx;
 }
 
+// @brief このノードを根とする部分グラフのサイズを返す．
+SizeType
+AigHandle::size() const
+{
+  return get()->size({_edge()});
+}
+
+// @brief 指定された複数のノードを根とする部分グラフのサイズを返す．
+SizeType
+AigHandle::size(
+  const std::vector<AigHandle>& root_list
+)
+{
+  vector<AigEdge> oedge_list;
+  auto mgr = hlist_to_elist(root_list, oedge_list);
+  return mgr->size(oedge_list);
+}
+
 // @brief dot 形式で出力する．
 void
 AigHandle::gen_dot(

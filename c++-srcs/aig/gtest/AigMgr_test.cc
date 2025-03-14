@@ -112,6 +112,37 @@ TEST(AigMgrTest, and_op4)
   EXPECT_EQ( h4, fanin_list[3] );
 }
 
+TEST(AigMgrTest, and_op8)
+{
+  AigMgr mgr;
+
+  auto h1 = mgr.make_input();
+  auto h2 = mgr.make_input();
+  auto h3 = mgr.make_input();
+  auto h4 = mgr.make_input();
+  auto h5 = mgr.make_input();
+  auto h6 = mgr.make_input();
+  auto h7 = mgr.make_input();
+  auto h8 = mgr.make_input();
+
+  auto ho = mgr.and_op({h1, h2, h3, h4, h5, h6, h7, h8});
+  EXPECT_TRUE( ho.is_and() );
+
+  EXPECT_EQ( 15, mgr.node_num() );
+  EXPECT_EQ( 7, mgr.and_num() );
+
+  auto fanin_list = ho.ex_fanin_list();
+  ASSERT_EQ( 8, fanin_list.size() );
+  EXPECT_EQ( h1, fanin_list[0] );
+  EXPECT_EQ( h2, fanin_list[1] );
+  EXPECT_EQ( h3, fanin_list[2] );
+  EXPECT_EQ( h4, fanin_list[3] );
+  EXPECT_EQ( h5, fanin_list[4] );
+  EXPECT_EQ( h6, fanin_list[5] );
+  EXPECT_EQ( h7, fanin_list[6] );
+  EXPECT_EQ( h8, fanin_list[7] );
+}
+
 TEST(AigMgrTest, or_op3)
 {
   AigMgr mgr;
@@ -162,6 +193,37 @@ TEST(AigMgrTest, or_op4)
   EXPECT_EQ( ~h2, fanin_list[1] );
   EXPECT_EQ( ~h3, fanin_list[2] );
   EXPECT_EQ( ~h4, fanin_list[3] );
+}
+
+TEST(AigMgrTest, or_op8)
+{
+  AigMgr mgr;
+
+  auto h1 = mgr.make_input();
+  auto h2 = mgr.make_input();
+  auto h3 = mgr.make_input();
+  auto h4 = mgr.make_input();
+  auto h5 = mgr.make_input();
+  auto h6 = mgr.make_input();
+  auto h7 = mgr.make_input();
+  auto h8 = mgr.make_input();
+
+  auto ho = mgr.or_op({h1, h2, h3, h4, h5, h6, h7, h8});
+  EXPECT_TRUE( ho.is_and() );
+
+  EXPECT_EQ( 15, mgr.node_num() );
+  EXPECT_EQ( 7, mgr.and_num() );
+
+  auto fanin_list = ho.ex_fanin_list();
+  ASSERT_EQ( 8, fanin_list.size() );
+  EXPECT_EQ( ~h1, fanin_list[0] );
+  EXPECT_EQ( ~h2, fanin_list[1] );
+  EXPECT_EQ( ~h3, fanin_list[2] );
+  EXPECT_EQ( ~h4, fanin_list[3] );
+  EXPECT_EQ( ~h5, fanin_list[4] );
+  EXPECT_EQ( ~h6, fanin_list[5] );
+  EXPECT_EQ( ~h7, fanin_list[6] );
+  EXPECT_EQ( ~h8, fanin_list[7] );
 }
 
 TEST(AigMgrTest, xor_op3)
