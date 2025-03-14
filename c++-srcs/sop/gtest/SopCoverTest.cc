@@ -2797,4 +2797,20 @@ TEST_F(SopTest, tvfunc)
   EXPECT_EQ( 1, func3.value(3) );
 }
 
+// write(), read() のテスト
+TEST_F(SopTest, read_write)
+{
+  auto cube1 = SopCube{3, {lit0, lit1}};
+  auto cube2 = SopCube{3, {~lit2}};
+  auto cover3 = SopCover{3, {cube1, cube2}};
+
+  ostringstream buf;
+  cover3.write(buf);
+
+  istringstream ibuf{buf.str()};
+  auto cover4 = SopCover::read(ibuf);
+
+  EXPECT_EQ( cover3, cover4 );
+}
+
 END_NAMESPACE_YM

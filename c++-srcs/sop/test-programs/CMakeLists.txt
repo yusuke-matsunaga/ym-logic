@@ -1,42 +1,24 @@
 # ===================================================================
-# ym-logic のための CMakeLists.txt
-# ===================================================================
-
-
-# ===================================================================
-# パッケージの検査
+# ym-logic/gtest のための CMakeLists.txt
 # ===================================================================
 
 
 # ===================================================================
 # インクルードパスの設定
 # ===================================================================
+include_directories()
+
 
 # ===================================================================
 # サブディレクトリの設定
 # ===================================================================
 
-add_subdirectory(gtest)
-add_subdirectory(test-programs)
+add_subdirectory(gen_factor)
 
 
 # ===================================================================
 #  ソースファイルの設定
 # ===================================================================
-
-set (sop_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopBase.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_read.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_algdiv.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_commoncube.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_concate.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_cofactor.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_compare.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_diff.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_product.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/SopCover_sort.cc
-  PARENT_SCOPE
-  )
 
 
 # ===================================================================

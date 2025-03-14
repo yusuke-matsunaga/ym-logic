@@ -52,7 +52,7 @@ BoolDivision::divide(
     auto& q1 = p.first;
     auto& r1 = p.second;
     // リテラル数の少ない方を答とする．
-    if ( calc_lit(q, d, r) > calc_lit(q1, d, r1) ) {
+    if ( q1.cube_num() > 0 && calc_lit(q, d, r) > calc_lit(q1, d, r1) ) {
       return make_pair(std::move(q1), std::move(r1));
     }
   }

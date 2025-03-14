@@ -386,7 +386,7 @@ protected:
     const Chunk& chunk ///< [in] 本体のビットベクタ
   ) const;
 
-  /// @brief カバー/キューブの内容を出力する．
+  /// @brief カバーの内容を出力する．
   void
   _print(
     ostream& s,         ///< [in] 出力先のストリーム
@@ -404,6 +404,22 @@ protected:
     Cube cube,                         ///< [in] キューブ
     const vector<string>& varname_list ///< [in] 変数名のリスト
     = {}
+  ) const;
+
+  /// @brief カバーの内容を blif のカバー形式で出力する．
+  void
+  _write_cover(
+    ostream& s,
+    const Chunk& chunk,
+    SizeType begin,
+    SizeType end
+  ) const;
+
+  /// @brief キューブの内容を blif のカバー形式で出力する．
+  void
+  _write_cube(
+    ostream& s,
+    Cube cube
   ) const;
 
   /// @brief 内容を出力する(デバッグ用)．

@@ -276,6 +276,39 @@ SopBase::_print(
   }
 }
 
+// @brief カバーの内容を blif のカバー形式で出力する．
+void
+SopBase::_write_cover(
+  ostream& s,
+  const Chunk& chunk,
+  SizeType begin,
+  SizeType end
+) const
+{
+  auto cube_list = _cube_list(chunk, begin, end);
+  for ( auto cube: cube_list ) {
+    _write_cube(s, cube);
+  }
+}
+
+// @brief キューブの内容を blif のカバー形式で出力する．
+void
+SopBase::_write_cube(
+  ostream& s,
+  Cube cube
+) const
+{
+  for ( SizeType i = 0; i < variable_num(); ++ i ) {
+    switch ( _get_pat(cube, i) ) {
+    case SopPat::__: s << '?'; break;
+    case SopPat::_1: s << '1'; break;
+    case SopPat::_0: s << '0'; break;
+    case SopPat::_X: s << '-'; break;
+    }
+  }
+  s << endl;
+}
+
 // @brief 内容を出力する(デバッグ用)．
 void
 SopBase::_debug_print(

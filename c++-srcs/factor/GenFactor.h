@@ -51,7 +51,8 @@ private:
   )
   {
     if ( debug ) {
-      cout << "factor(" << f << ")" << endl;
+      cout << "factor(f" << endl
+	   << "f[" << f.cube_num() << "] = " << f << endl;
     }
     if ( f.cube_num() == 0 ) {
       if ( debug ) {
@@ -70,9 +71,21 @@ private:
     auto p = Divide::divide(f, d);
     auto& q = p.first;
     auto& r = p.second;
+    if ( debug ) {
+      cout << "--------------------------" << endl;
+      cout << "d[" << d.cube_num() << "] = " << d << endl
+	   << "q[" << q.cube_num() << "] = " << q << endl
+	   << "r[" << r.cube_num() << "] = " << r << endl;
+    }
     if ( q.literal_num() == 0 ) {
       // special case
+      if ( debug ) {
+	cout << "factor(d)" << endl;
+      }
       auto d_expr = factor(d);
+      if ( debug ) {
+	cout << "factor(r)" << endl;
+      }
       auto r_expr = factor(r);
       auto expr = d_expr | r_expr;
       if ( debug ) {
@@ -81,15 +94,13 @@ private:
       }
       return expr;
     }
-    if ( debug ) {
-      cout << "d = " << d << endl
-	   << "q = " << q << endl
-	   << "r = " << r << endl;
-    }
     if ( q.cube_num() == 1 ) {
       auto cube_list = q.literal_list();
       if ( cube_list.size() != 1 ) {
 	throw std::logic_error{"cube_list.size() != 1"};
+      }
+      if ( debug ) {
+	cout << "literal_factor(f)" << endl;
       }
       auto expr = literal_factor(f, cube_list.front());
       if ( debug ) {
@@ -104,9 +115,22 @@ private:
       auto p = Divide::divide(f, q1);
       auto& d1 = p.first;
       auto& r1 = p.second;
+      if ( debug ) {
+	cout << "--------------------------" << endl;
+	cout << "cc = " << cc << endl;
+	cout << "d1[" << d1.cube_num() << "] = " << d1 << endl
+	     << "q1[" << q1.cube_num() << "] = " << q1 << endl
+	     << "r1[" << r1.cube_num() << "] = " << r1 << endl;
+      }
       if ( d1.literal_num() == 0 ) {
 	// special case
+	if ( debug ) {
+	  cout << "factor(q1)" << endl;
+	}
 	auto q_expr = factor(q1);
+	if ( debug ) {
+	  cout << "factor(r1)" << endl;
+	}
 	auto r_expr = factor(r1);
 	auto expr = q_expr | r_expr;
 	if ( debug ) {
@@ -115,15 +139,19 @@ private:
 	}
 	return expr;
       }
-      if ( debug ) {
-	cout << "d1 = " << q1 << endl
-	     << "q1 = " << d1 << endl
-	     << "r1 = " << r1 << endl;
-      }
       auto cc1 = d1.common_cube();
       if ( cc1.literal_num() == 0 ) {
+	if ( debug ) {
+	  cout << "factor(q1)" << endl;
+	}
 	auto q_expr = factor(q1);
+	if ( debug ) {
+	  cout << "factor(d1)" << endl;
+	}
 	auto d_expr = factor(d1);
+	if ( debug ) {
+	  cout << "factor(r1)" << endl;
+	}
 	auto r_expr = factor(r1);
 	auto expr = (q_expr & d_expr) | r_expr;
 	if ( debug ) {
@@ -134,6 +162,9 @@ private:
       }
       else {
 	auto lit_list = cc1.literal_list();
+	if ( debug ) {
+	  cout << "literal_factor(f)" << endl;
+	}
 	auto expr = literal_factor(f, lit_list);
 	if ( debug ) {
 	  cout << "*factor(" << f << ")" << endl
