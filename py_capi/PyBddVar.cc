@@ -122,8 +122,8 @@ BddVar_richcmpfunc(
   int op
 )
 {
-  if ( PyBddVar::Check(self) &&
-       PyBddVar::Check(other) ) {
+  if ( PyBddVar::_check(self) &&
+       PyBddVar::_check(other) ) {
     auto& val1 = PyBddVar::_get(self);
     auto& val2 = PyBddVar::_get(other);
     if ( op == Py_EQ ) {
@@ -181,7 +181,7 @@ PyBddVar::init(
 
 // @brief BddVar を PyObject に変換する．
 PyObject*
-PyBddVar::ToPyObject(
+PyBddVarConv::operator()(
   const BddVar& val
 )
 {
@@ -193,7 +193,7 @@ PyBddVar::ToPyObject(
 
 // @brief PyObject が BddVar タイプか調べる．
 bool
-PyBddVar::Check(
+PyBddVar::_check(
   PyObject* obj
 )
 {
@@ -202,16 +202,6 @@ PyBddVar::Check(
 
 // @brief BddVar を表す PyObject から BddVar を取り出す．
 BddVar
-PyBddVar::Get(
-  PyObject* obj
-)
-{
-  auto bddvar_obj = reinterpret_cast<BddVarObject*>(obj);
-  return bddvar_obj->mVal;
-}
-
-// @brief BddVar を表す PyObject から BddVar を取り出す．
-BddVar&
 PyBddVar::_get(
   PyObject* obj
 )

@@ -102,7 +102,7 @@ TvFunc_repr(
   PyObject* self
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   // func から 文字列を作る．
   auto tmp_str = func.str();
   return Py_BuildValue("s", tmp_str.c_str());
@@ -207,8 +207,8 @@ TvFunc_literal(
     return nullptr;
   }
   TvFunc func;
-  if ( PyLiteral::Check(var_obj) ) {
-    auto lit = PyLiteral::Get(var_obj);
+  if ( PyLiteral::_check(var_obj) ) {
+    auto lit = PyLiteral::_get_ref(var_obj);
     if ( lit.varid() >= ni ) {
       PyErr_SetString(PyExc_ValueError,
 		      "'var' is out of range.");
@@ -300,10 +300,10 @@ TvFunc_cofactor(
 				    &var_obj, &inv_int) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   TvFunc ans;
-  if ( PyLiteral::Check(var_obj) ) {
-    auto lit = PyLiteral::Get(var_obj);
+  if ( PyLiteral::_check(var_obj) ) {
+    auto lit = PyLiteral::_get_ref(var_obj);
     if ( lit.varid() >= func.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "'var' is out of range.");
@@ -341,9 +341,9 @@ TvFunc_cofactor_int(
 				    &var_obj, &inv_int) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(self);
-  if ( PyLiteral::Check(var_obj) ) {
-    auto lit = PyLiteral::Get(var_obj);
+  auto& func = PyTvFunc::_get_ref(self);
+  if ( PyLiteral::_check(var_obj) ) {
+    auto lit = PyLiteral::_get_ref(var_obj);
     if ( lit.varid() >= func.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "'var' is out of range.");
@@ -380,8 +380,8 @@ TvFunc_xform(
 				    PyNpnMap::_typeobject(), &npnmap_obj) ) {
     return nullptr;
   }
-  auto& npnmap = PyNpnMap::Get(npnmap_obj);
-  auto& func = PyTvFunc::Get(self);
+  auto& npnmap = PyNpnMap::_get_ref(npnmap_obj);
+  auto& func = PyTvFunc::_get_ref(self);
   auto ans = func.xform(npnmap);
   return PyTvFunc::ToPyObject(std::move(ans));
 }
@@ -392,7 +392,7 @@ TvFunc_shrink_map(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto npnmap = func.shrink_map();
   return PyNpnMap::ToPyObject(npnmap);
 }
@@ -403,7 +403,7 @@ TvFunc_npn_cannonical_map(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto npnmap = func.npn_cannonical_map();
   return PyNpnMap::ToPyObject(npnmap);
 }
@@ -414,7 +414,7 @@ TvFunc_npn_cannonical_all_map(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto npnmap_list = func.npn_cannonical_all_map();
   SizeType n = npnmap_list.size();
   auto ans_obj = PyList_New(n);
@@ -432,7 +432,7 @@ TvFunc_is_valid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto r = func.is_valid();
   return PyBool_FromLong(r);
 }
@@ -443,7 +443,7 @@ TvFunc_is_invalid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto r = func.is_invalid();
   return PyBool_FromLong(r);
 }
@@ -454,7 +454,7 @@ TvFunc_is_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto r = func.is_zero();
   return PyBool_FromLong(r);
 }
@@ -465,7 +465,7 @@ TvFunc_is_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto r = func.is_one();
   return PyBool_FromLong(r);
 }
@@ -487,7 +487,7 @@ TvFunc_value(
 				    &pos) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto nexp = 1U << func.input_num();
   if ( pos >= nexp ) {
     PyErr_SetString(PyExc_ValueError,
@@ -504,7 +504,7 @@ TvFunc_count_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto r = func.count_zero();
   return PyLong_FromLong(r);
 }
@@ -515,7 +515,7 @@ TvFunc_count_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto r = func.count_one();
   return PyLong_FromLong(r);
 }
@@ -526,7 +526,7 @@ TvFunc_walsh_0(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto r = func.walsh_0();
   return PyLong_FromLong(r);
 }
@@ -548,7 +548,7 @@ TvFunc_walsh_1(
 				    &var) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   if ( var >= func.input_num() ) {
     PyErr_SetString(PyExc_ValueError,
 		    "'var' is out of range.");
@@ -577,7 +577,7 @@ TvFunc_walsh_2(
 				    &var1, &var2) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   if ( var1 >= func.input_num() ) {
     PyErr_SetString(PyExc_ValueError,
 		    "'var1' is out of range.");
@@ -609,7 +609,7 @@ TvFunc_check_sup(
 				    &var) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   if ( var >= func.input_num() ) {
     PyErr_SetString(PyExc_ValueError,
 		    "'var' is out of range.");
@@ -636,7 +636,7 @@ TvFunc_check_unate(
 				    &var) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   if ( var >= func.input_num() ) {
     PyErr_SetString(PyExc_ValueError,
 		    "'var' is out of range.");
@@ -667,7 +667,7 @@ TvFunc_check_sym(
 				    &var1, &var2, &inv) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   if ( var1 >= func.input_num() ) {
     PyErr_SetString(PyExc_ValueError,
 		    "'var1' is out of range.");
@@ -688,7 +688,7 @@ TvFunc_analyze(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto ptype = func.analyze();
   return PyPrimType::ToPyObject(ptype);
 }
@@ -713,14 +713,14 @@ TvFunc_all_primes(
 				    PyTvFunc::_typeobject(), &dc_obj) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(f_obj);
+  auto& func = PyTvFunc::_get_ref(f_obj);
   if ( dc_obj == nullptr ) {
     auto cube_list = Tv2Sop::all_primes(func);
     auto cover = SopCover{func.input_num(), cube_list};
     return PySopCover::ToPyObject(cover);
   }
   else {
-    auto& dc_func = PyTvFunc::Get(dc_obj);
+    auto& dc_func = PyTvFunc::_get_ref(dc_obj);
     auto cube_list = Tv2Sop::all_primes(func, dc_func);
     auto cover = SopCover{func.input_num(), cube_list};
     return PySopCover::ToPyObject(cover);
@@ -747,14 +747,14 @@ TvFunc_isop(
 				    PyTvFunc::_typeobject(), &dc_obj) ) {
     return nullptr;
   }
-  auto& func = PyTvFunc::Get(f_obj);
+  auto& func = PyTvFunc::_get_ref(f_obj);
   if ( dc_obj == nullptr ) {
     auto cube_list = Tv2Sop::isop(func);
     auto cover = SopCover{func.input_num(), cube_list};
     return PySopCover::ToPyObject(cover);
   }
   else {
-    auto& dc_func = PyTvFunc::Get(dc_obj);
+    auto& dc_func = PyTvFunc::_get_ref(dc_obj);
     auto cube_list = Tv2Sop::isop(func, dc_func);
     auto cover = SopCover{func.input_num(), cube_list};
     return PySopCover::ToPyObject(cover);
@@ -859,7 +859,7 @@ TvFunc_input_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& func = PyTvFunc::Get(self);
+  auto& func = PyTvFunc::_get_ref(self);
   auto val = func.input_num();
   return PyLong_FromLong(val);
 }
@@ -878,10 +878,10 @@ TvFunc_richcmpfunc(
   int op
 )
 {
-  if ( PyTvFunc::Check(self) &&
-       PyTvFunc::Check(other) ) {
-    auto& val1 = PyTvFunc::Get(self);
-    auto& val2 = PyTvFunc::Get(other);
+  if ( PyTvFunc::_check(self) &&
+       PyTvFunc::_check(other) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    auto& val2 = PyTvFunc::_get_ref(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong(val1 == val2);
     }
@@ -899,8 +899,8 @@ TvFunc_invert(
   PyObject* self
 )
 {
-  if ( PyTvFunc::Check(self) ) {
-    auto& val = PyTvFunc::Get(self);
+  if ( PyTvFunc::_check(self) ) {
+    auto& val = PyTvFunc::_get_ref(self);
     return PyTvFunc::ToPyObject(~val);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -913,9 +913,9 @@ TvFunc_and(
   PyObject* other
 )
 {
-  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
-    auto& val1 = PyTvFunc::Get(self);
-    auto& val2 = PyTvFunc::Get(other);
+  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "input_num() mismatch");
@@ -934,9 +934,9 @@ TvFunc_or(
   PyObject* other
 )
 {
-  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
-    auto& val1 = PyTvFunc::Get(self);
-    auto& val2 = PyTvFunc::Get(other);
+  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "input_num() mismatch");
@@ -955,9 +955,9 @@ TvFunc_xor(
   PyObject* other
 )
 {
-  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
-    auto& val1 = PyTvFunc::Get(self);
-    auto& val2 = PyTvFunc::Get(other);
+  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "input_num() mismatch");
@@ -976,9 +976,9 @@ TvFunc_iand(
   PyObject* other
 )
 {
-  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
-    auto& val1 = PyTvFunc::Get(self);
-    auto& val2 = PyTvFunc::Get(other);
+  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "input_num() mismatch");
@@ -998,9 +998,9 @@ TvFunc_ior(
   PyObject* other
 )
 {
-  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
-    auto& val1 = PyTvFunc::Get(self);
-    auto& val2 = PyTvFunc::Get(other);
+  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "input_num() mismatch");
@@ -1020,9 +1020,9 @@ TvFunc_ixor(
   PyObject* other
 )
 {
-  if ( PyTvFunc::Check(self) && PyTvFunc::Check(other) ) {
-    auto& val1 = PyTvFunc::Get(self);
-    auto& val2 = PyTvFunc::Get(other);
+  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
 		      "input_num() mismatch");
@@ -1052,7 +1052,7 @@ TvFunc_hash(
   PyObject* self
 )
 {
-  auto val = PyTvFunc::Get(self);
+  auto val = PyTvFunc::_get_ref(self);
   return val.hash();
 }
 
@@ -1093,7 +1093,7 @@ PyTvFunc::init(
 
 // @brief TvFunc を PyObject に変換する．
 PyObject*
-PyTvFunc::ToPyObject(
+PyTvFuncConv::operator()(
   const TvFunc& val
 )
 {
@@ -1106,20 +1106,33 @@ PyTvFunc::ToPyObject(
 
 // @brief TvFunc を PyObject に変換する．
 PyObject*
-PyTvFunc::ToPyObject(
+PyTvFuncConv::operator()(
   TvFunc&& val
 )
 {
   auto obj = TvFuncType.tp_alloc(&TvFuncType, 0);
   auto tvfunc_obj = reinterpret_cast<TvFuncObject*>(obj);
   new (&tvfunc_obj->mVal) TvFunc{std::move(val)};
-  ASSERT_COND( obj != nullptr );
   return obj;
+}
+
+// @brief PyObject* から TvFunc を取り出す．
+bool
+PyTvFuncDeconv::operator()(
+  PyObject* obj,
+  TvFunc& val
+)
+{
+  if ( PyTvFunc::_check(obj) ) {
+    val = PyTvFunc::_get_ref(obj);
+    return true;
+  }
+  return false;
 }
 
 // @brief PyObject が TvFunc タイプか調べる．
 bool
-PyTvFunc::Check(
+PyTvFunc::_check(
   PyObject* obj
 )
 {
@@ -1128,7 +1141,7 @@ PyTvFunc::Check(
 
 // @brief TvFunc を表す PyObject から TvFunc を取り出す．
 TvFunc&
-PyTvFunc::Get(
+PyTvFunc::_get_ref(
   PyObject* obj
 )
 {

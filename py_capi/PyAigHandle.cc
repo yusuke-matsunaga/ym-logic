@@ -56,7 +56,7 @@ AigHandle_inv(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   auto ans = h.inv();
   return PyBool_FromLong(ans);
 }
@@ -67,7 +67,7 @@ AigHandle_is_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   auto ans = h.is_zero();
   return PyBool_FromLong(ans);
 }
@@ -78,7 +78,7 @@ AigHandle_is_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   auto ans = h.is_one();
   return PyBool_FromLong(ans);
 }
@@ -89,7 +89,7 @@ AigHandle_is_const(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   auto ans = h.is_const();
   return PyBool_FromLong(ans);
 }
@@ -100,7 +100,7 @@ AigHandle_is_input(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   auto ans = h.is_input();
   return PyBool_FromLong(ans);
 }
@@ -111,7 +111,7 @@ AigHandle_input_id(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   auto ans = h.input_id();
   return PyLong_FromLong(ans);
 }
@@ -122,7 +122,7 @@ AigHandle_is_and(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   auto ans = h.is_and();
   return PyBool_FromLong(ans);
 }
@@ -144,7 +144,7 @@ AigHandle_fanin(
 				    &pos) ) {
     return nullptr;
   }
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   try {
     auto ans = h.fanin(pos);
     return PyAigHandle::ToPyObject(ans);
@@ -161,7 +161,7 @@ AigHandle_fanin0(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   try {
     auto ans = h.fanin0();
     return PyAigHandle::ToPyObject(ans);
@@ -178,7 +178,7 @@ AigHandle_fanin1(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   try {
     auto ans = h.fanin1();
     return PyAigHandle::ToPyObject(ans);
@@ -195,7 +195,7 @@ AigHandle_ex_fanin_list(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   try {
     auto fanin_list = h.ex_fanin_list();
     auto n = fanin_list.size();
@@ -227,10 +227,10 @@ AigHandle_gen_dot(
   };
   const char* filename = nullptr;
   PyObject* option_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|$O!",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|$O",
 				    const_cast<char**>(kw_list),
 				    &filename,
-				    PyJsonValue::_typeobject(), &option_obj) ) {
+				    &option_obj) ) {
     return nullptr;
   }
 
@@ -243,9 +243,13 @@ AigHandle_gen_dot(
   }
   JsonValue option;
   if ( option_obj != nullptr ) {
-    option = PyJsonValue::Get(option_obj);
+    PyJsonValueDeconv json_dec;
+    if ( !json_dec(option_obj, option) ) {
+      PyErr_SetString(PyExc_TypeError, "'option' should be a JsonValue type");
+      return nullptr;
+    }
   }
-  auto aig = PyAigHandle::Get(self);
+  auto aig = PyAigHandle::_get_ref(self);
   aig.gen_dot(ofs, option);
   Py_RETURN_NONE;
 }
@@ -266,11 +270,11 @@ AigHandle_gen_dot2(
   const char* filename = nullptr;
   PyObject* aig_list_obj = nullptr;
   PyObject* option_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "sO|$O!",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "sO|$O",
 				    const_cast<char**>(kw_list),
 				    &filename,
 				    &aig_list_obj,
-				    PyJsonValue::_typeobject(), &option_obj) ) {
+				    &option_obj) ) {
     return nullptr;
   }
   const char* emsg = "'aig_list' shuld be a list of AigHandle";
@@ -282,11 +286,11 @@ AigHandle_gen_dot2(
   vector<AigHandle> aig_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto aig_obj = PySequence_GetItem(aig_list_obj, i);
-    if ( !PyAigHandle::Check(aig_obj) ) {
+    if ( !PyAigHandle::_check(aig_obj) ) {
       PyErr_SetString(PyExc_TypeError, emsg);
       return nullptr;
     }
-    auto aig = PyAigHandle::Get(aig_obj);
+    auto aig = PyAigHandle::_get_ref(aig_obj);
     aig_list[i] = aig;
     Py_DECREF(aig_obj);
   }
@@ -300,7 +304,11 @@ AigHandle_gen_dot2(
   }
   JsonValue option;
   if ( option_obj != nullptr ) {
-    option = PyJsonValue::Get(option_obj);
+    PyJsonValueDeconv json_dec;
+    if ( !json_dec(option_obj, option) ) {
+      PyErr_SetString(PyExc_TypeError, "'option' should be a JsonValue type");
+      return nullptr;
+    }
   }
   AigHandle::gen_dot(ofs, aig_list, option);
   Py_RETURN_NONE;
@@ -356,7 +364,7 @@ AigHandle_index(
   void* Py_UNUSED(closure)
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   auto ans = h.index();
   return PyLong_FromLong(ans);
 }
@@ -375,10 +383,10 @@ AigHandle_richcmpfunc(
   int op
 )
 {
-  if ( PyAigHandle::Check(self) &&
-       PyAigHandle::Check(other) ) {
-    auto val1 = PyAigHandle::Get(self);
-    auto val2 = PyAigHandle::Get(other);
+  if ( PyAigHandle::_check(self) &&
+       PyAigHandle::_check(other) ) {
+    auto val1 = PyAigHandle::_get_ref(self);
+    auto val2 = PyAigHandle::_get_ref(other);
     Py_RETURN_RICHCOMPARE(val1, val2, op);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -390,8 +398,8 @@ AigHandle_invert(
   PyObject* self
 )
 {
-  if ( PyAigHandle::Check(self) ) {
-    auto h = PyAigHandle::Get(self);
+  if ( PyAigHandle::_check(self) ) {
+    auto h = PyAigHandle::_get_ref(self);
     return PyAigHandle::ToPyObject(~h);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -404,8 +412,9 @@ AigHandle_mult(
   PyObject* other
 )
 {
-  if ( PyAigHandle::Check(self) && PyBool_Check(other) ) {
-    auto h = PyAigHandle::Get(self);
+  if ( PyAigHandle::_check(self) &&
+       PyBool_Check(other) ) {
+    auto h = PyAigHandle::_get_ref(self);
     auto inv = (other == Py_True);
     return PyAigHandle::ToPyObject(h * inv);
   }
@@ -419,9 +428,10 @@ AigHandle_and(
   PyObject* other
 )
 {
-  if ( PyAigHandle::Check(self) && PyAigHandle::Check(other) ) {
-    auto h1 = PyAigHandle::Get(self);
-    auto h2 = PyAigHandle::Get(other);
+  if ( PyAigHandle::_check(self) &&
+       PyAigHandle::_check(other) ) {
+    auto h1 = PyAigHandle::_get_ref(self);
+    auto h2 = PyAigHandle::_get_ref(other);
     return PyAigHandle::ToPyObject(h1 & h2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -434,9 +444,10 @@ AigHandle_or(
   PyObject* other
 )
 {
-  if ( PyAigHandle::Check(self) && PyAigHandle::Check(other) ) {
-    auto h1 = PyAigHandle::Get(self);
-    auto h2 = PyAigHandle::Get(other);
+  if ( PyAigHandle::_check(self) &&
+       PyAigHandle::_check(other) ) {
+    auto h1 = PyAigHandle::_get_ref(self);
+    auto h2 = PyAigHandle::_get_ref(other);
     return PyAigHandle::ToPyObject(h1 | h2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -449,9 +460,10 @@ AigHandle_xor(
   PyObject* other
 )
 {
-  if ( PyAigHandle::Check(self) && PyAigHandle::Check(other) ) {
-    auto h1 = PyAigHandle::Get(self);
-    auto h2 = PyAigHandle::Get(other);
+  if ( PyAigHandle::_check(self) &&
+       PyAigHandle::_check(other) ) {
+    auto h1 = PyAigHandle::_get_ref(self);
+    auto h2 = PyAigHandle::_get_ref(other);
     return PyAigHandle::ToPyObject(h1 ^ h2);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -476,7 +488,7 @@ AigHandle_hash(
   PyObject* self
 )
 {
-  auto h = PyAigHandle::Get(self);
+  auto h = PyAigHandle::_get_ref(self);
   return h.index();
 }
 
@@ -516,7 +528,7 @@ PyAigHandle::init(
 
 // @brief AigHandle を PyObject に変換する．
 PyObject*
-PyAigHandle::ToPyObject(
+PyAigHandleConv::operator()(
   const AigHandle& val
 )
 {
@@ -526,24 +538,23 @@ PyAigHandle::ToPyObject(
   return obj;
 }
 
-// @brief AigHandle のリストを表す PyObject を作る．
-PyObject*
-PyAigHandle::ToPyList(
-  const vector<AigHandle>& handle_list
+// @brief PyObject* から AigHandle を取り出す．
+bool
+PyAigHandleDeconv::operator()(
+  PyObject* obj,
+  AigHandle& val
 )
 {
-  auto n = handle_list.size();
-  auto ans_obj = PyList_New(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto obj = ToPyObject(handle_list[i]);
-    PyList_SetItem(ans_obj, i, obj);
+  if ( PyAigHandle::_check(obj) ) {
+    val = PyAigHandle::_get_ref(obj);
+    return true;
   }
-  return ans_obj;
+  return false;
 }
 
 // @brief PyObject が AigHandle タイプか調べる．
 bool
-PyAigHandle::Check(
+PyAigHandle::_check(
   PyObject* obj
 )
 {
@@ -551,40 +562,13 @@ PyAigHandle::Check(
 }
 
 // @brief AigHandle を表す PyObject から AigHandle を取り出す．
-AigHandle
-PyAigHandle::Get(
+AigHandle&
+PyAigHandle::_get_ref(
   PyObject* obj
 )
 {
   auto aighandle_obj = reinterpret_cast<AigHandleObject*>(obj);
   return aighandle_obj->mHandle;
-}
-
-// @brief AigHandle のリストを表す PyObject からの変換
-bool
-PyAigHandle::ConvFromPyList(
-  PyObject* list_obj,
-  vector<AigHandle>& handle_list
-)
-{
-  if ( !PySequence_Check(list_obj) ) {
-    return false;
-  }
-  auto n = PySequence_Size(list_obj);
-  vector<AigHandle> fanin_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto obj = PySequence_GetItem(list_obj, i);
-    auto res = Check(obj);
-    if ( res ) {
-      auto h = Get(obj);
-      fanin_list[i] = h;
-    }
-    Py_DECREF(obj);
-    if ( !res ) {
-      return false;
-    }
-  }
-  return true;
 }
 
 // @brief AigHandle を表すオブジェクトの型定義を返す．

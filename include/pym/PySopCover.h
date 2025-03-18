@@ -17,6 +17,57 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
+/// @class PySopCoverConv PySopCover.h "PySopCover.h"
+/// @brief SopCover を PyObject* に変換するファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PySopCoverConv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief SopCover を PyObject* に変換する．
+  PyObject*
+  operator()(
+    const SopCover& val
+  );
+
+  /// @brief SopCover を PyObject* に変換する．
+  PyObject*
+  operator()(
+    SopCover&& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
+/// @class PySopCoverDeconv PySopCover.h "PySopCover.h"
+/// @brief SopCover を取り出すファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PySopCoverDeconv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief PyObject* から SopCover を取り出す．
+  bool
+  operator()(
+    PyObject* obj,
+    SopCover& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /// @class PySopCover PySopCover.h "PySopCover.h"
 /// @brief Python 用の SopCover 拡張
 ///
@@ -45,7 +96,11 @@ public:
   PyObject*
   ToPyObject(
     const SopCover& val ///< [in] 値
-  );
+  )
+  {
+    PySopCoverConv conv;
+    return conv(val);
+  }
 
   /// @brief SopCover を表す PyObject を作る．
   /// @return 生成した PyObject を返す．
@@ -54,13 +109,17 @@ public:
   static
   PyObject*
   ToPyObject(
-    const SopCover&& val ///< [in] 値
-  );
+    SopCover&& val ///< [in] 値
+  )
+  {
+    PySopCoverConv conv;
+    return conv(val);
+  }
 
   /// @brief PyObject が SopCover タイプか調べる．
   static
   bool
-  Check(
+  _check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -70,7 +129,7 @@ public:
   /// Check(obj) == true であると仮定している．
   static
   SopCover&
-  Get(
+  _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 

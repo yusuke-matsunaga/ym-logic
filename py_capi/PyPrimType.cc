@@ -107,7 +107,7 @@ PrimType_repr(
   PyObject* self
 )
 {
-  auto val = PyPrimType::Get(self);
+  auto val = PyPrimType::_get_ref(self);
   // val から 文字列を作る．
   const char* tmp_str = nullptr;
   switch ( val ) {
@@ -139,10 +139,10 @@ PrimType_richcmpfunc(
   int op
 )
 {
-  if ( PyPrimType::Check(self) &&
-       PyPrimType::Check(other) ) {
-    auto val1 = PyPrimType::Get(self);
-    auto val2 = PyPrimType::Get(other);
+  if ( PyPrimType::_check(self) &&
+       PyPrimType::_check(other) ) {
+    auto val1 = PyPrimType::_get_ref(self);
+    auto val2 = PyPrimType::_get_ref(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong( val1 == val2 );
     }
@@ -159,7 +159,7 @@ PrimType_hash(
   PyObject* self
 )
 {
-  auto val = PyPrimType::Get(self);
+  auto val = PyPrimType::_get_ref(self);
   return static_cast<SizeType>(val);
 }
 
@@ -252,7 +252,7 @@ PyPrimType::init(
 
 // @brief PrimType を PyObject に変換する．
 PyObject*
-PyPrimType::ToPyObject(
+PyPrimTypeConv::operator()(
   PrimType val
 )
 {
@@ -264,9 +264,23 @@ PyPrimType::ToPyObject(
   return obj;
 }
 
+// @brief PyObject* から PrimType を取り出す．
+bool
+PyPrimTypeDeconv::operator()(
+  PyObject* obj,
+  PrimType& val
+)
+{
+  if ( PyPrimType::_check(obj) ) {
+    val = PyPrimType::_get_ref(obj);
+    return true;
+  }
+  return false;
+}
+
 // @brief PyObject が PrimType タイプか調べる．
 bool
-PyPrimType::Check(
+PyPrimType::_check(
   PyObject* obj
 )
 {
@@ -274,8 +288,8 @@ PyPrimType::Check(
 }
 
 // @brief PrimType を表す PyObject から PrimType を取り出す．
-PrimType
-PyPrimType::Get(
+PrimType&
+PyPrimType::_get_ref(
   PyObject* obj
 )
 {

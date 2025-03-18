@@ -17,6 +17,51 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
+/// @class PyLiteralConv PyLiteral.h "PyLiteral.h"
+/// @brief Literal を PyObject* に変換するファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PyLiteralConv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief Literal を PyObject* に変換する．
+  PyObject*
+  operator()(
+    Literal val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
+/// @class PyLiteralDeconv PyLiteral.h "PyLiteral.h"
+/// @brief Literal を取り出すファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PyLiteralDeconv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief PyObject* から Literal を取り出す．
+  bool
+  operator()(
+    PyObject* obj,
+    Literal& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /// @class PyLiteral PyLiteral.h "PyLiteral.h"
 /// @brief Python 用の Literal 拡張
 ///
@@ -45,12 +90,16 @@ public:
   PyObject*
   ToPyObject(
     Literal val ///< [in] 値
-  );
+  )
+  {
+    PyLiteralConv conv;
+    return conv(val);
+  }
 
   /// @brief PyObject が Literal タイプか調べる．
   static
   bool
-  Check(
+  _check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -59,8 +108,8 @@ public:
   ///
   /// _check(obj) == true であると仮定している．
   static
-  Literal
-  Get(
+  Literal&
+  _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 

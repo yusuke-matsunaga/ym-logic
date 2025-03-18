@@ -75,7 +75,7 @@ Literal_repr(
   PyObject* self
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   // val から 文字列を作る．
   ostringstream buf;
   buf << val;
@@ -112,7 +112,7 @@ Literal_is_valid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   auto r = val.is_valid();
   return PyBool_FromLong(r);
 }
@@ -123,7 +123,7 @@ Literal_is_positive(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   auto r = val.is_positive();
   return PyBool_FromLong(r);
 }
@@ -134,7 +134,7 @@ Literal_is_negative(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   auto r = val.is_negative();
   return PyBool_FromLong(r);
 }
@@ -145,7 +145,7 @@ Literal_make_positive(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   auto ans = val.make_positive();
   return PyLiteral::ToPyObject(ans);
 }
@@ -156,7 +156,7 @@ Literal_make_negative(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   auto ans = val.make_negative();
   return PyLiteral::ToPyObject(ans);
 }
@@ -190,7 +190,7 @@ Literal_varid(
   void* Py_UNUSED(closure)
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   auto varid = val.varid();
   return PyLong_FromLong(varid);
 }
@@ -201,7 +201,7 @@ Literal_index(
   void* Py_UNUSED(closure)
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   auto index = val.index();
   return PyLong_FromLong(index);
 }
@@ -220,10 +220,10 @@ Literal_richcmpfunc(
   int op
 )
 {
-  if ( PyLiteral::Check(obj1) &&
-       PyLiteral::Check(obj2) ) {
-    auto val1 = PyLiteral::Get(obj1);
-    auto val2 = PyLiteral::Get(obj2);
+  if ( PyLiteral::_check(obj1) &&
+       PyLiteral::_check(obj2) ) {
+    auto val1 = PyLiteral::_get_ref(obj1);
+    auto val2 = PyLiteral::_get_ref(obj2);
     Py_RETURN_RICHCOMPARE(val1, val2, op);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -235,8 +235,8 @@ Literal_invert(
   PyObject* self
 )
 {
-  if ( PyLiteral::Check(self) ) {
-    auto val = PyLiteral::Get(self);
+  if ( PyLiteral::_check(self) ) {
+    auto val = PyLiteral::_get_ref(self);
     return PyLiteral::ToPyObject(~val);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -253,7 +253,7 @@ Literal_hash(
   PyObject* self
 )
 {
-  auto val = PyLiteral::Get(self);
+  auto val = PyLiteral::_get_ref(self);
   return val.hash();
 }
 
@@ -294,7 +294,7 @@ PyLiteral::init(
 
 // @brief Literal を PyObject に変換する．
 PyObject*
-PyLiteral::ToPyObject(
+PyLiteralConv::operator()(
   Literal val
 )
 {
@@ -304,30 +304,41 @@ PyLiteral::ToPyObject(
   return obj;
 }
 
-// @brief PyObject が Literal タイプか調べる．
+// @brief PyObject* から Literal を取り出す．
 bool
-PyLiteral::Check(
-  PyObject* obj
-)
-{
-  if ( PyLong_Check(obj) ) {
-    // 特例: 整数タイプは Literal に変換可能
-    return true;
-  }
-  return Py_IS_TYPE(obj, _typeobject());
-}
-
-// @brief Literal を表す PyObject から Literal を取り出す．
-Literal
-PyLiteral::Get(
-  PyObject* obj
+PyLiteralDeconv::operator()(
+  PyObject* obj,
+  Literal& val
 )
 {
   if ( PyLong_Check(obj) ) {
     // 特例: 整数タイプは Literal に変換可能
     auto var = static_cast<SizeType>(PyLong_AsLong(obj));
-    return Literal(var);
+    val = Literal(var);
+    return true;
   }
+  if ( PyLiteral::_check(obj) ) {
+    val = PyLiteral::_get_ref(obj);
+    return true;
+  }
+  return false;
+}
+
+// @brief PyObject が Literal タイプか調べる．
+bool
+PyLiteral::_check(
+  PyObject* obj
+)
+{
+  return Py_IS_TYPE(obj, _typeobject());
+}
+
+// @brief Literal を表す PyObject から Literal を取り出す．
+Literal&
+PyLiteral::_get_ref(
+  PyObject* obj
+)
+{
   auto literal_obj = reinterpret_cast<LiteralObject*>(obj);
   return literal_obj->mVal;
 }

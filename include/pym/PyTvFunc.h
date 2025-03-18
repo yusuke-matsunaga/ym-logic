@@ -17,6 +17,57 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
+/// @class PyTvFuncConv PyTvFunc.h "PyTvFunc.h"
+/// @brief TvFunc を PyObject* に変換するファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PyTvFuncConv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief TvFunc を PyObject* に変換する．
+  PyObject*
+  operator()(
+    const TvFunc& val
+  );
+
+  /// @brief TvFunc を PyObject* に変換する．
+  PyObject*
+  operator()(
+    TvFunc&& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
+/// @class PyTvFuncDeconv PyTvFunc.h "PyTvFunc.h"
+/// @brief TvFunc を取り出すファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PyTvFuncDeconv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief PyObject* から TvFunc を取り出す．
+  bool
+  operator()(
+    PyObject* obj,
+    TvFunc& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /// @class PyTvFunc PyTvFunc.h "PyTvFunc.h"
 /// @brief Python 用の TvFunc 拡張
 ///
@@ -45,7 +96,11 @@ public:
   PyObject*
   ToPyObject(
     const TvFunc& val ///< [in] 値
-  );
+  )
+  {
+    PyTvFuncConv conv;
+    return conv(val);
+  }
 
   /// @brief TvFunc を表す PyObject を作る．
   /// @return 生成した PyObject を返す．
@@ -55,12 +110,16 @@ public:
   PyObject*
   ToPyObject(
     TvFunc&& val ///< [in] 値
-  );
+  )
+  {
+    PyTvFuncConv conv;
+    return conv(val);
+  }
 
   /// @brief PyObject が TvFunc タイプか調べる．
   static
   bool
-  Check(
+  _check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -70,7 +129,7 @@ public:
   /// _check(obj) == true であると仮定している．
   static
   TvFunc&
-  Get(
+  _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 

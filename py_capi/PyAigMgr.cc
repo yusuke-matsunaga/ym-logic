@@ -105,13 +105,13 @@ AigMgr_eval(
   }
 
   vector<AigHandle> output_list;
-  if ( !PyAigHandle::ConvFromPyList(ol_obj, output_list) ) {
+  if ( !PyAigHandle::FromPyList(ol_obj, output_list) ) {
     PyErr_SetString(PyExc_TypeError,
 		    "'output_list' should be a sequence of AigHandles");
     return nullptr;
   }
 
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   try {
     auto output_vals = mgr.eval(input_vals, output_list);
     auto n = output_vals.size();
@@ -147,7 +147,7 @@ AigMgr_input(
     return nullptr;
   }
 
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   try {
     auto ans = mgr.input(input_id);
     return PyAigHandle::ToPyObject(ans);
@@ -164,7 +164,7 @@ AigMgr_make_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.make_zero();
   return PyAigHandle::ToPyObject(ans);
 }
@@ -175,7 +175,7 @@ AigMgr_make_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.make_one();
   return PyAigHandle::ToPyObject(ans);
 }
@@ -186,7 +186,7 @@ AigMgr_make_input(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.make_input();
   return PyAigHandle::ToPyObject(ans);
 }
@@ -209,12 +209,12 @@ AigMgr_and_op(
     return nullptr;
   }
   vector<AigHandle> fanin_list;
-  if ( !PyAigHandle::ConvFromPyList(list_obj, fanin_list) ) {
+  if ( !PyAigHandle::FromPyList(list_obj, fanin_list) ) {
     PyErr_SetString(PyExc_TypeError,
 		    "'fanin_list' should be a sequcence of 'AigHandle'");
     return nullptr;
   }
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.and_op(fanin_list);
   return PyAigHandle::ToPyObject(ans);
 }
@@ -237,12 +237,12 @@ AigMgr_or_op(
     return nullptr;
   }
   vector<AigHandle> fanin_list;
-  if ( !PyAigHandle::ConvFromPyList(list_obj, fanin_list) ) {
+  if ( !PyAigHandle::FromPyList(list_obj, fanin_list) ) {
     PyErr_SetString(PyExc_TypeError,
 		    "'fanin_list' should be a sequcence of 'AigHandle'");
     return nullptr;
   }
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.or_op(fanin_list);
   return PyAigHandle::ToPyObject(ans);
 }
@@ -265,12 +265,12 @@ AigMgr_xor_op(
     return nullptr;
   }
   vector<AigHandle> fanin_list;
-  if ( !PyAigHandle::ConvFromPyList(list_obj, fanin_list) ) {
+  if ( !PyAigHandle::FromPyList(list_obj, fanin_list) ) {
     PyErr_SetString(PyExc_TypeError,
 		    "'fanin_list' should be a sequcence of 'AigHandle'");
     return nullptr;
   }
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.xor_op(fanin_list);
   return PyAigHandle::ToPyObject(ans);
 }
@@ -292,8 +292,8 @@ AigMgr_from_expr(
 				    PyExpr::_typeobject(), &expr_obj) ) {
     return nullptr;
   }
-  auto& expr = PyExpr::Get(expr_obj);
-  auto& mgr = PyAigMgr::_get(self);
+  auto expr = PyExpr::_get_ref(expr_obj);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.from_expr(expr);
   return PyAigHandle::ToPyObject(ans);
 }
@@ -324,9 +324,9 @@ AigMgr_from_expr_list(
   vector<Expr> expr_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto obj = PySequence_GetItem(list_obj, i);
-    auto res = PyExpr::Check(obj);
+    auto res = PyExpr::_check(obj);
     if ( res ) {
-      expr_list[i] = PyExpr::Get(obj);
+      expr_list[i] = PyExpr::_get_ref(obj);
     }
     Py_DecRef(obj);
     if ( !res ) {
@@ -334,7 +334,7 @@ AigMgr_from_expr_list(
       return nullptr;
     }
   }
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.from_expr_list(expr_list);
   return PyAigHandle::ToPyList(ans);
 }
@@ -380,7 +380,7 @@ AigMgr_node_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.node_num();
   return PyLong_FromLong(ans);
 }
@@ -391,7 +391,7 @@ AigMgr_input_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.input_num();
   return PyLong_FromLong(ans);
 }
@@ -402,7 +402,7 @@ AigMgr_and_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto& mgr = PyAigMgr::_get(self);
+  auto& mgr = PyAigMgr::_get_ref(self);
   auto ans = mgr.and_num();
   return PyLong_FromLong(ans);
 }
@@ -448,7 +448,7 @@ PyAigMgr::init(
 
 // @brief PyObject が AigMgr タイプか調べる．
 bool
-PyAigMgr::Check(
+PyAigMgr::_check(
   PyObject* obj
 )
 {
@@ -457,7 +457,7 @@ PyAigMgr::Check(
 
 // @brief AigMgr を表す PyObject から AigMgr を取り出す．
 AigMgr&
-PyAigMgr::_get(
+PyAigMgr::_get_ref(
   PyObject* obj
 )
 {

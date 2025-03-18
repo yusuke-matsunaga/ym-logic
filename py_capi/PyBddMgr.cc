@@ -81,7 +81,7 @@ BddMgr_variable(
 				    &varid) ) {
     return nullptr;
   }
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   auto var = bddmgr.variable(varid);
   return PyBdd::ToPyObject(var);
 }
@@ -103,8 +103,8 @@ BddMgr_copy(
 				    PyBdd::_typeobject(), !bdd_obj) ) {
     return nullptr;
   }
-  auto src_bdd = PyBdd::Get(bdd_obj);
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& src_bdd = PyBdd::_get_ref(bdd_obj);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   auto ans_bdd = bddmgr.copy(src_bdd);
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -115,7 +115,7 @@ BddMgr_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   auto ans_bdd = bddmgr.zero();
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -126,7 +126,7 @@ BddMgr_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   auto ans_bdd = bddmgr.one();
   return PyBdd::ToPyObject(ans_bdd);
 }
@@ -151,7 +151,7 @@ BddMgr_from_truth(
 				    &var_list_obj) ) {
     return nullptr;
   }
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   if ( var_list_obj == nullptr ) {
     try {
       auto ans_bdd = bddmgr.from_truth(str);
@@ -172,11 +172,11 @@ BddMgr_from_truth(
     vector<BddVar> var_list(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto var_obj = PySequence_GetItem(var_list_obj, i);
-      if ( !PyBdd::Check(var_obj) ) {
+      if ( !PyBdd::_check(var_obj) ) {
 	PyErr_SetString(PyExc_TypeError, err_msg);
 	return nullptr;
       }
-      auto var = PyBdd::Get(var_obj);
+      auto& var = PyBdd::_get_ref(var_obj);
       if ( !var.is_variable() ) {
 	PyErr_SetString(PyExc_TypeError, err_msg);
 	return nullptr;
@@ -194,72 +194,13 @@ BddMgr_from_truth(
   }
 }
 
-#if 0
-PyObject*
-BddMgr_gen_dot(
-  PyObject* Py_UNUSED(self),
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  const static char* kw_list[] = {
-    "filename",
-    "bdd_list",
-    "option",
-    nullptr
-  };
-  PyObject* bdd_list_obj = nullptr;
-  const char* filename = nullptr;
-  PyObject* option_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "sO|$O!",
-				    const_cast<char**>(kw_list),
-				    &filename,
-				    &bdd_list_obj,
-				    PyJsonValue::_typeobject(), &option_obj) ) {
-    return nullptr;
-  }
-
-  const char* emsg = "1st argument shuld be a list of Bdd";
-  if ( !PySequence_Check(bdd_list_obj) ) {
-    PyErr_SetString(PyExc_TypeError, emsg);
-    return nullptr;
-  }
-  auto n = PySequence_Size(bdd_list_obj);
-  vector<Bdd> bdd_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto bdd_obj = PySequence_GetItem(bdd_list_obj, i);
-    if ( !PyBdd::Check(bdd_obj) ) {
-      PyErr_SetString(PyExc_TypeError, emsg);
-      return nullptr;
-    }
-    auto bdd = PyBdd::Get(bdd_obj);
-    Py_DECREF(bdd_obj);
-    bdd_list[i] = bdd;
-  }
-
-  ofstream ofs{filename};
-  if ( !ofs ) {
-    ostringstream buf;
-    buf << "Could not create file '" << filename << "'";
-    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-    return nullptr;
-  }
-  JsonValue option;
-  if ( option_obj != nullptr ) {
-    option = PyJsonValue::Get(option_obj);
-  }
-  BddMgr::gen_dot(ofs, bdd_list, option);
-  Py_RETURN_NONE;
-}
-#endif
-
 PyObject*
 BddMgr_enable_gc(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   bddmgr.enable_gc();
   Py_RETURN_NONE;
 }
@@ -270,7 +211,7 @@ BddMgr_disable_gc(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   bddmgr.disable_gc();
   Py_RETURN_NONE;
 }
@@ -303,7 +244,7 @@ BddMgr_node_num(
   void* Py_UNUSED(closure)
 )
 {
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   auto val = bddmgr.node_num();
   return PyLong_FromLong(val);
 }
@@ -314,7 +255,7 @@ BddMgr_gc_limit(
   void* Py_UNUSED(closure)
 )
 {
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   auto val = bddmgr.gc_limit();
   return PyLong_FromLong(val);
 }
@@ -330,7 +271,7 @@ BddMgr_set_gc_limit(
     PyErr_SetString(PyExc_TypeError, "int value is expected");
     return -1;
   }
-  auto bddmgr = PyBddMgr::Get(self);
+  auto& bddmgr = PyBddMgr::_get_ref(self);
   SizeType val = PyLong_AsLong(val_obj);
   bddmgr.set_gc_limit(val);
   return 0;
@@ -388,7 +329,7 @@ PyBddMgr::ToPyObject(
 
 // @brief PyObject が BddMgr タイプか調べる．
 bool
-PyBddMgr::Check(
+PyBddMgr::_check(
   PyObject* obj
 )
 {
@@ -397,7 +338,7 @@ PyBddMgr::Check(
 
 // @brief BddMgr を表す PyObject から BddMgr を取り出す．
 BddMgr&
-PyBddMgr::Get(
+PyBddMgr::_get_ref(
   PyObject* obj
 )
 {

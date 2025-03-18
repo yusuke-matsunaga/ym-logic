@@ -56,7 +56,7 @@ BddLit_repr(
   PyObject* self
 )
 {
-  auto val = PyBddLit::Get(self);
+  auto val = PyBddLit::_get(self);
   // val から 文字列を作る．
   const char* tmp_str = nullptr;
   return Py_BuildValue("s", tmp_str);
@@ -122,8 +122,7 @@ BddLit_make_positive(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bddlit_obj = reinterpret_cast<BddLitObject*>(self);
-  auto& lit = *(bddlit_obj->mVal);
+  auto lit = PyBddLit::_get(self);
   auto ans = lit.make_positive();
   return PyBddLit::ToPyObject(ans);
 }
@@ -134,8 +133,7 @@ BddLit_make_negative(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bddlit_obj = reinterpret_cast<BddLitObject*>(self);
-  auto& lit = *(bddlit_obj->mVal);
+  auto lit = PyBddLit::_get(self);
   auto ans = lit.make_negative();
   return PyBddLit::ToPyObject(ans);
 }
@@ -146,8 +144,7 @@ BddLit_is_positive(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bddlit_obj = reinterpret_cast<BddLitObject*>(self);
-  auto& lit = *(bddlit_obj->mVal);
+  auto lit = PyBddLit::_get(self);
   auto ans = lit.is_positive();
   return PyBool_FromLong(ans);
 }
@@ -158,8 +155,7 @@ BddLit_is_negative(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bddlit_obj = reinterpret_cast<BddLitObject*>(self);
-  auto& lit = *(bddlit_obj->mVal);
+  auto lit = PyBddLit::_get(self);
   auto ans = lit.is_negative();
   return PyBool_FromLong(ans);
 }
@@ -196,8 +192,7 @@ BddLit_var(
   void* Py_UNUSED(closure)
 )
 {
-  auto bddlit_obj = reinterpret_cast<BddLitObject*>(self);
-  auto& lit = *(bddlit_obj->mVal);
+  auto lit = PyBddLit::_get(self);
   auto ans = lit.var();
   return PyBddVar::ToPyObject(ans);
 }
@@ -218,8 +213,8 @@ BddLit_richcmpfunc(
 {
   if ( PyBddLit::Check(self) &&
        PyBddLit::Check(other) ) {
-    auto& val1 = PyBddLit::_get(self);
-    auto& val2 = PyBddLit::_get(other);
+    auto val1 = PyBddLit::_get(self);
+    auto val2 = PyBddLit::_get(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong(val1 == val2);
     }
@@ -237,7 +232,7 @@ BddLit_invert(
 )
 {
   if ( PyBddLit::Check(self) ) {
-    auto& val = PyBddLit::_get(self);
+    auto val = PyBddLit::_get(self);
     return PyBddLit::ToPyObject(~val);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -254,7 +249,7 @@ BddLit_hash(
   PyObject* self
 )
 {
-  auto& val = PyBddLit::_get(self);
+  auto val = PyBddLit::_get(self);
   return val.hash();
 }
 
@@ -295,7 +290,7 @@ PyBddLit::init(
 
 // @brief BddLit を PyObject に変換する．
 PyObject*
-PyBddLit::ToPyObject(
+PyBddLitConv::operator()(
   const BddLit& val
 )
 {
@@ -307,7 +302,7 @@ PyBddLit::ToPyObject(
 
 // @brief PyObject が BddLit タイプか調べる．
 bool
-PyBddLit::Check(
+PyBddLit::_check(
   PyObject* obj
 )
 {
@@ -316,16 +311,6 @@ PyBddLit::Check(
 
 // @brief BddLit を表す PyObject から BddLit を取り出す．
 BddLit
-PyBddLit::Get(
-  PyObject* obj
-)
-{
-  auto bddlit_obj = reinterpret_cast<BddLitObject*>(obj);
-  return bddlit_obj->mVal;
-}
-
-// @brief BddLit を表す PyObject から BddLit を取り出す．
-BddLit&
 PyBddLit::_get(
   PyObject* obj
 )

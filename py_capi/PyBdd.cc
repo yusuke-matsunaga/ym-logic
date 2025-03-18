@@ -97,8 +97,8 @@ Bdd_cofactor(
   }
 
   auto inv = static_cast<bool>(inv_int);
-  auto bdd = PyBdd::Get(self);
-  auto bdd1 = PyBdd::Get(bdd_obj);
+  auto& bdd = PyBdd::_get_ref(self);
+  auto bdd1 = PyBdd::_get_ref(bdd_obj);
   if ( inv ) {
     bdd1 = ~bdd1;
   }
@@ -127,9 +127,9 @@ Bdd_ite(
 			 PyBdd::_typeobject(), &obj3) ) {
     return nullptr;
   }
-  auto cond_bdd = PyBdd::Get(obj1);
-  auto then_bdd = PyBdd::Get(obj2);
-  auto else_bdd = PyBdd::Get(obj3);
+  auto& cond_bdd = PyBdd::_get_ref(obj1);
+  auto& then_bdd = PyBdd::_get_ref(obj2);
+  auto& else_bdd = PyBdd::_get_ref(obj3);
   try {
     auto ans_bdd = Bdd::ite(cond_bdd, then_bdd, else_bdd);
     return PyBdd::ToPyObject(ans_bdd);
@@ -160,14 +160,14 @@ Bdd_compose(
 				   PyBdd::_typeobject(), &opr_obj) ) {
     return nullptr;
   }
-  auto var_bdd = PyBdd::Get(var_obj);
+  auto& var_bdd = PyBdd::_get_ref(var_obj);
   auto var = BddVar::from_bdd(var_bdd);
   if ( var.is_invalid() ) {
     PyErr_SetString(PyExc_TypeError, "var should be a variable");
     return nullptr;
   }
-  auto opr = PyBdd::Get(opr_obj);
-  auto bdd = PyBdd::Get(self);
+  auto& opr = PyBdd::_get_ref(opr_obj);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto ans_bdd = bdd.compose(var, opr);
     return PyBdd::ToPyObject(ans_bdd);
@@ -201,17 +201,17 @@ Bdd_multi_compose(
       Py_DecRef(values);
       return nullptr;
     }
-    auto var_bdd = PyBdd::Get(var_obj);
+    auto& var_bdd = PyBdd::_get_ref(var_obj);
     auto var = BddVar::from_bdd(var_bdd);
     if ( var.is_invalid() ) {
       PyErr_SetString(PyExc_TypeError, "var should be a variable");
       return nullptr;
     }
-    auto opr = PyBdd::Get(opr_obj);
+    auto& opr = PyBdd::_get_ref(opr_obj);
     compose_map.emplace(var, opr);
   }
   Py_DecRef(values);
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto ans_bdd = bdd.multi_compose(compose_map);
     return PyBdd::ToPyObject(ans_bdd);
@@ -244,13 +244,13 @@ Bdd_remap_vars(
 			   PyBdd::_typeobject(), &lit_obj) ) {
       return nullptr;
     }
-    auto var_bdd = PyBdd::Get(var_obj);
+    auto& var_bdd = PyBdd::_get_ref(var_obj);
     auto var = BddVar::from_bdd(var_bdd);
     if ( var.is_invalid() ) {
       PyErr_SetString(PyExc_TypeError, "var should be a variable");
       return nullptr;
     }
-    auto lit_bdd = PyBdd::Get(lit_obj);
+    auto& lit_bdd = PyBdd::_get_ref(lit_obj);
     auto lit = BddLit::from_bdd(lit_bdd);
     if ( lit.is_invalid() ) {
       PyErr_SetString(PyExc_TypeError, "operand should be a literal");
@@ -258,7 +258,7 @@ Bdd_remap_vars(
     }
     var_map.emplace(var, lit);
   }
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto ans_bdd = bdd.remap_vars(var_map);
     return PyBdd::ToPyObject(ans_bdd);
@@ -275,7 +275,7 @@ Bdd_is_valid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto r = bdd.is_valid();
   return PyBool_FromLong(r);
 }
@@ -286,7 +286,7 @@ Bdd_is_invalid(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto r = bdd.is_invalid();
   return PyBool_FromLong(r);
 }
@@ -297,7 +297,7 @@ Bdd_is_zero(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto r = bdd.is_zero();
   return PyBool_FromLong(r);
 }
@@ -308,7 +308,7 @@ Bdd_is_one(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto r = bdd.is_one();
   return PyBool_FromLong(r);
 }
@@ -319,7 +319,7 @@ Bdd_is_cube(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto r = bdd.is_cube();
   return PyBool_FromLong(r);
 }
@@ -330,7 +330,7 @@ Bdd_is_posicube(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto r = bdd.is_posicube();
   return PyBool_FromLong(r);
 }
@@ -352,13 +352,13 @@ Bdd_check_sup(
 				    PyBdd::_typeobject(), &var_obj) ) {
     return nullptr;
   }
-  auto var_bdd = PyBdd::Get(var_obj);
+  auto& var_bdd = PyBdd::_get_ref(var_obj);
   auto var = BddVar::from_bdd(var_bdd);
   if ( var.is_invalid() ) {
     PyErr_SetString(PyExc_TypeError, "var should be a variable");
     return nullptr;
   }
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto r = bdd.check_sup(var);
     return PyBool_FromLong(r);
@@ -392,20 +392,20 @@ Bdd_check_sym(
 				    &inv_int) ) {
     return nullptr;
   }
-  auto var1_bdd = PyBdd::Get(var1_obj);
+  auto& var1_bdd = PyBdd::_get_ref(var1_obj);
   auto var1 = BddVar::from_bdd(var1_bdd);
   if ( var1.is_invalid() ) {
     PyErr_SetString(PyExc_TypeError, "var1 should be a variable");
     return nullptr;
   }
-  auto var2_bdd = PyBdd::Get(var2_obj);
+  auto& var2_bdd = PyBdd::_get_ref(var2_obj);
   auto var2 = BddVar::from_bdd(var2_bdd);
   if ( var2.is_invalid() ) {
     PyErr_SetString(PyExc_TypeError, "var2 should be a variable");
     return nullptr;
   }
   auto inv = static_cast<bool>(inv_int);
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto r = bdd.check_sym(var1, var2, inv);
     return PyBool_FromLong(r);
@@ -422,7 +422,7 @@ Bdd_get_support(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto ans_bdd = bdd.get_support();
     return PyBddVarSet::ToPyObject(ans_bdd);
@@ -439,7 +439,7 @@ Bdd_get_onepath(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto ans_bdd = bdd.get_onepath();
     return PyBdd::ToPyObject(ans_bdd);
@@ -456,7 +456,7 @@ Bdd_get_zeropath(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto ans_bdd = bdd.get_zeropath();
     return PyBdd::ToPyObject(ans_bdd);
@@ -473,7 +473,7 @@ Bdd_root_decomp(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     Bdd f0;
     Bdd f1;
@@ -495,7 +495,7 @@ Bdd_root_var(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto var = bdd.root_var();
     return PyBdd::ToPyObject(var);
@@ -512,7 +512,7 @@ Bdd_root_cofactor0(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto ans_bdd = bdd.root_cofactor0();
     return PyBdd::ToPyObject(ans_bdd);
@@ -529,7 +529,7 @@ Bdd_root_cofactor1(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto ans_bdd = bdd.root_cofactor1();
     return PyBdd::ToPyObject(ans_bdd);
@@ -570,7 +570,7 @@ Bdd_eval(
     }
   }
 
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto val = bdd.eval(inputs);
   return PyBool_FromLong(val);
 }
@@ -581,7 +581,7 @@ Bdd_to_litlist(
   PyObject* Py_UNUSED(args)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto litlist = bdd.to_litlist();
     SizeType n = litlist.size();
@@ -624,11 +624,11 @@ Bdd_to_truth(
   vector<BddVar> var_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto var_obj = PySequence_GetItem(list_obj, i);
-    if ( !PyBdd::Check(var_obj) ) {
+    if ( !PyBdd::_check(var_obj) ) {
       PyErr_SetString(PyExc_TypeError, "'var_list' should be a list of 'BddVar'");
       return nullptr;
     }
-    auto var_bdd = PyBdd::Get(var_obj);
+    auto& var_bdd = PyBdd::_get_ref(var_obj);
     auto var = BddVar::from_bdd(var_bdd);
     if ( var.is_invalid() ) {
       PyErr_SetString(PyExc_TypeError, "var should be a variable");
@@ -637,7 +637,7 @@ Bdd_to_truth(
     var_list[i] = var;
     Py_DECREF(var_obj);
   }
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   try {
     auto str = bdd.to_truth(var_list);
     return Py_BuildValue("s", str.c_str());
@@ -662,10 +662,10 @@ Bdd_gen_dot(
   };
   const char* filename = nullptr;
   PyObject* option_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|$O!",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|$O",
 				    const_cast<char**>(kw_list),
 				    &filename,
-				    PyJsonValue::_typeobject(), &option_obj) ) {
+				    &option_obj) ) {
     return nullptr;
   }
   ofstream ofs{filename};
@@ -677,9 +677,13 @@ Bdd_gen_dot(
   }
   JsonValue option;
   if ( option_obj != nullptr ) {
-    option = PyJsonValue::Get(option_obj);
+    PyJsonValueDeconv json_dec;
+    if ( !json_dec(option_obj, option) ) {
+      PyErr_SetString(PyExc_TypeError, "'option' should be a JsonValue type");
+      return nullptr;
+    }
   }
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   bdd.gen_dot(ofs, option);
   Py_RETURN_NONE;
 }
@@ -700,11 +704,11 @@ Bdd_gen_dot2(
   PyObject* bdd_list_obj = nullptr;
   const char* filename = nullptr;
   PyObject* option_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "sO|$O!",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "sO|$O",
 				    const_cast<char**>(kw_list),
 				    &filename,
 				    &bdd_list_obj,
-				    PyJsonValue::_typeobject(), &option_obj) ) {
+				    &option_obj) ) {
     return nullptr;
   }
 
@@ -717,11 +721,11 @@ Bdd_gen_dot2(
   vector<Bdd> bdd_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto bdd_obj = PySequence_GetItem(bdd_list_obj, i);
-    if ( !PyBdd::Check(bdd_obj) ) {
+    if ( !PyBdd::_check(bdd_obj) ) {
       PyErr_SetString(PyExc_TypeError, emsg);
       return nullptr;
     }
-    auto bdd = PyBdd::Get(bdd_obj);
+    auto& bdd = PyBdd::_get_ref(bdd_obj);
     Py_DECREF(bdd_obj);
     bdd_list[i] = bdd;
   }
@@ -735,7 +739,11 @@ Bdd_gen_dot2(
   }
   JsonValue option;
   if ( option_obj != nullptr ) {
-    option = PyJsonValue::Get(option_obj);
+    PyJsonValueDeconv json_dec;
+    if ( !json_dec(option_obj, option) ) {
+      PyErr_SetString(PyExc_TypeError, "'option' should be a JsonValue type");
+      return nullptr;
+    }
   }
   Bdd::gen_dot(ofs, bdd_list, option);
   Py_RETURN_NONE;
@@ -830,7 +838,7 @@ Bdd_size(
   void* Py_UNUSED(closure)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto val = bdd.size();
   return PyLong_FromLong(val);
 }
@@ -841,7 +849,7 @@ Bdd_mgr(
   void* Py_UNUSED(closure)
 )
 {
-  auto bdd = PyBdd::Get(self);
+  auto& bdd = PyBdd::_get_ref(self);
   auto mgr = bdd.mgr();
   return PyBddMgr::ToPyObject(mgr);
 }
@@ -861,10 +869,10 @@ Bdd_richcmpfunc(
   int op
 )
 {
-  if ( PyBdd::Check(self) &&
-       PyBdd::Check(other) ) {
-    auto val1 = PyBdd::Get(self);
-    auto val2 = PyBdd::Get(other);
+  if ( PyBdd::_check(self) &&
+       PyBdd::_check(other) ) {
+    auto& val1 = PyBdd::_get_ref(self);
+    auto& val2 = PyBdd::_get_ref(other);
     if ( op == Py_EQ ) {
       return PyBool_FromLong(val1 == val2);
     }
@@ -882,8 +890,8 @@ Bdd_invert(
   PyObject* self
 )
 {
-  if ( PyBdd::Check(self) ) {
-    auto val = PyBdd::Get(self);
+  if ( PyBdd::_check(self) ) {
+    auto& val = PyBdd::_get_ref(self);
     return PyBdd::ToPyObject(~val);
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -896,9 +904,9 @@ Bdd_and(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) && PyBdd::Check(other) ) {
-    auto val1 = PyBdd::Get(self);
-    auto val2 = PyBdd::Get(other);
+  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
+    auto& val1 = PyBdd::_get_ref(self);
+    auto& val2 = PyBdd::_get_ref(other);
     try {
       return PyBdd::ToPyObject(val1 & val2);
     }
@@ -917,9 +925,9 @@ Bdd_or(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) && PyBdd::Check(other) ) {
-    auto val1 = PyBdd::Get(self);
-    auto val2 = PyBdd::Get(other);
+  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
+    auto& val1 = PyBdd::_get_ref(self);
+    auto& val2 = PyBdd::_get_ref(other);
     try {
       return PyBdd::ToPyObject(val1 | val2);
     }
@@ -938,9 +946,9 @@ Bdd_xor(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) && PyBdd::Check(other) ) {
-    auto val1 = PyBdd::Get(self);
-    auto val2 = PyBdd::Get(other);
+  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
+    auto& val1 = PyBdd::_get_ref(self);
+    auto& val2 = PyBdd::_get_ref(other);
     try {
       return PyBdd::ToPyObject(val1 ^ val2);
     }
@@ -959,9 +967,9 @@ Bdd_div(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) && PyBdd::Check(other) ) {
-    auto val1 = PyBdd::Get(self);
-    auto val2 = PyBdd::Get(other);
+  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
+    auto& val1 = PyBdd::_get_ref(self);
+    auto& val2 = PyBdd::_get_ref(other);
     try {
       return PyBdd::ToPyObject(val1 / val2);
     }
@@ -992,7 +1000,7 @@ Bdd_hash(
   PyObject* self
 )
 {
-  auto val = PyBdd::Get(self);
+  auto& val = PyBdd::_get_ref(self);
   return val.hash();
 }
 
@@ -1032,7 +1040,7 @@ PyBdd::init(
 
 // @brief Bdd を PyObject に変換する．
 PyObject*
-PyBdd::ToPyObject(
+PyBddConv::operator()(
   const Bdd& val
 )
 {
@@ -1042,9 +1050,23 @@ PyBdd::ToPyObject(
   return obj;
 }
 
+// @brief PyObject* から Bdd を取り出す．
+bool
+PyBddDeconv::operator()(
+  PyObject* obj,
+  Bdd& val
+)
+{
+  if ( PyBdd::_check(obj) ) {
+    val = PyBdd::_get_ref(obj);
+    return true;
+  }
+  return false;
+}
+
 // @brief PyObject が Bdd タイプか調べる．
 bool
-PyBdd::Check(
+PyBdd::_check(
   PyObject* obj
 )
 {
@@ -1052,8 +1074,8 @@ PyBdd::Check(
 }
 
 // @brief Bdd を表す PyObject から Bdd を取り出す．
-Bdd
-PyBdd::Get(
+Bdd&
+PyBdd::_get_ref(
   PyObject* obj
 )
 {

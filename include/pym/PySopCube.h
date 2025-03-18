@@ -17,6 +17,57 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
+/// @class PySopCubeConv PySopCube.h "PySopCube.h"
+/// @brief SopCube を PyObject* に変換するファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PySopCubeConv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief SopCube を PyObject* に変換する．
+  PyObject*
+  operator()(
+    const SopCube& val
+  );
+
+  /// @brief SopCube を PyObject* に変換する．
+  PyObject*
+  operator()(
+    SopCube&& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
+/// @class PySopCubeDeconv PySopCube.h "PySopCube.h"
+/// @brief SopCube を取り出すファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PySopCubeDeconv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief PyObject* から SopCube を取り出す．
+  bool
+  operator()(
+    PyObject* obj,
+    SopCube& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /// @class PySopCube PySopCube.h "PySopCube.h"
 /// @brief Python 用の SopCube 拡張
 ///
@@ -45,7 +96,11 @@ public:
   PyObject*
   ToPyObject(
     const SopCube& val ///< [in] 値
-  );
+  )
+  {
+    PySopCubeConv conv;
+    return conv(val);
+  }
 
   /// @brief SopCube を表す PyObject を作る．
   /// @return 生成した PyObject を返す．
@@ -54,13 +109,17 @@ public:
   static
   PyObject*
   ToPyObject(
-    const SopCube&& val ///< [in] 値
-  );
+    SopCube&& val ///< [in] 値
+  )
+  {
+    PySopCubeConv conv;
+    return conv(val);
+  }
 
   /// @brief PyObject が SopCube タイプか調べる．
   static
   bool
-  Check(
+  _check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -70,7 +129,7 @@ public:
   /// _check(obj) == true であると仮定している．
   static
   SopCube&
-  Get(
+  _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 

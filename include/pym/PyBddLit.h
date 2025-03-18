@@ -17,6 +17,58 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
+/// @class PyBddLitConv PyBddLit.h "PyBddLit.h"
+/// @brief BddLit を PyObject* に変換するファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PyBddLitConv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief BddLit を PyObject* に変換する．
+  PyObject*
+  operator()(
+    const BddLit& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
+/// @class PyBddLitDeconv PyBddLit.h "PyBddLit.h"
+/// @brief BddLit を取り出すファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PyBddLitDeconv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief PyObject* から BddLit を取り出す．
+  bool
+  operator()(
+    PyObject* obj,
+    BddLit& val
+  )
+  {
+    if ( PyBddLit::_check(obj) ) {
+      val = PyBddLit::_get(obj);
+      return true;
+    }
+    return false;
+  }
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /// @class PyBddLit PyBddLit.h "pym/PyBddLit.h"
 /// @brief Python 用の BddLit 拡張
 ///
@@ -45,12 +97,16 @@ public:
   PyObject*
   ToPyObject(
     const BddLit& val ///< [in] 値
-  );
+  )
+  {
+    PyBddLitConv conv;
+    return conv(val);
+  }
 
   /// @brief PyObject が BddLit タイプか調べる．
   static
   bool
-  Check(
+  _check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -60,16 +116,6 @@ public:
   /// Check(obj) == true であると仮定している．
   static
   BddLit
-  Get(
-    PyObject* obj ///< [in] 変換元の PyObject
-  );
-
-  /// @brief BddLit を表す PyObject から BddLit を取り出す．
-  /// @return BddLit を返す．
-  ///
-  /// Check(obj) == true であると仮定している．
-  static
-  BddLit&
   _get(
     PyObject* obj ///< [in] 変換元の PyObject
   );

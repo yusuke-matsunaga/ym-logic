@@ -17,6 +17,51 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
+/// @class PyPrimTypeConv PyPrimType.h "PyPrimType.h"
+/// @brief PrimType を PyObject* に変換するファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PyPrimTypeConv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief PrimType を PyObject* に変換する．
+  PyObject*
+  operator()(
+    PrimType val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
+/// @class PyPrimTypeDeconv PyPrimType.h "PyPrimType.h"
+/// @brief PrimType を取り出すファンクタクラス
+///
+/// 実はただの関数
+//////////////////////////////////////////////////////////////////////
+class PyPrimTypeDeconv
+{
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief PyObject* から PrimType を取り出す．
+  bool
+  operator()(
+    PyObject* obj,
+    PrimType& val
+  );
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /// @class PyPrimType PyPrimType.h "PyPrimType.h"
 /// @brief Python 用の PrimType 拡張
 ///
@@ -45,12 +90,16 @@ public:
   PyObject*
   ToPyObject(
     PrimType val ///< [in] 値
-  );
+  )
+  {
+    PyPrimTypeConv conv;
+    return conv(val);
+  }
 
   /// @brief PyObject が PrimType タイプか調べる．
   static
   bool
-  Check(
+  _check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -59,8 +108,8 @@ public:
   ///
   /// _check(obj) == true であると仮定している．
   static
-  PrimType
-  Get(
+  PrimType&
+  _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );
 
