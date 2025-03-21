@@ -64,6 +64,7 @@ TEST_F(ExprTest, empty_constr)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
   EXPECT_FALSE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -102,6 +103,7 @@ TEST_F(ExprTest, invalid)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
   EXPECT_FALSE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -141,6 +143,7 @@ TEST_F(ExprTest, zero)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -180,6 +183,7 @@ TEST_F(ExprTest, one)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -219,6 +223,7 @@ TEST_F(ExprTest, literal1)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -261,6 +266,7 @@ TEST_F(ExprTest, literal2)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -294,6 +300,7 @@ TEST_F(ExprTest, posi_literal)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -326,6 +333,7 @@ TEST_F(ExprTest, nega_literal)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
   EXPECT_TRUE( expr.is_simple() );
   EXPECT_FALSE( expr.is_simple_and() );
   EXPECT_FALSE( expr.is_simple_or() );
@@ -359,6 +367,7 @@ TEST_F(ExprTest, and_op1)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -419,6 +428,7 @@ TEST_F(ExprTest, and_op2)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -474,6 +484,7 @@ TEST_F(ExprTest, and_op3)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
 }
 
 TEST_F(ExprTest, and_op4)
@@ -496,6 +507,7 @@ TEST_F(ExprTest, and_op4)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -553,6 +565,7 @@ TEST_F(ExprTest, and_op5)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( lit_list, expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -610,6 +623,7 @@ TEST_F(ExprTest, and_int)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -666,6 +680,7 @@ TEST_F(ExprTest, or_op1)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -722,6 +737,7 @@ TEST_F(ExprTest, or_op2)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -777,6 +793,7 @@ TEST_F(ExprTest, or_op3)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_FALSE( expr.is_op() );
   EXPECT_EQ( 0, expr.operand_num() );
+  EXPECT_EQ( vector<Expr>{}, expr.operand_list() );
 }
 
 TEST_F(ExprTest, or_op4)
@@ -799,6 +816,7 @@ TEST_F(ExprTest, or_op4)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -856,6 +874,7 @@ TEST_F(ExprTest, or_op5)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -913,6 +932,7 @@ TEST_F(ExprTest, or_int)
   EXPECT_FALSE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -969,6 +989,7 @@ TEST_F(ExprTest, xor_op1)
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -1025,6 +1046,7 @@ TEST_F(ExprTest, xor_op2)
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -1082,6 +1104,7 @@ TEST_F(ExprTest, xor_op3)
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -1139,6 +1162,7 @@ TEST_F(ExprTest, xor_op4)
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );
@@ -1196,6 +1220,7 @@ TEST_F(ExprTest, xor_int)
   EXPECT_TRUE( expr.is_xor() );
   EXPECT_TRUE( expr.is_op() );
   EXPECT_EQ( 2, expr.operand_num() );
+  EXPECT_EQ( (vector<Expr>{lit0p, lit1n}), expr.operand_list() );
 
   auto opr0 = expr.operand(0);
   EXPECT_TRUE( opr0.is_posi_literal() );

@@ -511,6 +511,9 @@ Expr::operand(
 vector<Expr>
 Expr::operand_list() const
 {
+  if ( is_invalid() ) {
+    return {};
+  }
   SizeType n = operand_num();
   vector<Expr> ans_list;
   ans_list.reserve(n);
