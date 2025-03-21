@@ -17,57 +17,6 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PySopCubeConv PySopCube.h "PySopCube.h"
-/// @brief SopCube を PyObject* に変換するファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PySopCubeConv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief SopCube を PyObject* に変換する．
-  PyObject*
-  operator()(
-    const SopCube& val
-  );
-
-  /// @brief SopCube を PyObject* に変換する．
-  PyObject*
-  operator()(
-    SopCube&& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class PySopCubeDeconv PySopCube.h "PySopCube.h"
-/// @brief SopCube を取り出すファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PySopCubeDeconv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PyObject* から SopCube を取り出す．
-  bool
-  operator()(
-    PyObject* obj,
-    SopCube& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class PySopCube PySopCube.h "PySopCube.h"
 /// @brief Python 用の SopCube 拡張
 ///
@@ -75,6 +24,33 @@ public:
 //////////////////////////////////////////////////////////////////////
 class PySopCube
 {
+  using ElemType = SopCube;
+
+public:
+
+  /// @brief SopCube を PyObject* に変換するファンクタクラス
+  struct Conv {
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+
+    PyObject*
+    operator()(
+      ElemType&& val
+    );
+  };
+
+  /// @brief PyObject* から SopCube を取り出すファンクタクラス
+  struct Deconv {
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -95,10 +71,10 @@ public:
   static
   PyObject*
   ToPyObject(
-    const SopCube& val ///< [in] 値
+    const ElemType& val ///< [in] 値
   )
   {
-    PySopCubeConv conv;
+    Conv conv;
     return conv(val);
   }
 
@@ -109,26 +85,39 @@ public:
   static
   PyObject*
   ToPyObject(
-    SopCube&& val ///< [in] 値
+    ElemType&& val ///< [in] 値
   )
   {
-    PySopCubeConv conv;
+    Conv conv;
     return conv(val);
+  }
+
+  /// @brief PyObject から SopCube を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
   }
 
   /// @brief PyObject が SopCube タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief SopCube を表す PyObject から SopCube を取り出す．
   /// @return SopCube を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
-  SopCube&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );

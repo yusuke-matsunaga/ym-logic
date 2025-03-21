@@ -295,8 +295,8 @@ NpnMap_richcmpfunc(
   int op
 )
 {
-  if ( PyNpnMap::_check(self) &&
-       PyNpnMap::_check(other) ) {
+  if ( PyNpnMap::Check(self) &&
+       PyNpnMap::Check(other) ) {
     auto& val1 = PyNpnMap::_get_ref(self);
     auto& val2 = PyNpnMap::_get_ref(other);
     if ( op == Py_EQ ) {
@@ -316,7 +316,7 @@ NpnMap_invert(
   PyObject* self
 )
 {
-  if ( PyNpnMap::_check(self) ) {
+  if ( PyNpnMap::Check(self) ) {
     auto& val = PyNpnMap::_get_ref(self);
     return PyNpnMap::ToPyObject(~val);
   }
@@ -330,8 +330,8 @@ NpnMap_mul(
   PyObject* other
 )
 {
-  if ( PyNpnMap::_check(self) &&
-       PyNpnMap::_check(other) ) {
+  if ( PyNpnMap::Check(self) &&
+       PyNpnMap::Check(other) ) {
     auto& val1 = PyNpnMap::_get_ref(self);
     auto& val2 = PyNpnMap::_get_ref(other);
     return PyNpnMap::ToPyObject(val1 * val2);
@@ -383,7 +383,7 @@ PyNpnMap::init(
 
 // @brief NpnMap を PyObject に変換する．
 PyObject*
-PyNpnMapConv::operator()(
+PyNpnMap::Conv::operator()(
   const NpnMap& val
 )
 {
@@ -395,12 +395,12 @@ PyNpnMapConv::operator()(
 
 // @brief PyObject* から NpnMap を取り出す．
 bool
-PyNpnMapDeconv::operator()(
+PyNpnMap::Deconv::operator()(
   PyObject* obj,
   NpnMap& val
 )
 {
-  if ( PyNpnMap::_check(obj) ) {
+  if ( PyNpnMap::Check(obj) ) {
     val = PyNpnMap::_get_ref(obj);
     return true;
   }
@@ -409,7 +409,7 @@ PyNpnMapDeconv::operator()(
 
 // @brief PyObject が NpnMap タイプか調べる．
 bool
-PyNpnMap::_check(
+PyNpnMap::Check(
   PyObject* obj
 )
 {

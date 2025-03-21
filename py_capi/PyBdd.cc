@@ -624,7 +624,7 @@ Bdd_to_truth(
   vector<BddVar> var_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto var_obj = PySequence_GetItem(list_obj, i);
-    if ( !PyBdd::_check(var_obj) ) {
+    if ( !PyBdd::Check(var_obj) ) {
       PyErr_SetString(PyExc_TypeError, "'var_list' should be a list of 'BddVar'");
       return nullptr;
     }
@@ -677,7 +677,7 @@ Bdd_gen_dot(
   }
   JsonValue option;
   if ( option_obj != nullptr ) {
-    PyJsonValueDeconv json_dec;
+    PyJsonValue::Deconv json_dec;
     if ( !json_dec(option_obj, option) ) {
       PyErr_SetString(PyExc_TypeError, "'option' should be a JsonValue type");
       return nullptr;
@@ -721,7 +721,7 @@ Bdd_gen_dot2(
   vector<Bdd> bdd_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto bdd_obj = PySequence_GetItem(bdd_list_obj, i);
-    if ( !PyBdd::_check(bdd_obj) ) {
+    if ( !PyBdd::Check(bdd_obj) ) {
       PyErr_SetString(PyExc_TypeError, emsg);
       return nullptr;
     }
@@ -739,7 +739,7 @@ Bdd_gen_dot2(
   }
   JsonValue option;
   if ( option_obj != nullptr ) {
-    PyJsonValueDeconv json_dec;
+    PyJsonValue::Deconv json_dec;
     if ( !json_dec(option_obj, option) ) {
       PyErr_SetString(PyExc_TypeError, "'option' should be a JsonValue type");
       return nullptr;
@@ -869,8 +869,8 @@ Bdd_richcmpfunc(
   int op
 )
 {
-  if ( PyBdd::_check(self) &&
-       PyBdd::_check(other) ) {
+  if ( PyBdd::Check(self) &&
+       PyBdd::Check(other) ) {
     auto& val1 = PyBdd::_get_ref(self);
     auto& val2 = PyBdd::_get_ref(other);
     if ( op == Py_EQ ) {
@@ -890,7 +890,7 @@ Bdd_invert(
   PyObject* self
 )
 {
-  if ( PyBdd::_check(self) ) {
+  if ( PyBdd::Check(self) ) {
     auto& val = PyBdd::_get_ref(self);
     return PyBdd::ToPyObject(~val);
   }
@@ -904,7 +904,8 @@ Bdd_and(
   PyObject* other
 )
 {
-  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
+  if ( PyBdd::Check(self) &&
+       PyBdd::Check(other) ) {
     auto& val1 = PyBdd::_get_ref(self);
     auto& val2 = PyBdd::_get_ref(other);
     try {
@@ -925,7 +926,8 @@ Bdd_or(
   PyObject* other
 )
 {
-  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
+  if ( PyBdd::Check(self) &&
+       PyBdd::Check(other) ) {
     auto& val1 = PyBdd::_get_ref(self);
     auto& val2 = PyBdd::_get_ref(other);
     try {
@@ -946,7 +948,8 @@ Bdd_xor(
   PyObject* other
 )
 {
-  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
+  if ( PyBdd::Check(self) &&
+       PyBdd::Check(other) ) {
     auto& val1 = PyBdd::_get_ref(self);
     auto& val2 = PyBdd::_get_ref(other);
     try {
@@ -967,7 +970,8 @@ Bdd_div(
   PyObject* other
 )
 {
-  if ( PyBdd::_check(self) && PyBdd::_check(other) ) {
+  if ( PyBdd::Check(self) &&
+       PyBdd::Check(other) ) {
     auto& val1 = PyBdd::_get_ref(self);
     auto& val2 = PyBdd::_get_ref(other);
     try {
@@ -1040,7 +1044,7 @@ PyBdd::init(
 
 // @brief Bdd を PyObject に変換する．
 PyObject*
-PyBddConv::operator()(
+PyBdd::Conv::operator()(
   const Bdd& val
 )
 {
@@ -1052,12 +1056,12 @@ PyBddConv::operator()(
 
 // @brief PyObject* から Bdd を取り出す．
 bool
-PyBddDeconv::operator()(
+PyBdd::Deconv::operator()(
   PyObject* obj,
   Bdd& val
 )
 {
-  if ( PyBdd::_check(obj) ) {
+  if ( PyBdd::Check(obj) ) {
     val = PyBdd::_get_ref(obj);
     return true;
   }
@@ -1066,7 +1070,7 @@ PyBddDeconv::operator()(
 
 // @brief PyObject が Bdd タイプか調べる．
 bool
-PyBdd::_check(
+PyBdd::Check(
   PyObject* obj
 )
 {

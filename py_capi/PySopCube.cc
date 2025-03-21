@@ -51,7 +51,7 @@ SopCube_new(
   }
   vector<Literal> lit_list;
   if ( obj1 != nullptr ) {
-    if ( PyLiteral::_check(obj1) ) {
+    if ( PyLiteral::Check(obj1) ) {
       auto lit = PyLiteral::_get_ref(obj1);
       lit_list.push_back(lit);
     }
@@ -60,7 +60,7 @@ SopCube_new(
       lit_list.reserve(n);
       for ( SizeType i = 0; i < n; ++ i ) {
 	auto obj2 = PyList_GetItem(obj1, i);
-	if ( !PyLiteral::_check(obj2) ) {
+	if ( !PyLiteral::Check(obj2) ) {
 	  PyErr_SetString(PyExc_TypeError,
 			  "argument 2 must be a 'Literal' or list of 'Literal'");
 	  return nullptr;
@@ -327,8 +327,8 @@ SopCube_richcmpfunc(
   int op
 )
 {
-  if ( PySopCube::_check(self) &&
-       PySopCube::_check(other) ) {
+  if ( PySopCube::Check(self) &&
+       PySopCube::Check(other) ) {
     auto val1 = PySopCube::_get_ref(self);
     auto val2 = PySopCube::_get_ref(other);
     if ( val1.variable_num() != val2.variable_num() ) {
@@ -348,20 +348,21 @@ SopCube_and(
   PyObject* other
 )
 {
-  if ( PySopCube::_check(self) ) {
+  if ( PySopCube::Check(self) ) {
     auto& val1 = PySopCube::_get_ref(self);
-    if ( PySopCube::_check(other) ) {
+    if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::_get_ref(other);
       auto val3 = val1 & val2;
       return PySopCube::ToPyObject(val3);
     }
-    if ( PyLiteral::_check(other) ) {
+    if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::_get_ref(other);
       auto val3 = val1 & val2;
       return PySopCube::ToPyObject(val3);
     }
   }
-  else if ( PyLiteral::_check(self) && PySopCube::_check(other) ) {
+  else if ( PyLiteral::Check(self) &&
+	    PySopCube::Check(other) ) {
     auto val1 = PyLiteral::_get_ref(self);
     auto& val2 = PySopCube::_get_ref(other);
     auto val3 = val1 & val2;
@@ -377,15 +378,15 @@ SopCube_iand(
   PyObject* other
 )
 {
-  if ( PySopCube::_check(self) ) {
+  if ( PySopCube::Check(self) ) {
     auto& val1 = PySopCube::_get_ref(self);
-    if ( PySopCube::_check(other) ) {
+    if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::_get_ref(other);
       val1 &= val2;
       Py_IncRef(self);
       return self;
     }
-    if ( PyLiteral::_check(other) ) {
+    if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::_get_ref(other);
       val1 &= val2;
       Py_IncRef(self);
@@ -402,14 +403,14 @@ SopCube_algdiv(
   PyObject* other
 )
 {
-  if ( PySopCube::_check(self) ) {
+  if ( PySopCube::Check(self) ) {
     auto& val1 = PySopCube::_get_ref(self);
-    if ( PySopCube::_check(other) ) {
+    if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::_get_ref(other);
       auto val3 = val1 / val2;
       return PySopCube::ToPyObject(val3);
     }
-    if ( PyLiteral::_check(other) ) {
+    if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::_get_ref(other);
       auto val3 = val1 / val2;
       return PySopCube::ToPyObject(val3);
@@ -425,15 +426,15 @@ SopCube_ialgdiv(
   PyObject* other
 )
 {
-  if ( PySopCube::_check(self) ) {
+  if ( PySopCube::Check(self) ) {
     auto& val1 = PySopCube::_get_ref(self);
-    if ( PySopCube::_check(other) ) {
+    if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::_get_ref(other);
       val1 /= val2;
       Py_IncRef(self);
       return self;
     }
-    if ( PyLiteral::_check(other) ) {
+    if ( PyLiteral::Check(other) ) {
       auto val2 = PyLiteral::_get_ref(other);
       val1 /= val2;
       Py_IncRef(self);
@@ -497,7 +498,7 @@ PySopCube::init(
 
 // @brief SopCube を PyObject に変換する．
 PyObject*
-PySopCubeConv::operator()(
+PySopCube::Conv::operator()(
   const SopCube& val
 )
 {
@@ -509,7 +510,7 @@ PySopCubeConv::operator()(
 
 // @brief SopCube を PyObject に変換する．
 PyObject*
-PySopCubeConv::operator()(
+PySopCube::Conv::operator()(
   SopCube&& val
 )
 {
@@ -521,12 +522,12 @@ PySopCubeConv::operator()(
 
 // @brief PyObject* から SopCube を取り出す．
 bool
-PySopCubeDeconv::operator()(
+PySopCube::Deconv::operator()(
   PyObject* obj,
   SopCube& val
 )
 {
-  if ( PySopCube::_check(obj) ) {
+  if ( PySopCube::Check(obj) ) {
     val = PySopCube::_get_ref(obj);
     return true;
   }
@@ -535,7 +536,7 @@ PySopCubeDeconv::operator()(
 
 // @brief PyObject が SopCube タイプか調べる．
 bool
-PySopCube::_check(
+PySopCube::Check(
   PyObject* obj
 )
 {

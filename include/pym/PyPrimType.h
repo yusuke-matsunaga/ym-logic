@@ -17,51 +17,6 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PyPrimTypeConv PyPrimType.h "PyPrimType.h"
-/// @brief PrimType を PyObject* に変換するファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyPrimTypeConv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PrimType を PyObject* に変換する．
-  PyObject*
-  operator()(
-    PrimType val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class PyPrimTypeDeconv PyPrimType.h "PyPrimType.h"
-/// @brief PrimType を取り出すファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyPrimTypeDeconv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PyObject* から PrimType を取り出す．
-  bool
-  operator()(
-    PyObject* obj,
-    PrimType& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class PyPrimType PyPrimType.h "PyPrimType.h"
 /// @brief Python 用の PrimType 拡張
 ///
@@ -69,6 +24,28 @@ public:
 //////////////////////////////////////////////////////////////////////
 class PyPrimType
 {
+  using ElemType = PrimType;
+
+public:
+
+  /// @brief PrimType を PyObject* に変換するファンクタクラス
+  struct Conv {
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+  };
+
+  /// @brief PyObject* から PrimType を取り出すファンクタクラス
+  struct Deconv {
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -89,26 +66,39 @@ public:
   static
   PyObject*
   ToPyObject(
-    PrimType val ///< [in] 値
+    const ElemType& val ///< [in] 値
   )
   {
-    PyPrimTypeConv conv;
+    Conv conv;
     return conv(val);
+  }
+
+  /// @brief PyObject から PrimType を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
   }
 
   /// @brief PyObject が PrimType タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief PrimType を表す PyObject から PrimType を取り出す．
   /// @return PrimType を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
-  PrimType&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );

@@ -17,51 +17,6 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PyNpnMapConv PyNpnMap.h "PyNpnMap.h"
-/// @brief NpnMap を PyObject* に変換するファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyNpnMapConv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief NpnMap を PyObject* に変換する．
-  PyObject*
-  operator()(
-    const NpnMap& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class PyNpnMapDeconv PyNpnMap.h "PyNpnMap.h"
-/// @brief NpnMap を取り出すファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyNpnMapDeconv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PyObject* から NpnMap を取り出す．
-  bool
-  operator()(
-    PyObject* obj,
-    NpnMap& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class PyNpnMap PyNpnMap.h "PyNpnMap.h"
 /// @brief Python 用の NpnMap 拡張
 ///
@@ -69,6 +24,30 @@ public:
 //////////////////////////////////////////////////////////////////////
 class PyNpnMap
 {
+  using ElemType = NpnMap;
+
+public:
+
+  /// @brief NpnMap を PyObject* に変換するファンクタクラス
+  struct Conv {
+    /// @brief NpnMap を PyObject* に変換する．
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+  };
+
+  /// @brief NpnMap を取り出すファンクタクラス
+  struct Deconv {
+    /// @brief PyObject* から NpnMap を取り出す．
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -89,26 +68,39 @@ public:
   static
   PyObject*
   ToPyObject(
-    const NpnMap& val ///< [in] 値
+    const ElemType& val ///< [in] 値
   )
   {
-    PyNpnMapConv conv;
+    Conv conv;
     return conv(val);
+  }
+
+  /// @brief PyObject から NpnMap を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
   }
 
   /// @brief PyObject が NpnMap タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief NpnMap を表す PyObject から NpnMap を取り出す．
   /// @return NpnMap を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
-  NpnMap&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );

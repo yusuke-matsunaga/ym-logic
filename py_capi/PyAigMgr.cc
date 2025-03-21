@@ -21,7 +21,7 @@ BEGIN_NONAMESPACE
 struct AigMgrObject
 {
   PyObject_HEAD
-  AigMgr mMgr;
+  AigMgr mVal;
 };
 
 // Python 用のタイプ定義
@@ -48,7 +48,7 @@ AigMgr_new(
 
   auto self = type->tp_alloc(type, 0);
   auto aigmgr_obj = reinterpret_cast<AigMgrObject*>(self);
-  new (&aigmgr_obj->mMgr) AigMgr;
+  new (&aigmgr_obj->mVal) AigMgr;
   return self;
 }
 
@@ -59,7 +59,7 @@ AigMgr_dealloc(
 )
 {
   auto aigmgr_obj = reinterpret_cast<AigMgrObject*>(self);
-  aigmgr_obj->mMgr.~AigMgr();
+  aigmgr_obj->mVal.~AigMgr();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -324,7 +324,7 @@ AigMgr_from_expr_list(
   vector<Expr> expr_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto obj = PySequence_GetItem(list_obj, i);
-    auto res = PyExpr::_check(obj);
+    auto res = PyExpr::Check(obj);
     if ( res ) {
       expr_list[i] = PyExpr::_get_ref(obj);
     }
@@ -446,9 +446,36 @@ PyAigMgr::init(
   return false;
 }
 
+/// @brief AigMgr を PyObject* に変換する
+PyObject*
+PyAigMgr::Conv::operator()(
+  const ElemType& val
+)
+{
+  auto type = PyAigMgr::_typeobject();
+  auto obj = type->tp_alloc(type, 0);
+  auto aigmgr_obj = reinterpret_cast<AigMgrObject*>(obj);
+  new (&aigmgr_obj->mVal) AigMgr(val);
+  return obj;
+}
+
+// @brief PyObject* から AigMgr を取り出すファンクタクラス
+bool
+PyAigMgr::Deconv::operator()(
+  PyObject* obj,
+  ElemType& val
+)
+{
+  if ( PyAigMgr::Check(obj) ) {
+    val = PyAigMgr::_get_ref(obj);
+    return true;
+  }
+  return false;
+}
+
 // @brief PyObject が AigMgr タイプか調べる．
 bool
-PyAigMgr::_check(
+PyAigMgr::Check(
   PyObject* obj
 )
 {
@@ -462,7 +489,7 @@ PyAigMgr::_get_ref(
 )
 {
   auto aigmgr_obj = reinterpret_cast<AigMgrObject*>(obj);
-  return aigmgr_obj->mMgr;
+  return aigmgr_obj->mVal;
 }
 
 // @brief AigMgr を表すオブジェクトの型定義を返す．

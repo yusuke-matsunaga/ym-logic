@@ -22,7 +22,7 @@ BEGIN_NONAMESPACE
 struct ExprObject
 {
   PyObject_HEAD
-  Expr mExpr;
+  Expr mVal;
 };
 
 // Python 用のタイプ定義
@@ -60,7 +60,7 @@ Expr_new(
       return nullptr;
     }
   }
-  new (&expr_obj->mExpr) Expr{src_expr};
+  new (&expr_obj->mVal) Expr{src_expr};
   return obj;
 }
 
@@ -71,7 +71,7 @@ Expr_dealloc(
 )
 {
   auto expr_obj = reinterpret_cast<ExprObject*>(self);
-  expr_obj->mExpr.~Expr();
+  expr_obj->mVal.~Expr();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -149,18 +149,16 @@ Expr_literal(
 
   Expr expr;
   bool inv = static_cast<bool>(inv_int);
-  if ( PyLiteral::_check(var_obj) ) {
-    auto lit = PyLiteral::_get_ref(var_obj);
-    if ( inv ) {
-      lit = ~lit;
-    }
-    expr = Expr::literal(lit);
-  }
-  else {
+  Literal lit;
+  if ( !PyLiteral::FromPyObject(var_obj, lit) ) {
     PyErr_SetString(PyExc_TypeError,
 		    "'var' must be an int or a Literal");
     return nullptr;
   }
+  if ( inv ) {
+    lit = ~lit;
+  }
+  expr = Expr::literal(lit);
   return PyExpr::ToPyObject(expr);
 }
 
@@ -220,7 +218,7 @@ get_expr_list(
   expr_list.reserve(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     auto obj1 = PySequence_GetItem(arg_obj, i);
-    if ( !PyExpr::_check(obj1) ) {
+    if ( !PyExpr::Check(obj1) ) {
       Py_XDECREF(obj1);
       return false;
     }
@@ -331,7 +329,7 @@ Expr_compose(
     if ( id == -1 && PyErr_Occurred() ) {
       return nullptr;
     }
-    if ( !PyExpr::_check(value) ) {
+    if ( !PyExpr::Check(value) ) {
       PyErr_SetString(PyExc_TypeError,
 		      "'Expr' expected in dictionary value");
       return nullptr;
@@ -670,7 +668,7 @@ Expr_get_operand_list(
 )
 {
   auto& expr = PyExpr::_get_ref(self);
-  return PyList::ToPyObject<Expr, PyExprConv>(expr.operand_list());
+  return PyList<Expr, PyExpr>::ToPyObject(expr.operand_list());
 }
 
 PyObject*
@@ -695,6 +693,7 @@ Expr_literal_num(
 
   auto& expr = PyExpr::_get_ref(self);
   bool inv = static_cast<bool>(inv_int);
+  Literal lit;
   int ans = 0;
   if ( var_obj == nullptr ) {
     if ( inv ) {
@@ -704,8 +703,7 @@ Expr_literal_num(
     }
     ans = expr.literal_num();
   }
-  else if ( PyLiteral::_check(var_obj) ) {
-    auto lit = PyLiteral::_get_ref(var_obj);
+  else if ( PyLiteral::FromPyObject(var_obj, lit) ) {
     if ( inv ) {
       lit = ~lit;
     }
@@ -741,6 +739,7 @@ Expr_sop_literal_num(
 
   auto& expr = PyExpr::_get_ref(self);
   bool inv = static_cast<bool>(inv_int);
+  Literal lit;
   int ans = 0;
   if ( var_obj == nullptr ) {
     if ( inv ) {
@@ -750,8 +749,7 @@ Expr_sop_literal_num(
     }
     ans = expr.sop_literal_num();
   }
-  else if ( PyLiteral::_check(var_obj) ) {
-    auto lit = PyLiteral::_get_ref(var_obj);
+  else if ( PyLiteral::FromPyObject(var_obj, lit) ) {
     if ( inv_int ) {
       lit = ~lit;
     }
@@ -921,8 +919,8 @@ Expr_richcmpfunc(
   int op
 )
 {
-  if ( !PyExpr::_check(self) ||
-       !PyExpr::_check(other) ) {
+  if ( !PyExpr::Check(self) ||
+       !PyExpr::Check(other) ) {
     goto not_implemented;
   }
   {
@@ -945,7 +943,7 @@ Expr_invert(
   PyObject* self
 )
 {
-  if ( PyExpr::_check(self) ) {
+  if ( PyExpr::Check(self) ) {
     auto& val = PyExpr::_get_ref(self);
     return PyExpr::ToPyObject(~val);
   }
@@ -959,8 +957,8 @@ Expr_and(
   PyObject* other
 )
 {
-  if ( PyExpr::_check(self) &&
-       PyExpr::_check(other) ) {
+  if ( PyExpr::Check(self) &&
+       PyExpr::Check(other) ) {
     auto& val1 = PyExpr::_get_ref(self);
     auto& val2 = PyExpr::_get_ref(other);
     return PyExpr::ToPyObject(val1 & val2);
@@ -975,8 +973,8 @@ Expr_or(
   PyObject* other
 )
 {
-  if ( PyExpr::_check(self) &&
-       PyExpr::_check(other) ) {
+  if ( PyExpr::Check(self) &&
+       PyExpr::Check(other) ) {
     auto& val1 = PyExpr::_get_ref(self);
     auto& val2 = PyExpr::_get_ref(other);
     return PyExpr::ToPyObject(val1 | val2);
@@ -991,8 +989,8 @@ Expr_xor(
   PyObject* other
 )
 {
-  if ( PyExpr::_check(self) &&
-       PyExpr::_check(other) ) {
+  if ( PyExpr::Check(self) &&
+       PyExpr::Check(other) ) {
     auto& val1 = PyExpr::_get_ref(self);
     auto& val2 = PyExpr::_get_ref(other);
     return PyExpr::ToPyObject(val1 ^ val2);
@@ -1048,24 +1046,24 @@ PyExpr::init(
 
 // @brief Expr を PyObject に変換する．
 PyObject*
-PyExprConv::operator()(
+PyExpr::Conv::operator()(
   const Expr& val
 )
 {
   auto obj = ExprType.tp_alloc(&ExprType, 0);
   auto expr_obj = reinterpret_cast<ExprObject*>(obj);
-  new (&expr_obj->mExpr) Expr{val};
+  new (&expr_obj->mVal) Expr{val};
   return obj;
 }
 
 // @brief PyObject* から Expr を取り出す．
 bool
-PyExprDeconv::operator()(
+PyExpr::Deconv::operator()(
   PyObject* obj,
   Expr& val
 )
 {
-  if ( PyExpr::_check(obj) ) {
+  if ( PyExpr::Check(obj) ) {
     val = PyExpr::_get_ref(obj);
     return true;
   }
@@ -1074,7 +1072,7 @@ PyExprDeconv::operator()(
 
 // @brief PyObject が Expr タイプか調べる．
 bool
-PyExpr::_check(
+PyExpr::Check(
   PyObject* obj
 )
 {
@@ -1088,7 +1086,7 @@ PyExpr::_get_ref(
 )
 {
   auto expr_obj = reinterpret_cast<ExprObject*>(obj);
-  return expr_obj->mExpr;
+  return expr_obj->mVal;
 }
 
 // @brief Expr を表すオブジェクトの型定義を返す．

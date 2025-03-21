@@ -58,7 +58,7 @@ BddVarSet_new(
       var_set.reserve(n);
       for ( SizeType i = 0; i < n; ++ i ) {
 	auto obj1 = PyList_GetItem(varset_obj, i);
-	if ( !PyBdd::_check(obj1) ) {
+	if ( !PyBdd::Check(obj1) ) {
 	  PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'BddVar'");
 	  return nullptr;
 	}
@@ -160,8 +160,8 @@ BddVarSet_richcmpfunc(
   int op
 )
 {
-  if ( PyBddVarSet::_check(self) &&
-       PyBddVarSet::_check(other) ) {
+  if ( PyBddVarSet::Check(self) &&
+       PyBddVarSet::Check(other) ) {
     auto& val1 = PyBddVarSet::_get_ref(self);
     auto& val2 = PyBddVarSet::_get_ref(other);
     if ( op == Py_EQ ) {
@@ -182,8 +182,8 @@ BddVarSet_add(
   PyObject* other
 )
 {
-  if ( PyBddVarSet::_check(self) &&
-       PyBddVarSet::_check(other) ) {
+  if ( PyBddVarSet::Check(self) &&
+       PyBddVarSet::Check(other) ) {
     auto& val1 = PyBddVarSet::_get_ref(self);
     auto& val2 = PyBddVarSet::_get_ref(other);
     try {
@@ -204,8 +204,8 @@ BddVarSet_sub(
   PyObject* other
 )
 {
-  if ( PyBddVarSet::_check(self) &&
-       PyBddVarSet::_check(other) ) {
+  if ( PyBddVarSet::Check(self) &&
+       PyBddVarSet::Check(other) ) {
     auto& val1 = PyBddVarSet::_get_ref(self);
     auto& val2 = PyBddVarSet::_get_ref(other);
     try {
@@ -226,8 +226,8 @@ BddVarSet_and(
   PyObject* other
 )
 {
-  if ( PyBddVarSet::_check(self) &&
-       PyBddVarSet::_check(other) ) {
+  if ( PyBddVarSet::Check(self) &&
+       PyBddVarSet::Check(other) ) {
     auto& val1 = PyBddVarSet::_get_ref(self);
     auto& val2 = PyBddVarSet::_get_ref(other);
     try {
@@ -286,7 +286,7 @@ PyBddVarSet::init(
 
 // @brief BddVarSet を PyObject に変換する．
 PyObject*
-PyBddVarSetConv::operator()(
+PyBddVarSet::Conv::operator()(
   const BddVarSet& val
 )
 {
@@ -298,12 +298,12 @@ PyBddVarSetConv::operator()(
 
 // @brief PyObject* から BddVarSet を取り出す．
 bool
-PyBddVarSetDeconv::operator()(
+PyBddVarSet::Deconv::operator()(
   PyObject* obj,
   BddVarSet& val
 )
 {
-  if ( PyBddVarSet::_check(obj) ) {
+  if ( PyBddVarSet::Check(obj) ) {
     val = PyBddVarSet::_get_ref(obj);
     return true;
   }
@@ -312,7 +312,7 @@ PyBddVarSetDeconv::operator()(
 
 // @brief PyObject が BddVarSet タイプか調べる．
 bool
-PyBddVarSet::_check(
+PyBddVarSet::Check(
   PyObject* obj
 )
 {

@@ -17,51 +17,6 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PyExprConv PyExpr.h "PyExpr.h"
-/// @brief Expr を PyObject* に変換するファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyExprConv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief Expr を PyObject* に変換する．
-  PyObject*
-  operator()(
-    const Expr& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class PyExprDeconv PyExpr.h "PyExpr.h"
-/// @brief Expr を取り出すファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyExprDeconv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PyObject* から Expr を取り出す．
-  bool
-  operator()(
-    PyObject* obj,
-    Expr& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class PyExpr PyExpr.h "PyExpr.h"
 /// @brief Python 用の Expr 拡張
 ///
@@ -69,6 +24,28 @@ public:
 //////////////////////////////////////////////////////////////////////
 class PyExpr
 {
+  using ElemType = Expr;
+
+public:
+
+  /// @brief Expr を PyObject* に変換するファンクタクラス
+  struct Conv {
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+  };
+
+  /// @brief PyObject* から Expr を取り出すファンクタクラス
+  struct Deconv {
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -89,26 +66,39 @@ public:
   static
   PyObject*
   ToPyObject(
-    const Expr& val ///< [in] 値
+    const ElemType& val ///< [in] 値
   )
   {
-    PyExprConv conv;
+    Conv conv;
     return conv(val);
+  }
+
+  /// @brief PyObject から Expr を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
   }
 
   /// @brief PyObject が Expr タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief Expr を表す PyObject から Expr を取り出す．
   /// @return Expr を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
-  Expr&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );

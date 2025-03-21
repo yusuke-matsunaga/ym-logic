@@ -17,57 +17,6 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PySopCoverConv PySopCover.h "PySopCover.h"
-/// @brief SopCover を PyObject* に変換するファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PySopCoverConv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief SopCover を PyObject* に変換する．
-  PyObject*
-  operator()(
-    const SopCover& val
-  );
-
-  /// @brief SopCover を PyObject* に変換する．
-  PyObject*
-  operator()(
-    SopCover&& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class PySopCoverDeconv PySopCover.h "PySopCover.h"
-/// @brief SopCover を取り出すファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PySopCoverDeconv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PyObject* から SopCover を取り出す．
-  bool
-  operator()(
-    PyObject* obj,
-    SopCover& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class PySopCover PySopCover.h "PySopCover.h"
 /// @brief Python 用の SopCover 拡張
 ///
@@ -75,6 +24,33 @@ public:
 //////////////////////////////////////////////////////////////////////
 class PySopCover
 {
+  using ElemType = SopCover;
+
+public:
+
+  /// @brief SopCover を PyObject* に変換するファンクタクラス
+  struct Conv {
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+
+    PyObject*
+    operator()(
+      ElemType&& val
+    );
+  };
+
+  /// @brief PyObject* から SopCover を取り出すファンクタクラス
+  struct Deconv {
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -95,10 +71,10 @@ public:
   static
   PyObject*
   ToPyObject(
-    const SopCover& val ///< [in] 値
+    const ElemType& val ///< [in] 値
   )
   {
-    PySopCoverConv conv;
+    Conv conv;
     return conv(val);
   }
 
@@ -109,17 +85,30 @@ public:
   static
   PyObject*
   ToPyObject(
-    SopCover&& val ///< [in] 値
+    ElemType&& val ///< [in] 値
   )
   {
-    PySopCoverConv conv;
+    Conv conv;
     return conv(val);
+  }
+
+  /// @brief PyObject から SopCover を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
   }
 
   /// @brief PyObject が SopCover タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -128,7 +117,7 @@ public:
   ///
   /// Check(obj) == true であると仮定している．
   static
-  SopCover&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );

@@ -207,7 +207,7 @@ TvFunc_literal(
     return nullptr;
   }
   TvFunc func;
-  if ( PyLiteral::_check(var_obj) ) {
+  if ( PyLiteral::Check(var_obj) ) {
     auto lit = PyLiteral::_get_ref(var_obj);
     if ( lit.varid() >= ni ) {
       PyErr_SetString(PyExc_ValueError,
@@ -302,7 +302,7 @@ TvFunc_cofactor(
   }
   auto& func = PyTvFunc::_get_ref(self);
   TvFunc ans;
-  if ( PyLiteral::_check(var_obj) ) {
+  if ( PyLiteral::Check(var_obj) ) {
     auto lit = PyLiteral::_get_ref(var_obj);
     if ( lit.varid() >= func.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
@@ -342,7 +342,7 @@ TvFunc_cofactor_int(
     return nullptr;
   }
   auto& func = PyTvFunc::_get_ref(self);
-  if ( PyLiteral::_check(var_obj) ) {
+  if ( PyLiteral::Check(var_obj) ) {
     auto lit = PyLiteral::_get_ref(var_obj);
     if ( lit.varid() >= func.input_num() ) {
       PyErr_SetString(PyExc_ValueError,
@@ -878,8 +878,8 @@ TvFunc_richcmpfunc(
   int op
 )
 {
-  if ( PyTvFunc::_check(self) &&
-       PyTvFunc::_check(other) ) {
+  if ( PyTvFunc::Check(self) &&
+       PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::_get_ref(self);
     auto& val2 = PyTvFunc::_get_ref(other);
     if ( op == Py_EQ ) {
@@ -899,7 +899,7 @@ TvFunc_invert(
   PyObject* self
 )
 {
-  if ( PyTvFunc::_check(self) ) {
+  if ( PyTvFunc::Check(self) ) {
     auto& val = PyTvFunc::_get_ref(self);
     return PyTvFunc::ToPyObject(~val);
   }
@@ -913,7 +913,8 @@ TvFunc_and(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+  if ( PyTvFunc::Check(self) &&
+       PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::_get_ref(self);
     auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
@@ -934,7 +935,8 @@ TvFunc_or(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+  if ( PyTvFunc::Check(self) &&
+       PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::_get_ref(self);
     auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
@@ -955,7 +957,8 @@ TvFunc_xor(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+  if ( PyTvFunc::Check(self) &&
+       PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::_get_ref(self);
     auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
@@ -976,7 +979,8 @@ TvFunc_iand(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+  if ( PyTvFunc::Check(self) &&
+       PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::_get_ref(self);
     auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
@@ -998,7 +1002,8 @@ TvFunc_ior(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+  if ( PyTvFunc::Check(self) &&
+       PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::_get_ref(self);
     auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
@@ -1020,7 +1025,8 @@ TvFunc_ixor(
   PyObject* other
 )
 {
-  if ( PyTvFunc::_check(self) && PyTvFunc::_check(other) ) {
+  if ( PyTvFunc::Check(self) &&
+       PyTvFunc::Check(other) ) {
     auto& val1 = PyTvFunc::_get_ref(self);
     auto& val2 = PyTvFunc::_get_ref(other);
     if ( val1.input_num() != val2.input_num() ) {
@@ -1093,7 +1099,7 @@ PyTvFunc::init(
 
 // @brief TvFunc を PyObject に変換する．
 PyObject*
-PyTvFuncConv::operator()(
+PyTvFunc::Conv::operator()(
   const TvFunc& val
 )
 {
@@ -1106,7 +1112,7 @@ PyTvFuncConv::operator()(
 
 // @brief TvFunc を PyObject に変換する．
 PyObject*
-PyTvFuncConv::operator()(
+PyTvFunc::Conv::operator()(
   TvFunc&& val
 )
 {
@@ -1118,12 +1124,12 @@ PyTvFuncConv::operator()(
 
 // @brief PyObject* から TvFunc を取り出す．
 bool
-PyTvFuncDeconv::operator()(
+PyTvFunc::Deconv::operator()(
   PyObject* obj,
   TvFunc& val
 )
 {
-  if ( PyTvFunc::_check(obj) ) {
+  if ( PyTvFunc::Check(obj) ) {
     val = PyTvFunc::_get_ref(obj);
     return true;
   }
@@ -1132,7 +1138,7 @@ PyTvFuncDeconv::operator()(
 
 // @brief PyObject が TvFunc タイプか調べる．
 bool
-PyTvFunc::_check(
+PyTvFunc::Check(
   PyObject* obj
 )
 {

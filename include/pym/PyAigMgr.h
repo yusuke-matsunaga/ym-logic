@@ -24,6 +24,28 @@ BEGIN_NAMESPACE_YM
 //////////////////////////////////////////////////////////////////////
 class PyAigMgr
 {
+  using ElemType = AigMgr;
+
+public:
+
+  /// @brief AigMgr を PyObject* に変換するファンクタクラス
+  struct Conv {
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+  };
+
+  /// @brief PyObject* から AigMgr を取り出すファンクタクラス
+  struct Deconv {
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -37,10 +59,37 @@ public:
     PyObject* m ///< [in] 親のモジュールを表す PyObject
   );
 
+  /// @brief AigMgr を表す PyObject を作る．
+  /// @return 生成した PyObject を返す．
+  ///
+  /// 返り値は新しい参照が返される．
+  static
+  PyObject*
+  ToPyObject(
+    const ElemType& val ///< [in] 値
+  )
+  {
+    Conv conv;
+    return conv(val);
+  }
+
+  /// @brief PyObject から AigMgr を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
+  }
+
   /// @brief PyObject が AigMgr タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
@@ -49,7 +98,7 @@ public:
   ///
   /// Check(obj) == true であると仮定している．
   static
-  AigMgr&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );

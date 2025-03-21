@@ -17,57 +17,6 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PyTvFuncConv PyTvFunc.h "PyTvFunc.h"
-/// @brief TvFunc を PyObject* に変換するファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyTvFuncConv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief TvFunc を PyObject* に変換する．
-  PyObject*
-  operator()(
-    const TvFunc& val
-  );
-
-  /// @brief TvFunc を PyObject* に変換する．
-  PyObject*
-  operator()(
-    TvFunc&& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class PyTvFuncDeconv PyTvFunc.h "PyTvFunc.h"
-/// @brief TvFunc を取り出すファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyTvFuncDeconv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PyObject* から TvFunc を取り出す．
-  bool
-  operator()(
-    PyObject* obj,
-    TvFunc& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class PyTvFunc PyTvFunc.h "PyTvFunc.h"
 /// @brief Python 用の TvFunc 拡張
 ///
@@ -75,6 +24,33 @@ public:
 //////////////////////////////////////////////////////////////////////
 class PyTvFunc
 {
+  using ElemType = TvFunc;
+
+public:
+
+  /// @brief TvFunc を PyObject* に変換するファンクタクラス
+  struct Conv {
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+
+    PyObject*
+    operator()(
+      ElemType&& val
+    );
+  };
+
+  /// @brief PyObject* から TvFunc を取り出すファンクタクラス
+  struct Deconv {
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -95,10 +71,10 @@ public:
   static
   PyObject*
   ToPyObject(
-    const TvFunc& val ///< [in] 値
+    const ElemType& val ///< [in] 値
   )
   {
-    PyTvFuncConv conv;
+    Conv conv;
     return conv(val);
   }
 
@@ -109,26 +85,39 @@ public:
   static
   PyObject*
   ToPyObject(
-    TvFunc&& val ///< [in] 値
+    ElemType&& val ///< [in] 値
   )
   {
-    PyTvFuncConv conv;
+    Conv conv;
     return conv(val);
+  }
+
+  /// @brief PyObject から TvFunc を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
   }
 
   /// @brief PyObject が TvFunc タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief TvFunc を表す PyObject から TvFunc を取り出す．
   /// @return TvFunc を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
-  TvFunc&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );

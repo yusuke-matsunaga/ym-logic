@@ -17,51 +17,6 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PyBddVarSetConv PyBddVarSet.h "PyBddVarSet.h"
-/// @brief BddVarSet を PyObject* に変換するファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyBddVarSetConv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief BddVarSet を PyObject* に変換する．
-  PyObject*
-  operator()(
-    const BddVarSet& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class PyBddVarSetDeconv PyBddVarSet.h "PyBddVarSet.h"
-/// @brief BddVarSet を取り出すファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyBddVarSetDeconv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PyObject* から BddVarSet を取り出す．
-  bool
-  operator()(
-    PyObject* obj,
-    BddVarSet& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class PyBddVarSet PyBddVarSet.h "PyBddVarSet.h"
 /// @brief Python 用の BddVarSet 拡張
 ///
@@ -69,6 +24,28 @@ public:
 //////////////////////////////////////////////////////////////////////
 class PyBddVarSet
 {
+  using ElemType = BddVarSet;
+
+public:
+
+  /// @brief BddVarSet を PyObject* に変換するファンクタクラス
+  struct Conv {
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+  };
+
+  /// @brief PyObject* から BddVarSet を取り出すファンクタクラス
+  struct Deconv {
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -89,26 +66,39 @@ public:
   static
   PyObject*
   ToPyObject(
-    const BddVarSet& val ///< [in] 値
+    const ElemType& val ///< [in] 値
   )
   {
-    PyBddVarSetConv conv;
+    Conv conv;
     return conv(val);
+  }
+
+  /// @brief PyObject から BddVarSet を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
   }
 
   /// @brief PyObject が BddVarSet タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief BddVarSet を表す PyObject から BddVarSet を取り出す．
   /// @return BddVarSet を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
-  BddVarSet&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );

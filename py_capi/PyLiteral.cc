@@ -220,8 +220,8 @@ Literal_richcmpfunc(
   int op
 )
 {
-  if ( PyLiteral::_check(obj1) &&
-       PyLiteral::_check(obj2) ) {
+  if ( PyLiteral::Check(obj1) &&
+       PyLiteral::Check(obj2) ) {
     auto val1 = PyLiteral::_get_ref(obj1);
     auto val2 = PyLiteral::_get_ref(obj2);
     Py_RETURN_RICHCOMPARE(val1, val2, op);
@@ -235,7 +235,7 @@ Literal_invert(
   PyObject* self
 )
 {
-  if ( PyLiteral::_check(self) ) {
+  if ( PyLiteral::Check(self) ) {
     auto val = PyLiteral::_get_ref(self);
     return PyLiteral::ToPyObject(~val);
   }
@@ -294,7 +294,7 @@ PyLiteral::init(
 
 // @brief Literal を PyObject に変換する．
 PyObject*
-PyLiteralConv::operator()(
+PyLiteral::Conv::operator()(
   Literal val
 )
 {
@@ -306,7 +306,7 @@ PyLiteralConv::operator()(
 
 // @brief PyObject* から Literal を取り出す．
 bool
-PyLiteralDeconv::operator()(
+PyLiteral::Deconv::operator()(
   PyObject* obj,
   Literal& val
 )
@@ -317,7 +317,8 @@ PyLiteralDeconv::operator()(
     val = Literal(var);
     return true;
   }
-  if ( PyLiteral::_check(obj) ) {
+
+  if ( PyLiteral::Check(obj) ) {
     val = PyLiteral::_get_ref(obj);
     return true;
   }
@@ -326,7 +327,7 @@ PyLiteralDeconv::operator()(
 
 // @brief PyObject が Literal タイプか調べる．
 bool
-PyLiteral::_check(
+PyLiteral::Check(
   PyObject* obj
 )
 {

@@ -22,7 +22,7 @@ BEGIN_NONAMESPACE
 struct BddMgrObject
 {
   PyObject_HEAD
-  BddMgr mMgr;
+  BddMgr mVal;
 };
 
 // Python 用のタイプ定義
@@ -49,7 +49,7 @@ BddMgr_new(
 
   auto self = type->tp_alloc(type, 0);
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
-  new (&bddmgr_obj->mMgr) BddMgr{};
+  new (&bddmgr_obj->mVal) BddMgr{};
   return self;
 }
 
@@ -60,7 +60,7 @@ BddMgr_dealloc(
 )
 {
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
-  bddmgr_obj->mMgr.~BddMgr();
+  bddmgr_obj->mVal.~BddMgr();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -172,7 +172,7 @@ BddMgr_from_truth(
     vector<BddVar> var_list(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       auto var_obj = PySequence_GetItem(var_list_obj, i);
-      if ( !PyBdd::_check(var_obj) ) {
+      if ( !PyBdd::Check(var_obj) ) {
 	PyErr_SetString(PyExc_TypeError, err_msg);
 	return nullptr;
       }
@@ -315,21 +315,36 @@ PyBddMgr::init(
   return false;
 }
 
-// @brief BddMgr を表す PyObject を作る．
+// @brief BddMgr を PyObject* に変換する
 PyObject*
-PyBddMgr::ToPyObject(
-  const BddMgr& val
+PyBddMgr::Conv::operator()(
+  const ElemType& val
 )
 {
-  auto obj = BddMgrType.tp_alloc(&BddMgrType, 0);
+  auto type = PyBddMgr::_typeobject();
+  auto obj = type->tp_alloc(type, 0);
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
-  new (&bddmgr_obj->mMgr) BddMgr{val};
+  new (&bddmgr_obj->mVal) BddMgr(val);
   return obj;
+}
+
+// @brief PyObject* から BddMgr を取り出すファンクタクラス
+bool
+PyBddMgr::Deconv::operator()(
+  PyObject* obj,
+  ElemType& val
+)
+{
+  if ( PyBddMgr::Check(obj) ) {
+    val = PyBddMgr::_get_ref(obj);
+    return true;
+  }
+  return false;
 }
 
 // @brief PyObject が BddMgr タイプか調べる．
 bool
-PyBddMgr::_check(
+PyBddMgr::Check(
   PyObject* obj
 )
 {
@@ -343,7 +358,7 @@ PyBddMgr::_get_ref(
 )
 {
   auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
-  return bddmgr_obj->mMgr;
+  return bddmgr_obj->mVal;
 }
 
 // @brief BddMgr を表すオブジェクトの型定義を返す．

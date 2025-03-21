@@ -18,51 +18,6 @@
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PyAigHandleConv PyAigHandle.h "PyAigHandle.h"
-/// @brief AigHandle を PyObject* に変換するファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyAigHandleConv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief AigHandle を PyObject* に変換する．
-  PyObject*
-  operator()(
-    const AigHandle& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
-/// @class PyAigHandleDeconv PyAigHandle.h "PyAigHandle.h"
-/// @brief AigHandle を取り出すファンクタクラス
-///
-/// 実はただの関数
-//////////////////////////////////////////////////////////////////////
-class PyAigHandleDeconv
-{
-public:
-  //////////////////////////////////////////////////////////////////////
-  // 外部インターフェイス
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief PyObject* から AigHandle を取り出す．
-  bool
-  operator()(
-    PyObject* obj,
-    AigHandle& val
-  );
-
-};
-
-
-//////////////////////////////////////////////////////////////////////
 /// @class PyAigHandle PyAigHandle.h "PyAigHandle.h"
 /// @brief Python 用の AigHandle 拡張
 ///
@@ -70,6 +25,28 @@ public:
 //////////////////////////////////////////////////////////////////////
 class PyAigHandle
 {
+  using ElemType = AigHandle;
+
+public:
+
+  /// @brief AigHandle を PyObject* に変換するファンクタクラス
+  struct Conv {
+    PyObject*
+    operator()(
+      const ElemType& val
+    );
+  };
+
+  /// @brief PyObject* から AigHandle を取り出すファンクタクラス
+  struct Deconv {
+    bool
+    operator()(
+      PyObject* obj,
+      ElemType& val
+    );
+  };
+
+
 public:
   //////////////////////////////////////////////////////////////////////
   // 外部インターフェイス
@@ -90,10 +67,10 @@ public:
   static
   PyObject*
   ToPyObject(
-    const AigHandle& val ///< [in] 値
+    const ElemType& val ///< [in] 値
   )
   {
-    PyAigHandleConv conv;
+    Conv conv;
     return conv(val);
   }
 
@@ -104,10 +81,23 @@ public:
   static
   PyObject*
   ToPyList(
-    const vector<AigHandle>& val ///< [in] 値
+    const vector<ElemType>& val ///< [in] 値
   )
   {
-    return PyList::ToPyObject<AigHandle, PyAigHandleConv>(val);
+    return PyList<ElemType, PyAigHandle>::ToPyObject(val);
+  }
+
+  /// @brief PyObject から AigHandle を取り出す．
+  /// @return 正しく変換できた時に true を返す．
+  static
+  bool
+  FromPyObject(
+    PyObject* obj, ///< [in] Python のオブジェクト
+    ElemType& val  ///< [out] 結果を格納する変数
+  )
+  {
+    Deconv deconv;
+    return deconv(obj, val);
   }
 
   /// @brief AigHandle のリストを表す PyObject からの変換
@@ -115,26 +105,26 @@ public:
   static
   bool
   FromPyList(
-    PyObject* obj,                 ///< [in] 変換元の PyObject
-    vector<AigHandle>& handle_list ///< [out] 結果を格納するオブジェクト
+    PyObject* obj,                ///< [in] 変換元の PyObject
+    vector<ElemType>& handle_list ///< [out] 結果を格納するオブジェクト
   )
   {
-    return PyList::FromPyObject<AigHandle, PyAigHandleDeconv>(obj, handle_list);
+    return PyList<ElemType, PyAigHandle>::FromPyObject(obj, handle_list);
   }
 
   /// @brief PyObject が AigHandle タイプか調べる．
   static
   bool
-  _check(
+  Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
   /// @brief AigHandle を表す PyObject から AigHandle を取り出す．
   /// @return AigHandle を返す．
   ///
-  /// _check(obj) == true であると仮定している．
+  /// Check(obj) == true であると仮定している．
   static
-  AigHandle&
+  ElemType&
   _get_ref(
     PyObject* obj ///< [in] 変換元の PyObject
   );
