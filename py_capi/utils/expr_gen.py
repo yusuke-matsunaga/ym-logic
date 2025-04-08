@@ -7,7 +7,7 @@
 :copyright: Copyright (C) 2025 Yusuke Matsunaga, All rights reserved.
 """
 
-from mk_py_capi import PyObjGen, RawObjArg, ObjArg
+from mk_py_capi import PyObjGen, OptArg, KwdArg, RawObjArg, ObjConvArg
 from mk_py_capi import IntArg, UintArg, LongArg, UlongArg
 from mk_py_capi import BoolArg, StringArg
 
@@ -70,12 +70,13 @@ class ExprGen(PyObjGen):
         self.add_method('literal',
                         is_static=True,
                         func_body=meth_literal,
-                        arg_list=[ObjArg(cvarname='lit',
-                                         cvartype='Literal',
-                                         cvardefault='Literal::x()',
-                                         pyclassname='PyLiteral'),
+                        arg_list=[ObjConvArg(cvarname='lit',
+                                             cvartype='Literal',
+                                             cvardefault='Literal::x()',
+                                             pyclassname='PyLiteral'),
+                                  OptArg(),
+                                  KwdArg(),
                                   BoolArg(name='inv',
-                                          option=True,
                                           cvarname='inv',
                                           cvardefault='false')],
                         doc_str='make a literal object')
@@ -224,8 +225,9 @@ class ExprGen(PyObjGen):
         self.add_method('eval',
                         func_body=meth_eval,
                         arg_list=[RawObjArg(cvarname='vect_obj'),
+                                  OptArg(),
+                                  KwdArg(),
                                   UlongArg(cvarname='mask',
-                                           option=True,
                                            cvardefault='~0UL')],
                         doc_str='evaluate input vector')
 
@@ -402,10 +404,10 @@ class ExprGen(PyObjGen):
             writer.gen_return_py_long('ans')
         self.add_method('literal_num',
                         func_body=meth_literal_num,
-                        arg_list=[RawObjArg(cvarname='lit_obj',
-                                            option=True),
+                        arg_list=[OptArg(),
+                                  RawObjArg(cvarname='lit_obj'),
+                                  KwdArg(),
                                   BoolArg(name='inv',
-                                          option=True,
                                           cvarname='inv',
                                           cvardefault='false')],
                         doc_str='get literal num')
@@ -428,10 +430,10 @@ class ExprGen(PyObjGen):
             writer.gen_return_py_long('ans')
         self.add_method('sop_literal_num',
                         func_body=meth_sop_literal_num,
-                        arg_list=[RawObjArg(cvarname='lit_obj',
-                                            option=True),
+                        arg_list=[OptArg(),
+                                  RawObjArg(cvarname='lit_obj'),
+                                  KwdArg(),
                                   BoolArg(name='inv',
-                                          option=True,
                                           cvarname='inv',
                                           cvardefault='false')],
                         doc_str='get literal num in SOP form')
@@ -466,16 +468,15 @@ class ExprGen(PyObjGen):
 
         def nb_inplace_and(writer):
             with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
-                self.gen_obj_conv(writer, objname='self', varname='my_obj')
-                self.gen_ref_conv(writer, refname='val1')
+                self.gen_ref_conv(writer, objname='self', refname='val1')
                 self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.gen_assign('my_obj->mVal', 'val1 & val2')
+                writer.write_line('val1 &= val2')
+                writer.write_line('Py_INCREF(self)')
                 writer.gen_return('self')
             writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
 
         def nb_or(writer):
             with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
-                self.gen_obj_conv(writer, objname='self', varname='my_obj')
                 self.gen_ref_conv(writer, refname='val1')
                 self.gen_ref_conv(writer, objname='other', refname='val2')
                 gen_return_py_expr(writer, 'val1 | val2')
@@ -483,16 +484,15 @@ class ExprGen(PyObjGen):
 
         def nb_inplace_or(writer):
             with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
-                self.gen_obj_conv(writer, objname='self', varname='my_obj')
                 self.gen_ref_conv(writer, refname='val1')
                 self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.gen_assign('my_obj->mVal', 'val1 | val2')
+                writer.write_line('val1 |= val2')
+                writer.write_line('Py_INCREF(self)')
                 writer.gen_return('self')
             writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
 
         def nb_xor(writer):
             with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
-                self.gen_obj_conv(writer, objname='self', varname='my_obj')
                 self.gen_ref_conv(writer, refname='val1')
                 self.gen_ref_conv(writer, objname='other', refname='val2')
                 gen_return_py_expr(writer, 'val1 ^ val2')
@@ -500,10 +500,10 @@ class ExprGen(PyObjGen):
 
         def nb_inplace_xor(writer):
             with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
-                self.gen_obj_conv(writer, objname='self', varname='my_obj')
                 self.gen_ref_conv(writer, refname='val1')
                 self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.gen_assign('my_obj->mVal', 'val1 ^ val2')
+                writer.write_line('val1 ^= val2')
+                writer.write_line('Py_INCREF(self)')
                 writer.gen_return('self')
             writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
             

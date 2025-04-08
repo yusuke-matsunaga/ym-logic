@@ -7,7 +7,7 @@
 :copyright: Copyright (C) 2025 Yusuke Matsunaga, All rights reserved.
 """
 
-from mk_py_capi import PyObjGen, IntArg, BoolArg
+from mk_py_capi import PyObjGen, OptArg, KwdArg, IntArg, BoolArg
 
 
 class LiteralGen(PyObjGen):
@@ -44,12 +44,12 @@ class LiteralGen(PyObjGen):
                 writer.gen_assign('my_obj->mVal', 'Literal(id, inv)')
             writer.gen_return('self')
         self.add_new(func_body=new_body,
-                     arg_list=[IntArg(name=None,
-                                      option=True,
+                     arg_list=[OptArg(),
+                               IntArg(name=None,
                                       cvarname='id',
                                       cvardefault='-1'),
+                               KwdArg(),
                                BoolArg(name='inv',
-                                       option=True,
                                        cvarname='inv',
                                        cvardefault='false')])
 
@@ -61,8 +61,9 @@ class LiteralGen(PyObjGen):
                         arg_list=[IntArg(name=None,
                                          cvarname='id',
                                          cvardefault='-1'),
+                                  OptArg(),
+                                  KwdArg(),
                                   BoolArg(name='inv',
-                                          option=True,
                                           cvarname='inv',
                                           cvardefault='false')])
 
