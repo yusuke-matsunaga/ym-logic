@@ -12,6 +12,9 @@ from mk_py_capi import IntArg, UintArg, LongArg, UlongArg
 from mk_py_capi import BoolArg, StringArg
 
 
+def gen_return_py_expr(writer, varname):
+    writer.gen_return(f'PyExpr::ToPyObject({varname})')
+    
 class ExprGen(PyObjGen):
 
     def __init__(self):
@@ -37,7 +40,7 @@ class ExprGen(PyObjGen):
 
         def meth_invalid(writer):
             writer.gen_auto_assign('expr', 'Expr::invalid()')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('invalid',
                         is_static=True,
                         func_body=meth_invalid,
@@ -45,7 +48,7 @@ class ExprGen(PyObjGen):
 
         def meth_zero(writer):
             writer.gen_auto_assign('expr', 'Expr::zero()')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('zero',
                         is_static=True,
                         func_body=meth_zero,
@@ -53,7 +56,7 @@ class ExprGen(PyObjGen):
 
         def meth_one(writer):
             writer.gen_auto_assign('expr', 'Expr::one()')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('one',
                         is_static=True,
                         func_body=meth_one,
@@ -63,7 +66,7 @@ class ExprGen(PyObjGen):
             with writer.gen_if_block('inv'):
                 writer.gen_assign('lit', '~lit')
             writer.gen_auto_assign('expr', 'Expr::literal(lit)')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('literal',
                         is_static=True,
                         func_body=meth_literal,
@@ -80,7 +83,7 @@ class ExprGen(PyObjGen):
         def meth_posi_literal(writer):
             writer.gen_auto_assign('expr',
                                    'Expr::posi_literal(static_cast<SizeType>(varid))')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('posi_literal',
                         is_static=True,
                         func_body=meth_posi_literal,
@@ -90,7 +93,7 @@ class ExprGen(PyObjGen):
         def meth_nega_literal(writer):
             writer.gen_auto_assign('expr',
                                    'Expr::nega_literal(static_cast<SizeType>(varid))')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('nega_literal',
                         is_static=True,
                         func_body=meth_nega_literal,
@@ -103,7 +106,7 @@ class ExprGen(PyObjGen):
             with writer.gen_if_block('!PyList<Expr, PyExpr>::FromPyObject(obj, expr_list)'):
                 writer.gen_type_error("argument 1 must be a list of 'Expr's")
             writer.gen_auto_assign('expr', 'Expr::and_op(expr_list)')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('and_op',
                         is_static=True,
                         func_body=meth_and_op,
@@ -116,7 +119,7 @@ class ExprGen(PyObjGen):
             with writer.gen_if_block('!PyList<Expr, PyExpr>::FromPyObject(obj, expr_list)'):
                 writer.gen_type_error("argument 1 must be a list of 'Expr's")
             writer.gen_auto_assign('expr', 'Expr::or_op(expr_list)')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('or_op',
                         is_static=True,
                         func_body=meth_and_op,
@@ -129,7 +132,7 @@ class ExprGen(PyObjGen):
             with writer.gen_if_block('!PyList<Expr, PyExpr>::FromPyObject(obj, expr_list)'):
                 writer.gen_type_error("argument 1 must be a list of 'Expr's")
             writer.gen_auto_assign('expr', 'Expr::xor_op(expr_list)')
-            writer.gen_return('PyExpr::ToPyObject(expr)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('xor_op',
                         is_static=True,
                         func_body=meth_and_op,
@@ -139,7 +142,7 @@ class ExprGen(PyObjGen):
         def meth_from_string(writer):
             with writer.gen_try_block():
                 writer.gen_auto_assign('expr', 'Expr::from_string(expr_str)')
-                writer.gen_return('PyExpr::ToPyObject(expr)')
+                gen_return_py_expr(writer, 'expr')
             with writer.gen_catch_block('std::invalid_argument'):
                 writer.gen_type_error('syntax error in argument string')
         self.add_method('from_string',
@@ -169,8 +172,8 @@ class ExprGen(PyObjGen):
                 self.gen_ref_conv(writer, objname='value',
                                   refname='expr1')
                 writer.write_line('comp_map.emplace(static_cast<SizeType>(id), expr1);')
-            writer.gen_auto_assign('ans', 'val.compose(comp_map)')
-            writer.gen_return('PyExpr::ToPyObject(ans)')
+            writer.gen_auto_assign('expr', 'val.compose(comp_map)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('compose',
                         func_body=meth_compose,
                         arg_list=[RawObjArg(cvarname='obj')],
@@ -196,8 +199,8 @@ class ExprGen(PyObjGen):
                 with writer.gen_if_block('val == -1 && PyErr_Occurred()'):
                     writer.gen_return('nullptr')
                 writer.write_line('comp_map.emplace(static_cast<SizeType>(id), static_cast<SizeType>(val));')
-            writer.gen_auto_assign('ans', 'val.remap_var(comp_map)')
-            writer.gen_return('PyExpr::ToPyObject(ans)')
+            writer.gen_auto_assign('expr', 'val.remap_var(comp_map)')
+            gen_return_py_expr(writer, 'expr')
         self.add_method('remap_var',
                         func_body=meth_remap_var,
                         arg_list=[RawObjArg(cvarname='obj')],
@@ -406,8 +409,114 @@ class ExprGen(PyObjGen):
                                           cvarname='inv',
                                           cvardefault='false')],
                         doc_str='get literal num')
-                
+
+        def meth_sop_literal_num(writer):
+            writer.gen_vardecl(typename='Literal',
+                               varname='lit')
+            writer.gen_vardecl(typename='SizeType',
+                               varname='ans')
+            with writer.gen_if_block('lit_obj == nullptr'):
+                with writer.gen_if_block('inv'):
+                    writer.gen_value_error("'inv' should not be specified without 'var'")
+                writer.gen_assign('ans', 'val.sop_literal_num()')
+            with writer.gen_elseif_block('PyLiteral::FromPyObject(lit_obj, lit)'):
+                with writer.gen_if_block('inv'):
+                    writer.gen_assign('lit', '~lit')
+                writer.gen_assign('ans', 'val.sop_literal_num(lit)')
+            with writer.gen_else_block():
+                writer.gen_type_error('argument 1 must be an int or a literal')
+            writer.gen_return_py_long('ans')
+        self.add_method('sop_literal_num',
+                        func_body=meth_sop_literal_num,
+                        arg_list=[RawObjArg(cvarname='lit_obj',
+                                            option=True),
+                                  BoolArg(name='inv',
+                                          option=True,
+                                          cvarname='inv',
+                                          cvardefault='false')],
+                        doc_str='get literal num in SOP form')
+
+        def meth_sop_cube_num(writer):
+            writer.gen_auto_assign('ans', 'val.sop_cube_num()')
+            writer.gen_return_py_long('ans')
+        self.add_method('sop_cube_num',
+                        func_body=meth_sop_cube_num,
+                        doc_str='get cube num in SOP form')
+
+        def getter_input_size(writer):
+            writer.gen_auto_assign('ans', 'val.input_size()')
+            writer.gen_return_py_long('ans')
+        self.add_getter('input_size',
+                        func_body=getter_input_size)
+        self.add_attr('input_size',
+                      getter_name='input_size')
+
+        def nb_invert(writer):
+            with writer.gen_if_block('PyExpr::Check(self)'):
+                self.gen_ref_conv(writer, objname='self', refname='val')
+                gen_return_py_expr(writer, '~val')
+            writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
+
+        def nb_and(writer):
+            with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
+                self.gen_ref_conv(writer, refname='val1')
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                gen_return_py_expr(writer, 'val1 & val2')
+            writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
+
+        def nb_inplace_and(writer):
+            with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
+                self.gen_obj_conv(writer, objname='self', varname='my_obj')
+                self.gen_ref_conv(writer, refname='val1')
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                writer.gen_assign('my_obj->mVal', 'val1 & val2')
+                writer.gen_return('self')
+            writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
+
+        def nb_or(writer):
+            with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
+                self.gen_obj_conv(writer, objname='self', varname='my_obj')
+                self.gen_ref_conv(writer, refname='val1')
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                gen_return_py_expr(writer, 'val1 | val2')
+            writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
+
+        def nb_inplace_or(writer):
+            with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
+                self.gen_obj_conv(writer, objname='self', varname='my_obj')
+                self.gen_ref_conv(writer, refname='val1')
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                writer.gen_assign('my_obj->mVal', 'val1 | val2')
+                writer.gen_return('self')
+            writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
+
+        def nb_xor(writer):
+            with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
+                self.gen_obj_conv(writer, objname='self', varname='my_obj')
+                self.gen_ref_conv(writer, refname='val1')
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                gen_return_py_expr(writer, 'val1 ^ val2')
+            writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
+
+        def nb_inplace_xor(writer):
+            with writer.gen_if_block('PyExpr::Check(self) && PyExpr::Check(other)'):
+                self.gen_obj_conv(writer, objname='self', varname='my_obj')
+                self.gen_ref_conv(writer, refname='val1')
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                writer.gen_assign('my_obj->mVal', 'val1 ^ val2')
+                writer.gen_return('self')
+            writer.write_line('Py_RETURN_NOTIMPLEMENTED;')
             
+        self.add_number(nb_invert=nb_invert,
+                        nb_and = nb_and,
+                        nb_or = nb_or,
+                        nb_xor = nb_xor,
+                        nb_inplace_and = nb_inplace_and,
+                        nb_inplace_or = nb_inplace_or,
+                        nb_inplace_xor = nb_inplace_xor)
+
+        self.add_conv('default')
+        self.add_deconv('default')
         
         
 if __name__ == '__main__':
