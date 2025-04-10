@@ -25,7 +25,6 @@ class DdEdge;
 class BddVar :
   public Bdd
 {
-  //friend class BddMgr;
   friend class BddMgrHolder;
   friend class Bdd;
   friend class BddLit;
@@ -98,11 +97,11 @@ public:
 
   /// @brief 肯定のリテラルを返す．
   BddLit
-  posilit() const;
+  positive_literal() const;
 
   /// @brief 否定のリテラルを返す．
   BddLit
-  negalit() const;
+  negative_literal() const;
 
   /// @brief 等価比較演算子
   bool

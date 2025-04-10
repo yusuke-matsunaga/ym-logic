@@ -108,13 +108,7 @@ class LiteralGen(PyObjGen):
         self.add_attr('index',
                       getter_name='index_getter')
 
-        def richcompare(writer):
-            with writer.gen_if_block('PyLiteral::Check(self) && PyLiteral::Check(other)'):
-                self.gen_ref_conv(writer, objname='self', refname='val1')
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.write_line('Py_RETURN_RICHCOMPARE(val1, val2, op);')
-            writer.gen_return_py_notimplemented()
-        self.add_richcompare(func_body=richcompare)
+        self.add_richcompare('eq_default')
 
         def nb_invert(writer):
             writer.gen_return_pyobject('PyLiteral', '~val')

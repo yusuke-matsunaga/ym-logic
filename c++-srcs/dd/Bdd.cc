@@ -314,7 +314,7 @@ Bdd::is_const() const
 bool
 Bdd::is_variable() const
 {
-  return is_posilit();
+  return is_positive_literal();
 }
 
 // @brief リテラルの時 true を返す．
@@ -338,7 +338,7 @@ Bdd::is_literal() const
 
 // @brief 肯定のリテラルの時 true を返す．
 bool
-Bdd::is_posilit() const
+Bdd::is_positive_literal() const
 {
   if ( !is_literal() ) {
     return false;
@@ -348,7 +348,7 @@ Bdd::is_posilit() const
 
 // @brief 否定のリテラルの時 true を返す．
 bool
-Bdd::is_negalit() const
+Bdd::is_negative_literal() const
 {
   if ( !is_literal() ) {
     return false;
@@ -696,14 +696,14 @@ BddVar::level() const
 
 // @brief 肯定のリテラルを返す．
 BddLit
-BddVar::posilit() const
+BddVar::positive_literal() const
 {
   return BddLit(*this, false);
 }
 
 // @brief 否定のリテラルを返す．
 BddLit
-BddVar::negalit() const
+BddVar::negative_literal() const
 {
   return BddLit(*this, true);
 }

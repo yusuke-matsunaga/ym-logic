@@ -441,11 +441,11 @@ public:
   ///
   /// - is_variable() と等価
   bool
-  is_posilit() const;
+  is_positive_literal() const;
 
   /// @brief 否定のリテラルの時 true を返す．
   bool
-  is_negalit() const;
+  is_negative_literal() const;
 
   /// @brief 積項の時 true を返す．
   bool

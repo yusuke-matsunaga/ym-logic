@@ -995,7 +995,7 @@ def test_bad_from_string1():
     with pytest.raises(Exception) as e:
         _ = Expr.from_string(expr_str)
     assert e.type == ValueError
-    assert str(e.value) == "syntax error in argument string"
+    assert str(e.value) == "syntax error in argument string: syntax error"
 
     
 def test_analyze_c0():

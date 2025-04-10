@@ -2,7 +2,7 @@
 
 """ PyBdd を生成するスクリプト
 
-:file: tvfunc_gen.py
+:file: bdd_gen.py
 :author: Yusuke Matsunaga (松永 裕介)
 :copyright: Copyright (C) 2025 Yusuke Matsunaga, All rights reserved.
 """
@@ -308,15 +308,7 @@ class BddGen(PyObjGen):
         self.add_attr('mgr',
                       getter_name='get_mgr')
         
-        def cmp_func(writer):
-            with writer.gen_if_block('PyBdd::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('op == Py_EQ'):
-                    writer.gen_return_py_bool('val == val2')
-                with writer.gen_if_block('op == Py_NE'):
-                    writer.gen_return_py_bool('val != val2')
-            writer.gen_return_py_notimplemented()
-        self.add_richcompare(cmp_func)
+        self.add_richcompare('eq_default')
 
         def nb_invert(writer):
             writer.gen_return_pyobject('PyBdd', '~val')
@@ -387,7 +379,7 @@ class BddGen(PyObjGen):
         def conv_func(writer):
             self.gen_alloc_code(writer, varname='obj')
             self.gen_obj_conv(writer, objname='obj', varname='my_obj')
-            writer.write_line(f'new (&my_obj->mVal) {self.classname}(std::move(val));')
+            writer.write_line('new (&my_obj->mVal) Bdd(val);')
             writer.gen_return('obj')
         self.add_conv(conv_func)
 

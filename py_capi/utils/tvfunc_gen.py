@@ -382,15 +382,7 @@ class TvFuncGen(PyObjGen):
                                                         pytypename='PyTvFunc::_typeobject()')],
                                doc_str='return irredundant SOP')
 
-        def cmp_func(writer):
-            with writer.gen_if_block('PyTvFunc::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('op == Py_EQ'):
-                    writer.gen_return_py_bool('val == val2')
-                with writer.gen_if_block('op == Py_NE'):
-                    writer.gen_return_py_bool('val != val2')
-            writer.gen_return_py_notimplemented()
-        self.add_richcompare(func_body=cmp_func)
+        self.add_richcompare('eq_default')
 
         def nb_invert(writer):
             writer.gen_return_pyobject('PyTvFunc', '~val')

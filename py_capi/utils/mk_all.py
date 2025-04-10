@@ -64,6 +64,15 @@ tvfunc_gen = TvFuncGen()
 from bdd_gen import BddGen
 bdd_gen = BddGen()
 
+from bddmgr_gen import BddMgrGen
+bddmgr_gen = BddMgrGen()
+
+from bddlit_gen import BddGen
+bddlit_gen = BddLitGen()
+
+from bddvar_gen import BddVarGen
+bddvar_gen = BddVarGen()
+
 for gen, name in ((primtype_gen, 'PyPrimType'),
                   (literal_gen, 'PyLiteral'),
                   (npnmap_gen, 'PyNpnMap'),

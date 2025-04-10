@@ -488,15 +488,7 @@ class ExprGen(PyObjGen):
                         nb_inplace_or = nb_inplace_or,
                         nb_inplace_xor = nb_inplace_xor)
 
-        def cmp_func(writer):
-            with writer.gen_if_block('PyExpr::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('op == Py_EQ'):
-                    writer.gen_return_py_bool('val == val2')
-                with writer.gen_if_block('op == Py_NE'):
-                    writer.gen_return_py_bool('val != val2')
-            writer.gen_return_py_notimplemented()
-        self.add_richcompare(func_body=cmp_func)
+        self.add_richcompare('eq_default')
             
         self.add_conv('default')
         self.add_deconv('default')

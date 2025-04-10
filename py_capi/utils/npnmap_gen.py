@@ -43,6 +43,8 @@ class NpnMapGen(PyObjGen):
                                 IntArg(cvarname='ni2',
                                        cvardefault='-1')])
 
+        self.add_richcompare('eq_default')
+        
         def meth_identity(writer):
             writer.gen_return_pyobject('PyNpnMap',
                                        'NpnMap::identity(ni, inv)')
