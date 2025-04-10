@@ -96,7 +96,7 @@ class BddGen(PyObjGen):
                                doc_str='ITE op')
 
         def meth_compose(writer):
-            writer.gen_auto_assign('var', 'BddVar.from_bdd(var_bdd)')
+            writer.gen_auto_assign('var', 'BddVar::from_bdd(var_bdd)')
             with writer.gen_if_block('var.is_invalid()'):
                 writer.gen_type_error('"argument 1 must be a variable"')
             with writer.gen_try_block():
@@ -154,22 +154,16 @@ class BddGen(PyObjGen):
                         doc_str='return True if ONE')
 
         def meth_is_cube(writer):
-            writer.gen_return_py_bool('val.is_cube')
+            writer.gen_return_py_bool('val.is_cube()')
         self.add_method('is_cube',
                         func_body=meth_is_cube,
                         doc_str='return True if CUBE')
 
         def meth_is_posicube(writer):
-            writer.gen_return_py_bool('val.is_posicube')
+            writer.gen_return_py_bool('val.is_posicube()')
         self.add_method('is_posicube',
                         func_body=meth_is_posicube,
                         doc_str='return True if positive CUBE')
-
-        def meth_is_negacube(writer):
-            writer.gen_return_py_bool('val.is_negacube')
-        self.add_method('is_negacube',
-                        func_body=meth_is_negacube,
-                        doc_str='return True if negative CUBE')
 
         def meth_check_sup(writer):
             writer.gen_auto_assign('var', 'BddVar::from_bdd(var_bdd)')

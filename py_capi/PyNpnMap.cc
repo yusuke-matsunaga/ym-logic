@@ -374,8 +374,8 @@ new_func(
   static const char* kwlist[] = {
     nullptr
   };
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "",
-                                    const_cast<char**>(kwlist),
+  // 余分な引数を取らないことを確認しておく．
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "", const_cast<char**>(kwlist)) ) {
     return nullptr;
   }
   auto self = type->tp_alloc(type, 0);
