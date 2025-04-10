@@ -108,7 +108,7 @@ class LiteralGen(PyObjGen):
         self.add_attr('index',
                       getter_name='index_getter')
 
-        self.add_richcompare('eq_default')
+        self.add_richcompare('cmp_default')
 
         def nb_invert(writer):
             writer.gen_return_pyobject('PyLiteral', '~val')

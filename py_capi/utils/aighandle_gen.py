@@ -8,7 +8,9 @@
 """
 
 from mk_py_capi import PyObjGen
-from mk_py_capi import IntArg, BoolArg, StringArg, ObjConvArg, TypedObjConvArg, OptArg, KwdArg
+from mk_py_capi import IntArg, BoolArg, StringArg
+from mk_py_capi import RawObjArg, ObjConvArg, TypedObjConvArg
+from mk_py_capi import OptArg, KwdArg
 
         
 class JsonValueArg(ObjConvArg):
@@ -42,7 +44,11 @@ class AigHandleGen(PyObjGen):
                          pyname='AigHandle',
                          namespace='YM',
                          header_include_files=['ym/AigHandle.h'],
-                         source_include_files=['pym/PyAigHandle.h'])
+                         source_include_files=['pym/PyAigHandle.h',
+                                               'pym/PyLong.h',
+                                               'pym/PyBool.h',
+                                               'pym/PyList.h',
+                                               'pym/PyJsonValue.h'])
 
         self.add_new('disabled')
         
@@ -134,7 +140,7 @@ class AigHandleGen(PyObjGen):
                         doc_str='return EXTENDED fanin list')
 
         def meth_gen_dot(writer):
-            writer.gen_vardecl(typename='std::ofilestream',
+            writer.gen_vardecl(typename='std::ofstream',
                                varname='ofs(filename)')
             with writer.gen_if_block('!ofs'):
                 writer.gen_vardecl(typename='std::ostringstream',
@@ -154,11 +160,25 @@ class AigHandleGen(PyObjGen):
                         doc_str='generate DOT file')
 
         def meth_gen_dot2(writer):
-            pass
+            writer.gen_vardecl(typename='std::ofstream',
+                               varname='ofs(filename)')
+            with writer.gen_if_block('!ofs'):
+                writer.gen_vardecl(typename='std::ostringstream',
+                                   varname='buf')
+                writer.write_line('buf << "Could not create file \'" << filename << "\'";')
+                writer.gen_value_error('buf.str().c_str()')
+            writer.gen_vardecl(typename='std::vector<AigHandle>',
+                               varname='aig_list')
+            with writer.gen_if_block('!PyList<AigHandle, PyAigHandle>::FromPyObject(list_obj, aig_list)'):
+                writer.gen_type_error('"argument 2 should be a sequence of \'AigHandle\'"')
+            writer.write_line('AigHandle::gen_dot(ofs, aig_list, option);')
+            writer.gen_return_py_none()
         self.add_static_method('gen_dot2',
                                func_body=meth_gen_dot2,
                                arg_list=[StringArg(name='filename',
                                                    cvarname='filename'),
+                                         RawObjArg(name='aig_list',
+                                                   cvarname='list_obj'),
                                          OptArg(),
                                          KwdArg(),
                                          JsonValueArg(name='option',
@@ -178,7 +198,7 @@ class AigHandleGen(PyObjGen):
             writer.gen_return_pyobject('PyAigHandle', '~val')
 
         def nb_multiply(writer):
-            with writer.gen_if_block('PyBool::Check(other)'):
+            with writer.gen_if_block('PyBool_Check(other)'):
                 writer.gen_auto_assign('inv', 'PyBool::Get(other)')
                 writer.gen_return_pyobject('PyAigHandle', 'val * inv')
             writer.gen_return_py_notimplemented()

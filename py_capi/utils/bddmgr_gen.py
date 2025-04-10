@@ -8,7 +8,7 @@
 """
 
 from mk_py_capi import PyObjGen
-from mk_py_capi import IntArg
+from mk_py_capi import IntArg, StringArg, RawObjArg, OptArg, KwdArg
 from bdd_gen import BddArg
 
 
@@ -19,9 +19,11 @@ class BddMgrGen(PyObjGen):
                          pyname='BddMgr',
                          namespace='YM',
                          header_include_files=['ym/BddMgr.h'],
-                         source_include_files=['pym/BddMgr.h',
-                                               'pym/Bdd.h',
+                         source_include_files=['pym/PyBddMgr.h',
+                                               'pym/PyBdd.h',
+                                               'pym/PyLong.h',
                                                'pym/PyJsonValue.h',
+                                               'pym/PyList.h',
                                                'ym/BddVar.h'])
 
         def new_body(writer):
@@ -62,20 +64,42 @@ class BddMgrGen(PyObjGen):
                         doc_str='make ONE BDD')
 
         def meth_from_truth(writer):
-            pass
-        self.add_method('from_true',
+            with writer.gen_if_block('list_obj == nullptr'):
+                with writer.gen_try_block():
+                    writer.gen_return_pyobject('PyBdd', 'val.from_truth(func_str)')
+                writer.gen_catch_invalid_argument('"invalid string"')
+            with writer.gen_else_block():
+                writer.gen_vardecl(typename='std::vector<Bdd>',
+                                   varname='tmp_list')
+                with writer.gen_if_block('!PyList<Bdd, PyBdd>::FromPyObject(list_obj, tmp_list)'):
+                    writer.gen_type_error('"argument 2 should be a sequence of \'BddVar\'"')
+                writer.gen_vardecl(typename='std::vector<BddVar>',
+                                   varname='var_list')
+                with writer.gen_if_block('!BddVar::from_bdd_list(tmp_list, var_list)'):
+                    writer.gen_type_error('"argument 2 should be a sequence of \'BddVar\'"')
+                with writer.gen_try_block():
+                    writer.gen_return_pyobject('PyBdd', 'val.from_truth(func_str, var_list)')
+                writer.gen_catch_invalid_argument('"invalid string"')
+        self.add_method('from_truth',
                         func_body=meth_from_truth,
+                        arg_list=[StringArg(name='func_str',
+                                            cvarname='func_str'),
+                                  OptArg(),
+                                  KwdArg(),
+                                  RawObjArg(name='var_list',
+                                            cvarname='list_obj',
+                                            cvardefault='nullptr')],
                         doc_str='make a BDD from truth table')
 
         def meth_enable_gc(writer):
-            writer.write_line('val.enable_gc()')
+            writer.write_line('val.enable_gc();')
             writer.gen_return_py_none()
         self.add_method('enable_gc',
                         func_body=meth_enable_gc,
                         doc_str='enable GC')
 
         def meth_disable_gc(writer):
-            writer.write_line('val.disable_gc()')
+            writer.write_line('val.disable_gc();')
             writer.gen_return_py_none()
         self.add_method('disable_gc',
                         func_body=meth_enable_gc,
@@ -94,9 +118,10 @@ class BddMgrGen(PyObjGen):
                         func_body=get_gc_limit)
         def set_gc_limit(writer):
             with writer.gen_if_block('!PyLong::Check(obj)'):
-                writer.gen_type_error('"integer type is expected"')
+                writer.gen_type_error('"integer type is expected"',
+                                      error_val='-1')
             writer.gen_auto_assign('gc_limit', 'PyLong::Get(obj)')
-            writer.write_line('val.set_gc_limit(gc_limit)')
+            writer.write_line('val.set_gc_limit(gc_limit);')
             writer.gen_return('0')
         self.add_setter('set_gc_limit',
                         func_body=set_gc_limit)

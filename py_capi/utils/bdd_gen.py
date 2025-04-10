@@ -8,7 +8,7 @@
 """
 
 from mk_py_capi import PyObjGen, OptArg, KwdArg
-from mk_py_capi import RawObjArg, TypedRawObjArg
+from mk_py_capi import RawObjArg, TypedRawObjArg, ObjConvArg
 from mk_py_capi import IntArg, UintArg, LongArg, UlongArg
 from mk_py_capi import BoolArg, StringArg, TypedObjConvArg
 
@@ -24,6 +24,17 @@ class BddArg(TypedObjConvArg):
                          cvardefault=None,
                          pyclassname='PyBdd')
 
+class BddVarArg(ObjConvArg):
+
+    def __init__(self, *,
+                 name=None,
+                 cvarname):
+        super().__init__(name=name,
+                         cvarname=cvarname,
+                         cvartype='BddVar',
+                         cvardefault=None,
+                         pyclassname='PyBddVar')
+
 
 class BddGen(PyObjGen):
 
@@ -33,10 +44,17 @@ class BddGen(PyObjGen):
                          namespace='YM',
                          header_include_files=['ym/Bdd.h'],
                          source_include_files=['pym/PyBdd.h',
+                                               'pym/PyBddMgr.h',
+                                               'pym/PyBddVar.h',
+                                               'pym/PyBddLit.h',
+                                               'pym/PyBddCompMap.h',
+                                               'pym/PyBddVarMap.h',
+                                               'pym/PyBddVarSet.h',
                                                'pym/PyLiteral.h',
                                                'pym/PyNpnMap.h',
                                                'pym/PyInt.h',
                                                'pym/PyLong.h',
+                                               'pym/PyBool.h',
                                                'pym/PyString.h',
                                                'pym/PyModule.h',
                                                'ym/BddVar.h',
@@ -96,23 +114,27 @@ class BddGen(PyObjGen):
                                doc_str='ITE op')
 
         def meth_compose(writer):
-            writer.gen_auto_assign('var', 'BddVar::from_bdd(var_bdd)')
-            with writer.gen_if_block('var.is_invalid()'):
-                writer.gen_type_error('"argument 1 must be a variable"')
             with writer.gen_try_block():
                 writer.gen_return_pyobject('PyBdd',
                                            'val.compose(var, operand)')
             writer.gen_catch_invalid_argument()
         self.add_method('compose',
                         func_body=meth_compose,
-                        arg_list=[BddArg(name='var',
-                                         cvarname='var_bdd'),
+                        arg_list=[BddVarArg(name='var',
+                                            cvarname='var'),
                                   BddArg(name='operand',
                                          cvarname='operand')],
                         doc_str='COMPOSE op')
 
         def meth_multi_compose(writer):
-            pass
+            writer.gen_vardecl(typename='std::unordered_map<BddVar, Bdd>',
+                               varname='compose_map')
+            with writer.gen_if_block('!PyBddCompMap::FromPyObject(dict_obj, compose_map)'):
+                writer.gen_type_error('"argument 1 should be a dictionary from \'BddVar\' to \'Bdd\'"')
+            with writer.gen_try_block():
+                writer.gen_return_pyobject('PyBdd',
+                                           'val.multi_compose(compose_map)')
+            writer.gen_catch_invalid_argument()
         self.add_method('multi_compose',
                         func_body=meth_multi_compose,
                         arg_list=[TypedRawObjArg(name='map',
@@ -121,7 +143,14 @@ class BddGen(PyObjGen):
                         doc_str='multiway COMPOSE op')
 
         def meth_remap_vars(writer):
-            pass
+            writer.gen_vardecl(typename='std::unordered_map<BddVar, BddLit>',
+                               varname='var_map')
+            with writer.gen_if_block('!PyBddVarMap::FromPyObject(dict_obj, var_map)'):
+                writer.gen_type_error('"argument 1 should be a dictionary from \'BddVar\' to \'BddLit\'"')
+            with writer.gen_try_block():
+                writer.gen_return_pyobject('PyBdd',
+                                           'val.remap_vars(var_map)')
+            writer.gen_catch_invalid_argument()
         self.add_method('remap_vars',
                         func_body=meth_remap_vars,
                         arg_list=[TypedRawObjArg(name='map',
@@ -270,15 +299,20 @@ class BddGen(PyObjGen):
                         doc_str='return positive cofactor of root variable')
 
         def meth_eval(writer):
-            pass
+            writer.gen_vardecl(typename='std::vector<bool>',
+                               varname='input_vector')
+            with writer.gen_if_block('!PyList<bool, PyBool>::FromPyObject(vector_obj, input_vector)'):
+                writer.gen_type_error('"artument 1 should be a sequence of bool"')
+            writer.gen_return_py_bool('val.eval(input_vector)')
         self.add_method('eval',
                         func_body=meth_eval,
-                        arg_list=[],
+                        arg_list=[RawObjArg(name='input_vector',
+                                            cvarname='vector_obj')],
                         doc_str='evaluate input vector')
 
         def meth_to_litlist(writer):
             with writer.gen_try_block():
-                writer.gen_return_pyobject('PyList<Bdd, PyBdd>',
+                writer.gen_return_pyobject('PyList<BddLit, PyBddLit>',
                                            'val.to_litlist()')
             writer.gen_catch_invalid_argument()
         self.add_method('to_litlist',
@@ -286,7 +320,22 @@ class BddGen(PyObjGen):
                         doc_str='get literal list')
 
         def meth_to_truth(writer):
-            pass
+            writer.gen_vardecl(typename='std::vector<Bdd>',
+                               varname='tmp_list')
+            with writer.gen_if_block('!PyList<Bdd, PyBdd>::FromPyObject(list_obj, tmp_list)'):
+                writer.gen_type_error('"argument 1 should be a sequence of \'BddVar\'"')
+            writer.gen_vardecl(typename='std::vector<BddVar>',
+                               varname='var_list')
+            with writer.gen_if_block('!BddVar::from_bdd_list(tmp_list, var_list)'):
+                writer.gen_type_error('"argument 1 should be a sequence of \'BddVar\'"')
+            with writer.gen_try_block():
+                writer.gen_return_py_string('val.to_truth(var_list)')
+            writer.gen_catch_invalid_argument()
+        self.add_method('to_truth',
+                        func_body=meth_to_truth,
+                        arg_list=[RawObjArg(name='var_list',
+                                            cvarname='list_obj')],
+                        doc_str='convert to truth table')
 
         def meth_gen_dot(writer):
             pass

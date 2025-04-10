@@ -85,6 +85,17 @@ public:
     const Bdd& bdd ///< [in] コピー元のオブジェクト
   );
 
+  /// @brief Bdd のリストからの変換関数
+  ///
+  /// - bdd.is_variable() == true の時のみ成功する．
+  /// - bdd.is_variable() == false の時は false を返す．
+  static
+  bool
+  from_bdd_list(
+    const std::vector<Bdd>& bdd_list, ///< [in] コピー元のオブジェクト
+    std::vector<BddVar>& var_list     ///< [out] 結果を格納するオブジェクト
+  );
+
 
 public:
   //////////////////////////////////////////////////////////////////////

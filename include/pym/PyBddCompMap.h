@@ -1,8 +1,8 @@
-#ifndef PYAIGMGR_H
-#define PYAIGMGR_H
+#ifndef PYBDDCOMPMAP_H
+#define PYBDDCOMPMAP_H
 
-/// @file PyAigMgr.h
-/// @brief PyAigMgr のヘッダファイル
+/// @file PyBddCompMap.h
+/// @brief PyBddCompMap のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
 /// Copyright (C) 2025 Yusuke Matsunaga
@@ -11,26 +11,25 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-#include "ym/AigMgr.h"
+#include "ym/Bdd.h"
+#include "ym/BddVar.h"
 
 
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
-/// @class PyAigMgr PyAigMgr.h "PyAigMgr.h"
-/// @brief AigMgr を Python から使用するための拡張
-///
-/// 実際には static メンバ関数しか持たないのでクラスではない．
+/// @class PyBddCompMap PyBddCompMap.h "PyBddCompMap.h"
+/// @brief compose 用の辞書と PyObject* の間の変換を行うクラス
 //////////////////////////////////////////////////////////////////////
-class PyAigMgr
+class PyBddCompMap
 {
 public:
 
-  using ElemType = AigMgr;
+  using ElemType = std::unordered_map<BddVar, Bdd>;
 
 public:
 
-  /// @brief AigMgr を PyObject* に変換するファンクタクラス
+  /// @brief 辞書を PyObject* に変換するファンクタクラス
   struct Conv {
     PyObject*
     operator()(
@@ -38,7 +37,7 @@ public:
     );
   };
 
-  /// @brief PyObject* から AigMgr を取り出すファンクタクラス
+  /// @brief PyObject* から辞書を取り出すファンクタクラス
   struct Deconv {
     bool
     operator()(
@@ -53,17 +52,9 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 初期化する．
-  /// @return 初期化が成功したら true を返す．
-  static
-  bool
-  init(
-    PyObject* m ///< [in] 親のモジュールを表す PyObject
-  );
-
-  /// @brief AigMgr を表す PyObject を作る．
+  /// @brief 辞書を表す PyObject を作る．
   /// @return 生成した PyObject を返す．
-  /// 
+  ///
   /// 返り値は新しい参照が返される．
   static
   PyObject*
@@ -75,7 +66,7 @@ public:
     return conv(val);
   }
 
-  /// @brief PyObject から AigMgr を取り出す．
+  /// @brief PyObject から辞書を取り出す．
   /// @return 正しく変換できた時に true を返す．
   static
   bool
@@ -88,14 +79,14 @@ public:
     return deconv(obj, val);
   }
 
-  /// @brief PyObject が AigMgr タイプか調べる．
+  /// @brief PyObject が辞書タイプか調べる．
   static
   bool
   Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
 
-  /// @brief PyObject から AigMgr を取り出す．
+  /// @brief PyObject から辞書を取り出す．
   static
   ElemType
   Get(
@@ -103,30 +94,15 @@ public:
   )
   {
     ElemType val;
-    if ( PyAigMgr::FromPyObject(obj, val) ) {
+    if ( FromPyObject(obj, val) ) {
       return val;
     }
-    PyErr_SetString(PyExc_TypeError, "Could not convert to AigMgr");
+    PyErr_SetString(PyExc_TypeError, "Could not convert to BddCompMap");
     return val;
   }
-
-  /// @brief AigMgr を表す PyObject から AigMgr を取り出す．
-  /// @return AigMgr を返す．
-  ///
-  /// Check(obj) == true であると仮定している．
-  static
-  ElemType&
-  _get_ref(
-    PyObject* obj ///< [in] 変換元の PyObject
-  );
-
-  /// @brief AigMgr を表すオブジェクトの型定義を返す．
-  static
-  PyTypeObject*
-  _typeobject();
 
 };
 
 END_NAMESPACE_YM
 
-#endif // PYAIGMGR_H
+#endif // PYBDDCOMPMAP_H

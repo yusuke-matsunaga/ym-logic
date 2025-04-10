@@ -21,9 +21,9 @@ class NpnMapGen(PyObjGen):
                          source_include_files=['pym/PyNpnMap.h',
                                                'pym/PyInt.h'])
 
-        self.add_new(None)
+        self.add_new('default')
         
-        self.add_dealloc(None)
+        self.add_dealloc('default')
 
         def init_func(writer):
             self.gen_ref_conv(writer,

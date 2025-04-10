@@ -1,15 +1,16 @@
 
 /// @file PyAigMgr.cc
-/// @brief Python AigMgr の実装ファイル
+/// @brief PyAigMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2024 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "pym/PyAigMgr.h"
 #include "pym/PyAigHandle.h"
 #include "pym/PyExpr.h"
-#include "pym/PyJsonValue.h"
+#include "pym/PyList.h"
+#include "pym/PyLong.h"
 #include "pym/PyModule.h"
 
 
@@ -18,424 +19,321 @@ BEGIN_NAMESPACE_YM
 BEGIN_NONAMESPACE
 
 // Python 用のオブジェクト定義
-struct AigMgrObject
+// この構造体は同じサイズのヒープから作られるので
+// mVal のコンストラクタは起動されないことに注意．
+// そのためあとでコンストラクタを明示的に起動する必要がある．
+// またメモリを開放するときにも明示的にデストラクタを起動する必要がある．
+struct AigMgr_Object
 {
   PyObject_HEAD
   AigMgr mVal;
 };
 
 // Python 用のタイプ定義
-PyTypeObject AigMgrType = {
+PyTypeObject AigMgr_Type = {
   PyVarObject_HEAD_INIT(nullptr, 0)
+  // 残りは PyAigMgr::init() 中で初期化する．
 };
-
-// 生成関数
-PyObject*
-AigMgr_new(
-  PyTypeObject* type,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  // 引数を取らないことをチェックする．
-  static const char* kw_list[] = {
-    nullptr
-  };
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "",
-				    const_cast<char**>(kw_list)) ) {
-    return nullptr;
-  }
-
-  auto self = type->tp_alloc(type, 0);
-  auto aigmgr_obj = reinterpret_cast<AigMgrObject*>(self);
-  new (&aigmgr_obj->mVal) AigMgr;
-  return self;
-}
 
 // 終了関数
 void
-AigMgr_dealloc(
+dealloc_func(
   PyObject* self
 )
 {
-  auto aigmgr_obj = reinterpret_cast<AigMgrObject*>(self);
-  aigmgr_obj->mVal.~AigMgr();
+  auto obj = reinterpret_cast<AigMgr_Object*>(self);
+  obj->mVal.~AigMgr();
   Py_TYPE(self)->tp_free(self);
 }
 
+// return specified INPUT
 PyObject*
-AigMgr_eval(
+input(
   PyObject* self,
   PyObject* args,
   PyObject* kwds
 )
 {
-  static const char* kw_list[] = {
-    "input_vals",
-    "output_list",
-    nullptr
-  };
-  PyObject* iv_obj = nullptr;
-  PyObject* ol_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "OO",
-				    const_cast<char**>(kw_list),
-				    &iv_obj, &ol_obj) ) {
-    return nullptr;
-  }
-
-  static const char* emsg1 = "'input_vals' should be a sequence of int";
-  if ( !PySequence_Check(iv_obj) ) {
-    PyErr_SetString(PyExc_TypeError, emsg1);
-    return nullptr;
-  }
-  auto n1 = PySequence_Size(iv_obj);
-  vector<AigBitVect> input_vals(n1);
-  for ( SizeType i = 0; i < n1; ++ i ) {
-    auto obj = PySequence_GetItem(iv_obj, i);
-    auto res = PyLong_Check(obj);
-    if ( res ) {
-      auto val = PyLong_AsLong(obj);
-      input_vals[i] = val;
-    }
-    Py_DecRef(obj);
-    if ( !res ) {
-      PyErr_SetString(PyExc_TypeError, emsg1);
-      return nullptr;
-    }
-  }
-
-  vector<AigHandle> output_list;
-  if ( !PyAigHandle::FromPyList(ol_obj, output_list) ) {
-    PyErr_SetString(PyExc_TypeError,
-		    "'output_list' should be a sequence of AigHandles");
-    return nullptr;
-  }
-
-  auto& mgr = PyAigMgr::_get_ref(self);
-  try {
-    auto output_vals = mgr.eval(input_vals, output_list);
-    auto n = output_vals.size();
-    auto ans_obj = PyList_New(n);
-    for ( SizeType i = 0; i < n; ++ i ) {
-      auto val = output_vals[i];
-      auto obj = PyLong_FromLong(val);
-      PyList_SetItem(ans_obj, i, obj);
-    }
-    return ans_obj;
-  }
-  catch ( std::invalid_argument err ) {
-    PyErr_SetString(PyExc_ValueError, err.what());
-    return nullptr;
-  }
-}
-
-PyObject*
-AigMgr_input(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
+  static const char* kwlist[] = {
     "input_id",
     nullptr
   };
-  SizeType input_id = -1;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
-				    const_cast<char**>(kw_list),
-				    &input_id) ) {
+  int input_id;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "i",
+                                    const_cast<char**>(kwlist),
+                                    &input_id) ) {
     return nullptr;
   }
-
-  auto& mgr = PyAigMgr::_get_ref(self);
+  auto& val = PyAigMgr::_get_ref(self);
   try {
-    auto ans = mgr.input(input_id);
-    return PyAigHandle::ToPyObject(ans);
+    return PyAigHandle::ToPyObject(val.input(input_id));
   }
-  catch ( std::out_of_range err ) {
-    PyErr_SetString(PyExc_ValueError, err.what());
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
     return nullptr;
   }
 }
 
+// make ZERO
 PyObject*
-AigMgr_make_zero(
+zero(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.make_zero();
-  return PyAigHandle::ToPyObject(ans);
+  auto& val = PyAigMgr::_get_ref(self);
+  return PyAigHandle::ToPyObject(val.make_zero());
 }
 
+// make ONE
 PyObject*
-AigMgr_make_one(
+one(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.make_one();
-  return PyAigHandle::ToPyObject(ans);
+  auto& val = PyAigMgr::_get_ref(self);
+  return PyAigHandle::ToPyObject(val.make_one());
 }
 
+// make INPUT
 PyObject*
-AigMgr_make_input(
+make_input(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.make_input();
-  return PyAigHandle::ToPyObject(ans);
+  auto& val = PyAigMgr::_get_ref(self);
+  return PyAigHandle::ToPyObject(val.make_input());
 }
 
+// AND op
 PyObject*
-AigMgr_and_op(
+and_op(
   PyObject* self,
   PyObject* args,
   PyObject* kwds
 )
 {
-  static const char* kw_list[] = {
+  static const char* kwlist[] = {
     "fanin_list",
     nullptr
   };
   PyObject* list_obj = nullptr;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O",
-				    const_cast<char**>(kw_list),
-				    &list_obj) ) {
+                                    const_cast<char**>(kwlist),
+                                    &list_obj) ) {
     return nullptr;
   }
-  vector<AigHandle> fanin_list;
-  if ( !PyAigHandle::FromPyList(list_obj, fanin_list) ) {
-    PyErr_SetString(PyExc_TypeError,
-		    "'fanin_list' should be a sequcence of 'AigHandle'");
+  auto& val = PyAigMgr::_get_ref(self);
+  std::vector<AigHandle> fanin_list;
+  if ( !PyList<AigHandle, PyAigHandle>::FromPyObject(list_obj, fanin_list) ) {
+    PyErr_SetString(PyExc_TypeError, "argument 1 should be a sequence of 'AigHandle'");
     return nullptr;
   }
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.and_op(fanin_list);
-  return PyAigHandle::ToPyObject(ans);
+  return PyAigHandle::ToPyObject(val.and_op(fanin_list));
 }
 
+// OR op
 PyObject*
-AigMgr_or_op(
+or_op(
   PyObject* self,
   PyObject* args,
   PyObject* kwds
 )
 {
-  static const char* kw_list[] = {
+  static const char* kwlist[] = {
     "fanin_list",
     nullptr
   };
   PyObject* list_obj = nullptr;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O",
-				    const_cast<char**>(kw_list),
-				    &list_obj) ) {
+                                    const_cast<char**>(kwlist),
+                                    &list_obj) ) {
     return nullptr;
   }
-  vector<AigHandle> fanin_list;
-  if ( !PyAigHandle::FromPyList(list_obj, fanin_list) ) {
-    PyErr_SetString(PyExc_TypeError,
-		    "'fanin_list' should be a sequcence of 'AigHandle'");
+  auto& val = PyAigMgr::_get_ref(self);
+  std::vector<AigHandle> fanin_list;
+  if ( !PyList<AigHandle, PyAigHandle>::FromPyObject(list_obj, fanin_list) ) {
+    PyErr_SetString(PyExc_TypeError, "argument 1 should be a sequence of 'AigHandle'");
     return nullptr;
   }
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.or_op(fanin_list);
-  return PyAigHandle::ToPyObject(ans);
+  return PyAigHandle::ToPyObject(val.or_op(fanin_list));
 }
 
+// XOR op
 PyObject*
-AigMgr_xor_op(
+xor_op(
   PyObject* self,
   PyObject* args,
   PyObject* kwds
 )
 {
-  static const char* kw_list[] = {
+  static const char* kwlist[] = {
     "fanin_list",
     nullptr
   };
   PyObject* list_obj = nullptr;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O",
-				    const_cast<char**>(kw_list),
-				    &list_obj) ) {
+                                    const_cast<char**>(kwlist),
+                                    &list_obj) ) {
     return nullptr;
   }
-  vector<AigHandle> fanin_list;
-  if ( !PyAigHandle::FromPyList(list_obj, fanin_list) ) {
-    PyErr_SetString(PyExc_TypeError,
-		    "'fanin_list' should be a sequcence of 'AigHandle'");
+  auto& val = PyAigMgr::_get_ref(self);
+  std::vector<AigHandle> fanin_list;
+  if ( !PyList<AigHandle, PyAigHandle>::FromPyObject(list_obj, fanin_list) ) {
+    PyErr_SetString(PyExc_TypeError, "argument 1 should be a sequence of 'AigHandle'");
     return nullptr;
   }
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.xor_op(fanin_list);
-  return PyAigHandle::ToPyObject(ans);
+  return PyAigHandle::ToPyObject(val.and_op(fanin_list));
 }
 
+// make AIG from EXPR
 PyObject*
-AigMgr_from_expr(
+from_expr(
   PyObject* self,
   PyObject* args,
   PyObject* kwds
 )
 {
-  static const char* kw_list[] = {
+  static const char* kwlist[] = {
     "expr",
     nullptr
   };
   PyObject* expr_obj = nullptr;
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
-				    const_cast<char**>(kw_list),
-				    PyExpr::_typeobject(), &expr_obj) ) {
+                                    const_cast<char**>(kwlist),
+                                    PyExpr::_typeobject(), &expr_obj) ) {
     return nullptr;
   }
-  auto expr = PyExpr::_get_ref(expr_obj);
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.from_expr(expr);
-  return PyAigHandle::ToPyObject(ans);
-}
-
-PyObject*
-AigMgr_from_expr_list(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "expr_list",
-    nullptr
-  };
-  PyObject* list_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O",
-				    const_cast<char**>(kw_list),
-				    &list_obj) ) {
-    return nullptr;
-  }
-  static const char* emsg = "'expr_list' should be a sequence of Exprs";
-  if ( !PySequence_Check(list_obj) ) {
-    PyErr_SetString(PyExc_TypeError, emsg);
-    return nullptr;
-  }
-  auto n = PySequence_Size(list_obj);
-  vector<Expr> expr_list(n);
-  for ( SizeType i = 0; i < n; ++ i ) {
-    auto obj = PySequence_GetItem(list_obj, i);
-    auto res = PyExpr::Check(obj);
-    if ( res ) {
-      expr_list[i] = PyExpr::_get_ref(obj);
-    }
-    Py_DecRef(obj);
-    if ( !res ) {
-      PyErr_SetString(PyExc_TypeError, emsg);
+  Expr expr;
+  if ( expr_obj != nullptr ) {
+    if ( !PyExpr::FromPyObject(expr_obj, expr) ) {
+      PyErr_SetString(PyExc_TypeError, "could not convert to Expr");
       return nullptr;
     }
   }
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.from_expr_list(expr_list);
-  return PyAigHandle::ToPyList(ans);
+  auto& val = PyAigMgr::_get_ref(self);
+  return PyAigHandle::ToPyObject(val.from_expr(expr));
 }
 
 // メソッド定義
-PyMethodDef AigMgr_methods[] = {
-  {"eval", reinterpret_cast<PyCFunction>(AigMgr_eval),
+PyMethodDef methods[] = {
+  {"input",
+   reinterpret_cast<PyCFunction>(input),
    METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("evaluate")},
-  {"input", reinterpret_cast<PyCFunction>(AigMgr_input),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("returns an INPUT")},
-  {"make_zero", AigMgr_make_zero,
+   PyDoc_STR("return specified INPUT")},
+  {"zero",
+   zero,
    METH_NOARGS,
    PyDoc_STR("make ZERO")},
-  {"make_one", AigMgr_make_one,
+  {"one",
+   one,
    METH_NOARGS,
    PyDoc_STR("make ONE")},
-  {"make_input", AigMgr_make_input,
+  {"make_input",
+   make_input,
    METH_NOARGS,
-   PyDoc_STR("make an INPU")},
-  {"and_op", reinterpret_cast<PyCFunction>(AigMgr_and_op),
+   PyDoc_STR("make INPUT")},
+  {"and_op",
+   reinterpret_cast<PyCFunction>(and_op),
    METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("make an AND")},
-  {"or_op", reinterpret_cast<PyCFunction>(AigMgr_or_op),
+   PyDoc_STR("AND op")},
+  {"or_op",
+   reinterpret_cast<PyCFunction>(or_op),
    METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("make an OR")},
-  {"xor_op", reinterpret_cast<PyCFunction>(AigMgr_xor_op),
+   PyDoc_STR("OR op")},
+  {"xor_op",
+   reinterpret_cast<PyCFunction>(xor_op),
    METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("make an XOR")},
-  {"from_expr", reinterpret_cast<PyCFunction>(AigMgr_from_expr),
+   PyDoc_STR("XOR op")},
+  {"from_expr",
+   reinterpret_cast<PyCFunction>(from_expr),
    METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("convert from an Expr")},
-  {"from_expr_list", reinterpret_cast<PyCFunction>(AigMgr_from_expr_list),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("convert from a sequcence of Exprs")},
+   PyDoc_STR("make AIG from EXPR")},
+  // end-marker
   {nullptr, nullptr, 0, nullptr}
 };
 
 PyObject*
-AigMgr_node_num(
+get_node_num(
   PyObject* self,
   void* Py_UNUSED(closure)
 )
 {
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.node_num();
-  return PyLong_FromLong(ans);
+  auto& val = PyAigMgr::_get_ref(self);
+  return PyLong::ToPyObject(val.node_num());
 }
 
 PyObject*
-AigMgr_input_num(
+get_input_num(
   PyObject* self,
   void* Py_UNUSED(closure)
 )
 {
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.input_num();
-  return PyLong_FromLong(ans);
+  auto& val = PyAigMgr::_get_ref(self);
+  return PyLong::ToPyObject(val.input_num());
 }
 
 PyObject*
-AigMgr_and_num(
+get_and_num(
   PyObject* self,
   void* Py_UNUSED(closure)
 )
 {
-  auto& mgr = PyAigMgr::_get_ref(self);
-  auto ans = mgr.and_num();
-  return PyLong_FromLong(ans);
+  auto& val = PyAigMgr::_get_ref(self);
+  return PyLong::ToPyObject(val.and_num());
 }
 
-// get/set 関数定義
-PyGetSetDef AigMgr_getset[] = {
-  {"node_num", AigMgr_node_num, nullptr, PyDoc_STR("# of total nodes"), nullptr},
-  {"input_num", AigMgr_node_num, nullptr, PyDoc_STR("# of inputs"), nullptr},
-  {"and_num", AigMgr_node_num, nullptr, PyDoc_STR("# of AND nodes"), nullptr},
-  {nullptr, nullptr, nullptr, nullptr, nullptr},
+// getter/setter定義
+PyGetSetDef getsets[] = {
+  {"node_num", get_node_num, nullptr, PyDoc_STR(""), nullptr},
+  {"input_num", get_input_num, nullptr, PyDoc_STR(""), nullptr},
+  {"and_num", get_and_num, nullptr, PyDoc_STR(""), nullptr},
+  // end-marker
+  {nullptr, nullptr, nullptr, nullptr}
 };
+
+// new 関数
+PyObject*
+new_func(
+  PyTypeObject* type,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    nullptr
+  };
+  // 余分な引数を取らないことを確認しておく．
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "", const_cast<char**>(kwlist)) ) {
+    return nullptr;
+  }
+  auto self = type->tp_alloc(type, 0);
+  return self;
+}
 
 END_NONAMESPACE
 
 
-// @brief 'AigMgr' オブジェクトを使用可能にする．
+// @brief AigMgr オブジェクトを使用可能にする．
 bool
 PyAigMgr::init(
   PyObject* m
 )
 {
-  AigMgrType.tp_name = "AigMgr";
-  AigMgrType.tp_basicsize = sizeof(AigMgrObject);
-  AigMgrType.tp_itemsize = 0;
-  AigMgrType.tp_dealloc = AigMgr_dealloc;
-  AigMgrType.tp_flags = Py_TPFLAGS_DEFAULT;
-  AigMgrType.tp_doc = PyDoc_STR("AigMgr object");
-  AigMgrType.tp_methods = AigMgr_methods;
-  AigMgrType.tp_getset = AigMgr_getset;
-  AigMgrType.tp_new = AigMgr_new;
-
-  // 型オブジェクトの登録
-  if ( !PyModule::reg_type(m, "AigMgr", &AigMgrType) ) {
+  AigMgr_Type.tp_name = "AigMgr";
+  AigMgr_Type.tp_basicsize = sizeof(AigMgr_Object);
+  AigMgr_Type.tp_itemsize = 0;
+  AigMgr_Type.tp_dealloc = dealloc_func;
+  AigMgr_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+  AigMgr_Type.tp_doc = PyDoc_STR("Python extended object for AigMgr");
+  AigMgr_Type.tp_methods = methods;
+  AigMgr_Type.tp_getset = getsets;
+  AigMgr_Type.tp_new = new_func;
+  if ( !PyModule::reg_type(m, "AigMgr", &AigMgr_Type) ) {
     goto error;
   }
 
@@ -446,24 +344,24 @@ PyAigMgr::init(
   return false;
 }
 
-/// @brief AigMgr を PyObject* に変換する
+// AigMgr を PyObject に変換する．
 PyObject*
 PyAigMgr::Conv::operator()(
-  const ElemType& val
+  const AigMgr& val
 )
 {
   auto type = PyAigMgr::_typeobject();
   auto obj = type->tp_alloc(type, 0);
-  auto aigmgr_obj = reinterpret_cast<AigMgrObject*>(obj);
-  new (&aigmgr_obj->mVal) AigMgr(val);
+  auto my_obj = reinterpret_cast<AigMgr_Object*>(obj);
+  new (&my_obj->mVal) AigMgr(val);
   return obj;
 }
 
-// @brief PyObject* から AigMgr を取り出すファンクタクラス
+// PyObject を AigMgr に変換する．
 bool
 PyAigMgr::Deconv::operator()(
   PyObject* obj,
-  ElemType& val
+  AigMgr& val
 )
 {
   if ( PyAigMgr::Check(obj) ) {
@@ -479,24 +377,24 @@ PyAigMgr::Check(
   PyObject* obj
 )
 {
-  return Py_IS_TYPE(obj, _typeobject());
+  return Py_IS_TYPE(obj, &AigMgr_Type);
 }
 
-// @brief AigMgr を表す PyObject から AigMgr を取り出す．
+// @brief PyObject から AigMgr を取り出す．
 AigMgr&
 PyAigMgr::_get_ref(
   PyObject* obj
 )
 {
-  auto aigmgr_obj = reinterpret_cast<AigMgrObject*>(obj);
-  return aigmgr_obj->mVal;
+  auto my_obj = reinterpret_cast<AigMgr_Object*>(obj);
+  return my_obj->mVal;
 }
 
 // @brief AigMgr を表すオブジェクトの型定義を返す．
 PyTypeObject*
 PyAigMgr::_typeobject()
 {
-  return &AigMgrType;
+  return &AigMgr_Type;
 }
 
 END_NAMESPACE_YM

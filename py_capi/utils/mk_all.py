@@ -67,18 +67,21 @@ bdd_gen = BddGen()
 from bddmgr_gen import BddMgrGen
 bddmgr_gen = BddMgrGen()
 
-from bddlit_gen import BddGen
-bddlit_gen = BddLitGen()
+from aighandle_gen import AigHandleGen
+aighandle_gen = AigHandleGen()
 
-from bddvar_gen import BddVarGen
-bddvar_gen = BddVarGen()
+from aigmgr_gen import AigMgrGen
+aigmgr_gen = AigMgrGen()
 
 for gen, name in ((primtype_gen, 'PyPrimType'),
                   (literal_gen, 'PyLiteral'),
                   (npnmap_gen, 'PyNpnMap'),
                   (expr_gen, 'PyExpr'),
                   (tvfunc_gen, 'PyTvFunc'),
-                  (bdd_gen, 'PyBdd')):
+                  (bdd_gen, 'PyBdd'),
+                  (bddmgr_gen, 'PyBddMgr'),
+                  (aighandle_gen, 'PyAigHandle'),
+                  (aigmgr_gen, 'PyAigMgr')):
     filename = os.path.join(include_dir, f'{name}.h')
     with open(filename, 'wt') as fout:
         gen.make_header(fout=fout)

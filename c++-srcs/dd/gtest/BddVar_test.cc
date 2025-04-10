@@ -91,26 +91,26 @@ TEST(BddVarTest, copy_assignment2)
   }
 }
 
-TEST(BddVarTest, posilit)
+TEST(BddVarTest, positive_literal)
 {
   BddMgr mgr;
 
   SizeType id = 20;
   auto var = mgr.variable(id);
 
-  auto lit = var.posilit();
+  auto lit = var.positive_literal();
   EXPECT_TRUE( lit.is_positive() );
   EXPECT_EQ( var, lit.var() );
 }
 
-TEST(BddVarTest, negalit)
+TEST(BddVarTest, negative_literal)
 {
   BddMgr mgr;
 
   SizeType id = 20;
   auto var = mgr.variable(id);
 
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
   EXPECT_TRUE( lit.is_negative() );
   EXPECT_EQ( var, lit.var() );
 }

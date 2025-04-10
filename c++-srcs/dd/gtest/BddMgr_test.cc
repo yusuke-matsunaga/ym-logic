@@ -60,10 +60,10 @@ TEST_F(BddTest, literal1)
   EXPECT_TRUE( f1.is_one() );
 }
 
-TEST_F(BddTest, posi_literal)
+TEST_F(BddTest, positive_literal)
 {
   auto var = mMgr.variable(0);
-  Bdd bdd = var.posilit();
+  Bdd bdd = var.positive_literal();
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -84,7 +84,7 @@ TEST_F(BddTest, posi_literal)
 TEST_F(BddTest, nega_literal)
 {
   auto var = mMgr.variable(0);
-  Bdd bdd = var.negalit();
+  Bdd bdd = var.negative_literal();
 
   EXPECT_FALSE( bdd.is_invalid() );
   EXPECT_TRUE( bdd.is_valid() );
@@ -197,7 +197,7 @@ TEST_F(BddTest, mgr_copy)
   BddMgr mgr1;
   auto var = mgr1.variable(0);
 
-  auto bdd = var.posilit();
+  auto bdd = var.positive_literal();
 
   auto mgr2 = bdd.mgr();
 
@@ -210,7 +210,7 @@ TEST_F(BddTest, mgr_lifetime)
   {
     BddMgr mgr;
     auto var = mgr.variable(0);
-    bdd = var.posilit();
+    bdd = var.positive_literal();
   }
 
   EXPECT_TRUE( bdd.is_valid() );

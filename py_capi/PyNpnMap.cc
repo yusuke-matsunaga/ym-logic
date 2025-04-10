@@ -38,6 +38,8 @@ dealloc_func(
   PyObject* self
 )
 {
+  auto obj = reinterpret_cast<NpnMap_Object*>(self);
+  obj->mVal.~NpnMap();
   Py_TYPE(self)->tp_free(self);
 }
 
@@ -88,6 +90,27 @@ PyNumberMethods number = {
   .nb_invert = nb_invert,
   .nb_inplace_multiply = nb_inplace_multiply
 };
+
+// richcompare 関数
+PyObject*
+richcompare_func(
+  PyObject* self,
+  PyObject* other,
+  int op
+)
+{
+  auto& val = PyNpnMap::_get_ref(self);
+  if ( PyNpnMap::Check(other) ) {
+    auto& val2 = PyNpnMap::_get_ref(other);
+    if ( op == Py_EQ ) {
+      return PyBool_FromLong(val == val2);
+    }
+    if ( op == Py_NE ) {
+      return PyBool_FromLong(val != val2);
+    }
+  }
+  Py_RETURN_NOTIMPLEMENTED;
+}
 
 // make the identity map
 PyObject*
@@ -398,6 +421,7 @@ PyNpnMap::init(
   NpnMap_Type.tp_as_number = &number;
   NpnMap_Type.tp_flags = Py_TPFLAGS_DEFAULT;
   NpnMap_Type.tp_doc = PyDoc_STR("Python extended object for NpnMap");
+  NpnMap_Type.tp_richcompare = richcompare_func;
   NpnMap_Type.tp_methods = methods;
   NpnMap_Type.tp_getset = getsets;
   NpnMap_Type.tp_init = init_func;

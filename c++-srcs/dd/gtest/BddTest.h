@@ -87,7 +87,7 @@ public:
   )
   {
     auto var = mMgr.variable(varid);
-    return var.posilit();
+    return var.positive_literal();
   }
 
   /// @brief 真理値表形式の文字列からBDDを作る．

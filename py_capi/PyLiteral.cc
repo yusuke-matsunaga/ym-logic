@@ -89,10 +89,9 @@ richcompare_func(
 )
 {
   auto& val = PyLiteral::_get_ref(self);
-  if ( PyLiteral::Check(self) && PyLiteral::Check(other) ) {
-    auto& val1 = PyLiteral::_get_ref(self);
+  if ( PyLiteral::Check(other) ) {
     auto& val2 = PyLiteral::_get_ref(other);
-    Py_RETURN_RICHCOMPARE(val1, val2, op);
+    Py_RETURN_RICHCOMPARE(val, val2, op);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }

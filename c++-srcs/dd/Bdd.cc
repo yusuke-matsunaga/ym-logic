@@ -678,6 +678,25 @@ BddVar::from_bdd(
   return invalid();
 }
 
+// @brief Bdd のリストからの変換関数
+bool
+BddVar::from_bdd_list(
+  const std::vector<Bdd>& bdd_list,
+  std::vector<BddVar>& var_list
+)
+{
+  auto n = bdd_list.size();
+  var_list.clear();
+  var_list.reserve(n);
+  for ( auto& bdd: bdd_list ) {
+    if ( !bdd.is_variable() ) {
+      return false;
+    }
+    var_list.push_back(BddVar(bdd));
+  }
+  return true;
+}
+
 // @brief 変数番号を返す．
 SizeType
 BddVar::id() const

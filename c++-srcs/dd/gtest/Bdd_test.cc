@@ -712,7 +712,7 @@ TEST_F(BddTest, cofactor2)
   Bdd bdd = from_truth(src_str);
 
   auto var = variable(0);
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
   Bdd bdd1 = bdd.cofactor(lit);
 
   const char* exp_str = "01110111";
@@ -724,7 +724,7 @@ TEST_F(BddTest, cofactor2_invalid1)
   Bdd bdd; // 不正値
 
   auto var = variable(0);
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
   EXPECT_THROW( bdd.cofactor(lit), std::logic_error );
 }
 
@@ -747,7 +747,7 @@ TEST_F(BddTest, cofactor_int2)
   Bdd bdd = from_truth(src_str);
 
   auto var = variable(0);
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
   Bdd bdd1 = bdd.cofactor_int(lit);
 
   const char* exp_str = "01110111";
@@ -760,7 +760,7 @@ TEST_F(BddTest, cofactor_int2_invalid1)
   Bdd bdd; // 不正値
 
   auto var = variable(0);
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
   EXPECT_THROW( bdd.cofactor_int(lit), std::logic_error );
 }
 
@@ -783,7 +783,7 @@ TEST_F(BddTest, cofactor3)
   Bdd bdd = from_truth(src_str);
 
   auto var = variable(0);
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
 
   Bdd bdd1 = bdd / lit;
 
@@ -796,7 +796,7 @@ TEST_F(BddTest, cofactor3_invalid)
   Bdd bdd; // 不正値
 
   auto var = variable(0);
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
   EXPECT_THROW( bdd / lit, std::logic_error );
 }
 
@@ -806,7 +806,7 @@ TEST_F(BddTest, cofactor_int3)
   Bdd bdd = from_truth(src_str);
 
   auto var = variable(0);
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
   Bdd bdd1 = bdd /= lit;
 
   const char* exp_str = "01110111";
@@ -819,7 +819,7 @@ TEST_F(BddTest, cofactor_int3_invalid)
   Bdd bdd; // 不正値
 
   auto var = variable(0);
-  auto lit = var.negalit();
+  auto lit = var.negative_literal();
   EXPECT_THROW( bdd /= lit, std::logic_error );
 }
 

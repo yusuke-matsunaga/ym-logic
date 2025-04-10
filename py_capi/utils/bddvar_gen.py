@@ -24,15 +24,17 @@ class BddVarArg(TypedObjConvArg):
                          pyclassname='PyBddVar')
 
 
-class BddGen(PyObjGen):
+class BddVarGen(PyObjGen):
 
     def __init__(self):
-        super().__init__(classname='Bdd',
-                         pyname='Bdd',
+        super().__init__(classname='BddVar',
+                         pyname='BddVar',
                          namespace='YM',
                          header_include_files=['ym/BddVar.h'],
-                         source_include_files=['pym/PyBddVar.h',
-                                               'pym/PyBddLit.h'])
+                         source_include_files=['pym/PyBdd.h',
+                                               'pym/PyBddVar.h',
+                                               'pym/PyBddLit.h',
+                                               'pym/PyLong.h'])
 
         self.add_new('disabled')
         
@@ -95,7 +97,7 @@ class BddGen(PyObjGen):
             
 if __name__ == '__main__':
 
-    gen = BddGen()
+    gen = BddVarGen()
 
     gen.make_header()
 

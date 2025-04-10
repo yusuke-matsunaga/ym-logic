@@ -1,17 +1,18 @@
 
 /// @file PyBddMgr.cc
-/// @brief Python BddMgr の実装ファイル
+/// @brief PyBddMgr の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "pym/PyBddMgr.h"
 #include "pym/PyBdd.h"
+#include "pym/PyLong.h"
 #include "pym/PyJsonValue.h"
-#include "pym/PyModule.h"
-#include "ym/BddMgr.h"
+#include "pym/PyList.h"
 #include "ym/BddVar.h"
+#include "pym/PyModule.h"
 
 
 BEGIN_NAMESPACE_YM
@@ -19,292 +20,309 @@ BEGIN_NAMESPACE_YM
 BEGIN_NONAMESPACE
 
 // Python 用のオブジェクト定義
-struct BddMgrObject
+// この構造体は同じサイズのヒープから作られるので
+// mVal のコンストラクタは起動されないことに注意．
+// そのためあとでコンストラクタを明示的に起動する必要がある．
+// またメモリを開放するときにも明示的にデストラクタを起動する必要がある．
+struct BddMgr_Object
 {
   PyObject_HEAD
   BddMgr mVal;
 };
 
 // Python 用のタイプ定義
-PyTypeObject BddMgrType = {
+PyTypeObject BddMgr_Type = {
   PyVarObject_HEAD_INIT(nullptr, 0)
+  // 残りは PyBddMgr::init() 中で初期化する．
 };
 
-// 生成関数
+// 終了関数
+void
+dealloc_func(
+  PyObject* self
+)
+{
+  auto obj = reinterpret_cast<BddMgr_Object*>(self);
+  obj->mVal.~BddMgr();
+  Py_TYPE(self)->tp_free(self);
+}
+
+// make variable BDD
 PyObject*
-BddMgr_new(
+variable(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    "varid",
+    nullptr
+  };
+  int varid;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "i",
+                                    const_cast<char**>(kwlist),
+                                    &varid) ) {
+    return nullptr;
+  }
+  auto& val = PyBddMgr::_get_ref(self);
+  return PyBdd::ToPyObject(val.variable(varid));
+}
+
+// make a copy of BDD
+PyObject*
+copy(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    "src",
+    nullptr
+  };
+  PyObject* src_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
+                                    const_cast<char**>(kwlist),
+                                    PyBdd::_typeobject(), &src_obj) ) {
+    return nullptr;
+  }
+  Bdd src;
+  if ( src_obj != nullptr ) {
+    if ( !PyBdd::FromPyObject(src_obj, src) ) {
+      PyErr_SetString(PyExc_TypeError, "could not convert to Bdd");
+      return nullptr;
+    }
+  }
+  auto& val = PyBddMgr::_get_ref(self);
+  return PyBdd::ToPyObject(val.copy(src));
+}
+
+// make ZERO BDD
+PyObject*
+zero(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& val = PyBddMgr::_get_ref(self);
+  return PyBdd::ToPyObject(val.zero());
+}
+
+// make ONE BDD
+PyObject*
+one(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& val = PyBddMgr::_get_ref(self);
+  return PyBdd::ToPyObject(val.one());
+}
+
+// make a BDD from truth table
+PyObject*
+from_truth(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    "func_str",
+    "var_list",
+    nullptr
+  };
+  const char* func_str_tmp = nullptr;
+  PyObject* list_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|$O",
+                                    const_cast<char**>(kwlist),
+                                    &func_str_tmp,
+                                    &list_obj) ) {
+    return nullptr;
+  }
+  std::string func_str;
+  if ( func_str_tmp != nullptr ) {
+    func_str = std::string(func_str_tmp);
+  }
+  auto& val = PyBddMgr::_get_ref(self);
+  if ( list_obj == nullptr ) {
+    try {
+      return PyBdd::ToPyObject(val.from_truth(func_str));
+    }
+    catch ( std::invalid_argument err ) {
+      std::ostringstream buf;
+      buf << "invalid string" << ": " << err.what();
+      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+      return nullptr;
+    }
+  }
+  else {
+    std::vector<Bdd> tmp_list;
+    if ( !PyList<Bdd, PyBdd>::FromPyObject(list_obj, tmp_list) ) {
+      PyErr_SetString(PyExc_TypeError, "argument 2 should be a sequence of 'BddVar'");
+      return nullptr;
+    }
+    std::vector<BddVar> var_list;
+    if ( !BddVar::from_bdd_list(tmp_list, var_list) ) {
+      PyErr_SetString(PyExc_TypeError, "argument 2 should be a sequence of 'BddVar'");
+      return nullptr;
+    }
+    try {
+      return PyBdd::ToPyObject(val.from_truth(func_str, var_list));
+    }
+    catch ( std::invalid_argument err ) {
+      std::ostringstream buf;
+      buf << "invalid string" << ": " << err.what();
+      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+      return nullptr;
+    }
+  }
+}
+
+// enable GC
+PyObject*
+enable_gc(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& val = PyBddMgr::_get_ref(self);
+  val.enable_gc();
+  Py_RETURN_NONE;
+}
+
+// disable GC
+PyObject*
+disable_gc(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& val = PyBddMgr::_get_ref(self);
+  val.enable_gc();
+  Py_RETURN_NONE;
+}
+
+// メソッド定義
+PyMethodDef methods[] = {
+  {"variable",
+   reinterpret_cast<PyCFunction>(variable),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("make variable BDD")},
+  {"copy",
+   reinterpret_cast<PyCFunction>(copy),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("make a copy of BDD")},
+  {"zero",
+   zero,
+   METH_NOARGS,
+   PyDoc_STR("make ZERO BDD")},
+  {"one",
+   one,
+   METH_NOARGS,
+   PyDoc_STR("make ONE BDD")},
+  {"from_truth",
+   reinterpret_cast<PyCFunction>(from_truth),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("make a BDD from truth table")},
+  {"enable_gc",
+   enable_gc,
+   METH_NOARGS,
+   PyDoc_STR("enable GC")},
+  {"disable_gc",
+   disable_gc,
+   METH_NOARGS,
+   PyDoc_STR("disable GC")},
+  // end-marker
+  {nullptr, nullptr, 0, nullptr}
+};
+
+PyObject*
+get_node_num(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto& val = PyBddMgr::_get_ref(self);
+  return PyLong::ToPyObject(val.node_num());
+}
+
+PyObject*
+get_gc_limit(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto& val = PyBddMgr::_get_ref(self);
+  return PyLong::ToPyObject(val.gc_limit());
+}
+
+int
+set_gc_limit(
+  PyObject* self,
+  PyObject* obj,
+  void* Py_UNUSED(closure)
+)
+{
+  auto& val = PyBddMgr::_get_ref(self);
+  if ( !PyLong::Check(obj) ) {
+    PyErr_SetString(PyExc_TypeError, "integer type is expected");
+    return -1;
+  }
+  auto gc_limit = PyLong::Get(obj);
+  val.set_gc_limit(gc_limit);
+  return 0;
+}
+
+// getter/setter定義
+PyGetSetDef getsets[] = {
+  {"node_num", get_node_num, nullptr, PyDoc_STR(""), nullptr},
+  {"gc_limit", get_gc_limit, set_gc_limit, PyDoc_STR(""), nullptr},
+  // end-marker
+  {nullptr, nullptr, nullptr, nullptr}
+};
+
+// new 関数
+PyObject*
+new_func(
   PyTypeObject* type,
   PyObject* args,
   PyObject* kwds
 )
 {
-  // 引数を受け取らないことをチェックする．
-  static const char* kw_list[] = {
+  static const char* kwlist[] = {
     nullptr
   };
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "",
-				    const_cast<char**>(kw_list)) ) {
+  // 余分な引数を取らないことを確認しておく．
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "", const_cast<char**>(kwlist)) ) {
     return nullptr;
   }
-
   auto self = type->tp_alloc(type, 0);
-  auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
-  new (&bddmgr_obj->mVal) BddMgr{};
+  auto my_obj = reinterpret_cast<BddMgr_Object*>(self);
+  new (&my_obj->mVal) BddMgr();
   return self;
 }
-
-// 終了関数
-void
-BddMgr_dealloc(
-  PyObject* self
-)
-{
-  auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(self);
-  bddmgr_obj->mVal.~BddMgr();
-  Py_TYPE(self)->tp_free(self);
-}
-
-PyObject*
-BddMgr_variable(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "varid",
-    nullptr
-  };
-  SizeType varid = -1;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k",
-				    const_cast<char**>(kw_list),
-				    &varid) ) {
-    return nullptr;
-  }
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  auto var = bddmgr.variable(varid);
-  return PyBdd::ToPyObject(var);
-}
-
-PyObject*
-BddMgr_copy(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "src",
-    nullptr
-  };
-  PyObject* bdd_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O!",
-				    const_cast<char**>(kw_list),
-				    PyBdd::_typeobject(), !bdd_obj) ) {
-    return nullptr;
-  }
-  auto& src_bdd = PyBdd::_get_ref(bdd_obj);
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  auto ans_bdd = bddmgr.copy(src_bdd);
-  return PyBdd::ToPyObject(ans_bdd);
-}
-
-PyObject*
-BddMgr_zero(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  auto ans_bdd = bddmgr.zero();
-  return PyBdd::ToPyObject(ans_bdd);
-}
-
-PyObject*
-BddMgr_one(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  auto ans_bdd = bddmgr.one();
-  return PyBdd::ToPyObject(ans_bdd);
-}
-
-PyObject*
-BddMgr_from_truth(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "func_str",
-    "var_list",
-    nullptr
-  };
-  PyObject* var_list_obj = nullptr;
-  const char* str = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s|O",
-				    const_cast<char**>(kw_list),
-				    &str,
-				    &var_list_obj) ) {
-    return nullptr;
-  }
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  if ( var_list_obj == nullptr ) {
-    try {
-      auto ans_bdd = bddmgr.from_truth(str);
-      return PyBdd::ToPyObject(ans_bdd);
-    }
-    catch ( std::invalid_argument ) {
-      PyErr_SetString(PyExc_ValueError, "invalid string");
-      return nullptr;
-    }
-  }
-  else {
-    static const char* err_msg = "var_list should be a sequence of BddVar";
-    if ( !PySequence_Check(var_list_obj) ) {
-      PyErr_SetString(PyExc_TypeError, err_msg);
-      return nullptr;
-    }
-    auto n = PySequence_Size(var_list_obj);
-    vector<BddVar> var_list(n);
-    for ( SizeType i = 0; i < n; ++ i ) {
-      auto var_obj = PySequence_GetItem(var_list_obj, i);
-      if ( !PyBdd::Check(var_obj) ) {
-	PyErr_SetString(PyExc_TypeError, err_msg);
-	return nullptr;
-      }
-      auto& var = PyBdd::_get_ref(var_obj);
-      if ( !var.is_variable() ) {
-	PyErr_SetString(PyExc_TypeError, err_msg);
-	return nullptr;
-      }
-      var_list[i] = BddVar::from_bdd(var);
-    }
-    try {
-      auto ans_bdd = bddmgr.from_truth(str, var_list);
-      return PyBdd::ToPyObject(ans_bdd);
-    }
-    catch ( std::invalid_argument ) {
-      PyErr_SetString(PyExc_ValueError, "invalid string");
-      return nullptr;
-    }
-  }
-}
-
-PyObject*
-BddMgr_enable_gc(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  bddmgr.enable_gc();
-  Py_RETURN_NONE;
-}
-
-PyObject*
-BddMgr_disable_gc(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  bddmgr.disable_gc();
-  Py_RETURN_NONE;
-}
-
-// メソッド定義
-PyMethodDef BddMgr_methods[] = {
-  {"variable", reinterpret_cast<PyCFunction>(BddMgr_variable),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("return variable object")},
-  {"copy", reinterpret_cast<PyCFunction>(BddMgr_copy),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("copy BDD")},
-  {"zero", BddMgr_zero, METH_NOARGS,
-   PyDoc_STR("generate Zero")},
-  {"one", BddMgr_one, METH_NOARGS,
-   PyDoc_STR("generate One")},
-  {"from_truth", reinterpret_cast<PyCFunction>(BddMgr_from_truth),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("generate BDD from truth-table string")},
-  {"enable_gc", BddMgr_enable_gc, METH_NOARGS,
-   PyDoc_STR("enable GC")},
-  {"disable_gc", BddMgr_disable_gc, METH_NOARGS,
-   PyDoc_STR("disable GC")},
-  {nullptr, nullptr, 0, nullptr}
-};
-
-PyObject*
-BddMgr_node_num(
-  PyObject* self,
-  void* Py_UNUSED(closure)
-)
-{
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  auto val = bddmgr.node_num();
-  return PyLong_FromLong(val);
-}
-
-PyObject*
-BddMgr_gc_limit(
-  PyObject* self,
-  void* Py_UNUSED(closure)
-)
-{
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  auto val = bddmgr.gc_limit();
-  return PyLong_FromLong(val);
-}
-
-int
-BddMgr_set_gc_limit(
-  PyObject* self,
-  PyObject* val_obj,
-  void* Py_UNUSED(closure)
-)
-{
-  if ( !PyLong_Check(val_obj) ) {
-    PyErr_SetString(PyExc_TypeError, "int value is expected");
-    return -1;
-  }
-  auto& bddmgr = PyBddMgr::_get_ref(self);
-  SizeType val = PyLong_AsLong(val_obj);
-  bddmgr.set_gc_limit(val);
-  return 0;
-}
-
-// get/set 関数定義
-PyGetSetDef BddMgr_getset[] = {
-  {"node_num", BddMgr_node_num, nullptr, PyDoc_STR("total node number"), nullptr},
-  {"gc_limit", BddMgr_gc_limit, BddMgr_set_gc_limit, PyDoc_STR("GC limit"), nullptr},
-  {nullptr, nullptr, nullptr, nullptr, nullptr},
-};
 
 END_NONAMESPACE
 
 
-// @brief 'BddMgr' オブジェクトを使用可能にする．
+// @brief BddMgr オブジェクトを使用可能にする．
 bool
 PyBddMgr::init(
   PyObject* m
 )
 {
-  BddMgrType.tp_name = "BddMgr";
-  BddMgrType.tp_basicsize = sizeof(BddMgrObject);
-  BddMgrType.tp_itemsize = 0;
-  BddMgrType.tp_dealloc = BddMgr_dealloc;
-  BddMgrType.tp_flags = Py_TPFLAGS_DEFAULT;
-  BddMgrType.tp_doc = PyDoc_STR("BddMgr object");
-  BddMgrType.tp_methods = BddMgr_methods;
-  BddMgrType.tp_getset = BddMgr_getset;
-  BddMgrType.tp_new = BddMgr_new;
-
-  // 型オブジェクトの登録
-  if ( !PyModule::reg_type(m, "BddMgr", &BddMgrType) ) {
+  BddMgr_Type.tp_name = "BddMgr";
+  BddMgr_Type.tp_basicsize = sizeof(BddMgr_Object);
+  BddMgr_Type.tp_itemsize = 0;
+  BddMgr_Type.tp_dealloc = dealloc_func;
+  BddMgr_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+  BddMgr_Type.tp_doc = PyDoc_STR("Python extended object for BddMgr");
+  BddMgr_Type.tp_methods = methods;
+  BddMgr_Type.tp_getset = getsets;
+  BddMgr_Type.tp_new = new_func;
+  if ( !PyModule::reg_type(m, "BddMgr", &BddMgr_Type) ) {
     goto error;
   }
 
@@ -315,24 +333,24 @@ PyBddMgr::init(
   return false;
 }
 
-// @brief BddMgr を PyObject* に変換する
+// BddMgr を PyObject に変換する．
 PyObject*
 PyBddMgr::Conv::operator()(
-  const ElemType& val
+  const BddMgr& val
 )
 {
   auto type = PyBddMgr::_typeobject();
   auto obj = type->tp_alloc(type, 0);
-  auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
-  new (&bddmgr_obj->mVal) BddMgr(val);
+  auto my_obj = reinterpret_cast<BddMgr_Object*>(obj);
+  new (&my_obj->mVal) BddMgr(val);
   return obj;
 }
 
-// @brief PyObject* から BddMgr を取り出すファンクタクラス
+// PyObject を BddMgr に変換する．
 bool
 PyBddMgr::Deconv::operator()(
   PyObject* obj,
-  ElemType& val
+  BddMgr& val
 )
 {
   if ( PyBddMgr::Check(obj) ) {
@@ -348,24 +366,24 @@ PyBddMgr::Check(
   PyObject* obj
 )
 {
-  return Py_IS_TYPE(obj, _typeobject());
+  return Py_IS_TYPE(obj, &BddMgr_Type);
 }
 
-// @brief BddMgr を表す PyObject から BddMgr を取り出す．
+// @brief PyObject から BddMgr を取り出す．
 BddMgr&
 PyBddMgr::_get_ref(
   PyObject* obj
 )
 {
-  auto bddmgr_obj = reinterpret_cast<BddMgrObject*>(obj);
-  return bddmgr_obj->mVal;
+  auto my_obj = reinterpret_cast<BddMgr_Object*>(obj);
+  return my_obj->mVal;
 }
 
 // @brief BddMgr を表すオブジェクトの型定義を返す．
 PyTypeObject*
 PyBddMgr::_typeobject()
 {
-  return &BddMgrType;
+  return &BddMgr_Type;
 }
 
 END_NAMESPACE_YM

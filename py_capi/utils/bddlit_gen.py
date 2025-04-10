@@ -32,7 +32,8 @@ class BddLitGen(PyObjGen):
                          pyname='BddLit',
                          namespace='YM',
                          header_include_files=['ym/BddLit.h'],
-                         source_include_files=['pym/PyBddLit.h',
+                         source_include_files=['pym/PyBdd.h',
+                                               'pym/PyBddLit.h',
                                                'pym/PyBddVar.h'])
 
         self.add_new('disabled')
@@ -60,7 +61,7 @@ class BddLitGen(PyObjGen):
                         doc_str='convert from BDD')
         
         def meth_positive_literal(writer):
-            writer.gen_return_pyobject('PyBddLit', 'val.positive_literal(var)')
+            writer.gen_return_pyobject('PyBddLit', 'BddLit::positive_literal(var)')
         self.add_static_method('positive_literal',
                                func_body=meth_positive_literal,
                                arg_list=[BddVarArg(name='var',
@@ -68,7 +69,7 @@ class BddLitGen(PyObjGen):
                                doc_str='make positive literal')
 
         def meth_negative_literal(writer):
-            writer.gen_return_pyobject('PyBddLit', 'val.negative_literal(var)')
+            writer.gen_return_pyobject('PyBddLit', 'BddLit::negative_literal(var)')
         self.add_static_method('negative_literal',
                                func_body=meth_negative_literal,
                                arg_list=[BddVarArg(name='var',

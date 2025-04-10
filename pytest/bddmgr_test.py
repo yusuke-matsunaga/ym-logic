@@ -136,7 +136,8 @@ def test_from_truth1():
 
     var_list = [ mgr.variable(i) for i in range(3) ]
     exp_str = "10010110"
-    bdd = mgr.from_truth(exp_str,var_list)
+    bdd = mgr.from_truth(exp_str,
+                         var_list=var_list)
 
     assert not bdd.is_invalid()
     assert bdd.is_valid()
