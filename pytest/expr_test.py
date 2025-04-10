@@ -177,16 +177,16 @@ def test_literal1():
     assert expr.literal_num() == 1
     for i in range(10):
         exp_val = 1 if i == var0 else 0
-        assert expr.literal_num(var=i) == exp_val
+        assert expr.literal_num(i) == exp_val
     assert expr.literal_num(var0, inv=False) == 1
     assert expr.literal_num(Literal(var0, inv=False)) == 1
-    assert expr.literal_num(var=var0, inv=True) == 0
-    assert expr.literal_num(var=Literal(var0, inv=False)) == 1
+    assert expr.literal_num(var0, inv=True) == 0
+    assert expr.literal_num(Literal(var0, inv=False)) == 1
 
     assert expr.sop_literal_num() == 1
     for i in range(10):
         exp_val = 1 if i == var0 else 0
-        assert expr.sop_literal_num(var=i) == exp_val
+        assert expr.sop_literal_num(i) == exp_val
     assert expr.sop_literal_num(var0, inv=False) == 1
     assert expr.sop_literal_num(var0, inv=True) == 0
     assert expr.sop_literal_num(Literal(var0, inv=False)) == 1
@@ -245,7 +245,7 @@ def test_literal2():
 
 def test_literal3():
     var0 = 0
-    expr = Expr.literal(var=var0, inv=True)
+    expr = Expr.literal(var0, inv=True)
 
     assert expr.is_valid()
     assert not expr.is_invalid()
@@ -337,7 +337,7 @@ def test_literal4():
 
 def test_posi_literal():
     var0 = 1
-    expr = Expr.posi_literal(var=var0)
+    expr = Expr.posi_literal(var0)
 
     assert expr.is_valid()
     assert not expr.is_invalid()
@@ -995,7 +995,7 @@ def test_bad_from_string1():
     with pytest.raises(Exception) as e:
         _ = Expr.from_string(expr_str)
     assert e.type == ValueError
-    assert str(e.value) == "invalid argument"
+    assert str(e.value) == "syntax error in argument string"
 
     
 def test_analyze_c0():

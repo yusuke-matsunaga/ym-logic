@@ -1115,7 +1115,7 @@ TEST_P(TvFuncTest_base, xform)
       rpg.generate(mRandGen);
       for ( int i: Range(ni) ) {
 	bool iinv = mRandDist(mRandGen) ? true : false;
-	map.set(i, rpg.elem(i), iinv);
+	map.set_imap(i, rpg.elem(i), iinv);
       }
       auto xfunc = func.xform(map);
 
@@ -1304,7 +1304,7 @@ TEST(TvFuncTest, expand_lit1)
   auto func0 = TvFunc::literal(1, 0, false);
 
   auto map = NpnMap(1, 10);
-  map.set(0, 0, false);
+  map.set_imap(0, 0, false);
   auto func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::literal(10, 0, false), func1 );
@@ -1315,7 +1315,7 @@ TEST(TvFuncTest, expand_lit2)
   auto func0 = TvFunc::literal(2, 1, false);
 
   auto map = NpnMap(2, 10);
-  map.set(1, 2, false);
+  map.set_imap(1, 2, false);
   auto func1 = func0.xform(map);
 
   EXPECT_EQ( TvFunc::literal(10, 2, false), func1 );

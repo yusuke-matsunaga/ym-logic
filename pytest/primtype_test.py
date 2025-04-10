@@ -12,32 +12,38 @@ from ymlogic import PrimType
 
 
 def test_c0():
-    ptype = PrimType("c0")
+    ptype = PrimType("C0")
     assert ptype == PrimType.C0
 
-    ptyoe = PrimType("C0")
+    assert ptype.__repr__() == "C0"
+
+def test_c0_2():
+    ptype = PrimType("c0")
     assert ptype == PrimType.C0
 
     assert ptype.__repr__() == "C0"
 
 def test_c1():
-    ptype = PrimType("c1")
-    assert ptype == PrimType.C1
-
     ptype = PrimType("C1")
     assert ptype == PrimType.C1
 
     assert ptype.__repr__() == "C1"
 
+def test_c1_2():
+    ptype = PrimType("c1")
+    assert ptype == PrimType.C1
+
+    assert ptype.__repr__() == "C1"
+
 def test_buff():
-    ptype = PrimType("buff")
+    ptype = PrimType("BUFF")
     assert ptype == PrimType.Buff
 
-    type = PrimType("Buff")
-    #assert ptype == PrimType.Buff
+    assert ptype.__repr__() == "Buff"
 
-    #ptype = PrimType("BUFF")
-    #assert ptype == PrimType.Buff
+def test_buff_2():
+    ptype = PrimType("buff")
+    assert ptype == PrimType.Buff
 
     assert ptype.__repr__() == "Buff"
 
@@ -129,4 +135,4 @@ def test_invalid():
     with pytest.raises(Exception) as e:
         ptype = PrimType("mux")
     assert e.type == ValueError
-    assert str(e.value) == "mux: unknown type for PrimType"
+

@@ -45,11 +45,11 @@ TEST(NpnMapTest, base)
   // (3', 1, 4, 2', 0)'
   NpnMap map1(5);
   map1.set_oinv(true);
-  map1.set(0, 4, false);
-  map1.set(1, 1, false);
-  map1.set(2, 3, true);
-  map1.set(3, 0, true);
-  map1.set(4, 2, false);
+  map1.set_imap(0, 4, false);
+  map1.set_imap(1, 1, false);
+  map1.set_imap(2, 3, true);
+  map1.set_imap(3, 0, true);
+  map1.set_imap(4, 2, false);
 
   EXPECT_EQ( 5, map1.input_num() );
   EXPECT_EQ( true, map1.oinv() );
@@ -71,11 +71,11 @@ TEST(NpnMapTest, base)
 
   NpnMap map2(5);
   map2.set_oinv(true);
-  map2.set(0, 4, false);
-  map2.set(1, 1, false);
-  map2.set(2, 3, true);
-  map2.set(3, 0, true);
-  map2.set(4, 2, false);
+  map2.set_imap(0, 4, false);
+  map2.set_imap(1, 1, false);
+  map2.set_imap(2, 3, true);
+  map2.set_imap(3, 0, true);
+  map2.set_imap(4, 2, false);
 
   EXPECT_EQ( map1, map2 );
 
@@ -89,11 +89,11 @@ TEST(NpnMapTest, inverse)
   // (3', 1, 4, 2', 0)'
   NpnMap map1(5);
   map1.set_oinv(true);
-  map1.set(0, 4, false);
-  map1.set(1, 1, false);
-  map1.set(2, 3, true);
-  map1.set(3, 0, true);
-  map1.set(4, 2, false);
+  map1.set_imap(0, 4, false);
+  map1.set_imap(1, 1, false);
+  map1.set_imap(2, 3, true);
+  map1.set_imap(3, 0, true);
+  map1.set_imap(4, 2, false);
 
   NpnMap imap = map1.inverse();
 
@@ -111,11 +111,11 @@ TEST(NpnMapTest, inverse_op)
   // (3', 1, 4, 2', 0)'
   NpnMap map1(5);
   map1.set_oinv(true);
-  map1.set(0, 4, false);
-  map1.set(1, 1, false);
-  map1.set(2, 3, true);
-  map1.set(3, 0, true);
-  map1.set(4, 2, false);
+  map1.set_imap(0, 4, false);
+  map1.set_imap(1, 1, false);
+  map1.set_imap(2, 3, true);
+  map1.set_imap(3, 0, true);
+  map1.set_imap(4, 2, false);
 
   NpnMap imap = ~map1;
 
@@ -133,16 +133,16 @@ TEST(NpnMapTest, compose)
   // (9', 5, 3)'
   NpnMap map1(3, 10);
   map1.set_oinv(true);
-  map1.set(0, 9, true);
-  map1.set(1, 5, false);
-  map1.set(2, 3, false);
+  map1.set_imap(0, 9, true);
+  map1.set_imap(1, 5, false);
+  map1.set_imap(2, 3, false);
 
   // (--, --, --, 2', --, 1, --, --, --, 0)
   NpnMap map2(10, 3);
   map2.set_oinv(false);
-  map2.set(3, 2, true);
-  map2.set(5, 1, false);
-  map2.set(9, 0, false);
+  map2.set_imap(3, 2, true);
+  map2.set_imap(5, 1, false);
+  map2.set_imap(9, 0, false);
 
   NpnMap map3 = map1 * map2;
   EXPECT_EQ( 3, map3.input_num() );

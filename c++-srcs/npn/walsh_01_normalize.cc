@@ -57,18 +57,18 @@ walsh_01_normalize(
   for ( SizeType var = 0; var < ni; ++ var ) {
     if ( w1[var] < 0 ) {
       // 反転させる．
-      xmap.set(var, var, true);
+      xmap.set_imap(var, var, true);
       w1[var] = -w1[var];
     }
     else if ( w1[var] > 0 ) {
       // そのままの極性で固定する．
-      xmap.set(var, var, false);
+      xmap.set_imap(var, var, false);
     }
     else { // w1[var] == 0
       // 独立な変数かどうか調べる．
       if ( func.check_sup(var) ) {
 	// とりあえずそのままの極性で固定する．
-	xmap.set(var, var, false);
+	xmap.set_imap(var, var, false);
       }
       else {
 	// 独立だった．
@@ -117,7 +117,7 @@ walsh_01_normalize(
 	  // 逆相で対称だった．
 	  found = true;
 	  input_info.add_elem(gid, var);
-	  xmap.set(var, var, true);
+	  xmap.set_imap(var, var, true);
 	  break;
 	}
       }

@@ -25,26 +25,29 @@ class TvFuncGen(PyObjGen):
                                                'pym/PyNpnMap.h',
                                                'pym/PyPrimType.h',
                                                'pym/PySopCover.h',
+                                               'pym/PyInt.h',
+                                               'pym/PyLong.h',
+                                               'pym/PyString.h',
                                                'pym/PyModule.h',
                                                'ym/Tv2Sop.h'])
 
         def new_body(writer):
             writer.gen_vardecl(typename='TvFunc',
                                varname='func')
-            writer.gen_vardecl(typename='std::vector<long>',
+            writer.gen_vardecl(typename='std::vector<int>',
                                varname='vect')
             with writer.gen_if_block('ni == -1'):
                 writer.gen_assign('func', 'TvFunc::invalid()')
             with writer.gen_elseif_block('vect_obj == nullptr'):
-                writer.gen_assign('func', 'TvFunc::zefo(ni)')
-            with writer.gen_elseif_block('PyList<long, PyLong>(vect_obj, vect)'):
+                writer.gen_assign('func', 'TvFunc::zero(ni)')
+            with writer.gen_elseif_block('PyList<int, PyInt>::FromPyObject(vect_obj, vect)'):
                 writer.gen_auto_assign('n', 'vect.size()')
                 with writer.gen_if_block('n != (1 << ni)'):
                     writer.gen_value_error('"invalid vector size"')
                 writer.gen_assign('func', 'TvFunc(ni, vect)')
             with writer.gen_else_block():
                 writer.gen_value_error('"argument 2 must be a sequence of ints"')
-            writer.gen_return('PyTvFunc::ToPyObject(std::move(func))')
+            writer.gen_return_pyobject('PyTvFunc', 'std::move(func)')
         self.add_new(func_body=new_body,
                      arg_list=[OptArg(),
                                IntArg(name='input_num',
@@ -62,44 +65,38 @@ class TvFuncGen(PyObjGen):
 
         def meth_from_string(writer):
             with writer.gen_try_block():
-                writer.gen_auto_assign('func', 'TvFunc(s)')
-                writer.gen_return('PyTvFunc::ToPyObject(std::move(func))')
-            with writer.gen_catch_block('std::invalid_argument err'):
-                writer.gen_value_error('"invalid string"')
-        self.add_method('from_string',
-                        is_static=True,
-                        func_body=meth_from_string,
-                        arg_list=[StringArg(name='str',
-                                            cvarname='s',
-                                            cvardefault='nullptr')],
-                        doc_str='make TvFunc object from string')
+                writer.gen_return_pyobject('PyTvFunc', 'TvFunc(s)')
+            writer.gen_catch_invalid_argument()
+        self.add_static_method('from_string',
+                               func_body=meth_from_string,
+                               arg_list=[StringArg(name='str',
+                                                   cvarname='s',
+                                                   cvardefault='nullptr')],
+                               doc_str='make TvFunc object from string')
 
         def meth_invalid(writer):
-            writer.gen_return('PyTvFunc::ToPyObject(TvFunc::invalid())')
-        self.add_method('invalid',
-                        is_static=True,
-                        func_body=meth_invalid,
-                        doc_str='make invalid TvFunc object')
+            writer.gen_return_pyobject('PyTvFunc', 'TvFunc::invalid()')
+        self.add_static_method('invalid',
+                               func_body=meth_invalid,
+                               doc_str='make invalid TvFunc object')
 
         def meth_zero(writer):
-            writer.gen_return('PyTvFunc::ToPyObject(TvFunc::zero(ni))')
-        self.add_method('zero',
-                        is_static=True,
-                        func_body=meth_zero,
-                        arg_list=[IntArg(name='input_num',
-                                         cvarname='ni',
-                                         cvardefault='0')],
-                        doc_str='make ZERO TvFunc object')
+            writer.gen_return_pyobject('PyTvFunc', 'TvFunc::zero(ni)')
+        self.add_static_method('zero',
+                               func_body=meth_zero,
+                               arg_list=[IntArg(name='input_num',
+                                                cvarname='ni',
+                                                cvardefault='0')],
+                               doc_str='make ZERO TvFunc object')
 
         def meth_one(writer):
-            writer.gen_return('PyTvFunc::ToPyObject(TvFunc::one(ni))')
-        self.add_method('one',
-                        is_static=True,
-                        func_body=meth_zero,
-                        arg_list=[IntArg(name='input_num',
-                                         cvarname='ni',
-                                         cvardefault='0')],
-                        doc_str='make ONE TvFunc object')
+            writer.gen_return_pyobject('PyTvFunc', 'TvFunc::one(ni)')
+        self.add_static_method('one',
+                               func_body=meth_zero,
+                               arg_list=[IntArg(name='input_num',
+                                                cvarname='ni',
+                                                cvardefault='0')],
+                               doc_str='make ONE TvFunc object')
 
         def meth_literal(writer):
             writer.gen_vardecl(typename='Literal',
@@ -109,47 +106,44 @@ class TvFuncGen(PyObjGen):
                     writer.gen_value_error('"\'lit.varid()\' is out of range"')
                 with writer.gen_if_block('inv'):
                     writer.gen_assign('lit', '~lit')
-                writer.gen_return('PyTvFunc::ToPyObject(TvFunc::literal(ni, lit))')
+                writer.gen_return_pyobject('PyTvFunc', 'TvFunc::literal(ni, lit)')
             writer.gen_value_error('"argument 2 must be an integer or a Literal object"')
-        self.add_method('literal',
-                        is_static=True,
-                        func_body=meth_literal,
-                        arg_list=[IntArg(name='input_num',
-                                         cvarname='ni'),
-                                  RawObjArg(name='lit',
-                                            cvarname='lit_obj'),
-                                  OptArg(),
-                                  BoolArg(name='inv',
-                                          cvarname='inv',
-                                          cvardefault='false')],
-                        doc_str='make literal type TvFunc object')
+        self.add_static_method('literal',
+                               func_body=meth_literal,
+                               arg_list=[IntArg(name='input_num',
+                                                cvarname='ni'),
+                                         RawObjArg(name='lit',
+                                                   cvarname='lit_obj'),
+                                         OptArg(),
+                                         BoolArg(name='inv',
+                                                 cvarname='inv',
+                                                 cvardefault='false')],
+                               doc_str='make literal type TvFunc object')
 
         def meth_posi_literal(writer):
             with writer.gen_if_block('var >= ni'):
                 writer.gen_value_error('"\'var\' is out of range"')
-            writer.gen_return('PyTvFunc::ToPyObject(TvFunc::posi_literal(ni, var))')
-        self.add_method('posi_literal',
-                        is_static=True,
-                        func_body=meth_posi_literal,
-                        arg_list=[IntArg(name='input_num',
-                                         cvarname='ni'),
-                                  IntArg(name='var',
-                                            cvarname='var')],
-                        doc_str='make positive literal type TvFunc object')
+            writer.gen_return_pyobject('PyTvFunc', 'TvFunc::posi_literal(ni, var)')
+        self.add_static_method('posi_literal',
+                               func_body=meth_posi_literal,
+                               arg_list=[IntArg(name='input_num',
+                                                cvarname='ni'),
+                                         IntArg(name='var',
+                                                cvarname='var')],
+                               doc_str='make positive literal type TvFunc object')
 
         def meth_nega_literal(writer):
             with writer.gen_if_block('var >= ni'):
                 writer.gen_value_error('"\'var\' is out of range"')
-            writer.gen_return('PyTvFunc::ToPyObject(TvFunc::nega_literal(ni, var))')
-        self.add_method('nega_literal',
-                        is_static=True,
-                        func_body=meth_nega_literal,
-                        arg_list=[IntArg(name='input_num',
-                                         cvarname='ni'),
-                                  IntArg(name='var',
-                                            cvarname='var')],
-                        doc_str='make positive literal type TvFunc object')
-
+            writer.gen_return_pyobject('PyTvFunc', 'TvFunc::nega_literal(ni, var)')
+            self.add_static_method('nega_literal',
+                                   func_body=meth_nega_literal,
+                                   arg_list=[IntArg(name='input_num',
+                                                    cvarname='ni'),
+                                             IntArg(name='var',
+                                                    cvarname='var')],
+                                   doc_str='make positive literal type TvFunc object')
+            
         def meth_cofactor(writer):
             writer.gen_vardecl(typename='Literal',
                                varname='lit')
@@ -158,7 +152,7 @@ class TvFuncGen(PyObjGen):
                     writer.gen_value_error('"\'lit.varid()\' is out of range"')
                 with writer.gen_if_block('inv'):
                     writer.gen_assign('lit', '~lit')
-                writer.gen_return('PyTvFunc::ToPyObject(val.cofactor(lit))')
+                writer.gen_return_pyobject('PyTvFunc', 'val.cofactor(lit)')
             writer.gen_value_error('"argument 1 must be an integer or a Literal object"')
         self.add_method('cofactor',
                         func_body=meth_cofactor,
@@ -179,9 +173,8 @@ class TvFuncGen(PyObjGen):
                     writer.gen_value_error('"\'lit.varid()\' is out of range"')
                 with writer.gen_if_block('inv'):
                     writer.gen_assign('lit', '~lit')
-                writer.write_line('val.cofactor_int(lit)')
-                writer.write_line('Py_INCREF(self);')
-                writer.gen_return('return')
+                writer.write_line('val.cofactor_int(lit);')
+                writer.gen_return_self(incref=True)
             writer.gen_value_error('"argument 1 must be an integer or a Literal object"')
         self.add_method('cofactor_int',
                         func_body=meth_cofactor_int,
@@ -195,7 +188,7 @@ class TvFuncGen(PyObjGen):
                         doc_str='make a cofactor')
 
         def meth_xform(writer):
-            writer.gen_return('PyTvFunc::ToPyObject(val.xform(npnmap))')
+            writer.gen_return_pyobject('PyTvFunc', 'val.xform(npnmap)')
         self.add_method('xform',
                         func_body=meth_xform,
                         arg_list=[TypedObjConvArg(name='map',
@@ -206,19 +199,19 @@ class TvFuncGen(PyObjGen):
                         doc_str='transform')
 
         def meth_shrink_map(writer):
-            writer.gen_return('PyNpnMap::ToPyObject(val.shrink_map())')
+            writer.gen_return_pyobject('PyNpnMap', 'val.shrink_map()')
         self.add_method('shrink_map',
                         func_body=meth_shrink_map,
                         doc_str='shrink unused inputs')
 
         def meth_npn_cannonical_map(writer):
-            writer.gen_return('PyNpnMap::ToPyObject(val.npn_cannonical_map())')
+            writer.gen_return_pyobject('PyNpnMap', 'val.npn_cannonical_map()')
         self.add_method('npn_cannonical_map',
                         func_body=meth_npn_cannonical_map,
                         doc_str='get cannonical map')
 
         def meth_npn_cannonical_all_map(writer):
-            writer.gen_return('PyList<NpnMap, PyNpnMap>::ToPyObject(val.npn_cannonical_all_map)')
+            writer.gen_return_pyobject('PyList<NpnMap, PyNpnMap>', 'val.npn_cannonical_all_map()')
         self.add_method('npn_cannonical_all_map',
                         func_body=meth_npn_cannonical_all_map,
                         doc_str='get list of all cannonical maps')
@@ -340,7 +333,7 @@ class TvFuncGen(PyObjGen):
                         doc_str='check synmmetry')
 
         def meth_analyze(writer):
-            writer.gen_return('PyPrimType::ToPyObject(val.analyze())')
+            writer.gen_return_pyobject('PyPrimType', 'val.analyze()')
         self.add_method('analyze',
                         func_body=meth_analyze,
                         doc_str='analyze the function type')
@@ -348,44 +341,132 @@ class TvFuncGen(PyObjGen):
         def meth_all_primes(writer):
             self.gen_ref_conv(writer, objname='f_obj', refname='f')
             with writer.gen_if_block('dc_obj == nullptr'):
-                writer.gen_auto_assign('cube_list', 'TvSop::all_primes(f)')
-                writer.gen_return('PySopCover::ToPyObject(SopCover(f.input_num(), cube_list))')
+                writer.gen_auto_assign('cube_list', 'Tv2Sop::all_primes(f)')
+                writer.gen_return_pyobject('PySopCover',
+                                           'SopCover(f.input_num(), cube_list)')
             with writer.gen_else_block():
                 self.gen_ref_conv(writer, objname='dc_obj', refname='dc')
-                writer.gen_auto_assign('cube_list', 'TvSop::all_primes(f, dc)')
-                writer.gen_return('PySopCover::ToPyObject(SopCover(f.input_num(), cube_list))')
-        self.add_method('all_primes',
-                        is_static=True,
-                        func_body=meth_all_primes,
-                        arg_list=[TypedRawObjArg(name='f',
-                                                 cvarname='f_obj',
-                                                 pytypename='PyTvFunc::_typeobject()'),
-                                  OptArg(),
-                                  TypedRawObjArg(name='dc',
-                                                 cvarname='dc_obj',
-                                                 pytypename='PyTvFunc::_typeobject()')],
-                        doc_str='return all primes')
+                writer.gen_auto_assign('cube_list', 'Tv2Sop::all_primes(f, dc)')
+                writer.gen_return_pyobject('PySopCover',
+                                           'SopCover(f.input_num(), cube_list)')
+        self.add_static_method('all_primes',
+                               func_body=meth_all_primes,
+                               arg_list=[TypedRawObjArg(name='f',
+                                                        cvarname='f_obj',
+                                                        pytypename='PyTvFunc::_typeobject()'),
+                                         OptArg(),
+                                         TypedRawObjArg(name='dc',
+                                                        cvarname='dc_obj',
+                                                        pytypename='PyTvFunc::_typeobject()')],
+                               doc_str='return all primes')
 
         def meth_isop(writer):
             self.gen_ref_conv(writer, objname='f_obj', refname='f')
             with writer.gen_if_block('dc_obj == nullptr'):
-                writer.gen_auto_assign('cube_list', 'TvSop::isop(f)')
-                writer.gen_return('PySopCover::ToPyObject(SopCover(f.input_num(), cube_list))')
+                writer.gen_auto_assign('cube_list', 'Tv2Sop::isop(f)')
+                writer.gen_return_pyobject('PySopCover',
+                                           'SopCover(f.input_num(), cube_list)')
             with writer.gen_else_block():
                 self.gen_ref_conv(writer, objname='dc_obj', refname='dc')
-                writer.gen_auto_assign('cube_list', 'TvSop::isop(f, dc)')
-                writer.gen_return('PySopCover::ToPyObject(SopCover(f.input_num(), cube_list))')
-        self.add_method('isop',
-                        func_body=meth_isop,
-                        arg_list=[TypedRawObjArg(name='f',
-                                                 cvarname='f_obj',
-                                                 pytypename='PyTvFunc::_typeobject()'),
-                                  OptArg(),
-                                  TypedRawObjArg(name='dc',
-                                                 cvarname='dc_obj',
-                                                 pytypename='PyTvFunc::_typeobject()')],
-                        doc_str='return irredundant SOP')
+                writer.gen_auto_assign('cube_list', 'Tv2Sop::isop(f, dc)')
+                writer.gen_return_pyobject('PySopCover',
+                                           'SopCover(f.input_num(), cube_list)')
+        self.add_static_method('isop',
+                               func_body=meth_isop,
+                               arg_list=[TypedRawObjArg(name='f',
+                                                        cvarname='f_obj',
+                                                        pytypename='PyTvFunc::_typeobject()'),
+                                         OptArg(),
+                                         TypedRawObjArg(name='dc',
+                                                        cvarname='dc_obj',
+                                                        pytypename='PyTvFunc::_typeobject()')],
+                               doc_str='return irredundant SOP')
+
+        def cmp_func(writer):
+            with writer.gen_if_block('PyTvFunc::Check(other)'):
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                with writer.gen_if_block('op == Py_EQ'):
+                    writer.gen_return_py_bool('val == val2')
+                with writer.gen_if_block('op == Py_NE'):
+                    writer.gen_return_py_bool('val != val2')
+            writer.gen_return_py_notimplemented()
+        self.add_richcompare(func_body=cmp_func)
+
+        def nb_invert(writer):
+            writer.gen_return_pyobject('PyTvFunc', '~val')
+
+        def nb_and(writer):
+            with writer.gen_if_block('PyTvFunc::Check(other)'):
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                with writer.gen_if_block('val.input_num() != val2.input_num()'):
+                    writer.gen_value_error('"input_num() mismatch"')
+                writer.gen_return_pyobject('PyTvFunc', 'val & val2')
+            writer.gen_return_py_notimplemented()
+
+        def nb_or(writer):
+            with writer.gen_if_block('PyTvFunc::Check(other)'):
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                with writer.gen_if_block('val.input_num() != val2.input_num()'):
+                    writer.gen_value_error('"input_num() mismatch"')
+                writer.gen_return_pyobject('PyTvFunc', 'val | val2')
+            writer.gen_return_py_notimplemented()
+
+        def nb_xor(writer):
+            with writer.gen_if_block('PyTvFunc::Check(other)'):
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                with writer.gen_if_block('val.input_num() != val2.input_num()'):
+                    writer.gen_value_error('"input_num() mismatch"')
+                writer.gen_return_pyobject('PyTvFunc', 'val ^ val2')
+            writer.gen_return_py_notimplemented()
+
+        def nb_inplace_and(writer):
+            with writer.gen_if_block('PyTvFunc::Check(other)'):
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                with writer.gen_if_block('val.input_num() != val2.input_num()'):
+                    writer.gen_value_error('"input_num() mismatch"')
+                writer.write_line('val &= val2;')
+                writer.gen_return_self(incref=True)
+            writer.gen_return_py_notimplemented()
+
+        def nb_inplace_or(writer):
+            with writer.gen_if_block('PyTvFunc::Check(other)'):
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                with writer.gen_if_block('val.input_num() != val2.input_num()'):
+                    writer.gen_value_error('"input_num() mismatch"')
+                writer.write_line('val |= val2;')
+                writer.gen_return_self(incref=True)
+            writer.gen_return_py_notimplemented()
+
+        def nb_inplace_xor(writer):
+            with writer.gen_if_block('PyTvFunc::Check(other)'):
+                self.gen_ref_conv(writer, objname='other', refname='val2')
+                with writer.gen_if_block('val.input_num() != val2.input_num()'):
+                    writer.gen_value_error('"input_num() mismatch"')
+                writer.write_line('val ^= val2;')
+                writer.gen_return_self(incref=True)
+            writer.gen_return_py_notimplemented()
+
+        self.add_number(nb_invert=nb_invert,
+                        nb_and=nb_and,
+                        nb_or=nb_or,
+                        nb_xor=nb_xor,
+                        nb_inplace_and=nb_inplace_and,
+                        nb_inplace_or=nb_inplace_or,
+                        nb_inplace_xor=nb_inplace_xor)
+
+        def hash_func(writer):
+            writer.gen_return('val.hash()')
+        self.add_hash(hash_func)
         
+        def conv_func(writer):
+            self.gen_alloc_code(writer, varname='obj')
+            self.gen_obj_conv(writer, objname='obj', varname='my_obj')
+            writer.write_line(f'new (&my_obj->mVal) {self.classname}(std::move(val));')
+            writer.gen_return('obj')
+        self.add_conv(conv_func)
+
+        self.add_deconv('default')
+            
             
 if __name__ == '__main__':
 

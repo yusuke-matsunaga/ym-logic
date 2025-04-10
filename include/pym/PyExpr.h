@@ -5,25 +5,28 @@
 /// @brief PyExpr のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include "ym/Expr.h"
+#include "ym/Literal.h"
 
 
 BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
 /// @class PyExpr PyExpr.h "PyExpr.h"
-/// @brief Python 用の Expr 拡張
+/// @brief Expr を Python から使用するための拡張
 ///
-/// 複数の関数をひとまとめにしているだけなので実は名前空間として用いている．
+/// 実際には static メンバ関数しか持たないのでクラスではない．
 //////////////////////////////////////////////////////////////////////
 class PyExpr
 {
+public:
+
   using ElemType = Expr;
 
 public:
@@ -61,7 +64,7 @@ public:
 
   /// @brief Expr を表す PyObject を作る．
   /// @return 生成した PyObject を返す．
-  ///
+  /// 
   /// 返り値は新しい参照が返される．
   static
   PyObject*
@@ -78,7 +81,7 @@ public:
   static
   bool
   FromPyObject(
-    PyObject* obj, ///< [in] Python のオブジェクト
+    PyObject* obj, ///< [in] Python のオブジェクト,
     ElemType& val  ///< [out] 結果を格納する変数
   )
   {
@@ -92,6 +95,21 @@ public:
   Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
+
+  /// @brief PyObject から Expr を取り出す．
+  static
+  ElemType
+  Get(
+    PyObject* obj ///< [in] 対象の Python オブジェクト
+  )
+  {
+    ElemType val;
+    if ( PyExpr::FromPyObject(obj, val) ) {
+      return val;
+    }
+    PyErr_SetString(PyExc_TypeError, "Could not convert to Expr");
+    return val;
+  }
 
   /// @brief Expr を表す PyObject から Expr を取り出す．
   /// @return Expr を返す．

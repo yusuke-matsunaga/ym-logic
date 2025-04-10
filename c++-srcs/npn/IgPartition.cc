@@ -129,7 +129,7 @@ IgPartition::to_npnmap(
     auto n = mInputInfo.elem_num(gid);
     for ( SizeType j = 0; j < n; ++ j, ++ dst_var ) {
       auto src_var = mInputInfo.elem(gid, j);
-      npnmap.set(src_var, dst_var, polconf.iinv(src_var));
+      npnmap.set_imap(src_var, dst_var, polconf.iinv(src_var));
     }
   }
   return npnmap;

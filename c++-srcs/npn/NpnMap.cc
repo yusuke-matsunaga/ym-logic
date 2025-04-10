@@ -118,7 +118,7 @@ NpnMap::set_identity(
 
 // @brief 入力の変換内容の設定
 void
-NpnMap::set(
+NpnMap::set_imap(
   SizeType var,
   NpnVmap imap
 )
@@ -183,7 +183,7 @@ NpnMap::inverse() const
 	return NpnMap{};
       }
       bool inv = imap1.inv();
-      dst_map.set(dst_var, src_var, inv);
+      dst_map.set_imap(dst_var, src_var, inv);
     }
   }
   dst_map.set_oinv(oinv());
@@ -226,7 +226,7 @@ NpnMap::operator*(
   for ( SizeType var1 = 0; var1 < ni1; ++ var1 ) {
     auto imap1 = imap(var1);
     if ( imap1.is_invalid() ) {
-      dst_map.set(var1, NpnVmap::invalid());
+      dst_map.set_imap(var1, NpnVmap::invalid());
     }
     else {
       auto var2 = imap1.var();
@@ -241,7 +241,7 @@ NpnMap::operator*(
       else {
 	auto var3 = imap2.var();
 	bool inv3 = imap2.inv();
-	dst_map.set(var1, var3, inv2 ^ inv3);
+	dst_map.set_imap(var1, var3, inv2 ^ inv3);
       }
     }
   }
@@ -252,6 +252,16 @@ NpnMap::operator*(
   }
 
   return dst_map;
+}
+
+// @brief 合成を求める．
+NpnMap&
+NpnMap::operator*=(
+  const NpnMap& src2
+)
+{
+  *this = *this * src2;
+  return *this;
 }
 
 // ストリーム出力演算子
@@ -320,7 +330,7 @@ NpnMap::restore(
   for ( SizeType i = 0; i < ni; ++ i ) {
     NpnVmap vmap;
     vmap.restore(bis);
-    set(i, vmap);
+    set_imap(i, vmap);
   }
   bool inv;
   bis >> inv;

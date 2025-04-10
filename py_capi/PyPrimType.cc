@@ -1,12 +1,13 @@
 
 /// @file PyPrimType.cc
-/// @brief Python PrimType の実装ファイル
+/// @brief PyPrimType の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "pym/PyPrimType.h"
+#include "pym/PyString.h"
 #include "pym/PyModule.h"
 
 
@@ -14,263 +15,303 @@ BEGIN_NAMESPACE_YM
 
 BEGIN_NONAMESPACE
 
-// 定数を表すオブジェクトの配列
-PyObject* PrimType_ConstList[10];
-
 // Python 用のオブジェクト定義
-struct PrimTypeObject
+// この構造体は同じサイズのヒープから作られるので
+// mVal のコンストラクタは起動されないことに注意．
+// そのためあとでコンストラクタを明示的に起動する必要がある．
+// またメモリを開放するときにも明示的にデストラクタを起動する必要がある．
+struct PrimType_Object
 {
   PyObject_HEAD
   PrimType mVal;
 };
 
 // Python 用のタイプ定義
-PyTypeObject PrimTypeType = {
+PyTypeObject PrimType_Type = {
   PyVarObject_HEAD_INIT(nullptr, 0)
+  // 残りは PyPrimType::init() 中で初期化する．
 };
 
-// 生成関数
-PyObject*
-PrimType_new(
-  PyTypeObject* type,
-  PyObject* args,
-  PyObject* kwds
+// 定数を表すオブジェクト
+PyObject* Const_C0 = nullptr;
+PyObject* Const_C1 = nullptr;
+PyObject* Const_Buff = nullptr;
+PyObject* Const_Not = nullptr;
+PyObject* Const_And = nullptr;
+PyObject* Const_Nand = nullptr;
+PyObject* Const_Or = nullptr;
+PyObject* Const_Nor = nullptr;
+PyObject* Const_Xor = nullptr;
+PyObject* Const_Xnor = nullptr;
+
+// 定数の登録を行う関数
+bool
+reg_const_obj(
+  const char* name,
+  PrimType val,
+  PyObject*& const_obj
 )
 {
-  static const char* kw_list[] = {
-    "",
-    nullptr
-  };
-  const char* val_str = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "s",
-				    const_cast<char**>(kw_list),
-				    &val_str) ) {
-    return nullptr;
+  auto type = PyPrimType::_typeobject();
+  auto obj = type->tp_alloc(type, 0);
+  auto my_obj = reinterpret_cast<PrimType_Object*>(obj);
+  my_obj->mVal = val;
+  if ( PyDict_SetItemString(type->tp_dict, name, obj) < 0 ) {
+    return false;
   }
-
-  auto val = PrimType::None;
-  if ( strcasecmp(val_str, "c0") == 0 ) {
-    val = PrimType::C0;
-  }
-  else if ( strcasecmp(val_str, "c1") == 0 ) {
-    val = PrimType::C1;
-  }
-  else if ( strcasecmp(val_str, "buff") == 0 ) {
-    val = PrimType::Buff;
-  }
-  else if ( strcasecmp(val_str, "not") == 0 ) {
-    val = PrimType::Not;
-  }
-  else if ( strcasecmp(val_str, "and") == 0 ) {
-    val = PrimType::And;
-  }
-  else if ( strcasecmp(val_str, "nand") == 0 ) {
-    val = PrimType::Nand;
-  }
-  else if ( strcasecmp(val_str, "or") == 0 ) {
-    val = PrimType::Or;
-  }
-  else if ( strcasecmp(val_str, "nor") == 0 ) {
-    val = PrimType::Nor;
-  }
-  else if ( strcasecmp(val_str, "xor") == 0 ) {
-    val = PrimType::Xor;
-  }
-  else if ( strcasecmp(val_str, "xnor") == 0 ) {
-    val = PrimType::Xnor;
-  }
-  if ( val == PrimType::None ) {
-    ostringstream buf;
-    buf << val_str << ": unknown type for PrimType";
-    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-    return nullptr;
-  }
-
-  return PyPrimType::ToPyObject(val);
+  Py_INCREF(obj);
+  const_obj = obj;
+  return true;
 }
 
 // 終了関数
 void
-PrimType_dealloc(
+dealloc_func(
   PyObject* self
 )
 {
-  // auto primtype_obj = reinterpret_cast<PrimTypeObject*>(self);
-  // 必要なら primtype_obj->mVal の終了処理を行う．
-  // delete primtype_obj->mVal
   Py_TYPE(self)->tp_free(self);
 }
 
-// repr() 関数
+// repr 関数
 PyObject*
-PrimType_repr(
+repr_func(
   PyObject* self
 )
 {
-  auto val = PyPrimType::_get_ref(self);
-  // val から 文字列を作る．
-  const char* tmp_str = nullptr;
+  auto& val = PyPrimType::_get_ref(self);
+  std::string str_val;
   switch ( val ) {
-  case PrimType::None: tmp_str = "---"; break;
-  case PrimType::C0:   tmp_str = "C0"; break;
-  case PrimType::C1:   tmp_str = "C1"; break;
-  case PrimType::Buff: tmp_str = "Buff"; break;
-  case PrimType::Not:  tmp_str = "Not"; break;
-  case PrimType::And:  tmp_str = "And"; break;
-  case PrimType::Nand: tmp_str = "Nand"; break;
-  case PrimType::Or:   tmp_str = "Or"; break;
-  case PrimType::Nor:  tmp_str = "Nor"; break;
-  case PrimType::Xor:  tmp_str = "Xor"; break;
-  case PrimType::Xnor: tmp_str = "Xnor"; break;
+    case PrimType::C0: str_val = "C0"; break;
+    case PrimType::C1: str_val = "C1"; break;
+    case PrimType::Buff: str_val = "Buff"; break;
+    case PrimType::Not: str_val = "Not"; break;
+    case PrimType::And: str_val = "And"; break;
+    case PrimType::Nand: str_val = "Nand"; break;
+    case PrimType::Or: str_val = "Or"; break;
+    case PrimType::Nor: str_val = "Nor"; break;
+    case PrimType::Xor: str_val = "Xor"; break;
+    case PrimType::Xnor: str_val = "Xnor"; break;
+    case PrimType::None: str_val = "None"; break;
   }
-  return Py_BuildValue("s", tmp_str);
+  return PyString::ToPyObject(str_val);
 }
 
-// メソッド定義
-PyMethodDef PrimType_methods[] = {
-  {nullptr, nullptr, 0, nullptr}
-};
+// hash 関数
+Py_hash_t
+hash_func(
+  PyObject* self
+)
+{
+  auto& val = PyPrimType::_get_ref(self);
+  auto hash_val = static_cast<Py_hash_t>(val);
+  return hash_val;
+}
 
-// 比較関数
+// richcompare 関数
 PyObject*
-PrimType_richcmpfunc(
+richcompare_func(
   PyObject* self,
   PyObject* other,
   int op
 )
 {
-  if ( PyPrimType::Check(self) &&
-       PyPrimType::Check(other) ) {
-    auto val1 = PyPrimType::_get_ref(self);
-    auto val2 = PyPrimType::_get_ref(other);
+  auto& val = PyPrimType::_get_ref(self);
+  if ( PyPrimType::Check(self) && PyPrimType::Check(other) ) {
+    auto& val1 = PyPrimType::_get_ref(self);
+    auto& val2 = PyPrimType::_get_ref(other);
     if ( op == Py_EQ ) {
-      return PyBool_FromLong( val1 == val2 );
+      return PyBool_FromLong(val1 == val2);
     }
     if ( op == Py_NE ) {
-      return PyBool_FromLong( val1 != val2 );
+      return PyBool_FromLong(val1 != val2);
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-// ハッシュ関数
-Py_hash_t
-PrimType_hash(
-  PyObject* self
-)
-{
-  auto val = PyPrimType::_get_ref(self);
-  return static_cast<SizeType>(val);
-}
+// メソッド定義
+PyMethodDef methods[] = {
+  // end-marker
+  {nullptr, nullptr, 0, nullptr}
+};
 
-// 定数オブジェクトの登録
-bool
-reg_const(
-  const char* name,
-  PrimType val
+// getter/setter定義
+PyGetSetDef getsets[] = {
+  // end-marker
+  {nullptr, nullptr, nullptr, nullptr}
+};
+
+// new 関数
+PyObject*
+new_func(
+  PyTypeObject* type,
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  auto obj = PrimTypeType.tp_alloc(&PrimTypeType, 0);
-  auto primtype_obj = reinterpret_cast<PrimTypeObject*>(obj);
-  primtype_obj->mVal = val;
-  if ( PyDict_SetItemString(PrimTypeType.tp_dict, name, obj) < 0 ) {
-    return false;
+  static const char* kwlist[] = {
+    "",
+    nullptr
+  };
+  PyObject* val_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O",
+                                    const_cast<char**>(kwlist),
+                                    &val_obj) ) {
+    return nullptr;
   }
-  PrimType_ConstList[static_cast<SizeType>(val) - 1] = obj;
-  return true;
+  PrimType val;
+  if ( val_obj != nullptr ) {
+    if ( !PyPrimType::FromPyObject(val_obj, val) ) {
+      PyErr_SetString(PyExc_ValueError, "could not convert to PrimType");
+      return nullptr;
+    }
+  }
+  return PyPrimType::ToPyObject(val);
 }
 
 END_NONAMESPACE
 
 
-// @brief 'PrimType' オブジェクトを使用可能にする．
+// @brief PrimType オブジェクトを使用可能にする．
 bool
 PyPrimType::init(
   PyObject* m
 )
 {
-  PrimTypeType.tp_name = "PrimType";
-  PrimTypeType.tp_basicsize = sizeof(PrimTypeObject);
-  PrimTypeType.tp_itemsize = 0;
-  PrimTypeType.tp_dealloc = PrimType_dealloc;
-  PrimTypeType.tp_flags = Py_TPFLAGS_DEFAULT;
-  PrimTypeType.tp_doc = PyDoc_STR("PrimType object");
-  PrimTypeType.tp_richcompare = PrimType_richcmpfunc;
-  PrimTypeType.tp_methods = PrimType_methods;
-  PrimTypeType.tp_new = PrimType_new;
-  PrimTypeType.tp_repr = PrimType_repr;
-  PrimTypeType.tp_hash = PrimType_hash;
-
-  // 型オブジェクトの登録
-  if ( !PyModule::reg_type(m, "PrimType", &PrimTypeType) ) {
+  PrimType_Type.tp_name = "PrimType";
+  PrimType_Type.tp_basicsize = sizeof(PrimType_Object);
+  PrimType_Type.tp_itemsize = 0;
+  PrimType_Type.tp_dealloc = dealloc_func;
+  PrimType_Type.tp_repr = repr_func;
+  PrimType_Type.tp_hash = hash_func;
+  PrimType_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+  PrimType_Type.tp_doc = PyDoc_STR("Python extended object for PrimType");
+  PrimType_Type.tp_richcompare = richcompare_func;
+  PrimType_Type.tp_methods = methods;
+  PrimType_Type.tp_getset = getsets;
+  PrimType_Type.tp_new = new_func;
+  if ( !PyModule::reg_type(m, "PrimType", &PrimType_Type) ) {
     goto error;
   }
-
   // 定数オブジェクトの生成・登録
-  for ( SizeType i = 0; i < 10; ++ i ) {
-    PrimType_ConstList[i] = nullptr;
-  }
-  if ( !reg_const("C0", PrimType::C0) ) {
+  if ( !reg_const_obj("C0", PrimType::C0, Const_C0) ) {
     goto error;
   }
-  if ( !reg_const("C1", PrimType::C1) ) {
+  if ( !reg_const_obj("C1", PrimType::C1, Const_C1) ) {
     goto error;
   }
-  if ( !reg_const("Buff", PrimType::Buff) ) {
+  if ( !reg_const_obj("Buff", PrimType::Buff, Const_Buff) ) {
     goto error;
   }
-  if ( !reg_const("Not", PrimType::Not) ) {
+  if ( !reg_const_obj("Not", PrimType::Not, Const_Not) ) {
     goto error;
   }
-  if ( !reg_const("And", PrimType::And) ) {
+  if ( !reg_const_obj("And", PrimType::And, Const_And) ) {
     goto error;
   }
-  if ( !reg_const("Nand", PrimType::Nand) ) {
+  if ( !reg_const_obj("Nand", PrimType::Nand, Const_Nand) ) {
     goto error;
   }
-  if ( !reg_const("Or", PrimType::Or) ) {
+  if ( !reg_const_obj("Or", PrimType::Or, Const_Or) ) {
     goto error;
   }
-  if ( !reg_const("Nor", PrimType::Nor) ) {
+  if ( !reg_const_obj("Nor", PrimType::Nor, Const_Nor) ) {
     goto error;
   }
-  if ( !reg_const("Xor", PrimType::Xor) ) {
+  if ( !reg_const_obj("Xor", PrimType::Xor, Const_Xor) ) {
     goto error;
   }
-  if ( !reg_const("Xnor", PrimType::Xnor) ) {
+  if ( !reg_const_obj("Xnor", PrimType::Xnor, Const_Xnor) ) {
     goto error;
   }
+
   return true;
 
  error:
-  for ( SizeType i = 0; i < 10; ++ i ) {
-    Py_XDECREF(PrimType_ConstList[i]);
-  }
 
   return false;
 }
 
-// @brief PrimType を PyObject に変換する．
+// PrimType を PyObject に変換する．
 PyObject*
 PyPrimType::Conv::operator()(
   const PrimType& val
 )
 {
-  if ( val == PrimType::None ) {
-    Py_RETURN_NONE;
+  PyObject* obj = nullptr;
+  switch ( val ) {
+    case PrimType::C0: obj = Const_C0; break;
+    case PrimType::C1: obj = Const_C1; break;
+    case PrimType::Buff: obj = Const_Buff; break;
+    case PrimType::Not: obj = Const_Not; break;
+    case PrimType::And: obj = Const_And; break;
+    case PrimType::Nand: obj = Const_Nand; break;
+    case PrimType::Or: obj = Const_Or; break;
+    case PrimType::Nor: obj = Const_Nor; break;
+    case PrimType::Xor: obj = Const_Xor; break;
+    case PrimType::Xnor: obj = Const_Xnor; break;
+    case PrimType::None: Py_RETURN_NONE;
   }
-  auto obj = PrimType_ConstList[static_cast<SizeType>(val) - 1];
+  if ( obj == nullptr ) {
+    PyErr_SetString(PyExc_ValueError, "invalid string for PrimType");
+    return nullptr;
+  }
   Py_INCREF(obj);
   return obj;
 }
 
-// @brief PyObject* から PrimType を取り出す．
+// PyObject を PrimType に変換する．
 bool
 PyPrimType::Deconv::operator()(
   PyObject* obj,
   PrimType& val
 )
 {
+  std::string str_val;
+  if ( PyString::FromPyObject(obj, str_val) ) {
+    if ( strcasecmp(str_val.c_str(), "C0") == 0 ) {
+      val = PrimType::C0;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "C1") == 0 ) {
+      val = PrimType::C1;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "Buff") == 0 ) {
+      val = PrimType::Buff;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "Not") == 0 ) {
+      val = PrimType::Not;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "And") == 0 ) {
+      val = PrimType::And;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "Nand") == 0 ) {
+      val = PrimType::Nand;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "Or") == 0 ) {
+      val = PrimType::Or;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "Nor") == 0 ) {
+      val = PrimType::Nor;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "Xor") == 0 ) {
+      val = PrimType::Xor;
+      return true;
+    }
+    else if ( strcasecmp(str_val.c_str(), "Xnor") == 0 ) {
+      val = PrimType::Xnor;
+      return true;
+    }
+    return false;
+  }
   if ( PyPrimType::Check(obj) ) {
     val = PyPrimType::_get_ref(obj);
     return true;
@@ -284,24 +325,24 @@ PyPrimType::Check(
   PyObject* obj
 )
 {
-  return Py_IS_TYPE(obj, _typeobject());
+  return Py_IS_TYPE(obj, &PrimType_Type);
 }
 
-// @brief PrimType を表す PyObject から PrimType を取り出す．
+// @brief PyObject から PrimType を取り出す．
 PrimType&
 PyPrimType::_get_ref(
   PyObject* obj
 )
 {
-  auto primtype_obj = reinterpret_cast<PrimTypeObject*>(obj);
-  return primtype_obj->mVal;
+  auto my_obj = reinterpret_cast<PrimType_Object*>(obj);
+  return my_obj->mVal;
 }
 
 // @brief PrimType を表すオブジェクトの型定義を返す．
 PyTypeObject*
 PyPrimType::_typeobject()
 {
-  return &PrimTypeType;
+  return &PrimType_Type;
 }
 
 END_NAMESPACE_YM

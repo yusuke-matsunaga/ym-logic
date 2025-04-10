@@ -1,12 +1,14 @@
 
 /// @file PyLiteral.cc
-/// @brief Python Literal の実装ファイル
+/// @brief PyLiteral の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "pym/PyLiteral.h"
+#include "pym/PyLong.h"
+#include "pym/PyString.h"
 #include "pym/PyModule.h"
 
 
@@ -15,273 +17,290 @@ BEGIN_NAMESPACE_YM
 BEGIN_NONAMESPACE
 
 // Python 用のオブジェクト定義
-struct LiteralObject
+// この構造体は同じサイズのヒープから作られるので
+// mVal のコンストラクタは起動されないことに注意．
+// そのためあとでコンストラクタを明示的に起動する必要がある．
+// またメモリを開放するときにも明示的にデストラクタを起動する必要がある．
+struct Literal_Object
 {
   PyObject_HEAD
   Literal mVal;
 };
 
 // Python 用のタイプ定義
-PyTypeObject LiteralType = {
+PyTypeObject Literal_Type = {
   PyVarObject_HEAD_INIT(nullptr, 0)
+  // 残りは PyLiteral::init() 中で初期化する．
 };
-
-// 生成関数
-PyObject*
-Literal_new(
-  PyTypeObject* type,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "var",
-    "inv",
-    nullptr
-  };
-  SizeType id = -1;
-  int inv_int = false;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|k$p",
-				    const_cast<char**>(kw_list),
-				    &id, &inv_int) ) {
-    return nullptr;
-  }
-  auto self = type->tp_alloc(type, 0);
-  auto lit_obj = reinterpret_cast<LiteralObject*>(self);
-  if ( id == -1 ) {
-    lit_obj->mVal = Literal::x();
-  }
-  else {
-    bool inv = static_cast<bool>(inv_int);
-    lit_obj->mVal = Literal{id, inv};
-  }
-  return self;
-}
 
 // 終了関数
 void
-Literal_dealloc(
+dealloc_func(
   PyObject* self
 )
 {
-  // auto literal_obj = reinterpret_cast<LiteralObject*>(self);
-  // 必要なら literal_obj->mVal の終了処理を行う．
   Py_TYPE(self)->tp_free(self);
 }
 
-// repr() 関数
+// repr 関数
 PyObject*
-Literal_repr(
+repr_func(
   PyObject* self
 )
 {
-  auto val = PyLiteral::_get_ref(self);
-  // val から 文字列を作る．
-  ostringstream buf;
+  auto& val = PyLiteral::_get_ref(self);
+  // val から文字列を作る．
+  std::ostringstream buf;
   buf << val;
-  return Py_BuildValue("s", buf.str().c_str());
+  auto str_val = buf.str();
+  return PyString::ToPyObject(str_val);
 }
 
 PyObject*
-Literal_set(
-  PyObject* self,
-  PyObject* args,
-  PyObject* kwds
+nb_invert(
+  PyObject* self
 )
 {
-  static const char* kw_list[] = {
-    "var",
-    "inv",
-    nullptr
-  };
-  SizeType id = -1;
-  int inv = false;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "k|$p",
-				    const_cast<char**>(kw_list),
-				    &id, &inv) ) {
-    return nullptr;
-  }
-  auto lit_obj = reinterpret_cast<LiteralObject*>(self);
-  lit_obj->mVal.set(id, inv);
-  Py_RETURN_NONE;
+  auto& val = PyLiteral::_get_ref(self);
+  return PyLiteral::ToPyObject(~val);
 }
 
-PyObject*
-Literal_is_valid(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto val = PyLiteral::_get_ref(self);
-  auto r = val.is_valid();
-  return PyBool_FromLong(r);
-}
-
-PyObject*
-Literal_is_positive(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto val = PyLiteral::_get_ref(self);
-  auto r = val.is_positive();
-  return PyBool_FromLong(r);
-}
-
-PyObject*
-Literal_is_negative(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto val = PyLiteral::_get_ref(self);
-  auto r = val.is_negative();
-  return PyBool_FromLong(r);
-}
-
-PyObject*
-Literal_make_positive(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto val = PyLiteral::_get_ref(self);
-  auto ans = val.make_positive();
-  return PyLiteral::ToPyObject(ans);
-}
-
-PyObject*
-Literal_make_negative(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto val = PyLiteral::_get_ref(self);
-  auto ans = val.make_negative();
-  return PyLiteral::ToPyObject(ans);
-}
-
-// メソッド定義
-PyMethodDef Literal_methods[] = {
-  {"set", reinterpret_cast<PyCFunction>(Literal_set),
-   METH_VARARGS | METH_KEYWORDS,
-   PyDoc_STR("set the contents")},
-  {"is_valid", Literal_is_valid,
-   METH_NOARGS,
-   PyDoc_STR("True if valid")},
-  {"is_positive", Literal_is_positive,
-   METH_NOARGS,
-   PyDoc_STR("True if positive")},
-  {"is_negative", Literal_is_negative,
-   METH_NOARGS,
-   PyDoc_STR("True if negative")},
-  {"make_positive", Literal_make_positive,
-   METH_NOARGS,
-   PyDoc_STR("return positive literal with the same variable")},
-  {"make_negative", Literal_make_negative,
-   METH_NOARGS,
-   PyDoc_STR("return negative literal with the same variable")},
-  {nullptr, nullptr, 0, nullptr}
+// Numberオブジェクト構造体
+PyNumberMethods number = {
+  .nb_invert = nb_invert
 };
 
-PyObject*
-Literal_varid(
-  PyObject* self,
-  void* Py_UNUSED(closure)
+// hash 関数
+Py_hash_t
+hash_func(
+  PyObject* self
 )
 {
-  auto val = PyLiteral::_get_ref(self);
-  auto varid = val.varid();
-  return PyLong_FromLong(varid);
+  auto& val = PyLiteral::_get_ref(self);
+  return val.hash();
 }
 
+// richcompare 関数
 PyObject*
-Literal_index(
+richcompare_func(
   PyObject* self,
-  void* Py_UNUSED(closure)
-)
-{
-  auto val = PyLiteral::_get_ref(self);
-  auto index = val.index();
-  return PyLong_FromLong(index);
-}
-
-PyGetSetDef Literal_getsetters[] = {
-  {"varid", Literal_varid, nullptr, PyDoc_STR("Variable ID"), nullptr},
-  {"index", Literal_index, nullptr, PyDoc_STR("index"), nullptr},
-  {nullptr, nullptr, nullptr, nullptr}
-};
-
-// 比較関数
-PyObject*
-Literal_richcmpfunc(
-  PyObject* obj1,
-  PyObject* obj2,
+  PyObject* other,
   int op
 )
 {
-  if ( PyLiteral::Check(obj1) &&
-       PyLiteral::Check(obj2) ) {
-    auto val1 = PyLiteral::_get_ref(obj1);
-    auto val2 = PyLiteral::_get_ref(obj2);
+  auto& val = PyLiteral::_get_ref(self);
+  if ( PyLiteral::Check(self) && PyLiteral::Check(other) ) {
+    auto& val1 = PyLiteral::_get_ref(self);
+    auto& val2 = PyLiteral::_get_ref(other);
     Py_RETURN_RICHCOMPARE(val1, val2, op);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-// 否定演算(単項演算の例)
+// 
 PyObject*
-Literal_invert(
-  PyObject* self
+set(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kwds
 )
 {
-  if ( PyLiteral::Check(self) ) {
-    auto val = PyLiteral::_get_ref(self);
-    return PyLiteral::ToPyObject(~val);
+  static const char* kwlist[] = {
+    "",
+    "inv",
+    nullptr
+  };
+  int id = -1;
+  int inv_tmp = -1;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "i|$p",
+                                    const_cast<char**>(kwlist),
+                                    &id,
+                                    &inv_tmp) ) {
+    return nullptr;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  bool inv = false;
+  if ( inv_tmp != -1 ) {
+    inv = static_cast<bool>(inv_tmp);
+  }
+  auto& val = PyLiteral::_get_ref(self);
+  val.set(id, inv);
+  Py_RETURN_NONE;
 }
 
-// 数値演算メソッド定義
-PyNumberMethods Literal_number = {
-  .nb_invert = Literal_invert
-};
-
-// ハッシュ関数
-Py_hash_t
-Literal_hash(
-  PyObject* self
+// 
+PyObject*
+is_valid(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
 )
 {
-  auto val = PyLiteral::_get_ref(self);
-  return val.hash();
+  auto& val = PyLiteral::_get_ref(self);
+  return PyBool_FromLong(val.is_valid());
+}
+
+// 
+PyObject*
+is_positive(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& val = PyLiteral::_get_ref(self);
+  return PyBool_FromLong(val.is_positive());
+}
+
+// 
+PyObject*
+is_negative(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& val = PyLiteral::_get_ref(self);
+  return PyBool_FromLong(val.is_negative());
+}
+
+// 
+PyObject*
+make_positive(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& val = PyLiteral::_get_ref(self);
+  return PyLiteral::ToPyObject(val.make_positive());
+}
+
+// 
+PyObject*
+make_negative(
+  PyObject* self,
+  PyObject* Py_UNUSED(args)
+)
+{
+  auto& val = PyLiteral::_get_ref(self);
+  return PyLiteral::ToPyObject(val.make_negative());
+}
+
+// メソッド定義
+PyMethodDef methods[] = {
+  {"set",
+   reinterpret_cast<PyCFunction>(set),
+   METH_VARARGS | METH_KEYWORDS,
+   PyDoc_STR("")},
+  {"is_valid",
+   is_valid,
+   METH_NOARGS,
+   PyDoc_STR("")},
+  {"is_positive",
+   is_positive,
+   METH_NOARGS,
+   PyDoc_STR("")},
+  {"is_negative",
+   is_negative,
+   METH_NOARGS,
+   PyDoc_STR("")},
+  {"make_positive",
+   make_positive,
+   METH_NOARGS,
+   PyDoc_STR("")},
+  {"make_negative",
+   make_negative,
+   METH_NOARGS,
+   PyDoc_STR("")},
+  // end-marker
+  {nullptr, nullptr, 0, nullptr}
+};
+
+PyObject*
+varid_getter(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto& val = PyLiteral::_get_ref(self);
+  auto ans = val.varid();
+  return PyLong::ToPyObject(ans);
+}
+
+PyObject*
+index_getter(
+  PyObject* self,
+  void* Py_UNUSED(closure)
+)
+{
+  auto& val = PyLiteral::_get_ref(self);
+  auto ans = val.index();
+  return PyLong::ToPyObject(ans);
+}
+
+// getter/setter定義
+PyGetSetDef getsets[] = {
+  {"varid", varid_getter, nullptr, PyDoc_STR(""), nullptr},
+  {"index", index_getter, nullptr, PyDoc_STR(""), nullptr},
+  // end-marker
+  {nullptr, nullptr, nullptr, nullptr}
+};
+
+// new 関数
+PyObject*
+new_func(
+  PyTypeObject* type,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    "",
+    "inv",
+    nullptr
+  };
+  int id = -1;
+  int inv_tmp = -1;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|i$p",
+                                    const_cast<char**>(kwlist),
+                                    &id,
+                                    &inv_tmp) ) {
+    return nullptr;
+  }
+  bool inv = false;
+  if ( inv_tmp != -1 ) {
+    inv = static_cast<bool>(inv_tmp);
+  }
+  auto self = type->tp_alloc(type, 0);
+  auto my_obj = reinterpret_cast<Literal_Object*>(self);
+  if ( id == -1 ) {
+    my_obj->mVal = Literal::x();
+  }
+  else {
+    my_obj->mVal = Literal(id, inv);
+  }
+  return self;
 }
 
 END_NONAMESPACE
 
 
-// @brief 'Literal' オブジェクトを使用可能にする．
+// @brief Literal オブジェクトを使用可能にする．
 bool
 PyLiteral::init(
   PyObject* m
 )
 {
-  LiteralType.tp_name = "Literal";
-  LiteralType.tp_basicsize = sizeof(LiteralObject);
-  LiteralType.tp_itemsize = 0;
-  LiteralType.tp_dealloc = Literal_dealloc;
-  LiteralType.tp_flags = Py_TPFLAGS_DEFAULT;
-  LiteralType.tp_doc = PyDoc_STR("Literal object");
-  LiteralType.tp_richcompare = Literal_richcmpfunc;
-  LiteralType.tp_methods = Literal_methods;
-  LiteralType.tp_getset = Literal_getsetters;
-  LiteralType.tp_new = Literal_new;
-  LiteralType.tp_repr = Literal_repr;
-  LiteralType.tp_as_number = &Literal_number;
-  LiteralType.tp_hash = Literal_hash;
-
-  // 型オブジェクトの登録
-  if ( !PyModule::reg_type(m, "Literal", &LiteralType) ) {
+  Literal_Type.tp_name = "Literal";
+  Literal_Type.tp_basicsize = sizeof(Literal_Object);
+  Literal_Type.tp_itemsize = 0;
+  Literal_Type.tp_dealloc = dealloc_func;
+  Literal_Type.tp_repr = repr_func;
+  Literal_Type.tp_as_number = &number;
+  Literal_Type.tp_hash = hash_func;
+  Literal_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+  Literal_Type.tp_doc = PyDoc_STR("Python extended object for Literal");
+  Literal_Type.tp_richcompare = richcompare_func;
+  Literal_Type.tp_methods = methods;
+  Literal_Type.tp_getset = getsets;
+  Literal_Type.tp_new = new_func;
+  if ( !PyModule::reg_type(m, "Literal", &Literal_Type) ) {
     goto error;
   }
 
@@ -292,32 +311,31 @@ PyLiteral::init(
   return false;
 }
 
-// @brief Literal を PyObject に変換する．
+// Literal を PyObject に変換する．
 PyObject*
 PyLiteral::Conv::operator()(
-  Literal val
+  const Literal& val
 )
 {
-  auto obj = LiteralType.tp_alloc(&LiteralType, 0);
-  auto literal_obj = reinterpret_cast<LiteralObject*>(obj);
-  literal_obj->mVal = val;
+  auto type = PyLiteral::_typeobject();
+  auto obj = type->tp_alloc(type, 0);
+  auto my_obj = reinterpret_cast<Literal_Object*>(obj);
+  new (&my_obj->mVal) Literal(val);
   return obj;
 }
 
-// @brief PyObject* から Literal を取り出す．
+// PyObject を Literal に変換する．
 bool
 PyLiteral::Deconv::operator()(
   PyObject* obj,
   Literal& val
 )
 {
-  if ( PyLong_Check(obj) ) {
-    // 特例: 整数タイプは Literal に変換可能
-    auto var = static_cast<SizeType>(PyLong_AsLong(obj));
+  if ( PyLong::Check(obj) ) {
+    auto var = static_cast<SizeType>(PyLong::Get(obj));
     val = Literal(var);
     return true;
   }
-
   if ( PyLiteral::Check(obj) ) {
     val = PyLiteral::_get_ref(obj);
     return true;
@@ -331,24 +349,24 @@ PyLiteral::Check(
   PyObject* obj
 )
 {
-  return Py_IS_TYPE(obj, _typeobject());
+  return Py_IS_TYPE(obj, &Literal_Type);
 }
 
-// @brief Literal を表す PyObject から Literal を取り出す．
+// @brief PyObject から Literal を取り出す．
 Literal&
 PyLiteral::_get_ref(
   PyObject* obj
 )
 {
-  auto literal_obj = reinterpret_cast<LiteralObject*>(obj);
-  return literal_obj->mVal;
+  auto my_obj = reinterpret_cast<Literal_Object*>(obj);
+  return my_obj->mVal;
 }
 
 // @brief Literal を表すオブジェクトの型定義を返す．
 PyTypeObject*
 PyLiteral::_typeobject()
 {
-  return &LiteralType;
+  return &Literal_Type;
 }
 
 END_NAMESPACE_YM

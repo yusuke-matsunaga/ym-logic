@@ -3,7 +3,7 @@
 /// @brief Python 用の ymlogic モジュールを定義する．
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #define PY_SSIZE_T_CLEAN
@@ -27,18 +27,19 @@ BEGIN_NAMESPACE_YM
 
 BEGIN_NONAMESPACE
 
-// メソッド定義構造体
-PyMethodDef ymlogic_methods[] = {
-  {nullptr, nullptr, 0, nullptr},
+// メソッド定義
+PyMethodDef methods[] = {
+  // end-marker
+  {nullptr, nullptr, 0, nullptr}
 };
 
 // モジュール定義構造体
 PyModuleDef ymlogic_module = {
   PyModuleDef_HEAD_INIT,
   "ymlogic",
-  PyDoc_STR("ymlogic: Extension module for ym-logic"),
+  PyDoc_STR(""),
   -1,
-  ymlogic_methods,
+  methods,
 };
 
 END_NONAMESPACE

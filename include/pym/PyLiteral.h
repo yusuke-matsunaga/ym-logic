@@ -5,7 +5,7 @@
 /// @brief PyLiteral のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #define PY_SSIZE_T_CLEAN
@@ -18,12 +18,13 @@ BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
 /// @class PyLiteral PyLiteral.h "PyLiteral.h"
-/// @brief Python 用の Literal 拡張
+/// @brief Literal を Python から使用するための拡張
 ///
-/// 複数の関数をひとまとめにしているだけなので実は名前空間として用いている．
+/// 実際には static メンバ関数しか持たないのでクラスではない．
 //////////////////////////////////////////////////////////////////////
 class PyLiteral
 {
+public:
 
   using ElemType = Literal;
 
@@ -33,7 +34,7 @@ public:
   struct Conv {
     PyObject*
     operator()(
-      ElemType val
+      const ElemType& val
     );
   };
 
@@ -62,7 +63,7 @@ public:
 
   /// @brief Literal を表す PyObject を作る．
   /// @return 生成した PyObject を返す．
-  ///
+  /// 
   /// 返り値は新しい参照が返される．
   static
   PyObject*
@@ -79,7 +80,7 @@ public:
   static
   bool
   FromPyObject(
-    PyObject* obj, ///< [in] Python のオブジェクト
+    PyObject* obj, ///< [in] Python のオブジェクト,
     ElemType& val  ///< [out] 結果を格納する変数
   )
   {
@@ -93,6 +94,21 @@ public:
   Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
+
+  /// @brief PyObject から Literal を取り出す．
+  static
+  ElemType
+  Get(
+    PyObject* obj ///< [in] 対象の Python オブジェクト
+  )
+  {
+    ElemType val;
+    if ( PyLiteral::FromPyObject(obj, val) ) {
+      return val;
+    }
+    PyErr_SetString(PyExc_TypeError, "Could not convert to Literal");
+    return val;
+  }
 
   /// @brief Literal を表す PyObject から Literal を取り出す．
   /// @return Literal を返す．

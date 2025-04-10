@@ -15,8 +15,28 @@ class YmlogicGen(ModuleGen):
     def __init__(self):
         super().__init__(modulename='ymlogic',
                          pyclass_list=['PyPrimType',
+                                       'PyLiteral',
+                                       'PyNpnMap',
+                                       'PyTvFunc',
+                                       'PyExpr',
+                                       'PyBdd',
+                                       'PyBddMgr',
+                                       'PySopCover',
+                                       'PySopCube',
+                                       'PyAigHandle',
+                                       'PyAigMgr'
                                       ],
                          include_files=['pym/PyPrimType.h',
+                                        'pym/PyLiteral.h',
+                                        'pym/PyNpnMap.h',
+                                        'pym/PyTvFunc.h',
+                                        'pym/PyExpr.h',
+                                        'pym/PyBdd.h',
+                                        'pym/PyBddMgr.h',
+                                        'pym/PySopCover.h',
+                                        'pym/PySopCube.h',
+                                        'pym/PyAigHandle.h',
+                                        'pym/PyAigMgr.h'
                                        ],
                          namespace='YM')
 

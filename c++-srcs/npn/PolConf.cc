@@ -22,7 +22,7 @@ PolConf::to_npnmap(
   NpnMap map(ni);
   map.set_oinv(oinv());
   for ( SizeType i = 0; i < ni; ++ i ) {
-    map.set(i, i, iinv(i));
+    map.set_imap(i, i, iinv(i));
   }
   return map;
 }

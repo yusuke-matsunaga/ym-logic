@@ -38,7 +38,7 @@ def test_constructor2():
 
 def test_constructor3():
     var0 = 1
-    lit = Literal(var=var0, inv=False)
+    lit = Literal(var0, inv=False)
 
     assert lit.is_valid()
     assert lit.is_positive()

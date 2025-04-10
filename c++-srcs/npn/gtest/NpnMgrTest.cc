@@ -151,7 +151,7 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	    map.set_oinv(oinv);
 	    for ( int i: Range(ni) ) {
 	      bool iinv = (ip & (1U << i)) ? true : false;
-	      map.set(i, pg(i), iinv);
+	      map.set_imap(i, pg(i), iinv);
 	    }
 	    TvFunc f1 = f.xform(map);
 	    func_hash.insert(f1);
@@ -275,7 +275,7 @@ TEST_P(NpnMgrRandomTest, func_test)
 	  map.set_oinv(oinv);
 	  for ( int i: Range(ni) ) {
 	    bool iinv = rd2(mRandGen) ? true : false;
-	    map.set(i, dst_map[i], iinv);
+	    map.set_imap(i, dst_map[i], iinv);
 	  }
 	  TvFunc f1 = f.xform(map);
 
@@ -354,10 +354,10 @@ TEST(NpnMgrTest1, bug3)
   TvFunc cfunc = npnmgr.cannonical(func);
 
   NpnMap map1(4);
-  map1.set(0, 0, false);
-  map1.set(1, 1, false);
-  map1.set(2, 3, false);
-  map1.set(3, 2, false);
+  map1.set_imap(0, 0, false);
+  map1.set_imap(1, 1, false);
+  map1.set_imap(2, 3, false);
+  map1.set_imap(3, 2, false);
 
   TvFunc func1 = func.xform(map1);
 
@@ -374,10 +374,10 @@ TEST(NpnMgrTest1, bug4)
   TvFunc cfunc = npnmgr.cannonical(func);
 
   NpnMap map1(4);
-  map1.set(0, 0, false);
-  map1.set(1, 1, false);
-  map1.set(2, 3, false);
-  map1.set(3, 2, false);
+  map1.set_imap(0, 0, false);
+  map1.set_imap(1, 1, false);
+  map1.set_imap(2, 3, false);
+  map1.set_imap(3, 2, false);
 
   TvFunc func1 = func.xform(map1);
 
@@ -426,10 +426,10 @@ TEST(NpnMgrTest1, bug7)
   TvFunc cfunc = npnmgr.cannonical(func);
 
   NpnMap map1(4);
-  map1.set(0, 0, true);
-  map1.set(1, 1, false);
-  map1.set(2, 2, false);
-  map1.set(3, 3, false);
+  map1.set_imap(0, 0, true);
+  map1.set_imap(1, 1, false);
+  map1.set_imap(2, 2, false);
+  map1.set_imap(3, 3, false);
   map1.set_oinv(false);
   TvFunc func1 = func.xform(map1);
 
@@ -447,8 +447,8 @@ TEST(NpnMgrTest1, bug8)
 
   NpnMap map1(2);
   map1.set_oinv(false);
-  map1.set(0, 0, true);
-  map1.set(1, 1, false);
+  map1.set_imap(0, 0, true);
+  map1.set_imap(1, 1, false);
   TvFunc func1 = func.xform(map1);
 
   TvFunc cfunc1 = npnmgr.cannonical(func1);

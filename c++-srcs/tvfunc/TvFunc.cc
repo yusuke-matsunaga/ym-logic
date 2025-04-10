@@ -513,7 +513,7 @@ TvFunc::shrink_map() const
   SizeType rmap[kMaxNi];
   for ( SizeType i: Range(mInputNum) ) {
     if ( (varmap & (1U << i)) == 0U ) {
-      ans.set(i, j, false);
+      ans.set_imap(i, j, false);
       rmap[j] = i;
       ++ j;
     }

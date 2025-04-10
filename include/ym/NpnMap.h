@@ -123,7 +123,7 @@ public:
 
   /// @brief 入力の変換内容の設定
   void
-  set(
+  set_imap(
     SizeType src_var, ///< [in] 入力変数
     SizeType dst_var, ///< [in] 変換先の入力変数
     bool inv          ///< [in] 極性
@@ -131,13 +131,13 @@ public:
                       ///<  - true:  反転あり (負極性)
   )
   {
-    set(src_var, NpnVmap(dst_var, inv));
+    set_imap(src_var, NpnVmap(dst_var, inv));
   }
 
   /// @brief 入力の変換内容の設定
   /// @sa NpnVmap
   void
-  set(
+  set_imap(
     SizeType src_var, ///< [in] 入力変数
     NpnVmap imap      ///< [in] 変換情報(変換先の入力番号と極性)
   );
@@ -225,6 +225,15 @@ public:
   operator*(
     const NpnMap& src2  ///< [in] 右側のオペランド
   ) const;
+
+  /// @brief 合成を求める．
+  ///
+  /// this の値域とsrc2の定義域は一致していな
+  /// ければならない．そうでなければ答えは不定．
+  NpnMap&
+  operator*=(
+    const NpnMap& src2  ///< [in] 右側のオペランド
+  );
 
   /// @brief 内容が等しいか調べる．
   /// @return 自分自身と src が等しいときに true を返す．

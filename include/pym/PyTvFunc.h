@@ -5,7 +5,7 @@
 /// @brief PyTvFunc のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2022, 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #define PY_SSIZE_T_CLEAN
@@ -18,12 +18,14 @@ BEGIN_NAMESPACE_YM
 
 //////////////////////////////////////////////////////////////////////
 /// @class PyTvFunc PyTvFunc.h "PyTvFunc.h"
-/// @brief Python 用の TvFunc 拡張
+/// @brief TvFunc を Python から使用するための拡張
 ///
-/// 複数の関数をひとまとめにしているだけなので実は名前空間として用いている．
+/// 実際には static メンバ関数しか持たないのでクラスではない．
 //////////////////////////////////////////////////////////////////////
 class PyTvFunc
 {
+public:
+
   using ElemType = TvFunc;
 
 public:
@@ -33,11 +35,6 @@ public:
     PyObject*
     operator()(
       const ElemType& val
-    );
-
-    PyObject*
-    operator()(
-      ElemType&& val
     );
   };
 
@@ -66,7 +63,7 @@ public:
 
   /// @brief TvFunc を表す PyObject を作る．
   /// @return 生成した PyObject を返す．
-  ///
+  /// 
   /// 返り値は新しい参照が返される．
   static
   PyObject*
@@ -78,26 +75,12 @@ public:
     return conv(val);
   }
 
-  /// @brief TvFunc を表す PyObject を作る．
-  /// @return 生成した PyObject を返す．
-  ///
-  /// 返り値は新しい参照が返される．
-  static
-  PyObject*
-  ToPyObject(
-    ElemType&& val ///< [in] 値
-  )
-  {
-    Conv conv;
-    return conv(val);
-  }
-
   /// @brief PyObject から TvFunc を取り出す．
   /// @return 正しく変換できた時に true を返す．
   static
   bool
   FromPyObject(
-    PyObject* obj, ///< [in] Python のオブジェクト
+    PyObject* obj, ///< [in] Python のオブジェクト,
     ElemType& val  ///< [out] 結果を格納する変数
   )
   {
@@ -111,6 +94,21 @@ public:
   Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
+
+  /// @brief PyObject から TvFunc を取り出す．
+  static
+  ElemType
+  Get(
+    PyObject* obj ///< [in] 対象の Python オブジェクト
+  )
+  {
+    ElemType val;
+    if ( PyTvFunc::FromPyObject(obj, val) ) {
+      return val;
+    }
+    PyErr_SetString(PyExc_TypeError, "Could not convert to TvFunc");
+    return val;
+  }
 
   /// @brief TvFunc を表す PyObject から TvFunc を取り出す．
   /// @return TvFunc を返す．

@@ -27,7 +27,7 @@ class LiteralGen(PyObjGen):
             writer.gen_comment('val から文字列を作る．')
             writer.gen_vardecl(typename='std::ostringstream',
                                varname='buf')
-            writer.write_line('buf << val')
+            writer.write_line('buf << val;')
             writer.gen_auto_assign('str_val', 'buf.str()')
         self.add_repr(func_body=repr_func)
 
@@ -36,13 +36,13 @@ class LiteralGen(PyObjGen):
         self.add_hash(func_body=hash_func)
 
         def new_body(writer):
-            self.gen_alloc_code(writer, varname='self')
+            writer.write_line('auto self = type->tp_alloc(type, 0);')
             self.gen_obj_conv(writer, objname='self', varname='my_obj')
             with writer.gen_if_block('id == -1'):
                 writer.gen_assign('my_obj->mVal', 'Literal::x()')
             with writer.gen_else_block():
                 writer.gen_assign('my_obj->mVal', 'Literal(id, inv)')
-            writer.gen_return('self')
+            writer.gen_return_self()
         self.add_new(func_body=new_body,
                      arg_list=[OptArg(),
                                IntArg(name=None,
@@ -55,7 +55,7 @@ class LiteralGen(PyObjGen):
 
         def set_method(writer):
             writer.write_line('val.set(id, inv);')
-            writer.write_line('Py_RETURN_NONE;')
+            writer.gen_return_py_none()
         self.add_method('set',
                         func_body=set_method,
                         arg_list=[IntArg(name=None,
@@ -83,14 +83,12 @@ class LiteralGen(PyObjGen):
                         func_body=is_negative_method)
 
         def make_positive_method(writer):
-            writer.gen_auto_assign('ans', 'val.make_positive()')
-            writer.gen_return('PyLiteral::ToPyObject(ans)')
+            writer.gen_return_pyobject('PyLiteral', 'val.make_positive()')
         self.add_method('make_positive',
                         func_body=make_positive_method)
 
         def make_negative_method(writer):
-            writer.gen_auto_assign('ans', 'val.make_negative()')
-            writer.gen_return('PyLiteral::ToPyObject(ans)')
+            writer.gen_return_pyobject('PyLiteral', 'val.make_negative()')
         self.add_method('make_negative',
                         func_body=make_negative_method)
 
@@ -115,11 +113,11 @@ class LiteralGen(PyObjGen):
                 self.gen_ref_conv(writer, objname='self', refname='val1')
                 self.gen_ref_conv(writer, objname='other', refname='val2')
                 writer.write_line('Py_RETURN_RICHCOMPARE(val1, val2, op);')
-            writer.write_line('Py_RETURN_NOTIMPLEMENTED')
+            writer.gen_return_py_notimplemented()
         self.add_richcompare(func_body=richcompare)
 
         def nb_invert(writer):
-            writer.gen_return('PyLiteral::ToPyObject(~val)')
+            writer.gen_return_pyobject('PyLiteral', '~val')
         self.add_number(nb_invert=nb_invert)
         
         self.add_conv('default')
