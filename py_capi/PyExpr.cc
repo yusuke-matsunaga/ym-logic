@@ -75,10 +75,12 @@ nb_and(
   PyObject* other
 )
 {
-  auto& val = PyExpr::_get_ref(self);
-  if ( PyExpr::Check(other) ) {
-    auto& val2 = PyExpr::_get_ref(other);
-    return PyExpr::ToPyObject(val & val2);
+  if ( PyExpr::Check(self) ) {
+    auto& val1 = PyExpr::_get_ref(self);
+    if ( PyExpr::Check(other) ) {
+      auto& val2 = PyExpr::_get_ref(other);
+      return PyExpr::ToPyObject(val1 & val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -89,10 +91,12 @@ nb_xor(
   PyObject* other
 )
 {
-  auto& val = PyExpr::_get_ref(self);
-  if ( PyExpr::Check(other) ) {
-    auto& val2 = PyExpr::_get_ref(other);
-    return PyExpr::ToPyObject(val ^ val2);
+  if ( PyExpr::Check(self) ) {
+    auto& val1 = PyExpr::_get_ref(self);
+    if ( PyExpr::Check(other) ) {
+      auto& val2 = PyExpr::_get_ref(other);
+      return PyExpr::ToPyObject(val1 ^ val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -103,10 +107,12 @@ nb_or(
   PyObject* other
 )
 {
-  auto& val = PyExpr::_get_ref(self);
-  if ( PyExpr::Check(other) ) {
-    auto& val2 = PyExpr::_get_ref(other);
-    return PyExpr::ToPyObject(val | val2);
+  if ( PyExpr::Check(self) ) {
+    auto& val1 = PyExpr::_get_ref(self);
+    if ( PyExpr::Check(other) ) {
+      auto& val2 = PyExpr::_get_ref(other);
+      return PyExpr::ToPyObject(val1 | val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -117,12 +123,14 @@ nb_inplace_and(
   PyObject* other
 )
 {
-  auto& val = PyExpr::_get_ref(self);
-  if ( PyExpr::Check(other) ) {
-    auto& val2 = PyExpr::_get_ref(other);
-    val &= val2;
-    Py_XINCREF(self);
-    return self;
+  if ( PyExpr::Check(self) ) {
+    auto& val1 = PyExpr::_get_ref(self);
+    if ( PyExpr::Check(other) ) {
+      auto& val2 = PyExpr::_get_ref(other);
+      val1 &= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -133,12 +141,14 @@ nb_inplace_xor(
   PyObject* other
 )
 {
-  auto& val = PyExpr::_get_ref(self);
-  if ( PyExpr::Check(other) ) {
-    auto& val2 = PyExpr::_get_ref(other);
-    val ^= val2;
-    Py_XINCREF(self);
-    return self;
+  if ( PyExpr::Check(self) ) {
+    auto& val1 = PyExpr::_get_ref(self);
+    if ( PyExpr::Check(other) ) {
+      auto& val2 = PyExpr::_get_ref(other);
+      val1 ^= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -149,12 +159,14 @@ nb_inplace_or(
   PyObject* other
 )
 {
-  auto& val = PyExpr::_get_ref(self);
-  if ( PyExpr::Check(other) ) {
-    auto& val2 = PyExpr::_get_ref(other);
-    val |= val2;
-    Py_XINCREF(self);
-    return self;
+  if ( PyExpr::Check(self) ) {
+    auto& val1 = PyExpr::_get_ref(self);
+    if ( PyExpr::Check(other) ) {
+      auto& val2 = PyExpr::_get_ref(other);
+      val1 |= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }

@@ -198,37 +198,62 @@ class AigHandleGen(PyObjGen):
             writer.gen_return_pyobject('PyAigHandle', '~val')
 
         def nb_multiply(writer):
-            with writer.gen_if_block('PyBool_Check(other)'):
-                writer.gen_auto_assign('inv', 'PyBool::Get(other)')
-                writer.gen_return_pyobject('PyAigHandle', 'val * inv')
+            with writer.gen_if_block('PyAigHandle::Check(self)'):
+                writer.gen_autoref_assign('val1', 'PyAigHandle::_get_ref(self)')
+                with writer.gen_if_block('PyBool_Check(other)'):
+                    writer.gen_auto_assign('inv', 'PyBool::Get(other)')
+                    writer.gen_return_pyobject('PyAigHandle', 'val1 * inv')
             writer.gen_return_py_notimplemented()
 
-        def nb_and(writer):
-            with writer.gen_if_block('PyAigHandle::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.gen_return_pyobject('PyAigHandle', 'val & val2')
+        def nb_common(writer, body):
+            with writer.gen_if_block('PyAigHandle::Check(self)'):
+                writer.gen_autoref_assign('val1', 'PyAigHandle::_get_ref(self)')
+                with writer.gen_if_block('PyAigHandle::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PyAigHandle::_get_ref(other)')
+                    body(writer)
             writer.gen_return_py_notimplemented()
+            
+        def nb_and(writer):
+            def body(writer):
+                writer.gen_return_pyobject('PyAigHandle', 'val1 & val2')
+            nb_common(writer, body)
 
         def nb_or(writer):
-            with writer.gen_if_block('PyAigHandle::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.gen_return_pyobject('PyAigHandle', 'val | val2')
-            writer.gen_return_py_notimplemented()
+            def body(writer):
+                writer.gen_return_pyobject('PyAigHandle', 'val1 | val2')
+            nb_common(writer, body)
 
         def nb_xor(writer):
-            with writer.gen_if_block('PyAigHandle::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.gen_return_pyobject('PyAigHandle', 'val ^ val2')
-            writer.gen_return_py_notimplemented()
+            def body(writer):
+                writer.gen_return_pyobject('PyAigHandle', 'val1 ^ val2')
+            nb_common(writer, body)
+                    
+        def nb_inplace_and(writer):
+            def body(writer):
+                writer.write_line('val1 &= val2;')
+                writer.gen_return_self(incref=True)
+            nb_common(writer, body)
+                    
+        def nb_inplace_or(writer):
+            def body(writer):
+                writer.write_line('val1 |= val2;')
+                writer.gen_return_self(incref=True)
+            nb_common(writer, body)
+                    
+        def nb_inplace_xor(writer):
+            def body(writer):
+                writer.write_line('val1 ^= val2;')
+                writer.gen_return_self(incref=True)
+            nb_common(writer, body)
             
         self.add_number(nb_invert=nb_invert,
                         nb_multiply=nb_multiply,
                         nb_and=nb_and,
                         nb_or=nb_or,
                         nb_xor=nb_xor,
-                        nb_inplace_and=nb_and,
-                        nb_inplace_or=nb_or,
-                        nb_inplace_xor=nb_xor)
+                        nb_inplace_and=nb_inplace_and,
+                        nb_inplace_or=nb_inplace_or,
+                        nb_inplace_xor=nb_inplace_xor)
 
         def hash_func(writer):
             writer.gen_return('val.hash()')

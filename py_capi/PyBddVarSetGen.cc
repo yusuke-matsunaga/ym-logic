@@ -48,10 +48,12 @@ nb_add(
   PyObject* other
 )
 {
-  auto& val = PyBddVarSet::_get_ref(self);
-  if ( PyBddVarSet::Check(other) ) {
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    return PyBddVarSet::ToPyObject(val + val2);
+  if ( PyBddVarSet::Check(self) ) {
+    auto& val1 = PyBddVarSet::_get_ref(self);
+    if ( PyBddVarSet::Check(other) ) {
+      auto& val2 = PyBddVarSet::_get_ref(other);
+      return PyBddVarSet::ToPyObject(val + val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -62,10 +64,12 @@ nb_subtract(
   PyObject* other
 )
 {
-  auto& val = PyBddVarSet::_get_ref(self);
-  if ( PyBddVarSet::Check(other) ) {
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    return PyBddVarSet::ToPyObject(val - val2);
+  if ( PyBddVarSet::Check(self) ) {
+    auto& val1 = PyBddVarSet::_get_ref(self);
+    if ( PyBddVarSet::Check(other) ) {
+      auto& val2 = PyBddVarSet::_get_ref(other);
+      return PyBddVarSet::ToPyObject(val - val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -76,10 +80,12 @@ nb_and(
   PyObject* other
 )
 {
-  auto& val = PyBddVarSet::_get_ref(self);
-  if ( PyBddVarSet::Check(other) ) {
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    return PyBddVarSet::ToPyObject(val & val2);
+  if ( PyBddVarSet::Check(self) ) {
+    auto& val1 = PyBddVarSet::_get_ref(self);
+    if ( PyBddVarSet::Check(other) ) {
+      auto& val2 = PyBddVarSet::_get_ref(other);
+      return PyBddVarSet::ToPyObject(val & val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -90,12 +96,14 @@ nb_inplace_add(
   PyObject* other
 )
 {
-  auto& val = PyBddVarSet::_get_ref(self);
-  if ( PyBddVarSet::Check(other) ) {
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    val += val2
-    Py_XINCREF(self);
-    return self;
+  if ( PyBddVarSet::Check(self) ) {
+    auto& val1 = PyBddVarSet::_get_ref(self);
+    if ( PyBddVarSet::Check(other) ) {
+      auto& val2 = PyBddVarSet::_get_ref(other);
+      val += val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -106,12 +114,14 @@ nb_inplace_subtract(
   PyObject* other
 )
 {
-  auto& val = PyBddVarSet::_get_ref(self);
-  if ( PyBddVarSet::Check(other) ) {
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    val -= val2
-    Py_XINCREF(self);
-    return self;
+  if ( PyBddVarSet::Check(self) ) {
+    auto& val1 = PyBddVarSet::_get_ref(self);
+    if ( PyBddVarSet::Check(other) ) {
+      auto& val2 = PyBddVarSet::_get_ref(other);
+      val -= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -122,12 +132,14 @@ nb_inplace_and(
   PyObject* other
 )
 {
-  auto& val = PyBddVarSet::_get_ref(self);
-  if ( PyBddVarSet::Check(other) ) {
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    val &= val2
-    Py_XINCREF(self);
-    return self;
+  if ( PyBddVarSet::Check(self) ) {
+    auto& val1 = PyBddVarSet::_get_ref(self);
+    if ( PyBddVarSet::Check(other) ) {
+      auto& val2 = PyBddVarSet::_get_ref(other);
+      val &= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }

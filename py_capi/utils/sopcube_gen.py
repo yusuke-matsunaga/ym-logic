@@ -143,7 +143,7 @@ class SopCubeGen(PyObjGen):
                       getter_name='get_literal_num')
 
         self.add_richcompare('cmp_default')
-
+            
         def nb_and(writer):
             with writer.gen_if_block('PySopCube::Check(self)'):
                 writer.gen_autoref_assign('val1', 'PySopCube::_get_ref(self)')

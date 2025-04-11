@@ -52,10 +52,12 @@ nb_multiply(
   PyObject* other
 )
 {
-  auto& val = PyAigHandle::_get_ref(self);
-  if ( PyBool_Check(other) ) {
-    auto inv = PyBool::Get(other);
-    return PyAigHandle::ToPyObject(val * inv);
+  if ( PyAigHandle::Check(self) ) {
+    auto& val1 = PyAigHandle::_get_ref(self);
+    if ( PyBool_Check(other) ) {
+      auto inv = PyBool::Get(other);
+      return PyAigHandle::ToPyObject(val1 * inv);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -75,10 +77,12 @@ nb_and(
   PyObject* other
 )
 {
-  auto& val = PyAigHandle::_get_ref(self);
-  if ( PyAigHandle::Check(other) ) {
-    auto& val2 = PyAigHandle::_get_ref(other);
-    return PyAigHandle::ToPyObject(val & val2);
+  if ( PyAigHandle::Check(self) ) {
+    auto& val1 = PyAigHandle::_get_ref(self);
+    if ( PyAigHandle::Check(other) ) {
+      auto& val2 = PyAigHandle::_get_ref(other);
+      return PyAigHandle::ToPyObject(val1 & val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -89,10 +93,12 @@ nb_xor(
   PyObject* other
 )
 {
-  auto& val = PyAigHandle::_get_ref(self);
-  if ( PyAigHandle::Check(other) ) {
-    auto& val2 = PyAigHandle::_get_ref(other);
-    return PyAigHandle::ToPyObject(val ^ val2);
+  if ( PyAigHandle::Check(self) ) {
+    auto& val1 = PyAigHandle::_get_ref(self);
+    if ( PyAigHandle::Check(other) ) {
+      auto& val2 = PyAigHandle::_get_ref(other);
+      return PyAigHandle::ToPyObject(val1 ^ val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -103,10 +109,12 @@ nb_or(
   PyObject* other
 )
 {
-  auto& val = PyAigHandle::_get_ref(self);
-  if ( PyAigHandle::Check(other) ) {
-    auto& val2 = PyAigHandle::_get_ref(other);
-    return PyAigHandle::ToPyObject(val | val2);
+  if ( PyAigHandle::Check(self) ) {
+    auto& val1 = PyAigHandle::_get_ref(self);
+    if ( PyAigHandle::Check(other) ) {
+      auto& val2 = PyAigHandle::_get_ref(other);
+      return PyAigHandle::ToPyObject(val1 | val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -117,10 +125,14 @@ nb_inplace_and(
   PyObject* other
 )
 {
-  auto& val = PyAigHandle::_get_ref(self);
-  if ( PyAigHandle::Check(other) ) {
-    auto& val2 = PyAigHandle::_get_ref(other);
-    return PyAigHandle::ToPyObject(val & val2);
+  if ( PyAigHandle::Check(self) ) {
+    auto& val1 = PyAigHandle::_get_ref(self);
+    if ( PyAigHandle::Check(other) ) {
+      auto& val2 = PyAigHandle::_get_ref(other);
+      val1 &= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -131,10 +143,14 @@ nb_inplace_xor(
   PyObject* other
 )
 {
-  auto& val = PyAigHandle::_get_ref(self);
-  if ( PyAigHandle::Check(other) ) {
-    auto& val2 = PyAigHandle::_get_ref(other);
-    return PyAigHandle::ToPyObject(val ^ val2);
+  if ( PyAigHandle::Check(self) ) {
+    auto& val1 = PyAigHandle::_get_ref(self);
+    if ( PyAigHandle::Check(other) ) {
+      auto& val2 = PyAigHandle::_get_ref(other);
+      val1 ^= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -145,10 +161,14 @@ nb_inplace_or(
   PyObject* other
 )
 {
-  auto& val = PyAigHandle::_get_ref(self);
-  if ( PyAigHandle::Check(other) ) {
-    auto& val2 = PyAigHandle::_get_ref(other);
-    return PyAigHandle::ToPyObject(val | val2);
+  if ( PyAigHandle::Check(self) ) {
+    auto& val1 = PyAigHandle::_get_ref(self);
+    if ( PyAigHandle::Check(other) ) {
+      auto& val2 = PyAigHandle::_get_ref(other);
+      val1 |= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }

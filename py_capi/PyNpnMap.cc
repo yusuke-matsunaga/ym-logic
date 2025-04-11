@@ -49,11 +49,12 @@ nb_multiply(
   PyObject* other
 )
 {
-  auto& val = PyNpnMap::_get_ref(self);
-  if ( PyNpnMap::Check(other) ) {
+  if ( PyNpnMap::Check(self) ) {
     auto& val1 = PyNpnMap::_get_ref(self);
-    auto& val2 = PyNpnMap::_get_ref(other);
-    return PyNpnMap::ToPyObject(val1 * val2);
+    if ( PyNpnMap::Check(other) ) {
+      auto& val2 = PyNpnMap::_get_ref(other);
+      return PyNpnMap::ToPyObject(val1 * val2);
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -73,13 +74,14 @@ nb_inplace_multiply(
   PyObject* other
 )
 {
-  auto& val = PyNpnMap::_get_ref(self);
-  if ( PyNpnMap::Check(other) ) {
+  if ( PyNpnMap::Check(self) ) {
     auto& val1 = PyNpnMap::_get_ref(self);
-    auto& val2 = PyNpnMap::_get_ref(other);
-    val1 *= val2;
-    Py_XINCREF(self);
-    return self;
+    if ( PyNpnMap::Check(other) ) {
+      auto& val2 = PyNpnMap::_get_ref(other);
+      val1 *= val2;
+      Py_XINCREF(self);
+      return self;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }

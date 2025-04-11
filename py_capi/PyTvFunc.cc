@@ -77,14 +77,16 @@ nb_and(
   PyObject* other
 )
 {
-  auto& val = PyTvFunc::_get_ref(self);
-  if ( PyTvFunc::Check(other) ) {
-    auto& val2 = PyTvFunc::_get_ref(other);
-    if ( val.input_num() != val2.input_num() ) {
-      PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
-      return nullptr;
+  if ( PyTvFunc::Check(self) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    if ( PyTvFunc::Check(other) ) {
+      auto& val2 = PyTvFunc::_get_ref(other);
+      if ( val1.input_num() != val2.input_num() ) {
+        PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
+        return nullptr;
+      }
+      return PyTvFunc::ToPyObject(val1 & val2);
     }
-    return PyTvFunc::ToPyObject(val & val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -95,14 +97,16 @@ nb_xor(
   PyObject* other
 )
 {
-  auto& val = PyTvFunc::_get_ref(self);
-  if ( PyTvFunc::Check(other) ) {
-    auto& val2 = PyTvFunc::_get_ref(other);
-    if ( val.input_num() != val2.input_num() ) {
-      PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
-      return nullptr;
+  if ( PyTvFunc::Check(self) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    if ( PyTvFunc::Check(other) ) {
+      auto& val2 = PyTvFunc::_get_ref(other);
+      if ( val1.input_num() != val2.input_num() ) {
+        PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
+        return nullptr;
+      }
+      return PyTvFunc::ToPyObject(val1 ^ val2);
     }
-    return PyTvFunc::ToPyObject(val ^ val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -113,14 +117,16 @@ nb_or(
   PyObject* other
 )
 {
-  auto& val = PyTvFunc::_get_ref(self);
-  if ( PyTvFunc::Check(other) ) {
-    auto& val2 = PyTvFunc::_get_ref(other);
-    if ( val.input_num() != val2.input_num() ) {
-      PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
-      return nullptr;
+  if ( PyTvFunc::Check(self) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    if ( PyTvFunc::Check(other) ) {
+      auto& val2 = PyTvFunc::_get_ref(other);
+      if ( val1.input_num() != val2.input_num() ) {
+        PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
+        return nullptr;
+      }
+      return PyTvFunc::ToPyObject(val1 | val2);
     }
-    return PyTvFunc::ToPyObject(val | val2);
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -131,16 +137,18 @@ nb_inplace_and(
   PyObject* other
 )
 {
-  auto& val = PyTvFunc::_get_ref(self);
-  if ( PyTvFunc::Check(other) ) {
-    auto& val2 = PyTvFunc::_get_ref(other);
-    if ( val.input_num() != val2.input_num() ) {
-      PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
-      return nullptr;
+  if ( PyTvFunc::Check(self) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    if ( PyTvFunc::Check(other) ) {
+      auto& val2 = PyTvFunc::_get_ref(other);
+      if ( val1.input_num() != val2.input_num() ) {
+        PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
+        return nullptr;
+      }
+      val1 &= val2;
+      Py_XINCREF(self);
+      return self;
     }
-    val &= val2;
-    Py_XINCREF(self);
-    return self;
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -151,16 +159,18 @@ nb_inplace_xor(
   PyObject* other
 )
 {
-  auto& val = PyTvFunc::_get_ref(self);
-  if ( PyTvFunc::Check(other) ) {
-    auto& val2 = PyTvFunc::_get_ref(other);
-    if ( val.input_num() != val2.input_num() ) {
-      PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
-      return nullptr;
+  if ( PyTvFunc::Check(self) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    if ( PyTvFunc::Check(other) ) {
+      auto& val2 = PyTvFunc::_get_ref(other);
+      if ( val1.input_num() != val2.input_num() ) {
+        PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
+        return nullptr;
+      }
+      val1 ^= val2;
+      Py_XINCREF(self);
+      return self;
     }
-    val ^= val2;
-    Py_XINCREF(self);
-    return self;
   }
   Py_RETURN_NOTIMPLEMENTED;
 }
@@ -171,16 +181,18 @@ nb_inplace_or(
   PyObject* other
 )
 {
-  auto& val = PyTvFunc::_get_ref(self);
-  if ( PyTvFunc::Check(other) ) {
-    auto& val2 = PyTvFunc::_get_ref(other);
-    if ( val.input_num() != val2.input_num() ) {
-      PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
-      return nullptr;
+  if ( PyTvFunc::Check(self) ) {
+    auto& val1 = PyTvFunc::_get_ref(self);
+    if ( PyTvFunc::Check(other) ) {
+      auto& val2 = PyTvFunc::_get_ref(other);
+      if ( val1.input_num() != val2.input_num() ) {
+        PyErr_SetString(PyExc_ValueError, "input_num() mismatch");
+        return nullptr;
+      }
+      val1 |= val2;
+      Py_XINCREF(self);
+      return self;
     }
-    val |= val2;
-    Py_XINCREF(self);
-    return self;
   }
   Py_RETURN_NOTIMPLEMENTED;
 }

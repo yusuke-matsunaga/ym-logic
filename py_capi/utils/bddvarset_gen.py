@@ -42,44 +42,46 @@ class BddVarSetGen(PyObjGen):
                                          cvarname='list_obj')])
         self.add_dealloc('default')
 
-        def nb_add(writer):
-            with writer.gen_if_block('PyBddVarSet::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.gen_return_pyobject('PyBddVarSet', 'val + val2')
+        def nb_common(writer, body):
+            with writer.gen_if_block('PyBddVarSet::Check(self)'):
+                writer.gen_autoref_assign('val1', 'PyBddVarSet::_get_ref(self)')
+                with writer.gen_if_block('PyBddVarSet::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PyBddVarSet::_get_ref(other)')
+                    body(writer)
             writer.gen_return_py_notimplemented()
+            
+        def nb_add(writer):
+            def body(writer):
+                writer.gen_return_pyobject('PyBddVarSet', 'val + val2')
+            nb_common(writer, body)
 
         def nb_inplace_add(writer):
-            with writer.gen_if_block('PyBddVarSet::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.write_line('val += val2')
+            def body(writer):
+                writer.write_line('val += val2;')
                 writer.gen_return_self(incref=True)
-            writer.gen_return_py_notimplemented()
+            nb_common(writer, body)
 
         def nb_subtract(writer):
-            with writer.gen_if_block('PyBddVarSet::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
+            def body(writer):
                 writer.gen_return_pyobject('PyBddVarSet', 'val - val2')
-            writer.gen_return_py_notimplemented()
+            nb_common(writer, body)
 
         def nb_inplace_subtract(writer):
-            with writer.gen_if_block('PyBddVarSet::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.write_line('val -= val2')
+            def body(writer):
+                writer.write_line('val -= val2;')
                 writer.gen_return_self(incref=True)
-            writer.gen_return_py_notimplemented()
+            nb_common(writer, body)
 
         def nb_and(writer):
-            with writer.gen_if_block('PyBddVarSet::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
+            def body(writer):
                 writer.gen_return_pyobject('PyBddVarSet', 'val & val2')
-            writer.gen_return_py_notimplemented()
+            nb_common(writer, body)
 
         def nb_inplace_and(writer):
-            with writer.gen_if_block('PyBddVarSet::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                writer.write_line('val &= val2')
+            def body(writer):
+                writer.write_line('val &= val2;')
                 writer.gen_return_self(incref=True)
-            writer.gen_return_py_notimplemented()
+            nb_common(writer, body)
 
         self.add_number(nb_add=nb_add,
                         nb_subtract=nb_subtract,

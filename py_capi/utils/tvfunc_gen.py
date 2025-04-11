@@ -387,56 +387,48 @@ class TvFuncGen(PyObjGen):
         def nb_invert(writer):
             writer.gen_return_pyobject('PyTvFunc', '~val')
 
-        def nb_and(writer):
-            with writer.gen_if_block('PyTvFunc::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('val.input_num() != val2.input_num()'):
-                    writer.gen_value_error('"input_num() mismatch"')
-                writer.gen_return_pyobject('PyTvFunc', 'val & val2')
+        def nb_common(writer, body):
+            with writer.gen_if_block('PyTvFunc::Check(self)'):
+                writer.gen_autoref_assign('val1', 'PyTvFunc::_get_ref(self)')
+                with writer.gen_if_block('PyTvFunc::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PyTvFunc::_get_ref(other)')
+                    with writer.gen_if_block('val1.input_num() != val2.input_num()'):
+                        writer.gen_value_error('"input_num() mismatch"')
+                    body(writer)
             writer.gen_return_py_notimplemented()
+            
+        def nb_and(writer):
+            def body(writer):
+                writer.gen_return_pyobject('PyTvFunc', 'val1 & val2')
+            nb_common(writer, body)
 
         def nb_or(writer):
-            with writer.gen_if_block('PyTvFunc::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('val.input_num() != val2.input_num()'):
-                    writer.gen_value_error('"input_num() mismatch"')
-                writer.gen_return_pyobject('PyTvFunc', 'val | val2')
-            writer.gen_return_py_notimplemented()
+            def body(writer):
+                writer.gen_return_pyobject('PyTvFunc', 'val1 | val2')
+            nb_common(writer, body)
 
         def nb_xor(writer):
-            with writer.gen_if_block('PyTvFunc::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('val.input_num() != val2.input_num()'):
-                    writer.gen_value_error('"input_num() mismatch"')
-                writer.gen_return_pyobject('PyTvFunc', 'val ^ val2')
-            writer.gen_return_py_notimplemented()
+            def body(wtier):
+                writer.gen_return_pyobject('PyTvFunc', 'val1 ^ val2')
+            nb_common(writer, body)
 
         def nb_inplace_and(writer):
-            with writer.gen_if_block('PyTvFunc::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('val.input_num() != val2.input_num()'):
-                    writer.gen_value_error('"input_num() mismatch"')
-                writer.write_line('val &= val2;')
+            def body(writer):
+                writer.write_line('val1 &= val2;')
                 writer.gen_return_self(incref=True)
-            writer.gen_return_py_notimplemented()
+            nb_common(writer, body)
 
         def nb_inplace_or(writer):
-            with writer.gen_if_block('PyTvFunc::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('val.input_num() != val2.input_num()'):
-                    writer.gen_value_error('"input_num() mismatch"')
-                writer.write_line('val |= val2;')
+            def body(writer):
+                writer.write_line('val1 |= val2;')
                 writer.gen_return_self(incref=True)
-            writer.gen_return_py_notimplemented()
+            nb_common(writer, body)
 
         def nb_inplace_xor(writer):
-            with writer.gen_if_block('PyTvFunc::Check(other)'):
-                self.gen_ref_conv(writer, objname='other', refname='val2')
-                with writer.gen_if_block('val.input_num() != val2.input_num()'):
-                    writer.gen_value_error('"input_num() mismatch"')
-                writer.write_line('val ^= val2;')
+            def body(writer):
+                writer.write_line('val1 ^= val2;')
                 writer.gen_return_self(incref=True)
-            writer.gen_return_py_notimplemented()
+            nb_common(writer, body)
 
         self.add_number(nb_invert=nb_invert,
                         nb_and=nb_and,
