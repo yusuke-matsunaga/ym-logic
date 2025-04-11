@@ -152,31 +152,9 @@ class NpnMapGen(PyObjGen):
                       getter_name='get_oinv',
                       doc_str='output polarity')
 
-        def nb_invert(writer):
-            writer.gen_return_pyobject('PyNpnMap', '~val')
-
-        def nb_common(writer, body):
-            with writer.gen_if_block('PyNpnMap::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PyNpnMap::_get_ref(self)')
-                with writer.gen_if_block('PyNpnMap::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PyNpnMap::_get_ref(other)')
-                    body(writer)
-            writer.gen_return_py_notimplemented()
-            
-        def nb_multiply(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyNpnMap', 'val1 * val2')
-            nb_common(writer, body)
-
-        def nb_inplace_multiply(writer):
-            def body(writer):
-                writer.write_line('val1 *= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-
-        self.add_number(nb_invert=nb_invert,
-                        nb_multiply=nb_multiply,
-                        nb_inplace_multiply=nb_inplace_multiply)
+        self.add_number(nb_invert='default',
+                        nb_multiply='default',
+                        nb_inplace_multiply='default')
         
         self.add_conv('default')
 

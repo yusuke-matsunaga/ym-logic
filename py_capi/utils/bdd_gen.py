@@ -358,60 +358,14 @@ class BddGen(PyObjGen):
                       getter_name='get_mgr')
         
         self.add_richcompare('eq_default')
-
-        def nb_invert(writer):
-            writer.gen_return_pyobject('PyBdd', '~val')
-
-        def nb_common(writer, body):
-            with writer.gen_if_block('PyBdd::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PyBdd::_get_ref(self)')
-                with writer.gen_if_block('PyBdd::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PyBdd::_get_ref(other)')
-                    with writer.gen_try_block():
-                        body(writer)
-                    writer.gen_catch_invalid_argument()
-            writer.gen_return_py_notimplemented()
             
-        def nb_and(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyBdd', 'val1 & val2')
-            nb_common(writer, body)
-
-        def nb_or(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyBdd', 'val1 | val2')
-            nb_common(writer, body)
-
-        def nb_xor(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyBdd', 'val1 ^ val2')
-            nb_common(writer, body)
-
-        def nb_inplace_and(writer):
-            def body(writer):
-                writer.write_line('val1 &= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-
-        def nb_inplace_or(writer):
-            def body(writer):
-                writer.write_line('val1 |= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-
-        def nb_inplace_xor(writer):
-            def body(writer):
-                writer.write_line('val1 ^= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-            
-        self.add_number(nb_invert=nb_invert,
-                        nb_and=nb_and,
-                        nb_or=nb_or,
-                        nb_xor=nb_xor,
-                        nb_inplace_and=nb_inplace_and,
-                        nb_inplace_or=nb_inplace_or,
-                        nb_inplace_xor=nb_inplace_xor)
+        self.add_number(nb_invert='default',
+                        nb_and='default',
+                        nb_or='default',
+                        nb_xor='default',
+                        nb_inplace_and='default',
+                        nb_inplace_or='default',
+                        nb_inplace_xor='default')
 
         def hash_func(writer):
             writer.gen_return('val.hash()')

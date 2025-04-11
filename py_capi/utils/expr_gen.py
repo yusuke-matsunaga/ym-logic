@@ -437,58 +437,14 @@ class ExprGen(PyObjGen):
                         func_body=getter_input_size)
         self.add_attr('input_size',
                       getter_name='input_size')
-
-        def nb_invert(writer):
-            writer.gen_return_pyobject('PyExpr', '~val')
-
-        def nb_common(writer, body):
-            with writer.gen_if_block('PyExpr::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PyExpr::_get_ref(self)')
-                with writer.gen_if_block('PyExpr::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PyExpr::_get_ref(other)')
-                    body(writer)
-            writer.gen_return_py_notimplemented()
             
-        def nb_and(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyExpr', 'val1 & val2')
-            nb_common(writer, body)
-
-        def nb_inplace_and(writer):
-            def body(writer):
-                writer.write_line('val1 &= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-
-        def nb_or(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyExpr', 'val1 | val2')
-            nb_common(writer, body)
-
-        def nb_inplace_or(writer):
-            def body(writer):
-                writer.write_line('val1 |= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-
-        def nb_xor(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyExpr', 'val1 ^ val2')
-            nb_common(writer, body)
-            
-        def nb_inplace_xor(writer):
-            def body(writer):
-                writer.write_line('val1 ^= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-            
-        self.add_number(nb_invert=nb_invert,
+        self.add_number(nb_invert='default',
                         nb_and='default',
-                        nb_or=nb_or,
-                        nb_xor=nb_xor,
-                        nb_inplace_and=nb_inplace_and,
-                        nb_inplace_or=nb_inplace_or,
-                        nb_inplace_xor=nb_inplace_xor)
+                        nb_or='default',
+                        nb_xor='default',
+                        nb_inplace_and='default',
+                        nb_inplace_or='default',
+                        nb_inplace_xor='default')
 
         self.add_richcompare('eq_default')
             

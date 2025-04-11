@@ -79,7 +79,15 @@ nb_and(
     auto& val1 = PyExpr::_get_ref(self);
     if ( PyExpr::Check(other) ) {
       auto& val2 = PyExpr::_get_ref(other);
-      return PyExpr::ToPyObject(val1 & val2);
+      try {
+        return PyExpr::ToPyObject(val1 & val2);
+      }
+      catch ( std::invalid_argument err ) {
+        std::ostringstream buf;
+        buf << "invalid argument" << ": " << err.what();
+        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+        return nullptr;
+      }
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -95,7 +103,15 @@ nb_xor(
     auto& val1 = PyExpr::_get_ref(self);
     if ( PyExpr::Check(other) ) {
       auto& val2 = PyExpr::_get_ref(other);
-      return PyExpr::ToPyObject(val1 ^ val2);
+      try {
+        return PyExpr::ToPyObject(val1 ^ val2);
+      }
+      catch ( std::invalid_argument err ) {
+        std::ostringstream buf;
+        buf << "invalid argument" << ": " << err.what();
+        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+        return nullptr;
+      }
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -111,7 +127,15 @@ nb_or(
     auto& val1 = PyExpr::_get_ref(self);
     if ( PyExpr::Check(other) ) {
       auto& val2 = PyExpr::_get_ref(other);
-      return PyExpr::ToPyObject(val1 | val2);
+      try {
+        return PyExpr::ToPyObject(val1 | val2);
+      }
+      catch ( std::invalid_argument err ) {
+        std::ostringstream buf;
+        buf << "invalid argument" << ": " << err.what();
+        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+        return nullptr;
+      }
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -127,9 +151,17 @@ nb_inplace_and(
     auto& val1 = PyExpr::_get_ref(self);
     if ( PyExpr::Check(other) ) {
       auto& val2 = PyExpr::_get_ref(other);
-      val1 &= val2;
-      Py_XINCREF(self);
-      return self;
+      try {
+        val1 &= val2;
+        Py_XINCREF(self);
+        return self;
+      }
+      catch ( std::invalid_argument err ) {
+        std::ostringstream buf;
+        buf << "invalid argument" << ": " << err.what();
+        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+        return nullptr;
+      }
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -145,9 +177,17 @@ nb_inplace_xor(
     auto& val1 = PyExpr::_get_ref(self);
     if ( PyExpr::Check(other) ) {
       auto& val2 = PyExpr::_get_ref(other);
-      val1 ^= val2;
-      Py_XINCREF(self);
-      return self;
+      try {
+        val1 ^= val2;
+        Py_XINCREF(self);
+        return self;
+      }
+      catch ( std::invalid_argument err ) {
+        std::ostringstream buf;
+        buf << "invalid argument" << ": " << err.what();
+        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+        return nullptr;
+      }
     }
   }
   Py_RETURN_NOTIMPLEMENTED;
@@ -163,9 +203,17 @@ nb_inplace_or(
     auto& val1 = PyExpr::_get_ref(self);
     if ( PyExpr::Check(other) ) {
       auto& val2 = PyExpr::_get_ref(other);
-      val1 |= val2;
-      Py_XINCREF(self);
-      return self;
+      try {
+        val1 |= val2;
+        Py_XINCREF(self);
+        return self;
+      }
+      catch ( std::invalid_argument err ) {
+        std::ostringstream buf;
+        buf << "invalid argument" << ": " << err.what();
+        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+        return nullptr;
+      }
     }
   }
   Py_RETURN_NOTIMPLEMENTED;

@@ -42,53 +42,12 @@ class BddVarSetGen(PyObjGen):
                                          cvarname='list_obj')])
         self.add_dealloc('default')
 
-        def nb_common(writer, body):
-            with writer.gen_if_block('PyBddVarSet::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PyBddVarSet::_get_ref(self)')
-                with writer.gen_if_block('PyBddVarSet::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PyBddVarSet::_get_ref(other)')
-                    body(writer)
-            writer.gen_return_py_notimplemented()
-            
-        def nb_add(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyBddVarSet', 'val + val2')
-            nb_common(writer, body)
-
-        def nb_inplace_add(writer):
-            def body(writer):
-                writer.write_line('val += val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-
-        def nb_subtract(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyBddVarSet', 'val - val2')
-            nb_common(writer, body)
-
-        def nb_inplace_subtract(writer):
-            def body(writer):
-                writer.write_line('val -= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-
-        def nb_and(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PyBddVarSet', 'val & val2')
-            nb_common(writer, body)
-
-        def nb_inplace_and(writer):
-            def body(writer):
-                writer.write_line('val &= val2;')
-                writer.gen_return_self(incref=True)
-            nb_common(writer, body)
-
-        self.add_number(nb_add=nb_add,
-                        nb_subtract=nb_subtract,
-                        nb_and=nb_and,
-                        nb_inplace_add=nb_inplace_add,
-                        nb_inplace_subtract=nb_inplace_subtract,
-                        nb_inplace_and=nb_inplace_and)
+        self.add_number(nb_add='default',
+                        nb_subtract='default',
+                        nb_and='default',
+                        nb_inplace_add='default',
+                        nb_inplace_subtract='default',
+                        nb_inplace_and='default')
 
         self.add_richcompare('eq_default')
 

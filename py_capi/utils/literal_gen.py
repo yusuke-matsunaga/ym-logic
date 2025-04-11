@@ -110,9 +110,7 @@ class LiteralGen(PyObjGen):
 
         self.add_richcompare('cmp_default')
 
-        def nb_invert(writer):
-            writer.gen_return_pyobject('PyLiteral', '~val')
-        self.add_number(nb_invert=nb_invert)
+        self.add_number(nb_invert='default')
         
         self.add_conv('default')
 
