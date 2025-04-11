@@ -67,6 +67,9 @@ bdd_gen = BddGen()
 from bddmgr_gen import BddMgrGen
 bddmgr_gen = BddMgrGen()
 
+from bddvarset_gen import BddVarSetGen
+bddvarset_gen = BddVarSetGen()
+
 from aighandle_gen import AigHandleGen
 aighandle_gen = AigHandleGen()
 
@@ -80,6 +83,7 @@ for gen, name in ((primtype_gen, 'PyPrimType'),
                   (tvfunc_gen, 'PyTvFunc'),
                   (bdd_gen, 'PyBdd'),
                   (bddmgr_gen, 'PyBddMgr'),
+                  (bddvarset_gen, 'PyBddVarSetGen'),
                   (aighandle_gen, 'PyAigHandle'),
                   (aigmgr_gen, 'PyAigMgr')):
     filename = os.path.join(include_dir, f'{name}.h')
