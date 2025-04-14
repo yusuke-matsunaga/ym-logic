@@ -63,7 +63,15 @@ nb_invert(
 )
 {
   auto& val = PyBdd::_get_ref(self);
-  return PyBdd::ToPyObject(~val);
+  try {
+    return PyBdd::ToPyObject(~val);
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -72,22 +80,30 @@ nb_and(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) ) {
-    auto& val1 = PyBdd::_get_ref(self);
-    if ( PyBdd::Check(other) ) {
-      auto& val2 = PyBdd::_get_ref(other);
-      try {
-        return PyBdd::ToPyObject(val1 & val2);
-      }
-      catch ( std::invalid_argument err ) {
-        std::ostringstream buf;
-        buf << "invalid argument" << ": " << err.what();
-        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-        return nullptr;
+  try {
+    if ( PyBdd::Check(self) ) {
+      auto& val1 = PyBdd::_get_ref(self);
+      if ( PyBdd::Check(other) ) {
+        auto& val2 = PyBdd::_get_ref(other);
+        try {
+          return PyBdd::ToPyObject(val1 & val2);
+        }
+        catch ( std::invalid_argument err ) {
+          std::ostringstream buf;
+          buf << "invalid argument" << ": " << err.what();
+          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+          return nullptr;
+        }
       }
     }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -96,22 +112,30 @@ nb_xor(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) ) {
-    auto& val1 = PyBdd::_get_ref(self);
-    if ( PyBdd::Check(other) ) {
-      auto& val2 = PyBdd::_get_ref(other);
-      try {
-        return PyBdd::ToPyObject(val1 ^ val2);
-      }
-      catch ( std::invalid_argument err ) {
-        std::ostringstream buf;
-        buf << "invalid argument" << ": " << err.what();
-        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-        return nullptr;
+  try {
+    if ( PyBdd::Check(self) ) {
+      auto& val1 = PyBdd::_get_ref(self);
+      if ( PyBdd::Check(other) ) {
+        auto& val2 = PyBdd::_get_ref(other);
+        try {
+          return PyBdd::ToPyObject(val1 ^ val2);
+        }
+        catch ( std::invalid_argument err ) {
+          std::ostringstream buf;
+          buf << "invalid argument" << ": " << err.what();
+          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+          return nullptr;
+        }
       }
     }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -120,22 +144,30 @@ nb_or(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) ) {
-    auto& val1 = PyBdd::_get_ref(self);
-    if ( PyBdd::Check(other) ) {
-      auto& val2 = PyBdd::_get_ref(other);
-      try {
-        return PyBdd::ToPyObject(val1 | val2);
-      }
-      catch ( std::invalid_argument err ) {
-        std::ostringstream buf;
-        buf << "invalid argument" << ": " << err.what();
-        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-        return nullptr;
+  try {
+    if ( PyBdd::Check(self) ) {
+      auto& val1 = PyBdd::_get_ref(self);
+      if ( PyBdd::Check(other) ) {
+        auto& val2 = PyBdd::_get_ref(other);
+        try {
+          return PyBdd::ToPyObject(val1 | val2);
+        }
+        catch ( std::invalid_argument err ) {
+          std::ostringstream buf;
+          buf << "invalid argument" << ": " << err.what();
+          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+          return nullptr;
+        }
       }
     }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -144,24 +176,32 @@ nb_inplace_and(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) ) {
-    auto& val1 = PyBdd::_get_ref(self);
-    if ( PyBdd::Check(other) ) {
-      auto& val2 = PyBdd::_get_ref(other);
-      try {
-        val1 &= val2;
-        Py_XINCREF(self);
-        return self;
-      }
-      catch ( std::invalid_argument err ) {
-        std::ostringstream buf;
-        buf << "invalid argument" << ": " << err.what();
-        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-        return nullptr;
+  try {
+    if ( PyBdd::Check(self) ) {
+      auto& val1 = PyBdd::_get_ref(self);
+      if ( PyBdd::Check(other) ) {
+        auto& val2 = PyBdd::_get_ref(other);
+        try {
+          val1 &= val2;
+          Py_XINCREF(self);
+          return self;
+        }
+        catch ( std::invalid_argument err ) {
+          std::ostringstream buf;
+          buf << "invalid argument" << ": " << err.what();
+          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+          return nullptr;
+        }
       }
     }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -170,24 +210,32 @@ nb_inplace_xor(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) ) {
-    auto& val1 = PyBdd::_get_ref(self);
-    if ( PyBdd::Check(other) ) {
-      auto& val2 = PyBdd::_get_ref(other);
-      try {
-        val1 ^= val2;
-        Py_XINCREF(self);
-        return self;
-      }
-      catch ( std::invalid_argument err ) {
-        std::ostringstream buf;
-        buf << "invalid argument" << ": " << err.what();
-        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-        return nullptr;
+  try {
+    if ( PyBdd::Check(self) ) {
+      auto& val1 = PyBdd::_get_ref(self);
+      if ( PyBdd::Check(other) ) {
+        auto& val2 = PyBdd::_get_ref(other);
+        try {
+          val1 ^= val2;
+          Py_XINCREF(self);
+          return self;
+        }
+        catch ( std::invalid_argument err ) {
+          std::ostringstream buf;
+          buf << "invalid argument" << ": " << err.what();
+          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+          return nullptr;
+        }
       }
     }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -196,24 +244,32 @@ nb_inplace_or(
   PyObject* other
 )
 {
-  if ( PyBdd::Check(self) ) {
-    auto& val1 = PyBdd::_get_ref(self);
-    if ( PyBdd::Check(other) ) {
-      auto& val2 = PyBdd::_get_ref(other);
-      try {
-        val1 |= val2;
-        Py_XINCREF(self);
-        return self;
-      }
-      catch ( std::invalid_argument err ) {
-        std::ostringstream buf;
-        buf << "invalid argument" << ": " << err.what();
-        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-        return nullptr;
+  try {
+    if ( PyBdd::Check(self) ) {
+      auto& val1 = PyBdd::_get_ref(self);
+      if ( PyBdd::Check(other) ) {
+        auto& val2 = PyBdd::_get_ref(other);
+        try {
+          val1 |= val2;
+          Py_XINCREF(self);
+          return self;
+        }
+        catch ( std::invalid_argument err ) {
+          std::ostringstream buf;
+          buf << "invalid argument" << ": " << err.what();
+          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+          return nullptr;
+        }
       }
     }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // Numberオブジェクト構造体
@@ -248,11 +304,19 @@ richcompare_func(
   auto& val = PyBdd::_get_ref(self);
   if ( PyBdd::Check(other) ) {
     auto& val2 = PyBdd::_get_ref(other);
-    if ( op == Py_EQ ) {
-      return PyBool_FromLong(val == val2);
+    try {
+      if ( op == Py_EQ ) {
+        return PyBool_FromLong(val == val2);
+      }
+      if ( op == Py_NE ) {
+        return PyBool_FromLong(val != val2);
+      }
     }
-    if ( op == Py_NE ) {
-      return PyBool_FromLong(val != val2);
+    catch ( std::invalid_argument err ) {
+      std::ostringstream buf;
+      buf << "invalid argument" << ": " << err.what();
+      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+      return nullptr;
     }
   }
   Py_RETURN_NOTIMPLEMENTED;

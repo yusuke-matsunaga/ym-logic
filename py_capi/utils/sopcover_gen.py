@@ -8,7 +8,7 @@
 """
 
 from mk_py_capi import PyObjGen
-from mk_py_capi import IntArg, RawObjArg, TypedRawObjArg, TypedObjConvArg
+from mk_py_capi import IntArg, BoolArg, RawObjArg
 from mk_py_capi import OptArg, KwdArg
 
 
@@ -23,7 +23,9 @@ class SopCoverGen(PyObjGen):
                                                'pym/PySopCube.h',
                                                'pym/PyLiteral.h',
                                                'pym/PyExpr.h',
-                                               'pym/PyTvFunc.h'])
+                                               'pym/PyTvFunc.h',
+                                               'pym/PyLong.h',
+                                               'pym/PyString.h'])
 
         def new_body(writer):
             writer.gen_vardecl(typename='std::vector<SopCube>',
@@ -32,7 +34,7 @@ class SopCoverGen(PyObjGen):
                 with writer.gen_if_block('!PyList<SopCube, PySopCube>::FromPyObject(list_obj, cube_list)'):
                     writer.gen_type_error('"argument 2 should be a sequence of \'SopCube\'"')
             writer.gen_auto_assign('self', 'type->tp_alloc(type, 0)')
-            self.gen_obj_conv(writer, objname='sef', varname='my_obj')
+            self.gen_obj_conv(writer, objname='self', varname='my_obj')
             writer.write_line('new (&my_obj->mVal) SopCover(ni, cube_list);')
             writer.gen_return_self()
         self.add_new(new_body,
@@ -54,7 +56,7 @@ class SopCoverGen(PyObjGen):
         def meth_literal_num(writer):
             with writer.gen_if_block('var_obj == nullptr'):
                 with writer.gen_if_block('inv'):
-                    writer.gen_type_error('"\'inv\'" shoud not be specified without \'var\'"')
+                    writer.gen_type_error('"\'inv\' shoud not be specified without \'var\'"')
                 writer.gen_return_py_long('val.literal_num()')
             with writer.gen_elseif_block('PyLiteral::Check(var_obj)'):
                 writer.gen_auto_assign('lit', 'PyLiteral::_get_ref(var_obj)')
@@ -139,13 +141,24 @@ class SopCoverGen(PyObjGen):
                 with writer.gen_if_block('PySopCover::Check(other)'):
                     writer.gen_autoref_assign('val2', 'PySopCover::_get_ref(other)')
                     body(writer)
-                with writer.gen_if_block('PyLiteral::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PyLiteral::_get_ref(other)')
+                with writer.gen_if_block('PySopCube::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PySopCube::_get_ref(other)')
                     body(writer)
-            with writer.gen_elseif_block('PyLiteral::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PyLiteral::_get_ref(self)')
+            with writer.gen_elseif_block('PySopCube::Check(self)'):
+                writer.gen_autoref_assign('val1', 'PySopCube::_get_ref(self)')
                 with writer.gen_if_block('PySopCover::Check(other)'):
                     writer.gen_autoref_assign('val2', 'PySopCover::_get_ref(other)')
+                    body(writer)
+            writer.gen_return_py_notimplemented()
+
+        def nb_common2(writer, body):
+            with writer.gen_if_block('PySopCover::Check(self)'):
+                writer.gen_autoref_assign('val1', 'PySopCover::_get_ref(self)')
+                with writer.gen_if_block('PySopCover::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PySopCover::_get_ref(other)')
+                    body(writer)
+                with writer.gen_if_block('PySopCube::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PySopCube::_get_ref(other)')
                     body(writer)
             writer.gen_return_py_notimplemented()
 
@@ -156,34 +169,58 @@ class SopCoverGen(PyObjGen):
                     writer.gen_autoref_assign('val2', 'PySopCover::_get_ref(other)')
                     body(writer)
                     writer.gen_return_self(incref=True)
-                with writer.gen_if_block('PyLiteral::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PyLiteral::_get_ref(other)')
+                with writer.gen_if_block('PySopCube::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PySopCube::_get_ref(other)')
                     body(writer)
                     writer.gen_return_self(incref=True)
             writer.gen_return_py_notimplemented()
+            
+        def nb_add(writer):
+            def body(writer):
+                writer.gen_return_pyobject('PySopCover', 'val1 | val2')
+            nb_common(writer, body)
+
+        def nb_iadd(writer):
+            def body(writer):
+                writer.write_line('val1 |= val2;')
+            nb_inplace_common(writer, body)
+            
+        def nb_diff(writer):
+            def body(writer):
+                writer.gen_return_pyobject('PySopCover', 'val1 - val2')
+            nb_common2(writer, body)
+            
+        def nb_idiff(writer):
+            def body(writer):
+                writer.write_line('val1 -= val2;')
+            nb_inplace_common(writer, body)
             
         def nb_and(writer):
             def body(writer):
                 writer.gen_return_pyobject('PySopCover', 'val1 & val2')
             nb_common(writer, body)
 
-        def nb_inplace_and(writer):
+        def nb_iand(writer):
             def body(writer):
                 writer.write_line('val1 &= val2;')
             nb_inplace_common(writer, body)
 
         def nb_div(writer):
             def body(writer):
-                writer.gen_return_pyobject('PySopCover', 'val1 / val2')
-            nb_common(writer, body)
+                writer.gen_return_pyobject('PySopCover', 'val1.algdiv(val2)')
+            nb_common2(writer, body)
 
         def nb_idiv(writer):
             def body(writer):
-                writer.write_line('va1 /= val2;')
+                writer.write_line('val1.algdiv_int(val2);')
             nb_inplace_common(writer, body)
             
-        self.add_number(nb_and=nb_and,
-                        nb_inplace_and=nb_inplace_and,
+        self.add_number(nb_add=nb_add,
+                        nb_inplace_add=nb_iadd,
+                        nb_subtract=nb_diff,
+                        nb_inplace_subtract=nb_idiff,
+                        nb_and=nb_and,
+                        nb_inplace_and=nb_iand,
                         nb_true_divide=nb_div,
                         nb_inplace_true_divide=nb_idiv)
 

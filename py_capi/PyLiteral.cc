@@ -62,7 +62,15 @@ nb_invert(
 )
 {
   auto& val = PyLiteral::_get_ref(self);
-  return PyLiteral::ToPyObject(~val);
+  try {
+    return PyLiteral::ToPyObject(~val);
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // Numberオブジェクト構造体
@@ -91,7 +99,15 @@ richcompare_func(
   auto& val = PyLiteral::_get_ref(self);
   if ( PyLiteral::Check(other) ) {
     auto& val2 = PyLiteral::_get_ref(other);
-    Py_RETURN_RICHCOMPARE(val, val2, op);
+    try {
+      Py_RETURN_RICHCOMPARE(val, val2, op);
+    }
+    catch ( std::invalid_argument err ) {
+      std::ostringstream buf;
+      buf << "invalid argument" << ": " << err.what();
+      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+      return nullptr;
+    }
   }
   Py_RETURN_NOTIMPLEMENTED;
 }

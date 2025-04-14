@@ -76,6 +76,12 @@ aighandle_gen = AigHandleGen()
 from aigmgr_gen import AigMgrGen
 aigmgr_gen = AigMgrGen()
 
+from sopcube_gen import SopCubeGen
+sopcube_gen = SopCubeGen()
+
+from sopcover_gen import SopCoverGen
+sopcover_gen = SopCoverGen()
+
 for gen, name in ((primtype_gen, 'PyPrimType'),
                   (literal_gen, 'PyLiteral'),
                   (npnmap_gen, 'PyNpnMap'),
@@ -85,7 +91,9 @@ for gen, name in ((primtype_gen, 'PyPrimType'),
                   (bddmgr_gen, 'PyBddMgr'),
                   (bddvarset_gen, 'PyBddVarSetGen'),
                   (aighandle_gen, 'PyAigHandle'),
-                  (aigmgr_gen, 'PyAigMgr')):
+                  (aigmgr_gen, 'PyAigMgr'),
+                  (sopcube_gen, 'PySopCube'),
+                  (sopcover_gen, 'PySopCover')):
     filename = os.path.join(include_dir, f'{name}.h')
     with open(filename, 'wt') as fout:
         gen.make_header(fout=fout)

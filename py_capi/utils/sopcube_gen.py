@@ -22,7 +22,9 @@ class SopCubeGen(PyObjGen):
                          source_include_files=['pym/PySopCube.h',
                                                'pym/PyLiteral.h',
                                                'pym/PyExpr.h',
-                                               'pym/PyTvFunc.h'])
+                                               'pym/PyTvFunc.h',
+                                               'pym/PyLong.h',
+                                               'pym/PyString.h'])
 
         def new_body(writer):
             writer.gen_vardecl(typename='std::vector<Literal>',
@@ -31,7 +33,7 @@ class SopCubeGen(PyObjGen):
                 with writer.gen_if_block('!PyList<Literal, PyLiteral>::FromPyObject(list_obj, lit_list)'):
                     writer.gen_type_error('"argument 2 should be a sequence of \'Literal\'"')
             writer.gen_auto_assign('self', 'type->tp_alloc(type, 0)')
-            self.gen_obj_conv(writer, objname='sef', varname='my_obj')
+            self.gen_obj_conv(writer, objname='self', varname='my_obj')
             writer.write_line('new (&my_obj->mVal) SopCube(ni, lit_list);')
             writer.gen_return_self()
         self.add_new(new_body,
@@ -184,14 +186,28 @@ class SopCubeGen(PyObjGen):
             nb_inplace_common(writer, body)
 
         def nb_div(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PySopCube', 'val1 / val2')
-            nb_common(writer, body)
+            with writer.gen_if_block('PySopCube::Check(self)'):
+                writer.gen_autoref_assign('val1', 'PySopCube::_get_ref(self)')
+                with writer.gen_if_block('PySopCube::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PySopCube::_get_ref(other)')
+                    writer.gen_return_pyobject('PySopCube', 'val1 / val2')
+                with writer.gen_if_block('PyLiteral::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PyLiteral::_get_ref(other)')
+                    writer.gen_return_pyobject('PySopCube', 'val1 / val2')
+            writer.gen_return_py_notimplemented()
 
         def nb_idiv(writer):
-            def body(writer):
-                writer.write_line('va1 /= val2;')
-            nb_inplace_common(writer, body)
+            with writer.gen_if_block('PySopCube::Check(self)'):
+                writer.gen_autoref_assign('val1', 'PySopCube::_get_ref(self)')
+                with writer.gen_if_block('PySopCube::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PySopCube::_get_ref(other)')
+                    writer.write_line('val1 /= val2;')
+                    writer.gen_return_self(incref=True)
+                with writer.gen_if_block('PyLiteral::Check(other)'):
+                    writer.gen_autoref_assign('val2', 'PyLiteral::_get_ref(other)')
+                    writer.write_line('val1 /= val2;')
+                    writer.gen_return_self(incref=True)
+            writer.gen_return_py_notimplemented()
             
         self.add_number(nb_and=nb_and,
                         nb_inplace_and=nb_inplace_and,
