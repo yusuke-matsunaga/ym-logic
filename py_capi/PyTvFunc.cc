@@ -90,15 +90,7 @@ nb_and(
       auto& val1 = PyTvFunc::_get_ref(self);
       if ( PyTvFunc::Check(other) ) {
         auto& val2 = PyTvFunc::_get_ref(other);
-        try {
-          return PyTvFunc::ToPyObject(val1 & val2);
-        }
-        catch ( std::invalid_argument err ) {
-          std::ostringstream buf;
-          buf << "invalid argument" << ": " << err.what();
-          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-          return nullptr;
-        }
+        return PyTvFunc::ToPyObject(val1 & val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -122,15 +114,7 @@ nb_xor(
       auto& val1 = PyTvFunc::_get_ref(self);
       if ( PyTvFunc::Check(other) ) {
         auto& val2 = PyTvFunc::_get_ref(other);
-        try {
-          return PyTvFunc::ToPyObject(val1 ^ val2);
-        }
-        catch ( std::invalid_argument err ) {
-          std::ostringstream buf;
-          buf << "invalid argument" << ": " << err.what();
-          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-          return nullptr;
-        }
+        return PyTvFunc::ToPyObject(val1 ^ val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -154,15 +138,7 @@ nb_or(
       auto& val1 = PyTvFunc::_get_ref(self);
       if ( PyTvFunc::Check(other) ) {
         auto& val2 = PyTvFunc::_get_ref(other);
-        try {
-          return PyTvFunc::ToPyObject(val1 | val2);
-        }
-        catch ( std::invalid_argument err ) {
-          std::ostringstream buf;
-          buf << "invalid argument" << ": " << err.what();
-          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-          return nullptr;
-        }
+        return PyTvFunc::ToPyObject(val1 | val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -186,17 +162,9 @@ nb_inplace_and(
       auto& val1 = PyTvFunc::_get_ref(self);
       if ( PyTvFunc::Check(other) ) {
         auto& val2 = PyTvFunc::_get_ref(other);
-        try {
-          val1 &= val2;
-          Py_XINCREF(self);
-          return self;
-        }
-        catch ( std::invalid_argument err ) {
-          std::ostringstream buf;
-          buf << "invalid argument" << ": " << err.what();
-          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-          return nullptr;
-        }
+        val1 &= val2;
+        Py_XINCREF(self);
+        return self;
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -220,17 +188,9 @@ nb_inplace_xor(
       auto& val1 = PyTvFunc::_get_ref(self);
       if ( PyTvFunc::Check(other) ) {
         auto& val2 = PyTvFunc::_get_ref(other);
-        try {
-          val1 ^= val2;
-          Py_XINCREF(self);
-          return self;
-        }
-        catch ( std::invalid_argument err ) {
-          std::ostringstream buf;
-          buf << "invalid argument" << ": " << err.what();
-          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-          return nullptr;
-        }
+        val1 ^= val2;
+        Py_XINCREF(self);
+        return self;
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -254,17 +214,9 @@ nb_inplace_or(
       auto& val1 = PyTvFunc::_get_ref(self);
       if ( PyTvFunc::Check(other) ) {
         auto& val2 = PyTvFunc::_get_ref(other);
-        try {
-          val1 |= val2;
-          Py_XINCREF(self);
-          return self;
-        }
-        catch ( std::invalid_argument err ) {
-          std::ostringstream buf;
-          buf << "invalid argument" << ": " << err.what();
-          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-          return nullptr;
-        }
+        val1 |= val2;
+        Py_XINCREF(self);
+        return self;
       }
     }
     Py_RETURN_NOTIMPLEMENTED;

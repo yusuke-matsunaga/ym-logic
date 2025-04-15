@@ -110,7 +110,7 @@ class LiteralGen(PyObjGen):
 
         self.add_richcompare('cmp_default')
 
-        self.add_number(nb_invert='default')
+        self.add_nb_invert()
         
         self.add_conv('default')
 

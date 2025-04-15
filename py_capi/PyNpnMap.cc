@@ -54,15 +54,7 @@ nb_multiply(
       auto& val1 = PyNpnMap::_get_ref(self);
       if ( PyNpnMap::Check(other) ) {
         auto& val2 = PyNpnMap::_get_ref(other);
-        try {
-          return PyNpnMap::ToPyObject(val1 * val2);
-        }
-        catch ( std::invalid_argument err ) {
-          std::ostringstream buf;
-          buf << "invalid argument" << ": " << err.what();
-          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-          return nullptr;
-        }
+        return PyNpnMap::ToPyObject(val1 * val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -103,17 +95,9 @@ nb_inplace_multiply(
       auto& val1 = PyNpnMap::_get_ref(self);
       if ( PyNpnMap::Check(other) ) {
         auto& val2 = PyNpnMap::_get_ref(other);
-        try {
-          val1 *= val2;
-          Py_XINCREF(self);
-          return self;
-        }
-        catch ( std::invalid_argument err ) {
-          std::ostringstream buf;
-          buf << "invalid argument" << ": " << err.what();
-          PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-          return nullptr;
-        }
+        val1 *= val2;
+        Py_XINCREF(self);
+        return self;
       }
     }
     Py_RETURN_NOTIMPLEMENTED;

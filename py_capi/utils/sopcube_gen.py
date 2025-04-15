@@ -10,6 +10,7 @@
 from mk_py_capi import PyObjGen
 from mk_py_capi import IntArg, RawObjArg, TypedRawObjArg, TypedObjConvArg
 from mk_py_capi import OptArg, KwdArg
+from mk_py_capi import DefaultAnd, DefaultInplaceAnd, DefaultDiv, DefaultInplaceDiv
 
 
 class SopCubeGen(PyObjGen):
@@ -146,45 +147,6 @@ class SopCubeGen(PyObjGen):
 
         self.add_richcompare('cmp_default')
 
-        def nb_common(writer, body):
-            with writer.gen_if_block('PySopCube::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PySopCube::_get_ref(self)')
-                with writer.gen_if_block('PySopCube::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PySopCube::_get_ref(other)')
-                    body(writer)
-                with writer.gen_if_block('PyLiteral::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PyLiteral::_get_ref(other)')
-                    body(writer)
-            with writer.gen_elseif_block('PyLiteral::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PyLiteral::_get_ref(self)')
-                with writer.gen_if_block('PySopCube::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PySopCube::_get_ref(other)')
-                    body(writer)
-            writer.gen_return_py_notimplemented()
-
-        def nb_inplace_common(writer, body):
-            with writer.gen_if_block('PySopCube::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PySopCube::_get_ref(self)')
-                with writer.gen_if_block('PySopCube::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PySopCube::_get_ref(other)')
-                    body(writer)
-                    writer.gen_return_self(incref=True)
-                with writer.gen_if_block('PyLiteral::Check(other)'):
-                    writer.gen_autoref_assign('val2', 'PyLiteral::_get_ref(other)')
-                    body(writer)
-                    writer.gen_return_self(incref=True)
-            writer.gen_return_py_notimplemented()
-            
-        def nb_and(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PySopCube', 'val1 & val2')
-            nb_common(writer, body)
-
-        def nb_inplace_and(writer):
-            def body(writer):
-                writer.write_line('val1 &= val2;')
-            nb_inplace_common(writer, body)
-
         def nb_div(writer):
             with writer.gen_if_block('PySopCube::Check(self)'):
                 writer.gen_autoref_assign('val1', 'PySopCube::_get_ref(self)')
@@ -209,10 +171,11 @@ class SopCubeGen(PyObjGen):
                     writer.gen_return_self(incref=True)
             writer.gen_return_py_notimplemented()
             
-        self.add_number(nb_and=nb_and,
-                        nb_inplace_and=nb_inplace_and,
-                        nb_true_divide=nb_div,
-                        nb_inplace_true_divide=nb_idiv)
+        self.add_nb_and(op_list1=[DefaultAnd('PyLiteral')],
+                        op_list2=[DefaultAnd('PyLiteral')])
+        self.add_nb_inplace_and(op_list1=[DefaultInplaceAnd('PyLiteral')])
+        self.add_nb_true_divide(op_list1=[DefaultDiv('PyLiteral')])
+        self.add_nb_inplace_true_divide(op_list1=[DefaultInplaceDiv('PyLiteral')])
 
         def hash_func(writer):
             writer.gen_return('val.hash()')

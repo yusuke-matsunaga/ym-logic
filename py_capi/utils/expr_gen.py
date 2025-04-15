@@ -438,13 +438,13 @@ class ExprGen(PyObjGen):
         self.add_attr('input_size',
                       getter_name='input_size')
             
-        self.add_number(nb_invert='default',
-                        nb_and='default',
-                        nb_or='default',
-                        nb_xor='default',
-                        nb_inplace_and='default',
-                        nb_inplace_or='default',
-                        nb_inplace_xor='default')
+        self.add_nb_invert()
+        self.add_nb_and()
+        self.add_nb_or()
+        self.add_nb_xor()
+        self.add_nb_inplace_and()
+        self.add_nb_inplace_or()
+        self.add_nb_inplace_xor()
 
         self.add_richcompare('eq_default')
             

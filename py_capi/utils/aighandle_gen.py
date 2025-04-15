@@ -202,14 +202,14 @@ class AigHandleGen(PyObjGen):
                     writer.gen_return_pyobject('PyAigHandle', 'val1 * inv')
             writer.gen_return_py_notimplemented()
             
-        self.add_number(nb_invert='default',
-                        nb_multiply=nb_multiply,
-                        nb_and='default',
-                        nb_or='default',
-                        nb_xor='default',
-                        nb_inplace_and='default',
-                        nb_inplace_or='default',
-                        nb_inplace_xor='default')
+        self.add_nb_invert()
+        self.add_nb_multiply()
+        self.add_nb_and()
+        self.add_nb_or()
+        self.add_nb_xor()
+        self.add_nb_inplace_and()
+        self.add_nb_inplace_or()
+        self.add_nb_inplace_xor()
 
         def hash_func(writer):
             writer.gen_return('val.hash()')

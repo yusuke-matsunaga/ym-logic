@@ -152,9 +152,9 @@ class NpnMapGen(PyObjGen):
                       getter_name='get_oinv',
                       doc_str='output polarity')
 
-        self.add_number(nb_invert='default',
-                        nb_multiply='default',
-                        nb_inplace_multiply='default')
+        self.add_nb_invert()
+        self.add_nb_multiply()
+        self.add_nb_inplace_multiply()
         
         self.add_conv('default')
 

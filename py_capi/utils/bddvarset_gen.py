@@ -42,12 +42,12 @@ class BddVarSetGen(PyObjGen):
                                          cvarname='list_obj')])
         self.add_dealloc('default')
 
-        self.add_number(nb_add='default',
-                        nb_subtract='default',
-                        nb_and='default',
-                        nb_inplace_add='default',
-                        nb_inplace_subtract='default',
-                        nb_inplace_and='default')
+        self.add_nb_add()
+        self.add_nb_subtract()
+        self.add_nb_and()
+        self.add_nb_inplace_add()
+        self.add_nb_inplace_subtract()
+        self.add_nb_inplace_and()
 
         self.add_richcompare('eq_default')
 

@@ -59,18 +59,18 @@ nb_add(
       auto& val1 = PySopCover::_get_ref(self);
       if ( PySopCover::Check(other) ) {
         auto& val2 = PySopCover::_get_ref(other);
-        return PySopCover::ToPyObject(val1 | val2);
+        return PySopCover::ToPyObject(val1 + val2);
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        return PySopCover::ToPyObject(val1 | val2);
+        return PySopCube::ToPyObject(val1 + val2);
       }
     }
-    else if ( PySopCube::Check(self) ) {
-      auto& val1 = PySopCube::_get_ref(self);
-      if ( PySopCover::Check(other) ) {
-        auto& val2 = PySopCover::_get_ref(other);
-        return PySopCover::ToPyObject(val1 | val2);
+    if ( PySopCover::Check(other) ) {
+      auto& val2 = PySopCover::_get_ref(other);
+      if ( PySopCube::Check(self) ) {
+        auto& val1 = PySopCube::_get_ref(self);
+        return PySopCube::ToPyObject(val1 + val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -98,7 +98,7 @@ nb_subtract(
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        return PySopCover::ToPyObject(val1 - val2);
+        return PySopCube::ToPyObject(val1 - val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -126,14 +126,14 @@ nb_and(
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        return PySopCover::ToPyObject(val1 & val2);
+        return PySopCube::ToPyObject(val1 & val2);
       }
     }
-    else if ( PySopCube::Check(self) ) {
-      auto& val1 = PySopCube::_get_ref(self);
-      if ( PySopCover::Check(other) ) {
-        auto& val2 = PySopCover::_get_ref(other);
-        return PySopCover::ToPyObject(val1 & val2);
+    if ( PySopCover::Check(other) ) {
+      auto& val2 = PySopCover::_get_ref(other);
+      if ( PySopCube::Check(self) ) {
+        auto& val1 = PySopCube::_get_ref(self);
+        return PySopCube::ToPyObject(val1 & val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -157,13 +157,13 @@ nb_inplace_add(
       auto& val1 = PySopCover::_get_ref(self);
       if ( PySopCover::Check(other) ) {
         auto& val2 = PySopCover::_get_ref(other);
-        val1 |= val2;
+        val1 += val2;
         Py_XINCREF(self);
         return self;
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        val1 |= val2;
+        val1 += val2;
         Py_XINCREF(self);
         return self;
       }
@@ -257,7 +257,7 @@ nb_true_divide(
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        return PySopCover::ToPyObject(val1.algdiv(val2));
+        return PySopCube::ToPyObject(val1.algdiv(val2));
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -310,7 +310,7 @@ PyNumberMethods number = {
   .nb_inplace_add = nb_inplace_add,
   .nb_inplace_subtract = nb_inplace_subtract,
   .nb_inplace_and = nb_inplace_and,
-  .nb_true_divide = nb_true_divide,
+  .nb_floor_divide = nb_true_divide,
   .nb_inplace_true_divide = nb_inplace_true_divide
 };
 
