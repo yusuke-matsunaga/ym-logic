@@ -58,8 +58,16 @@ repr_func(
 )
 {
   auto& val = PyTvFunc::_get_ref(self);
-  auto str_val = val.str();
-  return PyString::ToPyObject(str_val);
+  try {
+    auto str_val = val.str();
+    return PyString::ToPyObject(str_val);
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -247,7 +255,15 @@ hash_func(
 )
 {
   auto& val = PyTvFunc::_get_ref(self);
-  return val.hash();
+  try {
+    return val.hash();
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return 0;
+  }
 }
 
 // richcompare 関数
@@ -259,9 +275,9 @@ richcompare_func(
 )
 {
   auto& val = PyTvFunc::_get_ref(self);
-  if ( PyTvFunc::Check(other) ) {
-    auto& val2 = PyTvFunc::_get_ref(other);
-    try {
+  try {
+    if ( PyTvFunc::Check(other) ) {
+      auto& val2 = PyTvFunc::_get_ref(other);
       if ( op == Py_EQ ) {
         return PyBool_FromLong(val == val2);
       }
@@ -269,14 +285,14 @@ richcompare_func(
         return PyBool_FromLong(val != val2);
       }
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // make TvFunc object from string
@@ -1052,27 +1068,35 @@ new_func(
                                     &vect_obj) ) {
     return nullptr;
   }
-  TvFunc func;
-  std::vector<int> vect;
-  if ( ni == -1 ) {
-    func = TvFunc::invalid();
-  }
-  else if ( vect_obj == nullptr ) {
-    func = TvFunc::zero(ni);
-  }
-  else if ( PyList<int, PyInt>::FromPyObject(vect_obj, vect) ) {
-    auto n = vect.size();
-    if ( n != (1 << ni) ) {
-      PyErr_SetString(PyExc_ValueError, "invalid vector size");
+  try {
+    TvFunc func;
+    std::vector<int> vect;
+    if ( ni == -1 ) {
+      func = TvFunc::invalid();
+    }
+    else if ( vect_obj == nullptr ) {
+      func = TvFunc::zero(ni);
+    }
+    else if ( PyList<int, PyInt>::FromPyObject(vect_obj, vect) ) {
+      auto n = vect.size();
+      if ( n != (1 << ni) ) {
+        PyErr_SetString(PyExc_ValueError, "invalid vector size");
+        return nullptr;
+      }
+      func = TvFunc(ni, vect);
+    }
+    else {
+      PyErr_SetString(PyExc_ValueError, "argument 2 must be a sequence of ints");
       return nullptr;
     }
-    func = TvFunc(ni, vect);
+    return PyTvFunc::ToPyObject(std::move(func));
   }
-  else {
-    PyErr_SetString(PyExc_ValueError, "argument 2 must be a sequence of ints");
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
     return nullptr;
   }
-  return PyTvFunc::ToPyObject(std::move(func));
 }
 
 END_NONAMESPACE

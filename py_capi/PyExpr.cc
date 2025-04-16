@@ -56,8 +56,16 @@ repr_func(
 )
 {
   auto& val = PyExpr::_get_ref(self);
-  auto str_val = val.rep_string();
-  return PyString::ToPyObject(str_val);
+  try {
+    auto str_val = val.rep_string();
+    return PyString::ToPyObject(str_val);
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -245,8 +253,16 @@ str_func(
 )
 {
   auto& val = PyExpr::_get_ref(self);
-  auto str_val = val.to_string();
-  return PyString::ToPyObject(str_val);
+  try {
+    auto str_val = val.to_string();
+    return PyString::ToPyObject(str_val);
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // richcompare 関数
@@ -258,9 +274,9 @@ richcompare_func(
 )
 {
   auto& val = PyExpr::_get_ref(self);
-  if ( PyExpr::Check(other) ) {
-    auto& val2 = PyExpr::_get_ref(other);
-    try {
+  try {
+    if ( PyExpr::Check(other) ) {
+      auto& val2 = PyExpr::_get_ref(other);
       if ( op == Py_EQ ) {
         return PyBool_FromLong(val == val2);
       }
@@ -268,14 +284,14 @@ richcompare_func(
         return PyBool_FromLong(val != val2);
       }
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // make an invalid object
@@ -1134,22 +1150,30 @@ new_func(
   if ( expr_str_tmp != nullptr ) {
     expr_str = std::string(expr_str_tmp);
   }
-  auto self = type->tp_alloc(type, 0);
-  auto my_obj = reinterpret_cast<Expr_Object*>(self);
-  Expr src;
-  if ( expr_str != string{} ) {
-    try {
-      src = Expr::from_rep_string(expr_str);
+  try {
+    auto self = type->tp_alloc(type, 0);
+    auto my_obj = reinterpret_cast<Expr_Object*>(self);
+    Expr src;
+    if ( expr_str != string{} ) {
+      try {
+        src = Expr::from_rep_string(expr_str);
+      }
+      catch ( std::invalid_argument err ) {
+        std::ostringstream buf;
+        buf << "invalid argument" << ": " << err.what();
+        PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+        return nullptr;
+      }
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    new (&my_obj->mVal) Expr(src);
+    return self;
   }
-  new (&my_obj->mVal) Expr(src);
-  return self;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE

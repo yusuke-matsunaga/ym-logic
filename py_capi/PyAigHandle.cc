@@ -256,7 +256,15 @@ hash_func(
 )
 {
   auto& val = PyAigHandle::_get_ref(self);
-  return val.hash();
+  try {
+    return val.hash();
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return 0;
+  }
 }
 
 // richcompare 関数
@@ -268,19 +276,19 @@ richcompare_func(
 )
 {
   auto& val = PyAigHandle::_get_ref(self);
-  if ( PyAigHandle::Check(other) ) {
-    auto& val2 = PyAigHandle::_get_ref(other);
-    try {
+  try {
+    if ( PyAigHandle::Check(other) ) {
+      auto& val2 = PyAigHandle::_get_ref(other);
       Py_RETURN_RICHCOMPARE(val, val2, op);
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // return INV flag
@@ -633,8 +641,16 @@ new_func(
   PyObject* kwds
 )
 {
-  PyErr_SetString(PyExc_TypeError, "instantiation of 'AigHandle' is disabled");
-  return nullptr;
+  try {
+    PyErr_SetString(PyExc_TypeError, "instantiation of 'AigHandle' is disabled");
+    return nullptr;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE

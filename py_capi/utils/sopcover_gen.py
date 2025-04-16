@@ -10,10 +10,10 @@
 from mk_py_capi import PyObjGen
 from mk_py_capi import IntArg, BoolArg, RawObjArg
 from mk_py_capi import OptArg, KwdArg
-from mk_py_capi import DefaultSub, DefaultInplaceSub
-from mk_py_capi import DefaultAnd, DefaultInplaceAnd
-from mk_py_capi import DefaultOr, DefaultInplaceOr
-from mk_py_capi import DefaultOp, DefaultInplaceOp
+from mk_py_capi import SubOp, SubIop
+from mk_py_capi import AndOp, AndIop
+from mk_py_capi import OrOp, OrIop
+from mk_py_capi import Op, Iop
 
 
 class SopCoverGen(PyObjGen):
@@ -32,15 +32,31 @@ class SopCoverGen(PyObjGen):
                                                'pym/PyString.h'])
 
         def new_body(writer):
-            writer.gen_vardecl(typename='std::vector<SopCube>',
-                               varname='cube_list')
             with writer.gen_if_block('list_obj != nullptr'):
-                with writer.gen_if_block('!PyList<SopCube, PySopCube>::FromPyObject(list_obj, cube_list)'):
-                    writer.gen_type_error('"argument 2 should be a sequence of \'SopCube\'"')
-            writer.gen_auto_assign('self', 'type->tp_alloc(type, 0)')
-            self.gen_obj_conv(writer, objname='self', varname='my_obj')
-            writer.write_line('new (&my_obj->mVal) SopCover(ni, cube_list);')
-            writer.gen_return_self()
+                with writer.gen_block(comment='SopCube のリスト'):
+                    writer.gen_vardecl(typename='std::vector<SopCube>',
+                                       varname='cube_list')
+                    with writer.gen_if_block('PyList<SopCube, PySopCube>::FromPyObject(list_obj, cube_list)'):
+                        writer.gen_auto_assign('self', 'type->tp_alloc(type, 0)')
+                        self.gen_obj_conv(writer, objname='self', varname='my_obj')
+                        writer.write_line('new (&my_obj->mVal) SopCover(ni, cube_list);')
+                        writer.gen_return_self()
+                with writer.gen_block(comment='Literal のリストのリスト'):
+                    writer.gen_vardecl(typename='std::vector<std::vector<Literal>>',
+                                       varname='literal_list')
+                    with writer.gen_if_block('PyList<std::vector<Literal>, PyList<Literal, PyLiteral>>::FromPyObject(list_obj, literal_list)'):
+                        writer.gen_auto_assign('self', 'type->tp_alloc(type, 0)')
+                        self.gen_obj_conv(writer, objname='self', varname='my_obj')
+                        writer.write_line('new (&my_obj->mVal) SopCover(ni, literal_list);')
+                        writer.gen_return_self()
+                    
+                writer.gen_type_error('"argument 2 should be a sequence of \'SopCube\'"')
+            with writer.gen_else_block():
+                writer.gen_auto_assign('self', 'type->tp_alloc(type, 0)')
+                self.gen_obj_conv(writer, objname='self', varname='my_obj')
+                writer.write_line('new (&my_obj->mVal) SopCover(ni);')
+                writer.gen_return_self()
+                
         self.add_new(new_body,
                      arg_list=[IntArg(name='input_num',
                                       cvarname='ni'),
@@ -72,15 +88,16 @@ class SopCoverGen(PyObjGen):
         self.add_method('literal_num',
                         func_body=meth_literal_num,
                         arg_list=[OptArg(),
-                                  KwdArg(),
                                   RawObjArg(name='var',
                                             cvarname='var_obj'),
+                                  KwdArg(),
                                   BoolArg(name='inv',
-                                          cvarname='inv')],
+                                          cvarname='inv',
+                                          cvardefault='false')],
                         doc_str='return number of literals')
 
         def meth_literal_list(writer):
-            pass
+            writer.gen_return_pyobject('PyList<std::vector<Literal>, PyList<Literal, PyLiteral>>', 'val.literal_list()')
         self.add_method('literal_list',
                         func_body=meth_literal_list,
                         doc_str='convert to list of list of literals')
@@ -138,31 +155,28 @@ class SopCoverGen(PyObjGen):
                       getter_name='get_cube_num')
 
         self.add_richcompare('cmp_default')
-
-        def nb_div(writer):
-            def body(writer):
-                writer.gen_return_pyobject('PySopCover', 'val1.algdiv(val2)')
-            nb_common2(writer, body)
-
-        def nb_idiv(writer):
-            def body(writer):
-                writer.write_line('val1.algdiv_int(val2);')
-            nb_inplace_common(writer, body)
             
-        self.add_nb_or(op_list1=[DefaultOr('PySopCube')],
-                       op_list2=[DefaultOr('PySopCube')])
-        self.add_nb_inplace_or(op_list1=[DefaultInplaceOr('PySopCube')])
-        self.add_nb_subtract(op_list1=[DefaultSub('PySopCube')])
-        self.add_nb_inplace_subtract(op_list1=[DefaultInplaceSub('PySopCube')])
-        self.add_nb_and(op_list1=[DefaultAnd('PySopCube')],
-                        op_list2=[DefaultAnd('PySopCube')])
-        self.add_nb_inplace_and(op_list1=[DefaultInplaceAnd('PySopCube')])
+        self.add_nb_or(op_list1=[OrOp('PySopCube')],
+                       op_list2=[OrOp('PySopCube')])
+        self.add_nb_inplace_or(op_list1=[OrIop('PySopCube')])
+        self.add_nb_subtract(op_list1=[SubOp('PySopCube')])
+        self.add_nb_inplace_subtract(op_list1=[SubIop('PySopCube')])
+        self.add_nb_and(op_list1=[AndOp('PySopCube'),
+                                  AndOp('PyLiteral')],
+                        op_list2=[AndOp('PySopCube'),
+                                  AndOp('PyLiteral')])
+        self.add_nb_inplace_and(op_list1=[AndIop('PySopCube'),
+                                          AndIop('PyLiteral')])
         self.add_nb_true_divide(expr='val1.algdiv(val2)',
-                                op_list1=[DefaultOp('PySopCube',
-                                                    expr='val1.algdiv(val2)')])
+                                op_list1=[Op('PySopCube',
+                                             expr='val1.algdiv(val2)'),
+                                          Op('PyLiteral',
+                                             expr='val1.algdiv(val2)')])
         self.add_nb_inplace_true_divide(stmt='val1.algdiv_int(val2)',
-                                        op_list1=[DefaultInplaceOp('PySopCube',
-                                                                   stmt='val1.algdiv_int(val2)')])
+                                        op_list1=[Iop('PySopCube',
+                                                      stmt='val1.algdiv_int(val2)'),
+                                                  Iop('PyLiteral',
+                                                      stmt='val1.algdiv_int(val2)')])
 
         def hash_func(writer):
             writer.gen_return('val.hash()')

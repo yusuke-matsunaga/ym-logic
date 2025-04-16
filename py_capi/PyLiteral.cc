@@ -49,11 +49,19 @@ repr_func(
 )
 {
   auto& val = PyLiteral::_get_ref(self);
-  // val から文字列を作る．
-  std::ostringstream buf;
-  buf << val;
-  auto str_val = buf.str();
-  return PyString::ToPyObject(str_val);
+  try {
+    // val から文字列を作る．
+    std::ostringstream buf;
+    buf << val;
+    auto str_val = buf.str();
+    return PyString::ToPyObject(str_val);
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 PyObject*
@@ -85,7 +93,15 @@ hash_func(
 )
 {
   auto& val = PyLiteral::_get_ref(self);
-  return val.hash();
+  try {
+    return val.hash();
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return 0;
+  }
 }
 
 // richcompare 関数
@@ -97,19 +113,19 @@ richcompare_func(
 )
 {
   auto& val = PyLiteral::_get_ref(self);
-  if ( PyLiteral::Check(other) ) {
-    auto& val2 = PyLiteral::_get_ref(other);
-    try {
+  try {
+    if ( PyLiteral::Check(other) ) {
+      auto& val2 = PyLiteral::_get_ref(other);
       Py_RETURN_RICHCOMPARE(val, val2, op);
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // 
@@ -282,15 +298,23 @@ new_func(
   if ( inv_tmp != -1 ) {
     inv = static_cast<bool>(inv_tmp);
   }
-  auto self = type->tp_alloc(type, 0);
-  auto my_obj = reinterpret_cast<Literal_Object*>(self);
-  if ( id == -1 ) {
-    my_obj->mVal = Literal::x();
+  try {
+    auto self = type->tp_alloc(type, 0);
+    auto my_obj = reinterpret_cast<Literal_Object*>(self);
+    if ( id == -1 ) {
+      my_obj->mVal = Literal::x();
+    }
+    else {
+      my_obj->mVal = Literal(id, inv);
+    }
+    return self;
   }
-  else {
-    my_obj->mVal = Literal(id, inv);
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
   }
-  return self;
 }
 
 END_NONAMESPACE

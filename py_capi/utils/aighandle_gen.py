@@ -11,7 +11,7 @@ from mk_py_capi import PyObjGen
 from mk_py_capi import IntArg, BoolArg, StringArg
 from mk_py_capi import RawObjArg, ObjConvArg, TypedObjConvArg
 from mk_py_capi import OptArg, KwdArg
-from mk_py_capi import DefaultMul
+from mk_py_capi import MulOp
 
         
 class JsonValueArg(ObjConvArg):
@@ -197,7 +197,7 @@ class AigHandleGen(PyObjGen):
             
         self.add_nb_invert()
         self.add_nb_multiply(expr=None,
-                             op_list1=[DefaultMul('PyBool', useref=False)])
+                             op_list1=[MulOp('PyBool', useref=False)])
         self.add_nb_and()
         self.add_nb_or()
         self.add_nb_xor()

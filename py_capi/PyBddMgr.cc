@@ -298,10 +298,18 @@ new_func(
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "", const_cast<char**>(kwlist)) ) {
     return nullptr;
   }
-  auto self = type->tp_alloc(type, 0);
-  auto my_obj = reinterpret_cast<BddMgr_Object*>(self);
-  new (&my_obj->mVal) BddMgr();
-  return self;
+  try {
+    auto self = type->tp_alloc(type, 0);
+    auto my_obj = reinterpret_cast<BddMgr_Object*>(self);
+    new (&my_obj->mVal) BddMgr();
+    return self;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE

@@ -170,7 +170,7 @@ def test_cover_cover_sum():
     cover1 = SopCover(ni, cube_list=[cube1])
     cover2 = SopCover(ni, cube_list=[cube1, cube2])
 
-    cover3 = cover1 + cover2
+    cover3 = cover1 | cover2
     
     assert cover3.variable_num == ni
     assert cover3.cube_num == 2
@@ -211,7 +211,7 @@ def test_cover_cover_sum_bad():
     cover2 = SopCover(ni + 1, cube_list=[[lit2, ~lit3]])
 
     with pytest.raises(ValueError) as e:
-        cover3 = cover1 + cover2
+        cover3 = cover1 | cover2
 
 def test_cover_cube_sum():
     ni = 10
@@ -226,7 +226,7 @@ def test_cover_cube_sum():
 
     cover1 = SopCover(ni, cube_list=[cube1])
 
-    cover3 = cover1 + cube2
+    cover3 = cover1 | cube2
     
     assert cover3.variable_num == ni
     assert cover3.cube_num == 2
@@ -269,7 +269,7 @@ def test_cover_cube_sum_bad():
     cover1 = SopCover(ni, cube_list=[cube1])
 
     with pytest.raises(ValueError) as e:
-        cover3 = cover1 + cube2
+        cover3 = cover1 | cube2
 
 def test_cube_cover_sum():
     ni = 10
@@ -284,7 +284,7 @@ def test_cube_cover_sum():
 
     cover2 = SopCover(ni, cube_list=[cube2])
 
-    cover3 = cube1 + cover2
+    cover3 = cube1 | cover2
     
     assert cover3.variable_num == ni
     assert cover3.cube_num == 2
@@ -327,7 +327,7 @@ def test_cube_cover_sum_bad():
     cover2 = SopCover(ni, cube_list=[cube2])
 
     with pytest.raises(ValueError) as e:
-        cover3 = cube1 + cover2
+        cover3 = cube1 | cover2
 
 def test_cover_cover_sum_int():
     ni = 10
@@ -343,7 +343,7 @@ def test_cover_cover_sum_int():
     cover1 = SopCover(ni, cube_list=[cube1])
     cover2 = SopCover(ni, cube_list=[cube1, cube2])
 
-    cover1 += cover2
+    cover1 |= cover2
     
     assert cover1.variable_num == ni
     assert cover1.cube_num == 2
@@ -384,7 +384,7 @@ def test_cover_cover_sum_int_bad():
     cover2 = SopCover(ni + 1, cube_list=[[lit2, ~lit3]])
 
     with pytest.raises(ValueError) as e:
-        cover1 += cover2
+        cover1 |= cover2
 
 def test_cover_cube_sum_int():
     ni = 10
@@ -399,7 +399,7 @@ def test_cover_cube_sum_int():
 
     cover1 = SopCover(ni, cube_list=[cube1])
 
-    cover1 += cube2
+    cover1 |= cube2
     
     assert cover1.variable_num == ni
     assert cover1.cube_num == 2
@@ -442,7 +442,7 @@ def test_cover_cube_sum_int_bad():
     cover1 = SopCover(ni, cube_list=[cube1])
 
     with pytest.raises(ValueError) as e:
-        cover1 += cube2
+        cover1 |= cube2
 
 def test_cover_cover_diff():
     ni = 10
@@ -1182,3 +1182,4 @@ def test_expr():
     expr_str = str(expr)
     assert expr_str == "( ( 0 & 1 ) | ~2 )"
     
+

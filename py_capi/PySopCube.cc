@@ -178,7 +178,7 @@ nb_inplace_true_divide(
 PyNumberMethods number = {
   .nb_and = nb_and,
   .nb_inplace_and = nb_inplace_and,
-  .nb_floor_divide = nb_true_divide,
+  .nb_true_divide = nb_true_divide,
   .nb_inplace_true_divide = nb_inplace_true_divide
 };
 
@@ -189,7 +189,15 @@ hash_func(
 )
 {
   auto& val = PySopCube::_get_ref(self);
-  return val.hash();
+  try {
+    return val.hash();
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return 0;
+  }
 }
 
 // richcompare 関数
@@ -201,19 +209,19 @@ richcompare_func(
 )
 {
   auto& val = PySopCube::_get_ref(self);
-  if ( PySopCube::Check(other) ) {
-    auto& val2 = PySopCube::_get_ref(other);
-    try {
+  try {
+    if ( PySopCube::Check(other) ) {
+      auto& val2 = PySopCube::_get_ref(other);
       Py_RETURN_RICHCOMPARE(val, val2, op);
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // make a copy
@@ -477,17 +485,25 @@ new_func(
                                     &list_obj) ) {
     return nullptr;
   }
-  std::vector<Literal> lit_list;
-  if ( list_obj != nullptr ) {
-    if ( !PyList<Literal, PyLiteral>::FromPyObject(list_obj, lit_list) ) {
-      PyErr_SetString(PyExc_TypeError, "argument 2 should be a sequence of 'Literal'");
-      return nullptr;
+  try {
+    std::vector<Literal> lit_list;
+    if ( list_obj != nullptr ) {
+      if ( !PyList<Literal, PyLiteral>::FromPyObject(list_obj, lit_list) ) {
+        PyErr_SetString(PyExc_TypeError, "argument 2 should be a sequence of 'Literal'");
+        return nullptr;
+      }
     }
+    auto self = type->tp_alloc(type, 0);
+    auto my_obj = reinterpret_cast<SopCube_Object*>(self);
+    new (&my_obj->mVal) SopCube(ni, lit_list);
+    return self;
   }
-  auto self = type->tp_alloc(type, 0);
-  auto my_obj = reinterpret_cast<SopCube_Object*>(self);
-  new (&my_obj->mVal) SopCube(ni, lit_list);
-  return self;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE

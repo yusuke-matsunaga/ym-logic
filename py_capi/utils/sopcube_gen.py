@@ -10,7 +10,7 @@
 from mk_py_capi import PyObjGen
 from mk_py_capi import IntArg, RawObjArg, TypedRawObjArg, TypedObjConvArg
 from mk_py_capi import OptArg, KwdArg
-from mk_py_capi import DefaultAnd, DefaultInplaceAnd, DefaultDiv, DefaultInplaceDiv
+from mk_py_capi import AndOp, AndIop, DivOp, DivIop
 
 
 class SopCubeGen(PyObjGen):
@@ -171,11 +171,11 @@ class SopCubeGen(PyObjGen):
                     writer.gen_return_self(incref=True)
             writer.gen_return_py_notimplemented()
             
-        self.add_nb_and(op_list1=[DefaultAnd('PyLiteral')],
-                        op_list2=[DefaultAnd('PyLiteral')])
-        self.add_nb_inplace_and(op_list1=[DefaultInplaceAnd('PyLiteral')])
-        self.add_nb_true_divide(op_list1=[DefaultDiv('PyLiteral')])
-        self.add_nb_inplace_true_divide(op_list1=[DefaultInplaceDiv('PyLiteral')])
+        self.add_nb_and(op_list1=[AndOp('PyLiteral')],
+                        op_list2=[AndOp('PyLiteral')])
+        self.add_nb_inplace_and(op_list1=[AndIop('PyLiteral')])
+        self.add_nb_true_divide(op_list1=[DivOp('PyLiteral')])
+        self.add_nb_inplace_true_divide(op_list1=[DivIop('PyLiteral')])
 
         def hash_func(writer):
             writer.gen_return('val.hash()')

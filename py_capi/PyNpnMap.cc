@@ -126,9 +126,9 @@ richcompare_func(
 )
 {
   auto& val = PyNpnMap::_get_ref(self);
-  if ( PyNpnMap::Check(other) ) {
-    auto& val2 = PyNpnMap::_get_ref(other);
-    try {
+  try {
+    if ( PyNpnMap::Check(other) ) {
+      auto& val2 = PyNpnMap::_get_ref(other);
       if ( op == Py_EQ ) {
         return PyBool_FromLong(val == val2);
       }
@@ -136,14 +136,14 @@ richcompare_func(
         return PyBool_FromLong(val != val2);
       }
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // make the identity map
@@ -407,17 +407,25 @@ init_func(
                          &ni2) ) {
     return -1;
   }
-  auto& npnmap = PyNpnMap::_get_ref(self);
-  if ( ni1 == -1 ) {
-    npnmap = NpnMap();
+  try {
+    auto& npnmap = PyNpnMap::_get_ref(self);
+    if ( ni1 == -1 ) {
+      npnmap = NpnMap();
+    }
+    else if ( ni2 == -1 ) {
+      npnmap = NpnMap(ni1);
+    }
+    else {
+      npnmap = NpnMap(ni1, ni2);
+    }
+    return 0;
   }
-  else if ( ni2 == -1 ) {
-    npnmap = NpnMap(ni1);
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return -1;
   }
-  else {
-    npnmap = NpnMap(ni1, ni2);
-  }
-  return 0;
 }
 
 // new 関数
@@ -435,8 +443,16 @@ new_func(
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "", const_cast<char**>(kwlist)) ) {
     return nullptr;
   }
-  auto self = type->tp_alloc(type, 0);
-  return self;
+  try {
+    auto self = type->tp_alloc(type, 0);
+    return self;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE

@@ -93,11 +93,19 @@ nb_and(
         auto& val2 = PySopCube::_get_ref(other);
         return PySopCover::ToPyObject(val1 & val2);
       }
+      if ( PyLiteral::Check(other) ) {
+        auto& val2 = PyLiteral::_get_ref(other);
+        return PySopCover::ToPyObject(val1 & val2);
+      }
     }
     if ( PySopCover::Check(other) ) {
       auto& val2 = PySopCover::_get_ref(other);
       if ( PySopCube::Check(self) ) {
         auto& val1 = PySopCube::_get_ref(self);
+        return PySopCover::ToPyObject(val1 & val2);
+      }
+      if ( PyLiteral::Check(self) ) {
+        auto& val1 = PyLiteral::_get_ref(self);
         return PySopCover::ToPyObject(val1 & val2);
       }
     }
@@ -199,6 +207,12 @@ nb_inplace_and(
         Py_XINCREF(self);
         return self;
       }
+      if ( PyLiteral::Check(other) ) {
+        auto& val2 = PyLiteral::_get_ref(other);
+        val1 &= val2;
+        Py_XINCREF(self);
+        return self;
+      }
     }
     Py_RETURN_NOTIMPLEMENTED;
   }
@@ -259,6 +273,10 @@ nb_true_divide(
         auto& val2 = PySopCube::_get_ref(other);
         return PySopCover::ToPyObject(val1.algdiv(val2));
       }
+      if ( PyLiteral::Check(other) ) {
+        auto& val2 = PyLiteral::_get_ref(other);
+        return PySopCover::ToPyObject(val1.algdiv(val2));
+      }
     }
     Py_RETURN_NOTIMPLEMENTED;
   }
@@ -291,6 +309,12 @@ nb_inplace_true_divide(
         Py_XINCREF(self);
         return self;
       }
+      if ( PyLiteral::Check(other) ) {
+        auto& val2 = PyLiteral::_get_ref(other);
+        val1.algdiv_int(val2);
+        Py_XINCREF(self);
+        return self;
+      }
     }
     Py_RETURN_NOTIMPLEMENTED;
   }
@@ -310,7 +334,7 @@ PyNumberMethods number = {
   .nb_inplace_subtract = nb_inplace_subtract,
   .nb_inplace_and = nb_inplace_and,
   .nb_inplace_or = nb_inplace_or,
-  .nb_floor_divide = nb_true_divide,
+  .nb_true_divide = nb_true_divide,
   .nb_inplace_true_divide = nb_inplace_true_divide
 };
 
@@ -321,7 +345,15 @@ hash_func(
 )
 {
   auto& val = PySopCover::_get_ref(self);
-  return val.hash();
+  try {
+    return val.hash();
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return 0;
+  }
 }
 
 // richcompare 関数
@@ -333,19 +365,19 @@ richcompare_func(
 )
 {
   auto& val = PySopCover::_get_ref(self);
-  if ( PySopCover::Check(other) ) {
-    auto& val2 = PySopCover::_get_ref(other);
-    try {
+  try {
+    if ( PySopCover::Check(other) ) {
+      auto& val2 = PySopCover::_get_ref(other);
       Py_RETURN_RICHCOMPARE(val, val2, op);
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // make a copy
@@ -374,13 +406,13 @@ literal_num(
   };
   PyObject* var_obj = nullptr;
   int inv_tmp = -1;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|$Op",
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O$p",
                                     const_cast<char**>(kwlist),
                                     &var_obj,
                                     &inv_tmp) ) {
     return nullptr;
   }
-  bool inv;
+  bool inv = false;
   if ( inv_tmp != -1 ) {
     inv = static_cast<bool>(inv_tmp);
   }
@@ -413,6 +445,7 @@ literal_list(
 )
 {
   auto& val = PySopCover::_get_ref(self);
+  return PyList<std::vector<Literal>, PyList<Literal, PyLiteral>>::ToPyObject(val.literal_list());
 }
 
 // get pat
@@ -567,17 +600,46 @@ new_func(
                                     &list_obj) ) {
     return nullptr;
   }
-  std::vector<SopCube> cube_list;
-  if ( list_obj != nullptr ) {
-    if ( !PyList<SopCube, PySopCube>::FromPyObject(list_obj, cube_list) ) {
+  try {
+    if ( list_obj != nullptr ) {
+
+      // SopCube のリスト
+      {
+        std::vector<SopCube> cube_list;
+        if ( PyList<SopCube, PySopCube>::FromPyObject(list_obj, cube_list) ) {
+          auto self = type->tp_alloc(type, 0);
+          auto my_obj = reinterpret_cast<SopCover_Object*>(self);
+          new (&my_obj->mVal) SopCover(ni, cube_list);
+          return self;
+        }
+      }
+
+      // Literal のリストのリスト
+      {
+        std::vector<std::vector<Literal>> literal_list;
+        if ( PyList<std::vector<Literal>, PyList<Literal, PyLiteral>>::FromPyObject(list_obj, literal_list) ) {
+          auto self = type->tp_alloc(type, 0);
+          auto my_obj = reinterpret_cast<SopCover_Object*>(self);
+          new (&my_obj->mVal) SopCover(ni, literal_list);
+          return self;
+        }
+      }
       PyErr_SetString(PyExc_TypeError, "argument 2 should be a sequence of 'SopCube'");
       return nullptr;
     }
+    else {
+      auto self = type->tp_alloc(type, 0);
+      auto my_obj = reinterpret_cast<SopCover_Object*>(self);
+      new (&my_obj->mVal) SopCover(ni);
+      return self;
+    }
   }
-  auto self = type->tp_alloc(type, 0);
-  auto my_obj = reinterpret_cast<SopCover_Object*>(self);
-  new (&my_obj->mVal) SopCover(ni, cube_list);
-  return self;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE

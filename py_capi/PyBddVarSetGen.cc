@@ -211,9 +211,9 @@ richcompare_func(
 )
 {
   auto& val = PyBddVarSet::_get_ref(self);
-  if ( PyBddVarSet::Check(other) ) {
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    try {
+  try {
+    if ( PyBddVarSet::Check(other) ) {
+      auto& val2 = PyBddVarSet::_get_ref(other);
       if ( op == Py_EQ ) {
         return PyBool_FromLong(val == val2);
       }
@@ -221,14 +221,14 @@ richcompare_func(
         return PyBool_FromLong(val != val2);
       }
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // return size
@@ -303,21 +303,29 @@ new_func(
                                     &list_obj) ) {
     return nullptr;
   }
-  auto self = type->tp_alloc(type, 0);
-  auto my_obj = reinterpret_cast<PyBddVarSet_Object*>(self);
-  if ( mgr_obj == nullptr ) {
-    new (&my_obj->mVal) BddVarSet();
-  }
-  else {
-    auto& mgr = PyBddMgr::_get_ref(mgr_obj);
-    std::vector<Bddvar> var_set;
-    if ( !PyList<BddVar, PyBddVar>::FromPyObject(list_obj, var_set) ) {
-      PyErr_SetString(PyExc_TypeError, "argument 2 should be a sequence of 'BddVar'");
-      return nullptr;
+  try {
+    auto self = type->tp_alloc(type, 0);
+    auto my_obj = reinterpret_cast<PyBddVarSet_Object*>(self);
+    if ( mgr_obj == nullptr ) {
+      new (&my_obj->mVal) BddVarSet();
     }
-    new (&my_obj->mVal) BddVarSet(mgr, var_set);
+    else {
+      auto& mgr = PyBddMgr::_get_ref(mgr_obj);
+      std::vector<Bddvar> var_set;
+      if ( !PyList<BddVar, PyBddVar>::FromPyObject(list_obj, var_set) ) {
+        PyErr_SetString(PyExc_TypeError, "argument 2 should be a sequence of 'BddVar'");
+        return nullptr;
+      }
+      new (&my_obj->mVal) BddVarSet(mgr, var_set);
+    }
+    return self;
   }
-  return self;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE

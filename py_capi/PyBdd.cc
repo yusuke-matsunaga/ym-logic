@@ -242,7 +242,15 @@ hash_func(
 )
 {
   auto& val = PyBdd::_get_ref(self);
-  return val.hash();
+  try {
+    return val.hash();
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return 0;
+  }
 }
 
 // richcompare 関数
@@ -254,9 +262,9 @@ richcompare_func(
 )
 {
   auto& val = PyBdd::_get_ref(self);
-  if ( PyBdd::Check(other) ) {
-    auto& val2 = PyBdd::_get_ref(other);
-    try {
+  try {
+    if ( PyBdd::Check(other) ) {
+      auto& val2 = PyBdd::_get_ref(other);
       if ( op == Py_EQ ) {
         return PyBool_FromLong(val == val2);
       }
@@ -264,14 +272,14 @@ richcompare_func(
         return PyBool_FromLong(val != val2);
       }
     }
-    catch ( std::invalid_argument err ) {
-      std::ostringstream buf;
-      buf << "invalid argument" << ": " << err.what();
-      PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-      return nullptr;
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // make invalid Bdd object
@@ -1046,10 +1054,18 @@ new_func(
   if ( !PyArg_ParseTupleAndKeywords(args, kwds, "", const_cast<char**>(kwlist)) ) {
     return nullptr;
   }
-  auto self = type->tp_alloc(type, 0);
-  auto my_obj = reinterpret_cast<Bdd_Object*>(self);
-  new (&my_obj->mVal) Bdd();
-  return self;
+  try {
+    auto self = type->tp_alloc(type, 0);
+    auto my_obj = reinterpret_cast<Bdd_Object*>(self);
+    new (&my_obj->mVal) Bdd();
+    return self;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE

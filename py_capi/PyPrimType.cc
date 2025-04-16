@@ -80,21 +80,29 @@ repr_func(
 )
 {
   auto& val = PyPrimType::_get_ref(self);
-  std::string str_val;
-  switch ( val ) {
-    case PrimType::C0: str_val = "C0"; break;
-    case PrimType::C1: str_val = "C1"; break;
-    case PrimType::Buff: str_val = "Buff"; break;
-    case PrimType::Not: str_val = "Not"; break;
-    case PrimType::And: str_val = "And"; break;
-    case PrimType::Nand: str_val = "Nand"; break;
-    case PrimType::Or: str_val = "Or"; break;
-    case PrimType::Nor: str_val = "Nor"; break;
-    case PrimType::Xor: str_val = "Xor"; break;
-    case PrimType::Xnor: str_val = "Xnor"; break;
-    case PrimType::None: str_val = "None"; break;
+  try {
+    std::string str_val;
+    switch ( val ) {
+      case PrimType::C0: str_val = "C0"; break;
+      case PrimType::C1: str_val = "C1"; break;
+      case PrimType::Buff: str_val = "Buff"; break;
+      case PrimType::Not: str_val = "Not"; break;
+      case PrimType::And: str_val = "And"; break;
+      case PrimType::Nand: str_val = "Nand"; break;
+      case PrimType::Or: str_val = "Or"; break;
+      case PrimType::Nor: str_val = "Nor"; break;
+      case PrimType::Xor: str_val = "Xor"; break;
+      case PrimType::Xnor: str_val = "Xnor"; break;
+      case PrimType::None: str_val = "None"; break;
+    }
+    return PyString::ToPyObject(str_val);
   }
-  return PyString::ToPyObject(str_val);
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // hash 関数
@@ -104,8 +112,16 @@ hash_func(
 )
 {
   auto& val = PyPrimType::_get_ref(self);
-  auto hash_val = static_cast<Py_hash_t>(val);
-  return hash_val;
+  try {
+    auto hash_val = static_cast<Py_hash_t>(val);
+    return hash_val;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return 0;
+  }
 }
 
 // richcompare 関数
@@ -117,17 +133,25 @@ richcompare_func(
 )
 {
   auto& val = PyPrimType::_get_ref(self);
-  if ( PyPrimType::Check(self) && PyPrimType::Check(other) ) {
-    auto& val1 = PyPrimType::_get_ref(self);
-    auto& val2 = PyPrimType::_get_ref(other);
-    if ( op == Py_EQ ) {
-      return PyBool_FromLong(val1 == val2);
+  try {
+    if ( PyPrimType::Check(self) && PyPrimType::Check(other) ) {
+      auto& val1 = PyPrimType::_get_ref(self);
+      auto& val2 = PyPrimType::_get_ref(other);
+      if ( op == Py_EQ ) {
+        return PyBool_FromLong(val1 == val2);
+      }
+      if ( op == Py_NE ) {
+        return PyBool_FromLong(val1 != val2);
+      }
     }
-    if ( op == Py_NE ) {
-      return PyBool_FromLong(val1 != val2);
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_RETURN_NOTIMPLEMENTED;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 // new 関数
@@ -155,7 +179,15 @@ new_func(
       return nullptr;
     }
   }
-  return PyPrimType::ToPyObject(val);
+  try {
+    return PyPrimType::ToPyObject(val);
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
 END_NONAMESPACE
