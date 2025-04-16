@@ -49,41 +49,6 @@ dealloc_func(
 }
 
 PyObject*
-nb_add(
-  PyObject* self,
-  PyObject* other
-)
-{
-  try {
-    if ( PySopCover::Check(self) ) {
-      auto& val1 = PySopCover::_get_ref(self);
-      if ( PySopCover::Check(other) ) {
-        auto& val2 = PySopCover::_get_ref(other);
-        return PySopCover::ToPyObject(val1 + val2);
-      }
-      if ( PySopCube::Check(other) ) {
-        auto& val2 = PySopCube::_get_ref(other);
-        return PySopCube::ToPyObject(val1 + val2);
-      }
-    }
-    if ( PySopCover::Check(other) ) {
-      auto& val2 = PySopCover::_get_ref(other);
-      if ( PySopCube::Check(self) ) {
-        auto& val1 = PySopCube::_get_ref(self);
-        return PySopCube::ToPyObject(val1 + val2);
-      }
-    }
-    Py_RETURN_NOTIMPLEMENTED;
-  }
-  catch ( std::invalid_argument err ) {
-    std::ostringstream buf;
-    buf << "invalid argument" << ": " << err.what();
-    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-    return nullptr;
-  }
-}
-
-PyObject*
 nb_subtract(
   PyObject* self,
   PyObject* other
@@ -98,7 +63,7 @@ nb_subtract(
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        return PySopCube::ToPyObject(val1 - val2);
+        return PySopCover::ToPyObject(val1 - val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -126,14 +91,14 @@ nb_and(
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        return PySopCube::ToPyObject(val1 & val2);
+        return PySopCover::ToPyObject(val1 & val2);
       }
     }
     if ( PySopCover::Check(other) ) {
       auto& val2 = PySopCover::_get_ref(other);
       if ( PySopCube::Check(self) ) {
         auto& val1 = PySopCube::_get_ref(self);
-        return PySopCube::ToPyObject(val1 & val2);
+        return PySopCover::ToPyObject(val1 & val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -147,7 +112,7 @@ nb_and(
 }
 
 PyObject*
-nb_inplace_add(
+nb_or(
   PyObject* self,
   PyObject* other
 )
@@ -157,15 +122,18 @@ nb_inplace_add(
       auto& val1 = PySopCover::_get_ref(self);
       if ( PySopCover::Check(other) ) {
         auto& val2 = PySopCover::_get_ref(other);
-        val1 += val2;
-        Py_XINCREF(self);
-        return self;
+        return PySopCover::ToPyObject(val1 | val2);
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        val1 += val2;
-        Py_XINCREF(self);
-        return self;
+        return PySopCover::ToPyObject(val1 | val2);
+      }
+    }
+    if ( PySopCover::Check(other) ) {
+      auto& val2 = PySopCover::_get_ref(other);
+      if ( PySopCube::Check(self) ) {
+        auto& val1 = PySopCube::_get_ref(self);
+        return PySopCover::ToPyObject(val1 | val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -243,6 +211,38 @@ nb_inplace_and(
 }
 
 PyObject*
+nb_inplace_or(
+  PyObject* self,
+  PyObject* other
+)
+{
+  try {
+    if ( PySopCover::Check(self) ) {
+      auto& val1 = PySopCover::_get_ref(self);
+      if ( PySopCover::Check(other) ) {
+        auto& val2 = PySopCover::_get_ref(other);
+        val1 |= val2;
+        Py_XINCREF(self);
+        return self;
+      }
+      if ( PySopCube::Check(other) ) {
+        auto& val2 = PySopCube::_get_ref(other);
+        val1 |= val2;
+        Py_XINCREF(self);
+        return self;
+      }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
+}
+
+PyObject*
 nb_true_divide(
   PyObject* self,
   PyObject* other
@@ -257,7 +257,7 @@ nb_true_divide(
       }
       if ( PySopCube::Check(other) ) {
         auto& val2 = PySopCube::_get_ref(other);
-        return PySopCube::ToPyObject(val1.algdiv(val2));
+        return PySopCover::ToPyObject(val1.algdiv(val2));
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -304,12 +304,12 @@ nb_inplace_true_divide(
 
 // Numberオブジェクト構造体
 PyNumberMethods number = {
-  .nb_add = nb_add,
   .nb_subtract = nb_subtract,
   .nb_and = nb_and,
-  .nb_inplace_add = nb_inplace_add,
+  .nb_or = nb_or,
   .nb_inplace_subtract = nb_inplace_subtract,
   .nb_inplace_and = nb_inplace_and,
+  .nb_inplace_or = nb_inplace_or,
   .nb_floor_divide = nb_true_divide,
   .nb_inplace_true_divide = nb_inplace_true_divide
 };

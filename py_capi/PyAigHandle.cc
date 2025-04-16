@@ -55,8 +55,8 @@ nb_multiply(
   try {
     if ( PyAigHandle::Check(self) ) {
       auto& val1 = PyAigHandle::_get_ref(self);
-      if ( PyAigHandle::Check(other) ) {
-        auto& val2 = PyAigHandle::_get_ref(other);
+      if ( PyBool::Check(other) ) {
+        auto val2 = PyBool::Get(other);
         return PyAigHandle::ToPyObject(val1 * val2);
       }
     }

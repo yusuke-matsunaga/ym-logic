@@ -130,18 +130,6 @@ richcompare_func(
   Py_RETURN_NOTIMPLEMENTED;
 }
 
-// メソッド定義
-PyMethodDef methods[] = {
-  // end-marker
-  {nullptr, nullptr, 0, nullptr}
-};
-
-// getter/setter定義
-PyGetSetDef getsets[] = {
-  // end-marker
-  {nullptr, nullptr, nullptr, nullptr}
-};
-
 // new 関数
 PyObject*
 new_func(
@@ -188,8 +176,6 @@ PyPrimType::init(
   PrimType_Type.tp_flags = Py_TPFLAGS_DEFAULT;
   PrimType_Type.tp_doc = PyDoc_STR("Python extended object for PrimType");
   PrimType_Type.tp_richcompare = richcompare_func;
-  PrimType_Type.tp_methods = methods;
-  PrimType_Type.tp_getset = getsets;
   PrimType_Type.tp_new = new_func;
   if ( !PyModule::reg_type(m, "PrimType", &PrimType_Type) ) {
     goto error;

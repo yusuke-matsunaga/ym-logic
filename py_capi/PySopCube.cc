@@ -62,14 +62,14 @@ nb_and(
       }
       if ( PyLiteral::Check(other) ) {
         auto& val2 = PyLiteral::_get_ref(other);
-        return PyLiteral::ToPyObject(val1 & val2);
+        return PySopCube::ToPyObject(val1 & val2);
       }
     }
     if ( PySopCube::Check(other) ) {
       auto& val2 = PySopCube::_get_ref(other);
       if ( PyLiteral::Check(self) ) {
         auto& val1 = PyLiteral::_get_ref(self);
-        return PyLiteral::ToPyObject(val1 & val2);
+        return PySopCube::ToPyObject(val1 & val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;
@@ -129,7 +129,7 @@ nb_true_divide(
       }
       if ( PyLiteral::Check(other) ) {
         auto& val2 = PyLiteral::_get_ref(other);
-        return PyLiteral::ToPyObject(val1 / val2);
+        return PySopCube::ToPyObject(val1 / val2);
       }
     }
     Py_RETURN_NOTIMPLEMENTED;

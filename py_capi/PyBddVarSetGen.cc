@@ -282,12 +282,6 @@ PyMethodDef methods[] = {
   {nullptr, nullptr, 0, nullptr}
 };
 
-// getter/setter定義
-PyGetSetDef getsets[] = {
-  // end-marker
-  {nullptr, nullptr, nullptr, nullptr}
-};
-
 // new 関数
 PyObject*
 new_func(
@@ -344,7 +338,6 @@ PyBddVarSet::init(
   PyBddVarSet_Type.tp_doc = PyDoc_STR("Python extended object for BddVarSet");
   PyBddVarSet_Type.tp_richcompare = richcompare_func;
   PyBddVarSet_Type.tp_methods = methods;
-  PyBddVarSet_Type.tp_getset = getsets;
   PyBddVarSet_Type.tp_new = new_func;
   if ( !PyModule::reg_type(m, "PyBddVarSet", &PyBddVarSet_Type) ) {
     goto error;

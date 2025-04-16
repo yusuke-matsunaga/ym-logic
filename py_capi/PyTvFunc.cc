@@ -1031,12 +1031,6 @@ PyMethodDef methods[] = {
   {nullptr, nullptr, 0, nullptr}
 };
 
-// getter/setter定義
-PyGetSetDef getsets[] = {
-  // end-marker
-  {nullptr, nullptr, nullptr, nullptr}
-};
-
 // new 関数
 PyObject*
 new_func(
@@ -1101,7 +1095,6 @@ PyTvFunc::init(
   TvFunc_Type.tp_doc = PyDoc_STR("Python extended object for TvFunc");
   TvFunc_Type.tp_richcompare = richcompare_func;
   TvFunc_Type.tp_methods = methods;
-  TvFunc_Type.tp_getset = getsets;
   TvFunc_Type.tp_new = new_func;
   if ( !PyModule::reg_type(m, "TvFunc", &TvFunc_Type) ) {
     goto error;

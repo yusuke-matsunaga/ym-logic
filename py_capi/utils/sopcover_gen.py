@@ -10,8 +10,9 @@
 from mk_py_capi import PyObjGen
 from mk_py_capi import IntArg, BoolArg, RawObjArg
 from mk_py_capi import OptArg, KwdArg
-from mk_py_capi import DefaultAdd, DefaultInplaceAdd, DefaultSub, DefaultInplaceSub
+from mk_py_capi import DefaultSub, DefaultInplaceSub
 from mk_py_capi import DefaultAnd, DefaultInplaceAnd
+from mk_py_capi import DefaultOr, DefaultInplaceOr
 from mk_py_capi import DefaultOp, DefaultInplaceOp
 
 
@@ -148,9 +149,9 @@ class SopCoverGen(PyObjGen):
                 writer.write_line('val1.algdiv_int(val2);')
             nb_inplace_common(writer, body)
             
-        self.add_nb_add(op_list1=[DefaultAdd('PySopCube')],
-                        op_list2=[DefaultAdd('PySopCube')])
-        self.add_nb_inplace_add(op_list1=[DefaultInplaceAdd('PySopCube')])
+        self.add_nb_or(op_list1=[DefaultOr('PySopCube')],
+                       op_list2=[DefaultOr('PySopCube')])
+        self.add_nb_inplace_or(op_list1=[DefaultInplaceOr('PySopCube')])
         self.add_nb_subtract(op_list1=[DefaultSub('PySopCube')])
         self.add_nb_inplace_subtract(op_list1=[DefaultInplaceSub('PySopCube')])
         self.add_nb_and(op_list1=[DefaultAnd('PySopCube')],

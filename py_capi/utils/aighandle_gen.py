@@ -11,6 +11,7 @@ from mk_py_capi import PyObjGen
 from mk_py_capi import IntArg, BoolArg, StringArg
 from mk_py_capi import RawObjArg, ObjConvArg, TypedObjConvArg
 from mk_py_capi import OptArg, KwdArg
+from mk_py_capi import DefaultMul
 
         
 class JsonValueArg(ObjConvArg):
@@ -193,17 +194,10 @@ class AigHandleGen(PyObjGen):
                       getter_name='get_index')
 
         self.add_richcompare('cmp_default')
-
-        def nb_multiply(writer):
-            with writer.gen_if_block('PyAigHandle::Check(self)'):
-                writer.gen_autoref_assign('val1', 'PyAigHandle::_get_ref(self)')
-                with writer.gen_if_block('PyBool_Check(other)'):
-                    writer.gen_auto_assign('inv', 'PyBool::Get(other)')
-                    writer.gen_return_pyobject('PyAigHandle', 'val1 * inv')
-            writer.gen_return_py_notimplemented()
             
         self.add_nb_invert()
-        self.add_nb_multiply()
+        self.add_nb_multiply(expr=None,
+                             op_list1=[DefaultMul('PyBool', useref=False)])
         self.add_nb_and()
         self.add_nb_or()
         self.add_nb_xor()
