@@ -677,7 +677,7 @@ PySopCover::init(
 // SopCover を PyObject に変換する．
 PyObject*
 PySopCover::Conv::operator()(
-  const SopCover& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PySopCover::_typeobject();
@@ -690,8 +690,8 @@ PySopCover::Conv::operator()(
 // PyObject を SopCover に変換する．
 bool
 PySopCover::Deconv::operator()(
-  PyObject* obj,
-  SopCover& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PySopCover::Check(obj) ) {

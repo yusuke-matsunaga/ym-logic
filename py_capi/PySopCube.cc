@@ -541,7 +541,7 @@ PySopCube::init(
 // SopCube を PyObject に変換する．
 PyObject*
 PySopCube::Conv::operator()(
-  const SopCube& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PySopCube::_typeobject();
@@ -554,8 +554,8 @@ PySopCube::Conv::operator()(
 // PyObject を SopCube に変換する．
 bool
 PySopCube::Deconv::operator()(
-  PyObject* obj,
-  SopCube& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PySopCube::Check(obj) ) {

@@ -344,7 +344,7 @@ PyBddMgr::init(
 // BddMgr を PyObject に変換する．
 PyObject*
 PyBddMgr::Conv::operator()(
-  const BddMgr& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyBddMgr::_typeobject();
@@ -357,8 +357,8 @@ PyBddMgr::Conv::operator()(
 // PyObject を BddMgr に変換する．
 bool
 PyBddMgr::Deconv::operator()(
-  PyObject* obj,
-  BddMgr& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyBddMgr::Check(obj) ) {

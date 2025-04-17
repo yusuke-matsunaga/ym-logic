@@ -361,7 +361,7 @@ PyBddVarSet::init(
 // BddVarSet を PyObject に変換する．
 PyObject*
 PyBddVarSet::Conv::operator()(
-  const BddVarSet& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyBddVarSet::_typeobject();
@@ -374,8 +374,8 @@ PyBddVarSet::Conv::operator()(
 // PyObject を BddVarSet に変換する．
 bool
 PyBddVarSet::Deconv::operator()(
-  PyObject* obj,
-  BddVarSet& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyBddVarSet::Check(obj) ) {

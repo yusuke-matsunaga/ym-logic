@@ -641,16 +641,8 @@ new_func(
   PyObject* kwds
 )
 {
-  try {
-    PyErr_SetString(PyExc_TypeError, "instantiation of 'AigHandle' is disabled");
-    return nullptr;
-  }
-  catch ( std::invalid_argument err ) {
-    std::ostringstream buf;
-    buf << "invalid argument" << ": " << err.what();
-    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
-    return nullptr;
-  }
+  PyErr_SetString(PyExc_TypeError, "instantiation of 'AigHandle' is disabled");
+  return nullptr;
 }
 
 END_NONAMESPACE
@@ -688,7 +680,7 @@ PyAigHandle::init(
 // AigHandle を PyObject に変換する．
 PyObject*
 PyAigHandle::Conv::operator()(
-  const AigHandle& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyAigHandle::_typeobject();
@@ -701,8 +693,8 @@ PyAigHandle::Conv::operator()(
 // PyObject を AigHandle に変換する．
 bool
 PyAigHandle::Deconv::operator()(
-  PyObject* obj,
-  AigHandle& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyAigHandle::Check(obj) ) {

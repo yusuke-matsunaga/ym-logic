@@ -1134,7 +1134,7 @@ PyTvFunc::init(
 // TvFunc を PyObject に変換する．
 PyObject*
 PyTvFunc::Conv::operator()(
-  const TvFunc& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyTvFunc::_typeobject();
@@ -1147,8 +1147,8 @@ PyTvFunc::Conv::operator()(
 // PyObject を TvFunc に変換する．
 bool
 PyTvFunc::Deconv::operator()(
-  PyObject* obj,
-  TvFunc& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyTvFunc::Check(obj) ) {

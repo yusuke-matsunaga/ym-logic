@@ -1212,7 +1212,7 @@ PyExpr::init(
 // Expr を PyObject に変換する．
 PyObject*
 PyExpr::Conv::operator()(
-  const Expr& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyExpr::_typeobject();
@@ -1225,8 +1225,8 @@ PyExpr::Conv::operator()(
 // PyObject を Expr に変換する．
 bool
 PyExpr::Deconv::operator()(
-  PyObject* obj,
-  Expr& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyExpr::Check(obj) ) {

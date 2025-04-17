@@ -1103,7 +1103,7 @@ PyBdd::init(
 // Bdd を PyObject に変換する．
 PyObject*
 PyBdd::Conv::operator()(
-  const Bdd& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyBdd::_typeobject();
@@ -1116,8 +1116,8 @@ PyBdd::Conv::operator()(
 // PyObject を Bdd に変換する．
 bool
 PyBdd::Deconv::operator()(
-  PyObject* obj,
-  Bdd& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyBdd::Check(obj) ) {

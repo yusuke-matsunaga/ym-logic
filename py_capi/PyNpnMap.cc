@@ -490,7 +490,7 @@ PyNpnMap::init(
 // NpnMap を PyObject に変換する．
 PyObject*
 PyNpnMap::Conv::operator()(
-  const NpnMap& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyNpnMap::_typeobject();
@@ -503,8 +503,8 @@ PyNpnMap::Conv::operator()(
 // PyObject を NpnMap に変換する．
 bool
 PyNpnMap::Deconv::operator()(
-  PyObject* obj,
-  NpnMap& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyNpnMap::Check(obj) ) {

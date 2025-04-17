@@ -254,7 +254,7 @@ PyPrimType::init(
 // PrimType を PyObject に変換する．
 PyObject*
 PyPrimType::Conv::operator()(
-  const PrimType& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   PyObject* obj = nullptr;
@@ -272,7 +272,7 @@ PyPrimType::Conv::operator()(
     case PrimType::None: Py_RETURN_NONE;
   }
   if ( obj == nullptr ) {
-    PyErr_SetString(PyExc_ValueError, "invalid string for PrimType");
+    PyErr_SetString(PyExc_ValueError, "invalid value for PrimType");
     return nullptr;
   }
   Py_INCREF(obj);
@@ -282,8 +282,8 @@ PyPrimType::Conv::operator()(
 // PyObject を PrimType に変換する．
 bool
 PyPrimType::Deconv::operator()(
-  PyObject* obj,
-  PrimType& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   std::string str_val;

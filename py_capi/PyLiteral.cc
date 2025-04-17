@@ -128,7 +128,7 @@ richcompare_func(
   }
 }
 
-// 
+//
 PyObject*
 set(
   PyObject* self,
@@ -158,7 +158,7 @@ set(
   Py_RETURN_NONE;
 }
 
-// 
+//
 PyObject*
 is_valid(
   PyObject* self,
@@ -169,7 +169,7 @@ is_valid(
   return PyBool_FromLong(val.is_valid());
 }
 
-// 
+//
 PyObject*
 is_positive(
   PyObject* self,
@@ -180,7 +180,7 @@ is_positive(
   return PyBool_FromLong(val.is_positive());
 }
 
-// 
+//
 PyObject*
 is_negative(
   PyObject* self,
@@ -191,7 +191,7 @@ is_negative(
   return PyBool_FromLong(val.is_negative());
 }
 
-// 
+//
 PyObject*
 make_positive(
   PyObject* self,
@@ -202,7 +202,7 @@ make_positive(
   return PyLiteral::ToPyObject(val.make_positive());
 }
 
-// 
+//
 PyObject*
 make_negative(
   PyObject* self,
@@ -353,7 +353,7 @@ PyLiteral::init(
 // Literal を PyObject に変換する．
 PyObject*
 PyLiteral::Conv::operator()(
-  const Literal& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyLiteral::_typeobject();
@@ -366,8 +366,8 @@ PyLiteral::Conv::operator()(
 // PyObject を Literal に変換する．
 bool
 PyLiteral::Deconv::operator()(
-  PyObject* obj,
-  Literal& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyLong::Check(obj) ) {

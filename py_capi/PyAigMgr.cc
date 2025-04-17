@@ -355,7 +355,7 @@ PyAigMgr::init(
 // AigMgr を PyObject に変換する．
 PyObject*
 PyAigMgr::Conv::operator()(
-  const AigMgr& val
+  const ElemType& val ///< [in] 元の値
 )
 {
   auto type = PyAigMgr::_typeobject();
@@ -368,8 +368,8 @@ PyAigMgr::Conv::operator()(
 // PyObject を AigMgr に変換する．
 bool
 PyAigMgr::Deconv::operator()(
-  PyObject* obj,
-  AigMgr& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyAigMgr::Check(obj) ) {
