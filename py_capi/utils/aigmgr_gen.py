@@ -25,7 +25,7 @@ class ExprArg(TypedObjConvArg):
                          cvartype='Expr',
                          cvardefault=None,
                          pyclassname='PyExpr')
-        
+
 
 class AigMgrGen(PyObjGen):
 
@@ -41,7 +41,7 @@ class AigMgrGen(PyObjGen):
                                                'pym/PyLong.h'])
 
         self.add_new('default')
-        
+
         self.add_dealloc('default')
 
         def meth_input(writer):
@@ -148,8 +148,8 @@ class AigMgrGen(PyObjGen):
         self.add_conv('default')
 
         self.add_deconv('default')
-        
-        
+
+
 if __name__ == '__main__':
 
     gen = AigMgrGen()

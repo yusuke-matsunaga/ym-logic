@@ -22,7 +22,7 @@ class LiteralGen(PyObjGen):
                                                'pym/PyString.h'])
 
         self.add_dealloc(func_body=None)
-        
+
         def repr_func(writer):
             writer.gen_comment('val から文字列を作る．')
             writer.gen_vardecl(typename='std::ostringstream',
@@ -111,7 +111,7 @@ class LiteralGen(PyObjGen):
         self.add_richcompare('cmp_default')
 
         self.add_nb_invert()
-        
+
         self.add_conv('default')
 
         def deconv_body(writer):

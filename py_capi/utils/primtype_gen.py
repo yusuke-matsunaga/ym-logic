@@ -36,7 +36,7 @@ class PrimTypeGen(EnumGen):
                                    casttype='Py_hash_t')
             writer.gen_return('hash_val')
         self.add_hash(func_body=hash_body)
-        
+
 
 if __name__ == '__main__':
 

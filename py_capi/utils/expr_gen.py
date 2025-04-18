@@ -11,7 +11,7 @@ from mk_py_capi import PyObjGen, OptArg, KwdArg, RawObjArg, ObjConvArg
 from mk_py_capi import IntArg, UintArg, LongArg, UlongArg
 from mk_py_capi import BoolArg, StringArg
 
-    
+
 class ExprGen(PyObjGen):
 
     def __init__(self):
@@ -43,7 +43,7 @@ class ExprGen(PyObjGen):
         self.add_new(func_body=new_func,
                      arg_list=[OptArg(),
                                StringArg(cvarname='expr_str')])
-        
+
         self.add_dealloc()
 
         def repr_func(writer):
@@ -223,7 +223,7 @@ class ExprGen(PyObjGen):
                                varname='vals')
             with writer.gen_if_block('!PyList<unsigned long, PyUlong>::FromPyObject(vect_obj, vals)'):
                 writer.gen_type_error('"argument 1 must be a vector of integer"')
-                
+
             writer.gen_auto_assign('ans', 'val.eval(vals, static_cast<Expr::BitVectType>(mask))')
             writer.gen_return_py_long('ans')
         self.add_method('eval',
@@ -437,7 +437,7 @@ class ExprGen(PyObjGen):
                         func_body=getter_input_size)
         self.add_attr('input_size',
                       getter_name='input_size')
-            
+
         self.add_nb_invert()
         self.add_nb_and()
         self.add_nb_or()
@@ -447,11 +447,11 @@ class ExprGen(PyObjGen):
         self.add_nb_inplace_xor()
 
         self.add_richcompare('eq_default')
-            
+
         self.add_conv('default')
         self.add_deconv('default')
-        
-        
+
+
 if __name__ == '__main__':
 
     gen = ExprGen()
@@ -459,4 +459,3 @@ if __name__ == '__main__':
     gen.make_header()
 
     gen.make_source()
-

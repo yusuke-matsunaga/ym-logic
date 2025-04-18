@@ -56,7 +56,7 @@ class TvFuncGen(PyObjGen):
                                KwdArg(),
                                RawObjArg(name='values',
                                          cvarname='vect_obj')])
-        
+
         self.add_dealloc()
 
         def repr_func(writer):
@@ -143,7 +143,7 @@ class TvFuncGen(PyObjGen):
                                              IntArg(name='var',
                                                     cvarname='var')],
                                    doc_str='make positive literal type TvFunc object')
-            
+
         def meth_cofactor(writer):
             writer.gen_vardecl(typename='Literal',
                                varname='lit')
@@ -302,7 +302,7 @@ class TvFuncGen(PyObjGen):
                         arg_list=[IntArg(name='var',
                                          cvarname='var')],
                         doc_str='check if the specified variable is a support')
-                                         
+
         def meth_check_unate(writer):
             with writer.gen_if_block('var >= val.input_num()'):
                 writer.gen_value_error('"\'var\' is out of range"')
@@ -395,7 +395,7 @@ class TvFuncGen(PyObjGen):
         def hash_func(writer):
             writer.gen_return('val.hash()')
         self.add_hash(hash_func)
-        
+
         def conv_func(writer):
             self.gen_alloc_code(writer, varname='obj')
             self.gen_obj_conv(writer, objname='obj', varname='my_obj')
@@ -404,8 +404,8 @@ class TvFuncGen(PyObjGen):
         self.add_conv(conv_func)
 
         self.add_deconv('default')
-            
-            
+
+
 if __name__ == '__main__':
 
     gen = TvFuncGen()

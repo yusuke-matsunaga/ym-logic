@@ -170,7 +170,7 @@ class SopCubeGen(PyObjGen):
                     writer.write_line('val1 /= val2;')
                     writer.gen_return_self(incref=True)
             writer.gen_return_py_notimplemented()
-            
+
         self.add_nb_and(op_list1=[AndOp('PyLiteral')],
                         op_list2=[AndOp('PyLiteral')])
         self.add_nb_inplace_and(op_list1=[AndIop('PyLiteral')])
@@ -183,8 +183,8 @@ class SopCubeGen(PyObjGen):
 
         self.add_conv('default')
         self.add_deconv('default')
-        
-        
+
+
 if __name__ == '__main__':
 
     gen = SopCubeGen()

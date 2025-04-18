@@ -22,7 +22,7 @@ class NpnMapGen(PyObjGen):
                                                'pym/PyInt.h'])
 
         self.add_new('default')
-        
+
         self.add_dealloc('default')
 
         def init_func(writer):
@@ -44,7 +44,7 @@ class NpnMapGen(PyObjGen):
                                        cvardefault='-1')])
 
         self.add_richcompare('eq_default')
-        
+
         def meth_identity(writer):
             writer.gen_return_pyobject('PyNpnMap',
                                        'NpnMap::identity(ni, inv)')
@@ -155,7 +155,7 @@ class NpnMapGen(PyObjGen):
         self.add_nb_invert()
         self.add_nb_multiply()
         self.add_nb_inplace_multiply()
-        
+
         self.add_conv('default')
 
         self.add_deconv('default')
@@ -168,5 +168,3 @@ if __name__ == '__main__':
     gen.make_header()
 
     gen.make_source()
-    
-    

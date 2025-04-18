@@ -66,7 +66,7 @@ class BddGen(PyObjGen):
             writer.write_line('new (&my_obj->mVal) Bdd();')
             writer.gen_return_self()
         self.add_new(new_body)
-        
+
         self.add_dealloc('default')
 
         """
@@ -356,9 +356,9 @@ class BddGen(PyObjGen):
                         func_body=get_mgr)
         self.add_attr('mgr',
                       getter_name='get_mgr')
-        
+
         self.add_richcompare('eq_default')
-            
+
         self.add_nb_invert()
         self.add_nb_and()
         self.add_nb_or()
@@ -370,7 +370,7 @@ class BddGen(PyObjGen):
         def hash_func(writer):
             writer.gen_return('val.hash()')
         self.add_hash(hash_func)
-        
+
         def conv_func(writer):
             self.gen_alloc_code(writer, varname='obj')
             self.gen_obj_conv(writer, objname='obj', varname='my_obj')
@@ -379,8 +379,8 @@ class BddGen(PyObjGen):
         self.add_conv(conv_func)
 
         self.add_deconv('default')
-            
-            
+
+
 if __name__ == '__main__':
 
     gen = BddGen()

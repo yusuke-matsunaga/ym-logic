@@ -49,14 +49,14 @@ class SopCoverGen(PyObjGen):
                         self.gen_obj_conv(writer, objname='self', varname='my_obj')
                         writer.write_line('new (&my_obj->mVal) SopCover(ni, literal_list);')
                         writer.gen_return_self()
-                    
+
                 writer.gen_type_error('"argument 2 should be a sequence of \'SopCube\'"')
             with writer.gen_else_block():
                 writer.gen_auto_assign('self', 'type->tp_alloc(type, 0)')
                 self.gen_obj_conv(writer, objname='self', varname='my_obj')
                 writer.write_line('new (&my_obj->mVal) SopCover(ni);')
                 writer.gen_return_self()
-                
+
         self.add_new(new_body,
                      arg_list=[IntArg(name='input_num',
                                       cvarname='ni'),
@@ -101,7 +101,7 @@ class SopCoverGen(PyObjGen):
         self.add_method('literal_list',
                         func_body=meth_literal_list,
                         doc_str='convert to list of list of literals')
-        
+
         def meth_get_pat(writer):
             writer.gen_auto_assign('pat', 'val.get_pat(cube_pos, var_pos)')
             writer.gen_vardecl(typename='const char*',
@@ -155,7 +155,7 @@ class SopCoverGen(PyObjGen):
                       getter_name='get_cube_num')
 
         self.add_richcompare('cmp_default')
-            
+
         self.add_nb_or(op_list1=[OrOp('PySopCube')],
                        op_list2=[OrOp('PySopCube')])
         self.add_nb_inplace_or(op_list1=[OrIop('PySopCube')])
@@ -184,8 +184,8 @@ class SopCoverGen(PyObjGen):
 
         self.add_conv('default')
         self.add_deconv('default')
-        
-        
+
+
 if __name__ == '__main__':
 
     gen = SopCoverGen()

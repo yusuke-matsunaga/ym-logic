@@ -73,7 +73,7 @@ class BddVarSetGen(PyObjGen):
         self.add_conv('default')
 
         self.add_deconv('default')
-        
+
 
 if __name__ == '__main__':
 
@@ -82,4 +82,3 @@ if __name__ == '__main__':
     gen.make_header()
 
     gen.make_source()
-    

@@ -132,7 +132,7 @@ class BddMgrGen(PyObjGen):
         self.add_conv('default')
 
         self.add_deconv('default')
-        
+
 
 if __name__ == '__main__':
 

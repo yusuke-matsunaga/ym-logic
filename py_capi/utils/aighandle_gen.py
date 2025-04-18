@@ -13,7 +13,7 @@ from mk_py_capi import RawObjArg, ObjConvArg, TypedObjConvArg
 from mk_py_capi import OptArg, KwdArg
 from mk_py_capi import MulOp
 
-        
+
 class JsonValueArg(ObjConvArg):
 
     def __init__(self, *,
@@ -25,7 +25,7 @@ class JsonValueArg(ObjConvArg):
                          cvardefault=None,
                          pyclassname='PyJsonValue')
 
-        
+
 class AigHandleArg(TypedObjConvArg):
 
     def __init__(self, *,
@@ -52,7 +52,7 @@ class AigHandleGen(PyObjGen):
                                                'pym/PyJsonValue.h'])
 
         self.add_new('disabled')
-        
+
         self.add_dealloc('default')
 
         """
@@ -194,7 +194,7 @@ class AigHandleGen(PyObjGen):
                       getter_name='get_index')
 
         self.add_richcompare('cmp_default')
-            
+
         self.add_nb_invert()
         self.add_nb_multiply(expr=None,
                              op_list1=[MulOp('PyBool', useref=False)])
@@ -208,7 +208,7 @@ class AigHandleGen(PyObjGen):
         def hash_func(writer):
             writer.gen_return('val.hash()')
         self.add_hash(hash_func)
-        
+
         def conv_func(writer):
             self.gen_alloc_code(writer, varname='obj')
             self.gen_obj_conv(writer, objname='obj', varname='my_obj')
@@ -217,8 +217,8 @@ class AigHandleGen(PyObjGen):
         self.add_conv(conv_func)
 
         self.add_deconv('default')
-            
-            
+
+
 if __name__ == '__main__':
 
     gen = AigHandleGen()
