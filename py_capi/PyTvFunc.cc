@@ -59,8 +59,7 @@ repr_func(
 {
   auto& val = PyTvFunc::_get_ref(self);
   try {
-    auto str_val = val.str();
-    return PyString::ToPyObject(str_val);
+    return PyString::ToPyObject(val.str());
   }
   catch ( std::invalid_argument err ) {
     std::ostringstream buf;

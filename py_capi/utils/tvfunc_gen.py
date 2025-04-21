@@ -60,7 +60,7 @@ class TvFuncGen(PyObjGen):
         self.add_dealloc()
 
         def repr_func(writer):
-            writer.gen_auto_assign('str_val', 'val.str()')
+            writer.gen_return_py_string('val.str()')
         self.add_repr(func_body=repr_func)
 
         def meth_from_string(writer):

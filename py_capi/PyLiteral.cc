@@ -53,8 +53,7 @@ repr_func(
     // val から文字列を作る．
     std::ostringstream buf;
     buf << val;
-    auto str_val = buf.str();
-    return PyString::ToPyObject(str_val);
+    return PyString::ToPyObject(buf.str());
   }
   catch ( std::invalid_argument err ) {
     std::ostringstream buf;

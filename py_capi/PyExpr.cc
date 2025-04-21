@@ -57,8 +57,7 @@ repr_func(
 {
   auto& val = PyExpr::_get_ref(self);
   try {
-    auto str_val = val.rep_string();
-    return PyString::ToPyObject(str_val);
+    return PyString::ToPyObject(val.rep_string());
   }
   catch ( std::invalid_argument err ) {
     std::ostringstream buf;
@@ -254,8 +253,7 @@ str_func(
 {
   auto& val = PyExpr::_get_ref(self);
   try {
-    auto str_val = val.to_string();
-    return PyString::ToPyObject(str_val);
+    return PyString::ToPyObject(val.to_string());
   }
   catch ( std::invalid_argument err ) {
     std::ostringstream buf;

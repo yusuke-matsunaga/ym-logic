@@ -641,7 +641,7 @@ new_func(
   PyObject* kwds
 )
 {
-  PyErr_SetString(PyExc_TypeError, "instantiation of 'AigHandle' is disabled");
+  PyErr_SetString(PyExc_TypeError, "Instantiation of 'AigHandle' is disabled");
   return nullptr;
 }
 

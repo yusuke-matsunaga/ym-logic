@@ -47,11 +47,11 @@ class ExprGen(PyObjGen):
         self.add_dealloc()
 
         def repr_func(writer):
-            writer.gen_auto_assign('str_val', 'val.rep_string()')
+            writer.gen_return_py_string('val.rep_string()')
         self.add_repr(func_body=repr_func)
 
         def str_func(writer):
-            writer.gen_auto_assign('str_val', 'val.to_string()')
+            writer.gen_return_py_string('val.to_string()')
         self.add_str(func_body=str_func)
 
         def meth_invalid(writer):

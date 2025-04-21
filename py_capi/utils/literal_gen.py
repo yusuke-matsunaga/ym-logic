@@ -28,7 +28,7 @@ class LiteralGen(PyObjGen):
             writer.gen_vardecl(typename='std::ostringstream',
                                varname='buf')
             writer.write_line('buf << val;')
-            writer.gen_auto_assign('str_val', 'buf.str()')
+            writer.gen_return_py_string('buf.str()')
         self.add_repr(func_body=repr_func)
 
         def hash_func(writer):
