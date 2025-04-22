@@ -37,15 +37,6 @@ if args.source_dir is None:
 else:
     source_dir = args.source_dir
 
-from ymlogic_gen import YmlogicGen
-ymlogic_gen = YmlogicGen()
-filename = os.path.join(include_dir, 'ymlogic.h')
-with open(filename, 'wt') as fout:
-    ymlogic_gen.make_header(fout=fout)
-filename = os.path.join(source_dir, 'ymlogic_module.cc')
-with open(filename, 'wt') as fout:
-    ymlogic_gen.make_source(fout=fout)
-
 from primtype_gen import PrimTypeGen
 primtype_gen = PrimTypeGen()
 
@@ -82,21 +73,16 @@ sopcube_gen = SopCubeGen()
 from sopcover_gen import SopCoverGen
 sopcover_gen = SopCoverGen()
 
-for gen, name in ((primtype_gen, 'PyPrimType'),
-                  (literal_gen, 'PyLiteral'),
-                  (npnmap_gen, 'PyNpnMap'),
-                  (expr_gen, 'PyExpr'),
-                  (tvfunc_gen, 'PyTvFunc'),
-                  (bdd_gen, 'PyBdd'),
-                  (bddmgr_gen, 'PyBddMgr'),
-                  (bddvarset_gen, 'PyBddVarSetGen'),
-                  (aighandle_gen, 'PyAigHandle'),
-                  (aigmgr_gen, 'PyAigMgr'),
-                  (sopcube_gen, 'PySopCube'),
-                  (sopcover_gen, 'PySopCover')):
-    filename = os.path.join(include_dir, f'{name}.h')
-    with open(filename, 'wt') as fout:
-        gen.make_header(fout=fout)
-    filename = os.path.join(source_dir, f'{name}.cc')
-    with open(filename, 'wt') as fout:
-        gen.make_source(fout=fout)
+gen_list = [primtype_gen, literal_gen, npnmap_gen,
+            tvfunc_gen, expr_gen,
+            bdd_gen, bddmgr_gen,
+            sopcover_gen, sopcube_gen,
+            aighandle_gen, aigmgr_gen]
+
+from mk_py_capi import ModuleGen
+module_gen = ModuleGen(modulename='ymlogic',
+                       pyclass_gen_list=gen_list,
+                       namespace='YM')
+
+module_gen.make_all(include_dir=include_dir,
+                    source_dir=source_dir)
