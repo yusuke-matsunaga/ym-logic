@@ -583,7 +583,7 @@ eval(
   }
   auto& val = PyExpr::_get_ref(self);
   std::vector<unsigned long> vals;
-  if ( !PyList<unsigned long, PyUlong>::FromPyObject(vect_obj, vals) ) {
+  if ( !PyList<std::uint64_t, PyUlong>::FromPyObject(vect_obj, vals) ) {
     PyErr_SetString(PyExc_TypeError, "argument 1 must be a vector of integer");
     return nullptr;
   }

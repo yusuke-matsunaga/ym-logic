@@ -221,7 +221,7 @@ class ExprGen(PyObjGen):
         def meth_eval(writer):
             writer.gen_vardecl(typename='std::vector<unsigned long>',
                                varname='vals')
-            with writer.gen_if_block('!PyList<unsigned long, PyUlong>::FromPyObject(vect_obj, vals)'):
+            with writer.gen_if_block('!PyList<std::uint64_t, PyUlong>::FromPyObject(vect_obj, vals)'):
                 writer.gen_type_error('"argument 1 must be a vector of integer"')
 
             writer.gen_auto_assign('ans', 'val.eval(vals, static_cast<Expr::BitVectType>(mask))')
