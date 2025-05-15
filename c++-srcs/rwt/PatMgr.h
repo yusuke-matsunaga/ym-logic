@@ -8,10 +8,10 @@
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "ym/logic.h"
+#include "ym/aig.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_AIG
 
 class PatNode;
 
@@ -80,6 +80,6 @@ private:
 
 };
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_AIG
 
 #endif // PATMGR_H

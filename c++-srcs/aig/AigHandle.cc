@@ -428,6 +428,9 @@ AigHandle::_set_edge(
   AigEdge edge
 )
 {
+  auto mgr = get();
+  mgr->inc_ref(edge);
+  mgr->dec_ref(_edge());
   mEdge = edge.mPackedData;
 }
 

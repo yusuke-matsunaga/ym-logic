@@ -20,22 +20,25 @@ BEGIN_NAMESPACE_YM_AIG
 ///
 /// 以下の情報を持つ．
 /// - ID番号
+/// - 参照回数
 /// - 入力ノードかANDノードかのフラグ
 /// - 入力ノード: 入力番号
 /// - ANDノード: 2つのファンインの枝
 //////////////////////////////////////////////////////////////////////
 class AigNode
 {
+  friend class AigMgrImpl; // 参照回数の更新のため
+
 public:
 
   /// @brief 入力ノード用のコンストラクタ
   AigNode(
     SizeType id,      ///< [in] ノード番号
     SizeType input_id ///< [in] 入力番号
-  ) : mId{id}
+  ) : mId{id},
+      mRefCount{0}
   {
-    mFanins[0] = reinterpret_cast<AigNode*>(input_id);
-    mFlags[BIT_INPUT] = true;
+    _set_input(input_id);
   }
 
   /// @brief ANDノード用のコンストラクタ
@@ -44,11 +47,9 @@ public:
     AigEdge fanin0, ///< [in] ファンイン0の枝
     AigEdge fanin1  ///< [in] ファンイン1の枝
   ) : mId{id},
-      mFanins{fanin0.node(), fanin1.node()}
+      mRefCount{0}
   {
-    mFlags[BIT_INPUT] = false;
-    mFlags[BIT_INV0] = fanin0.inv();
-    mFlags[BIT_INV1] = fanin1.inv();
+    _set_and(fanin0, fanin1);
   }
 
   /// @brief デストラクタ
@@ -71,7 +72,7 @@ public:
   bool
   is_input() const
   {
-    return mFlags[BIT_INPUT];
+    return mInput;
   }
 
   /// @brief ANDノードの時，true を返す．
@@ -79,6 +80,13 @@ public:
   is_and() const
   {
     return !is_input();
+  }
+
+  /// @brief 参照回数を返す．
+  SizeType
+  ref_count() const
+  {
+    return mRefCount;
   }
 
 
@@ -138,7 +146,7 @@ public:
     _check_and("fanin_inv");
     // 安全のため pos の範囲を補正しておく．
     pos &= 1;
-    return mFlags[BIT_INV0 + pos];
+    return ( pos == 0 )? mInv0 : mInv1;
   }
 
   /// @brief ファンイン0の反転属性を返す．
@@ -146,7 +154,7 @@ public:
   fanin0_inv() const
   {
     _check_and("fanin0_inv");
-    return mFlags[BIT_INV0];
+    return mInv0;
   }
 
   /// @brief ファンイン1の反転属性を返す．
@@ -154,7 +162,7 @@ public:
   fanin1_inv() const
   {
     _check_and("fanin1_inv");
-    return mFlags[BIT_INV1];
+    return mInv1;
   }
 
   /// @brief ファンインの枝を返す．
@@ -166,7 +174,7 @@ public:
     _check_and("fanin");
     // 安全のため pos の範囲を補正しておく．
     pos &= 1;
-    return AigEdge{mFanins[pos], mFlags[BIT_INV0 + pos]};
+    return (pos == 0)? fanin0() : fanin1();
   }
 
   /// @brief ファンイン0の枝を返す．
@@ -174,7 +182,7 @@ public:
   fanin0() const
   {
     _check_and("fanin0");
-    return AigEdge{mFanins[0], mFlags[BIT_INV0]};
+    return AigEdge{mFanins[0], mInv0};
   }
 
   /// @brief ファンイン0のハンドルを返す．
@@ -182,7 +190,7 @@ public:
   fanin1() const
   {
     _check_and("fanin1");
-    return AigEdge{mFanins[1], mFlags[BIT_INV1]};
+    return AigEdge{mFanins[1], mInv1};
   }
 
   /// @brief ANDグループのファンインのリストを返す．
@@ -194,8 +202,59 @@ public:
 
 private:
   //////////////////////////////////////////////////////////////////////
+  // 参照回数の更新を行う関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 参照回数を増やす．
+  /// @return 結果の参照回数を返す．
+  SizeType
+  inc_ref()
+  {
+    ++ mRefCount;
+    return mRefCount;
+  }
+
+  /// @brief 参照回数を減らす．
+  /// @return 結果の参照回数を返す．
+  SizeType
+  dec_ref()
+  {
+    -- mRefCount;
+    return mRefCount;
+  }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
+
+  /// @brief 入力ノードの内容をセットする．
+  void
+  _set_input(
+    SizeType input_id ///< [in] 入力番号
+  )
+  {
+    mFanins[0] = reinterpret_cast<AigNode*>(input_id);
+    mFanins[1] = nullptr;
+    mInput = true;
+    mInv0 = false;
+    mInv1 = false;
+  }
+
+  /// @brief ANDノードの内容をセットする．
+  void
+  _set_and(
+    AigEdge fanin0, ///< [in] ファンイン0の枝
+    AigEdge fanin1  ///< [in] ファンイン1の枝
+  )
+  {
+    mFanins[0] = fanin0.node();
+    mFanins[1] = fanin1.node();
+    mInput = false;
+    mInv0 = fanin0.inv();
+    mInv1 = fanin1.inv();
+  }
 
   /// @brief 入力専用の関数の例外発生
   void
@@ -235,26 +294,17 @@ private:
   // ファンインのノード
   AigNode* mFanins[2]{nullptr, nullptr};
 
-  // 入力/ANDの種類，極性などの情報をパックしたもの
-  bitset<3> mFlags{0};
+  // 入力/ANDの区別
+  bool mInput : 1;
 
+  // ファンイン0の極性
+  bool mInv0 : 1;
 
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 定数の定義
-  //////////////////////////////////////////////////////////////////////
+  // ファンイン1の極性
+  bool mInv1 : 1;
 
-  // 入力フラグ
-  static
-  const int BIT_INPUT  = 0;
-
-  // ファンイン0 の極性
-  static
-  const int BIT_INV0 = 1;
-
-  // ファンイン1 の極性
-  static
-  const int BIT_INV1 = 2;
+  // 参照回数(ファンアウト数)
+  SizeType mRefCount : 61;
 
 };
 

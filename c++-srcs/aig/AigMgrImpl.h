@@ -44,7 +44,7 @@ public:
   SizeType
   node_num() const
   {
-    return mNodeArray.size();
+    return mNodeNum;
   }
 
   /// @brief 入力ノード数を返す．
@@ -108,11 +108,7 @@ public:
   AigEdge
   make_input()
   {
-    auto id = mNodeArray.size();
-    auto input_id = mInputArray.size();
-    auto node = new AigNode{id, input_id};
-    mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-    mInputArray.push_back(node);
+    auto node = _new_input();
     return AigEdge{node, false};
   }
 
@@ -146,10 +142,7 @@ public:
     }
 
     // step3: 新しいノードを作る．
-    auto id = mNodeArray.size();
-    auto node = new AigNode{id, fanin0, fanin1};
-    mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-    mAndTable.insert(node);
+    auto node = _new_and(fanin0, fanin1);
     return AigEdge{node, false};
   }
 
@@ -237,6 +230,32 @@ public:
     const vector<AigEdge>& edge_list   ///< [in] 対象の枝のリスト
   );
 
+  /// @brief 枝の参照回数を増やす．
+  void
+  inc_ref(
+    AigEdge edge ///< [in] 対象の枝
+  )
+  {
+    auto node = edge.node();
+    if ( node != nullptr ) {
+      node->inc_ref();
+    }
+  }
+
+  /// @brief 枝の参照回数を減らす．
+  void
+  dec_ref(
+    AigEdge edge ///< [in] 対象の枝
+  )
+  {
+    auto node = edge.node();
+    if ( node != nullptr ) {
+      if ( node->dec_ref() == 0 ) {
+	_free_node(node);
+      }
+    }
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -281,6 +300,73 @@ private:
     EdgeDict& res_dict ///< [in] 結果を格納する辞書
   );
 
+  /// @brief 入力ノードを作る．
+  AigNode*
+  _new_input()
+  {
+    auto input_id = mInputArray.size();
+    AigNode* node = nullptr;
+    if ( mAvailList.empty() ) {
+      auto id = mNodeArray.size();
+      node = new AigNode(id, input_id);
+      mNodeArray.push_back(std::unique_ptr<AigNode>{node});
+    }
+    else {
+      auto id = mAvailList.back();
+      mAvailList.pop_back();
+      node = mNodeArray[id].get();
+      node->_set_input(input_id);
+    }
+    mInputArray.push_back(node);
+    ++ mNodeNum;
+    return node;
+  }
+
+  /// @brief ANDノードを作る．
+  AigNode*
+  _new_and(
+    AigEdge fanin0,
+    AigEdge fanin1
+  )
+  {
+    AigNode* node = nullptr;
+    if ( mAvailList.empty() ) {
+      auto id = mNodeArray.size();
+      node = new AigNode{id, fanin0, fanin1};
+      mNodeArray.push_back(std::unique_ptr<AigNode>{node});
+    }
+    else {
+      auto id = mAvailList.back();
+      mAvailList.pop_back();
+      node = mNodeArray[id].get();
+      node->_set_and(fanin0, fanin1);
+    }
+    inc_ref(fanin0);
+    inc_ref(fanin1);
+    mAndTable.insert(node);
+    ++ mNodeNum;
+    return node;
+  }
+
+  /// @brief ノードを削除する．
+  ///
+  /// 実際には mAvailList に記録される．
+  void
+  _free_node(
+    AigNode* node
+  )
+  {
+    if ( node->is_input() ) {
+      // 入力ノードは削除しない．
+      return;
+    }
+    mAvailList.push_back(node->id());
+    -- mNodeNum;
+    mAndTable.erase(node);
+    dec_ref(node->fanin0());
+    dec_ref(node->fanin1());
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -290,12 +376,18 @@ private:
   // 参照回数
   SizeType mRefCount{0};
 
+  // アクティブなノード数
+  SizeType mNodeNum{0};
+
   // ID番号をキーにして AigNode を収めた配列
   // AigNode の所有権を持つ．
-  vector<std::unique_ptr<AigNode>> mNodeArray;
+  std::vector<std::unique_ptr<AigNode>> mNodeArray;
+
+  // 参照回数が0になったノード番号のリスト
+  std::vector<SizeType> mAvailList;
 
   // 入力番号をキーにして入力ノードを収めた配列
-  vector<AigNode*> mInputArray;
+  std::vector<AigNode*> mInputArray;
 
   // ANDノードの構造ハッシュ
   AigTable mAndTable;
