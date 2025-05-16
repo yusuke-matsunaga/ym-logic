@@ -38,9 +38,13 @@ AigHandle::AigHandle(
 AigHandle::AigHandle(
   const AigMgrHolder& holder,
   AigEdge edge
-) : AigMgrHolder{holder}
+) : AigMgrHolder{holder},
+    mEdge{edge.mPackedData}
 {
-  _set_edge(edge);
+  if ( !edge.is_const() ) {
+    auto mgr = get();
+    mgr->inc_ref(edge);
+  }
 }
 
 // @brief デストラクタ
@@ -298,16 +302,17 @@ AigHandle::operator&=(
 )
 {
   if ( !is_zero() ) {
+    AigEdge ans;
     if ( is_one() ) {
-      _set_edge(right._edge());
+      ans = right._edge();
     }
     else {
       _check_mgr(right);
       auto e1 = _edge();
       auto e2 = right._edge();
-      auto ans = get()->and_op(e1, e2);
-      _set_edge(ans);
+      ans = get()->and_op(e1, e2);
     }
+    _set_edge(ans);
   }
   return *this;
 }
@@ -338,16 +343,17 @@ AigHandle::operator|=(
 )
 {
   if ( !is_one() ) {
+    AigEdge ans;
     if ( is_zero() ) {
-      _set_edge(right._edge());
+      ans = right._edge();
     }
     else {
       _check_mgr(right);
       auto e1 = _edge();
       auto e2 = right._edge();
-      auto ans = get()->or_op(e1, e2);
-      _set_edge(ans);
+      ans = get()->or_op(e1, e2);
     }
+    _set_edge(ans);
   }
   return *this;
 }
@@ -377,19 +383,20 @@ AigHandle::operator^=(
   const AigHandle& right
 )
 {
+  AigEdge ans;
   if ( is_zero() ) {
-    _set_edge(right._edge());
+    ans = right._edge();
   }
   else if ( is_one() ) {
-    _set_edge(~right._edge());
+    ans = ~right._edge();
   }
   else {
     _check_mgr(right);
     auto e1 = _edge();
     auto e2 = right._edge();
-    auto ans = get()->xor_op(e1, e2);
-    _set_edge(ans);
+    ans = get()->xor_op(e1, e2);
   }
+  _set_edge(ans);
   return *this;
 }
 

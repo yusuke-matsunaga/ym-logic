@@ -27,6 +27,11 @@ class Cut
 {
 public:
 
+  /// @brief 4入力論理関数を表す型
+  using Tv4Type = std::uint16_t;
+
+public:
+
   /// @brief 自身を葉とするコンストラクタ
   Cut(
     const AigNode* node
@@ -72,6 +77,12 @@ public:
   {
     return mNodeList;
   }
+
+  /// @brief 論理関数を計算する．
+  Tv4Type
+  calc_tv(
+    const AigNode* root ///< [in] 根のノード
+  ) const;
 
 
 private:

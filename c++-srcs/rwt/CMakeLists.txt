@@ -19,6 +19,7 @@ add_subdirectory ( gtest )
 # ===================================================================
 
 set ( rwt_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/Cut.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/CutMgr.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/PatMgr.cc
   PARENT_SCOPE
