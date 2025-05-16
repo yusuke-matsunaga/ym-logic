@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include <gtest/gtest.h>
-#include "AigNode.h"
+#include "aig/AigNode.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

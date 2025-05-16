@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "ym/AigMgr.h"
-#include "AigMgrImpl.h"
+#include "aig/AigMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

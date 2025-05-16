@@ -10,7 +10,7 @@
 
 #include "ym/aig.h"
 #include "ym/Expr.h"
-#include "AigNode.h"
+#include "aig/AigNode.h"
 #include "AigTable.h"
 #include "ym/JsonValue.h"
 

@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
-#include "AigEdge.h"
+#include "aig/AigEdge.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

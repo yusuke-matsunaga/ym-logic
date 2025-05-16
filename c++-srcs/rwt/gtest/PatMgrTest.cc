@@ -11,7 +11,7 @@
 #include "PatNode.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_AIG
 
 TEST(PatMgrTest, init)
 {
@@ -40,4 +40,4 @@ TEST(PatMgrTest, init)
   }
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_AIG

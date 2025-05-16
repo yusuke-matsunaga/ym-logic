@@ -24,3 +24,9 @@ ym_add_gtest(logic_rwt_PatMgr_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   ${YM_SUBMODULE_OBJ_D_LIST}
   )
+
+ym_add_gtest(logic_rwt_CutMgr_test
+  CutMgrTest.cc
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  ${YM_SUBMODULE_OBJ_D_LIST}
+  )

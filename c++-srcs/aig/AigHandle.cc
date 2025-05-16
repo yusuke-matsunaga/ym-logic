@@ -8,9 +8,9 @@
 
 #include "ym/AigHandle.h"
 #include "ym/AigMgr.h"
-#include "AigMgrImpl.h"
-#include "AigNode.h"
-#include "AigEdge.h"
+#include "aig/AigMgrImpl.h"
+#include "aig/AigNode.h"
+#include "aig/AigEdge.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

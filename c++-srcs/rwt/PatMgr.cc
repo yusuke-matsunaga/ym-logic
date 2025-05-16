@@ -10,7 +10,7 @@
 #include "PatNode.h"
 
 
-BEGIN_NAMESPACE_YM_LOGIC
+BEGIN_NAMESPACE_YM_AIG
 
 BEGIN_NONAMESPACE
 
@@ -125,4 +125,4 @@ PatMgr::add_node(
   mPatListArray[tv].push_back(node);
 }
 
-END_NAMESPACE_YM_LOGIC
+END_NAMESPACE_YM_AIG

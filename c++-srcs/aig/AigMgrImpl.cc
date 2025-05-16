@@ -6,8 +6,7 @@
 /// Copyright (C) 2024 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "AigMgrImpl.h"
-//#include "ym/AigMgrHolder.h"
+#include "aig/AigMgrImpl.h"
 #include "ym/AigHandle.h"
 #include "ValArray.h"
 #include "EdgeDict.h"

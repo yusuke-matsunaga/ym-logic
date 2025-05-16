@@ -7,8 +7,8 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
-#include "AigMgrImpl.h"
-#include "AigEdge.h"
+#include "aig/AigMgrImpl.h"
+#include "aig/AigEdge.h"
 #include "DotGen.h"
 
 
