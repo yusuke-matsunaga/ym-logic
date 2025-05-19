@@ -111,7 +111,7 @@ Dec_GraphUpdateNetwork() で AIG の置き換えを行うので
 トップレベルの for ループは入力側からのトポロジカル順で
 行う必要がある．
 
-Rwr_NodeRwrite は opt/rwr/rwrEva.c にある．
+Rwr_NodeRewrite は opt/rwr/rwrEva.c にある．
 
 int
 Rwr_NodeRewrite(
@@ -135,7 +135,7 @@ foreach pCut {
     continue;
   }
   // ファンインの極性と順序を正規化する．
-  // ファンインのノードのファンアウト数が 3 以上ならスキップ
+  // ファンインのノードのファンアウト数が 1 のノードが 3 個以上ならスキップ
   // if ( Counter > 2 ) {
   //   continue;
   // }
@@ -221,3 +221,7 @@ if ( Dec_GraphIsConst(pGraph) || Dec_GraphIsVar(pGraph) ) {
 必要なノードが存在しているか調べる．
 ただし，その際にノード数やレベルが NodeMax か LevelMax を超えたら
 -1 を返す．
+
+入力の正規化
+
+Extra_Truth4VarNPN は misc/extra/extraUtilMisc.c にある．

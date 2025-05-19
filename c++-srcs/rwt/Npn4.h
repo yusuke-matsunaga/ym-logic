@@ -116,14 +116,18 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief iperm の範囲チェックなし
-  SizeType
-  _iperm(
-    SizeType pos
-  ) const
+  /// @brief 内容を直接したコンストラクタ
+  Npn4(
+    std::uint16_t chunk
+  ) : mChunk{chunk}
   {
-    auto b0 = mBitChunk[pos * 2 + 0];
-    auto b1 = mBitChunk[pos * 2 + 1];
+  }
+
+  /// @brief インデックスを返す．
+  std::uint8_t
+  _index() const
+  {
+    return static_cast<std::uint8_t>(mChunk & 31);
   }
 
 

@@ -25,6 +25,7 @@ BEGIN_NAMESPACE_YM_AIG
 
 BEGIN_NONAMESPACE
 
+// 順列のリスト
 static
 std::uint8_t perm_list[][4] = {
   {0, 1, 2, 3},
@@ -53,6 +54,50 @@ std::uint8_t perm_list[][4] = {
   {3, 2, 1, 0}
 };
 
+// 逆変換用のテーブル
+static
+std::uint8_t inv_tbl[] = {
+#include "rwt/inv_tbl.h"
+};
+
+// 入力順(iperm)をシグネチャに変換する．
+// 具体的には各々の値を2ビットずつシフトして足し合わせる．
+SizeType
+perm2sig(
+  const vector<SizeType>& iperm
+)
+{
+  SizeType sig = 0;
+  for ( SizeType i = 0; i < 4; ++ i ) {
+    auto val = iperm[i] & 3;
+    sig |= val << (i * 2);
+  }
+  return sig;
+}
+
+// 入力順(iperm)をインデックス番号に変換する．
+// iperm が不正な時は std::invalid_argument 例外を送出する．
+std::uint16_t
+perm2index(
+  const vector<SizeType>& iperm
+)
+{
+  static std::uint8_t index_tbl[] = {
+#include "rwt/index_tbl.h"
+  };
+
+  if ( iperm.size() != 4 ) {
+    throw std::invalid_argument{"iperm.size() != 4"};
+  }
+  auto sig = perm2sig(iperm);
+  std::uint16_t index = index_tbl[sig];
+  if ( index == 255 ) {
+    throw std::invalid_argument{"iperm is invalid"};
+  }
+  return index;
+}
+
+
 END_NONAMESPACE
 
 // @brief 内容を指定したコンストラクタ
@@ -65,29 +110,7 @@ Npn4::Npn4(
   if ( iinv.size() != 4 ) {
     throw std::invalid_argument{"iinv.size() != 4"};
   }
-  if ( iperm.size() != 4 ) {
-    throw std::invalid_argument{"iperm.size() != 4"};
-  }
-  std::uint16_t index = 0;
-  bool found = false;
-  for ( ; index < 24; ++ index ) {
-    auto& perm = perm_list[index];
-    bool ok = true;
-    for ( SizeType i = 0; i < 4; ++ i ) {
-      if ( perm[i] != iperm[i] ) {
-	ok = false;
-	break;
-      }
-    }
-    if ( ok ) {
-      found = true;
-      break;
-    }
-  }
-  if ( !found ) {
-    throw std::invalid_argument{"iperm is invalid"};
-  }
-
+  auto index = perm2index(iperm);
   mChunk = index;
   for ( SizeType i = 0; i < 4; ++ i ) {
     if ( iinv[i] ) {
@@ -118,12 +141,60 @@ Npn4::operator()(
   Tv4 tv
 ) const
 {
+  static std::uint8_t xform_tbl[][16] = {
+#include "rwt/xform_tbl.h"
+  };
+
+  if ( mChunk & (1 << 5) ) {
+    // 入力0の反転
+    auto tv1 = tv & 0xAAAA;
+    auto tv0 = tv & 0x5555;
+    tv = (tv1 >> 1) | (tv0 << 1);
+  }
+  if ( mChunk & (1 << 6) ) {
+    // 入力1の反転
+    auto tv1 = tv & 0xCCCC;
+    auto tv0 = tv & 0x3333;
+    tv = (tv1 >> 2) | (tv0 << 2);
+  }
+  if ( mChunk & (1 << 7) ) {
+    // 入力2の反転
+    auto tv1 = tv & 0xF0F0;
+    auto tv0 = tv & 0x0F0F;
+    tv = (tv1 >> 4) | (tv0 << 4);
+  }
+  if ( mChunk & (1 << 8) ) {
+    // 入力3の反転
+    auto tv1 = tv & 0xFF00;
+    auto tv0 = tv & 0x00FF;
+    tv = (tv1 >> 8) | (tv0 << 8);
+  }
+  Tv4 new_tv = 0;
+  for ( SizeType b = 0; b < 16; ++ b ) {
+    if ( tv & b ) {
+      auto new_b = xform_tbl[_index()][b];
+      new_tv |= new_b;
+    }
+  }
+  return new_tv;
 }
 
 // @brief 逆変換を返す．
 Npn4
 Npn4::operator~() const
 {
+  auto inv_index = inv_tbl[_index()];
+  std::uint16_t chunk = inv_index;
+  auto& inv_iperm = perm_list[inv_index];
+  if ( oinv() ) {
+    chunk |= (1 << 9);
+  }
+  for ( SizeType i = 0; i < 4; ++ i ) {
+    if ( iinv(inv_iperm[i]) ) {
+      chunk |= (1 << (i + 5));
+    }
+  }
+  return Npn4(chunk);
 }
 
 // @brief 合成を返す．
@@ -132,6 +203,24 @@ Npn4::operator*(
   const Npn4& right
 ) const
 {
+  static std::uint8_t compose_tbl[][24] = {
+#include "rwt/compose_tbl.h"
+  };
+  auto index1 = _index();
+  auto index2 = right._index();
+  auto index = compose_tbl[index1][index2];
+  std::uint16_t chunk = index;
+  if ( oinv() != right.oinv() ) {
+    chunk |= (1 << 9);
+  }
+  auto inv_index = inv_tbl[_index()];
+  auto& inv_iperm = perm_list[inv_index];
+  for ( SizeType i = 0; i < 4; ++ i ) {
+    if ( iinv(i) != right.iinv(inv_iperm[i]) ) {
+      chunk |= (1 << (i + 5));
+    }
+  }
+  return Npn4(chunk);
 }
 
 END_NAMESPACE_YM_AIG
