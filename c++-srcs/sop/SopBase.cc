@@ -26,7 +26,7 @@ _count(
 {
   static const int table[] = {
     // utils/gen_litcount_tbl.py で生成
-#include "litcount_tbl.h"
+#include "sop/litcount_tbl.h"
   };
 
   return table[pat];
@@ -110,7 +110,7 @@ byte_literal_list(
 {
   static const int table[] = {
     // utils/gen_soplbit_tbl.py で生成
-#include "soplbit_tbl.h"
+#include "sop/soplbit_tbl.h"
   };
 
   while ( byte != 0xFFU ) {
