@@ -1,0 +1,142 @@
+#ifndef NPN4_H
+#define NPN4_H
+
+/// @file Npn4.h
+/// @brief Npn4 のヘッダファイル
+/// @author Yusuke Matsunaga (松永 裕介)
+///
+/// Copyright (C) 2025 Yusuke Matsunaga
+/// All rights reserved.
+
+#include "ym/aig.h"
+
+
+BEGIN_NAMESPACE_YM_AIG
+
+//////////////////////////////////////////////////////////////////////
+/// @class Npn4 Npn4.h "Npn4.h"
+/// @brief 4入力関数のNPN変換を表すクラス
+///
+/// - 出力の反転の有無
+/// - 入力の反転の有無
+/// - 入力変数の順列
+/// を持つ．
+///
+/// 変換としてはまず，入出力の反転を行った後に順列の入れ替えを行うものとする．
+///
+/// 全部で 2^1 x 2^4 x 4! = 2 x 16 x 24 = 768 通りしかない．
+/// 緩めのパッキングでも10ビットで表せる．
+/// 演算は表引きで行う．
+//////////////////////////////////////////////////////////////////////
+class Npn4
+{
+public:
+
+  /// @brief 4入力関数を表す真理値表のパタン
+  using Tv4 = std::uint16_t;
+
+public:
+
+  /// @brief コンストラクタ
+  ///
+  /// 恒等変換となる．
+  Npn4() = default;
+
+  /// @brief 内容を指定したコンストラクタ
+  ///
+  /// iinv, iperm が不正な時は std::invalid_argument 例外を送出する．
+  Npn4(
+    bool oinv,                    ///< [in] 出力の反転属性
+    const vector<bool>& iinv,     ///< [in] 入力の反転属性(4つ)
+    const vector<SizeType>& iperm ///< [in] 入力の順列
+  );
+
+  /// @brief 恒等変換を返すクラスメソッド
+  static
+  Npn4
+  identity()
+  {
+    return Npn4();
+  }
+
+  /// @brief デストラクタ
+  ~Npn4() = default;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 出力の反転属性を返す．
+  bool
+  oinv() const
+  {
+    return static_cast<bool>((mChunk >> 9) & 1);
+  }
+
+  /// @brief 入力の反転属性を返す．
+  bool
+  iinv(
+    SizeType pos ///< [in] 入力番号 (0 <= pos < 4)
+  ) const
+  {
+    if ( pos < 0 || 4 <= pos ) {
+      std::out_of_range{"pos is out of range"};
+    }
+    return static_cast<bool>((mChunk >> (pos + 5)) & 1);
+  }
+
+  /// @brief 入力の置換結果を返す．
+  /// @return pos 番目の入力の置換先の番号を返す．
+  SizeType
+  iperm(
+    SizeType pos ///< [in] 入力番号 (0 <= pos < 4)
+  ) const;
+
+  /// @brief 関数のNPN変換結果を求める．
+  Tv4
+  operator()(
+    Tv4 tv ///< [in] 関数の真理値表パタン
+  ) const;
+
+  /// @brief 逆変換を返す．
+  Npn4
+  operator~() const;
+
+  /// @brief 合成を返す．
+  Npn4
+  operator*(
+    const Npn4& right
+  ) const;
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief iperm の範囲チェックなし
+  SizeType
+  _iperm(
+    SizeType pos
+  ) const
+  {
+    auto b0 = mBitChunk[pos * 2 + 0];
+    auto b1 = mBitChunk[pos * 2 + 1];
+  }
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // すべての情報をパックしたもの
+  std::uint16_t mChunk{0};
+
+};
+
+END_NAMESPACE_YM_AIG
+
+#endif // NPN4_H
