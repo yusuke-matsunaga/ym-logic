@@ -30,3 +30,9 @@ ym_add_gtest(logic_rwt_CutMgr_test
   $<TARGET_OBJECTS:ym_logic_obj_d>
   ${YM_SUBMODULE_OBJ_D_LIST}
   )
+
+ym_add_gtest(logic_rwt_Npn4_test
+  Npn4Test.cc
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  ${YM_SUBMODULE_OBJ_D_LIST}
+  )

@@ -96,9 +96,18 @@ public:
 
   /// @brief 関数のNPN変換結果を求める．
   Tv4
-  operator()(
+  xform(
     Tv4 tv ///< [in] 関数の真理値表パタン
   ) const;
+
+  /// @brief xform() の別名
+  Tv4
+  operator()(
+    Tv4 tv ///< [in] 関数の真理値表パタン
+  ) const
+  {
+    return xform(tv);
+  }
 
   /// @brief 逆変換を返す．
   Npn4
@@ -108,6 +117,30 @@ public:
   Npn4
   operator*(
     const Npn4& right
+  ) const;
+
+  /// @brief 等価比較演算
+  bool
+  operator==(
+    const Npn4& right
+  ) const
+  {
+    return mChunk == right.mChunk;
+  }
+
+  /// @brief 非等価比較演算
+  bool
+  operator!=(
+    const Npn4& right
+  ) const
+  {
+    return !operator==(right);
+  }
+
+  /// @brief 内容を出力する．
+  void
+  print(
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const;
 
 
@@ -140,6 +173,18 @@ private:
   std::uint16_t mChunk{0};
 
 };
+
+/// @brief ストリーム出力
+inline
+std::ostream&
+operator<<(
+  std::ostream& s,
+  const Npn4& npn
+)
+{
+  npn.print(s);
+  return s;
+}
 
 END_NAMESPACE_YM_AIG
 

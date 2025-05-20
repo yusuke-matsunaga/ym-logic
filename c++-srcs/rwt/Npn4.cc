@@ -137,7 +137,7 @@ Npn4::iperm(
 
 /// @brief 関数のNPN変換結果を求める．
 Npn4::Tv4
-Npn4::operator()(
+Npn4::xform(
   Tv4 tv
 ) const
 {
@@ -145,6 +145,10 @@ Npn4::operator()(
 #include "rwt/xform_tbl.h"
   };
 
+  if ( mChunk & (1 << 9) ) {
+    // 出力の反転
+    tv = ~tv & 0xFFFF;
+  }
   if ( mChunk & (1 << 5) ) {
     // 入力0の反転
     auto tv1 = tv & 0xAAAA;
@@ -170,10 +174,11 @@ Npn4::operator()(
     tv = (tv1 >> 8) | (tv0 << 8);
   }
   Tv4 new_tv = 0;
+  auto& xf = xform_tbl[_index()];
   for ( SizeType b = 0; b < 16; ++ b ) {
-    if ( tv & b ) {
-      auto new_b = xform_tbl[_index()][b];
-      new_tv |= new_b;
+    if ( tv & (1 << b) ) {
+      auto new_b = xf[b];
+      new_tv |= (1 << new_b);
     }
   }
   return new_tv;
@@ -221,6 +226,40 @@ Npn4::operator*(
     }
   }
   return Npn4(chunk);
+}
+
+BEGIN_NONAMESPACE
+
+void
+print_input(
+  std::ostream& s,
+  bool iinv,
+  SizeType iperm
+)
+{
+  if ( iinv ) {
+    s << "~";
+  }
+  s << iperm;
+}
+
+END_NONAMESPACE
+
+// @brief 内容を出力する．
+void
+Npn4::print(
+  std::ostream& s
+) const
+{
+  if ( oinv() ) {
+    s << "~";
+  }
+  s << "(";
+  print_input(s, iinv(0), iperm(0));
+  print_input(s, iinv(1), iperm(1));
+  print_input(s, iinv(2), iperm(2));
+  print_input(s, iinv(3), iperm(3));
+  s << ")";
 }
 
 END_NAMESPACE_YM_AIG
