@@ -221,7 +221,7 @@ Npn4::operator*(
   auto inv_index = inv_tbl[_index()];
   auto& inv_iperm = perm_list[inv_index];
   for ( SizeType i = 0; i < 4; ++ i ) {
-    if ( iinv(i) != right.iinv(inv_iperm[i]) ) {
+    if ( iinv(i) != right.iinv(iperm(i)) ) {
       chunk |= (1 << (i + 5));
     }
   }
