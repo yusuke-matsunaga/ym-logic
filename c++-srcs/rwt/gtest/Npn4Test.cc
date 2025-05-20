@@ -222,13 +222,15 @@ TEST_F(Npn4Test, compose)
 	auto oinv2 = static_cast<bool>((b2 >> 4) & 1);
 	std::vector<bool> iinv2(4);
 	for ( SizeType i2 = 0; i2 < 4; ++ i2 ) {
-	  iinv[i2] = static_cast<bool>((b2 >> i2) & 1);
+	  iinv2[i2] = static_cast<bool>((b2 >> i2) & 1);
 	}
 	for ( auto& iperm2: iperm_list ) {
 	  auto npn2 = Npn4(oinv2, iinv2, iperm2);
 	  auto npn3 = npn * npn2;
 	  auto npn4 = compose(npn, npn2);
-	  EXPECT_EQ( npn4, npn3 );
+	  std::ostringstream buf;
+	  buf << npn << " * " << npn2 << " = " << npn3;
+	  EXPECT_EQ( npn4, npn3 ) << buf.str();
 	}
       }
     }
