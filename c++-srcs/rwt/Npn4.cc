@@ -185,12 +185,20 @@ Npn4::xform(
 }
 
 // @brief 正規化を行う．
-Tv4
+Npn4::Tv4
 Npn4::normalize(
   Tv4 tv,
   Npn4& npn
 )
 {
+  static std::uint16_t canon_tbl[] = {
+#include "rwt/canon_tbl.h"
+  };
+  SizeType index = tv * 2;
+  auto ctv = canon_tbl[index + 0];
+  auto chunk = canon_tbl[index + 1];
+  npn = Npn4(chunk);
+  return ctv;
 }
 
 // @brief 逆変換を返す．

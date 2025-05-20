@@ -94,6 +94,65 @@ def mk_xform_tbl():
         xform_tbl.append(xform_tbl1)
     return xform_tbl
 
+def xform(tv, oinv, iinv_list, iperm_list):
+    if oinv:
+        tv = ~tv & 0xFFFF
+    if iinv_list[0]:
+        tv0 = tv & 0x5555
+        tv1 = tv & 0xAAAA
+        tv = (tv1 >> 1) | (tv0 << 1)
+    if iinv_list[1]:
+        tv0 = tv & 0x3333
+        tv1 = tv & 0xCCCC
+        tv = (tv1 >> 2) | (tv0 << 2)
+    if iinv_list[2]:
+        tv0 = tv & 0x0F0F
+        tv1 = tv & 0xF0F0
+        tv = (tv1 >> 4) | (tv0 << 4)
+    if iinv_list[3]:
+        tv0 = tv & 0x00FF
+        tv1 = tv & 0xFF00
+        tv = (tv1 >> 8) | (tv0 << 8)
+    xtv = 0
+    for b in range(16):
+        if tv & (1 << b):
+            new_b = 0
+            for i in range(4):
+                if b & (1 << i):
+                    new_b |= (1 << iperm_list[i])
+            xtv |= (1 << new_b)
+    return xtv
+
+def inv_npn(oinv, iinv_list, iperm_list):
+    inv_iinv_list = [ False, False, False, False ]
+    inv_iperm_list = [ 0, 1, 2, 3 ]
+    for i in range(4):
+        i2 = iperm_list[i]
+        inv_iinv_list[i2] = iinv_list[i]
+        inv_iperm_list[i2] = i
+    return oinv, inv_iinv_list, inv_iperm_list
+
+def mk_canon_tbl():
+    """正規化用のテーブルを作る．
+    """
+    perm_list = mk_perm_list()
+    canon_tbl = [ None for _ in range(0x10000) ]
+    rep_count = 0
+    for tv in range(0x10000):
+        if canon_tbl[tv] is not None:
+            continue
+        rep_count += 1
+        canon_tbl[tv] = (tv, (False, (False, False, False, False), (0, 1, 2, 3)))
+        for b in range(32):
+            oinv = ((b >> 4) & 1) == 1
+            iinv_list = [ ((b >> i) & 1) == 1 for i in range(4) ]
+            for perm in perm_list:
+                tv1 = xform(tv, oinv, iinv_list, perm)
+                if canon_tbl[tv1] is None:
+                    canon_tbl[tv1] = (tv, (oinv, iinv_list, perm))
+    assert rep_count == 222
+    return canon_tbl
+
 
 class Npn4:
     """４入力関数のNPN変換を表すクラス
@@ -104,6 +163,7 @@ class Npn4:
     inv_tbl = mk_inv_tbl()
     compose_tbl = mk_compose_tbl()
     xform_tbl = mk_xform_tbl()
+    canon_tbl = mk_canon_tbl()
 
     def __init__(self, *,
                  oinv=False,
@@ -118,7 +178,7 @@ class Npn4:
         """
         sig = perm2sig(self.__iperm)
         ans = Npn4.index_tbl[sig]
-        assert index < 24
+        assert ans < 24
         if self.__oinv:
             ans |= (1 << 9)
         for i in range(4):
@@ -144,3 +204,44 @@ class Npn4:
         if pos < 0 or 4 <= pos:
             raise ValueError
         return self.__iperm[pos]
+
+    def inv(self):
+        """逆変換を返す．
+        """
+        oinv = self.oinv()
+        iinv_list = [ False, False, False, False ]
+        iperm_list = [ 0, 0, 0, 0 ]
+        for i in range(4):
+            i2 = self.iperm(i)
+            iinv_list[i2] = self.iinv(i)
+            iperm_list[i2] = i
+        return Npn4(oinv, iinv_list, iperm_list)
+
+    def xform(self, tv):
+        if self.oinv():
+            tv = ~tv & 0xFFFF
+        if self.iinv(0):
+            tv0 = tv & 0x5555
+            tv1 = tv & 0xAAAA
+            tv = (tv1 >> 1) | (tv0 << 1)
+        if self.iinv(1):
+            tv0 = tv & 0x3333
+            tv1 = tv & 0xCCCC
+            tv = (tv1 >> 2) | (tv0 << 2)
+        if self.iinv(2):
+            tv0 = tv & 0x0F0F
+            tv1 = tv & 0xF0F0
+            tv = (tv1 >> 4) | (tv0 << 4)
+        if self.iinv(3):
+            tv0 = tv & 0x00FF
+            tv1 = tv & 0xFF00
+            tv = (tv1 >> 8) | (tv0 << 8)
+        xtv = 0
+        for b in range(16):
+            if tv & (1 << b):
+                new_b = 0
+                for i in range(4):
+                    if b & (1 << i):
+                        new_b |= (1 << self.iperm(i))
+                xtv |= (1 << new_b)
+        return xtv

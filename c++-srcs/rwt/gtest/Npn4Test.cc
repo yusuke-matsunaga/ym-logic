@@ -237,4 +237,28 @@ TEST_F(Npn4Test, compose)
   }
 }
 
+TEST_F(Npn4Test, normalize)
+{
+  std::unordered_set<Npn4::Tv4> rep_funcs;
+  for ( SizeType tv = 0; tv < 0x10000; ++ tv ) {
+    Npn4 npn;
+    auto ctv = Npn4::normalize(tv, npn);
+    if ( rep_funcs.count(ctv) == 0 ) {
+      rep_funcs.emplace(ctv);
+    }
+    auto tv1 = npn.xform(ctv);
+    std::ostringstream buf;
+    buf << hex << setw(4) << setfill('0')
+	<< tv << "| "
+	<< setw(4) << ctv
+	<< dec << setfill(' ')
+	<< ", " << npn
+	<< " => "
+	<< hex << setw(4) << setfill('0')
+	<< tv1 << setfill(' ') << dec;
+    EXPECT_EQ( tv1, tv ) << buf.str();
+  }
+  EXPECT_EQ( 222, rep_funcs.size() );
+}
+
 END_NAMESPACE_YM_AIG
