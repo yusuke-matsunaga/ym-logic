@@ -109,6 +109,14 @@ public:
     return xform(tv);
   }
 
+  /// @brief 正規化を行う．
+  static
+  Tv4
+  normalize(
+    Tv4 tv,   ///< [in] 元の関数
+    Npn4& npn ///< [out] 正規化用の変換
+  );
+
   /// @brief 逆変換を返す．
   Npn4
   operator~() const;

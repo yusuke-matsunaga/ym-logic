@@ -43,8 +43,7 @@ END_NONAMESPACE
 PatMgr::PatMgr(
 ) : mPatListArray(1 << 16)
 {
-  static
-    std::uint16_t pat_data[] = {
+  static std::uint16_t pat_data[] = {
 #include "pat_data.h"
   };
   // テーブルには EOD が入っているので -1

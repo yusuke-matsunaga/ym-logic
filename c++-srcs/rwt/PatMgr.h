@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
+#include "Npn4.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
@@ -18,9 +19,17 @@ class PatNode;
 //////////////////////////////////////////////////////////////////////
 /// @class PatMgr PatMgr.h "PatMgr.h"
 /// @brief Rewrite 用のパタンマネージャ
+///
+/// 関数の真理値表を表す数値(16ビット)をキーとして対応するパタンのリストを返す．
+/// ただし，内部では Npn4 に基づく正規化を行っておく．
 //////////////////////////////////////////////////////////////////////
 class PatMgr
 {
+public:
+
+  // 4入力関数の真理値表を表す型
+  using Tv4 = Npn4::Tv4;
+
 public:
 
   /// @brief コンストラクタ
@@ -38,7 +47,7 @@ public:
   /// @brief 関数をキーにして対応するパタンの根のノードをリストを返す．
   const vector<const PatNode*>&
   pat_list(
-    SizeType tv ///< [in] 関数の真理値表を表す数値
+    Tv4 tv ///< [in] 関数の真理値表を表す数値
   ) const
   {
     if ( tv >= mPatListArray.size() ) {

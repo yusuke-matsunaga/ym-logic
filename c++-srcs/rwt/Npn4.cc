@@ -184,6 +184,15 @@ Npn4::xform(
   return new_tv;
 }
 
+// @brief 正規化を行う．
+Tv4
+Npn4::normalize(
+  Tv4 tv,
+  Npn4& npn
+)
+{
+}
+
 // @brief 逆変換を返す．
 Npn4
 Npn4::operator~() const
