@@ -16,6 +16,20 @@ BEGIN_NAMESPACE_YM_AIG
 
 class PatNode;
 
+
+//////////////////////////////////////////////////////////////////////
+/// @brief 置き換え用のパタンを表す構造体
+///
+/// - 葉のノードは 1 〜 4 番のノード
+/// - npn の変換を施すことで代表関数になる．
+//////////////////////////////////////////////////////////////////////
+struct PatGraph
+{
+  const PatNode* root; ///< 根のノード
+  Npn4 npn;            ///< 正規化用の変換
+};
+
+
 //////////////////////////////////////////////////////////////////////
 /// @class PatMgr PatMgr.h "PatMgr.h"
 /// @brief Rewrite 用のパタンマネージャ
@@ -44,16 +58,20 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 関数をキーにして対応するパタンの根のノードをリストを返す．
-  const vector<const PatNode*>&
-  pat_list(
-    Tv4 tv ///< [in] 関数の真理値表を表す数値
+  /// @brief 関数をキーにして対応するパタンのリストを返す．
+  const std::vector<PatGraph>&
+  get_pat(
+    Tv4 tv,   ///< [in] 関数の真理値表を表す数値
+    Npn4& npn ///< [out] 代表関数に対するNPN変換
   ) const
   {
-    if ( tv >= mPatListArray.size() ) {
-      throw std::invalid_argument{"tv is out of range"};
+    auto rep_tv = Npn4::normalize(tv, npn);
+    if ( mPatGraphDict.count(rep_tv) > 0 ) {
+      return mPatGraphDict.at(rep_tv);
     }
-    return mPatListArray[tv];
+    // 空のリスト
+    static std::vector<PatGraph> dummy{};
+    return dummy;
   }
 
 
@@ -72,7 +90,11 @@ private:
     const PatNode* child0, ///< [in] 左の子供
     bool inv0,             ///< [in] 左の子供の反転フラグ
     const PatNode* child1, ///< [in] 右の子供
-    bool inv1              ///< [in] 右の子供の反転フラグ
+    bool inv1,             ///< [in] 右の子供の反転フラグ
+    bool input0,           ///< [in] input0 フラグ
+    bool input1,           ///< [in] input1 フラグ
+    bool input2,           ///< [in] input2 フラグ
+    bool input3            ///< [in] input3 フラグ
   );
 
 
@@ -82,10 +104,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // ノードの本体の配列
-  vector<PatNode> mNodeArray;
+  std::vector<PatNode> mNodeArray;
 
-  // 真理値表をキーにして根のノードのリストを保持する配列
-  vector<vector<const PatNode*>> mPatListArray;
+  // 代表関数をキーにしてパタングラフのリストを保持する配列
+  std::unordered_map<Tv4, std::vector<PatGraph>> mPatGraphDict;
 
 };
 

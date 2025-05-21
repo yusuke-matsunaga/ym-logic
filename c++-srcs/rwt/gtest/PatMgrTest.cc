@@ -18,24 +18,19 @@ TEST(PatMgrTest, init)
   PatMgr mgr;
 
   for ( SizeType tv = 0; tv < 0x10000; ++ tv ) {
-    auto& pat_list = mgr.pat_list(tv);
+    Npn4 rep_npn;
+    auto& pat_list = mgr.get_pat(tv, rep_npn);
     if ( pat_list.empty() ) {
       continue;
     }
-    cout << "F" << hex << tv << dec << endl;
-    for ( auto node: pat_list ) {
-      cout << "  Node#" << node->id() << endl;
-      cout << "    ";
-      if ( node->is_xor() ) {
-	cout << "XOR";
-      }
-      else {
-	cout << "AND";
-      }
-      cout << endl;
-      cout << "    TV:    " << hex << node->tv() << dec << endl
-	   << "    Size:  " << node->size() << endl
-	   << "    Level: " << node->level() << endl;
+    cout << hex << setw(4) << setfill('0') << tv
+	 << dec << setfill(' ') << endl;
+    for ( auto& graph: pat_list ) {
+      auto root = graph.root;
+      auto npn = graph.npn * rep_npn;
+      cout << "  Node#" << root->id() << ": " << npn << endl;
+      auto tv1 = npn.xform(root->tv());
+      EXPECT_EQ( tv, tv1 );
     }
   }
 }
