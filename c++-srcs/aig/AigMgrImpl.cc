@@ -28,6 +28,21 @@ AigMgrImpl::~AigMgrImpl()
 {
 }
 
+// @brief ANDノードの入力側からのトポロジカル順のリストを得る．
+std::vector<AigNode*>
+AigMgrImpl::and_list() const
+{
+  std::vector<AigNode*> node_list;
+  node_list.reserve(and_num());
+  for ( auto& node: mNodeArray ) {
+    if ( node->is_input() || node->ref_count() == 0 ) {
+      continue;
+    }
+    node_list.push_back(node.get());
+  }
+  return node_list;
+}
+
 // @brief 論理シミュレーションを行う．
 AigBitVect
 AigMgrImpl::eval(
@@ -352,6 +367,34 @@ AigMgrImpl::cofactor_sub(
     new_edge = ~new_edge;
   }
   return new_edge;
+}
+
+// @brief 参照回数が0のノードを取り除く
+void
+AigMgrImpl::sweep()
+{
+  // mNodeArray は unique_ptr<> の配列なのでちょっと面倒
+  // とりあえず，削除されるノードを末尾に寄せて最後に
+  // erase() する．
+  auto rpos = mNodeArray.begin();
+  auto epos = mNodeArray.end();
+  auto wpos = rpos;
+  SizeType id = 0;
+  for ( ; rpos != epos; ++ rpos ) {
+    auto& node_ptr = *rpos;
+    if ( node_ptr->is_input() || node_ptr->ref_count() > 0 ) {
+      if ( wpos != rpos ) {
+	std::swap(*wpos, *rpos);
+      }
+      node_ptr->mId = id;
+      ++ id;
+      ++ wpos;
+    }
+  }
+  if ( wpos != epos ) {
+    // ここで参照回数0のノードが開放される．
+    mNodeArray.erase(wpos, epos);
+  }
 }
 
 END_NAMESPACE_YM_AIG

@@ -150,4 +150,11 @@ AigMgr::cofactor(
   return elist_to_hlist(ans_list);
 }
 
+// @brief 参照されていないノードを削除する．
+void
+AigMgr::sweep()
+{
+  get()->sweep();
+}
+
 END_NAMESPACE_YM_AIG

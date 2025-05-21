@@ -141,6 +141,10 @@ public:
     const vector<AigHandle>& handle_list ///< [in] 対象のハンドルのリスト
   );
 
+  /// @brief 参照されていないノードを削除する．
+  void
+  sweep();
+
   /// @brief 等価比較演算子
   bool
   operator==(

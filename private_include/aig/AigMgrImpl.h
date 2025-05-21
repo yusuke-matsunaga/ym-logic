@@ -75,6 +75,10 @@ public:
     return mAndTable.size();
   }
 
+  /// @brief ANDノードの入力側からのトポロジカル順のリストを得る．
+  std::vector<AigNode*>
+  and_list() const;
+
   /// @brief 論理シミュレーションを行う．
   /// @return output_list に対応する出力値のリストを返す．
   AigBitVect
@@ -230,6 +234,12 @@ public:
     const vector<AigEdge>& edge_list   ///< [in] 対象の枝のリスト
   );
 
+  /// @brief 参照回数が0のノードを取り除く
+  ///
+  /// ノードのID番号が変わる可能性がある．
+  void
+  sweep();
+
   /// @brief 枝の参照回数を増やす．
   void
   inc_ref(
@@ -305,18 +315,9 @@ private:
   _new_input()
   {
     auto input_id = mInputArray.size();
-    AigNode* node = nullptr;
-    if ( mAvailList.empty() ) {
-      auto id = mNodeArray.size();
-      node = new AigNode(id, input_id);
-      mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-    }
-    else {
-      auto id = mAvailList.back();
-      mAvailList.pop_back();
-      node = mNodeArray[id].get();
-      node->_set_input(input_id);
-    }
+    auto id = mNodeArray.size();
+    auto node = new AigNode(id, input_id);
+    mNodeArray.push_back(std::unique_ptr<AigNode>{node});
     mInputArray.push_back(node);
     ++ mNodeNum;
     return node;
@@ -329,18 +330,9 @@ private:
     AigEdge fanin1
   )
   {
-    AigNode* node = nullptr;
-    if ( mAvailList.empty() ) {
-      auto id = mNodeArray.size();
-      node = new AigNode{id, fanin0, fanin1};
-      mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-    }
-    else {
-      auto id = mAvailList.back();
-      mAvailList.pop_back();
-      node = mNodeArray[id].get();
-      node->_set_and(fanin0, fanin1);
-    }
+    auto id = mNodeArray.size();
+    auto node = new AigNode{id, fanin0, fanin1};
+    mNodeArray.push_back(std::unique_ptr<AigNode>{node});
     inc_ref(fanin0);
     inc_ref(fanin1);
     mAndTable.insert(node);
@@ -350,7 +342,7 @@ private:
 
   /// @brief ノードを削除する．
   ///
-  /// 実際には mAvailList に記録される．
+  /// 実際には sweep() を呼ぶまでは削除されない．
   void
   _free_node(
     AigNode* node
@@ -360,7 +352,6 @@ private:
       // 入力ノードは削除しない．
       return;
     }
-    mAvailList.push_back(node->id());
     -- mNodeNum;
     mAndTable.erase(node);
     dec_ref(node->fanin0());
@@ -382,9 +373,6 @@ private:
   // ID番号をキーにして AigNode を収めた配列
   // AigNode の所有権を持つ．
   std::vector<std::unique_ptr<AigNode>> mNodeArray;
-
-  // 参照回数が0になったノード番号のリスト
-  std::vector<SizeType> mAvailList;
 
   // 入力番号をキーにして入力ノードを収めた配列
   std::vector<AigNode*> mInputArray;

@@ -50,6 +50,10 @@ AigHandle::AigHandle(
 // @brief デストラクタ
 AigHandle::~AigHandle()
 {
+  if ( !_edge().is_const() ) {
+    auto mgr = get();
+    mgr->dec_ref(_edge());
+  }
 }
 
 // @brief 定数0のハンドルを返す．

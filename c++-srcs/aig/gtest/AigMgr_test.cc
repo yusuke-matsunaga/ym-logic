@@ -26,6 +26,10 @@ TEST(AigMgrTest, make_zero)
 
   auto h = mgr.make_zero();
   EXPECT_TRUE( h.is_zero() );
+  EXPECT_FALSE( h.is_one() );
+  EXPECT_TRUE( h.is_const() );
+  EXPECT_FALSE( h.is_input() );
+  EXPECT_FALSE( h.is_and() );
 
   EXPECT_EQ( 0, mgr.node_num() );
   EXPECT_EQ( 0, mgr.input_num() );
@@ -37,7 +41,11 @@ TEST(AigMgrTest, make_one)
   AigMgr mgr;
 
   auto h = mgr.make_one();
+  EXPECT_FALSE( h.is_zero() );
   EXPECT_TRUE( h.is_one() );
+  EXPECT_TRUE( h.is_const() );
+  EXPECT_FALSE( h.is_input() );
+  EXPECT_FALSE( h.is_and() );
 
   EXPECT_EQ( 0, mgr.node_num() );
   EXPECT_EQ( 0, mgr.input_num() );
@@ -49,8 +57,12 @@ TEST(AigMgrTest, make_input)
   AigMgr mgr;
 
   auto h = mgr.make_input();
+  EXPECT_FALSE( h.is_zero() );
+  EXPECT_FALSE( h.is_one() );
+  EXPECT_FALSE( h.is_const() );
   EXPECT_TRUE( h.is_input() );
   EXPECT_EQ( 0, h.input_id() );
+  EXPECT_FALSE( h.is_and() );
 
   EXPECT_EQ( 1, mgr.node_num() );
   EXPECT_EQ( 1, mgr.input_num() );
@@ -58,6 +70,33 @@ TEST(AigMgrTest, make_input)
 
   auto mgr2 = h.mgr();
   EXPECT_EQ( mgr, mgr2 );
+}
+
+TEST(AigMgrTest, and_op2)
+{
+  AigMgr mgr;
+
+  auto h1 = mgr.make_input();
+  auto h2 = mgr.make_input();
+
+  auto ho = mgr.and_op({h1, h2});
+  EXPECT_FALSE( ho.is_zero() );
+  EXPECT_FALSE( ho.is_one() );
+  EXPECT_FALSE( ho.is_const() );
+  EXPECT_FALSE( ho.is_input() );
+  EXPECT_TRUE( ho.is_and() );
+
+  EXPECT_EQ( 3, mgr.node_num() );
+  EXPECT_EQ( 1, mgr.and_num() );
+
+  vector<AigBitVect> input_vals{0xCC, 0xAA};
+  auto bv = ho.eval(input_vals);
+  EXPECT_EQ( 0x88, bv );
+
+  auto fanin_list = ho.ex_fanin_list();
+  EXPECT_EQ( 2, fanin_list.size() );
+  EXPECT_EQ( h1, fanin_list[0] );
+  EXPECT_EQ( h2, fanin_list[1] );
 }
 
 TEST(AigMgrTest, and_op3)
@@ -69,6 +108,10 @@ TEST(AigMgrTest, and_op3)
   auto h3 = mgr.make_input();
 
   auto ho = mgr.and_op({h1, h2, h3});
+  EXPECT_FALSE( ho.is_zero() );
+  EXPECT_FALSE( ho.is_one() );
+  EXPECT_FALSE( ho.is_const() );
+  EXPECT_FALSE( ho.is_input() );
   EXPECT_TRUE( ho.is_and() );
 
   EXPECT_EQ( 5, mgr.node_num() );
@@ -385,6 +428,33 @@ TEST(AigMgrTest, from_expr_xor)
   vector<AigBitVect> input_vals{0xC, 0xA};
   auto bv = h.eval(input_vals);
   EXPECT_EQ( 0x6, bv );
+}
+
+TEST(AigMgrTest, sweep)
+{
+  AigMgr mgr;
+
+  auto h1 = mgr.make_input();
+  auto h2 = mgr.make_input();
+  auto h3 = mgr.make_input();
+
+  {
+    auto ho = mgr.and_op({h1, h2, h3});
+    EXPECT_TRUE( ho.is_and() );
+
+    EXPECT_EQ( 5, mgr.node_num() );
+    EXPECT_EQ( 2, mgr.and_num() );
+  }
+  mgr.sweep();
+  EXPECT_EQ( 3, mgr.node_num() );
+  EXPECT_EQ( 0, mgr.and_num() );
+  {
+    auto ho = mgr.and_op({h1, h2, h3});
+    EXPECT_TRUE( ho.is_and() );
+
+    EXPECT_EQ( 5, mgr.node_num() );
+    EXPECT_EQ( 2, mgr.and_num() );
+  }
 }
 
 END_NAMESPACE_YM
