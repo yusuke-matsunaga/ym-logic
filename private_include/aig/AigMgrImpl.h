@@ -234,6 +234,23 @@ public:
     const vector<AigEdge>& edge_list   ///< [in] 対象の枝のリスト
   );
 
+  /// @brief AND ノードを探す．
+  ///
+  /// なければ nullptr を返す．
+  AigNode*
+  find_and(
+    const AigEdge& fanin0, ///< [in] ファンイン0のハンドル
+    const AigEdge& fanin1  ///< [in] ファンイン1のハンドル
+  ) const
+  {
+    AigNode key{0, fanin0, fanin1};
+    auto p = mAndTable.find(&key);
+    if ( p != mAndTable.end() ) {
+      return *p;
+    }
+    return nullptr;
+  }
+
   /// @brief 参照回数が0のノードを取り除く
   ///
   /// ノードのID番号が変わる可能性がある．

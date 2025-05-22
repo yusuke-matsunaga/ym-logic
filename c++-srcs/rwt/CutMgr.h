@@ -18,10 +18,10 @@ BEGIN_NAMESPACE_YM_AIG
 /// @class Cut CutMgr.h "CutMgr.h"
 /// @brief カットを表すクラス
 ///
+/// - 根のノード
 /// - 葉のノードのリスト
-/// - 内部に含まれるノードのリスト
+/// - 内部に含まれるノードのリスト(根のノードも含む)
 /// を持つ．
-/// 根のノードはコンテキストから明らかなのでここでは保持しない．
 //////////////////////////////////////////////////////////////////////
 class Cut
 {
@@ -34,16 +34,19 @@ public:
 
   /// @brief 自身を葉とするコンストラクタ
   Cut(
-    const AigNode* node
-  ) : mLeafList{node}
+    AigNode* node
+  ) : mRoot{node},
+      mLeafList{node}
   {
   }
 
-  /// @brief コンストラクタ
+  /// @brief 通常のコンストラクタ
   Cut(
-    const std::vector<const AigNode*>& leaf_list, ///< [in] 葉のリスト
-    const std::vector<const AigNode*>& node_list  ///< [in] 内部ノードのリスト
-  ) : mLeafList{leaf_list},
+    AigNode* root,                          ///< [in] 根のノード
+    const std::vector<AigNode*>& leaf_list, ///< [in] 葉のリスト
+    const std::vector<AigNode*>& node_list  ///< [in] 内部ノードのリスト
+  ) : mRoot{root},
+      mLeafList{leaf_list},
       mNodeList{node_list}
   {
   }
@@ -57,6 +60,13 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 根のノードを返す．
+  AigNode*
+  root() const
+  {
+    return mRoot;
+  }
+
   /// @brief 葉のサイズを返す．
   SizeType
   leaf_size() const
@@ -65,14 +75,26 @@ public:
   }
 
   /// @brief 葉のノードのリストを返す．
-  const std::vector<const AigNode*>&
+  const std::vector<AigNode*>&
   leaf_list() const
   {
     return mLeafList;
   }
 
+  /// @brief 葉のノードを返す．
+  AigNode*
+  leaf(
+    SizeType pos ///< [in] 位置番号 ( 0 <= pos < leaf_size() )
+  ) const
+  {
+    if ( pos >= mLeafList.size() ) {
+      throw std::out_of_range{"pos is out of range"};
+    }
+    return mLeafList[pos];
+  }
+
   /// @brief 内部のノードのリストを返す．
-  const std::vector<const AigNode*>&
+  const std::vector<AigNode*>&
   node_list() const
   {
     return mNodeList;
@@ -80,9 +102,7 @@ public:
 
   /// @brief 論理関数を計算する．
   Tv4Type
-  calc_tv(
-    const AigNode* root ///< [in] 根のノード
-  ) const;
+  calc_tv() const;
 
 
 private:
@@ -90,11 +110,14 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
+  // 根のノード
+  AigNode* mRoot;
+
   // 葉のノードのリスト
-  std::vector<const AigNode*> mLeafList;
+  std::vector<AigNode*> mLeafList;
 
   // 内部のノードのリスト
-  std::vector<const AigNode*> mNodeList;
+  std::vector<AigNode*> mNodeList;
 
 };
 
@@ -133,7 +156,7 @@ public:
   /// @brief カットを列挙する．
   const std::vector<Cut*>&
   enum_cuts(
-    const AigNode* node ///< [in] 根のノード
+    AigNode* node ///< [in] 根のノード
   )
   {
     return _enum_cuts(node);
@@ -142,7 +165,7 @@ public:
   /// @brief ノードの削除に伴ってカットを削除する．
   void
   erase_cuts(
-    const AigNode* node ///< [in] 対象のノード
+    AigNode* node ///< [in] 対象のノード
   )
   {
     if ( mCutHash.count(node->id()) > 0 ) {
@@ -160,7 +183,7 @@ private:
   /// @brief enum_cuts() の下請け関数
   const std::vector<Cut*>&
   _enum_cuts(
-    const AigNode* node ///< [in] 根のノード
+    AigNode* node ///< [in] 根のノード
   );
 
   /// @brief 2つのカットをマージする．
@@ -169,9 +192,9 @@ private:
   /// 不正なカットの組み合わせの場合は nullptr を返す．
   Cut*
   _merge_cuts(
-    const AigNode* root, ///< [in] 根のノード
-    const Cut* cut0,     ///< [in] fanin0 のカット
-    const Cut* cut1      ///< [in] fanin1 のカット
+    AigNode* root,   ///< [in] 根のノード
+    const Cut* cut0, ///< [in] fanin0 のカット
+    const Cut* cut1  ///< [in] fanin1 のカット
   );
 
   /// @brief カットのリストを削除する．

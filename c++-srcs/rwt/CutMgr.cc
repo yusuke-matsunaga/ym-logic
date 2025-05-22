@@ -35,13 +35,13 @@ CutMgr::~CutMgr()
 /// @brief enum_cuts() の下請け関数
 const std::vector<Cut*>&
 CutMgr::_enum_cuts(
-  const AigNode* node ///< [in] 根のノード
+  AigNode* node
 )
 {
   if ( mCutHash.count(node->id()) == 0 ) {
     std::vector<Cut*> cut_list;
     { // 自身を葉とするカットを作る．
-      auto cut = new Cut({node}, {});
+      auto cut = new Cut(node);
       cut_list.push_back(cut);
     }
     if ( node->is_and() ) {
@@ -67,17 +67,17 @@ CutMgr::_enum_cuts(
 // @brief 2つのカットをマージする．
 Cut*
 CutMgr::_merge_cuts(
-  const AigNode* root,
+  AigNode* root,
   const Cut* cut0,
   const Cut* cut1
 )
 {
   // 結果の葉のリスト
-  std::vector<const AigNode*> leaf_list;
+  std::vector<AigNode*> leaf_list;
   // leaf_list 用のハッシュ
   std::unordered_set<SizeType> leaf_hash;
   // 結果のノードリスト
-  std::vector<const AigNode*> node_list;
+  std::vector<AigNode*> node_list;
   node_list.push_back(root);
   // cut0 のノードリストに対応したハッシュ
   std::unordered_set<SizeType> set0;
@@ -114,7 +114,7 @@ CutMgr::_merge_cuts(
     // サイズが大きければ不正
     return nullptr;
   }
-  return new Cut(leaf_list, node_list);
+  return new Cut(root, leaf_list, node_list);
 }
 
 END_NAMESPACE_YM_AIG

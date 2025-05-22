@@ -42,8 +42,8 @@ public:
   /// @brief 関数をセットする．
   void
   set_tv(
-    const AigNode* node, ///< [in] 対象のノード
-    Tv4Type tv           ///< [in] 論理関数
+    AigNode* node, ///< [in] 対象のノード
+    Tv4Type tv     ///< [in] 論理関数
   )
   {
     mTvDict.emplace(node->id(), tv);
@@ -52,7 +52,7 @@ public:
   /// @brief 関数を計算する．
   Tv4Type
   calc(
-    const AigNode* node ///< [in] 対象のノード
+    AigNode* node ///< [in] 対象のノード
   )
   {
     if ( mTvDict.count(node->id()) > 0 ) {
@@ -92,9 +92,7 @@ private:
 
 // @brief 論理関数を計算する．
 Cut::Tv4Type
-Cut::calc_tv(
-  const AigNode* root
-) const
+Cut::calc_tv() const
 {
   if ( leaf_size() != 4 ) {
     throw std::invalid_argument{"leaf_size != 4"};
@@ -107,7 +105,7 @@ Cut::calc_tv(
   calc_tv.set_tv(mLeafList[1], 0xCCCC);
   calc_tv.set_tv(mLeafList[2], 0xF0F0);
   calc_tv.set_tv(mLeafList[3], 0xFF00);
-  return calc_tv.calc(root);
+  return calc_tv.calc(mRoot);
 }
 
 END_NAMESPACE_YM_AIG
