@@ -121,6 +121,7 @@ public:
   /// @return サポートを表すビットベクタを返す．
   ///
   /// iビット目が1の時，i番目の入力がサポートになっていることを示す．
+  static
   std::uint8_t
   get_support(
     Tv4 tv ///< [in] 対象の関数

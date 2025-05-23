@@ -261,4 +261,43 @@ TEST_F(Npn4Test, normalize)
   EXPECT_EQ( 222, rep_funcs.size() );
 }
 
+bool
+check_support(
+  SizeType tv,
+  SizeType pos
+)
+{
+  SizeType bit = 1 << pos;
+  for ( SizeType p = 0; p < 16; ++ p ) {
+    auto p1 = p ^ bit;
+    auto m1 = (tv >> p) & 1;
+    auto m2 = (tv >> p1) & 1;
+    if ( m1 != m2 ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+TEST_F(Npn4Test, get_support)
+{
+  for ( SizeType tv = 0; tv < 0x10000; ++ tv ) {
+    std::ostringstream buf0;
+    buf0 << "tv = " << hex << setw(4) << setfill('0') << tv;
+    auto sup = Npn4::get_support(tv);
+    auto check0 = static_cast<bool>((sup >> 0) & 1);
+    auto ex_check0 = check_support(tv, 0);
+    EXPECT_EQ( ex_check0, check0 ) << buf0.str();
+    auto check1 = static_cast<bool>((sup >> 1) & 1);
+    auto ex_check1 = check_support(tv, 1);
+    EXPECT_EQ( ex_check1, check1 ) << buf0.str();
+    auto check2 = static_cast<bool>((sup >> 2) & 1);
+    auto ex_check2 = check_support(tv, 2);
+    EXPECT_EQ( ex_check2, check2 ) << buf0.str();
+    auto check3 = static_cast<bool>((sup >> 3) & 1);
+    auto ex_check3 = check_support(tv, 3);
+    EXPECT_EQ( ex_check3, check3 ) << buf0.str();
+  }
+}
+
 END_NAMESPACE_YM_AIG
