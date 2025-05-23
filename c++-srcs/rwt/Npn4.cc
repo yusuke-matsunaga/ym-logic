@@ -201,6 +201,18 @@ Npn4::normalize(
   return ctv;
 }
 
+// @brief サポートを求める．
+std::uint8_t
+Npn4::get_support(
+  Tv4 tv
+)
+{
+  static std::uint8_t sup_tbl[] = {
+#include "rwt/sup_tbl.h"
+  };
+  return sup_tbl[tv];
+}
+
 // @brief 逆変換を返す．
 Npn4
 Npn4::operator~() const

@@ -117,6 +117,15 @@ public:
     Npn4& npn ///< [out] 正規化用の変換
   );
 
+  /// @brief サポートを求める．
+  /// @return サポートを表すビットベクタを返す．
+  ///
+  /// iビット目が1の時，i番目の入力がサポートになっていることを示す．
+  std::uint8_t
+  get_support(
+    Tv4 tv ///< [in] 対象の関数
+  );
+
   /// @brief 逆変換を返す．
   Npn4
   operator~() const;

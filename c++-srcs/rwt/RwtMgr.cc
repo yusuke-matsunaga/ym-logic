@@ -142,6 +142,7 @@ RwtMgr::rewrite(
       for ( auto cut: cut_list ) {
 	// カットの関数にマッチするパタンを列挙する．
 	auto tv = cut->calc_tv(node);
+	auto sup = Npn4::get_support(tv);
 	Npn4 rep_npn;
 	auto& pat_list = cut_mgr.get_pat(tv, rep_npn);
 	for ( auto& pat: pat_list ) {
