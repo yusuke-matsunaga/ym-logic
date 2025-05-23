@@ -54,6 +54,8 @@ PatMgr::PatMgr()
   add_node(false, 0x0000, 0, 0,
 	   nullptr, false, nullptr, false,
 	   false, false, false, false);
+  mConst0 = &mNodeArray[0];
+
   // 入力0〜3を登録する．
   add_node(false, 0xAAAA, 0, 0,
 	   nullptr, false, nullptr, false,
@@ -70,6 +72,11 @@ PatMgr::PatMgr()
   if ( mNodeArray.size() != 5 ) {
     throw std::logic_error{"something wrong"};
   }
+  mInputList[0] = &mNodeArray[1];
+  mInputList[1] = &mNodeArray[2];
+  mInputList[2] = &mNodeArray[3];
+  mInputList[3] = &mNodeArray[4];
+
   // 残りはデータから読み込む．
   for ( SizeType i = 0; ; ++ i ) {
     auto base = i * 2;

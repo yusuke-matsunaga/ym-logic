@@ -74,6 +74,25 @@ public:
     return dummy;
   }
 
+  /// @brief 定数0ノードを返す．
+  const PatNode*
+  const0() const
+  {
+    return mConst0;
+  }
+
+  /// @brief 入力ノードを返す．
+  const PatNode*
+  input(
+    SizeType pos ///< [in] 入力番号 ( 0 <= pos < 4 )
+  ) const
+  {
+    if ( pos < 0 || 4 <= pos ) {
+      throw std::out_of_range{"pos is out of range"};
+    }
+    return mInputList[pos];
+  }
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -105,6 +124,12 @@ private:
 
   // ノードの本体の配列
   std::vector<PatNode> mNodeArray;
+
+  // 定数ノード
+  const PatNode* mConst0;
+
+  // 入力ノードのリスト
+  const PatNode* mInputList[4];
 
   // 代表関数をキーにしてパタングラフのリストを保持する配列
   std::unordered_map<Tv4, std::vector<PatGraph>> mPatGraphDict;

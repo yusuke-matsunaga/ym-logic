@@ -68,6 +68,13 @@ calc_merit(
   const std::vector<AigNode*>& leaf_list
 )
 {
+  // 大まかには cut の葉になっているノードよりも根のノード側にある
+  // MFFC(Maximal Fanout Free Cone)のサイズを求めればよい．
+  // めんどくさいのは見かけ上は葉のノードが実際には使われていない
+  // 場合があるということ．
+  // 例えば a & a' という式に対応するノードがあったら，実際には
+  // 定数0なので a のノードは不要となる．
+
   auto root = cut->root();
   if ( !root->is_and() ) {
     return 0;
