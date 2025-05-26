@@ -94,17 +94,22 @@ private:
 Cut::Tv4Type
 Cut::calc_tv() const
 {
-  if ( leaf_size() != 4 ) {
-    throw std::invalid_argument{"leaf_size != 4"};
-  }
 
   CalcTv calc_tv;
   // 入力の論理関数を登録する．
   // このパタンは PatMgr と一致させる必要がある．
-  calc_tv.set_tv(mLeafList[0], 0xAAAA);
-  calc_tv.set_tv(mLeafList[1], 0xCCCC);
-  calc_tv.set_tv(mLeafList[2], 0xF0F0);
-  calc_tv.set_tv(mLeafList[3], 0xFF00);
+  if ( leaf_size() > 0 ) {
+    calc_tv.set_tv(mLeafList[0], 0xAAAA);
+    if ( leaf_size() > 1 ) {
+      calc_tv.set_tv(mLeafList[1], 0xCCCC);
+      if ( leaf_size() > 2 ) {
+	calc_tv.set_tv(mLeafList[2], 0xF0F0);
+	if ( leaf_size() > 3 ) {
+	  calc_tv.set_tv(mLeafList[3], 0xFF00);
+	}
+      }
+    }
+  }
   return calc_tv.calc(mRoot);
 }
 

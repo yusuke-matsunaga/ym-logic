@@ -16,7 +16,6 @@ BEGIN_NAMESPACE_YM_AIG
 
 class PatNode;
 
-
 //////////////////////////////////////////////////////////////////////
 /// @brief 置き換え用のパタンを表す構造体
 ///
@@ -109,11 +108,7 @@ private:
     const PatNode* child0, ///< [in] 左の子供
     bool inv0,             ///< [in] 左の子供の反転フラグ
     const PatNode* child1, ///< [in] 右の子供
-    bool inv1,             ///< [in] 右の子供の反転フラグ
-    bool input0,           ///< [in] input0 フラグ
-    bool input1,           ///< [in] input1 フラグ
-    bool input2,           ///< [in] input2 フラグ
-    bool input3            ///< [in] input3 フラグ
+    bool inv1              ///< [in] 右の子供の反転フラグ
   );
 
 

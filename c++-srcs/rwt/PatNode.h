@@ -36,11 +36,7 @@ public:
     const PatNode* child0,
     bool inv0,
     const PatNode* child1,
-    bool inv1,
-    bool input0,
-    bool input1,
-    bool input2,
-    bool input3
+    bool inv1
   ) : mId{id},
       mTv{tv},
       mSize{size},
@@ -56,18 +52,6 @@ public:
     }
     if ( inv1 ) {
       mFlags.set(2);
-    }
-    if ( input0 ) {
-      mFlags.set(3);
-    }
-    if ( input1 ) {
-      mFlags.set(4);
-    }
-    if ( input2 ) {
-      mFlags.set(5);
-    }
-    if ( input3 ) {
-      mFlags.set(6);
     }
   }
 
@@ -150,34 +134,6 @@ public:
     return mFlags.test(2);
   }
 
-  /// @brief 入力0フラグ
-  bool
-  input0() const
-  {
-    return mFlags.test(3);
-  }
-
-  /// @brief 入力1フラグ
-  bool
-  input1() const
-  {
-    return mFlags.test(4);
-  }
-
-  /// @brief 入力2フラグ
-  bool
-  input2() const
-  {
-    return mFlags.test(5);
-  }
-
-  /// @brief 入力4フラグ
-  bool
-  input3() const
-  {
-    return mFlags.test(6);
-  }
-
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -191,11 +147,7 @@ private:
   // 0: EXOR フラグ
   // 1: mChild0 の反転フラグ
   // 2: mChild1 の反転フラグ
-  // 3: input0 フラグ
-  // 4: input1 フラグ
-  // 5: input2 フラグ
-  // 6: input3 フラグ
-  std::bitset<7> mFlags{0};
+  std::bitset<3> mFlags{0};
 
   // このノードの関数を表す真理値表
   std::uint16_t mTv;
