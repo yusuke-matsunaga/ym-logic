@@ -10,6 +10,7 @@
 #include "pym/PyTvFunc.h"
 #include "pym/PyLiteral.h"
 #include "pym/PyPrimType.h"
+#include "pym/PyUint64.h"
 #include "pym/PyLong.h"
 #include "pym/PyUlong.h"
 #include "pym/PyString.h"
@@ -535,7 +536,7 @@ remap_var(
   PyObject* value;
   Py_ssize_t pos = 0;
   while ( PyDict_Next(dict_obj, &pos, &key, &value) ) {
-    auto id = PyLong::Get(key);
+    auto id = PyUlong::Get(key);
     if ( id == -1 && PyErr_Occurred() ) {
       return nullptr;
     }
@@ -574,16 +575,16 @@ eval(
     nullptr
   };
   PyObject* vect_obj = nullptr;
-  unsigned long mask = ~0UL;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$k",
+  std::uint64_t mask = ~0UL;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "O|$K",
                                     const_cast<char**>(kwlist),
                                     &vect_obj,
                                     &mask) ) {
     return nullptr;
   }
   auto& val = PyExpr::_get_ref(self);
-  std::vector<unsigned long> vals;
-  if ( !PyList<std::uint64_t, PyUlong>::FromPyObject(vect_obj, vals) ) {
+  std::vector<std::uint64_t> vals;
+  if ( !PyList<std::uint64_t, PyUint64>::FromPyObject(vect_obj, vals) ) {
     PyErr_SetString(PyExc_TypeError, "argument 1 must be a vector of integer");
     return nullptr;
   }

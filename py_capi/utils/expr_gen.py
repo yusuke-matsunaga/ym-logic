@@ -8,7 +8,7 @@
 """
 
 from mk_py_capi import PyObjGen, OptArg, KwdArg, RawObjArg, ObjConvArg
-from mk_py_capi import IntArg, UintArg, LongArg, UlongArg
+from mk_py_capi import IntArg, Uint64Arg, UlongArg
 from mk_py_capi import BoolArg, StringArg
 
 
@@ -24,6 +24,7 @@ class ExprGen(PyObjGen):
                                                'pym/PyTvFunc.h',
                                                'pym/PyLiteral.h',
                                                'pym/PyPrimType.h',
+                                               'pym/PyUint64.h',
                                                'pym/PyLong.h',
                                                'pym/PyUlong.h',
                                                'pym/PyString.h',
@@ -198,7 +199,7 @@ class ExprGen(PyObjGen):
                                varname='pos',
                                initializer='0')
             with writer.gen_while_block('PyDict_Next(dict_obj, &pos, &key, &value)'):
-                writer.gen_auto_assign('id', 'PyLong::Get(key)')
+                writer.gen_auto_assign('id', 'PyUlong::Get(key)')
                 with writer.gen_if_block('id == -1 && PyErr_Occurred()'):
                     writer.gen_return('nullptr')
                 writer.gen_auto_assign('val', 'PyLong::Get(value)')
@@ -219,9 +220,9 @@ class ExprGen(PyObjGen):
                         doc_str='simplify')
 
         def meth_eval(writer):
-            writer.gen_vardecl(typename='std::vector<unsigned long>',
+            writer.gen_vardecl(typename='std::vector<std::uint64_t>',
                                varname='vals')
-            with writer.gen_if_block('!PyList<std::uint64_t, PyUlong>::FromPyObject(vect_obj, vals)'):
+            with writer.gen_if_block('!PyList<std::uint64_t, PyUint64>::FromPyObject(vect_obj, vals)'):
                 writer.gen_type_error('"argument 1 must be a vector of integer"')
 
             writer.gen_auto_assign('ans', 'val.eval(vals, static_cast<Expr::BitVectType>(mask))')
@@ -231,9 +232,9 @@ class ExprGen(PyObjGen):
                         arg_list=[RawObjArg(cvarname='vect_obj'),
                                   OptArg(),
                                   KwdArg(),
-                                  UlongArg(name='mask',
-                                           cvarname='mask',
-                                           cvardefault='~0UL')],
+                                  Uint64Arg(name='mask',
+                                            cvarname='mask',
+                                            cvardefault='~0UL')],
                         doc_str='evaluate input vector')
 
         def meth_tvfunc(writer):
