@@ -1,0 +1,69 @@
+#ifndef CALCMERIT_H
+#define CALCMERIT_H
+
+/// @file CalcMerit.h
+/// @brief CalcMerit のヘッダファイル
+/// @author Yusuke Matsunaga (松永 裕介)
+///
+/// Copyright (C) 2025 Yusuke Matsunaga
+/// All rights reserved.
+
+#include "ym/aig.h"
+
+
+BEGIN_NAMESPACE_YM_AIG
+
+class AigNode;
+
+//////////////////////////////////////////////////////////////////////
+/// @class CalcMerit CalcMerit.h "CalcMerit.h"
+/// @brief 削除されるノード数を計算するクラス
+//////////////////////////////////////////////////////////////////////
+class CalcMerit
+{
+public:
+
+  /// @brief コンストラクタ
+  CalcMerit() = default;
+
+  /// @brief デストラクタ
+  ~CalcMerit() = default;
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief カットを削除したときのメリットを計算する．
+  int
+  calc(
+    const Cut* cut, ///< [in] カット
+    Cut::Tv4Type tv ///< [in] カットに対応する論理関数
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // 内部で用いられる関数
+  //////////////////////////////////////////////////////////////////////
+
+  int
+  calc_sub(
+    AigNode* node
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // ノード番号をキーにしてカウントを保持する辞書
+  std::unordered_map<SizeType, int> mCountDict;
+
+};
+
+END_NAMESPACE_YM_AIG
+
+#endif // CALCMERIT_H

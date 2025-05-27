@@ -10,38 +10,16 @@
 #include "PatMgr.h"
 #include "PatNode.h"
 #include "CutMgr.h"
+#include "CalcMerit.h"
+#include "CalcCost.h"
 #include "aig/AigMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
 
-BEGIN_NONAMESPACE
-
-int
-calc_merit_dfs(
-  AigNode* node,
-  std::unordered_map<SizeType, int>& count_dict
-)
-{
-  if ( count_dict.count(node->id()) == 0 ) {
-    count_dict.emplace(node->id(), 0);
-  }
-  auto& count = count_dict.at(node->id());
-  ++ count;
-  int ans = 0;
-  if ( count == node->ref_count() ) {
-    if ( node->is_and() ) {
-      ++ ans;
-      ans += calc_merit_dfs(node->fanin0_node(), count_dict);
-      ans += calc_merit_dfs(node->fanin1_node(), count_dict);
-    }
-  }
-  return ans;
-}
-
 // 削除されるノード数を数える．
 int
-calc_merit(
+CalcMerit::calc(
   const Cut* cut,
   Cut::Tv4Type tv
 )
@@ -52,94 +30,50 @@ calc_merit(
   // 場合があるということ．
   // 例えば a & a' という式に対応するノードがあったら，実際には
   // 定数0なので a のノードは不要となる．
-
   auto root = cut->root();
   if ( !root->is_and() ) {
     return 0;
   }
-
-  // ノード番号をキーにしてカウントを保持する辞書
-  std::unordered_map<SizeType, int> count_dict;
 
   // サポートになっている葉のノードに印を付ける．
   auto sup = Npn4::get_support(tv);
   for ( SizeType i = 0; i < cut->leaf_size(); ++ i ) {
     if ( sup & (1 << i) ) {
       auto node = cut->leaf(i);
-      count_dict.emplace(node->id(), -1);
+      mCountDict.emplace(node->id(), -1);
     }
   }
   int ans = 1;
-  ans += calc_merit_dfs(root->fanin0_node(), count_dict);
-  ans += calc_merit_dfs(root->fanin1_node(), count_dict);
+  ans += calc_sub(root->fanin0_node());
+  ans += calc_sub(root->fanin1_node());
   return ans;
 }
 
 int
-calc_cost_dfs(
-  const PatNode* node,
-  AigMgrImpl* aig_mgr,
-  const Cut* cut,
-  const Npn4& npn,
-  std::unordered_map<SizeType, AigEdge>& node_dict
+CalcMerit::calc_sub(
+  AigNode* node
 )
 {
-  auto id = node->id();
-  if ( id == 0 ) {
-    // 定数ノードはありえない
-    throw std::invalid_argument{"constant node in pat graph"};
+  if ( mCountDict.count(node->id()) == 0 ) {
+    mCountDict.emplace(node->id(), 0);
   }
-  if ( id < 4 ) {
-    // 葉のノード
-    auto iinv = npn.iinv(id);
-    auto iperm = npn.iperm(id);
-    auto aig_node = cut->leaf(iperm);
-    auto aig_edge = AigEdge(aig_node, iinv);
-    node_dict.emplace(id, aig_edge);
-    return 0;
-  }
+  auto& count = mCountDict.at(node->id());
+  ++ count;
   int ans = 0;
-  auto node0 = node->child0();
-  auto aig_edge0 = AigEdge::zero();
-  if ( node_dict.count(node0->id()) == 0 ) {
-    ans += calc_cost_dfs(node0, aig_mgr, cut, npn, node_dict);
-  }
-  else {
-    aig_edge0 = node_dict.at(node0->id());
-  }
-  auto node1 = node->child1();
-  auto aig_edge1 = AigEdge::zero();
-  if ( node_dict.count(node1->id()) == 0 ) {
-    ans += calc_cost_dfs(node1, aig_mgr, cut, npn, node_dict);
-  }
-  else {
-    aig_edge1 = node_dict.at(node1->id());
-  }
-  if ( node->is_and() ) {
-    if ( !aig_edge0.is_zero() && !aig_edge1.is_zero() ) {
-      auto aig_node = aig_mgr->find_and(aig_edge0, aig_edge1);
-      if ( aig_node != nullptr ) {
-	auto aig_edge = AigEdge(aig_node, false);
-	node_dict.emplace(id, aig_edge);
-	return 0;
-      }
+  if ( count == node->ref_count() ) {
+    if ( node->is_and() ) {
+      ++ ans;
+      ans += calc_sub(node->fanin0_node());
+      ans += calc_sub(node->fanin1_node());
     }
-    node_dict.emplace(id, AigEdge::zero());
-    ans += 1;
-  }
-  else {
-    // XOR ノード
-    node_dict.emplace(id, AigEdge::zero());
-    ans += 3;
   }
   return ans;
 }
 
 // pat で新規に追加されるノード数を数える．
 int
-calc_cost(
+CalcCost::calc(
   const Cut* cut,
-  AigMgrImpl* aig_mgr,
   const Npn4& rep_npn,
   const PatGraph& pat
 )
@@ -154,11 +88,66 @@ calc_cost(
   auto npn1 = pat.npn * rep_npn;
   // PatNode のノード番号をキーにして対応する AigEdge を保持する辞書
   // 対応する AigEdge がない場合には AigEdge::zero() を用いる．
-  std::unordered_map<SizeType, AigEdge> node_dict;
-  return calc_cost_dfs(pat_root, aig_mgr, cut, npn1, node_dict);
+  return calc_sub(pat_root, cut, npn1);
 }
 
-END_NONAMESPACE
+int
+CalcCost::calc_sub(
+  const PatNode* node,
+  const Cut* cut,
+  const Npn4& npn
+)
+{
+  auto id = node->id();
+  if ( id == 0 ) {
+    // 定数ノードはありえない
+    throw std::invalid_argument{"constant node in pat graph"};
+  }
+  if ( id < 4 ) {
+    // 葉のノード
+    auto iinv = npn.iinv(id);
+    auto iperm = npn.iperm(id);
+    auto aig_node = cut->leaf(iperm);
+    auto aig_edge = AigEdge(aig_node, iinv);
+    mNodeDict.emplace(id, aig_edge);
+    return 0;
+  }
+  int ans = 0;
+  auto node0 = node->child0();
+  auto aig_edge0 = AigEdge::zero();
+  if ( mNodeDict.count(node0->id()) == 0 ) {
+    ans += calc_sub(node0, cut, npn);
+  }
+  else {
+    aig_edge0 = mNodeDict.at(node0->id());
+  }
+  auto node1 = node->child1();
+  auto aig_edge1 = AigEdge::zero();
+  if ( mNodeDict.count(node1->id()) == 0 ) {
+    ans += calc_sub(node1, cut, npn);
+  }
+  else {
+    aig_edge1 = mNodeDict.at(node1->id());
+  }
+  if ( node->is_and() ) {
+    if ( !aig_edge0.is_zero() && !aig_edge1.is_zero() ) {
+      auto aig_node = mAigMgr->find_and(aig_edge0, aig_edge1);
+      if ( aig_node != nullptr ) {
+	auto aig_edge = AigEdge(aig_node, false);
+	mNodeDict.emplace(id, aig_edge);
+	return 0;
+      }
+    }
+    mNodeDict.emplace(id, AigEdge::zero());
+    ans += 1;
+  }
+  else {
+    // XOR ノード
+    mNodeDict.emplace(id, AigEdge::zero());
+    ans += 3;
+  }
+  return ans;
+}
 
 // @brief パタンの置き換えを行う．
 void
@@ -180,13 +169,15 @@ RwtMgr::rewrite(
       for ( auto cut: cut_list ) {
 	auto tv = cut->calc_tv();
 	// カットの内部のノードのうち，削除されるノード数を数える．
-	auto merit = calc_merit(cut, tv);
+	CalcMerit calc_merit;
+	auto merit = calc_merit.calc(cut, tv);
 	// カットの関数にマッチするパタンを列挙する．
 	Npn4 rep_npn;
 	auto& pat_list = pat_mgr.get_pat(tv, rep_npn);
 	for ( auto& pat: pat_list ) {
 	  // cut を pat で置き換えた時の得失を計算する．
-	  auto cost = calc_cost(cut, mgr, rep_npn, pat);
+	  CalcCost calc_cost(mgr);
+	  auto cost = calc_cost.calc(cut, rep_npn, pat);
 	  auto gain = merit - cost;
 	  if ( max_gain < gain ) {
 	    max_gain = gain;
