@@ -244,7 +244,7 @@ BddMgrImpl::new_node(
   }
 
   // 極性の正規化を行う．
-  bool oinv{edge0.inv()};
+  auto oinv = edge0.inv();
   edge0 ^= oinv;
   edge1 ^= oinv;
 
