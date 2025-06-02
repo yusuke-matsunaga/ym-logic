@@ -352,33 +352,6 @@ PyAigMgr::init(
   return false;
 }
 
-// AigMgr を PyObject に変換する．
-PyObject*
-PyAigMgr::Conv::operator()(
-  const ElemType& val ///< [in] 元の値
-)
-{
-  auto type = PyAigMgr::_typeobject();
-  auto obj = type->tp_alloc(type, 0);
-  auto my_obj = reinterpret_cast<AigMgr_Object*>(obj);
-  new (&my_obj->mVal) AigMgr(val);
-  return obj;
-}
-
-// PyObject を AigMgr に変換する．
-bool
-PyAigMgr::Deconv::operator()(
-  PyObject* obj, ///< [in] Python のオブジェクト
-  ElemType& val  ///< [out] 結果を格納する変数
-)
-{
-  if ( PyAigMgr::Check(obj) ) {
-    val = PyAigMgr::_get_ref(obj);
-    return true;
-  }
-  return false;
-}
-
 // @brief PyObject が AigMgr タイプか調べる．
 bool
 PyAigMgr::Check(

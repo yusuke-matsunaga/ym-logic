@@ -29,29 +29,19 @@ public:
   /// @brief コンストラクタ
   PatNode(
     SizeType id,
-    bool xor_flag,
-    std::uint16_t tv,
-    std::uint8_t size,
-    std::uint8_t level,
     const PatNode* child0,
     bool inv0,
     const PatNode* child1,
     bool inv1
   ) : mId{id},
-      mTv{tv},
-      mSize{size},
-      mLevel{level},
       mChild0{child0},
       mChild1{child1}
   {
-    if ( xor_flag ) {
+    if ( inv0 ) {
       mFlags.set(0);
     }
-    if ( inv0 ) {
-      mFlags.set(1);
-    }
     if ( inv1 ) {
-      mFlags.set(2);
+      mFlags.set(1);
     }
   }
 
@@ -71,41 +61,6 @@ public:
     return mId;
   }
 
-  /// @brief EXOR ノードの時 true を返す．
-  bool
-  is_xor() const
-  {
-    return mFlags.test(0);
-  }
-
-  /// @brief AND ノードの時 true を返す．
-  bool
-  is_and() const
-  {
-    return !is_xor();
-  }
-
-  /// @brief このノードの表す論理関数の真理値表のパタンを返す．
-  std::uint16_t
-  tv() const
-  {
-    return mTv;
-  }
-
-  /// @brief このノードを根とするパタンのサイズを返す．
-  SizeType
-  size() const
-  {
-    return mSize;
-  }
-
-  /// @brief このノードを根とするパタンのレベルを返す．
-  SizeType
-  level() const
-  {
-    return mLevel;
-  }
-
   /// @brief 左の子供を返す．
   const PatNode*
   child0() const
@@ -117,7 +72,7 @@ public:
   bool
   inv0() const
   {
-    return mFlags.test(1);
+    return mFlags.test(0);
   }
 
   /// @brief 右の子供を返す．
@@ -131,7 +86,7 @@ public:
   bool
   inv1() const
   {
-    return mFlags.test(2);
+    return mFlags.test(1);
   }
 
 
@@ -144,19 +99,9 @@ private:
   SizeType mId;
 
   // いくつかのフラグ
-  // 0: EXOR フラグ
-  // 1: mChild0 の反転フラグ
-  // 2: mChild1 の反転フラグ
-  std::bitset<3> mFlags{0};
-
-  // このノードの関数を表す真理値表
-  std::uint16_t mTv;
-
-  // このノードを根とするパタンのサイズ
-  std::uint8_t mSize;
-
-  // このノードを根とするパタンのレベル
-  std::uint8_t mLevel;
+  // 0: mChild0 の反転フラグ
+  // 1: mChild1 の反転フラグ
+  std::bitset<2> mFlags{0};
 
   // 左の子供
   const PatNode* mChild0;

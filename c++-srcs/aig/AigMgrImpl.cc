@@ -223,7 +223,8 @@ AigMgrImpl::xor_sub(
 // @brief Expr から変換する．
 AigEdge
 AigMgrImpl::from_expr(
-  const Expr& expr
+  const Expr& expr,
+  const std::vector<AigEdge>& input_list
 )
 {
   if ( expr.is_zero() ) {
@@ -235,16 +236,21 @@ AigMgrImpl::from_expr(
   if ( expr.is_literal() ) {
     auto lit = expr.literal();
     auto varid = lit.varid();
-    while ( input_num() <= varid ) {
-      make_input();
+    if ( input_list.size() <= varid ) {
+      throw std::invalid_argument{"input_list is too small"};
     }
-    auto node = mInputArray[varid];
-    return AigEdge{node, lit.is_negative()};
+    auto e = input_list[varid];
+    if ( lit.is_positive() ) {
+      return e;
+    }
+    else {
+      return ~e;
+    }
   }
   auto n = expr.operand_num();
   vector<AigEdge> opr_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
-    opr_list[i] = from_expr(expr.operand(i));
+    opr_list[i] = from_expr(expr.operand(i), input_list);
   }
   if ( expr.is_and() ) {
     return and_op(opr_list);
@@ -259,19 +265,50 @@ AigMgrImpl::from_expr(
   return AigEdge::zero();
 }
 
-// @brief 複数の Expr から変換する．
-vector<AigEdge>
-AigMgrImpl::from_expr_list(
-  const vector<Expr>& expr_list
+// @brief SopCover から変換する．
+AigEdge
+AigMgrImpl::from_cover(
+  const SopCover& cover,
+  const std::vector<AigEdge>& input_list
 )
 {
-  vector<AigEdge> ans_list;
-  ans_list.reserve(expr_list.size());
-  for ( auto& expr: expr_list ) {
-    auto h = from_expr(expr);
-    ans_list.push_back(h);
+  auto nc = cover.cube_num();
+  if ( nc == 0 ) {
+    // 空のカバーは 0
+    return AigEdge::zero();
   }
-  return ans_list;
+  std::vector<AigEdge> edge_list(nc);
+  for ( SizeType i = 0; i < nc; ++ i ) {
+    auto cube = cover.get_cube(i);
+    auto e1 = from_cube(cube, input_list);
+    edge_list[i] = e1;
+  }
+  return or_op(edge_list);
+}
+
+// @brief SopCube から変換する．
+AigEdge
+AigMgrImpl::from_cube(
+  const SopCube& cube,
+  const std::vector<AigEdge>& input_list
+)
+{
+  auto lit_list = cube.literal_list();
+  if ( lit_list.empty() ) {
+    // 空のキューブは 1
+    return AigEdge::one();
+  }
+  auto n = lit_list.size();
+  std::vector<AigEdge> edge_list;
+  edge_list.reserve(n);
+  for ( auto lit: lit_list ) {
+    auto e1 = input_list[lit.varid()];
+    if ( lit.is_negative() ) {
+      e1 = ~e1;
+    }
+    edge_list.push_back(e1);
+  }
+  return and_op(edge_list);
 }
 
 BEGIN_NONAMESPACE
@@ -369,6 +406,82 @@ AigMgrImpl::cofactor_sub(
   return new_edge;
 }
 
+// @brief ノードの置き換えを行う．
+void
+AigMgrImpl::replace(
+  AigNode* old_node,
+  AigEdge new_edge
+)
+{
+  struct RepInfo {
+    AigNode* old_node;
+    AigEdge new_edge;
+  };
+
+  _sanity_check();
+
+  std::deque<RepInfo> queue;
+  queue.push_back({old_node, new_edge});
+
+  while ( !queue.empty() ) {
+    auto p = queue.front();
+    auto old_node = p.old_node;
+    auto new_edge = p.new_edge;
+    queue.pop_front();
+    {
+      cout << "replace(Node#" << old_node->id()
+	   << ", " << new_edge << ")" << endl;
+      for ( auto& fo_info: old_node->mFanoutList ) {
+	if ( fo_info.type == 2 ) {
+	  cout << "  -> AigHandle(" << fo_info.handle->_edge() << ")" << endl;
+	}
+	else {
+	  cout << "  -> AigNode(Node#" << fo_info.node->id()
+	       << "), " << static_cast<int>(fo_info.type) << endl;
+	}
+      }
+    }
+
+    for ( auto& fo_info: old_node->mFanoutList ) {
+      if ( fo_info.type == 2 ) {
+	auto handle = fo_info.handle;
+	auto new_edge1 = new_edge;
+	if ( handle->_edge().inv() ) {
+	  new_edge1 = ~new_edge1;
+	}
+	handle->mEdge = new_edge1.mPackedData;
+	new_edge1.add_fanout(handle);
+      }
+      else {
+	auto fo_node = fo_info.node;
+	auto pos = fo_info.type;
+	auto old_edge = fo_node->fanin(pos);
+	auto new_edge1 = new_edge;
+	if ( old_edge.inv() ) {
+	  new_edge1 = ~new_edge1;
+	}
+	if ( new_edge1.is_zero() ) {
+	  fo_node->mFanins[pos] = 0;
+	  queue.push_back({fo_node, AigEdge::zero()});
+	}
+	else if ( new_edge1.is_one() ) {
+	  fo_node->mFanins[pos] = 0;
+	  auto xpos = pos ^ 1;
+	  auto new_edge = fo_node->fanin(xpos);
+	  queue.push_back({fo_node, new_edge});
+	}
+	else {
+	  fo_node->mFanins[pos] = new_edge1.mPackedData;
+	  new_edge1.add_fanout(fo_node, pos);
+	}
+      }
+    }
+    old_node->mFanoutList.clear();
+    _free_node(old_node);
+  }
+  _sanity_check();
+}
+
 // @brief 参照回数が0のノードを取り除く
 void
 AigMgrImpl::sweep()
@@ -394,6 +507,193 @@ AigMgrImpl::sweep()
   if ( wpos != epos ) {
     // ここで参照回数0のノードが開放される．
     mNodeArray.erase(wpos, epos);
+  }
+}
+
+// @brief ノードを削除する．
+void
+AigMgrImpl::_free_node(
+  AigNode* node
+)
+{
+  std::deque<AigNode*> queue;
+
+  queue.push_back(node);
+  while ( !queue.empty() ) {
+    auto node = queue.front();
+    queue.pop_front();
+    if ( node->is_input() ) {
+      // 入力ノードは削除しない．
+      continue;
+    }
+    {
+      cout << "_free_node(Node#" << node->id() << ")" << endl;
+    }
+    -- mNodeNum;
+    mAndTable.erase(node);
+
+    auto node0 = node->fanin0_node();
+    if ( node0 != nullptr ) {
+      if ( node0->delete_fanout(node, 0) ) {
+	queue.push_back(node0);
+      }
+      node->mFanins[0] = 0;
+    }
+
+    auto node1 = node->fanin1_node();
+    if ( node1 != nullptr ) {
+      if ( node1->delete_fanout(node, 1) ) {
+	queue.push_back(node1);
+      }
+      node->mFanins[1] = 0;
+    }
+  }
+}
+
+// @brief 内部情報が正しいかチェックする．
+void
+AigMgrImpl::_sanity_check() const
+{
+  // Phase-0
+  for ( auto& node: mNodeArray ) {
+    if ( node->ref_count() == 0 ) {
+      continue;
+    }
+    if ( node->is_input() ) {
+      continue;
+    }
+    if ( node->fanin0_node() == nullptr ) {
+      std::ostringstream buf;
+      buf << "Node#" << node->id() << "->fanin0_node() == nullptr";
+      throw std::logic_error{buf.str()};
+    }
+    if ( node->fanin1_node() == nullptr ) {
+      std::ostringstream buf;
+      buf << "Node#" << node->id() << "->fanin1_node() == nullptr";
+      throw std::logic_error{buf.str()};
+    }
+  }
+
+  // Phase-1
+  for ( auto& node: mNodeArray ) {
+    for ( auto& fo_info: node->mFanoutList ) {
+      if ( fo_info.type == 2 ) {
+	auto handle = fo_info.handle;
+	if ( handle->_edge().node() != node.get() ) {
+	  {
+	    cout << endl;
+	    cout << "Node#" << node->id()
+		 << " -> AigHandle" << endl;
+	  }
+	  throw std::logic_error{"something wrong(1)"};
+	}
+      }
+      else {
+	auto fo_node = fo_info.node;
+	if ( fo_node->fanin_node(fo_info.type) != node.get() ) {
+	  {
+	    cout << endl;
+	    cout << "Node#" << node->id()
+		 << " -> Node#" << fo_node->id()
+		 << "@" << static_cast<int>(fo_info.type)
+		 << ": " << fo_node->fanin_node(fo_info.type)->id() << endl;
+	  }
+	  throw std::logic_error{"something wrong(2)"};
+	}
+      }
+    }
+  }
+  // Phase-2
+  for ( auto& node: mNodeArray ) {
+    if ( !node->is_and() ) {
+      continue;
+    }
+    auto node0 = node->fanin0_node();
+    if ( node0 != nullptr ) {
+      bool found = false;
+      for ( auto& fo_info: node0->mFanoutList ) {
+	if ( fo_info.type == 0 && fo_info.node == node.get() ) {
+	  found = true;
+	  break;
+	}
+      }
+      if ( !found ) {
+	cout << endl;
+	cout << "checking Node#" << node->id()
+	     << "@0 = Node#" << node0->id() << endl;
+	for ( auto& fo_info: node0->mFanoutList ) {
+	  if ( fo_info.type == 2 ) {
+	    cout << "  AigHandle" << endl;
+	  }
+	  else {
+	    cout << "  AigNode(Node#" << fo_info.node->id()
+		 << ")@" << static_cast<int>(fo_info.type) << endl;
+	  }
+	}
+	throw std::logic_error{"something wrong(3)"};
+      }
+    }
+    auto node1 = node->fanin1_node();
+    if ( node1 != nullptr ) {
+      auto found = false;
+      for ( auto& fo_info: node1->mFanoutList ) {
+	if ( fo_info.type == 1 && fo_info.node == node.get() ) {
+	  found = true;
+	  break;
+	}
+      }
+      if ( !found ) {
+	cout << endl;
+	cout << "checking Node#" << node->id()
+	     << "@1 = Node#" << node1->id() << endl;
+	for ( auto& fo_info: node1->mFanoutList ) {
+	  if ( fo_info.type == 2 ) {
+	    cout << "  AigHandle" << endl;
+	  }
+	  else {
+	    cout << "  AigNode(Node#" << fo_info.node->id()
+		 << "@" << static_cast<int>(fo_info.type) << endl;
+	  }
+	}
+	throw std::logic_error{"something wrong(4)"};
+      }
+    }
+  }
+}
+
+// @brief 内容を出力する．
+void
+AigMgrImpl::print(
+  std::ostream& s
+)
+{
+  for ( auto& node: mNodeArray ) {
+    s << "Node#" << node->id() << ": ";
+    if ( node->is_input() ) {
+      s << "Input#" << node->input_id();
+    }
+    else { // node->is_and() ) {
+      s << "And("
+	<< node->fanin0()
+	<< ", "
+	<< node->fanin1()
+	<< ")";
+    }
+    s << endl;
+    for ( auto& fo_info: node->mFanoutList ) {
+      s << "  -> ";
+      if ( fo_info.type == 2 ) {
+	s << "AigHandle("
+	  << hex << fo_info.handle << dec
+	  << ")";
+      }
+      else {
+	s << "Node#" << fo_info.node->id()
+	  << ", " << static_cast<int>(fo_info.type);
+      }
+      s << endl;
+    }
+    s << endl;
   }
 }
 

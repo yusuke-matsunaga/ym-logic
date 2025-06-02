@@ -215,7 +215,7 @@ class Npn4:
             i2 = self.iperm(i)
             iinv_list[i2] = self.iinv(i)
             iperm_list[i2] = i
-        return Npn4(oinv, iinv_list, iperm_list)
+        return Npn4(oinv=oinv, iinv_list=iinv_list, iperm=iperm_list)
 
     def xform(self, tv):
         if self.oinv():

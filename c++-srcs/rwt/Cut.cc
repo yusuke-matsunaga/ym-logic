@@ -41,7 +41,7 @@ public:
 
   /// @brief 関数をセットする．
   void
-  set_tv(
+  set(
     AigNode* node, ///< [in] 対象のノード
     Tv4Type tv     ///< [in] 論理関数
   )
@@ -49,28 +49,31 @@ public:
     mTvDict.emplace(node->id(), tv);
   }
 
-  /// @brief 関数を計算する．
+  /// @brief 関数を返す．
   Tv4Type
-  calc(
-    AigNode* node ///< [in] 対象のノード
+  tv(
+    AigNode* node
+  ) const
+  {
+    if ( mTvDict.count(node->id()) == 0 ) {
+      std::ostringstream buf;
+      buf << "Node#" << node->id() << " is not registered";
+      throw std::logic_error{buf.str()};
+    }
+    return mTvDict.at(node->id());
+  }
+
+  /// @brief 関数を返す．
+  Tv4Type
+  tv(
+    AigEdge edge ///< [in] 対象の枝
   )
   {
-    if ( mTvDict.count(node->id()) > 0 ) {
-      return mTvDict.at(node->id());
+    auto node = edge.node();
+    auto tv = this->tv(node);
+    if ( edge.inv() ) {
+      tv = ~tv;
     }
-    ASSERT_COND( node->is_and() );
-    auto node0 = node->fanin0_node();
-    auto node1 = node->fanin1_node();
-    auto tv0 = calc(node0);
-    auto tv1 = calc(node1);
-    if ( node->fanin0_inv() ) {
-      tv0 = ~tv0;
-    }
-    if ( node->fanin1_inv() ) {
-      tv1 = ~tv1;
-    }
-    auto tv = tv0 & tv1;
-    set_tv(node, tv);
     return tv;
   }
 
@@ -94,23 +97,59 @@ private:
 Cut::Tv4Type
 Cut::calc_tv() const
 {
-
-  CalcTv calc_tv;
   // 入力の論理関数を登録する．
   // このパタンは PatMgr と一致させる必要がある．
-  if ( leaf_size() > 0 ) {
-    calc_tv.set_tv(mLeafList[0], 0xAAAA);
-    if ( leaf_size() > 1 ) {
-      calc_tv.set_tv(mLeafList[1], 0xCCCC);
-      if ( leaf_size() > 2 ) {
-	calc_tv.set_tv(mLeafList[2], 0xF0F0);
-	if ( leaf_size() > 3 ) {
-	  calc_tv.set_tv(mLeafList[3], 0xFF00);
-	}
-      }
-    }
+  static Tv4Type pat[] = {
+    0xAAAA,
+    0xCCCC,
+    0xF0F0,
+    0xFF00
+  };
+  // ノード番号をキーにして論理関数を保持する辞書
+  CalcTv calc_tv;
+  for ( SizeType i = 0; i < leaf_size(); ++ i ) {
+    auto node = leaf(i);
+    calc_tv.set(node, pat[i]);
   }
-  return calc_tv.calc(mRoot);
+  try {
+    for ( auto node: mNodeList ) {
+      auto tv0 = calc_tv.tv(node->fanin0());
+      auto tv1 = calc_tv.tv(node->fanin1());
+      auto tv = tv0 & tv1;
+      calc_tv.set(node, tv);
+    }
+    return calc_tv.tv(mRoot);
+  }
+  catch ( std::logic_error err ) {
+    print(cout);
+    throw err;
+  }
+}
+
+// @brief 内容を出力する．
+void
+Cut::print(
+  std::ostream& s
+) const
+{
+  s << "Root: Node#" << mRoot->id() << endl;
+  s << "Leaves:";
+  for ( auto node: mLeafList ) {
+    s << " Node#" << node->id();
+  }
+  s << endl;
+  for ( auto node: mNodeList ) {
+    s << "  Node#" << node->id() << ": ";
+    if ( node->is_input() ) {
+      s << "Input#" << node->input_id();
+    }
+    else {
+      s << "And(" << node->fanin0()
+	<< ", " << node->fanin1()
+	<< ")";
+    }
+    s << endl;
+  }
 }
 
 END_NAMESPACE_YM_AIG

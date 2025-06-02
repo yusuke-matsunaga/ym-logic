@@ -53,6 +53,7 @@ AigEdge::fanin(
 ) const
 {
   if ( is_const() ) {
+    abort();
     throw std::invalid_argument{"fanin() is valid if is_and() == true"};
   }
   return node()->fanin(pos);
@@ -63,6 +64,7 @@ AigEdge
 AigEdge::fanin0() const
 {
   if ( is_const() ) {
+    abort();
     throw std::invalid_argument{"fanin0() is valid if is_and() == true"};
   }
   return node()->fanin0();
@@ -73,9 +75,45 @@ AigEdge
 AigEdge::fanin1() const
 {
   if ( is_const() ) {
+    abort();
     throw std::invalid_argument{"fanin1() is valid if is_and() == true"};
   }
   return node()->fanin1();
+}
+
+// @brief ファンアウト先のノードを追加する．
+void
+AigEdge::add_fanout(
+  AigNode* node,
+  SizeType pos
+)
+{
+  if ( !is_const() ) {
+    this->node()->add_fanout(node, pos);
+  }
+}
+
+// @brief ファンアウト先のハンドルを追加する．
+void
+AigEdge::add_fanout(
+  AigHandle* handle
+)
+{
+  if ( !is_const() ) {
+    node()->add_fanout(handle);
+  }
+}
+
+// @brief ファンアウト先のハンドルを置き換える．
+void
+AigEdge::replace_fanout(
+  AigHandle* old_ptr,
+  AigHandle* new_ptr
+)
+{
+  if ( !is_const() ) {
+    node()->replace_fanout(old_ptr, new_ptr);
+  }
 }
 
 // @brief ANDグループのファンインのリストを返す．
@@ -83,6 +121,7 @@ vector<AigEdge>
 AigEdge::ex_fanin_list() const
 {
   if ( !is_and() ) {
+    abort();
     throw std::invalid_argument{"ex_fanin_list() is valid if is_and() == true"};
   }
   vector<AigEdge> fanin_list;
@@ -141,6 +180,26 @@ AigEdge::index() const
     val += 1;
   }
   return val;
+}
+
+// @brief 内容を出力する．
+void
+AigEdge::print(
+  std::ostream& s
+) const
+{
+  if ( is_zero() ) {
+    s << "--0--";
+  }
+  else if ( is_one() ) {
+    s << "--1--";
+  }
+  else {
+    if ( inv() ) {
+      s << "~";
+    }
+    s << "Node#" << node()->id();
+  }
 }
 
 END_NAMESPACE_YM_AIG

@@ -35,6 +35,23 @@ public:
     const AigMgrHolder& src ///< [in] コピー元のオブジェクト
   );
 
+  /// @brief ムーブコンストラクタ
+  AigMgrHolder(
+    AigMgrHolder&& src ///< [in] ムーブ元のオブジェクト
+  );
+
+  /// @brief コピー代入演算子
+  AigMgrHolder&
+  operator=(
+    const AigMgrHolder& src ///< [in] コピー元のオブジェクト
+  );
+
+  /// @brief ムーブ代入演算子
+  AigMgrHolder&
+  operator=(
+    AigMgrHolder&& src ///< [in] ムーブ元のオブジェクト
+  );
+
   /// @brief デストラクタ
   ~AigMgrHolder();
 

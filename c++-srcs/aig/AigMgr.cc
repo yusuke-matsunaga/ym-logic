@@ -117,6 +117,32 @@ AigMgr::xor_op(
   return edge_to_handle(get()->xor_op(edge_list));
 }
 
+// @brief PrimType の演算を行う．
+AigHandle
+AigMgr::primitive_op(
+  PrimType type,
+  const vector<AigHandle>& fanin_list
+)
+{
+  switch ( type ) {
+  case PrimType::None: break;
+  case PrimType::C0:   return AigHandle::zero();
+  case PrimType::C1:   return AigHandle::one();
+  case PrimType::Buff: return fanin_list[0];
+  case PrimType::Not:  return ~fanin_list[0];
+  case PrimType::And:  return and_op(fanin_list);
+  case PrimType::Nand: return ~and_op(fanin_list);
+  case PrimType::Or:   return or_op(fanin_list);
+  case PrimType::Nor:  return ~or_op(fanin_list);
+  case PrimType::Xor:  return xor_op(fanin_list);
+  case PrimType::Xnor: return ~xor_op(fanin_list);
+  }
+  std::ostringstream buf;
+  buf << type << ": Wrong primitive type";
+  throw std::invalid_argument{buf.str()};
+  return AigHandle::zero();
+}
+
 // @brief Expr から変換する．
 AigHandle
 AigMgr::from_expr(
@@ -124,6 +150,19 @@ AigMgr::from_expr(
 )
 {
   auto edge = get()->from_expr(expr);
+  return edge_to_handle(edge);
+}
+
+// @brief Expr から変換する．
+AigHandle
+AigMgr::from_expr(
+  const Expr& expr,
+  const std::vector<AigHandle>& input_list
+)
+{
+  std::vector<AigEdge> input_edge_list;
+  hlist_to_elist(input_list, input_edge_list);
+  auto edge = get()->from_expr(expr, input_edge_list);
   return edge_to_handle(edge);
 }
 
@@ -135,6 +174,65 @@ AigMgr::from_expr_list(
 {
   auto edge_list = get()->from_expr_list(expr_list);
   return elist_to_hlist(edge_list);
+}
+
+// @brief 複数の Expr から変換する．
+vector<AigHandle>
+AigMgr::from_expr_list(
+  const vector<Expr>& expr_list,
+  const std::vector<AigHandle>& input_list
+)
+{
+  std::vector<AigEdge> input_edge_list;
+  hlist_to_elist(input_list, input_edge_list);
+  auto edge_list = get()->from_expr_list(expr_list, input_edge_list);
+  return elist_to_hlist(edge_list);
+}
+
+// @brief SopCover から変換する．
+AigHandle
+AigMgr::from_cover(
+  const SopCover& cover
+)
+{
+  auto edge = get()->from_cover(cover);
+  return edge_to_handle(edge);
+}
+
+// @brief SopCover から変換する．
+AigHandle
+AigMgr::from_cover(
+  const SopCover& cover,
+  const std::vector<AigHandle>& input_list
+)
+{
+  std::vector<AigEdge> input_edge_list;
+  hlist_to_elist(input_list, input_edge_list);
+  auto edge = get()->from_cover(cover, input_edge_list);
+  return edge_to_handle(edge);
+}
+
+// @brief SopCube から変換する．
+AigHandle
+AigMgr::from_cube(
+  const SopCube& cube
+)
+{
+  auto edge = get()->from_cube(cube);
+  return edge_to_handle(edge);
+}
+
+// @brief SopCube から変換する．
+AigHandle
+AigMgr::from_cube(
+  const SopCube& cube,
+  const std::vector<AigHandle>& input_list
+)
+{
+  std::vector<AigEdge> input_edge_list;
+  hlist_to_elist(input_list, input_edge_list);
+  auto edge = get()->from_cube(cube, input_edge_list);
+  return edge_to_handle(edge);
 }
 
 // @brief コファクター演算
@@ -150,11 +248,27 @@ AigMgr::cofactor(
   return elist_to_hlist(ans_list);
 }
 
+// @brief local rewriting を行う．
+void
+AigMgr::rewrite()
+{
+  get()->rewrite();
+}
+
 // @brief 参照されていないノードを削除する．
 void
 AigMgr::sweep()
 {
   get()->sweep();
+}
+
+// @brief 内容を出力する．
+void
+AigMgr::print(
+  std::ostream& s
+) const
+{
+  get()->print(s);
 }
 
 END_NAMESPACE_YM_AIG

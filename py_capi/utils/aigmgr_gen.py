@@ -145,9 +145,9 @@ class AigMgrGen(PyObjGen):
         self.add_attr('and_num',
                       getter_name='get_and_num')
 
-        self.add_conv('default')
+        #self.add_conv('default')
 
-        self.add_deconv('default')
+        #self.add_deconv('default')
 
 
 if __name__ == '__main__':

@@ -30,6 +30,8 @@ class AigNode;
 class AigEdge
 {
   friend class AigHandle;
+  friend class AigNode;
+  friend class AigMgrImpl;
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -243,6 +245,12 @@ public:
     return !operator<(right);
   }
 
+  /// @brief 内容を出力する．
+  void
+  print(
+    std::ostream& s ///< [in] 出力ストリーム
+  ) const;
+
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -256,6 +264,26 @@ private:
   ) : mPackedData{data}
   {
   }
+
+  /// @brief ファンアウト先のノードを追加する．
+  void
+  add_fanout(
+    AigNode* node, ///< [in] ノード
+    SizeType pos   ///< [in] ファンイン番号 ( 0 <= pos < 1 )
+  );
+
+  /// @brief ファンアウト先のハンドルを追加する．
+  void
+  add_fanout(
+    AigHandle* handle ///< [in] ハンドル
+  );
+
+  /// @brief ファンアウト先のハンドルを置き換える．
+  void
+  replace_fanout(
+    AigHandle* old_ptr,
+    AigHandle* new_ptr
+  );
 
   /// @brief ex_fanin_list() の下請け関数
   void
@@ -273,6 +301,18 @@ private:
   PtrIntType mPackedData{0UL};
 
 };
+
+/// @brief ストリーム演算
+inline
+std::ostream&
+operator<<(
+  std::ostream& s,
+  const AigEdge& edge
+)
+{
+  edge.print(s);
+  return s;
+}
 
 END_NAMESPACE_YM_AIG
 

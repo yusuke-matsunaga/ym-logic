@@ -10,6 +10,7 @@
 
 #include "ym/aig.h"
 #include "ym/Expr.h"
+#include "ym/SopCover.h"
 #include "aig/AigNode.h"
 #include "AigTable.h"
 #include "ym/JsonValue.h"
@@ -26,6 +27,8 @@ class EdgeDict;
 //////////////////////////////////////////////////////////////////////
 class AigMgrImpl
 {
+  friend class AigHandle;
+
 public:
 
   /// @brief コンストラクタ
@@ -136,6 +139,12 @@ public:
     if ( fanin1.is_one() ) {
       return fanin0;
     }
+    if ( fanin0 == fanin1 ) {
+      return fanin0;
+    }
+    if ( fanin0 == ~fanin1 ) {
+      return AigEdge::zero();
+    }
 
     // step2: 構造テーブルを探す．
     AigNode key{0, fanin0, fanin1};
@@ -208,12 +217,116 @@ public:
   AigEdge
   from_expr(
     const Expr& expr ///< [in] 論理式
+  )
+  {
+    auto nmax = expr.input_size();
+    while ( input_num() <= nmax ) {
+      make_input();
+    }
+    std::vector<AigEdge> input_list(nmax);
+    for ( SizeType i = 0; i < nmax; ++ i ) {
+      input_list[i] = AigEdge{mInputArray[i], false};
+    }
+    return from_expr(expr, input_list);
+  }
+
+  /// @brief Expr から変換する．
+  AigEdge
+  from_expr(
+    const Expr& expr,                      ///< [in] 論理式
+    const std::vector<AigEdge>& input_list ///< [in] 入力の枝のリスト
   );
 
   /// @brief 複数の Expr から変換する．
   vector<AigEdge>
   from_expr_list(
     const vector<Expr>& expr_list ///< [in] 論理式のリスト
+  )
+  {
+    SizeType nmax = 0;
+    for ( auto& expr: expr_list ) {
+      nmax = std::max(nmax, expr.input_size());
+    }
+    while ( input_num() <= nmax ) {
+      make_input();
+    }
+    std::vector<AigEdge> input_list(nmax);
+    for ( SizeType i = 0; i < nmax; ++ i ) {
+      input_list[i] = AigEdge{mInputArray[i], false};
+    }
+    return from_expr_list(expr_list, input_list);
+  }
+
+  /// @brief 複数の Expr から変換する．
+  vector<AigEdge>
+  from_expr_list(
+    const vector<Expr>& expr_list,         ///< [in] 論理式のリスト
+    const std::vector<AigEdge>& input_list ///< [in] 入力の枝のリスト
+  )
+  {
+    vector<AigEdge> ans_list;
+    ans_list.reserve(expr_list.size());
+    for ( auto& expr: expr_list ) {
+      auto h = from_expr(expr, input_list);
+      ans_list.push_back(h);
+    }
+    return ans_list;
+  }
+
+  /// @brief SopCover から変換する．
+  ///
+  /// カバーの i 番目の変数は i 番目の入力を用いる．
+  AigEdge
+  from_cover(
+    const SopCover& cover ///< [in] カバー
+  )
+  {
+    auto nmax = cover.variable_num();
+    while ( input_num() <= nmax ) {
+      make_input();
+    }
+    std::vector<AigEdge> input_list(nmax);
+    for ( SizeType i = 0; i < nmax; ++ i ) {
+      input_list[i] = AigEdge{mInputArray[i], false};
+    }
+    return from_cover(cover, input_list);
+  }
+
+  /// @brief SopCover から変換する．
+  ///
+  /// カバーの i 番目の変数は input_list[i] を用いる．
+  AigEdge
+  from_cover(
+    const SopCover& cover,                 ///< [in] カバー
+    const std::vector<AigEdge>& input_list ///< [in] 変数に対応する枝のリスト
+  );
+
+  /// @brief SopCube から変換する．
+  ///
+  /// キューブの i 番目の変数は i 番目の入力を用いる．
+  AigEdge
+  from_cube(
+    const SopCube& cube ///< [in] キューブ
+  )
+  {
+    auto nmax = cube.variable_num();
+    while ( input_num() <= nmax ) {
+      make_input();
+    }
+    std::vector<AigEdge> input_list(nmax);
+    for ( SizeType i = 0; i < nmax; ++ i ) {
+      input_list[i] = AigEdge{mInputArray[i], false};
+    }
+    return from_cube(cube, input_list);
+  }
+
+  /// @brief SopCube から変換する．
+  ///
+  /// キューブの i 番目の変数は input_list[i] を用いる．
+  AigEdge
+  from_cube(
+    const SopCube& cube,                   ///< [in] カバー
+    const std::vector<AigEdge>& input_list ///< [in] 変数に対応する枝のリスト
   );
 
   /// @brief コファクター演算
@@ -251,37 +364,28 @@ public:
     return nullptr;
   }
 
+  /// @brief local rewriting を行う．
+  void
+  rewrite();
+
+  /// @brief ノードの置き換えを行う．
+  void
+  replace(
+    AigNode* old_node, ///< [in] 置き換えられるノード
+    AigEdge new_edge   ///< [in] 新しい枝
+  );
+
   /// @brief 参照回数が0のノードを取り除く
   ///
   /// ノードのID番号が変わる可能性がある．
   void
   sweep();
 
-  /// @brief 枝の参照回数を増やす．
+  /// @brief 内容を出力する．
   void
-  inc_ref(
-    AigEdge edge ///< [in] 対象の枝
-  )
-  {
-    auto node = edge.node();
-    if ( node != nullptr ) {
-      node->inc_ref();
-    }
-  }
-
-  /// @brief 枝の参照回数を減らす．
-  void
-  dec_ref(
-    AigEdge edge ///< [in] 対象の枝
-  )
-  {
-    auto node = edge.node();
-    if ( node != nullptr ) {
-      if ( node->dec_ref() == 0 ) {
-	_free_node(node);
-      }
-    }
-  }
+  print(
+    std::ostream& s ///< [in] 出力ストリーム
+  );
 
 
 private:
@@ -349,9 +453,9 @@ private:
   {
     auto id = mNodeArray.size();
     auto node = new AigNode{id, fanin0, fanin1};
+    fanin0.add_fanout(node, 0);
+    fanin1.add_fanout(node, 1);
     mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-    inc_ref(fanin0);
-    inc_ref(fanin1);
     mAndTable.insert(node);
     ++ mNodeNum;
     return node;
@@ -363,17 +467,11 @@ private:
   void
   _free_node(
     AigNode* node
-  )
-  {
-    if ( node->is_input() ) {
-      // 入力ノードは削除しない．
-      return;
-    }
-    -- mNodeNum;
-    mAndTable.erase(node);
-    dec_ref(node->fanin0());
-    dec_ref(node->fanin1());
-  }
+  );
+
+  /// @brief 内部情報が正しいかチェックする．
+  void
+  _sanity_check() const;
 
 
 private:

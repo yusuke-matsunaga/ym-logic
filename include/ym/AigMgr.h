@@ -120,16 +120,79 @@ public:
     const vector<AigHandle>& fanin_list ///< [in] ファンインのハンドルのリスト
   );
 
+  /// @brief PrimType の演算を行う．
+  AigHandle
+  primitive_op(
+    PrimType type,                      ///< [in] 演算の種類
+    const vector<AigHandle>& fanin_list ///< [in] ファンインのハンドルのリスト
+  );
+
   /// @brief Expr から変換する．
+  ///
+  /// 論理式の i 番目の変数は i 番目の入力を用いる．
   AigHandle
   from_expr(
     const Expr& expr ///< [in] 論理式
   );
 
+  /// @brief Expr から変換する．
+  ///
+  /// 論理式の i 番目の変数は input_list[i] を用いる．
+  AigHandle
+  from_expr(
+    const Expr& expr,                        ///< [in] 論理式
+    const std::vector<AigHandle>& input_list ///< [in] 変数に対応するハンドルのリスト
+  );
+
   /// @brief 複数の Expr から変換する．
+  ///
+  /// 論理式の i 番目の変数は i 番目の入力を用いる．
   vector<AigHandle>
   from_expr_list(
     const vector<Expr>& expr_list ///< [in] 論理式のリスト
+  );
+
+  /// @brief 複数の Expr から変換する．
+  ///
+  /// 論理式の i 番目の変数は input_list[i] を用いる．
+  vector<AigHandle>
+  from_expr_list(
+    const vector<Expr>& expr_list,           ///< [in] 論理式のリスト
+    const std::vector<AigHandle>& input_list ///< [in] 変数に対応するハンドルのリスト
+  );
+
+  /// @brief SopCover から変換する．
+  ///
+  /// カバーの i 番目の変数は i 番目の入力を用いる．
+  AigHandle
+  from_cover(
+    const SopCover& cover ///< [in] カバー
+  );
+
+  /// @brief SopCover から変換する．
+  ///
+  /// カバーの i 番目の変数は input_list[i] を用いる．
+  AigHandle
+  from_cover(
+    const SopCover& cover,                   ///< [in] カバー
+    const std::vector<AigHandle>& input_list ///< [in] 変数に対応するハンドルのリスト
+  );
+
+  /// @brief SopCube から変換する．
+  ///
+  /// キューブの i 番目の変数は i 番目の入力を用いる．
+  AigHandle
+  from_cube(
+    const SopCube& cube ///< [in] キューブ
+  );
+
+  /// @brief SopCube から変換する．
+  ///
+  /// キューブの i 番目の変数は input_list[i] を用いる．
+  AigHandle
+  from_cube(
+    const SopCube& cube,                     ///< [in] カバー
+    const std::vector<AigHandle>& input_list ///< [in] 変数に対応するハンドルのリスト
   );
 
   /// @brief コファクター演算
@@ -141,11 +204,23 @@ public:
     const vector<AigHandle>& handle_list ///< [in] 対象のハンドルのリスト
   );
 
+  /// @brief local rewriting を行う．
+  void
+  rewrite();
+
   /// @brief 参照されていないノードを削除する．
   void
   sweep();
 
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 演算
+  //////////////////////////////////////////////////////////////////////
+
   /// @brief 等価比較演算子
+  ///
+  /// 意味的な等価ではなく，同一のマネージャかどうか調べる．
   bool
   operator==(
     const AigMgr& right
@@ -162,6 +237,18 @@ public:
   {
     return !operator==(right);
   }
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // その他の関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief 内容を出力する．
+  void
+  print(
+    std::ostream& s ///< [in] 出力ストリーム
+  ) const;
 
 };
 

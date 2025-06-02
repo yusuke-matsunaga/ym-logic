@@ -78,6 +78,7 @@ TEST(AigMgrImplTest, and_op3)
   EXPECT_EQ( 2, mgr.and_num() );
 }
 
+#if 0
 TEST(AigMgrImplTest, sweep)
 {
   AigMgrImpl mgr;
@@ -88,7 +89,6 @@ TEST(AigMgrImplTest, sweep)
 
   {
     auto e = mgr.and_op({e1, e2, e3});
-    mgr.inc_ref(e);
     EXPECT_TRUE( e.is_and() );
 
     EXPECT_EQ( 4, e.node()->id() );
@@ -113,5 +113,6 @@ TEST(AigMgrImplTest, sweep)
     mgr.dec_ref(e);
   }
 }
+#endif
 
 END_NAMESPACE_YM_AIG

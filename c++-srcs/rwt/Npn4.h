@@ -110,6 +110,9 @@ public:
   }
 
   /// @brief 正規化を行う．
+  /// @return 正規化された関数を返す．
+  ///
+  /// npn には tv に適用することで正規化された関数になる変換を入れる．
   static
   Tv4
   normalize(

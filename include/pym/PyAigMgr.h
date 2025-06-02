@@ -30,22 +30,7 @@ public:
 
 public:
 
-  /// @brief AigMgr を PyObject* に変換するファンクタクラス
-  struct Conv {
-    PyObject*
-    operator()(
-      const ElemType& val ///< [in] 元の値
-    );
-  };
-
-  /// @brief PyObject* から AigMgr を取り出すファンクタクラス
-  struct Deconv {
-    bool
-    operator()(
-      PyObject* obj, ///< [in] Python のオブジェクト
-      ElemType& val  ///< [out] 結果を格納する変数
-    );
-  };
+  // このクラスは Conv/Deconv を持たない．
 
 
 public:
@@ -61,54 +46,12 @@ public:
     PyObject* m ///< [in] 親のモジュールを表す PyObject
   );
 
-  /// @brief AigMgr を表す PyObject を作る．
-  /// @return 生成した PyObject を返す．
-  ///
-  /// 返り値は新しい参照が返される．
-  static
-  PyObject*
-  ToPyObject(
-    const ElemType& val ///< [in] 元の値
-  )
-  {
-    Conv conv;
-    return conv(val);
-  }
-
-  /// @brief PyObject から AigMgr を取り出す．
-  /// @return 正しく変換できた時に true を返す．
-  static
-  bool
-  FromPyObject(
-    PyObject* obj, ///< [in] Python のオブジェクト
-    ElemType& val  ///< [out] 結果を格納する変数
-  )
-  {
-    Deconv deconv;
-    return deconv(obj, val);
-  }
-
   /// @brief PyObject が AigMgr タイプか調べる．
   static
   bool
   Check(
     PyObject* obj ///< [in] 対象の PyObject
   );
-
-  /// @brief PyObject から AigMgr を取り出す．
-  static
-  ElemType
-  Get(
-    PyObject* obj ///< [in] 対象の Python オブジェクト
-  )
-  {
-    ElemType val;
-    if ( PyAigMgr::FromPyObject(obj, val) ) {
-      return val;
-    }
-    PyErr_SetString(PyExc_TypeError, "Could not convert to AigMgr");
-    return val;
-  }
 
   /// @brief AigMgr を表す PyObject から AigMgr を取り出す．
   /// @return AigMgr を返す．

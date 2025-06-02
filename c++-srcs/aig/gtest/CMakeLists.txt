@@ -56,3 +56,10 @@ ym_add_gtest ( logic_aig_AigMgrImpl_test
   ${YM_SUBMODULE_OBJ_D_LIST}
   DEFINITIONS "-DTESTDATA_DIR=\"${TESTDATA_DIR}\""
   )
+
+ym_add_gtest ( logic_aig_Cov2Aig_test
+  cov2aig_test.cc
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  ${YM_SUBMODULE_OBJ_D_LIST}
+  DEFINITIONS "-DTESTDATA_DIR=\"${TESTDATA_DIR}\""
+  )

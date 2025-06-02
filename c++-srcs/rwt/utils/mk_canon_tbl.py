@@ -18,11 +18,12 @@ if __name__ == '__main__':
         npn = Npn4(oinv=oinv,
                    iinv_list=iinv_list,
                    iperm=iperm_list)
+        inpn = npn.inv()
         if tv % 4 == 0:
             print('  ', end='')
         else:
             print(' ', end='')
-        print(f'0x{ctv:04x}, 0x{npn.pack():03x}', end='')
+        print(f'0x{ctv:04x}, 0x{inpn.pack():03x}', end='')
         if tv < 0xFFFF:
             print(',', end='')
         if tv % 4 == 3:

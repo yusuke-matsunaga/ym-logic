@@ -7,37 +7,15 @@
 /// All rights reserved.
 
 #include "PatMgr.h"
+#include "PatGraph.h"
 #include "PatNode.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
 
-BEGIN_NONAMESPACE
-
-// ノード数を数える．
-SizeType
-count_size(
-  const PatNode* node,
-  vector<bool>& mark_array
-)
-{
-  if ( mark_array[node->id()] ) {
-    return 0;
-  }
-  mark_array[node->id()] = true;
-  auto child0 = node->child0();
-  SizeType size = 1;
-  if ( child0 != nullptr ) {
-    size += count_size(child0, mark_array);
-  }
-  auto child1 = node->child1();
-  if ( child1 != nullptr ) {
-    size += count_size(child1, mark_array);
-  }
-  return size;
-}
-
-END_NONAMESPACE
+//////////////////////////////////////////////////////////////////////
+// クラス PatMgr
+//////////////////////////////////////////////////////////////////////
 
 // @brief コンストラクタ
 PatMgr::PatMgr()
@@ -48,29 +26,42 @@ PatMgr::PatMgr()
   // テーブルには EOD が入っているので -1
   // それ以外に定数０，入力を4つで + 5
   SizeType node_size = sizeof(pat_data) / (sizeof(std::uint8_t) * 2) - 1 + 5;
-
   mNodeArray.reserve(node_size);
-  // 定数0を登録する．
-  add_node(false, 0x0000, 0, 0,
-	   nullptr, false, nullptr, false);
-  mConst0 = &mNodeArray[0];
 
-  // 入力0〜3を登録する．
-  add_node(false, 0xAAAA, 0, 0,
-	   nullptr, false, nullptr, false);
-  add_node(false, 0xCCCC, 0, 0,
-	   nullptr, false, nullptr, false);
-  add_node(false, 0xF0F0, 0, 0,
-	   nullptr, false, nullptr, false);
-  add_node(false, 0xFF00, 0, 0,
-	   nullptr, false, nullptr, false);
-  if ( mNodeArray.size() != 5 ) {
+  // ノード番号をキーにして論理関数を保持する辞書
+  std::unordered_map<SizeType, Tv4> tv_dict;
+
+  // 定数0を登録する．
+  mConst0 = add_node(0x0000, nullptr, false, nullptr, false,
+		     tv_dict);
+  if ( mConst0->id() != 0 ) {
     throw std::logic_error{"something wrong"};
   }
-  mInputList[0] = &mNodeArray[1];
-  mInputList[1] = &mNodeArray[2];
-  mInputList[2] = &mNodeArray[3];
-  mInputList[3] = &mNodeArray[4];
+
+  // 入力0〜3を登録する．
+  mInputList[0] = add_node(0xAAAA, nullptr, false, nullptr, false,
+			   tv_dict);
+  if ( mInputList[0]->id() != 1 ) {
+    throw std::logic_error{"something wrong"};
+  }
+
+  mInputList[1] = add_node(0xCCCC, nullptr, false, nullptr, false,
+			   tv_dict);
+  if ( mInputList[1]->id() != 2 ) {
+    throw std::logic_error{"something wrong"};
+  }
+
+  mInputList[2] = add_node(0xF0F0, nullptr, false, nullptr, false,
+			   tv_dict);
+  if ( mInputList[2]->id() != 3 ) {
+    throw std::logic_error{"something wrong"};
+  }
+
+  mInputList[3] = add_node(0xFF00, nullptr, false, nullptr, false,
+			   tv_dict);
+  if ( mInputList[3]->id() != 4 ) {
+    throw std::logic_error{"something wrong"};
+  }
 
   // 残りはデータから読み込む．
   for ( SizeType i = 0; ; ++ i ) {
@@ -88,58 +79,117 @@ PatMgr::PatMgr()
     auto idx1 = data1 >> 1;
     auto node0 = &mNodeArray[idx0];
     auto node1 = &mNodeArray[idx1];
-    std::uint16_t tv;
+    auto tv0 = tv_dict.at(node0->id());
+    auto tv1 = tv_dict.at(node1->id());
     if ( xor_flag ) {
       // XOR の場合は入力の反転はない．
-      tv = node0->tv() ^ node1->tv();
+      auto tv00 = ~tv0 & ~tv1;
+      auto node00 = add_node(tv00, node0, true, node1, true, tv_dict);
+      auto tv11 = tv0 & tv1;
+      auto node11 = add_node(tv11, node0, false, node1, false, tv_dict);
+      auto tv = tv0 ^ tv1;
+      add_node(tv, node00, true, node11, true, tv_dict);
     }
     else {
-      auto tv0 = node0->tv();
       if ( inv0 ) {
 	tv0 = ~tv0;
       }
-      auto tv1 = node1->tv();
       if ( inv1 ) {
 	tv1 = ~tv1;
       }
-      tv = tv0 & tv1;
+      auto tv = tv0 & tv1;
+      add_node(tv, node0, inv0, node1, inv1,
+	       tv_dict);
     }
-    vector<bool> mark_array(mNodeArray.size(), false);
-    auto size0 = count_size(node0, mark_array);
-    auto size1 = count_size(node1, mark_array);
-    auto size = size0 + size1 + 1;
-    auto level = std::max(node0->level(), node1->level()) + 1;
-    add_node(xor_flag, tv, size, level,
-	     node0, inv0, node1, inv1);
   }
 }
 
 // @brief ノードを追加する．
-void
+PatNode*
 PatMgr::add_node(
-  bool xor_flag,
-  std::uint16_t tv,
-  std::uint8_t size,
-  std::uint8_t level,
+  Tv4 tv,
   const PatNode* child0,
   bool inv0,
   const PatNode* child1,
-  bool inv1
+  bool inv1,
+  std::unordered_map<SizeType, Tv4>& tv_dict
 )
 {
   auto id = mNodeArray.size();
-  mNodeArray.push_back(PatNode(id, xor_flag,
-			       tv, size, level,
-			       child0, inv0,
-			       child1, inv1));
+  tv_dict.emplace(id, tv);
+  mNodeArray.push_back(PatNode(id, child0, inv0, child1, inv1));
   auto node = &mNodeArray[id];
   Npn4 npn;
   auto rep_tv = Npn4::normalize(tv, npn);
   if ( mPatGraphDict.count(rep_tv) == 0 ) {
     mPatGraphDict.emplace(rep_tv, std::vector<PatGraph>{});
   }
+
   auto& pat_list = mPatGraphDict.at(rep_tv);
-  pat_list.push_back(PatGraph{node, ~npn});
+  pat_list.push_back(PatGraph(node, npn));
+  return node;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// クラス PatGraph
+//////////////////////////////////////////////////////////////////////
+
+BEGIN_NONAMESPACE
+
+void
+print_dfs(
+  std::ostream& s,
+  const PatNode* node,
+  std::unordered_set<SizeType>& mark
+)
+{
+  if ( node->id() <= 4 ) {
+    // node は定数か入力のはず．
+    return;
+  }
+  if ( mark.count(node->id()) > 0 ) {
+    return;
+  }
+  mark.emplace(node->id());
+
+  // node は AND ノードのはず．
+  auto node0 = node->child0();
+  auto inv0 = node->inv0();
+  auto node1 = node->child1();
+  auto inv1 = node->inv1();
+  s << "Node#" << node->id() << ": ";
+  if ( inv0 ) {
+    s << "~";
+  }
+  else {
+    s << " ";
+  }
+  s << "Node#" << node0->id();
+  s << " & ";
+  if ( inv1 ) {
+    s << "~";
+  }
+  else {
+    s << " ";
+  }
+  s << "Node#" << node1->id();
+  s << endl;
+  print_dfs(s, node0, mark);
+  print_dfs(s, node1, mark);
+}
+
+END_NONAMESPACE
+
+// @brief 内容を出力する(主にデバッグ用)．
+void
+PatGraph::print(
+  std::ostream& s
+) const
+{
+  std::unordered_set<SizeType> mark;
+  print_dfs(s, root(), mark);
+  s << npn() << endl;
 }
 
 END_NAMESPACE_YM_AIG

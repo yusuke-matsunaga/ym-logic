@@ -9,10 +9,13 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
+#include "ym/AigHandle.h"
 #include "AigEdge.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
+
+class AigHandle;
 
 //////////////////////////////////////////////////////////////////////
 /// @class AigNode AigNode.h "AigNode.h"
@@ -27,7 +30,34 @@ BEGIN_NAMESPACE_YM_AIG
 //////////////////////////////////////////////////////////////////////
 class AigNode
 {
-  friend class AigMgrImpl; // 参照回数の更新のため
+  friend class AigMgrImpl; // mFanoutList の更新のため
+  friend class AigEdge;    // mFanoutList の更新のため
+
+  // ファンアウト先の情報
+  struct FoInfo {
+    std::uint8_t type;
+    union {
+      AigNode* node;
+      AigHandle* handle;
+    };
+
+    FoInfo(
+      AigNode* _node,
+      SizeType pos
+    )
+    {
+      type = pos;
+      node = _node;
+    }
+
+    FoInfo(
+      AigHandle* _handle
+    )
+    {
+      type = 2;
+      handle = _handle;
+    }
+  };
 
 public:
 
@@ -35,8 +65,7 @@ public:
   AigNode(
     SizeType id,      ///< [in] ノード番号
     SizeType input_id ///< [in] 入力番号
-  ) : mId{id},
-      mRefCount{0}
+  ) : mId{id}
   {
     _set_input(input_id);
   }
@@ -46,8 +75,7 @@ public:
     SizeType id,    ///< [in] ノード番号
     AigEdge fanin0, ///< [in] ファンイン0の枝
     AigEdge fanin1  ///< [in] ファンイン1の枝
-  ) : mId{id},
-      mRefCount{0}
+  ) : mId{id}
   {
     _set_and(fanin0, fanin1);
   }
@@ -86,7 +114,7 @@ public:
   SizeType
   ref_count() const
   {
-    return mRefCount;
+    return mFanoutList.size();
   }
 
 
@@ -100,7 +128,7 @@ public:
   input_id() const
   {
     _check_input("input_id");
-    return reinterpret_cast<PtrIntType>(mFanins[0]);
+    return reinterpret_cast<SizeType>(mFanins[0]);
   }
 
 
@@ -118,7 +146,7 @@ public:
     _check_and("fanin_node");
     // 安全のため pos の範囲を補正しておく．
     pos &= 1;
-    return mFanins[pos];
+    return fanin(pos).node();
   }
 
   /// @brief ファンイン0のノードを返す．
@@ -126,7 +154,7 @@ public:
   fanin0_node() const
   {
     _check_and("fanin0_node");
-    return mFanins[0];
+    return fanin0().node();
   }
 
   /// @brief ファンイン1のノードを返す．
@@ -134,7 +162,7 @@ public:
   fanin1_node() const
   {
     _check_and("fanin1_node");
-    return mFanins[1];
+    return fanin1().node();
   }
 
   /// @brief ファンインの反転属性を返す．
@@ -146,7 +174,7 @@ public:
     _check_and("fanin_inv");
     // 安全のため pos の範囲を補正しておく．
     pos &= 1;
-    return ( pos == 0 )? mInv0 : mInv1;
+    return fanin(pos).inv();
   }
 
   /// @brief ファンイン0の反転属性を返す．
@@ -154,7 +182,7 @@ public:
   fanin0_inv() const
   {
     _check_and("fanin0_inv");
-    return mInv0;
+    return fanin0().inv();
   }
 
   /// @brief ファンイン1の反転属性を返す．
@@ -162,7 +190,7 @@ public:
   fanin1_inv() const
   {
     _check_and("fanin1_inv");
-    return mInv1;
+    return fanin1().inv();
   }
 
   /// @brief ファンインの枝を返す．
@@ -174,7 +202,7 @@ public:
     _check_and("fanin");
     // 安全のため pos の範囲を補正しておく．
     pos &= 1;
-    return (pos == 0)? fanin0() : fanin1();
+    return AigEdge{mFanins[pos]};
   }
 
   /// @brief ファンイン0の枝を返す．
@@ -182,7 +210,7 @@ public:
   fanin0() const
   {
     _check_and("fanin0");
-    return AigEdge{mFanins[0], mInv0};
+    return AigEdge{mFanins[0]};
   }
 
   /// @brief ファンイン0のハンドルを返す．
@@ -190,7 +218,7 @@ public:
   fanin1() const
   {
     _check_and("fanin1");
-    return AigEdge{mFanins[1], mInv1};
+    return AigEdge{mFanins[1]};
   }
 
   /// @brief ANDグループのファンインのリストを返す．
@@ -199,28 +227,99 @@ public:
   vector<AigEdge>
   ex_fanin_list() const;
 
-
-private:
-  //////////////////////////////////////////////////////////////////////
-  // 参照回数の更新を行う関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief 参照回数を増やす．
-  /// @return 結果の参照回数を返す．
-  SizeType
-  inc_ref()
+  /// @brief ファンアウト先のノードを追加する．
+  void
+  add_fanout(
+    AigNode* node, ///< [in] ノード
+    SizeType pos   ///< [in] ファンイン番号 ( 0 <= pos < 1 )
+  )
   {
-    ++ mRefCount;
-    return mRefCount;
+    {
+      cout << "Node#" << id() << "::add_fanout(Node#" << node->id()
+	   << ", " << pos << ")" << endl;
+    }
+    mFanoutList.push_back(FoInfo(node, pos));
   }
 
-  /// @brief 参照回数を減らす．
-  /// @return 結果の参照回数を返す．
-  SizeType
-  dec_ref()
+  /// @brief ファンアウト先のハンドルを追加する．
+  void
+  add_fanout(
+    AigHandle* handle ///< [in] ハンドル
+  )
   {
-    -- mRefCount;
-    return mRefCount;
+    {
+      cout << "Node#" << id() << "::add_fanout(AigHandle): "
+	   << hex << handle << dec << endl;
+    }
+    mFanoutList.push_back(FoInfo(handle));
+  }
+
+  /// @brief ファンアウト先のポインタを置き換える．
+  void
+  replace_fanout(
+    AigHandle* old_ptr,
+    AigHandle* new_ptr
+  )
+  {
+    for ( auto p = mFanoutList.begin(); p != mFanoutList.end(); ++ p ) {
+      if ( p->type == 2 && p->handle == old_ptr ) {
+	p->handle = new_ptr;
+	return;
+      }
+    }
+    throw std::logic_error{"error in delete_fanout(): ptr does not exist"};
+  }
+
+  /// @brief ファンアウト先のノードを削除する．
+  /// @return ファンアウトが空になったら true を返す．
+  bool
+  delete_fanout(
+    AigNode* node,
+    SizeType pos
+  )
+  {
+    {
+      cout << "Node#" << id() << "::delete_fanout(Node#"
+	   << node->id() << ", " << pos << ")" << endl;
+    }
+    for ( auto p = mFanoutList.begin(); p != mFanoutList.end(); ++ p ) {
+      if ( p->type == pos && p->node == node ) {
+	mFanoutList.erase(p);
+	return mFanoutList.empty();
+      }
+    }
+    {
+      cout << "Node#" << id() << ": delete_fanout(Node#" << node->id()
+	   << ", " << pos << ")" << endl;
+      for ( auto& fo_info: mFanoutList ) {
+	if ( fo_info.type == 2 ) {
+	  cout << "  AigHandle()" << endl;
+	}
+	else {
+	  cout << "  AigNode(Node#" << fo_info.node->id()
+	       << "), " << static_cast<int>(fo_info.type) << endl;
+	}
+      }
+    }
+    throw std::logic_error{"error in delete_fanout(): ptr does not exist"};
+    return false;
+  }
+
+  /// @brief ファンアウト先のハンドルを削除する．
+  /// @return ファンアウトが空になったら true を返す．
+  bool
+  delete_fanout(
+    AigHandle* handle
+  )
+  {
+    for ( auto p = mFanoutList.begin(); p != mFanoutList.end(); ++ p ) {
+      if ( p->type == 2 && p->handle == handle ) {
+	mFanoutList.erase(p);
+	return mFanoutList.empty();
+      }
+    }
+    throw std::logic_error{"error in delete_fanout(): ptr does not exist"};
+    return false;
   }
 
 
@@ -235,11 +334,9 @@ private:
     SizeType input_id ///< [in] 入力番号
   )
   {
-    mFanins[0] = reinterpret_cast<AigNode*>(input_id);
-    mFanins[1] = nullptr;
     mInput = true;
-    mInv0 = false;
-    mInv1 = false;
+    mFanins[0] = reinterpret_cast<PtrIntType>(input_id);
+    mFanins[1] = 0;
   }
 
   /// @brief ANDノードの内容をセットする．
@@ -249,11 +346,9 @@ private:
     AigEdge fanin1  ///< [in] ファンイン1の枝
   )
   {
-    mFanins[0] = fanin0.node();
-    mFanins[1] = fanin1.node();
     mInput = false;
-    mInv0 = fanin0.inv();
-    mInv1 = fanin1.inv();
+    mFanins[0] = fanin0.mPackedData;
+    mFanins[1] = fanin1.mPackedData;
   }
 
   /// @brief 入力専用の関数の例外発生
@@ -263,6 +358,7 @@ private:
   ) const
   {
     if ( !is_input() ) {
+      abort();
       ostringstream buf;
       buf << "AigNode::" << name << "() is valid if is_input() == true";
       throw std::invalid_argument{buf.str()};
@@ -276,6 +372,7 @@ private:
   ) const
   {
     if ( !is_and() ) {
+      abort();
       ostringstream buf;
       buf << "AigNode::" << name << "() is valid if is_and() == true";
       throw std::invalid_argument{buf.str()};
@@ -289,22 +386,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // ID番号
-  SizeType mId;
-
-  // ファンインのノード
-  AigNode* mFanins[2]{nullptr, nullptr};
+  SizeType mId : 63;
 
   // 入力/ANDの区別
   bool mInput : 1;
 
-  // ファンイン0の極性
-  bool mInv0 : 1;
+  // ファンインの枝
+  PtrIntType mFanins[2];
 
-  // ファンイン1の極性
-  bool mInv1 : 1;
-
-  // 参照回数(ファンアウト数)
-  SizeType mRefCount : 61;
+  // ファンアウト先のリスト
+  std::vector<FoInfo> mFanoutList;
 
 };
 

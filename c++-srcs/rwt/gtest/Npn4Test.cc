@@ -246,7 +246,7 @@ TEST_F(Npn4Test, normalize)
     if ( rep_funcs.count(ctv) == 0 ) {
       rep_funcs.emplace(ctv);
     }
-    auto tv1 = npn.xform(ctv);
+    auto ctv1 = npn.xform(tv);
     std::ostringstream buf;
     buf << hex << setw(4) << setfill('0')
 	<< tv << "| "
@@ -255,8 +255,8 @@ TEST_F(Npn4Test, normalize)
 	<< ", " << npn
 	<< " => "
 	<< hex << setw(4) << setfill('0')
-	<< tv1 << setfill(' ') << dec;
-    EXPECT_EQ( tv1, tv ) << buf.str();
+	<< ctv1 << setfill(' ') << dec;
+    EXPECT_EQ( ctv, ctv1 ) << buf.str();
   }
   EXPECT_EQ( 222, rep_funcs.size() );
 }

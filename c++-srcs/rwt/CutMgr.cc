@@ -78,7 +78,6 @@ CutMgr::_merge_cuts(
   std::unordered_set<SizeType> leaf_hash;
   // 結果のノードリスト
   std::vector<AigNode*> node_list;
-  node_list.push_back(root);
   // cut0 のノードリストに対応したハッシュ
   std::unordered_set<SizeType> set0;
   for ( auto node: cut0->node_list() ) {
@@ -113,6 +112,37 @@ CutMgr::_merge_cuts(
   if ( leaf_list.size() > mCutSize ) {
     // サイズが大きければ不正
     return nullptr;
+  }
+  node_list.push_back(root);
+  {
+    // カットが正しいかチェックする．
+    std::unordered_set<SizeType> mark;
+    for ( auto node: leaf_list ) {
+      mark.emplace(node->id());
+    }
+    for ( auto node: node_list ) {
+      auto node0 = node->fanin0_node();
+      if ( mark.count(node0->id()) == 0 ) {
+	cout << "Node#" << node0->id() << " is not contained" << endl;
+	cout << "root: " << root->id() << endl;
+	cout << "cut0:" << endl;
+	cut0->print(cout);
+	cout << "cut1:" << endl;
+	cut1->print(cout);
+	abort();
+      }
+      auto node1 = node->fanin1_node();
+      if ( mark.count(node1->id()) == 0 ) {
+	cout << "Node#" << node1->id() << " is not contained" << endl;
+	cout << "root: " << root->id() << endl;
+	cout << "cut0:" << endl;
+	cut0->print(cout);
+	cout << "cut1:" << endl;
+	cut1->print(cout);
+	abort();
+      }
+      mark.emplace(node->id());
+    }
   }
   return new Cut(root, leaf_list, node_list);
 }

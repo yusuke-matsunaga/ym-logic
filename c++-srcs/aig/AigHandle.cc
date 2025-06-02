@@ -19,19 +19,48 @@ BEGIN_NAMESPACE_YM_AIG
 // クラス AigHandle
 //////////////////////////////////////////////////////////////////////
 
-// @brief 空のコンストラクタ
-AigHandle::AigHandle(
-)
-{
-}
-
 // @brief コピーコンストラクタ
 AigHandle::AigHandle(
   const AigHandle& src
-) : AigHandle(src, src._edge())
+) : AigMgrHolder(src),
+    mEdge{src.mEdge}
 {
-  // delegate constructor パタン
-  // 下のコンストラクタを利用している．
+  _edge().add_fanout(this);
+}
+
+// @brief ムーブコンストラクタ
+AigHandle::AigHandle(
+  AigHandle&& src
+) : AigMgrHolder(std::move(src)),
+    mEdge{src.mEdge}
+{
+  src.mEdge = 0;
+  _edge().replace_fanout(&src, this);
+}
+
+// @brief コピー代入演算子
+AigHandle&
+AigHandle::operator=(
+  const AigHandle& src
+)
+{
+  AigMgrHolder::operator=(src);
+  mEdge = src.mEdge;
+  _edge().add_fanout(this);
+  return *this;
+}
+
+// @brief ムーブ代入演算子
+AigHandle&
+AigHandle::operator=(
+  AigHandle&& src
+)
+{
+  AigMgrHolder::operator=(std::move(src));
+  mEdge = src.mEdge;
+  src.mEdge = 0;
+  _edge().replace_fanout(&src, this);
+  return *this;
 }
 
 // @brief 内容を指定したコンストラクタ
@@ -41,18 +70,17 @@ AigHandle::AigHandle(
 ) : AigMgrHolder{holder},
     mEdge{edge.mPackedData}
 {
-  if ( !edge.is_const() ) {
-    auto mgr = get();
-    mgr->inc_ref(edge);
-  }
+  edge.add_fanout(this);
 }
 
 // @brief デストラクタ
 AigHandle::~AigHandle()
 {
   if ( !_edge().is_const() ) {
-    auto mgr = get();
-    mgr->dec_ref(_edge());
+    auto node = _edge().node();
+    if ( node->delete_fanout(this) ) {
+      get()->_free_node(node);
+    }
   }
 }
 
@@ -439,10 +467,16 @@ AigHandle::_set_edge(
   AigEdge edge
 )
 {
-  auto mgr = get();
-  mgr->inc_ref(edge);
-  mgr->dec_ref(_edge());
-  mEdge = edge.mPackedData;
+  if ( edge != _edge() ) {
+    edge.add_fanout(this);
+    if ( !_edge().is_const() ) {
+      auto node = _edge().node();
+      if ( node->delete_fanout(this) ) {
+	get()->_free_node(node);
+      }
+    }
+    mEdge = edge.mPackedData;
+  }
 }
 
 END_NAMESPACE_YM_AIG

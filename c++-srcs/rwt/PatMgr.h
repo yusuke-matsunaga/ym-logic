@@ -10,24 +10,12 @@
 
 #include "ym/aig.h"
 #include "Npn4.h"
+#include "PatGraph.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
 
 class PatNode;
-
-//////////////////////////////////////////////////////////////////////
-/// @brief 置き換え用のパタンを表す構造体
-///
-/// - 葉のノードは 1 〜 4 番のノード
-/// - npn の変換を施すことで代表関数になる．
-//////////////////////////////////////////////////////////////////////
-struct PatGraph
-{
-  const PatNode* root; ///< 根のノード
-  Npn4 npn;            ///< 正規化用の変換
-};
-
 
 //////////////////////////////////////////////////////////////////////
 /// @class PatMgr PatMgr.h "PatMgr.h"
@@ -61,15 +49,17 @@ public:
   const std::vector<PatGraph>&
   get_pat(
     Tv4 tv,   ///< [in] 関数の真理値表を表す数値
-    Npn4& npn ///< [out] 代表関数に対するNPN変換
+    Npn4& npn ///< [out] パタンが表している関数に対するNPN変換
   ) const
   {
-    auto rep_tv = Npn4::normalize(tv, npn);
+    Npn4 xnpn;
+    auto rep_tv = Npn4::normalize(tv, xnpn);
+    npn = ~xnpn;
     if ( mPatGraphDict.count(rep_tv) > 0 ) {
       return mPatGraphDict.at(rep_tv);
     }
     // 空のリスト
-    static std::vector<PatGraph> dummy{};
+    static std::vector<PatGraph> dummy;
     return dummy;
   }
 
@@ -99,16 +89,14 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief ノードを追加する．
-  void
+  PatNode*
   add_node(
-    bool xor_flag,         ///< [in] XORフラグ
-    std::uint16_t tv,      ///< [in] 真理値表を表すパタン
-    std::uint8_t size,     ///< [in] サイズ
-    std::uint8_t level,    ///< [in] レベル
-    const PatNode* child0, ///< [in] 左の子供
-    bool inv0,             ///< [in] 左の子供の反転フラグ
-    const PatNode* child1, ///< [in] 右の子供
-    bool inv1              ///< [in] 右の子供の反転フラグ
+    Tv4 tv,                 ///< [in] 真理値表を表すパタン
+    const PatNode* child0,  ///< [in] 左の子供
+    bool inv0,              ///< [in] 左の子供の反転フラグ
+    const PatNode* child1,  ///< [in] 右の子供
+    bool inv1,              ///< [in] 右の子供の反転フラグ
+    std::unordered_map<SizeType, Tv4>& tv_dict
   );
 
 

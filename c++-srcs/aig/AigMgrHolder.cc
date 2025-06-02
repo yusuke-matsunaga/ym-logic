@@ -31,6 +31,33 @@ AigMgrHolder::AigMgrHolder(
 {
 }
 
+// @brief ムーブコンストラクタ
+AigMgrHolder::AigMgrHolder(
+  AigMgrHolder&& src
+) : mPtr{std::move(src.mPtr)}
+{
+}
+
+// @brief コピー代入演算子
+AigMgrHolder&
+AigMgrHolder::operator=(
+  const AigMgrHolder& src
+)
+{
+  mPtr = src.mPtr;
+  return *this;
+}
+
+// @brief ムーブ代入演算子
+AigMgrHolder&
+AigMgrHolder::operator=(
+  AigMgrHolder&& src
+)
+{
+  std::swap(mPtr, src.mPtr);
+  return *this;
+}
+
 // @brief デストラクタ
 AigMgrHolder::~AigMgrHolder()
 {

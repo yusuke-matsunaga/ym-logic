@@ -25,11 +25,15 @@ class AigEdge;
 /// と同様だが，AigNode の管理のために AigMgrImpl のポインタも持つ．
 /// AigMgrImpl は参照回数を管理しており，最後の参照がなくなった時に
 /// 開放される．
+///
+/// さらに AigEdge を非公開にするために内部では AigEdge と等価な
+/// PtrIntType で値を保持している．
 //////////////////////////////////////////////////////////////////////
 class AigHandle :
   public AigMgrHolder
 {
   friend class AigMgrHolder;
+  friend class AigMgrImpl;
 
 public:
   //////////////////////////////////////////////////////////////////////
@@ -39,11 +43,28 @@ public:
   /// @brief 空のコンストラクタ
   ///
   /// 不正な値となる．
-  AigHandle();
+  AigHandle() = default;
 
   /// @brief コピーコンストラクタ
   AigHandle(
     const AigHandle& src
+  );
+
+  /// @brief ムーブコンストラクタ
+  AigHandle(
+    AigHandle&& src
+  );
+
+  /// @brief コピー代入演算子
+  AigHandle&
+  operator=(
+    const AigHandle& src
+  );
+
+  /// @brief ムーブ代入演算子
+  AigHandle&
+  operator=(
+    AigHandle&& src
   );
 
   /// @brief デストラクタ
@@ -337,7 +358,7 @@ private:
   /// @brief 内容を指定したコンストラクタ
   AigHandle(
     const AigMgrHolder& mgr, ///< [in] マネージャ
-    AigEdge edge          ///< [in] 枝
+    AigEdge edge             ///< [in] 枝
   );
 
   /// @brief マネージャが同じかチェックする．
