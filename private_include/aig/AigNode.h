@@ -33,6 +33,8 @@ class AigNode
   friend class AigMgrImpl; // mFanoutList の更新のため
   friend class AigEdge;    // mFanoutList の更新のため
 
+public:
+
   // ファンアウト先の情報
   struct FoInfo {
     std::uint8_t type;
@@ -58,6 +60,7 @@ class AigNode
       handle = _handle;
     }
   };
+
 
 public:
 
@@ -227,6 +230,13 @@ public:
   vector<AigEdge>
   ex_fanin_list() const;
 
+  /// @brief ファンアウト先の情報のリストを返す．
+  const std::vector<FoInfo>&
+  fanout_list() const
+  {
+    return mFanoutList;
+  }
+
   /// @brief ファンアウト先のノードを追加する．
   void
   add_fanout(
@@ -235,7 +245,7 @@ public:
   )
   {
     {
-      cout << "Node#" << id() << "::add_fanout(Node#" << node->id()
+      cout << "  Node#" << id() << "::add_fanout(Node#" << node->id()
 	   << ", " << pos << ")" << endl;
     }
     mFanoutList.push_back(FoInfo(node, pos));
@@ -248,7 +258,7 @@ public:
   )
   {
     {
-      cout << "Node#" << id() << "::add_fanout(AigHandle): "
+      cout << "  Node#" << id() << "::add_fanout(AigHandle): "
 	   << hex << handle << dec << endl;
     }
     mFanoutList.push_back(FoInfo(handle));
@@ -279,7 +289,7 @@ public:
   )
   {
     {
-      cout << "Node#" << id() << "::delete_fanout(Node#"
+      cout << "  Node#" << id() << "::delete_fanout(Node#"
 	   << node->id() << ", " << pos << ")" << endl;
     }
     for ( auto p = mFanoutList.begin(); p != mFanoutList.end(); ++ p ) {
@@ -289,14 +299,14 @@ public:
       }
     }
     {
-      cout << "Node#" << id() << ": delete_fanout(Node#" << node->id()
+      cout << "  Node#" << id() << ": delete_fanout(Node#" << node->id()
 	   << ", " << pos << ")" << endl;
       for ( auto& fo_info: mFanoutList ) {
 	if ( fo_info.type == 2 ) {
-	  cout << "  AigHandle()" << endl;
+	  cout << "    AigHandle()" << endl;
 	}
 	else {
-	  cout << "  AigNode(Node#" << fo_info.node->id()
+	  cout << "    AigNode(Node#" << fo_info.node->id()
 	       << "), " << static_cast<int>(fo_info.type) << endl;
 	}
       }

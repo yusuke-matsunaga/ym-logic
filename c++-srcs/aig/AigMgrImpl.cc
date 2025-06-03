@@ -527,7 +527,7 @@ AigMgrImpl::_free_node(
       continue;
     }
     {
-      cout << "_free_node(Node#" << node->id() << ")" << endl;
+      cout << "  _free_node(Node#" << node->id() << ")" << endl;
     }
     -- mNodeNum;
     mAndTable.erase(node);

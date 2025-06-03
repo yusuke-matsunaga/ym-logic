@@ -66,6 +66,7 @@ AigMgrImpl::rewrite()
 	Pat2Aig pat2aig(this);
 	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
 	replace(node, new_edge);
+	cut_mgr.erase_cuts(node);
 	_sanity_check();
       }
     }

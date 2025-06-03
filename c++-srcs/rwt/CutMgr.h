@@ -177,13 +177,7 @@ public:
   void
   erase_cuts(
     AigNode* node ///< [in] 対象のノード
-  )
-  {
-    if ( mCutHash.count(node->id()) > 0 ) {
-      auto& cut_list = mCutHash.at(node->id());
-      remove_cuts(cut_list);
-    }
-  }
+  );
 
 
 private:

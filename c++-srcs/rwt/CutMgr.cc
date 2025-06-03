@@ -147,4 +147,30 @@ CutMgr::_merge_cuts(
   return new Cut(root, leaf_list, node_list);
 }
 
+// @brief ノードの削除に伴ってカットを削除する．
+void
+CutMgr::erase_cuts(
+  AigNode* node ///< [in] 対象のノード
+)
+{
+  std::deque<AigNode*> queue;
+  queue.push_back(node);
+  while ( !queue.empty() ) {
+    auto node = queue.front();
+    queue.pop_front();
+    if ( mCutHash.count(node->id()) > 0 ) {
+      auto& cut_list = mCutHash.at(node->id());
+      remove_cuts(cut_list);
+      mCutHash.erase(node->id());
+      for ( auto& fo_info: node->fanout_list() ) {
+	if ( fo_info.type == 2 ) {
+	  continue;
+	}
+	auto fo_node = fo_info.node;
+	queue.push_back(fo_node);
+      }
+    }
+  }
+}
+
 END_NAMESPACE_YM_AIG
