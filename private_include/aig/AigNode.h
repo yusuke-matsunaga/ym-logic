@@ -12,6 +12,9 @@
 #include "ym/AigHandle.h"
 #include "AigEdge.h"
 
+#define DEBUG_AIGNODE 0
+#define DOUT std::cout
+
 
 BEGIN_NAMESPACE_YM_AIG
 
@@ -244,10 +247,12 @@ public:
     SizeType pos   ///< [in] ファンイン番号 ( 0 <= pos < 1 )
   )
   {
+#if DEBUG_AIGNODE
     {
-      cout << "  Node#" << id() << "::add_fanout(Node#" << node->id()
+      DOUT << "  Node#" << id() << "::add_fanout(Node#" << node->id()
 	   << ", " << pos << ")" << endl;
     }
+#endif
     mFanoutList.push_back(FoInfo(node, pos));
   }
 
@@ -257,10 +262,12 @@ public:
     AigHandle* handle ///< [in] ハンドル
   )
   {
+#if DEBUG_AIGNODE
     {
-      cout << "  Node#" << id() << "::add_fanout(AigHandle): "
+      DOUT << "  Node#" << id() << "::add_fanout(AigHandle): "
 	   << hex << handle << dec << endl;
     }
+#endif
     mFanoutList.push_back(FoInfo(handle));
   }
 
@@ -288,16 +295,19 @@ public:
     SizeType pos
   )
   {
+#if DEBUG_AIGNODE
     {
-      cout << "  Node#" << id() << "::delete_fanout(Node#"
+      DOUT << "  Node#" << id() << "::delete_fanout(Node#"
 	   << node->id() << ", " << pos << ")" << endl;
     }
+#endif
     for ( auto p = mFanoutList.begin(); p != mFanoutList.end(); ++ p ) {
       if ( p->type == pos && p->node == node ) {
 	mFanoutList.erase(p);
 	return mFanoutList.empty();
       }
     }
+#if DEBUG_AIGNODE
     {
       cout << "  Node#" << id() << ": delete_fanout(Node#" << node->id()
 	   << ", " << pos << ")" << endl;
@@ -311,7 +321,8 @@ public:
 	}
       }
     }
-    throw std::logic_error{"error in delete_fanout(): ptr does not exist"};
+#endif
+    throw std::logic_error{"error in delete_fanout(): node does not exist"};
     return false;
   }
 

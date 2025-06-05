@@ -13,6 +13,9 @@
 #include "CalcMerit.h"
 #include "Pat2Aig.h"
 
+#define DEBUG_REWRITE 1
+#define DOUT std::cout
+
 
 BEGIN_NAMESPACE_YM_AIG
 
@@ -24,7 +27,8 @@ AigMgrImpl::rewrite()
   for ( bool go_on = true; go_on; ) {
     CutMgr cut_mgr(4);
     bool changed = false;
-    for ( auto node: and_list() ) {
+    auto node_list = and_list();
+    for ( auto node: node_list ) {
       if ( node->ref_count() == 0 ) {
 	// 削除されたノード
 	continue;
@@ -60,19 +64,26 @@ AigMgrImpl::rewrite()
 	}
       }
       if ( max_gain > 0 ) {
-	cout << " max_gain = " << max_gain << endl;
+#if DEBUG_REWRITE
+	DOUT << "Node#" << node->id()
+	     << ": max_gain = " << max_gain << endl;
+#endif
 	// max_cut を max_pat で置き換える．
 	changed = true;
 	Pat2Aig pat2aig(this);
 	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
-	replace(node, new_edge);
 	cut_mgr.erase_cuts(node);
+	replace(node, new_edge);
+#if VERIFY
 	_sanity_check();
+#endif
       }
     }
     if ( changed ) {
       sweep();
-      cout << and_num() << endl;
+#if DEBUG_REWRITE
+      DOUT << and_num() << endl;
+#endif
     }
     else {
       go_on = false;

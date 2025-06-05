@@ -151,6 +151,9 @@ public:
     auto p = mAndTable.find(&key);
     if ( p != mAndTable.end() ) {
       auto node = *p;
+      if ( node->ref_count() == 0 ) {
+	abort();
+      }
       return AigEdge{node, false};
     }
 
@@ -385,7 +388,7 @@ public:
   void
   print(
     std::ostream& s ///< [in] 出力ストリーム
-  );
+  ) const;
 
 
 private:

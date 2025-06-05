@@ -38,6 +38,7 @@ CutMgr::_enum_cuts(
   AigNode* node
 )
 {
+  _sanity_check();
   if ( mCutHash.count(node->id()) == 0 ) {
     std::vector<Cut*> cut_list;
     { // 自身を葉とするカットを作る．
@@ -114,36 +115,6 @@ CutMgr::_merge_cuts(
     return nullptr;
   }
   node_list.push_back(root);
-  {
-    // カットが正しいかチェックする．
-    std::unordered_set<SizeType> mark;
-    for ( auto node: leaf_list ) {
-      mark.emplace(node->id());
-    }
-    for ( auto node: node_list ) {
-      auto node0 = node->fanin0_node();
-      if ( mark.count(node0->id()) == 0 ) {
-	cout << "Node#" << node0->id() << " is not contained" << endl;
-	cout << "root: " << root->id() << endl;
-	cout << "cut0:" << endl;
-	cut0->print(cout);
-	cout << "cut1:" << endl;
-	cut1->print(cout);
-	abort();
-      }
-      auto node1 = node->fanin1_node();
-      if ( mark.count(node1->id()) == 0 ) {
-	cout << "Node#" << node1->id() << " is not contained" << endl;
-	cout << "root: " << root->id() << endl;
-	cout << "cut0:" << endl;
-	cut0->print(cout);
-	cout << "cut1:" << endl;
-	cut1->print(cout);
-	abort();
-      }
-      mark.emplace(node->id());
-    }
-  }
   return new Cut(root, leaf_list, node_list);
 }
 
@@ -168,6 +139,45 @@ CutMgr::erase_cuts(
 	}
 	auto fo_node = fo_info.node;
 	queue.push_back(fo_node);
+      }
+    }
+  }
+}
+
+// @brief カットの情報が正しいかチェックする．
+void
+CutMgr::_sanity_check() const
+{
+  for ( auto& p: mCutHash ) {
+    auto& cut_list = p.second;
+    for ( auto cut: cut_list ) {
+      if ( cut->root()->ref_count() == 0 ) {
+	continue;
+      }
+      // カットが正しいかチェックする．
+      std::unordered_set<SizeType> mark;
+      for ( auto node: cut->leaf_list() ) {
+	mark.emplace(node->id());
+      }
+      for ( auto node: cut->node_list() ) {
+	if ( node->ref_count() == 0 ) {
+	  cout << "Node#" << node->id() << " is deleted" << endl;
+	  cut->print(cout);
+	  abort();
+	}
+	auto node0 = node->fanin0_node();
+	if ( mark.count(node0->id()) == 0 ) {
+	  cout << "Node#" << node0->id() << " is not contained" << endl;
+	  cut->print(cout);
+	  abort();
+	}
+	auto node1 = node->fanin1_node();
+	if ( mark.count(node1->id()) == 0 ) {
+	  cout << "Node#" << node1->id() << " is not contained" << endl;
+	  cut->print(cout);
+	  abort();
+	}
+	mark.emplace(node->id());
       }
     }
   }

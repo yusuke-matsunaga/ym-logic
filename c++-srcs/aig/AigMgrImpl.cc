@@ -11,6 +11,9 @@
 #include "ValArray.h"
 #include "EdgeDict.h"
 
+#define DEBUG_AIGMGRIMPL 1
+#define DOUT std::cout
+
 
 BEGIN_NAMESPACE_YM_AIG
 
@@ -428,19 +431,21 @@ AigMgrImpl::replace(
     auto old_node = p.old_node;
     auto new_edge = p.new_edge;
     queue.pop_front();
+#if DEBUG_AIGMGRIMPL
     {
-      cout << "replace(Node#" << old_node->id()
+      DOUT << "replace(Node#" << old_node->id()
 	   << ", " << new_edge << ")" << endl;
       for ( auto& fo_info: old_node->mFanoutList ) {
 	if ( fo_info.type == 2 ) {
-	  cout << "  -> AigHandle(" << fo_info.handle->_edge() << ")" << endl;
+	  DOUT << "  -> AigHandle(" << fo_info.handle->_edge() << ")" << endl;
 	}
 	else {
-	  cout << "  -> AigNode(Node#" << fo_info.node->id()
+	  DOUT << "  -> AigNode(Node#" << fo_info.node->id()
 	       << "), " << static_cast<int>(fo_info.type) << endl;
 	}
       }
     }
+#endif
 
     for ( auto& fo_info: old_node->mFanoutList ) {
       if ( fo_info.type == 2 ) {
@@ -526,9 +531,11 @@ AigMgrImpl::_free_node(
       // 入力ノードは削除しない．
       continue;
     }
+#if DEBUG_AIGMGRIMPL
     {
-      cout << "  _free_node(Node#" << node->id() << ")" << endl;
+      DOUT << "  _free_node(Node#" << node->id() << ")" << endl;
     }
+#endif
     -- mNodeNum;
     mAndTable.erase(node);
 
@@ -563,13 +570,17 @@ AigMgrImpl::_sanity_check() const
       continue;
     }
     if ( node->fanin0_node() == nullptr ) {
+      print(cout);
       std::ostringstream buf;
       buf << "Node#" << node->id() << "->fanin0_node() == nullptr";
+      cout << buf.str() << endl;
       throw std::logic_error{buf.str()};
     }
     if ( node->fanin1_node() == nullptr ) {
+      print(cout);
       std::ostringstream buf;
       buf << "Node#" << node->id() << "->fanin1_node() == nullptr";
+      cout << buf.str() << endl;
       throw std::logic_error{buf.str()};
     }
   }
@@ -580,9 +591,10 @@ AigMgrImpl::_sanity_check() const
       if ( fo_info.type == 2 ) {
 	auto handle = fo_info.handle;
 	if ( handle->_edge().node() != node.get() ) {
+	  print(cout);
 	  {
-	    cout << endl;
-	    cout << "Node#" << node->id()
+	    cout << endl
+		 << "Node#" << node->id()
 		 << " -> AigHandle" << endl;
 	  }
 	  throw std::logic_error{"something wrong(1)"};
@@ -591,9 +603,10 @@ AigMgrImpl::_sanity_check() const
       else {
 	auto fo_node = fo_info.node;
 	if ( fo_node->fanin_node(fo_info.type) != node.get() ) {
+	  print(cout);
 	  {
-	    cout << endl;
-	    cout << "Node#" << node->id()
+	    cout << endl
+		 << "Node#" << node->id()
 		 << " -> Node#" << fo_node->id()
 		 << "@" << static_cast<int>(fo_info.type)
 		 << ": " << fo_node->fanin_node(fo_info.type)->id() << endl;
@@ -618,8 +631,9 @@ AigMgrImpl::_sanity_check() const
 	}
       }
       if ( !found ) {
-	cout << endl;
-	cout << "checking Node#" << node->id()
+	print(cout);
+	cout << endl
+	     << "checking Node#" << node->id()
 	     << "@0 = Node#" << node0->id() << endl;
 	for ( auto& fo_info: node0->mFanoutList ) {
 	  if ( fo_info.type == 2 ) {
@@ -643,8 +657,9 @@ AigMgrImpl::_sanity_check() const
 	}
       }
       if ( !found ) {
-	cout << endl;
-	cout << "checking Node#" << node->id()
+	print(cout);
+	cout << endl
+	     << "checking Node#" << node->id()
 	     << "@1 = Node#" << node1->id() << endl;
 	for ( auto& fo_info: node1->mFanoutList ) {
 	  if ( fo_info.type == 2 ) {
@@ -665,7 +680,7 @@ AigMgrImpl::_sanity_check() const
 void
 AigMgrImpl::print(
   std::ostream& s
-)
+) const
 {
   for ( auto& node: mNodeArray ) {
     s << "Node#" << node->id() << ": ";
