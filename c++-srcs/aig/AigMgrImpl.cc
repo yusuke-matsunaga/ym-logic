@@ -18,6 +18,49 @@
 BEGIN_NAMESPACE_YM_AIG
 
 //////////////////////////////////////////////////////////////////////
+// クラス EventMgr
+//////////////////////////////////////////////////////////////////////
+
+// @brief コンストラクタ
+EventMgr::EventMgr(
+  AigMgrImpl* mgr
+) : mMgr{mgr}
+{
+  mgr->add_event_mgr(this);
+}
+
+// @brief デストラクタ
+EventMgr::~EventMgr()
+{
+  mMgr->delete_event_mgr(this);
+}
+
+// @brief ハンドルの内容が変化したときに呼ばれる関数
+void
+EventMgr::change_proc(
+  AigHandle* handle
+)
+{
+}
+
+// @brief ノードのファンインが変化したときに呼ばれる関数
+void
+EventMgr::change_proc(
+  AigNode* node
+)
+{
+}
+
+// @brief ノードが削除されるときに呼ばれる関数
+void
+EventMgr::delete_proc(
+  AigNode* node ///< [in] 対象のノード
+)
+{
+}
+
+
+//////////////////////////////////////////////////////////////////////
 // クラス AigMgrImpl
 //////////////////////////////////////////////////////////////////////
 
@@ -456,6 +499,7 @@ AigMgrImpl::replace(
 	}
 	handle->mEdge = new_edge1.mPackedData;
 	new_edge1.add_fanout(handle);
+	_propagate_change(handle);
       }
       else {
 	auto fo_node = fo_info.node;
@@ -478,6 +522,7 @@ AigMgrImpl::replace(
 	else {
 	  fo_node->mFanins[pos] = new_edge1.mPackedData;
 	  new_edge1.add_fanout(fo_node, pos);
+	  _propagate_change(fo_node);
 	}
       }
     }
@@ -554,6 +599,7 @@ AigMgrImpl::_free_node(
       }
       node->mFanins[1] = 0;
     }
+    _propagate_delete(node);
   }
 }
 

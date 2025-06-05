@@ -18,8 +18,10 @@ BEGIN_NAMESPACE_YM_AIG
 
 // @brief コンストラクタ
 CutMgr::CutMgr(
+  AigMgrImpl* mgr,
   SizeType cut_size
-) : mCutSize{cut_size}
+) : EventMgr(mgr),
+    mCutSize{cut_size}
 {
 }
 
@@ -28,7 +30,7 @@ CutMgr::~CutMgr()
 {
   for ( auto p: mCutHash ) {
     auto& cut_list = p.second;
-    remove_cuts(cut_list);
+    _remove_cuts(cut_list);
   }
 }
 
@@ -118,10 +120,28 @@ CutMgr::_merge_cuts(
   return new Cut(root, leaf_list, node_list);
 }
 
+// @brief ノードのファンインが変化したときに呼ばれる関数
+void
+CutMgr::change_proc(
+  AigNode* node
+)
+{
+  _erase_cuts(node);
+}
+
+// @brief ノードが削除されるときに呼ばれる関数
+void
+CutMgr::delete_proc(
+  AigNode* node
+)
+{
+  _erase_cuts(node);
+}
+
 // @brief ノードの削除に伴ってカットを削除する．
 void
-CutMgr::erase_cuts(
-  AigNode* node ///< [in] 対象のノード
+CutMgr::_erase_cuts(
+  AigNode* node
 )
 {
   std::deque<AigNode*> queue;
@@ -131,14 +151,14 @@ CutMgr::erase_cuts(
     queue.pop_front();
     if ( mCutHash.count(node->id()) > 0 ) {
       auto& cut_list = mCutHash.at(node->id());
-      remove_cuts(cut_list);
+      _remove_cuts(cut_list);
       mCutHash.erase(node->id());
       for ( auto& fo_info: node->fanout_list() ) {
 	if ( fo_info.type == 2 ) {
 	  continue;
 	}
-	auto fo_node = fo_info.node;
-	queue.push_back(fo_node);
+	auto node1 = fo_info.node;
+	queue.push_back(node1);
       }
     }
   }

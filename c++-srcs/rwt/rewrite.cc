@@ -25,7 +25,7 @@ AigMgrImpl::rewrite()
 {
   PatMgr pat_mgr;
   for ( bool go_on = true; go_on; ) {
-    CutMgr cut_mgr(4);
+    CutMgr cut_mgr(this, 4);
     bool changed = false;
     auto node_list = and_list();
     for ( auto node: node_list ) {
@@ -72,7 +72,6 @@ AigMgrImpl::rewrite()
 	changed = true;
 	Pat2Aig pat2aig(this);
 	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
-	cut_mgr.erase_cuts(node);
 	replace(node, new_edge);
 #if VERIFY
 	_sanity_check();

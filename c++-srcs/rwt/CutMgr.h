@@ -9,6 +9,7 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
+#include "aig/AigMgrImpl.h"
 #include "aig/AigNode.h"
 
 
@@ -144,12 +145,14 @@ private:
 /// 生成されたカットの参照は CutMgr が所有する．
 /// CutMgr が破棄される時にすべて破棄される．
 //////////////////////////////////////////////////////////////////////
-class CutMgr
+class CutMgr :
+  public EventMgr
 {
 public:
 
   /// @brief コンストラクタ
   CutMgr(
+    AigMgrImpl* mgr,  ///< [in] 親の AigMgr
     SizeType cut_size ///< [in] カットの入力数の最大値
   );
 
@@ -173,11 +176,23 @@ public:
     return _enum_cuts(node);
   }
 
-  /// @brief ノードの削除に伴ってカットを削除する．
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // EventMgr の仮想関数
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ノードのファンインが変化したときに呼ばれる関数
   void
-  erase_cuts(
+  change_proc(
     AigNode* node ///< [in] 対象のノード
-  );
+  ) override;
+
+  /// @brief ノードが削除されるときに呼ばれる関数
+  void
+  delete_proc(
+    AigNode* node ///< [in] 対象のノード
+  ) override;
 
 
 private:
@@ -202,9 +217,15 @@ private:
     const Cut* cut1  ///< [in] fanin1 のカット
   );
 
+  /// @brief ノードの削除に伴ってカットを削除する．
+  void
+  _erase_cuts(
+    AigNode* node ///< [in] 対象のノード
+  );
+
   /// @brief カットのリストを削除する．
   void
-  remove_cuts(
+  _remove_cuts(
     const std::vector<Cut*>& cut_list
   )
   {

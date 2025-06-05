@@ -21,7 +21,7 @@ TEST(CutMgrTest, input)
   auto node = e.node();
 
   SizeType cut_size = 4;
-  CutMgr cut_mgr(cut_size);
+  CutMgr cut_mgr(&mgr, cut_size);
   auto cuts = cut_mgr.enum_cuts(node);
 
   EXPECT_EQ( 1, cuts.size() );
@@ -40,7 +40,7 @@ TEST(CutMgrTest, and2)
   auto e2 = mgr.and_op(e0, e1);
 
   SizeType cut_size = 4;
-  CutMgr cut_mgr(cut_size);
+  CutMgr cut_mgr(&mgr, cut_size);
   auto cuts = cut_mgr.enum_cuts(e2.node());
 
   ASSERT_EQ( 2, cuts.size() );
@@ -69,7 +69,7 @@ TEST(CutMgrTest, and3)
   auto e4 = mgr.and_op(e3, e2);
 
   SizeType cut_size = 4;
-  CutMgr cut_mgr(cut_size);
+  CutMgr cut_mgr(&mgr, cut_size);
   auto cuts = cut_mgr.enum_cuts(e4.node());
 
   ASSERT_EQ( 3, cuts.size() );

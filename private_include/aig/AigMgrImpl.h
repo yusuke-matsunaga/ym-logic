@@ -22,6 +22,62 @@ class ValArray;
 class EdgeDict;
 
 //////////////////////////////////////////////////////////////////////
+/// @class EventMgr EventMgr.h "EventMgr.h"
+/// @brief AIG の変更のイベントを扱う基底クラス
+//////////////////////////////////////////////////////////////////////
+class EventMgr
+{
+public:
+
+  /// @brief コンストラクタ
+  EventMgr(
+    AigMgrImpl* mgr ///< [in] 親のマネージャ
+  );
+
+  /// @brief デストラクタ
+  virtual
+  ~EventMgr();
+
+
+public:
+  //////////////////////////////////////////////////////////////////////
+  // 外部インターフェイス
+  //////////////////////////////////////////////////////////////////////
+
+  /// @brief ハンドルの内容が変化したときに呼ばれる関数
+  virtual
+  void
+  change_proc(
+    AigHandle* handle ///< [in] 対象のハンドル
+  );
+
+  /// @brief ノードのファンインが変化したときに呼ばれる関数
+  virtual
+  void
+  change_proc(
+    AigNode* node ///< [in] 対象のノード
+  );
+
+  /// @brief ノードが削除されるときに呼ばれる関数
+  virtual
+  void
+  delete_proc(
+    AigNode* node ///< [in] 対象のノード
+  );
+
+
+private:
+  //////////////////////////////////////////////////////////////////////
+  // データメンバ
+  //////////////////////////////////////////////////////////////////////
+
+  // 親のマネージャ
+  AigMgrImpl* mMgr{nullptr};
+
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /// @class AigMgrImpl AigMgrImpl.h "AigMgrImpl.h"
 /// @brief AigMgr の実装クラス
 //////////////////////////////////////////////////////////////////////
@@ -384,6 +440,24 @@ public:
   void
   sweep();
 
+  /// @brief EventMgr を追加する．
+  void
+  add_event_mgr(
+    EventMgr* evmgr ///< [in] イベントマネージャ
+  )
+  {
+    mEvHash.emplace(evmgr);
+  }
+
+  /// @brief EventMgr を削除する．
+  void
+  delete_event_mgr(
+    EventMgr* evmgr ///< [in] イベントマネージャ
+  )
+  {
+    mEvHash.erase(evmgr);
+  }
+
   /// @brief 内容を出力する．
   void
   print(
@@ -433,6 +507,39 @@ private:
     AigEdge edge,      ///< [in] 対象の枝
     EdgeDict& res_dict ///< [in] 結果を格納する辞書
   );
+
+  /// @brief change イベントを伝える．
+  void
+  _propagate_change(
+    AigHandle* handle ///< [in] 変更のあったハンドル
+  )
+  {
+    for ( auto evmgr: mEvHash ) {
+      evmgr->change_proc(handle);
+    }
+  }
+
+  /// @brief change イベントを伝える．
+  void
+  _propagate_change(
+    AigNode* node ///< [in] 変更のあったノード
+  )
+  {
+    for ( auto evmgr: mEvHash ) {
+      evmgr->change_proc(node);
+    }
+  }
+
+  /// @brief delete イベントを伝える．
+  void
+  _propagate_delete(
+    AigNode* node ///< [in] 削除されたノード
+  )
+  {
+    for ( auto evmgr: mEvHash ) {
+      evmgr->delete_proc(node);
+    }
+  }
 
   /// @brief 入力ノードを作る．
   AigNode*
@@ -497,6 +604,9 @@ private:
 
   // ANDノードの構造ハッシュ
   AigTable mAndTable;
+
+  // EventMgr のハッシュ
+  std::unordered_set<EventMgr*> mEvHash;
 
 };
 
