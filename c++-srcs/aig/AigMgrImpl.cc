@@ -459,76 +459,48 @@ AigMgrImpl::replace(
   AigEdge new_edge
 )
 {
-  struct RepInfo {
-    AigNode* old_node;
-    AigEdge new_edge;
-  };
-
-  _sanity_check();
-
-  std::deque<RepInfo> queue;
-  queue.push_back({old_node, new_edge});
-
-  while ( !queue.empty() ) {
-    auto p = queue.front();
-    auto old_node = p.old_node;
-    auto new_edge = p.new_edge;
-    queue.pop_front();
 #if DEBUG_AIGMGRIMPL
-    {
-      DOUT << "replace(Node#" << old_node->id()
-	   << ", " << new_edge << ")" << endl;
-      for ( auto& fo_info: old_node->mFanoutList ) {
-	if ( fo_info.type == 2 ) {
-	  DOUT << "  -> AigHandle(" << fo_info.handle->_edge() << ")" << endl;
-	}
-	else {
-	  DOUT << "  -> AigNode(Node#" << fo_info.node->id()
-	       << "), " << static_cast<int>(fo_info.type) << endl;
-	}
-      }
-    }
-#endif
-
+  {
+    DOUT << "replace(Node#" << old_node->id()
+	 << ", " << new_edge << ")" << endl;
     for ( auto& fo_info: old_node->mFanoutList ) {
       if ( fo_info.type == 2 ) {
-	auto handle = fo_info.handle;
-	auto new_edge1 = new_edge;
-	if ( handle->_edge().inv() ) {
-	  new_edge1 = ~new_edge1;
-	}
-	handle->mEdge = new_edge1.mPackedData;
-	new_edge1.add_fanout(handle);
-	_propagate_change(handle);
+	DOUT << "  -> AigHandle(" << fo_info.handle->_edge() << ")" << endl;
       }
       else {
-	auto fo_node = fo_info.node;
-	auto pos = fo_info.type;
-	auto old_edge = fo_node->fanin(pos);
-	auto new_edge1 = new_edge;
-	if ( old_edge.inv() ) {
-	  new_edge1 = ~new_edge1;
-	}
-	if ( new_edge1.is_zero() ) {
-	  fo_node->mFanins[pos] = 0;
-	  queue.push_back({fo_node, AigEdge::zero()});
-	}
-	else if ( new_edge1.is_one() ) {
-	  fo_node->mFanins[pos] = 0;
-	  auto xpos = pos ^ 1;
-	  auto new_edge = fo_node->fanin(xpos);
-	  queue.push_back({fo_node, new_edge});
-	}
-	else {
-	  fo_node->mFanins[pos] = new_edge1.mPackedData;
-	  new_edge1.add_fanout(fo_node, pos);
-	  _propagate_change(fo_node);
-	}
+	DOUT << "  -> AigNode(Node#" << fo_info.node->id()
+	     << "), " << static_cast<int>(fo_info.type) << endl;
       }
     }
-    old_node->mFanoutList.clear();
-    _free_node(old_node);
   }
+#endif
+
+  for ( auto& fo_info: old_node->mFanoutList ) {
+    if ( fo_info.type == 2 ) {
+      auto handle = fo_info.handle;
+      auto new_edge1 = new_edge;
+      if ( handle->_edge().inv() ) {
+	new_edge1 = ~new_edge1;
+      }
+      handle->mEdge = new_edge1.mPackedData;
+      new_edge1.add_fanout(handle);
+      _propagate_change(handle);
+    }
+    else {
+      auto fo_node = fo_info.node;
+      auto pos = fo_info.type;
+      auto old_edge = fo_node->fanin(pos);
+      auto new_edge1 = new_edge;
+      if ( old_edge.inv() ) {
+	new_edge1 = ~new_edge1;
+      }
+      fo_node->mFanins[pos] = new_edge1.mPackedData;
+      new_edge1.add_fanout(fo_node, pos);
+      _propagate_change(fo_node);
+    }
+  }
+  old_node->mFanoutList.clear();
+  _free_node(old_node);
   _sanity_check();
 }
 
@@ -536,6 +508,66 @@ AigMgrImpl::replace(
 void
 AigMgrImpl::sweep()
 {
+  auto node_list = and_list();
+  std::unordered_map<SizeType, AigEdge> remap_dict;
+  for ( auto node: node_list ) {
+    bool changed = false;
+    auto fanin0 = node->fanin0();
+    if ( remap_dict.count(fanin0.node()->id()) > 0 ) {
+      changed = true;
+      fanin0 = remap_dict.at(fanin0.node()->id());
+      if ( node->fanin0_inv() ) {
+	fanin0 = ~fanin0;
+      }
+    }
+    auto fanin1 = node->fanin1();
+    if ( remap_dict.count(fanin1.node()->id()) > 0 ) {
+      changed = true;
+      fanin1 = remap_dict.at(fanin1.node()->id());
+      if ( node->fanin1_inv() ) {
+	fanin1 = ~fanin1;
+      }
+    }
+    if ( !changed ) {
+      // 変わらず．
+      continue;
+    }
+    if ( fanin0.is_zero() || fanin1.is_zero() ) {
+      // node は 0 になる．
+      remap_dict.emplace(node->id(), AigEdge::zero());
+      _free_node(node);
+    }
+    if ( fanin0.is_one() && fanin1.is_one() ) {
+      // node は 1 になる．
+      remap_dict.emplace(node->id(), AigEdge::one());
+      _free_node(node);
+    }
+    if ( fanin0.is_one() ) {
+      // node は fanin1 に置き換えられる．
+      remap_dict.emplace(node->id(), fanin1);
+      _free_node(node);
+    }
+    if ( fanin1.is_one() ) {
+      // node は fanin0 に置き換えられる．
+      remap_dict.emplace(node->id(), fanin0);
+      _free_node(node);
+    }
+    if ( fanin0 == fanin1 ) {
+      // node は fanin0 に置き換えられる．
+      remap_dict.emplace(node->id(), fanin0);
+      _free_node(node);
+    }
+    if ( fanin0 == ~fanin1 ) {
+      // node は 0 に置き換えられる．
+      remap_dict.emplace(node->id(), AigEdge::zero());
+      _free_node(node);
+    }
+    // 新しいノードを作る．
+    auto new_edge = and_op(fanin0, fanin1);
+    remap_dict.emplace(node->id(), new_edge);
+    _free_node(node);
+  }
+
   // mNodeArray は unique_ptr<> の配列なのでちょっと面倒
   // とりあえず，削除されるノードを末尾に寄せて最後に
   // erase() する．
