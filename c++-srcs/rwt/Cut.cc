@@ -121,7 +121,7 @@ Cut::calc_tv() const
     return calc_tv.tv(mRoot);
   }
   catch ( std::logic_error err ) {
-    print(cout);
+    print(cerr);
     throw err;
   }
 }

@@ -49,6 +49,9 @@ bn2aig(
     if ( func.is_cover() ) {
       auto& cover = func.input_cover();
       h = mgr.from_cover(cover, fanin_list);
+      if ( func.output_pat() == '0' ) {
+	h = ~h;
+      }
     }
     else if ( func.is_expr() ) {
       h = mgr.from_expr(func.expr(), fanin_list);

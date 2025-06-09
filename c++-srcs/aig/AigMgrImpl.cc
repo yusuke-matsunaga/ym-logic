@@ -74,12 +74,25 @@ AigMgrImpl::~AigMgrImpl()
 {
 }
 
+// @brief ANDノード数を返す．
+SizeType
+AigMgrImpl::and_num() const
+{
+  SizeType num = 0;
+  for ( auto& node: mNodeArray ) {
+    if ( !node->is_input() && node->ref_count() > 0 ) {
+      ++ num;
+    }
+  }
+  return num;
+}
+
 // @brief ANDノードの入力側からのトポロジカル順のリストを得る．
 std::vector<AigNode*>
 AigMgrImpl::and_list() const
 {
   std::vector<AigNode*> node_list;
-  node_list.reserve(and_num());
+  node_list.reserve(mNodeArray.size());
   for ( auto& node: mNodeArray ) {
     if ( node->is_input() || node->ref_count() == 0 ) {
       continue;
@@ -460,129 +473,37 @@ AigMgrImpl::_change_fanin(
   AigEdge fanin1
 )
 {
-  mAndTable.erase(node);
-  node->_set_and(fanin0, fanin1);
-  mAndTable.insert(node);
-}
-
-#if 0
-// @brief ノードの置き換えを行う．
-void
-AigMgrImpl::replace(
-  AigNode* old_node,
-  AigEdge new_edge
-)
-{
 #if DEBUG_AIGMGRIMPL
   {
-    DOUT << "replace(Node#" << old_node->id()
-	 << ", " << new_edge << ")" << endl;
-    for ( auto& fo_info: old_node->mFanoutList ) {
-      if ( fo_info.type == 2 ) {
-	DOUT << "  -> AigHandle(" << fo_info.handle->_edge() << ")" << endl;
-      }
-      else {
-	DOUT << "  -> AigNode(Node#" << fo_info.node->id()
-	     << "), " << static_cast<int>(fo_info.type) << endl;
-      }
-    }
+    DOUT << "_change_fanin(Node#" << node->id()
+	 << ", " << fanin0
+	 << ", " << fanin1
+	 << ")" << endl;
   }
 #endif
-
-  for ( auto& fo_info: old_node->mFanoutList ) {
-    if ( fo_info.type == 2 ) {
-      auto handle = fo_info.handle;
-      auto new_edge1 = new_edge;
-      if ( handle->_edge().inv() ) {
-	new_edge1 = ~new_edge1;
-      }
-      handle->mEdge = new_edge1.mPackedData;
-      new_edge1.add_fanout(handle);
-      _propagate_change(handle);
-    }
-    else {
-      auto fo_node = fo_info.node;
-      auto pos = fo_info.type;
-      auto old_edge = fo_node->fanin(pos);
-      auto new_edge1 = new_edge;
-      if ( old_edge.inv() ) {
-	new_edge1 = ~new_edge1;
-      }
-      fo_node->mFanins[pos] = new_edge1.mPackedData;
-      new_edge1.add_fanout(fo_node, pos);
-      _propagate_change(fo_node);
-    }
+  mAndTable.erase(node);
+  auto node0 = node->fanin0_node();
+  auto new_node0 = fanin0.node();
+  if ( node0 != new_node0 ) {
+    _inc_node_ref(new_node0);
+    _dec_node_ref(node0);
+    node->mFanins[0] = fanin0.mPackedData;
   }
-  old_node->mFanoutList.clear();
-  _free_node(old_node);
-  _sanity_check();
+  auto node1 = node->fanin1_node();
+  auto new_node1 = fanin1.node();
+  if ( node1 != new_node1 ) {
+    _inc_node_ref(new_node1);
+    _dec_node_ref(node1);
+    node->mFanins[1] = fanin1.mPackedData;
+  }
+  mAndTable.insert(node);
+  _propagate_change(node);
 }
-#endif
 
 // @brief 参照回数が0のノードを取り除く
 void
 AigMgrImpl::sweep()
 {
-  auto node_list = and_list();
-  std::unordered_map<SizeType, AigEdge> remap_dict;
-  for ( auto node: node_list ) {
-    bool changed = false;
-    auto fanin0 = node->fanin0();
-    if ( remap_dict.count(fanin0.node()->id()) > 0 ) {
-      changed = true;
-      fanin0 = remap_dict.at(fanin0.node()->id());
-      if ( node->fanin0_inv() ) {
-	fanin0 = ~fanin0;
-      }
-    }
-    auto fanin1 = node->fanin1();
-    if ( remap_dict.count(fanin1.node()->id()) > 0 ) {
-      changed = true;
-      fanin1 = remap_dict.at(fanin1.node()->id());
-      if ( node->fanin1_inv() ) {
-	fanin1 = ~fanin1;
-      }
-    }
-    if ( !changed ) {
-      // 変わらず．
-      continue;
-    }
-    if ( fanin0.is_zero() || fanin1.is_zero() ) {
-      // node は 0 になる．
-      remap_dict.emplace(node->id(), AigEdge::zero());
-      _free_node(node);
-    }
-    if ( fanin0.is_one() && fanin1.is_one() ) {
-      // node は 1 になる．
-      remap_dict.emplace(node->id(), AigEdge::one());
-      _free_node(node);
-    }
-    if ( fanin0.is_one() ) {
-      // node は fanin1 に置き換えられる．
-      remap_dict.emplace(node->id(), fanin1);
-      _free_node(node);
-    }
-    if ( fanin1.is_one() ) {
-      // node は fanin0 に置き換えられる．
-      remap_dict.emplace(node->id(), fanin0);
-      _free_node(node);
-    }
-    if ( fanin0 == fanin1 ) {
-      // node は fanin0 に置き換えられる．
-      remap_dict.emplace(node->id(), fanin0);
-      _free_node(node);
-    }
-    if ( fanin0 == ~fanin1 ) {
-      // node は 0 に置き換えられる．
-      remap_dict.emplace(node->id(), AigEdge::zero());
-      _free_node(node);
-    }
-    // 新しいノードを作る．
-    auto new_edge = and_op(fanin0, fanin1);
-    remap_dict.emplace(node->id(), new_edge);
-    _free_node(node);
-  }
-
   // mNodeArray は unique_ptr<> の配列なのでちょっと面倒
   // とりあえず，削除されるノードを末尾に寄せて最後に
   // erase() する．
@@ -593,60 +514,110 @@ AigMgrImpl::sweep()
   for ( ; rpos != epos; ++ rpos ) {
     auto& node_ptr = *rpos;
     if ( node_ptr->is_input() || node_ptr->ref_count() > 0 ) {
-      if ( wpos != rpos ) {
-	std::swap(*wpos, *rpos);
-      }
       node_ptr->mId = id;
+      if ( wpos != rpos ) {
+	std::swap(*wpos, node_ptr);
+      }
       ++ id;
       ++ wpos;
+    }
+    else {
+      auto node = node_ptr.get();
+      mAndTable.erase(node);
+#if DEBUG_AIGMGRIMPL
+      {
+	DOUT << "  Node#" << node->id() << " is deleted" << endl;
+      }
+#endif
     }
   }
   if ( wpos != epos ) {
     // ここで参照回数0のノードが開放される．
     mNodeArray.erase(wpos, epos);
   }
+  {
+    std::unordered_set<SizeType> mark;
+    for ( auto& node: mNodeArray ) {
+      if ( node->is_and() ) {
+	auto node0 = node->fanin0_node();
+	if ( mark.count(node0->id()) == 0 ) {
+	  cout << "Error: Node#" << node0->id()
+	       << " is ahead of Node#" << node->id() << endl;
+	  abort();
+	}
+	auto node1 = node->fanin1_node();
+	if ( mark.count(node1->id()) == 0 ) {
+	  cout << "Error: Node#" << node1->id()
+	       << " is ahead of Node#" << node->id() << endl;
+	  abort();
+	}
+      }
+      mark.emplace(node->id());
+    }
+  }
 }
 
-// @brief ノードを削除する．
+// @brief ANDノードを作る．
+AigNode*
+AigMgrImpl::_new_and(
+  AigEdge fanin0,
+  AigEdge fanin1
+)
+{
+  auto id = mNodeArray.size();
+  auto node = new AigNode{id, fanin0, fanin1};
+  mNodeArray.push_back(std::unique_ptr<AigNode>{node});
+  mAndTable.insert(node);
+#if DEBUG_AIGMGRIMPL
+  {
+    DOUT << "  _new_and(Node#"
+	 << node->id()
+	 << ": AND(" << fanin0
+	 << ", " << fanin1 << "))" << endl;
+  }
+#endif
+  return node;
+}
+
+// @brief ノードの参照回数を増やす．
 void
-AigMgrImpl::_free_node(
+AigMgrImpl::_inc_node_ref(
   AigNode* node
 )
 {
-  std::deque<AigNode*> queue;
-
-  queue.push_back(node);
-  while ( !queue.empty() ) {
-    auto node = queue.front();
-    queue.pop_front();
-    if ( node->is_input() ) {
-      // 入力ノードは削除しない．
-      continue;
-    }
+  if ( node->is_input() ) {
+    // 入力ノードの参照回数は変更しない．
+    return;
+  }
 #if DEBUG_AIGMGRIMPL
-    {
-      DOUT << "  _free_node(Node#" << node->id() << ")" << endl;
-    }
+  {
+    DOUT << "  _inc_node_ref(Node#" << node->id() << ")" << endl;
+  }
 #endif
-    -- mNodeNum;
-    mAndTable.erase(node);
+  if ( node->_inc_ref() ) {
+    _inc_node_ref(node->fanin0_node());
+    _inc_node_ref(node->fanin1_node());
+  }
+}
 
-    auto node0 = node->fanin0_node();
-    if ( node0 != nullptr ) {
-      if ( node0->_dec_ref() ) {
-	queue.push_back(node0);
-      }
-      node->mFanins[0] = 0;
-    }
-
-    auto node1 = node->fanin1_node();
-    if ( node1 != nullptr ) {
-      if ( node1->_dec_ref() ) {
-	queue.push_back(node1);
-      }
-      node->mFanins[1] = 0;
-    }
-    _propagate_delete(node);
+// @brief ノードの参照回数を減らす．
+void
+AigMgrImpl::_dec_node_ref(
+  AigNode* node
+)
+{
+  if ( node->is_input() ) {
+    // 入力ノードの参照回数は変更しない．
+    return;
+  }
+#if DEBUG_AIGMGRIMPL
+  {
+    DOUT << "  _dec_node_ref(Node#" << node->id() << ")" << endl;
+  }
+#endif
+  if ( node->_dec_ref() ) {
+    _dec_node_ref(node->fanin0_node());
+    _dec_node_ref(node->fanin1_node());
   }
 }
 
@@ -685,18 +656,13 @@ AigMgrImpl::print(
 ) const
 {
   for ( auto& node: mNodeArray ) {
-    s << "Node#" << node->id() << ": ";
-    if ( node->is_input() ) {
-      s << "Input#" << node->input_id();
-    }
-    else { // node->is_and() ) {
-      s << "And("
-	<< node->fanin0()
-	<< ", "
-	<< node->fanin1()
-	<< ")";
-    }
-    s << endl;
+    node->print(s);
+  }
+  for ( auto handle: mHandleHash ) {
+    auto edge = handle->_edge();
+    s << "Handle("
+      << hex << handle << dec
+      << "): " << edge << endl;
   }
 }
 

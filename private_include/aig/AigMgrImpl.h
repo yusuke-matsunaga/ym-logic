@@ -103,7 +103,7 @@ public:
   SizeType
   node_num() const
   {
-    return mNodeNum;
+    return mNodeArray.size();
   }
 
   /// @brief 入力ノード数を返す．
@@ -129,10 +129,7 @@ public:
 
   /// @brief ANDノード数を返す．
   SizeType
-  and_num() const
-  {
-    return mAndTable.size();
-  }
+  and_num() const;
 
   /// @brief ANDノードの入力側からのトポロジカル順のリストを得る．
   std::vector<AigNode*>
@@ -183,23 +180,9 @@ public:
   )
   {
     // step1: 境界条件
-    if ( fanin0.is_zero() ) {
-      return AigEdge::zero();
-    }
-    if ( fanin1.is_zero() ) {
-      return AigEdge::zero();
-    }
-    if ( fanin0.is_one() ) {
-      return fanin1;
-    }
-    if ( fanin1.is_one() ) {
-      return fanin0;
-    }
-    if ( fanin0 == fanin1 ) {
-      return fanin0;
-    }
-    if ( fanin0 == ~fanin1 ) {
-      return AigEdge::zero();
+    AigEdge ans_edge;
+    if ( _special_case(fanin0, fanin1, ans_edge) ) {
+      return ans_edge;
     }
 
     // step2: 構造テーブルを探す．
@@ -207,9 +190,6 @@ public:
     auto p = mAndTable.find(&key);
     if ( p != mAndTable.end() ) {
       auto node = *p;
-      if ( node->ref_count() == 0 ) {
-	abort();
-      }
       return AigEdge{node, false};
     }
 
@@ -439,6 +419,10 @@ public:
     AigHandle* handle ///< [in] 対象のハンドル
   )
   {
+    auto edge = handle->_edge();
+    if ( mHandleHash.count(handle) > 0 ) {
+      throw std::logic_error{"already exists"};
+    }
     mHandleHash.emplace(handle);
   }
 
@@ -448,6 +432,7 @@ public:
     AigHandle* handle ///< [in] 対象のハンドル
   )
   {
+    auto edge = handle->_edge();
     mHandleHash.erase(handle);
   }
 
@@ -519,6 +504,42 @@ private:
     EdgeDict& res_dict ///< [in] 結果を格納する辞書
   );
 
+  /// @brief 境界条件を調べる．
+  /// @return 条件が成り立った時に true を返す．
+  bool
+  _special_case(
+    AigEdge fanin0,   ///< [in] ファンイン0
+    AigEdge fanin1,   ///< [in] ファンイン1
+    AigEdge& new_edge ///< [out] 結果の枝
+  )
+  {
+    if ( fanin0.is_zero() ) {
+      new_edge = AigEdge::zero();
+      return true;
+    }
+    if ( fanin1.is_zero() ) {
+      new_edge = AigEdge::zero();
+      return true;
+    }
+    if ( fanin0.is_one() ) {
+      new_edge = fanin1;
+      return true;
+    }
+    if ( fanin1.is_one() ) {
+      new_edge = fanin0;
+      return true;
+    }
+    if ( fanin0 == fanin1 ) {
+      new_edge = fanin0;
+      return true;
+    }
+    if ( fanin0 == ~fanin1 ) {
+      new_edge = AigEdge::zero();
+      return true;
+    }
+    return false;
+  }
+
   /// @brief ノードのファンインを変更する．
   void
   _change_fanin(
@@ -569,7 +590,6 @@ private:
     auto node = new AigNode(id, input_id);
     mNodeArray.push_back(std::unique_ptr<AigNode>{node});
     mInputArray.push_back(node);
-    ++ mNodeNum;
     return node;
   }
 
@@ -578,23 +598,22 @@ private:
   _new_and(
     AigEdge fanin0,
     AigEdge fanin1
-  )
-  {
-    auto id = mNodeArray.size();
-    auto node = new AigNode{id, fanin0, fanin1};
-    fanin0.node()->_inc_ref();
-    fanin1.node()->_inc_ref();
-    mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-    mAndTable.insert(node);
-    ++ mNodeNum;
-    return node;
-  }
+  );
 
-  /// @brief ノードを削除する．
+  /// @brief ノードの参照回数を増やす．
   ///
-  /// 実際には sweep() を呼ぶまでは削除されない．
+  /// 場合によってはファンインのノードに再帰する．
   void
-  _free_node(
+  _inc_node_ref(
+    AigNode* node
+  );
+
+  /// @brief ノードの参照回数を減らす．
+  ///
+  /// 場合によってはファンインのノードに再帰する．
+  /// 参照回数が 0 になったノードは sweep() で削除される．
+  void
+  _dec_node_ref(
     AigNode* node
   );
 
@@ -610,9 +629,6 @@ private:
 
   // 参照回数
   SizeType mRefCount{0};
-
-  // アクティブなノード数
-  SizeType mNodeNum{0};
 
   // ID番号をキーにして AigNode を収めた配列
   // AigNode の所有権を持つ．

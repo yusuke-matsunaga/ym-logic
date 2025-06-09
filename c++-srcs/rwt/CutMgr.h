@@ -133,6 +133,17 @@ private:
 
 };
 
+inline
+std::ostream&
+operator<<(
+  std::ostream& s,
+  const Cut& cut
+)
+{
+  cut.print(s);
+  return s;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 /// @class CutMgr CutMgr.h "CutMgr.h"

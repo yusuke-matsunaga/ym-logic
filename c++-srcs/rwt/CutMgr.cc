@@ -40,6 +40,7 @@ CutMgr::_enum_cuts(
   AigNode* node
 )
 {
+  cout << "_enum_cuts(Node#" << node->id() << ")" << endl;
   _sanity_check();
   if ( mCutHash.count(node->id()) == 0 ) {
     std::vector<Cut*> cut_list;
@@ -126,6 +127,14 @@ CutMgr::change_proc(
   AigNode* node
 )
 {
+  {
+    cout << "CutMgr::change_proc(Node#" << node->id() << ")" << endl;
+  }
+  if ( mCutHash.count(node->id()) > 0 ) {
+    auto& cut_list = mCutHash.at(node->id());
+    _remove_cuts(cut_list);
+    mCutHash.erase(node->id());
+  }
 }
 
 // @brief ノードが削除されるときに呼ばれる関数

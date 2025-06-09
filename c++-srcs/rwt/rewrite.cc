@@ -20,14 +20,54 @@
 
 BEGIN_NAMESPACE_YM_AIG
 
+BEGIN_NONAMESPACE
+
+void
+print_dfs(
+  std::ostream& s,
+  AigNode* node,
+  std::unordered_set<SizeType>& mark
+)
+{
+  if ( node == nullptr ) {
+    return;
+  }
+  if ( mark.count(node->id()) > 0 ) {
+    return;
+  }
+  mark.emplace(node->id());
+  node->print(s);
+  if ( node->is_and() ) {
+    print_dfs(s, node->fanin0_node(), mark);
+    print_dfs(s, node->fanin1_node(), mark);
+  }
+}
+
+void
+print_new_edge(
+  std::ostream& s,
+  AigEdge root,
+  const Cut* cut
+)
+{
+  std::unordered_set<SizeType> mark;
+  s << "Root: " << root << endl;
+  for ( auto node: cut->leaf_list() ) {
+    mark.emplace(node->id());
+  }
+  print_dfs(s, root.node(), mark);
+}
+
+END_NONAMESPACE
+
 // @brief パタンの置き換えを行う．
 void
 AigMgrImpl::rewrite()
 {
   PatMgr pat_mgr;
   for ( bool go_on = true; go_on; ) {
-    CutMgr cut_mgr(this, 4);
     bool changed = false;
+    CutMgr cut_mgr(this, 4);
     auto node_list = and_list();
     // 置き換え結果を記録する辞書
     ReplaceDict replace_dict;
@@ -39,19 +79,9 @@ AigMgrImpl::rewrite()
       // 置き換えの結果を反映させる．
       auto fanin0 = replace_dict.get(node->fanin0());
       auto fanin1 = replace_dict.get(node->fanin1());
-      if ( fanin0.is_zero() || fanin1.is_zero() ) {
-	// node も 0 に置き換える．
-	replace_dict.add(node, AigEdge::zero());
-	continue;
-      }
-      if ( fanin0.is_one() ) {
-	// node を fanin1 に置き換える．
-	replace_dict.add(node, fanin1);
-	continue;
-      }
-      if ( fanin1.is_one() ) {
-	// node を fanin0 に置き換える．
-	replace_dict.add(node, fanin0);
+      AigEdge new_edge;
+      if ( _special_case(fanin0, fanin1, new_edge) ) {
+	replace_dict.add(node, new_edge);
 	continue;
       }
       if ( fanin0 != node->fanin0() || fanin1 != node->fanin1() ) {
@@ -88,14 +118,20 @@ AigMgrImpl::rewrite()
 	}
       }
       if ( max_gain > 0 ) {
-#if DEBUG_REWRITE
-	DOUT << "Node#" << node->id()
-	     << ": max_gain = " << max_gain << endl;
-#endif
 	// max_cut を max_pat で置き換える．
 	changed = true;
 	Pat2Aig pat2aig(this);
 	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
+#if DEBUG_REWRITE
+	DOUT << "=====================" << endl
+	     << "Node#" << node->id() << endl
+	     << "max_gain = " << max_gain << endl
+	     << "max_cut:" << endl
+	     << *max_cut
+	     << "--------------------" << endl
+	     << " =>" << endl;
+	print_new_edge(DOUT, new_edge, max_cut);
+#endif
 	replace_dict.add(node, new_edge);
 #if VERIFY
 	_sanity_check();
@@ -105,6 +141,10 @@ AigMgrImpl::rewrite()
     if ( changed ) {
       // ハンドルの置き換えを行う．
       for ( auto handle: mHandleHash ) {
+	auto old_edge = handle->_edge();
+	if ( old_edge.is_const() ) {
+	  continue;
+	}
 	auto new_edge = replace_dict.get(handle->_edge());
 	if ( new_edge != handle->_edge() ) {
 	  handle->_set_edge(new_edge);
@@ -112,6 +152,7 @@ AigMgrImpl::rewrite()
       }
       sweep();
 #if DEBUG_REWRITE
+      print(DOUT);
       DOUT << and_num() << endl;
 #endif
     }

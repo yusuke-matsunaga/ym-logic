@@ -38,7 +38,6 @@ AigHandle::AigHandle(
   src._delete_handle();
   src.mEdge = 0;
   // 指している AigNode の参照数は変わらない．
-  _add_handle();
 }
 
 // @brief コピー代入演算子
@@ -50,7 +49,6 @@ AigHandle::operator=(
   AigMgrHolder::operator=(src);
   mEdge = src.mEdge;
   _inc_ref();
-  _add_handle();
   return *this;
 }
 
@@ -60,12 +58,11 @@ AigHandle::operator=(
   AigHandle&& src
 )
 {
-  AigMgrHolder::operator=(std::move(src));
   src._delete_handle();
+  AigMgrHolder::operator=(std::move(src));
   mEdge = src.mEdge;
   src.mEdge = 0;
   // 指している AigNode の参照数は変わらない．
-  _add_handle();
   return *this;
 }
 
@@ -83,12 +80,7 @@ AigHandle::AigHandle(
 // @brief デストラクタ
 AigHandle::~AigHandle()
 {
-  if ( !_edge().is_const() ) {
-    auto node = _edge().node();
-    if ( node->_dec_ref() ) {
-      get()->_free_node(node);
-    }
-  }
+  _dec_ref();
   _delete_handle();
 }
 
@@ -476,7 +468,7 @@ AigHandle::_set_edge(
 )
 {
   if ( !edge.is_const() ) {
-    edge.node()->_inc_ref();
+    get()->_inc_node_ref(edge.node());
   }
   _dec_ref();
   mEdge = edge.mPackedData;
@@ -487,8 +479,7 @@ void
 AigHandle::_inc_ref()
 {
   if ( !_edge().is_const() ) {
-    auto node = _edge().node();
-    node->_inc_ref();
+    get()->_inc_node_ref(_edge().node());
   }
 }
 
@@ -497,10 +488,7 @@ void
 AigHandle::_dec_ref()
 {
   if ( !_edge().is_const() ) {
-    auto node = _edge().node();
-    if ( node->_dec_ref() ) {
-      get()->_free_node(node);
-    }
+    get()->_dec_node_ref(_edge().node());
   }
 }
 

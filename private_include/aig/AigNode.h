@@ -42,9 +42,10 @@ public:
   AigNode(
     SizeType id,      ///< [in] ノード番号
     SizeType input_id ///< [in] 入力番号
-  ) : mId{id}
+  ) : mId{id},
+      mInput{true},
+      mFanins{reinterpret_cast<PtrIntType>(input_id), 0}
   {
-    _set_input(input_id);
   }
 
   /// @brief ANDノード用のコンストラクタ
@@ -52,9 +53,10 @@ public:
     SizeType id,    ///< [in] ノード番号
     AigEdge fanin0, ///< [in] ファンイン0の枝
     AigEdge fanin1  ///< [in] ファンイン1の枝
-  ) : mId{id}
+  ) : mId{id},
+      mInput{false},
+      mFanins{fanin0.mPackedData, fanin1.mPackedData}
   {
-    _set_and(fanin0, fanin1);
   }
 
   /// @brief デストラクタ
@@ -92,6 +94,26 @@ public:
   ref_count() const
   {
     return mRefCount;
+  }
+
+  /// @brief 内容を出力する．
+  void
+  print(
+    std::ostream& s ///< [in] 出力ストリーム
+  ) const
+  {
+    s << "Node#" << id() << ": ";
+    if ( is_input() ) {
+      s << "Input#" << input_id();
+    }
+    else { // is_and()
+      s << "And("
+	<< fanin0()
+	<< ", "
+	<< fanin1()
+	<< ")";
+    }
+    s << endl;
   }
 
 
@@ -210,34 +232,12 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  /// @brief 入力ノードの内容をセットする．
-  void
-  _set_input(
-    SizeType input_id ///< [in] 入力番号
-  )
-  {
-    mInput = true;
-    mFanins[0] = reinterpret_cast<PtrIntType>(input_id);
-    mFanins[1] = 0;
-  }
-
-  /// @brief ANDノードの内容をセットする．
-  void
-  _set_and(
-    AigEdge fanin0, ///< [in] ファンイン0の枝
-    AigEdge fanin1  ///< [in] ファンイン1の枝
-  )
-  {
-    mInput = false;
-    mFanins[0] = fanin0.mPackedData;
-    mFanins[1] = fanin1.mPackedData;
-  }
-
   /// @brief 参照回数を増やす
-  void
+  bool
   _inc_ref()
   {
     ++ mRefCount;
+    return mRefCount == 1;
   }
 
   /// @brief 参照回数を減らす

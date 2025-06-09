@@ -79,6 +79,17 @@ private:
 
 };
 
+inline
+std::ostream&
+operator<<(
+  std::ostream& s,
+  const PatGraph& pat
+)
+{
+  pat.print(s);
+  return s;
+}
+
 END_NAMESPACE_YM_AIG
 
 #endif // PATMGR_H
