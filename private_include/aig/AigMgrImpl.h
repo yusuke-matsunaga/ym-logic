@@ -129,11 +129,23 @@ public:
 
   /// @brief ANDノード数を返す．
   SizeType
-  and_num() const;
+  and_num() const
+  {
+    if ( mAndDirty ) {
+      _make_and_list();
+    }
+    return mAndList.size();
+  }
 
   /// @brief ANDノードの入力側からのトポロジカル順のリストを得る．
-  std::vector<AigNode*>
-  and_list() const;
+  const std::vector<AigNode*>&
+  and_list() const
+  {
+    if ( mAndDirty ) {
+      _make_and_list();
+    }
+    return mAndList;
+  }
 
   /// @brief 論理シミュレーションを行う．
   /// @return output_list に対応する出力値のリストを返す．
@@ -419,7 +431,6 @@ public:
     AigHandle* handle ///< [in] 対象のハンドル
   )
   {
-    auto edge = handle->_edge();
     if ( mHandleHash.count(handle) > 0 ) {
       throw std::logic_error{"already exists"};
     }
@@ -432,7 +443,6 @@ public:
     AigHandle* handle ///< [in] 対象のハンドル
   )
   {
-    auto edge = handle->_edge();
     mHandleHash.erase(handle);
   }
 
@@ -600,6 +610,10 @@ private:
     AigEdge fanin1
   );
 
+  /// @brief mAndList を再構築する．
+  void
+  _make_and_list() const;
+
   /// @brief ノードの参照回数を増やす．
   ///
   /// 場合によってはファンインのノードに再帰する．
@@ -636,6 +650,14 @@ private:
 
   // 入力番号をキーにして入力ノードを収めた配列
   std::vector<AigNode*> mInputArray;
+
+  // ANDノードを入力側からのトポロジカル順に並べたリスト
+  mutable
+  std::vector<AigNode*> mAndList;
+
+  // mAndList の構築が必要な時 true となるフラグ
+  mutable
+  bool mAndDirty{false};
 
   // ANDノードの構造ハッシュ
   AigTable mAndTable;

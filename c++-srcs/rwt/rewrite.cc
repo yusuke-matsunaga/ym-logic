@@ -68,7 +68,7 @@ AigMgrImpl::rewrite()
   for ( bool go_on = true; go_on; ) {
     bool changed = false;
     CutMgr cut_mgr(this, 4);
-    auto node_list = and_list();
+    auto& node_list = and_list();
     // 置き換え結果を記録する辞書
     ReplaceDict replace_dict;
     // 入力からのトポロジカル順に処理を行う．

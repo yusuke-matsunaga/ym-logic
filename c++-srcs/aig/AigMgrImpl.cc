@@ -74,34 +74,6 @@ AigMgrImpl::~AigMgrImpl()
 {
 }
 
-// @brief ANDノード数を返す．
-SizeType
-AigMgrImpl::and_num() const
-{
-  SizeType num = 0;
-  for ( auto& node: mNodeArray ) {
-    if ( !node->is_input() && node->ref_count() > 0 ) {
-      ++ num;
-    }
-  }
-  return num;
-}
-
-// @brief ANDノードの入力側からのトポロジカル順のリストを得る．
-std::vector<AigNode*>
-AigMgrImpl::and_list() const
-{
-  std::vector<AigNode*> node_list;
-  node_list.reserve(mNodeArray.size());
-  for ( auto& node: mNodeArray ) {
-    if ( node->is_input() || node->ref_count() == 0 ) {
-      continue;
-    }
-    node_list.push_back(node.get());
-  }
-  return node_list;
-}
-
 // @brief 論理シミュレーションを行う．
 AigBitVect
 AigMgrImpl::eval(
@@ -146,22 +118,19 @@ AigMgrImpl::eval_sub(
   ValArray& val_array
 ) const
 {
+  for ( auto node: mInputArray ) {
+    auto bv = input_vals[node->input_id()];
+    val_array.put_val(node, bv);
+  }
   // ノードの評価を行う．
-  // AIG はノードの作り方から mNodeArray が
-  // かならずトロポジカルソートされている性質がある．
-  for ( auto& node: mNodeArray ) {
-    AigBitVect bv;
-    if ( node->is_input() ) {
-      bv = input_vals[node->input_id()];
-    }
-    else {
-      auto h0 = node->fanin0();
-      auto h1 = node->fanin1();
-      auto bv0 = val_array.get_val(h0);
-      auto bv1 = val_array.get_val(h1);
-      bv = bv0 & bv1;
-    }
-    val_array.put_val(node.get(), bv);
+  auto& node_list = and_list();
+  for ( auto node: node_list ) {
+    auto h0 = node->fanin0();
+    auto h1 = node->fanin1();
+    auto bv0 = val_array.get_val(h0);
+    auto bv1 = val_array.get_val(h1);
+    auto bv = bv0 & bv1;
+    val_array.put_val(node, bv);
   }
 }
 
@@ -496,6 +465,7 @@ AigMgrImpl::_change_fanin(
     _dec_node_ref(node1);
     node->mFanins[1] = fanin1.mPackedData;
   }
+  mAndDirty = true;
   mAndTable.insert(node);
   _propagate_change(node);
 }
@@ -535,26 +505,6 @@ AigMgrImpl::sweep()
     // ここで参照回数0のノードが開放される．
     mNodeArray.erase(wpos, epos);
   }
-  {
-    std::unordered_set<SizeType> mark;
-    for ( auto& node: mNodeArray ) {
-      if ( node->is_and() ) {
-	auto node0 = node->fanin0_node();
-	if ( mark.count(node0->id()) == 0 ) {
-	  cout << "Error: Node#" << node0->id()
-	       << " is ahead of Node#" << node->id() << endl;
-	  abort();
-	}
-	auto node1 = node->fanin1_node();
-	if ( mark.count(node1->id()) == 0 ) {
-	  cout << "Error: Node#" << node1->id()
-	       << " is ahead of Node#" << node->id() << endl;
-	  abort();
-	}
-      }
-      mark.emplace(node->id());
-    }
-  }
 }
 
 // @brief ANDノードを作る．
@@ -567,6 +517,7 @@ AigMgrImpl::_new_and(
   auto id = mNodeArray.size();
   auto node = new AigNode{id, fanin0, fanin1};
   mNodeArray.push_back(std::unique_ptr<AigNode>{node});
+  mAndList.push_back(node);
   mAndTable.insert(node);
 #if DEBUG_AIGMGRIMPL
   {
@@ -577,6 +528,43 @@ AigMgrImpl::_new_and(
   }
 #endif
   return node;
+}
+
+BEGIN_NONAMESPACE
+
+void
+and_dfs(
+  AigNode* node,
+  std::unordered_set<SizeType>& mark,
+  std::vector<AigNode*>& and_list
+)
+{
+  if ( node->is_input() || node->ref_count() == 0 ) {
+    return;
+  }
+  if ( mark.count(node->id()) > 0 ) {
+    return;
+  }
+  auto node0 = node->fanin0_node();
+  and_dfs(node0, mark, and_list);
+  auto node1 = node->fanin1_node();
+  and_dfs(node1, mark, and_list);
+  mark.emplace(node->id());
+}
+
+END_NONAMESPACE
+
+// @brief mAndList を再構築する．
+void
+AigMgrImpl::_make_and_list() const
+{
+  mAndList.clear();
+  mAndList.reserve(mNodeArray.size() - mInputArray.size());
+  std::unordered_set<SizeType> mark;
+  for ( auto& node: mNodeArray ) {
+    and_dfs(node.get(), mark, mAndList);
+  }
+  mAndDirty = false;
 }
 
 // @brief ノードの参照回数を増やす．
@@ -664,6 +652,9 @@ AigMgrImpl::print(
       << hex << handle << dec
       << "): " << edge << endl;
   }
+  s << "# of inputs: "  << mInputArray.size() << endl
+    << "# of ANDs:   "  << and_num() << endl
+    << "# of handles: " << mHandleHash.size() << endl;
 }
 
 END_NAMESPACE_YM_AIG

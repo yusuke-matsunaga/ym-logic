@@ -102,7 +102,8 @@ public:
     std::ostream& s ///< [in] 出力ストリーム
   ) const
   {
-    s << "Node#" << id() << ": ";
+    s << "Node#" << id() << "["
+      << ref_count() << "]: ";
     if ( is_input() ) {
       s << "Input#" << input_id();
     }
