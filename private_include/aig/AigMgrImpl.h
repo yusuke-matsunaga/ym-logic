@@ -427,18 +427,29 @@ public:
   void
   rewrite();
 
-  /// @brief ノードの置き換えを行う．
-  void
-  replace(
-    AigNode* old_node, ///< [in] 置き換えられるノード
-    AigEdge new_edge   ///< [in] 新しい枝
-  );
-
   /// @brief 参照回数が0のノードを取り除く
   ///
   /// ノードのID番号が変わる可能性がある．
   void
   sweep();
+
+  /// @brief AigHandle を登録する．
+  void
+  add_handle(
+    AigHandle* handle ///< [in] 対象のハンドル
+  )
+  {
+    mHandleHash.emplace(handle);
+  }
+
+  /// @brief AigHandle の登録を削除する．
+  void
+  delete_handle(
+    AigHandle* handle ///< [in] 対象のハンドル
+  )
+  {
+    mHandleHash.erase(handle);
+  }
 
   /// @brief EventMgr を追加する．
   void
@@ -508,6 +519,14 @@ private:
     EdgeDict& res_dict ///< [in] 結果を格納する辞書
   );
 
+  /// @brief ノードのファンインを変更する．
+  void
+  _change_fanin(
+    AigNode* node,  ///< [in] 対象のノード
+    AigEdge fanin0, ///< [in] ファンイン0
+    AigEdge fanin1  ///< [in] ファンイン1
+  );
+
   /// @brief change イベントを伝える．
   void
   _propagate_change(
@@ -563,8 +582,8 @@ private:
   {
     auto id = mNodeArray.size();
     auto node = new AigNode{id, fanin0, fanin1};
-    fanin0.add_fanout(node, 0);
-    fanin1.add_fanout(node, 1);
+    fanin0.node()->_inc_ref();
+    fanin1.node()->_inc_ref();
     mNodeArray.push_back(std::unique_ptr<AigNode>{node});
     mAndTable.insert(node);
     ++ mNodeNum;
@@ -607,6 +626,9 @@ private:
 
   // EventMgr のハッシュ
   std::unordered_set<EventMgr*> mEvHash;
+
+  // AigHandle のハッシュ
+  std::unordered_set<AigHandle*> mHandleHash;
 
 };
 

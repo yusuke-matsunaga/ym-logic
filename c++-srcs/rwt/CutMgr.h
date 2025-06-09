@@ -217,12 +217,6 @@ private:
     const Cut* cut1  ///< [in] fanin1 のカット
   );
 
-  /// @brief ノードの削除に伴ってカットを削除する．
-  void
-  _erase_cuts(
-    AigNode* node ///< [in] 対象のノード
-  );
-
   /// @brief カットのリストを削除する．
   void
   _remove_cuts(

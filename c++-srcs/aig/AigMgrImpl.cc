@@ -452,6 +452,20 @@ AigMgrImpl::cofactor_sub(
   return new_edge;
 }
 
+// @brief ノードのファンインを変更する．
+void
+AigMgrImpl::_change_fanin(
+  AigNode* node,
+  AigEdge fanin0,
+  AigEdge fanin1
+)
+{
+  mAndTable.erase(node);
+  node->_set_and(fanin0, fanin1);
+  mAndTable.insert(node);
+}
+
+#if 0
 // @brief ノードの置き換えを行う．
 void
 AigMgrImpl::replace(
@@ -503,6 +517,7 @@ AigMgrImpl::replace(
   _free_node(old_node);
   _sanity_check();
 }
+#endif
 
 // @brief 参照回数が0のノードを取り除く
 void
@@ -618,7 +633,7 @@ AigMgrImpl::_free_node(
 
     auto node0 = node->fanin0_node();
     if ( node0 != nullptr ) {
-      if ( node0->delete_fanout(node, 0) ) {
+      if ( node0->_dec_ref() ) {
 	queue.push_back(node0);
       }
       node->mFanins[0] = 0;
@@ -626,7 +641,7 @@ AigMgrImpl::_free_node(
 
     auto node1 = node->fanin1_node();
     if ( node1 != nullptr ) {
-      if ( node1->delete_fanout(node, 1) ) {
+      if ( node1->_dec_ref() ) {
 	queue.push_back(node1);
       }
       node->mFanins[1] = 0;
@@ -639,7 +654,6 @@ AigMgrImpl::_free_node(
 void
 AigMgrImpl::_sanity_check() const
 {
-  // Phase-0
   for ( auto& node: mNodeArray ) {
     if ( node->ref_count() == 0 ) {
       continue;
@@ -662,96 +676,6 @@ AigMgrImpl::_sanity_check() const
       throw std::logic_error{buf.str()};
     }
   }
-
-  // Phase-1
-  for ( auto& node: mNodeArray ) {
-    for ( auto& fo_info: node->mFanoutList ) {
-      if ( fo_info.type == 2 ) {
-	auto handle = fo_info.handle;
-	if ( handle->_edge().node() != node.get() ) {
-	  print(cout);
-	  {
-	    cout << endl
-		 << "Node#" << node->id()
-		 << " -> AigHandle" << endl;
-	  }
-	  throw std::logic_error{"something wrong(1)"};
-	}
-      }
-      else {
-	auto fo_node = fo_info.node;
-	if ( fo_node->fanin_node(fo_info.type) != node.get() ) {
-	  print(cout);
-	  {
-	    cout << endl
-		 << "Node#" << node->id()
-		 << " -> Node#" << fo_node->id()
-		 << "@" << static_cast<int>(fo_info.type)
-		 << ": " << fo_node->fanin_node(fo_info.type)->id() << endl;
-	  }
-	  throw std::logic_error{"something wrong(2)"};
-	}
-      }
-    }
-  }
-  // Phase-2
-  for ( auto& node: mNodeArray ) {
-    if ( !node->is_and() ) {
-      continue;
-    }
-    auto node0 = node->fanin0_node();
-    if ( node0 != nullptr ) {
-      bool found = false;
-      for ( auto& fo_info: node0->mFanoutList ) {
-	if ( fo_info.type == 0 && fo_info.node == node.get() ) {
-	  found = true;
-	  break;
-	}
-      }
-      if ( !found ) {
-	print(cout);
-	cout << endl
-	     << "checking Node#" << node->id()
-	     << "@0 = Node#" << node0->id() << endl;
-	for ( auto& fo_info: node0->mFanoutList ) {
-	  if ( fo_info.type == 2 ) {
-	    cout << "  AigHandle" << endl;
-	  }
-	  else {
-	    cout << "  AigNode(Node#" << fo_info.node->id()
-		 << ")@" << static_cast<int>(fo_info.type) << endl;
-	  }
-	}
-	throw std::logic_error{"something wrong(3)"};
-      }
-    }
-    auto node1 = node->fanin1_node();
-    if ( node1 != nullptr ) {
-      auto found = false;
-      for ( auto& fo_info: node1->mFanoutList ) {
-	if ( fo_info.type == 1 && fo_info.node == node.get() ) {
-	  found = true;
-	  break;
-	}
-      }
-      if ( !found ) {
-	print(cout);
-	cout << endl
-	     << "checking Node#" << node->id()
-	     << "@1 = Node#" << node1->id() << endl;
-	for ( auto& fo_info: node1->mFanoutList ) {
-	  if ( fo_info.type == 2 ) {
-	    cout << "  AigHandle" << endl;
-	  }
-	  else {
-	    cout << "  AigNode(Node#" << fo_info.node->id()
-		 << "@" << static_cast<int>(fo_info.type) << endl;
-	  }
-	}
-	throw std::logic_error{"something wrong(4)"};
-      }
-    }
-  }
 }
 
 // @brief 内容を出力する．
@@ -771,20 +695,6 @@ AigMgrImpl::print(
 	<< ", "
 	<< node->fanin1()
 	<< ")";
-    }
-    s << endl;
-    for ( auto& fo_info: node->mFanoutList ) {
-      s << "  -> ";
-      if ( fo_info.type == 2 ) {
-	s << "AigHandle("
-	  << hex << fo_info.handle << dec
-	  << ")";
-      }
-      else {
-	s << "Node#" << fo_info.node->id()
-	  << ", " << static_cast<int>(fo_info.type);
-      }
-      s << endl;
     }
     s << endl;
   }

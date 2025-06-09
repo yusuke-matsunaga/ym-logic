@@ -265,26 +265,6 @@ private:
   {
   }
 
-  /// @brief ファンアウト先のノードを追加する．
-  void
-  add_fanout(
-    AigNode* node, ///< [in] ノード
-    SizeType pos   ///< [in] ファンイン番号 ( 0 <= pos < 1 )
-  );
-
-  /// @brief ファンアウト先のハンドルを追加する．
-  void
-  add_fanout(
-    AigHandle* handle ///< [in] ハンドル
-  );
-
-  /// @brief ファンアウト先のハンドルを置き換える．
-  void
-  replace_fanout(
-    AigHandle* old_ptr,
-    AigHandle* new_ptr
-  );
-
   /// @brief ex_fanin_list() の下請け関数
   void
   ex_fanin_sub(

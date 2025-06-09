@@ -126,7 +126,6 @@ CutMgr::change_proc(
   AigNode* node
 )
 {
-  _erase_cuts(node);
 }
 
 // @brief ノードが削除されるときに呼ばれる関数
@@ -135,33 +134,6 @@ CutMgr::delete_proc(
   AigNode* node
 )
 {
-  _erase_cuts(node);
-}
-
-// @brief ノードの削除に伴ってカットを削除する．
-void
-CutMgr::_erase_cuts(
-  AigNode* node
-)
-{
-  std::deque<AigNode*> queue;
-  queue.push_back(node);
-  while ( !queue.empty() ) {
-    auto node = queue.front();
-    queue.pop_front();
-    if ( mCutHash.count(node->id()) > 0 ) {
-      auto& cut_list = mCutHash.at(node->id());
-      _remove_cuts(cut_list);
-      mCutHash.erase(node->id());
-      for ( auto& fo_info: node->fanout_list() ) {
-	if ( fo_info.type == 2 ) {
-	  continue;
-	}
-	auto node1 = fo_info.node;
-	queue.push_back(node1);
-      }
-    }
-  }
 }
 
 // @brief カットの情報が正しいかチェックする．

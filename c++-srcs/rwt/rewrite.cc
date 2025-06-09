@@ -12,6 +12,7 @@
 #include "CutMgr.h"
 #include "CalcMerit.h"
 #include "Pat2Aig.h"
+#include "ReplaceDict.h"
 
 #define DEBUG_REWRITE 1
 #define DOUT std::cout
@@ -28,10 +29,33 @@ AigMgrImpl::rewrite()
     CutMgr cut_mgr(this, 4);
     bool changed = false;
     auto node_list = and_list();
+    // 置き換え結果を記録する辞書
+    ReplaceDict replace_dict;
+    // 入力からのトポロジカル順に処理を行う．
+    // 置き換え結果は replace_dict に記録される．
+    // トポロジカル順なので置き換えの影響を受けるノードは必ず
+    // 後で処理される．
     for ( auto node: node_list ) {
-      if ( node->ref_count() == 0 ) {
-	// 削除されたノード
+      // 置き換えの結果を反映させる．
+      auto fanin0 = replace_dict.get(node->fanin0());
+      auto fanin1 = replace_dict.get(node->fanin1());
+      if ( fanin0.is_zero() || fanin1.is_zero() ) {
+	// node も 0 に置き換える．
+	replace_dict.add(node, AigEdge::zero());
 	continue;
+      }
+      if ( fanin0.is_one() ) {
+	// node を fanin1 に置き換える．
+	replace_dict.add(node, fanin1);
+	continue;
+      }
+      if ( fanin1.is_one() ) {
+	// node を fanin0 に置き換える．
+	replace_dict.add(node, fanin0);
+	continue;
+      }
+      if ( fanin0 != node->fanin0() || fanin1 != node->fanin1() ) {
+	_change_fanin(node, fanin0, fanin1);
       }
       int max_gain = -1;
       Cut* max_cut = nullptr;
@@ -72,13 +96,20 @@ AigMgrImpl::rewrite()
 	changed = true;
 	Pat2Aig pat2aig(this);
 	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
-	replace(node, new_edge);
+	replace_dict.add(node, new_edge);
 #if VERIFY
 	_sanity_check();
 #endif
       }
     }
     if ( changed ) {
+      // ハンドルの置き換えを行う．
+      for ( auto handle: mHandleHash ) {
+	auto new_edge = replace_dict.get(handle->_edge());
+	if ( new_edge != handle->_edge() ) {
+	  handle->_set_edge(new_edge);
+	}
+      }
       sweep();
 #if DEBUG_REWRITE
       DOUT << and_num() << endl;

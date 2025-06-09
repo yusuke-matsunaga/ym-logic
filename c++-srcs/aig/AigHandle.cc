@@ -25,7 +25,8 @@ AigHandle::AigHandle(
 ) : AigMgrHolder(src),
     mEdge{src.mEdge}
 {
-  _edge().add_fanout(this);
+  _inc_ref();
+  _add_handle();
 }
 
 // @brief ムーブコンストラクタ
@@ -34,8 +35,10 @@ AigHandle::AigHandle(
 ) : AigMgrHolder(std::move(src)),
     mEdge{src.mEdge}
 {
+  src._delete_handle();
   src.mEdge = 0;
-  _edge().replace_fanout(&src, this);
+  // 指している AigNode の参照数は変わらない．
+  _add_handle();
 }
 
 // @brief コピー代入演算子
@@ -46,7 +49,8 @@ AigHandle::operator=(
 {
   AigMgrHolder::operator=(src);
   mEdge = src.mEdge;
-  _edge().add_fanout(this);
+  _inc_ref();
+  _add_handle();
   return *this;
 }
 
@@ -57,9 +61,11 @@ AigHandle::operator=(
 )
 {
   AigMgrHolder::operator=(std::move(src));
+  src._delete_handle();
   mEdge = src.mEdge;
   src.mEdge = 0;
-  _edge().replace_fanout(&src, this);
+  // 指している AigNode の参照数は変わらない．
+  _add_handle();
   return *this;
 }
 
@@ -70,7 +76,8 @@ AigHandle::AigHandle(
 ) : AigMgrHolder{holder},
     mEdge{edge.mPackedData}
 {
-  edge.add_fanout(this);
+  _inc_ref();
+  _add_handle();
 }
 
 // @brief デストラクタ
@@ -78,10 +85,11 @@ AigHandle::~AigHandle()
 {
   if ( !_edge().is_const() ) {
     auto node = _edge().node();
-    if ( node->delete_fanout(this) ) {
+    if ( node->_dec_ref() ) {
       get()->_free_node(node);
     }
   }
+  _delete_handle();
 }
 
 // @brief 定数0のハンドルを返す．
@@ -467,15 +475,50 @@ AigHandle::_set_edge(
   AigEdge edge
 )
 {
-  if ( edge != _edge() ) {
-    edge.add_fanout(this);
-    if ( !_edge().is_const() ) {
-      auto node = _edge().node();
-      if ( node->delete_fanout(this) ) {
-	get()->_free_node(node);
-      }
+  if ( !edge.is_const() ) {
+    edge.node()->_inc_ref();
+  }
+  _dec_ref();
+  mEdge = edge.mPackedData;
+}
+
+// @brief 指しているノードの参照回数を増やす．
+void
+AigHandle::_inc_ref()
+{
+  if ( !_edge().is_const() ) {
+    auto node = _edge().node();
+    node->_inc_ref();
+  }
+}
+
+// @brief 指しているノードの参照回数を減らす．
+void
+AigHandle::_dec_ref()
+{
+  if ( !_edge().is_const() ) {
+    auto node = _edge().node();
+    if ( node->_dec_ref() ) {
+      get()->_free_node(node);
     }
-    mEdge = edge.mPackedData;
+  }
+}
+
+// @brief マネージャに自身を登録する．
+void
+AigHandle::_add_handle()
+{
+  if ( is_valid() ) {
+    get()->add_handle(this);
+  }
+}
+
+// @brief マネージャから自身の登録を削除する．
+void
+AigHandle::_delete_handle()
+{
+  if ( is_valid() ) {
+    get()->delete_handle(this);
   }
 }
 

@@ -33,37 +33,8 @@ class AigHandle;
 //////////////////////////////////////////////////////////////////////
 class AigNode
 {
-  friend class AigMgrImpl; // mFanoutList の更新のため
-  friend class AigEdge;    // mFanoutList の更新のため
-
-public:
-
-  // ファンアウト先の情報
-  struct FoInfo {
-    std::uint8_t type;
-    union {
-      AigNode* node;
-      AigHandle* handle;
-    };
-
-    FoInfo(
-      AigNode* _node,
-      SizeType pos
-    )
-    {
-      type = pos;
-      node = _node;
-    }
-
-    FoInfo(
-      AigHandle* _handle
-    )
-    {
-      type = 2;
-      handle = _handle;
-    }
-  };
-
+  friend class AigHandle;  // _inc_ref()/_dec_ref()
+  friend class AigMgrImpl; // _inc_ref()/_dec_ref()
 
 public:
 
@@ -120,7 +91,7 @@ public:
   SizeType
   ref_count() const
   {
-    return mFanoutList.size();
+    return mRefCount;
   }
 
 
@@ -233,116 +204,6 @@ public:
   vector<AigEdge>
   ex_fanin_list() const;
 
-  /// @brief ファンアウト先の情報のリストを返す．
-  const std::vector<FoInfo>&
-  fanout_list() const
-  {
-    return mFanoutList;
-  }
-
-  /// @brief ファンアウト先のノードを追加する．
-  void
-  add_fanout(
-    AigNode* node, ///< [in] ノード
-    SizeType pos   ///< [in] ファンイン番号 ( 0 <= pos < 1 )
-  )
-  {
-#if DEBUG_AIGNODE
-    {
-      DOUT << "  Node#" << id() << "::add_fanout(Node#" << node->id()
-	   << ", " << pos << ")" << endl;
-    }
-#endif
-    mFanoutList.push_back(FoInfo(node, pos));
-  }
-
-  /// @brief ファンアウト先のハンドルを追加する．
-  void
-  add_fanout(
-    AigHandle* handle ///< [in] ハンドル
-  )
-  {
-#if DEBUG_AIGNODE
-    {
-      DOUT << "  Node#" << id() << "::add_fanout(AigHandle): "
-	   << hex << handle << dec << endl;
-    }
-#endif
-    mFanoutList.push_back(FoInfo(handle));
-  }
-
-  /// @brief ファンアウト先のポインタを置き換える．
-  void
-  replace_fanout(
-    AigHandle* old_ptr,
-    AigHandle* new_ptr
-  )
-  {
-    for ( auto p = mFanoutList.begin(); p != mFanoutList.end(); ++ p ) {
-      if ( p->type == 2 && p->handle == old_ptr ) {
-	p->handle = new_ptr;
-	return;
-      }
-    }
-    throw std::logic_error{"error in delete_fanout(): ptr does not exist"};
-  }
-
-  /// @brief ファンアウト先のノードを削除する．
-  /// @return ファンアウトが空になったら true を返す．
-  bool
-  delete_fanout(
-    AigNode* node,
-    SizeType pos
-  )
-  {
-#if DEBUG_AIGNODE
-    {
-      DOUT << "  Node#" << id() << "::delete_fanout(Node#"
-	   << node->id() << ", " << pos << ")" << endl;
-    }
-#endif
-    for ( auto p = mFanoutList.begin(); p != mFanoutList.end(); ++ p ) {
-      if ( p->type == pos && p->node == node ) {
-	mFanoutList.erase(p);
-	return mFanoutList.empty();
-      }
-    }
-#if DEBUG_AIGNODE
-    {
-      cout << "  Node#" << id() << ": delete_fanout(Node#" << node->id()
-	   << ", " << pos << ")" << endl;
-      for ( auto& fo_info: mFanoutList ) {
-	if ( fo_info.type == 2 ) {
-	  cout << "    AigHandle()" << endl;
-	}
-	else {
-	  cout << "    AigNode(Node#" << fo_info.node->id()
-	       << "), " << static_cast<int>(fo_info.type) << endl;
-	}
-      }
-    }
-#endif
-    throw std::logic_error{"error in delete_fanout(): node does not exist"};
-    return false;
-  }
-
-  /// @brief ファンアウト先のハンドルを削除する．
-  /// @return ファンアウトが空になったら true を返す．
-  bool
-  delete_fanout(
-    AigHandle* handle
-  )
-  {
-    for ( auto p = mFanoutList.begin(); p != mFanoutList.end(); ++ p ) {
-      if ( p->type == 2 && p->handle == handle ) {
-	mFanoutList.erase(p);
-	return mFanoutList.empty();
-      }
-    }
-    throw std::logic_error{"error in delete_fanout(): ptr does not exist"};
-    return false;
-  }
-
 
 private:
   //////////////////////////////////////////////////////////////////////
@@ -370,6 +231,21 @@ private:
     mInput = false;
     mFanins[0] = fanin0.mPackedData;
     mFanins[1] = fanin1.mPackedData;
+  }
+
+  /// @brief 参照回数を増やす
+  void
+  _inc_ref()
+  {
+    ++ mRefCount;
+  }
+
+  /// @brief 参照回数を減らす
+  bool
+  _dec_ref()
+  {
+    -- mRefCount;
+    return mRefCount == 0;
   }
 
   /// @brief 入力専用の関数の例外発生
@@ -412,11 +288,11 @@ private:
   // 入力/ANDの区別
   bool mInput : 1;
 
+  // 参照回数
+  SizeType mRefCount{0};
+
   // ファンインの枝
   PtrIntType mFanins[2];
-
-  // ファンアウト先のリスト
-  std::vector<FoInfo> mFanoutList;
 
 };
 

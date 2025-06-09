@@ -81,41 +81,6 @@ AigEdge::fanin1() const
   return node()->fanin1();
 }
 
-// @brief ファンアウト先のノードを追加する．
-void
-AigEdge::add_fanout(
-  AigNode* node,
-  SizeType pos
-)
-{
-  if ( !is_const() ) {
-    this->node()->add_fanout(node, pos);
-  }
-}
-
-// @brief ファンアウト先のハンドルを追加する．
-void
-AigEdge::add_fanout(
-  AigHandle* handle
-)
-{
-  if ( !is_const() ) {
-    node()->add_fanout(handle);
-  }
-}
-
-// @brief ファンアウト先のハンドルを置き換える．
-void
-AigEdge::replace_fanout(
-  AigHandle* old_ptr,
-  AigHandle* new_ptr
-)
-{
-  if ( !is_const() ) {
-    node()->replace_fanout(old_ptr, new_ptr);
-  }
-}
-
 // @brief ANDグループのファンインのリストを返す．
 vector<AigEdge>
 AigEdge::ex_fanin_list() const

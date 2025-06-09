@@ -384,6 +384,22 @@ private:
     AigEdge edge
   );
 
+  /// @brief 指しているノードの参照回数を増やす．
+  void
+  _inc_ref();
+
+  /// @brief 指しているノードの参照回数を減らす．
+  void
+  _dec_ref();
+
+  /// @brief マネージャに自身を登録する．
+  void
+  _add_handle();
+
+  /// @brief マネージャから自身の登録を削除する．
+  void
+  _delete_handle();
+
 
 private:
   //////////////////////////////////////////////////////////////////////
