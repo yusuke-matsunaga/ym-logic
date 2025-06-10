@@ -518,7 +518,7 @@ AigMgrImpl::_new_and(
   auto id = mNodeArray.size();
   auto node = new AigNode{id, fanin0, fanin1};
   mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-  mAndList.push_back(node);
+  mAndDirty = true;
   mAndTable.insert(node);
 #if DEBUG_AIGMGRIMPL
   {
@@ -550,6 +550,7 @@ and_dfs(
   and_dfs(node0, mark, and_list);
   auto node1 = node->fanin1_node();
   and_dfs(node1, mark, and_list);
+  and_list.push_back(node);
   mark.emplace(node->id());
 }
 
