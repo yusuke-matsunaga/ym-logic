@@ -117,6 +117,10 @@ AigMgrHolder::edge_to_handle(
   AigEdge edge
 ) const
 {
+  {
+    cout << "AigMgrHolder::edge_to_handle("
+	 << edge << ")" << endl;
+  }
   return AigHandle(*this, edge);
 }
 
