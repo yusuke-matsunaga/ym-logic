@@ -425,6 +425,8 @@ TEST(AigMgrTest, from_expr_xor)
 
   auto h = mgr.from_expr(expr);
 
+  mgr.print(cout);
+
   vector<AigBitVect> input_vals{0xC, 0xA};
   auto bv = h.eval(input_vals);
   EXPECT_EQ( 0x6, bv );
@@ -452,9 +454,25 @@ TEST(AigMgrTest, sweep)
     auto ho = mgr.and_op({h1, h2, h3});
     EXPECT_TRUE( ho.is_and() );
 
+    mgr.print(cout);
     EXPECT_EQ( 5, mgr.node_num() );
     EXPECT_EQ( 2, mgr.and_num() );
   }
+}
+
+TEST(AigMgrTest, ref_count)
+{
+  AigMgr mgr;
+
+  AigHandle ho;
+  {
+    auto h1 = mgr.make_input();
+    auto h2 = mgr.make_input();
+    auto h3 = mgr.make_input();
+
+    ho = mgr.and_op({h1, h2, h3});
+  }
+  mgr.print(cout);
 }
 
 END_NAMESPACE_YM

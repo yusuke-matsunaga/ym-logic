@@ -33,24 +33,24 @@ public:
   /// @brief コピーコンストラクタ
   AigMgrHolder(
     const AigMgrHolder& src ///< [in] コピー元のオブジェクト
-  );
+  ) = default;
 
   /// @brief ムーブコンストラクタ
   AigMgrHolder(
     AigMgrHolder&& src ///< [in] ムーブ元のオブジェクト
-  );
+  ) = default;
 
   /// @brief コピー代入演算子
   AigMgrHolder&
   operator=(
     const AigMgrHolder& src ///< [in] コピー元のオブジェクト
-  );
+  ) = default;
 
   /// @brief ムーブ代入演算子
   AigMgrHolder&
   operator=(
     AigMgrHolder&& src ///< [in] ムーブ元のオブジェクト
-  );
+  ) = default;
 
   /// @brief デストラクタ
   ~AigMgrHolder();

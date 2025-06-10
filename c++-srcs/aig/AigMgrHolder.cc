@@ -24,40 +24,6 @@ AigMgrHolder::AigMgrHolder(
 {
 }
 
-// @brief コピーコンストラクタ
-AigMgrHolder::AigMgrHolder(
-  const AigMgrHolder& src
-) : mPtr{src.mPtr}
-{
-}
-
-// @brief ムーブコンストラクタ
-AigMgrHolder::AigMgrHolder(
-  AigMgrHolder&& src
-) : mPtr{std::move(src.mPtr)}
-{
-}
-
-// @brief コピー代入演算子
-AigMgrHolder&
-AigMgrHolder::operator=(
-  const AigMgrHolder& src
-)
-{
-  mPtr = src.mPtr;
-  return *this;
-}
-
-// @brief ムーブ代入演算子
-AigMgrHolder&
-AigMgrHolder::operator=(
-  AigMgrHolder&& src
-)
-{
-  std::swap(mPtr, src.mPtr);
-  return *this;
-}
-
 // @brief デストラクタ
 AigMgrHolder::~AigMgrHolder()
 {
@@ -117,10 +83,6 @@ AigMgrHolder::edge_to_handle(
   AigEdge edge
 ) const
 {
-  {
-    cout << "AigMgrHolder::edge_to_handle("
-	 << edge << ")" << endl;
-  }
   return AigHandle(*this, edge);
 }
 

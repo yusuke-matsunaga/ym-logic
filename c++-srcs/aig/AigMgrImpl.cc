@@ -493,6 +493,7 @@ AigMgrImpl::sweep()
     }
     else {
       auto node = node_ptr.get();
+      mAndDirty = true;
       mAndTable.erase(node);
 #if DEBUG_AIGMGRIMPL
       {

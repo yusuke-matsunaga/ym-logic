@@ -25,24 +25,8 @@ AigHandle::AigHandle(
 ) : AigMgrHolder(src),
     mEdge{src.mEdge}
 {
-  cout << "copy constr" << endl;
   _inc_ref();
   _add_handle();
-  cout << "copy constr end" << endl;
-}
-
-// @brief ムーブコンストラクタ
-AigHandle::AigHandle(
-  AigHandle&& src
-) : AigMgrHolder(std::move(src)),
-    mEdge{src.mEdge}
-{
-  cout << "move constr: src = " << src._edge() << endl;
-  //src._delete_handle();
-  src.mEdge = 0;
-  // 指している AigNode の参照数は変わらない．
-  _add_handle();
-  cout << "move constr end" << endl;
 }
 
 // @brief コピー代入演算子
@@ -51,31 +35,16 @@ AigHandle::operator=(
   const AigHandle& src
 )
 {
-  cout << "copy assign: src = " << src._edge() << endl;
-  AigMgrHolder::operator=(src);
+  if ( !check_mgr(src) ) {
+    _delete_handle();
+    AigMgrHolder::operator=(src);
+    _add_handle();
+  }
   if ( mEdge != src.mEdge ) {
     _dec_ref();
     mEdge = src.mEdge;
     _inc_ref();
   }
-  cout << "copy assign end" << endl;
-  return *this;
-}
-
-// @brief ムーブ代入演算子
-AigHandle&
-AigHandle::operator=(
-  AigHandle&& src
-)
-{
-  cout << "move assign: src = " << src._edge() << endl
-       << "  this = " << dec << setw(8) << setfill('0') << this << dec << endl;
-  src._delete_handle();
-  AigMgrHolder::operator=(std::move(src));
-  mEdge = src.mEdge;
-  src.mEdge = 0;
-  // 指している AigNode の参照数は変わらない．
-  cout << "move assign end" << endl;
   return *this;
 }
 
@@ -86,16 +55,13 @@ AigHandle::AigHandle(
 ) : AigMgrHolder{holder},
     mEdge{edge.mPackedData}
 {
-  cout << "raw constr: this = " << hex << setw(8) << setfill('0') << this << dec << endl;
   _inc_ref();
   _add_handle();
-  cout << "raw constr end" << endl;
 }
 
 // @brief デストラクタ
 AigHandle::~AigHandle()
 {
-  cout << "destr: this = " << hex << setw(0) << setfill('0') << this << dec << endl;
   _dec_ref();
   _delete_handle();
 }
@@ -513,11 +479,6 @@ void
 AigHandle::_add_handle()
 {
   if ( is_valid() ) {
-    {
-      cout << "AigHandle::_add_handle("
-	   << hex << setw(8) << setfill('0') << this << dec
-	   << "): " << _edge() << endl;
-    }
     get()->add_handle(this);
   }
 }
@@ -527,11 +488,6 @@ void
 AigHandle::_delete_handle()
 {
   if ( is_valid() ) {
-    {
-      cout << "AigHandle::_delete_handle("
-	   << hex << setw(8) << setfill('0') << this << dec
-	   << "): " << _edge() << endl;
-    }
     get()->delete_handle(this);
   }
 }

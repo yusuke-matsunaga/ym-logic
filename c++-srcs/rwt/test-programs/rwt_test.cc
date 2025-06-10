@@ -89,6 +89,7 @@ rwt_test(
     AigMgr mgr;
     auto no = model.output_num();
     std::vector<AigHandle> output_list(no);
+    cout << "model.output_num() = " << no << endl;
     {
       // BnNode のノード番号をキーにして AigHandle を持つ辞書
       std::unordered_map<SizeType, AigHandle> aig_map;
@@ -116,6 +117,11 @@ rwt_test(
 	}
 	auto h = aig_map.at(node.id());
 	output_list[i] = h;
+	{
+	  cout << "output_list[" << i << "] = "
+	       << hex << setw(0) << setfill('0') << &output_list[i] << dec
+	       << endl;
+	}
       }
     }
     mgr.print(cout);

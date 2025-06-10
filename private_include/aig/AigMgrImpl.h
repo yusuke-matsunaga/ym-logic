@@ -271,7 +271,7 @@ public:
   )
   {
     auto nmax = expr.input_size();
-    while ( input_num() <= nmax ) {
+    while ( input_num() < nmax ) {
       make_input();
     }
     std::vector<AigEdge> input_list(nmax);
@@ -298,7 +298,7 @@ public:
     for ( auto& expr: expr_list ) {
       nmax = std::max(nmax, expr.input_size());
     }
-    while ( input_num() <= nmax ) {
+    while ( input_num() < nmax ) {
       make_input();
     }
     std::vector<AigEdge> input_list(nmax);
@@ -431,7 +431,15 @@ public:
     AigHandle* handle ///< [in] 対象のハンドル
   )
   {
+    {
+      auto edge = handle->_edge();
+      DOUT << "AigMgrImpl::add_handle("
+	   << setw(8) << setfill('0') << hex
+	   << handle << dec
+	   << "): " << edge << endl;
+    }
     if ( mHandleHash.count(handle) > 0 ) {
+      abort();
       throw std::logic_error{"already exists"};
     }
     mHandleHash.emplace(handle);
@@ -443,6 +451,17 @@ public:
     AigHandle* handle ///< [in] 対象のハンドル
   )
   {
+    {
+      auto edge = handle->_edge();
+      DOUT << "AigMgrImpl::delete_handle("
+	   << setw(8) << setfill('0') << hex
+	   << handle << dec
+	   << "): " << edge << endl;
+    }
+    if ( mHandleHash.count(handle) == 0 ) {
+      abort();
+      throw std::logic_error{"does not exist"};
+    }
     mHandleHash.erase(handle);
   }
 

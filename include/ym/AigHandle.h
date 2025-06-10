@@ -38,6 +38,9 @@ class AigHandle :
 public:
   //////////////////////////////////////////////////////////////////////
   // コンストラクタ/デストラクタ
+  //
+  // AigMgrHolder と違ってムーブは面倒なのと効率が大しててコピーと変わらないので
+  // 実装しない．
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 空のコンストラクタ
@@ -50,21 +53,10 @@ public:
     const AigHandle& src
   );
 
-  /// @brief ムーブコンストラクタ
-  AigHandle(
-    AigHandle&& src
-  );
-
   /// @brief コピー代入演算子
   AigHandle&
   operator=(
     const AigHandle& src
-  );
-
-  /// @brief ムーブ代入演算子
-  AigHandle&
-  operator=(
-    AigHandle&& src
   );
 
   /// @brief デストラクタ
