@@ -97,7 +97,7 @@ rwt_test(
       auto ni = model.input_num();
       for ( SizeType i = 0; i < ni; ++ i ) {
 	auto node = model.input(i);
-	auto h = mgr.make_input();
+	auto h = mgr.input(i);
 	aig_map.emplace(node.id(), h);
       }
       // 論理ノードを作る．

@@ -10,8 +10,9 @@
 #include "ym/AigHandle.h"
 #include "ValArray.h"
 #include "EdgeDict.h"
+#include "CopyOp.h"
 
-#define DEBUG_AIGMGRIMPL 1
+//#define DEBUG_AIGMGRIMPL 1
 #define DOUT std::cout
 
 
@@ -72,6 +73,33 @@ AigMgrImpl::AigMgrImpl()
 // @brief デストラクタ
 AigMgrImpl::~AigMgrImpl()
 {
+}
+
+// @brief 複製を作る．
+AigEdge
+AigMgrImpl::copy(
+  AigEdge edge
+)
+{
+  CopyOp op(this);
+  auto new_edge = op.copy(edge);
+  return new_edge;
+}
+
+// @brief 複製を作る．
+std::vector<AigEdge>
+AigMgrImpl::copy(
+  const std::vector<AigEdge>& edge_list
+)
+{
+  CopyOp op(this);
+  std::vector<AigEdge> ans_list;
+  ans_list.reserve(edge_list.size());
+  for ( auto edge: edge_list ) {
+    auto new_edge = op.copy(edge);
+    ans_list.push_back(new_edge);
+  }
+  return ans_list;
 }
 
 // @brief 論理シミュレーションを行う．
@@ -657,6 +685,42 @@ AigMgrImpl::print(
   s << "# of inputs: "  << mInputArray.size() << endl
     << "# of ANDs:   "  << and_num() << endl
     << "# of handles: " << mHandleHash.size() << endl;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// クラス CopyOp
+//////////////////////////////////////////////////////////////////////
+
+// @brief コピーする．
+AigEdge
+CopyOp::copy(
+  AigEdge edge
+)
+{
+  if ( edge.is_zero() ) {
+    return AigEdge::zero();
+  }
+  if ( edge.is_one() ) {
+    return AigEdge::one();
+  }
+  auto node = edge.node();
+  AigNode* new_node = nullptr;
+  if ( mNodeDict.count(node->id()) == 0 ) {
+    if ( node->is_input() ) {
+      new_node = mMgr->input(node->input_id());
+    }
+    else {
+      auto new_fanin0 = copy(node->fanin0());
+      auto new_fanin1 = copy(node->fanin1());
+      new_node = mMgr->and_op(new_fanin0, new_fanin1);
+    }
+    mNodeDict.emplace(node->id(), new_node);
+  }
+  else {
+    new_node = mNodeDict.at(node->id());
+  }
+  return AigEdge(new_node, edge.inv());
 }
 
 END_NAMESPACE_YM_AIG

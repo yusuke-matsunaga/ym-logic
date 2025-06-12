@@ -99,6 +99,26 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 複製を作る．
+  /// @return 対応するの枝を返す．
+  ///
+  /// - edge の構造をコピーする．
+  /// - その際に必要な入力ノードが作成される．
+  AigEdge
+  copy(
+    AigEdge edge ///< [in] コピー対象の枝
+  );
+
+  /// @brief 複製を作る．
+  /// @return 対応するの枝のリストを返す．
+  ///
+  /// - edge_list の枝の構造をコピーする．
+  /// - その際に必要な入力ノードが作成される．
+  std::vector<AigEdge>
+  copy(
+    const std::vector<AigEdge>& edge_list ///< [in] コピー対象の枝のリスト
+  );
+
   /// @brief ノード数を返す．
   SizeType
   node_num() const
@@ -110,21 +130,7 @@ public:
   SizeType
   input_num() const
   {
-    return mInputArray.size();
-  }
-
-  /// @brief 入力の枝を返す．
-  ///
-  /// この枝は常に反転なし
-  AigEdge
-  input(
-    SizeType input_id ///< [in] 入力番号 ( 0 <= input_id < input_num() )
-  ) const
-  {
-    if ( input_id >= input_num() ) {
-      throw std::out_of_range{"'input_id' is out of range"};
-    }
-    return AigEdge{mInputArray[input_id], false};
+    return mInputDict.size();
   }
 
   /// @brief ANDノード数を返す．
@@ -176,11 +182,22 @@ public:
     const JsonValue& option           ///< [in] オプションを表す JSON オブジェクト
   ) const;
 
-  /// @brief 外部入力ノードを作る．
+  /// @brief 外部入力ノードを返す．
+  /// @return 入力ノードを指す枝を返す．
+  ///
+  /// なければ作る．
   AigEdge
-  make_input()
+  input(
+    SizeType input_id ///< [in] 入力番号
+  )
   {
-    auto node = _new_input();
+    AigNode* node = nullptr;
+    if ( mInputDict.count(input_id) == 0 ) {
+      node = _new_input(input_id);
+    }
+    else {
+      node = mInputDict.at(input_id);
+    }
     return AigEdge{node, false};
   }
 
@@ -271,12 +288,9 @@ public:
   )
   {
     auto nmax = expr.input_size();
-    while ( input_num() < nmax ) {
-      make_input();
-    }
     std::vector<AigEdge> input_list(nmax);
     for ( SizeType i = 0; i < nmax; ++ i ) {
-      input_list[i] = AigEdge{mInputArray[i], false};
+      input_list[i] = input(i);
     }
     return from_expr(expr, input_list);
   }
@@ -298,12 +312,9 @@ public:
     for ( auto& expr: expr_list ) {
       nmax = std::max(nmax, expr.input_size());
     }
-    while ( input_num() < nmax ) {
-      make_input();
-    }
     std::vector<AigEdge> input_list(nmax);
     for ( SizeType i = 0; i < nmax; ++ i ) {
-      input_list[i] = AigEdge{mInputArray[i], false};
+      input_list[i] = input(i);
     }
     return from_expr_list(expr_list, input_list);
   }
@@ -333,12 +344,9 @@ public:
   )
   {
     auto nmax = cover.variable_num();
-    while ( input_num() <= nmax ) {
-      make_input();
-    }
     std::vector<AigEdge> input_list(nmax);
     for ( SizeType i = 0; i < nmax; ++ i ) {
-      input_list[i] = AigEdge{mInputArray[i], false};
+      input_list[i] = input(i);
     }
     return from_cover(cover, input_list);
   }
@@ -361,12 +369,9 @@ public:
   )
   {
     auto nmax = cube.variable_num();
-    while ( input_num() <= nmax ) {
-      make_input();
-    }
     std::vector<AigEdge> input_list(nmax);
     for ( SizeType i = 0; i < nmax; ++ i ) {
-      input_list[i] = AigEdge{mInputArray[i], false};
+      input_list[i] = input(i);
     }
     return from_cube(cube, input_list);
   }
@@ -431,15 +436,7 @@ public:
     AigHandle* handle ///< [in] 対象のハンドル
   )
   {
-    {
-      auto edge = handle->_edge();
-      DOUT << "AigMgrImpl::add_handle("
-	   << setw(8) << setfill('0') << hex
-	   << handle << dec
-	   << "): " << edge << endl;
-    }
     if ( mHandleHash.count(handle) > 0 ) {
-      abort();
       throw std::logic_error{"already exists"};
     }
     mHandleHash.emplace(handle);
@@ -451,15 +448,7 @@ public:
     AigHandle* handle ///< [in] 対象のハンドル
   )
   {
-    {
-      auto edge = handle->_edge();
-      DOUT << "AigMgrImpl::delete_handle("
-	   << setw(8) << setfill('0') << hex
-	   << handle << dec
-	   << "): " << edge << endl;
-    }
     if ( mHandleHash.count(handle) == 0 ) {
-      abort();
       throw std::logic_error{"does not exist"};
     }
     mHandleHash.erase(handle);
@@ -612,13 +601,14 @@ private:
 
   /// @brief 入力ノードを作る．
   AigNode*
-  _new_input()
+  _new_input(
+    SizeType input_id
+  )
   {
-    auto input_id = mInputArray.size();
     auto id = mNodeArray.size();
     auto node = new AigNode(id, input_id);
     mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-    mInputArray.push_back(node);
+    mInputDict.emplace(input_id, node);
     return node;
   }
 
@@ -667,8 +657,8 @@ private:
   // AigNode の所有権を持つ．
   std::vector<std::unique_ptr<AigNode>> mNodeArray;
 
-  // 入力番号をキーにして入力ノードを収めた配列
-  std::vector<AigNode*> mInputArray;
+  // 入力番号をキーにして入力ノードを収めた辞書
+  std::unordered_map<SizeType, AigNode*> mInputDict;
 
   // ANDノードを入力側からのトポロジカル順に並べたリスト
   mutable

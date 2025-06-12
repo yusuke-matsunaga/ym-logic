@@ -88,7 +88,7 @@ TEST(AigHandleTest, input)
 {
   AigMgr mgr;
 
-  auto h = mgr.make_input();
+  auto h = mgr.input(0);
 
   EXPECT_FALSE( h.inv() );
   EXPECT_EQ( mgr, h.mgr() );
@@ -114,8 +114,8 @@ TEST(AigHandleTest, and1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
   auto h3 = h1 & h2;
 
   EXPECT_EQ( 3, mgr.node_num() );
@@ -152,8 +152,8 @@ TEST(AigHandleTest, and_bad1)
   AigMgr mgr;
   AigMgr mgr2;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr2.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr2.input(1);
 
   EXPECT_THROW( h1 & h2,
 		std::invalid_argument );
@@ -164,8 +164,8 @@ TEST(AigHandleTest, and_bad2)
   AigMgr mgr;
   AigMgr mgr2;
 
-  auto h1 = mgr2.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr2.input(0);
+  auto h2 = mgr.input(1);
 
   EXPECT_THROW( h1 & h2,
 		std::invalid_argument );
@@ -175,7 +175,7 @@ TEST(AigHandleTest, and_zero1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
+  auto h1 = mgr.input(0);
   auto h2 = AigHandle::zero();
 
   auto h3 = h1 & h2;
@@ -187,7 +187,7 @@ TEST(AigHandleTest, and_zero2)
   AigMgr mgr;
 
   auto h1 = AigHandle::zero();
-  auto h2 = mgr.make_input();
+  auto h2 = mgr.input(0);
 
   auto h3 = h1 & h2;
   EXPECT_TRUE( h3.is_zero() );
@@ -197,7 +197,7 @@ TEST(AigHandleTest, and_one1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
+  auto h1 = mgr.input(0);
   auto h2 = AigHandle::one();
 
   auto h3 = h1 & h2;
@@ -209,7 +209,7 @@ TEST(AigHandleTest, and_one2)
   AigMgr mgr;
 
   auto h1 = AigHandle::one();
-  auto h2 = mgr.make_input();
+  auto h2 = mgr.input(0);
 
   auto h3 = h1 & h2;
   EXPECT_EQ( h2, h3 );
@@ -219,8 +219,8 @@ TEST(AigHandleTest, and2)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
 
   auto h3 = h1 & h2;
   EXPECT_TRUE( h3.is_and() );
@@ -236,8 +236,8 @@ TEST(AigHandleTest, iand1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
   h1 &= h2;
 
   EXPECT_FALSE( h1.inv() );
@@ -261,8 +261,8 @@ TEST(AigHandleTest, or1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
   auto h3 = h1 | h2;
 
   EXPECT_EQ( 3, mgr.node_num() );
@@ -298,7 +298,7 @@ TEST(AigHandleTest, or_zero1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
+  auto h1 = mgr.input(0);
   auto h2 = AigHandle::zero();
 
   auto h3 = h1 | h2;
@@ -310,7 +310,7 @@ TEST(AigHandleTest, or_zero2)
   AigMgr mgr;
 
   auto h1 = AigHandle::zero();
-  auto h2 = mgr.make_input();
+  auto h2 = mgr.input(0);
 
   auto h3 = h1 | h2;
   EXPECT_EQ( h2, h3 );
@@ -320,7 +320,7 @@ TEST(AigHandleTest, or_one1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
+  auto h1 = mgr.input(0);
   auto h2 = AigHandle::one();
 
   auto h3 = h1 | h2;
@@ -332,7 +332,7 @@ TEST(AigHandleTest, or_one2)
   AigMgr mgr;
 
   auto h1 = AigHandle::one();
-  auto h2 = mgr.make_input();
+  auto h2 = mgr.input(0);
 
   auto h3 = h1 | h2;
   EXPECT_TRUE( h3.is_one() );
@@ -343,8 +343,8 @@ TEST(AigHandleTest, or_bad1)
   AigMgr mgr;
   AigMgr mgr2;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr2.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr2.input(1);
 
   EXPECT_THROW( h1 | h2,
 		std::invalid_argument );
@@ -355,8 +355,8 @@ TEST(AigHandleTest, or_bad2)
   AigMgr mgr;
   AigMgr mgr2;
 
-  auto h1 = mgr2.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr2.input(0);
+  auto h2 = mgr.input(1);
 
   EXPECT_THROW( h1 | h2,
 		std::invalid_argument );
@@ -366,8 +366,8 @@ TEST(AigHandleTest, or2)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
 
   auto h3 = h1 | h2;
   EXPECT_TRUE( h3.is_and() );
@@ -383,8 +383,8 @@ TEST(AigHandleTest, ior1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
   h1 |= h2;
 
   EXPECT_TRUE( h1.inv() );
@@ -408,8 +408,8 @@ TEST(AigHandleTest, xor1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
 
   auto h3 = h1 ^ h2;
   EXPECT_TRUE( h3.is_and() );
@@ -429,7 +429,7 @@ TEST(AigHandleTest, xor_zero1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
+  auto h1 = mgr.input(0);
   auto h2 = AigHandle::zero();
 
   auto h3 = h1 ^ h2;
@@ -441,7 +441,7 @@ TEST(AigHandleTest, xor_zero2)
   AigMgr mgr;
 
   auto h1 = AigHandle::zero();
-  auto h2 = mgr.make_input();
+  auto h2 = mgr.input(0);
 
   auto h3 = h1 ^ h2;
   EXPECT_EQ( h2, h3 );
@@ -451,7 +451,7 @@ TEST(AigHandleTest, xor_one1)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
+  auto h1 = mgr.input(0);
   auto h2 = AigHandle::one();
 
   auto h3 = h1 ^ h2;
@@ -463,7 +463,7 @@ TEST(AigHandleTest, xor_one2)
   AigMgr mgr;
 
   auto h1 = AigHandle::one();
-  auto h2 = mgr.make_input();
+  auto h2 = mgr.input(0);
 
   auto h3 = h1 ^ h2;
   EXPECT_EQ( ~h2, h3 );
@@ -474,8 +474,8 @@ TEST(AigHandleTest, xor_bad1)
   AigMgr mgr;
   AigMgr mgr2;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr2.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr2.input(1);
 
   EXPECT_THROW( h1 ^ h2,
 		std::invalid_argument );
@@ -486,8 +486,8 @@ TEST(AigHandleTest, xor_bad2)
   AigMgr mgr;
   AigMgr mgr2;
 
-  auto h1 = mgr2.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr2.input(0);
+  auto h2 = mgr.input(1);
 
   EXPECT_THROW( h1 ^ h2,
 		std::invalid_argument );
@@ -497,8 +497,8 @@ TEST(AigHandleTest, xor2)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
 
   auto h3 = h1 ^ h2;
   EXPECT_TRUE( h3.is_and() );

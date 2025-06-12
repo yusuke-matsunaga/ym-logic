@@ -58,14 +58,6 @@ public:
   SizeType
   input_num() const;
 
-  /// @brief 入力のハンドルを返す．
-  ///
-  /// このハンドルは常に反転なし
-  AigHandle
-  input(
-    SizeType input_id ///< [in] 入力番号 ( 0 <= input_id < input_num() )
-  );
-
   /// @brief ANDノード数を返す．
   SizeType
   and_num() const;
@@ -84,6 +76,20 @@ public:
   // 内容を操作する関数
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief コピーを作る．
+  ///
+  /// handle が自身に属している場合には handle を返す．
+  AigHandle
+  copy(
+    AigHandle handle
+  );
+
+  /// @brief 複数のハンドルのコピーを作る．
+  std::vector<AigHandle>
+  copy(
+    const std::vector<AigHandle>& handle_list
+  );
+
   /// @brief 定数0 のハンドルを作る．
   AigHandle
   make_zero()
@@ -98,9 +104,11 @@ public:
     return AigHandle::one();
   }
 
-  /// @brief 外部入力ノードを作る．
+  /// @brief 外部入力ノードを返す．
   AigHandle
-  make_input();
+  input(
+    SizeType input_id ///< [in] 入力番号
+  );
 
   /// @brief 複数の入力の AND を表すハンドルを返す．
   AigHandle

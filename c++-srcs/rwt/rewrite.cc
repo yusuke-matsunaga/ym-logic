@@ -14,7 +14,8 @@
 #include "Pat2Aig.h"
 #include "ReplaceDict.h"
 
-#define DEBUG_REWRITE 1
+#define DEBUG_REWRITE 0
+#define VERIFY_REWRITE 0
 #define DOUT std::cout
 
 
@@ -58,6 +59,26 @@ print_new_edge(
   print_dfs(s, root.node(), mark);
 }
 
+void
+lock_dfs(
+  AigEdge edge,
+  std::unordered_set<SizeType>& lock_mark
+)
+{
+  if ( edge.is_const() ) {
+    return;
+  }
+  auto node = edge.node();
+  if ( lock_mark.count(node->id()) > 0 ) {
+    return;
+  }
+  lock_mark.emplace(node->id());
+  if ( node->is_and() ) {
+    lock_dfs(node->fanin0(), lock_mark);
+    lock_dfs(node->fanin1(), lock_mark);
+  }
+}
+
 END_NONAMESPACE
 
 // @brief パタンの置き換えを行う．
@@ -69,6 +90,12 @@ AigMgrImpl::rewrite()
     bool changed = false;
     CutMgr cut_mgr(this, 4);
     auto& node_list = and_list();
+    // 'ロック'の印
+    std::unordered_set<SizeType> lock_mark;
+#if DEBUG_REWRITE
+    DOUT << "===================================================" << endl;
+    print(DOUT);
+#endif
     // 置き換え結果を記録する辞書
     ReplaceDict replace_dict;
     // 入力からのトポロジカル順に処理を行う．
@@ -76,6 +103,13 @@ AigMgrImpl::rewrite()
     // トポロジカル順なので置き換えの影響を受けるノードは必ず
     // 後で処理される．
     for ( auto node: node_list ) {
+      if ( lock_mark.count(node->id()) > 0 ) {
+	continue;
+      }
+#if DEBUG_REWRITE
+      DOUT << "--------------------------------------------------" << endl
+	   << "  pick up Node#" << node->id() << endl;
+#endif
       // 置き換えの結果を反映させる．
       auto fanin0 = replace_dict.get(node->fanin0());
       auto fanin1 = replace_dict.get(node->fanin1());
@@ -133,9 +167,14 @@ AigMgrImpl::rewrite()
 	print_new_edge(DOUT, new_edge, max_cut);
 #endif
 	replace_dict.add(node, new_edge);
-#if VERIFY
+	lock_dfs(new_edge, lock_mark);
+#if VERIFY_REWITE
 	_sanity_check();
 #endif
+      }
+      else {
+	lock_dfs(node->fanin0(), lock_mark);
+	lock_dfs(node->fanin1(), lock_mark);
       }
     }
     if ( changed ) {

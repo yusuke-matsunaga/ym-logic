@@ -52,14 +52,30 @@ AigMgr::input_num() const
   return get()->input_num();
 }
 
-// @brief 入力のハンドルを返す．
+// @brief コピーを作る．
 AigHandle
-AigMgr::input(
-  SizeType input_id
+AigMgr::copy(
+  AigHandle handle
 )
 {
-  auto edge = get()->input(input_id);
-  return edge_to_handle(edge);
+  if ( check_mgr(handle) ) {
+    return handle;
+  }
+  auto edge = handle.handle_to_edge(handle);
+  auto new_edge = get()->copy(edge);
+  return edge_to_handle(new_edge);
+}
+
+// @brief 複数のハンドルのコピーを作る．
+std::vector<AigHandle>
+AigMgr::copy(
+  const std::vector<AigHandle>& handle_list
+)
+{
+  std::vector<AigEdge> edge_list;
+  AigMgrHolder::hlist_to_elist(handle_list, edge_list);
+  auto new_edge_list = get()->copy(edge_list);
+  return elist_to_hlist(new_edge_list);
 }
 
 // @brief ANDノード数を返す．
@@ -80,11 +96,14 @@ AigMgr::eval(
   return get()->eval(input_vals, oedge_list);
 }
 
-// @brief 外部入力ノードを作る．
+// @brief 外部入力ノードを返す．
 AigHandle
-AigMgr::make_input()
+AigMgr::input(
+  SizeType input_id
+)
 {
-  return edge_to_handle(get()->make_input());
+  auto edge = get()->input(input_id);
+  return edge_to_handle(edge);
 }
 
 // @brief 複数の入力の AND を表すハンドルを返す．

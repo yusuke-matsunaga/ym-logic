@@ -98,17 +98,6 @@ one(
   return PyAigHandle::ToPyObject(val.make_one());
 }
 
-// make INPUT
-PyObject*
-make_input(
-  PyObject* self,
-  PyObject* Py_UNUSED(args)
-)
-{
-  auto& val = PyAigMgr::_get_ref(self);
-  return PyAigHandle::ToPyObject(val.make_input());
-}
-
 // AND op
 PyObject*
 and_op(
@@ -233,10 +222,6 @@ PyMethodDef methods[] = {
    one,
    METH_NOARGS,
    PyDoc_STR("make ONE")},
-  {"make_input",
-   make_input,
-   METH_NOARGS,
-   PyDoc_STR("make INPUT")},
   {"and_op",
    reinterpret_cast<PyCFunction>(and_op),
    METH_VARARGS | METH_KEYWORDS,

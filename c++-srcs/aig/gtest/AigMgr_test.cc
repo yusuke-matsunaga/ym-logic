@@ -52,11 +52,11 @@ TEST(AigMgrTest, make_one)
   EXPECT_EQ( 0, mgr.and_num() );
 }
 
-TEST(AigMgrTest, make_input)
+TEST(AigMgrTest, input)
 {
   AigMgr mgr;
 
-  auto h = mgr.make_input();
+  auto h = mgr.input(0);
   EXPECT_FALSE( h.is_zero() );
   EXPECT_FALSE( h.is_one() );
   EXPECT_FALSE( h.is_const() );
@@ -76,8 +76,8 @@ TEST(AigMgrTest, and_op2)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
 
   auto ho = mgr.and_op({h1, h2});
   EXPECT_FALSE( ho.is_zero() );
@@ -103,9 +103,9 @@ TEST(AigMgrTest, and_op3)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
 
   auto ho = mgr.and_op({h1, h2, h3});
   EXPECT_FALSE( ho.is_zero() );
@@ -132,10 +132,10 @@ TEST(AigMgrTest, and_op4)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
-  auto h4 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
+  auto h4 = mgr.input(3);
 
   auto ho = mgr.and_op({h1, h2, h3, h4});
   EXPECT_TRUE( ho.is_and() );
@@ -159,14 +159,14 @@ TEST(AigMgrTest, and_op8)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
-  auto h4 = mgr.make_input();
-  auto h5 = mgr.make_input();
-  auto h6 = mgr.make_input();
-  auto h7 = mgr.make_input();
-  auto h8 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
+  auto h4 = mgr.input(3);
+  auto h5 = mgr.input(4);
+  auto h6 = mgr.input(5);
+  auto h7 = mgr.input(6);
+  auto h8 = mgr.input(7);
 
   auto ho = mgr.and_op({h1, h2, h3, h4, h5, h6, h7, h8});
   EXPECT_TRUE( ho.is_and() );
@@ -190,9 +190,9 @@ TEST(AigMgrTest, or_op3)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
 
   auto ho = mgr.or_op({h1, h2, h3});
   EXPECT_TRUE( ho.is_and() );
@@ -215,10 +215,10 @@ TEST(AigMgrTest, or_op4)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
-  auto h4 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
+  auto h4 = mgr.input(3);
 
   auto ho = mgr.or_op({h1, h2, h3, h4});
   EXPECT_TRUE( ho.is_and() );
@@ -242,14 +242,14 @@ TEST(AigMgrTest, or_op8)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
-  auto h4 = mgr.make_input();
-  auto h5 = mgr.make_input();
-  auto h6 = mgr.make_input();
-  auto h7 = mgr.make_input();
-  auto h8 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
+  auto h4 = mgr.input(3);
+  auto h5 = mgr.input(4);
+  auto h6 = mgr.input(5);
+  auto h7 = mgr.input(6);
+  auto h8 = mgr.input(7);
 
   auto ho = mgr.or_op({h1, h2, h3, h4, h5, h6, h7, h8});
   EXPECT_TRUE( ho.is_and() );
@@ -273,9 +273,9 @@ TEST(AigMgrTest, xor_op3)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
 
   auto ho = mgr.xor_op({h1, h2, h3});
   EXPECT_TRUE( ho.is_and() );
@@ -295,10 +295,10 @@ TEST(AigMgrTest, xor_op4)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
-  auto h4 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
+  auto h4 = mgr.input(3);
 
   auto ho = mgr.xor_op({h1, h2, h3, h4});
   EXPECT_TRUE( ho.is_and() );
@@ -318,9 +318,9 @@ TEST(AigMgrTest, ex_fanin_list)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
 
   auto t1 = h1 & h2;
   auto t2 = h2 & h3;
@@ -436,9 +436,9 @@ TEST(AigMgrTest, sweep)
 {
   AigMgr mgr;
 
-  auto h1 = mgr.make_input();
-  auto h2 = mgr.make_input();
-  auto h3 = mgr.make_input();
+  auto h1 = mgr.input(0);
+  auto h2 = mgr.input(1);
+  auto h3 = mgr.input(2);
 
   {
     auto ho = mgr.and_op({h1, h2, h3});
@@ -466,9 +466,9 @@ TEST(AigMgrTest, ref_count)
 
   AigHandle ho;
   {
-    auto h1 = mgr.make_input();
-    auto h2 = mgr.make_input();
-    auto h3 = mgr.make_input();
+    auto h1 = mgr.input(0);
+    auto h2 = mgr.input(1);
+    auto h3 = mgr.input(2);
 
     ho = mgr.and_op({h1, h2, h3});
   }

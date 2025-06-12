@@ -69,13 +69,6 @@ class AigMgrGen(PyObjGen):
                         func_body=meth_one,
                         doc_str='make ONE')
 
-        def meth_make_input(writer):
-            writer.gen_return_pyobject('PyAigHandle',
-                                       'val.make_input()')
-        self.add_method('make_input',
-                        func_body=meth_make_input,
-                        doc_str='make INPUT')
-
         def meth_and_op(writer):
             writer.gen_vardecl(typename='std::vector<AigHandle>',
                                varname='fanin_list')

@@ -9,6 +9,8 @@
 #include "CutMgr.h"
 #include "aig/AigNode.h"
 
+#define DEBUG_CUTMGR 0
+
 
 BEGIN_NAMESPACE_YM_AIG
 
@@ -40,8 +42,10 @@ CutMgr::_enum_cuts(
   AigNode* node
 )
 {
+#if DEBUG_CUTMGR
   cout << "_enum_cuts(Node#" << node->id() << ")" << endl;
   _sanity_check();
+#endif
   if ( mCutHash.count(node->id()) == 0 ) {
     std::vector<Cut*> cut_list;
     { // 自身を葉とするカットを作る．
@@ -127,9 +131,6 @@ CutMgr::change_proc(
   AigNode* node
 )
 {
-  {
-    cout << "CutMgr::change_proc(Node#" << node->id() << ")" << endl;
-  }
   if ( mCutHash.count(node->id()) > 0 ) {
     auto& cut_list = mCutHash.at(node->id());
     _remove_cuts(cut_list);
