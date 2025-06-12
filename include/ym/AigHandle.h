@@ -143,11 +143,10 @@ public:
   ex_fanin_list() const;
 
   /// @brief 論理シミュレーションを行う．
-  ///
-  /// input_vals のサイズが入力数よりも小さい場合は例外が送出される．
   AigBitVect
   eval(
-    const vector<AigBitVect>& input_vals ///< [in] 入力値のリスト
+    const std::unordered_map<SizeType, AigBitVect>& ival_dict ///< [in] 入力値の辞書
+                                                              ///<      入力番号をキーとする．
   ) const;
 
   /// @brief コファクター演算

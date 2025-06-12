@@ -154,18 +154,18 @@ public:
   }
 
   /// @brief 論理シミュレーションを行う．
-  /// @return output_list に対応する出力値のリストを返す．
+  /// @return output に対応する出力値を返す．
   AigBitVect
   eval(
-    const vector<AigBitVect>& input_vals, ///< [in] 入力値のリスト
-    AigEdge output                        ///< [in] 出力
+    const std::unordered_map<SizeType, AigBitVect>& ival_dict, ///< [in] 入力値の辞書
+    AigEdge output                                             ///< [in] 出力
   ) const;
 
   /// @brief 論理シミュレーションを行う．
   vector<AigBitVect>
   eval(
-    const vector<AigBitVect>& input_vals, ///< [in] 入力値のリスト
-    const vector<AigEdge>& output_list    ///< [in] 出力のリスト
+    const std::unordered_map<SizeType, AigBitVect>& ival_dict, ///< [in] 入力値の辞書
+    const vector<AigEdge>& output_list                         ///< [in] 出力のリスト
   ) const;
 
   /// @brief ノード数を返す．
@@ -183,22 +183,28 @@ public:
   ) const;
 
   /// @brief 外部入力ノードを返す．
-  /// @return 入力ノードを指す枝を返す．
+  /// @return 入力ノードを返す．
   ///
   /// なければ作る．
+  AigNode*
+  input_node(
+    SizeType input_id ///< [in] 入力番号
+  )
+  {
+    if ( mInputDict.count(input_id) > 0 ) {
+      return mInputDict.at(input_id);
+    }
+    return _new_input(input_id);
+  }
+
+  /// @brief 外部入力を表す枝を返す．
   AigEdge
   input(
     SizeType input_id ///< [in] 入力番号
   )
   {
-    AigNode* node = nullptr;
-    if ( mInputDict.count(input_id) == 0 ) {
-      node = _new_input(input_id);
-    }
-    else {
-      node = mInputDict.at(input_id);
-    }
-    return AigEdge{node, false};
+    auto node = input_node(input_id);
+    return AigEdge(node, false);
   }
 
   /// @brief ANDノードを作る．

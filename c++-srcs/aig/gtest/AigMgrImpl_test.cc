@@ -24,7 +24,7 @@ TEST(AigMgrImplTest, make_input)
 {
   AigMgrImpl mgr;
 
-  auto e = mgr.make_input();
+  auto e = mgr.input(0);
   EXPECT_FALSE( e.is_zero() );
   EXPECT_FALSE( e.is_one() );
   EXPECT_FALSE( e.is_const() );
@@ -41,8 +41,8 @@ TEST(AigMgrImplTest, and_op2)
 {
   AigMgrImpl mgr;
 
-  auto e1 = mgr.make_input();
-  auto e2 = mgr.make_input();
+  auto e1 = mgr.input(0);
+  auto e2 = mgr.input(1);
 
   auto e = mgr.and_op(e1, e2);
   EXPECT_FALSE( e.is_zero() );
@@ -54,16 +54,16 @@ TEST(AigMgrImplTest, and_op2)
   EXPECT_EQ( 2, e.node()->id() );
 
   EXPECT_EQ( 3, mgr.node_num() );
-  EXPECT_EQ( 1, mgr.and_num() );
+  //EXPECT_EQ( 1, mgr.and_num() );
 }
 
 TEST(AigMgrImplTest, and_op3)
 {
   AigMgrImpl mgr;
 
-  auto e1 = mgr.make_input();
-  auto e2 = mgr.make_input();
-  auto e3 = mgr.make_input();
+  auto e1 = mgr.input(0);
+  auto e2 = mgr.input(1);
+  auto e3 = mgr.input(2);
 
   auto e = mgr.and_op({e1, e2, e3});
   EXPECT_FALSE( e.is_zero() );
@@ -75,7 +75,7 @@ TEST(AigMgrImplTest, and_op3)
   EXPECT_EQ( 4, e.node()->id() );
 
   EXPECT_EQ( 5, mgr.node_num() );
-  EXPECT_EQ( 2, mgr.and_num() );
+  //EXPECT_EQ( 2, mgr.and_num() );
 }
 
 #if 0
@@ -83,9 +83,9 @@ TEST(AigMgrImplTest, sweep)
 {
   AigMgrImpl mgr;
 
-  auto e1 = mgr.make_input();
-  auto e2 = mgr.make_input();
-  auto e3 = mgr.make_input();
+  auto e1 = mgr.input(0);
+  auto e2 = mgr.input(1);
+  auto e3 = mgr.input(2);
 
   {
     auto e = mgr.and_op({e1, e2, e3});

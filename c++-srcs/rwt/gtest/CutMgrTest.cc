@@ -17,7 +17,7 @@ TEST(CutMgrTest, input)
 {
   AigMgrImpl mgr;
 
-  auto e = mgr.make_input();
+  auto e = mgr.input(0);
   auto node = e.node();
 
   SizeType cut_size = 4;
@@ -35,8 +35,8 @@ TEST(CutMgrTest, and2)
 {
   AigMgrImpl mgr;
 
-  auto e0 = mgr.make_input();
-  auto e1 = mgr.make_input();
+  auto e0 = mgr.input(0);
+  auto e1 = mgr.input(1);
   auto e2 = mgr.and_op(e0, e1);
 
   SizeType cut_size = 4;
@@ -62,9 +62,9 @@ TEST(CutMgrTest, and3)
 {
   AigMgrImpl mgr;
 
-  auto e0 = mgr.make_input();
-  auto e1 = mgr.make_input();
-  auto e2 = mgr.make_input();
+  auto e0 = mgr.input(0);
+  auto e1 = mgr.input(1);
+  auto e2 = mgr.input(2);
   auto e3 = mgr.and_op(e0, e1);
   auto e4 = mgr.and_op(e3, e2);
 

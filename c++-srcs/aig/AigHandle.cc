@@ -177,7 +177,7 @@ AigHandle::ex_fanin_list() const
 // @brief 論理シミュレーションを行う．
 AigBitVect
 AigHandle::eval(
-  const vector<AigBitVect>& input_vals
+  const std::unordered_map<SizeType, AigBitVect>& ival_dict
 ) const
 {
   if ( is_zero() ) {
@@ -186,7 +186,7 @@ AigHandle::eval(
   if ( is_one() ) {
     return ~0UL;
   }
-  return get()->eval(input_vals, _edge());
+  return get()->eval(ival_dict, _edge());
 }
 
 // @brief コファクター演算

@@ -53,7 +53,6 @@ AigEdge::fanin(
 ) const
 {
   if ( is_const() ) {
-    abort();
     throw std::invalid_argument{"fanin() is valid if is_and() == true"};
   }
   return node()->fanin(pos);
@@ -64,7 +63,6 @@ AigEdge
 AigEdge::fanin0() const
 {
   if ( is_const() ) {
-    abort();
     throw std::invalid_argument{"fanin0() is valid if is_and() == true"};
   }
   return node()->fanin0();
@@ -75,7 +73,6 @@ AigEdge
 AigEdge::fanin1() const
 {
   if ( is_const() ) {
-    abort();
     throw std::invalid_argument{"fanin1() is valid if is_and() == true"};
   }
   return node()->fanin1();
@@ -86,7 +83,6 @@ vector<AigEdge>
 AigEdge::ex_fanin_list() const
 {
   if ( !is_and() ) {
-    abort();
     throw std::invalid_argument{"ex_fanin_list() is valid if is_and() == true"};
   }
   vector<AigEdge> fanin_list;

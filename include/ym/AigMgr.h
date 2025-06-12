@@ -66,8 +66,8 @@ public:
   /// @return hanndle_list に対応する出力値のリストを返す．
   vector<AigBitVect>
   eval(
-    const vector<AigBitVect>& input_vals, ///< [in] 入力値のリスト
-    const vector<AigHandle>& handle_list  ///< [in] 出力ハンドルのリスト
+    const std::unordered_map<SizeType, AigBitVect>& input_vals, ///< [in] 入力値の辞書
+    const vector<AigHandle>& handle_list                        ///< [in] 出力ハンドルのリスト
   ) const;
 
 

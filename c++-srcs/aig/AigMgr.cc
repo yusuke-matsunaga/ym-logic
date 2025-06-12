@@ -58,12 +58,10 @@ AigMgr::copy(
   AigHandle handle
 )
 {
-  if ( check_mgr(handle) ) {
-    return handle;
-  }
-  auto edge = handle.handle_to_edge(handle);
-  auto new_edge = get()->copy(edge);
-  return edge_to_handle(new_edge);
+  auto edge = handle_to_edge(handle);
+  AigMgr new_mgr;
+  auto new_edge = new_mgr.get()->copy(edge);
+  return new_mgr.edge_to_handle(new_edge);
 }
 
 // @brief 複数のハンドルのコピーを作る．
@@ -72,10 +70,10 @@ AigMgr::copy(
   const std::vector<AigHandle>& handle_list
 )
 {
-  std::vector<AigEdge> edge_list;
-  AigMgrHolder::hlist_to_elist(handle_list, edge_list);
-  auto new_edge_list = get()->copy(edge_list);
-  return elist_to_hlist(new_edge_list);
+  auto edge_list = hlist_to_elist(handle_list);
+  AigMgr new_mgr;
+  auto new_edge_list = new_mgr.get()->copy(edge_list);
+  return new_mgr.elist_to_hlist(new_edge_list);
 }
 
 // @brief ANDノード数を返す．
@@ -86,14 +84,14 @@ AigMgr::and_num() const
 }
 
 // @brief 論理シミュレーションを行う．
-vector<AigBitVect>
+std::vector<AigBitVect>
 AigMgr::eval(
-  const vector<AigBitVect>& input_vals,
+  const std::unordered_map<SizeType, AigBitVect>& ival_dict,
   const vector<AigHandle>& output_list
 ) const
 {
   auto oedge_list = hlist_to_elist(output_list);
-  return get()->eval(input_vals, oedge_list);
+  return get()->eval(ival_dict, oedge_list);
 }
 
 // @brief 外部入力ノードを返す．
@@ -102,7 +100,8 @@ AigMgr::input(
   SizeType input_id
 )
 {
-  auto edge = get()->input(input_id);
+  auto node = get()->input_node(input_id);
+  auto edge = AigEdge(node, false);
   return edge_to_handle(edge);
 }
 

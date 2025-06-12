@@ -11,6 +11,7 @@
 #include "ValArray.h"
 #include "EdgeDict.h"
 #include "CopyOp.h"
+#include "EvalOp.h"
 
 //#define DEBUG_AIGMGRIMPL 1
 #define DOUT std::cout
@@ -105,61 +106,32 @@ AigMgrImpl::copy(
 // @brief 論理シミュレーションを行う．
 AigBitVect
 AigMgrImpl::eval(
-  const vector<AigBitVect>& input_vals,
+  const std::unordered_map<SizeType, AigBitVect>& ival_dict,
   AigEdge output
 ) const
 {
-  // ノード番号をキーにして値を入れておく配列
-  ValArray val_array(node_num());
-
-  eval_sub(input_vals, val_array);
-
-  return val_array.get_val(output);
+  EvalOp eval(ival_dict);
+  auto oval = eval(output);
+  return oval;
 }
 
 // @brief 論理シミュレーションを行う．
 vector<AigBitVect>
 AigMgrImpl::eval(
-  const vector<AigBitVect>& input_vals,
+  const std::unordered_map<SizeType, AigBitVect>& ival_dict,
   const vector<AigEdge>& output_list
 ) const
 {
-  // ノード番号をキーにして値を入れておく配列
-  ValArray val_array(node_num());
-
-  eval_sub(input_vals, val_array);
+  EvalOp eval(ival_dict);
 
   vector<AigBitVect> output_vals;
   auto no = output_list.size();
   output_vals.reserve(no);
-  for ( auto edge: output_list ) {
-    auto bv = val_array.get_val(edge);
-    output_vals.push_back(bv);
+  for ( auto output: output_list ) {
+    auto oval = eval(output);
+    output_vals.push_back(oval);
   }
   return output_vals;
-}
-
-// @brief eval() の下請け関数
-void
-AigMgrImpl::eval_sub(
-  const vector<AigBitVect>& input_vals,
-  ValArray& val_array
-) const
-{
-  for ( auto node: mInputArray ) {
-    auto bv = input_vals[node->input_id()];
-    val_array.put_val(node, bv);
-  }
-  // ノードの評価を行う．
-  auto& node_list = and_list();
-  for ( auto node: node_list ) {
-    auto h0 = node->fanin0();
-    auto h1 = node->fanin1();
-    auto bv0 = val_array.get_val(h0);
-    auto bv1 = val_array.get_val(h1);
-    auto bv = bv0 & bv1;
-    val_array.put_val(node, bv);
-  }
 }
 
 BEGIN_NONAMESPACE
@@ -589,7 +561,7 @@ void
 AigMgrImpl::_make_and_list() const
 {
   mAndList.clear();
-  mAndList.reserve(mNodeArray.size() - mInputArray.size());
+  mAndList.reserve(mNodeArray.size() - input_num());
   std::unordered_set<SizeType> mark;
   for ( auto& node: mNodeArray ) {
     and_dfs(node.get(), mark, mAndList);
@@ -682,7 +654,7 @@ AigMgrImpl::print(
       << hex << handle << dec
       << "): " << edge << endl;
   }
-  s << "# of inputs: "  << mInputArray.size() << endl
+  s << "# of inputs: "  << input_num() << endl
     << "# of ANDs:   "  << and_num() << endl
     << "# of handles: " << mHandleHash.size() << endl;
 }
@@ -707,20 +679,71 @@ CopyOp::copy(
   auto node = edge.node();
   AigNode* new_node = nullptr;
   if ( mNodeDict.count(node->id()) == 0 ) {
+    AigEdge new_edge;
     if ( node->is_input() ) {
-      new_node = mMgr->input(node->input_id());
+      new_edge = mMgr->input(node->input_id());
     }
     else {
       auto new_fanin0 = copy(node->fanin0());
       auto new_fanin1 = copy(node->fanin1());
-      new_node = mMgr->and_op(new_fanin0, new_fanin1);
+      new_edge = mMgr->and_op(new_fanin0, new_fanin1);
     }
+    if ( new_edge.inv() ) {
+      throw std::logic_error{"something wrong"};
+    }
+    new_node = new_edge.node();
     mNodeDict.emplace(node->id(), new_node);
   }
   else {
     new_node = mNodeDict.at(node->id());
   }
   return AigEdge(new_node, edge.inv());
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// クラス EvalOp
+//////////////////////////////////////////////////////////////////////
+
+// @brief 値を求める．
+AigBitVect
+EvalOp::eval(
+  AigEdge edge
+)
+{
+  if ( edge.is_zero() ) {
+    return 0U;
+  }
+  else if ( edge.is_one() ) {
+    return ~0U;
+  }
+  auto node = edge.node();
+  auto val = 0U;
+  if ( mValDict.count(node->id()) > 0 ) {
+    val = mValDict.at(node->id());
+  }
+  else {
+    if ( node->is_input() ) {
+      if ( mIvalDict.count(node->input_id()) == 0 ) {
+	std::ostringstream buf;
+	buf << "Input#" << node->input_id() << "'s value is not registered";
+	throw std::logic_error{buf.str()};
+      }
+      val = mIvalDict.at(node->input_id());
+    }
+    else {
+      auto fanin0 = node->fanin0();
+      auto fanin1 = node->fanin1();
+      auto val0 = eval(fanin0);
+      auto val1 = eval(fanin1);
+      val = val0 & val1;
+    }
+    mValDict.emplace(node->id(), val);
+  }
+  if ( edge.inv() ) {
+    val = ~val;
+  }
+  return val;
 }
 
 END_NAMESPACE_YM_AIG

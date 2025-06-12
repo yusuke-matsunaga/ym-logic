@@ -89,8 +89,9 @@ TEST(AigMgrTest, and_op2)
   EXPECT_EQ( 3, mgr.node_num() );
   EXPECT_EQ( 1, mgr.and_num() );
 
-  vector<AigBitVect> input_vals{0xCC, 0xAA};
-  auto bv = ho.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xCC},
+						     {1, 0xAA}};
+  auto bv = ho.eval(ival_dict);
   EXPECT_EQ( 0x88, bv );
 
   auto fanin_list = ho.ex_fanin_list();
@@ -117,8 +118,10 @@ TEST(AigMgrTest, and_op3)
   EXPECT_EQ( 5, mgr.node_num() );
   EXPECT_EQ( 2, mgr.and_num() );
 
-  vector<AigBitVect> input_vals{0xF0, 0xCC, 0xAA};
-  auto bv = ho.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xF0},
+						     {1, 0xCC},
+						     {2, 0xAA}};
+  auto bv = ho.eval(ival_dict);
   EXPECT_EQ( 0x80, bv );
 
   auto fanin_list = ho.ex_fanin_list();
@@ -143,8 +146,11 @@ TEST(AigMgrTest, and_op4)
   EXPECT_EQ( 7, mgr.node_num() );
   EXPECT_EQ( 3, mgr.and_num() );
 
-  vector<AigBitVect> input_vals{0xFF00, 0xF0F0, 0xCCCC, 0xAAAA};
-  auto bv = ho.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xFF00},
+						     {1, 0xF0F0},
+						     {2, 0xCCCC},
+						     {3, 0xAAAA}};
+  auto bv = ho.eval(ival_dict);
   EXPECT_EQ( 0x8000, bv );
 
   auto fanin_list = ho.ex_fanin_list();
@@ -200,8 +206,10 @@ TEST(AigMgrTest, or_op3)
   EXPECT_EQ( 5, mgr.node_num() );
   EXPECT_EQ( 2, mgr.and_num() );
 
-  vector<AigBitVect> input_vals{0xF0, 0xCC, 0xAA};
-  auto bv = ho.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xF0},
+						     {1, 0xCC},
+						     {2, 0xAA}};
+  auto bv = ho.eval(ival_dict);
   EXPECT_EQ( 0xFE, bv );
 
   auto fanin_list = ho.ex_fanin_list();
@@ -226,8 +234,11 @@ TEST(AigMgrTest, or_op4)
   EXPECT_EQ( 7, mgr.node_num() );
   EXPECT_EQ( 3, mgr.and_num() );
 
-  vector<AigBitVect> input_vals{0xFF00, 0xF0F0, 0xCCCC, 0xAAAA};
-  auto bv = ho.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xFF00},
+						     {1, 0xF0F0},
+						     {2, 0xCCCC},
+						     {3, 0xAAAA}};
+  auto bv = ho.eval(ival_dict);
   EXPECT_EQ( 0xFFFE, bv );
 
   auto fanin_list = ho.ex_fanin_list();
@@ -283,8 +294,10 @@ TEST(AigMgrTest, xor_op3)
   EXPECT_EQ( 9, mgr.node_num() );
   EXPECT_EQ( 6, mgr.and_num() );
 
-  vector<AigBitVect> input_vals{0xF0, 0xCC, 0xAA};
-  auto bv = ho.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xF0},
+						     {1, 0xCC},
+						     {2, 0xAA}};
+  auto bv = ho.eval(ival_dict);
   EXPECT_EQ( 0x96, bv );
 
   auto fanin_list = ho.ex_fanin_list();
@@ -306,8 +319,11 @@ TEST(AigMgrTest, xor_op4)
   EXPECT_EQ( 13, mgr.node_num() );
   EXPECT_EQ( 9, mgr.and_num() );
 
-  vector<AigBitVect> input_vals{0xFF00, 0xF0F0, 0xCCCC, 0xAAAA};
-  auto bv = ho.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xFF00},
+						     {1, 0xF0F0},
+						     {2, 0xCCCC},
+						     {3, 0xAAAA}};
+  auto bv = ho.eval(ival_dict);
   EXPECT_EQ( 0x6996, bv );
 
   auto fanin_list = ho.ex_fanin_list();
@@ -427,8 +443,9 @@ TEST(AigMgrTest, from_expr_xor)
 
   mgr.print(cout);
 
-  vector<AigBitVect> input_vals{0xC, 0xA};
-  auto bv = h.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xC},
+						     {1, 0xA}};
+  auto bv = h.eval(ival_dict);
   EXPECT_EQ( 0x6, bv );
 }
 

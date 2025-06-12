@@ -256,7 +256,6 @@ private:
   ) const
   {
     if ( !is_input() ) {
-      abort();
       ostringstream buf;
       buf << "AigNode::" << name << "() is valid if is_input() == true";
       throw std::invalid_argument{buf.str()};
@@ -270,7 +269,6 @@ private:
   ) const
   {
     if ( !is_and() ) {
-      abort();
       ostringstream buf;
       buf << "AigNode::" << name << "() is valid if is_and() == true";
       throw std::invalid_argument{buf.str()};

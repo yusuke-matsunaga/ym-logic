@@ -142,8 +142,9 @@ TEST(AigHandleTest, and1)
   EXPECT_EQ( h1, fanin_list[0] );
   EXPECT_EQ( h2, fanin_list[1] );
 
-  vector<AigBitVect> input_vals{0xC, 0xA};
-  auto output_val = h3.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xC},
+						     {1, 0xA}};
+  auto output_val = h3.eval(ival_dict);
   EXPECT_EQ( 0x8, output_val );
 }
 
@@ -289,8 +290,9 @@ TEST(AigHandleTest, or1)
   EXPECT_EQ( ~h1, fanin_list[0] );
   EXPECT_EQ( ~h2, fanin_list[1] );
 
-  vector<AigBitVect> input_vals{0xC, 0xA};
-  auto bv = h3.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xC},
+						     {1, 0xA}};
+  auto bv = h3.eval(ival_dict);
   EXPECT_EQ( 0xE, bv );
 }
 
@@ -420,8 +422,9 @@ TEST(AigHandleTest, xor1)
   auto fanin_list = h3.ex_fanin_list();
   EXPECT_EQ( 2, fanin_list.size() );
 
-  vector<AigBitVect> input_vals{0xC, 0xA};
-  auto bv = h3.eval(input_vals);
+  std::unordered_map<SizeType, AigBitVect> ival_dict{{0, 0xC},
+						     {1, 0xA}};
+  auto bv = h3.eval(ival_dict);
   EXPECT_EQ( 0x6, bv );
 }
 
