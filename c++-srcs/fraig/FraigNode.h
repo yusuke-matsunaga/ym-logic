@@ -31,9 +31,11 @@ public:
 
   /// @brief AND用のコンストラクタ
   FraigNode(
-    SizeType id,         ///< [in] ノード番号
-    FraigHandle handle1, ///< [in] 入力1のハンドル
-    FraigHandle handle2  ///< [in] 入力2のハンドル
+    SizeType id,       ///< [in] ノード番号
+    FraigNode* fanin0, ///< [in] ファンイン0のノード
+    bool inv0,         ///< [in] ファンイン0の反転属性
+    FraigNode* fanin1, ///< [in] ファンイン1のノード
+    bool inv1	       ///< [in] ファンイン1の反転属性
   );
 
   /// @brief デストラクタ
@@ -69,7 +71,7 @@ public:
   SizeType
   input_id() const
   {
-    return reinterpret_cast<PtrIntType>(mFanins[0]);
+    return reinterpret_cast<SizeType>(mFanins[0]);
   }
 
 
@@ -133,29 +135,6 @@ public:
   fanin1_inv() const
   {
     return mFlags[BIT_INV1];
-  }
-
-  /// @brief ファンインのハンドルを得る．
-  FraigHandle
-  fanin_handle(
-    SizeType pos ///< [in] 位置 ( 0 or 1 )
-  ) const
-  {
-    return FraigHandle(fanin(pos), fanin_inv(pos));
-  }
-
-  /// @brief 1番め初のファンインのハンドルを得る．
-  FraigHandle
-  fanin0_handle() const
-  {
-    return FraigHandle(fanin0(), fanin0_inv());
-  }
-
-  /// @brief 2番めのファンインのハンドルを得る．
-  FraigHandle
-  fanin1_handle() const
-  {
-    return FraigHandle(fanin1(), fanin1_inv());
   }
 
 

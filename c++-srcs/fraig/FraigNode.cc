@@ -144,14 +144,15 @@ FraigNode::FraigNode(
 // @brief AND用のコンストラクタ
 FraigNode::FraigNode(
   SizeType id,
-  FraigHandle handle1,
-  FraigHandle handle2
-) : mId{id}
+  FraigNode* fanin0,
+  bool inv0,
+  FraigNode* fanin1,
+  bool inv1
+) : mId{id},
+    mFanins{fanin0, fanin1}
 {
   resize_pat(mPatSize);
 
-  mFanins[0] = handle1.node();
-  mFanins[1] = handle2.node();
   mFlags[BIT_INV0] = handle1.inv();
   mFlags[BIT_INV1] = handle2.inv();
   calc_pat(0, mPatUsed);

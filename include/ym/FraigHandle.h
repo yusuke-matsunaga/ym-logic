@@ -13,16 +13,17 @@
 
 BEGIN_NAMESPACE_YM_FRAIG
 
-class FraigNode;
-
 //////////////////////////////////////////////////////////////////////
 /// @class FraigHandle FraigHandle.h "ym/FraigHandle.h"
 /// @brief Fraig の枝を表すクラス
 ///
-/// 具体的には FraigNode へのポインタと極性を表す1ビットの情報をまとめたもの
+/// 具体的にはノード番号と極性を表す1ビットの情報をまとめたもの
+/// ノード番号0番は特殊なノードで定数0を表す
 //////////////////////////////////////////////////////////////////////
 class FraigHandle
 {
+  friend class MgrImpl;
+
 public:
   //////////////////////////////////////////////////////////////////////
   // コンストラクタ/デストラクタと生成/内容の設定
@@ -31,20 +32,12 @@ public:
   /// @brief 空のコンストラクタ
   FraigHandle() = default;
 
-  /// @brief 内容を設定したコンストラクタ
-  FraigHandle(
-    FraigNode* node, ///< [in] ノード
-    bool inv         ///< [in] 反転している時に true とするフラグ
-  ) : FraigHandle{reinterpret_cast<PtrIntType>(node) | inv}
-  {
-  }
-
   /// @brief 定数０のハンドルを返す．
   static
   FraigHandle
   zero()
   {
-    return FraigHandle{nullptr, false};
+    return FraigHandle{0};
   }
 
   /// @brief 定数1のハンドルを返す．
@@ -52,7 +45,7 @@ public:
   FraigHandle
   one()
   {
-    return FraigHandle{nullptr, true};
+    return FraigHandle{1};
   }
 
   /// @brief デストラクタ
@@ -73,18 +66,18 @@ public:
 
   /// @brief 極性をかけ合わせる．
   FraigHandle
-  operator^(
+  operator*(
     bool inv ///< [in] 極性
   ) const
   {
-    return FraigHandle{mPackedData ^ static_cast<bool>(inv)};
+    return FraigHandle{mPackedData ^ static_cast<SizeType>(inv)};
   }
 
-  /// @brief ノードを得る．
-  FraigNode*
-  node() const
+  /// @brief ノード番号を得る．
+  SizeType
+  node_id() const
   {
-    return reinterpret_cast<FraigNode*>(mPackedData & ~3UL);
+    return mPackedData >> 1;
   }
 
   /// @brief 極性を得る．
@@ -117,40 +110,6 @@ public:
   {
     return (mPackedData & ~1UL) == 0UL;
   }
-
-  /// @brief 外部入力ノードへのハンドルのとき true を返す．
-  bool
-  is_input() const;
-
-  /// @brief 外部入力ノードへのハンドルのとき，入力番号を返す．
-  ///
-  /// is_input() == true の時のみ意味を持つ．
-  SizeType
-  input_id() const;
-
-  /// @brief ANDノードへのハンドルのとき true を返す．
-  bool
-  is_and() const;
-
-  /// @brief pos で指示されたファンインのハンドルを得る．
-  ///
-  /// is_and() == true の時のみ意味を持つ．
-  FraigHandle
-  fanin_handle(
-    SizeType pos ///< [in] 位置 ( 0 or 1 )
-  ) const;
-
-  /// @brief fanin0 のハンドルを得る．
-  ///
-  /// is_and() == true の時のみ意味を持つ．
-  FraigHandle
-  fanin0_handle() const;
-
-  /// @brief fanin1 のハンドルを得る．
-  ///
-  /// is_and() == true の時のみ意味を持つ．
-  FraigHandle
-  fanin1_handle() const;
 
   /// @brief ハッシュ値を返す．
   SizeType
@@ -186,7 +145,7 @@ private:
   /// @brief 内容を直接指定したコンストラクタ
   explicit
   FraigHandle(
-    PtrIntType data ///< [in] 内容
+    SizeType data ///< [in] 内容
   ) : mPackedData{data}
   {
   }
@@ -197,8 +156,8 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // すべてのデータをまとめたもの
-  PtrIntType mPackedData{0UL};
+  // ノード番号＋極性
+  SizeType mPackedData;
 
 };
 

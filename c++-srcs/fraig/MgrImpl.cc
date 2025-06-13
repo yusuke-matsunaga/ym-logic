@@ -110,13 +110,13 @@ MgrImpl::make_and(
   else if ( handle1 == handle2 ) {
     ans = handle1;
   }
-  else if ( handle1.node() == handle2.node() ) {
+  else if ( handle1.node_id() == handle2.node_id() ) {
     // handle1.inv != handle2.inv() のはず
     ans = make_zero();
   }
   else {
     // 順番の正規化
-    if ( handle1.node()->id() < handle2.node()->id() ) {
+    if ( handle1.node_id() < handle2.node_id() ) {
       std::swap(handle1, handle2);
     }
 
@@ -130,7 +130,7 @@ MgrImpl::make_and(
     if ( p != mStructTable.end() ) {
       // 等価なノードが存在した．
       auto node = *p;
-      ans = FraigHandle(node, false);
+      ans = FraigHandle(node->id(), false);
     }
     else {
       // ノードを作る．

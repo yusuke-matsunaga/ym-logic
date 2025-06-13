@@ -16,32 +16,6 @@ BEGIN_NAMESPACE_EQUIV
 // FraigHandle
 //////////////////////////////////////////////////////////////////////
 
-// @brief 外部入力ノードへのハンドルのとき true を返す．
-bool
-FraigHandle::is_input() const
-{
-  auto n = node();
-  if ( n && n->is_input() ) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-// @brief 外部入力ノードへのハンドルのとき，入力番号を返す．
-//
-// is_input() の時のみ意味を持つ．
-SizeType
-FraigHandle::input_id() const
-{
-  auto n = node();
-  if ( n && n->is_input() ) {
-    return n->input_id();
-  }
-  return 0;
-}
-
 // @relates FraigHandle
 // @brief 内容を出力する関数
 ostream&
