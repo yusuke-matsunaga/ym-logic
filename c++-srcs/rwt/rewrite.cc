@@ -14,7 +14,7 @@
 #include "Pat2Aig.h"
 #include "ReplaceDict.h"
 
-#define DEBUG_REWRITE 0
+#define DEBUG_REWRITE 1
 #define VERIFY_REWRITE 0
 #define DOUT std::cout
 
@@ -22,6 +22,9 @@
 BEGIN_NAMESPACE_YM_AIG
 
 BEGIN_NONAMESPACE
+
+static
+int debug = DEBUG_REWRITE;
 
 void
 print_dfs(
@@ -92,10 +95,10 @@ AigMgrImpl::rewrite()
     auto& node_list = and_list();
     // 'ロック'の印
     std::unordered_set<SizeType> lock_mark;
-#if DEBUG_REWRITE
-    DOUT << "===================================================" << endl;
-    print(DOUT);
-#endif
+    if ( debug > 0 ) {
+      DOUT << "===================================================" << endl;
+      print(DOUT);
+    }
     // 置き換え結果を記録する辞書
     ReplaceDict replace_dict;
     // 入力からのトポロジカル順に処理を行う．
@@ -106,10 +109,10 @@ AigMgrImpl::rewrite()
       if ( lock_mark.count(node->id()) > 0 ) {
 	continue;
       }
-#if DEBUG_REWRITE
-      DOUT << "--------------------------------------------------" << endl
-	   << "  pick up Node#" << node->id() << endl;
-#endif
+      if ( debug > 1 ) {
+	DOUT << "--------------------------------------------------" << endl
+	     << "  pick up Node#" << node->id() << endl;
+      }
       // 置き換えの結果を反映させる．
       auto fanin0 = replace_dict.get(node->fanin0());
       auto fanin1 = replace_dict.get(node->fanin1());
@@ -156,16 +159,23 @@ AigMgrImpl::rewrite()
 	changed = true;
 	Pat2Aig pat2aig(this);
 	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
-#if DEBUG_REWRITE
-	DOUT << "=====================" << endl
-	     << "Node#" << node->id() << endl
-	     << "max_gain = " << max_gain << endl
-	     << "max_cut:" << endl
-	     << *max_cut
-	     << "--------------------" << endl
-	     << " =>" << endl;
-	print_new_edge(DOUT, new_edge, max_cut);
-#endif
+	if ( debug > 0 ) {
+	  auto tv = max_cut->calc_tv();
+	  CalcMerit calc_merit(max_cut, tv);
+	  Pat2Aig pat2aig(this);
+	  Npn4 rep_npn;
+	  pat_mgr.get_pat(tv, rep_npn);
+	  auto cost = pat2aig.calc_cost(max_cut, rep_npn, max_pat, calc_merit);
+	  DOUT << "=====================" << endl
+	       << "Node#" << node->id() << endl
+	       << "max_gain = " << max_gain
+	       << " (" << calc_merit.merit() << " - " << cost << ")" << endl
+	       << "max_cut:" << endl
+	       << *max_cut
+	       << "--------------------" << endl
+	       << " =>" << endl;
+	  print_new_edge(DOUT, new_edge, max_cut);
+	}
 	replace_dict.add(node, new_edge);
 	lock_dfs(new_edge, lock_mark);
 #if VERIFY_REWITE
@@ -190,10 +200,12 @@ AigMgrImpl::rewrite()
 	}
       }
       sweep();
-#if DEBUG_REWRITE
-      print(DOUT);
-      DOUT << and_num() << endl;
-#endif
+      if ( debug > 1 ) {
+	print(DOUT);
+      }
+      if ( debug > 0 ) {
+	DOUT << and_num() << endl;
+      }
     }
     else {
       go_on = false;

@@ -92,8 +92,8 @@ TEST(CutMgrTest, and3)
   EXPECT_EQ( e1.node(), cut2->leaf_list()[1] );
   EXPECT_EQ( e2.node(), cut2->leaf_list()[2] );
   ASSERT_EQ( 2, cut2->node_list().size() );
-  EXPECT_EQ( e4.node(), cut2->node_list()[0] );
-  EXPECT_EQ( e3.node(), cut2->node_list()[1] );
+  EXPECT_EQ( e4.node(), cut2->node_list()[1] );
+  EXPECT_EQ( e3.node(), cut2->node_list()[0] );
 }
 
 END_NAMESPACE_YM_AIG

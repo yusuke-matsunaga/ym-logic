@@ -126,16 +126,58 @@ Cut::calc_tv() const
   }
 }
 
+BEGIN_NONAMESPACE
+
+void
+count_dfs(
+  AigNode* node,
+  std::unordered_map<SizeType, SizeType>& count_dict
+)
+{
+  auto& count = count_dict.at(node->id());
+  ++ count;
+  if ( count == node->ref_count() ) {
+    if ( node->is_and() ) {
+      count_dfs(node->fanin0_node(), count_dict);
+      count_dfs(node->fanin1_node(), count_dict);
+    }
+  }
+}
+
+END_NONAMESPACE
+
 // @brief 内容を出力する．
 void
 Cut::print(
   std::ostream& s
 ) const
 {
+  // カット内部の参照数を数える．
+  std::unordered_map<SizeType, SizeType> count_dict;
+  {
+    for ( auto node: mLeafList ) {
+      count_dict.emplace(node->id(), 0);
+    }
+    for ( auto node: mNodeList ) {
+      count_dict.emplace(node->id(), 0);
+    }
+    for ( auto node: mNodeList ) {
+      auto node0 = node->fanin0_node();
+      ++ count_dict.at(node0->id());
+      auto node1 = node->fanin1_node();
+      ++ count_dict.at(node1->id());
+    }
+  }
   s << "Root: Node#" << mRoot->id() << endl;
   s << "Leaves:";
   for ( auto node: mLeafList ) {
     s << " Node#" << node->id();
+#if 0
+    if ( node->ref_count() == count_dict.at(node->id()) ) {
+      s << "**";
+    }
+#endif
+    s << " " << count_dict.at(node->id()) << "/" << node->ref_count();
   }
   s << endl;
   for ( auto node: mNodeList ) {
@@ -147,6 +189,12 @@ Cut::print(
       s << "And(" << node->fanin0()
 	<< ", " << node->fanin1()
 	<< ")";
+#if 0
+      if ( node->ref_count() == count_dict.at(node->id()) ) {
+	s << "**";
+      }
+#endif
+      s << " " << count_dict.at(node->id()) << "/" << node->ref_count();
     }
     s << endl;
   }
