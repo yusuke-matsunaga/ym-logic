@@ -29,6 +29,10 @@ class Pat2Aig
 {
 public:
 
+  static bool debug;
+
+public:
+
   /// @brief コンストラクタ
   Pat2Aig(
     AigMgrImpl* aig_mgr

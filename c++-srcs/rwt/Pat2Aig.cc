@@ -17,6 +17,9 @@
 
 BEGIN_NAMESPACE_YM_AIG
 
+bool
+Pat2Aig::debug = false;
+
 // @brief PatGraph を AIG に変換する．
 AigEdge
 Pat2Aig::new_aig(
@@ -57,7 +60,14 @@ Pat2Aig::aig_sub(
   const PatNode* node
 )
 {
+  if ( debug ) {
+    cout << "aig_sub(Node#" << node->id() << ")" << endl;
+  }
   if ( mNodeDict.count(node->id()) > 0 ) {
+    if ( debug ) {
+      cout << "  -> aig_sub(Node#" << node->id() << ")"
+	   << " = " << mNodeDict.at(node->id()) << "[*]" << endl;
+    }
     return mNodeDict.at(node->id());
   }
 
@@ -75,6 +85,10 @@ Pat2Aig::aig_sub(
 
   auto aig_edge = mAigMgr->and_op(aig_edge0, aig_edge1);
   mNodeDict.emplace(node->id(), aig_edge);
+  if ( debug ) {
+    cout << "  -> aig_sub(Node#" << node->id() << ")"
+	 << "  -> " << aig_edge0 << " & " << aig_edge1 << " = " << aig_edge << endl;
+  }
   return aig_edge;
 }
 
@@ -118,8 +132,14 @@ Pat2Aig::calc_sub(
   const CalcMerit& calc_merit
 )
 {
+  if ( debug ) {
+    cout << "calc_sub(Node#" << node->id() << ")" << endl;
+  }
   auto id = node->id();
   if ( mNodeDict.count(id) > 0 ) {
+    if ( debug ) {
+      cout << "  -> " << mNodeDict.at(id) << endl;
+    }
     return mNodeDict.at(id);
   }
   if ( id == 0 ) {
@@ -146,15 +166,21 @@ Pat2Aig::calc_sub(
   if ( !aig_edge0.is_const() && !aig_edge1.is_const() ) {
     auto aig_node = mAigMgr->find_and(aig_edge0, aig_edge1);
     // 同じ構造のノードが既に存在しているか調べる．
+    // 存在しても削除されるノードなら無視する．
     if ( aig_node != nullptr && !calc_merit.check(aig_node) ) {
-      // 存在しても削除されるノードなら無視する．
       auto aig_edge = AigEdge(aig_node, false);
       mNodeDict.emplace(id, aig_edge);
+      if ( debug ) {
+	cout << "  -> " << aig_edge << "[*]" << endl;
+      }
       return aig_edge;
     }
   }
   ++ mCount;
   mNodeDict.emplace(id, AigEdge::zero());
+  if ( debug ) {
+    cout << "  -> zero" << endl;
+  }
   return AigEdge::zero();
 }
 

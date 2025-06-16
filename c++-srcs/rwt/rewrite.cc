@@ -91,6 +91,7 @@ AigMgrImpl::rewrite()
   PatMgr pat_mgr;
   for ( bool go_on = true; go_on; ) {
     bool changed = false;
+    int acc_gain = 0;
     CutMgr cut_mgr(this, 4);
     auto& node_list = and_list();
     // 'ロック'の印
@@ -105,6 +106,7 @@ AigMgrImpl::rewrite()
     // 置き換え結果は replace_dict に記録される．
     // トポロジカル順なので置き換えの影響を受けるノードは必ず
     // 後で処理される．
+    auto before_num = and_num();
     for ( auto node: node_list ) {
       if ( lock_mark.count(node->id()) > 0 ) {
 	continue;
@@ -119,12 +121,20 @@ AigMgrImpl::rewrite()
       AigEdge new_edge;
       if ( _special_case(fanin0, fanin1, new_edge) ) {
 	replace_dict.add(node, new_edge);
+	++ acc_gain;
 	continue;
       }
       if ( fanin0 != node->fanin0() || fanin1 != node->fanin1() ) {
 	_change_fanin(node, fanin0, fanin1);
       }
+      {
+	if ( changed ) {
+	  continue;
+	}
+      }
       int max_gain = -1;
+      int max_merit = 0;
+      int max_cost = 0;
       Cut* max_cut = nullptr;
       Npn4 max_npn;
       PatGraph max_pat;
@@ -151,25 +161,38 @@ AigMgrImpl::rewrite()
 	    max_cut = cut;
 	    max_npn = rep_npn;
 	    max_pat = pat;
+	    max_merit = merit;
+	    max_cost = cost;
 	  }
 	}
       }
       if ( max_gain > 0 ) {
 	// max_cut を max_pat で置き換える．
 	changed = true;
-	Pat2Aig pat2aig(this);
-	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
-	if ( debug > 0 ) {
+	acc_gain += max_gain;
+	{
 	  auto tv = max_cut->calc_tv();
 	  CalcMerit calc_merit(max_cut, tv);
+	  Pat2Aig::debug = true;
 	  Pat2Aig pat2aig(this);
 	  Npn4 rep_npn;
 	  pat_mgr.get_pat(tv, rep_npn);
+	  auto merit = calc_merit.merit();
+	  max_pat.print(DOUT);
 	  auto cost = pat2aig.calc_cost(max_cut, rep_npn, max_pat, calc_merit);
+	  DOUT << "current merit = " << merit << endl
+	       << "current cost =  " << cost << endl;
+	  Pat2Aig::debug = false;
+	}
+	Pat2Aig pat2aig(this);
+	Pat2Aig::debug = true;
+	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
+	Pat2Aig::debug = false;
+	if ( debug > 0 ) {
 	  DOUT << "=====================" << endl
 	       << "Node#" << node->id() << endl
 	       << "max_gain = " << max_gain
-	       << " (" << calc_merit.merit() << " - " << cost << ")" << endl
+	       << " (" << max_merit << " - " << max_cost << ")" << endl
 	       << "max_cut:" << endl
 	       << *max_cut
 	       << "--------------------" << endl
@@ -204,7 +227,12 @@ AigMgrImpl::rewrite()
 	print(DOUT);
       }
       if ( debug > 0 ) {
-	DOUT << and_num() << endl;
+	DOUT << "before:   " << before_num << endl
+	     << "after:    " << and_num() << endl
+	     << "expected: " << before_num - acc_gain << endl;
+	if ( and_num() != (before_num - acc_gain) ) {
+	  abort();
+	}
       }
     }
     else {
