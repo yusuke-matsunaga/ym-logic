@@ -41,18 +41,15 @@ public:
   /// @brief 自身を葉とするコンストラクタ
   Cut(
     AigNode* node
-  ) : mRoot{node},
-      mLeafList{node}
+  ) : mLeafList{node}
   {
   }
 
   /// @brief 通常のコンストラクタ
   Cut(
-    AigNode* root,                          ///< [in] 根のノード
     const std::vector<AigNode*>& leaf_list, ///< [in] 葉のリスト
     const std::vector<AigNode*>& node_list  ///< [in] 内部ノードのリスト
-  ) : mRoot{root},
-      mLeafList{leaf_list},
+  ) : mLeafList{leaf_list},
       mNodeList{node_list}
   {
   }
@@ -70,7 +67,10 @@ public:
   AigNode*
   root() const
   {
-    return mRoot;
+    if ( mNodeList.empty() ) {
+      return mLeafList.front();
+    }
+    return mNodeList.back();
   }
 
   /// @brief 葉のサイズを返す．
@@ -110,6 +110,10 @@ public:
   Tv4Type
   calc_tv() const;
 
+  /// @brief 内容が正しいかチェックする．
+  bool
+  check() const;
+
   /// @brief 内容を出力する．
   void
   print(
@@ -122,13 +126,12 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  // 根のノード
-  AigNode* mRoot;
-
   // 葉のノードのリスト
   std::vector<AigNode*> mLeafList;
 
   // 内部のノードのリスト
+  // 葉からのトポロジカル順になっている．
+  // 最後のノードが根のノードとなる．
   std::vector<AigNode*> mNodeList;
 
 };
@@ -223,9 +226,17 @@ private:
   /// 不正なカットの組み合わせの場合は nullptr を返す．
   Cut*
   _merge_cuts(
-    AigNode* root,   ///< [in] 根のノード
-    const Cut* cut0, ///< [in] fanin0 のカット
-    const Cut* cut1  ///< [in] fanin1 のカット
+    AigNode* root,                              ///< [in] 根のノード
+    const Cut* cut0,                            ///< [in] fanin0 のカット
+    const Cut* cut1,                            ///< [in] fanin1 のカット
+    const std::unordered_set<SizeType>& fp_mark ///< [in] フットプリントのマーク
+  );
+
+  /// @brief フットプリントをマージする．
+  std::unordered_set<SizeType>
+  _merge_footprint(
+    AigNode* node0,
+    AigNode* node1
   );
 
   /// @brief カットのリストを削除する．
@@ -253,7 +264,10 @@ private:
   SizeType mCutSize{0};
 
   // ノード番号をキーにしてカットのリストを持つハッシュ表
-  std::unordered_map<SizeType, std::vector<Cut*>> mCutHash;
+  std::unordered_map<SizeType, std::vector<Cut*>> mCutDict;
+
+  // ノード番号をキーにしてカットリストのフットプリントを持つハッシュ表
+  std::unordered_map<SizeType, std::vector<AigNode*>> mFootPrintDict;
 
 };
 

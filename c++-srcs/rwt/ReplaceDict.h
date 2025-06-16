@@ -26,10 +26,23 @@ class ReplaceDict
 public:
 
   /// @brief コンストラクタ
-  ReplaceDict() = default;
+  ReplaceDict(
+    AigMgrImpl* mgr
+  ) : mMgr{mgr}
+  {
+  }
 
   /// @brief デストラクタ
-  ~ReplaceDict() = default;
+  ~ReplaceDict()
+  {
+    for ( auto& p: mDict ) {
+      auto edge = p.second;
+      if ( edge.is_and() ) {
+	auto node = edge.node();
+	mMgr->dec_node_ref(node);
+      }
+    }
+  }
 
 
 public:
@@ -45,6 +58,10 @@ public:
   )
   {
     mDict.emplace(old_node->id(), new_edge);
+    if ( new_edge.is_and() ) {
+      auto node = new_edge.node();
+      mMgr->inc_node_ref(node);
+    }
   }
 
   /// @brief 置き換え結果を得る．
@@ -71,6 +88,9 @@ private:
   //////////////////////////////////////////////////////////////////////
   // データメンバ
   //////////////////////////////////////////////////////////////////////
+
+  // AIGマネージャ
+  AigMgrImpl* mMgr;
 
   // 辞書の本体
   std::unordered_map<SizeType, AigEdge> mDict;

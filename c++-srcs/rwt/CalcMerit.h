@@ -28,8 +28,9 @@ public:
 
   /// @brief コンストラクタ
   CalcMerit(
-    const Cut* cut, ///< [in] カット
-    Cut::Tv4Type tv ///< [in] カットに対応する論理関数
+    const Cut* cut,  ///< [in] カット
+    Cut::Tv4Type tv, ///< [in] カットに対応する論理関数
+    bool debug = false
   );
 
   /// @brief デストラクタ
@@ -85,6 +86,8 @@ private:
 
   // 削除されるノードの印
   std::unordered_set<SizeType> mDeleteMark;
+
+  bool mDebug{false};
 
 };
 

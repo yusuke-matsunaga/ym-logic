@@ -166,14 +166,16 @@ Pat2Aig::calc_sub(
   if ( !aig_edge0.is_const() && !aig_edge1.is_const() ) {
     auto aig_node = mAigMgr->find_and(aig_edge0, aig_edge1);
     // 同じ構造のノードが既に存在しているか調べる．
-    // 存在しても削除されるノードなら無視する．
-    if ( aig_node != nullptr && !calc_merit.check(aig_node) ) {
-      auto aig_edge = AigEdge(aig_node, false);
-      mNodeDict.emplace(id, aig_edge);
-      if ( debug ) {
-	cout << "  -> " << aig_edge << "[*]" << endl;
+    if ( aig_node != nullptr ) {
+      // ただし存在しても削除されるノードなら無視する．
+      if ( !calc_merit.check(aig_node) && aig_node->ref_count() > 0 ) {
+	auto aig_edge = AigEdge(aig_node, false);
+	mNodeDict.emplace(id, aig_edge);
+	if ( debug ) {
+	  cout << "  -> " << aig_edge << "[*]" << endl;
+	}
+	return aig_edge;
       }
-      return aig_edge;
     }
   }
   ++ mCount;

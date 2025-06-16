@@ -16,8 +16,9 @@ BEGIN_NAMESPACE_YM_AIG
 // @brief コンストラクタ
 CalcMerit::CalcMerit(
   const Cut* cut,
-  Cut::Tv4Type tv
-)
+  Cut::Tv4Type tv,
+  bool debug
+) : mDebug{debug}
 {
   // 大まかには cut の葉になっているノードよりも根のノード側にある
   // MFFC(Maximal Fanout Free Cone)のサイズを求めればよい．
@@ -32,6 +33,12 @@ CalcMerit::CalcMerit(
     return;
   }
 
+  if ( mDebug ) {
+    cout << "CalcMerit" << endl;
+    cut->print(cout);
+    cout << endl;
+  }
+
   // サポートになっている葉のノードに印を付ける．
   auto sup = Npn4::get_support(tv);
   for ( SizeType i = 0; i < cut->leaf_size(); ++ i ) {
@@ -43,6 +50,10 @@ CalcMerit::CalcMerit(
 
   // root は削除されるはず．
   delete_node(root);
+
+  if ( mDebug ) {
+    cout << endl;
+  }
 }
 
 void
@@ -55,6 +66,11 @@ CalcMerit::calc_sub(
   }
   auto& count = mCountDict.at(node->id());
   ++ count;
+  if ( mDebug ) {
+    cout << "calc_sub(Node#" << node->id() << ")" << endl
+	 << "  count = " << count
+	 << " / " << node->ref_count() << endl;
+  }
   if ( count == node->ref_count() ) {
     if ( node->is_and() ) {
       // node は削除される．

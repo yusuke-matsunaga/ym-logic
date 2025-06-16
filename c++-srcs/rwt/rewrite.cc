@@ -101,12 +101,13 @@ AigMgrImpl::rewrite()
       print(DOUT);
     }
     // 置き換え結果を記録する辞書
-    ReplaceDict replace_dict;
+    ReplaceDict replace_dict(this);
     // 入力からのトポロジカル順に処理を行う．
     // 置き換え結果は replace_dict に記録される．
     // トポロジカル順なので置き換えの影響を受けるノードは必ず
     // 後で処理される．
     auto before_num = and_num();
+    bool reached = false;
     for ( auto node: node_list ) {
       if ( lock_mark.count(node->id()) > 0 ) {
 	continue;
@@ -127,11 +128,14 @@ AigMgrImpl::rewrite()
       if ( fanin0 != node->fanin0() || fanin1 != node->fanin1() ) {
 	_change_fanin(node, fanin0, fanin1);
       }
-      {
-	if ( changed ) {
-	  continue;
-	}
+      if ( reached ) {
+	continue;
       }
+#if 0
+      if ( changed ) {
+	continue;
+      }
+#endif
       int max_gain = -1;
       int max_merit = 0;
       int max_cost = 0;
@@ -170,24 +174,6 @@ AigMgrImpl::rewrite()
 	// max_cut を max_pat で置き換える．
 	changed = true;
 	acc_gain += max_gain;
-	{
-	  auto tv = max_cut->calc_tv();
-	  CalcMerit calc_merit(max_cut, tv);
-	  Pat2Aig::debug = true;
-	  Pat2Aig pat2aig(this);
-	  Npn4 rep_npn;
-	  pat_mgr.get_pat(tv, rep_npn);
-	  auto merit = calc_merit.merit();
-	  max_pat.print(DOUT);
-	  auto cost = pat2aig.calc_cost(max_cut, rep_npn, max_pat, calc_merit);
-	  DOUT << "current merit = " << merit << endl
-	       << "current cost =  " << cost << endl;
-	  Pat2Aig::debug = false;
-	}
-	Pat2Aig pat2aig(this);
-	Pat2Aig::debug = true;
-	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
-	Pat2Aig::debug = false;
 	if ( debug > 0 ) {
 	  DOUT << "=====================" << endl
 	       << "Node#" << node->id() << endl
@@ -197,10 +183,14 @@ AigMgrImpl::rewrite()
 	       << *max_cut
 	       << "--------------------" << endl
 	       << " =>" << endl;
-	  print_new_edge(DOUT, new_edge, max_cut);
 	}
+	Pat2Aig pat2aig(this);
+	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
 	replace_dict.add(node, new_edge);
 	lock_dfs(new_edge, lock_mark);
+	if ( debug > 0 ) {
+	  print_new_edge(DOUT, new_edge, max_cut);
+	}
 #if VERIFY_REWITE
 	_sanity_check();
 #endif
@@ -208,6 +198,9 @@ AigMgrImpl::rewrite()
       else {
 	lock_dfs(node->fanin0(), lock_mark);
 	lock_dfs(node->fanin1(), lock_mark);
+      }
+      if ( node->id() == 405 ) {
+	reached = true;
       }
     }
     if ( changed ) {
@@ -222,11 +215,12 @@ AigMgrImpl::rewrite()
 	  handle->_set_edge(new_edge);
 	}
       }
-      sweep();
+      //sweep();
       if ( debug > 1 ) {
 	print(DOUT);
       }
       if ( debug > 0 ) {
+	print(DOUT);
 	DOUT << "before:   " << before_num << endl
 	     << "after:    " << and_num() << endl
 	     << "expected: " << before_num - acc_gain << endl;
@@ -234,6 +228,7 @@ AigMgrImpl::rewrite()
 	  abort();
 	}
       }
+      break;
     }
     else {
       go_on = false;

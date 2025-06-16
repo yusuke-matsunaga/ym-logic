@@ -436,6 +436,23 @@ public:
   void
   sweep();
 
+  /// @brief ノードの参照回数を増やす．
+  ///
+  /// 場合によってはファンインのノードに再帰する．
+  void
+  inc_node_ref(
+    AigNode* node
+  );
+
+  /// @brief ノードの参照回数を減らす．
+  ///
+  /// 場合によってはファンインのノードに再帰する．
+  /// 参照回数が 0 になったノードは sweep() で削除される．
+  void
+  dec_node_ref(
+    AigNode* node
+  );
+
   /// @brief AigHandle を登録する．
   void
   add_handle(
@@ -628,23 +645,6 @@ private:
   /// @brief mAndList を再構築する．
   void
   _make_and_list() const;
-
-  /// @brief ノードの参照回数を増やす．
-  ///
-  /// 場合によってはファンインのノードに再帰する．
-  void
-  _inc_node_ref(
-    AigNode* node
-  );
-
-  /// @brief ノードの参照回数を減らす．
-  ///
-  /// 場合によってはファンインのノードに再帰する．
-  /// 参照回数が 0 になったノードは sweep() で削除される．
-  void
-  _dec_node_ref(
-    AigNode* node
-  );
 
   /// @brief 内部情報が正しいかチェックする．
   void

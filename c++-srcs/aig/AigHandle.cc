@@ -450,7 +450,7 @@ AigHandle::_set_edge(
 )
 {
   if ( !edge.is_const() ) {
-    get()->_inc_node_ref(edge.node());
+    get()->inc_node_ref(edge.node());
   }
   _dec_ref();
   mEdge = edge.mPackedData;
@@ -461,7 +461,7 @@ void
 AigHandle::_inc_ref()
 {
   if ( !_edge().is_const() ) {
-    get()->_inc_node_ref(_edge().node());
+    get()->inc_node_ref(_edge().node());
   }
 }
 
@@ -470,7 +470,7 @@ void
 AigHandle::_dec_ref()
 {
   if ( !_edge().is_const() ) {
-    get()->_dec_node_ref(_edge().node());
+    get()->dec_node_ref(_edge().node());
   }
 }
 

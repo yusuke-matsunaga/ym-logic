@@ -454,15 +454,15 @@ AigMgrImpl::_change_fanin(
   auto node0 = node->fanin0_node();
   auto new_node0 = fanin0.node();
   if ( node0 != new_node0 ) {
-    _inc_node_ref(new_node0);
-    _dec_node_ref(node0);
+    inc_node_ref(new_node0);
+    dec_node_ref(node0);
     node->mFanins[0] = fanin0.mPackedData;
   }
   auto node1 = node->fanin1_node();
   auto new_node1 = fanin1.node();
   if ( node1 != new_node1 ) {
-    _inc_node_ref(new_node1);
-    _dec_node_ref(node1);
+    inc_node_ref(new_node1);
+    dec_node_ref(node1);
     node->mFanins[1] = fanin1.mPackedData;
   }
   mAndDirty = true;
@@ -571,7 +571,7 @@ AigMgrImpl::_make_and_list() const
 
 // @brief ノードの参照回数を増やす．
 void
-AigMgrImpl::_inc_node_ref(
+AigMgrImpl::inc_node_ref(
   AigNode* node
 )
 {
@@ -581,18 +581,18 @@ AigMgrImpl::_inc_node_ref(
   }
 #if DEBUG_AIGMGRIMPL
   {
-    DOUT << "  _inc_node_ref(Node#" << node->id() << ")" << endl;
+    DOUT << "  inc_node_ref(Node#" << node->id() << ")" << endl;
   }
 #endif
   if ( node->_inc_ref() ) {
-    _inc_node_ref(node->fanin0_node());
-    _inc_node_ref(node->fanin1_node());
+    inc_node_ref(node->fanin0_node());
+    inc_node_ref(node->fanin1_node());
   }
 }
 
 // @brief ノードの参照回数を減らす．
 void
-AigMgrImpl::_dec_node_ref(
+AigMgrImpl::dec_node_ref(
   AigNode* node
 )
 {
@@ -602,12 +602,12 @@ AigMgrImpl::_dec_node_ref(
   }
 #if DEBUG_AIGMGRIMPL
   {
-    DOUT << "  _dec_node_ref(Node#" << node->id() << ")" << endl;
+    DOUT << "  dec_node_ref(Node#" << node->id() << ")" << endl;
   }
 #endif
   if ( node->_dec_ref() ) {
-    _dec_node_ref(node->fanin0_node());
-    _dec_node_ref(node->fanin1_node());
+    dec_node_ref(node->fanin0_node());
+    dec_node_ref(node->fanin1_node());
   }
 }
 

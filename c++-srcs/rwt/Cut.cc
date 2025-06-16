@@ -118,12 +118,64 @@ Cut::calc_tv() const
       auto tv = tv0 & tv1;
       calc_tv.set(node, tv);
     }
-    return calc_tv.tv(mRoot);
+    return calc_tv.tv(root());
   }
   catch ( std::logic_error err ) {
     print(cerr);
     throw err;
   }
+}
+
+BEGIN_NONAMESPACE
+
+bool
+check_dfs(
+  AigNode* node,
+  std::unordered_set<SizeType>& node_mark,
+  const std::unordered_set<SizeType>& leaf_mark,
+  std::unordered_set<SizeType>& mark
+)
+{
+  auto id = node->id();
+  if ( mark.count(id) > 0 ) {
+    return true;
+  }
+  mark.emplace(id);
+  if ( leaf_mark.count(id) > 0 ) {
+    return true;
+  }
+  node_mark.emplace(id);
+  if ( !node->is_and() ) {
+    cout << "node is not AND";
+    return false;
+  }
+  auto node0 = node->fanin0_node();
+  check_dfs(node0, node_mark, leaf_mark, mark);
+  auto node1 = node->fanin1_node();
+  check_dfs(node1, node_mark, leaf_mark, mark);
+  return true;
+}
+
+END_NONAMESPACE
+
+// @brief 内容が正しいかチェックする．
+bool
+Cut::check() const
+{
+  std::unordered_set<SizeType> leaf_mark;
+  for ( auto node: mLeafList ) {
+    leaf_mark.emplace(node->id());
+  }
+  std::unordered_set<SizeType> node_mark;
+  std::unordered_set<SizeType> mark;
+  if ( !check_dfs(root(), node_mark, leaf_mark, mark) ) {
+    print(cout);
+    throw std::logic_error{""};
+  }
+  if ( node_mark.size() != mNodeList.size() ) {
+    return false;
+  }
+  return true;
 }
 
 BEGIN_NONAMESPACE
@@ -162,13 +214,15 @@ Cut::print(
       count_dict.emplace(node->id(), 0);
     }
     for ( auto node: mNodeList ) {
-      auto node0 = node->fanin0_node();
-      ++ count_dict.at(node0->id());
-      auto node1 = node->fanin1_node();
-      ++ count_dict.at(node1->id());
+      if ( node->is_and() ) {
+	auto node0 = node->fanin0_node();
+	++ count_dict.at(node0->id());
+	auto node1 = node->fanin1_node();
+	++ count_dict.at(node1->id());
+      }
     }
   }
-  s << "Root: Node#" << mRoot->id() << endl;
+  s << "Root: Node#" << root()->id() << endl;
   s << "Leaves:";
   for ( auto node: mLeafList ) {
     s << " Node#" << node->id();

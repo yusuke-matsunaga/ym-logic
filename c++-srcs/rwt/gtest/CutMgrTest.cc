@@ -96,4 +96,29 @@ TEST(CutMgrTest, and3)
   EXPECT_EQ( e3.node(), cut2->node_list()[0] );
 }
 
+TEST(CutMgrTest, xor2)
+{
+  AigMgrImpl mgr;
+
+  auto e0 = mgr.input(0);
+  auto e1 = mgr.input(1);
+  auto e5 = mgr.input(2);
+  auto e6 = mgr.input(3);
+  auto e2 = mgr.and_op(e0, ~e1);
+  auto e3 = mgr.and_op(~e0, e1);
+  auto e4 = mgr.and_op(~e2, ~e3);
+  auto e7 = mgr.and_op(e5, e6);
+  auto e8 = mgr.and_op(e4, e7);
+
+  SizeType cut_size = 4;
+  CutMgr cut_mgr(&mgr, cut_size);
+  auto cuts = cut_mgr.enum_cuts(e8.node());
+
+  mgr.print(cout);
+  for ( auto cut: cuts ) {
+    cut->print(cout);
+    cout << endl;
+  }
+}
+
 END_NAMESPACE_YM_AIG
