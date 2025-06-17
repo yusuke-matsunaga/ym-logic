@@ -15,7 +15,6 @@
 #include "ReplaceDict.h"
 
 #define DEBUG_REWRITE 0
-#define VERIFY_REWRITE 0
 #define DOUT std::cout
 
 
@@ -107,9 +106,9 @@ AigMgrImpl::rewrite()
     // トポロジカル順なので置き換えの影響を受けるノードは必ず
     // 後で処理される．
     auto before_num = and_num();
-    bool reached = false;
     for ( auto node: node_list ) {
       if ( lock_mark.count(node->id()) > 0 ) {
+	// ロックされたノードはスキップする．
 	continue;
       }
       if ( debug > 1 ) {
@@ -121,16 +120,17 @@ AigMgrImpl::rewrite()
       auto fanin1 = replace_dict.get(node->fanin1());
       AigEdge new_edge;
       if ( _special_case(fanin0, fanin1, new_edge) ) {
+	// 定数か fanin0, fanin1 に縮退していた．
 	replace_dict.add(node, new_edge);
 	++ acc_gain;
 	continue;
       }
       if ( fanin0 != node->fanin0() || fanin1 != node->fanin1() ) {
+	// ファンインが変更された．
 	_change_fanin(node, fanin0, fanin1);
       }
+      // node に対する置き換えパタンを求める．
       int max_gain = -1;
-      int max_merit = 0;
-      int max_cost = 0;
       Cut* max_cut = nullptr;
       Npn4 max_npn;
       PatGraph max_pat;
@@ -153,12 +153,11 @@ AigMgrImpl::rewrite()
 	  auto cost = pat2aig.calc_cost(cut, rep_npn, pat, calc_merit);
 	  auto gain = merit - cost;
 	  if ( max_gain < gain ) {
+	    // 最大ゲインとなるパタンを記録しておく．
 	    max_gain = gain;
 	    max_cut = cut;
 	    max_npn = rep_npn;
 	    max_pat = pat;
-	    max_merit = merit;
-	    max_cost = cost;
 	  }
 	}
       }
@@ -169,8 +168,7 @@ AigMgrImpl::rewrite()
 	if ( debug > 0 ) {
 	  DOUT << "=====================" << endl
 	       << "Node#" << node->id() << endl
-	       << "max_gain = " << max_gain
-	       << " (" << max_merit << " - " << max_cost << ")" << endl
+	       << "max_gain = " << max_gain << endl
 	       << "max_cut:" << endl
 	       << *max_cut
 	       << "--------------------" << endl
@@ -183,12 +181,13 @@ AigMgrImpl::rewrite()
 	if ( debug > 0 ) {
 	  print_new_edge(DOUT, new_edge, max_cut);
 	}
+	// node を非活性化しておく．
+	// ただし，構造はそのままで残してあるので
+	// 後に別のノードから参照される可能性はある．
 	_deactivate(node);
-#if VERIFY_REWITE
-	_sanity_check();
-#endif
       }
       else {
+	// TFIをロックする．
 	lock_dfs(node->fanin0(), lock_mark);
 	lock_dfs(node->fanin1(), lock_mark);
       }
@@ -205,25 +204,21 @@ AigMgrImpl::rewrite()
 	  handle->_set_edge(new_edge);
 	}
       }
-      //sweep();
       if ( debug > 1 ) {
 	print(DOUT);
       }
-      if ( debug > 0 ) {
-	print(DOUT);
+      if ( and_num() > (before_num - acc_gain) ) {
 	DOUT << "before:   " << before_num << endl
 	     << "after:    " << and_num() << endl
 	     << "expected: " << before_num - acc_gain << endl;
-	if ( and_num() != (before_num - acc_gain) ) {
-	  abort();
-	}
+	abort();
       }
-      break;
     }
     else {
       go_on = false;
     }
   }
+  sweep();
 }
 
 END_NAMESPACE_YM_AIG

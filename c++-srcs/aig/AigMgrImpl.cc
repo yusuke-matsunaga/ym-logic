@@ -13,7 +13,7 @@
 #include "CopyOp.h"
 #include "EvalOp.h"
 
-//#define DEBUG_AIGMGRIMPL 1
+#define DEBUG_AIGMGRIMPL 0
 #define DOUT std::cout
 
 
@@ -481,15 +481,14 @@ AigMgrImpl::_deactivate(
     DOUT << "_deactivate(Node#" << node->id() << ")" << endl;
   }
 #endif
-  mAndTable.erase(node);
-  auto node0 = node->fanin0_node();
-  dec_node_ref(node0);
-  auto node1 = node->fanin1_node();
-  dec_node_ref(node1);
-  node->mFanins[0] = 0;
-  node->mFanins[1] = 0;
+  node->_deactivate();
+  if ( node->mFanins[0] != 0 ) {
+    dec_node_ref(node->fanin0_node());
+  }
+  if ( node->mFanins[1] != 0 ) {
+    dec_node_ref(node->fanin1_node());
+  }
   mAndDirty = true;
-  _propagate_change(node);
 }
 
 // @brief 参照回数が0のノードを取り除く
@@ -562,7 +561,8 @@ and_dfs(
   std::vector<AigNode*>& and_list
 )
 {
-  if ( node->is_input() || node->ref_count() == 0 ) {
+  if ( node->is_input() ||
+       node->ref_count() == 0 ) {
     return;
   }
   if ( mark.count(node->id()) > 0 ) {
@@ -607,6 +607,7 @@ AigMgrImpl::inc_node_ref(
   }
 #endif
   if ( node->_inc_ref() ) {
+    node->_activate();
     inc_node_ref(node->fanin0_node());
     inc_node_ref(node->fanin1_node());
   }
@@ -622,18 +623,16 @@ AigMgrImpl::dec_node_ref(
     // 入力ノードの参照回数は変更しない．
     return;
   }
+  if ( !node->is_active() ) {
+    return;
+  }
 #if DEBUG_AIGMGRIMPL
   {
     DOUT << "  dec_node_ref(Node#" << node->id() << ")" << endl;
   }
 #endif
   if ( node->_dec_ref() ) {
-    if ( node->mFanins[0] != 0 ) {
-      dec_node_ref(node->fanin0_node());
-    }
-    if ( node->mFanins[1] != 0 ) {
-      dec_node_ref(node->fanin1_node());
-    }
+    _deactivate(node);
   }
 }
 
