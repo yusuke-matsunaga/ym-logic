@@ -14,7 +14,7 @@
 #include "Pat2Aig.h"
 #include "ReplaceDict.h"
 
-#define DEBUG_REWRITE 1
+#define DEBUG_REWRITE 0
 #define VERIFY_REWRITE 0
 #define DOUT std::cout
 
@@ -128,14 +128,6 @@ AigMgrImpl::rewrite()
       if ( fanin0 != node->fanin0() || fanin1 != node->fanin1() ) {
 	_change_fanin(node, fanin0, fanin1);
       }
-      if ( reached ) {
-	continue;
-      }
-#if 0
-      if ( changed ) {
-	continue;
-      }
-#endif
       int max_gain = -1;
       int max_merit = 0;
       int max_cost = 0;
@@ -191,6 +183,7 @@ AigMgrImpl::rewrite()
 	if ( debug > 0 ) {
 	  print_new_edge(DOUT, new_edge, max_cut);
 	}
+	_deactivate(node);
 #if VERIFY_REWITE
 	_sanity_check();
 #endif
@@ -198,9 +191,6 @@ AigMgrImpl::rewrite()
       else {
 	lock_dfs(node->fanin0(), lock_mark);
 	lock_dfs(node->fanin1(), lock_mark);
-      }
-      if ( node->id() == 405 ) {
-	reached = true;
       }
     }
     if ( changed ) {

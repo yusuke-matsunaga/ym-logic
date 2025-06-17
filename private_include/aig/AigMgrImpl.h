@@ -589,6 +589,12 @@ private:
     AigEdge fanin1  ///< [in] ファンイン1
   );
 
+  /// @brief ノードを無効化する．
+  void
+  _deactivate(
+    AigNode* node ///< [in] 対象のノード
+  );
+
   /// @brief change イベントを伝える．
   void
   _propagate_change(

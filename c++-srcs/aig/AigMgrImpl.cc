@@ -470,6 +470,28 @@ AigMgrImpl::_change_fanin(
   _propagate_change(node);
 }
 
+// @brief ノードを無効化する．
+void
+AigMgrImpl::_deactivate(
+  AigNode* node
+)
+{
+#if DEBUG_AIGMGRIMPL
+  {
+    DOUT << "_deactivate(Node#" << node->id() << ")" << endl;
+  }
+#endif
+  mAndTable.erase(node);
+  auto node0 = node->fanin0_node();
+  dec_node_ref(node0);
+  auto node1 = node->fanin1_node();
+  dec_node_ref(node1);
+  node->mFanins[0] = 0;
+  node->mFanins[1] = 0;
+  mAndDirty = true;
+  _propagate_change(node);
+}
+
 // @brief 参照回数が0のノードを取り除く
 void
 AigMgrImpl::sweep()
@@ -606,8 +628,12 @@ AigMgrImpl::dec_node_ref(
   }
 #endif
   if ( node->_dec_ref() ) {
-    dec_node_ref(node->fanin0_node());
-    dec_node_ref(node->fanin1_node());
+    if ( node->mFanins[0] != 0 ) {
+      dec_node_ref(node->fanin0_node());
+    }
+    if ( node->mFanins[1] != 0 ) {
+      dec_node_ref(node->fanin1_node());
+    }
   }
 }
 
