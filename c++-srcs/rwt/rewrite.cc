@@ -14,7 +14,7 @@
 #include "Pat2Aig.h"
 #include "ReplaceDict.h"
 
-#define DEBUG_REWRITE 0
+#define DEBUG_REWRITE 1
 #define DOUT std::cout
 
 
@@ -87,6 +87,9 @@ END_NONAMESPACE
 void
 AigMgrImpl::rewrite()
 {
+  if ( debug > 1 ) {
+    print(DOUT);
+  }
   PatMgr pat_mgr;
   for ( bool go_on = true; go_on; ) {
     bool changed = false;
@@ -97,7 +100,6 @@ AigMgrImpl::rewrite()
     std::unordered_set<SizeType> lock_mark;
     if ( debug > 0 ) {
       DOUT << "===================================================" << endl;
-      print(DOUT);
     }
     // 置き換え結果を記録する辞書
     ReplaceDict replace_dict(this);
@@ -165,7 +167,7 @@ AigMgrImpl::rewrite()
 	// max_cut を max_pat で置き換える．
 	changed = true;
 	acc_gain += max_gain;
-	if ( debug > 0 ) {
+	if ( debug > 1 ) {
 	  DOUT << "=====================" << endl
 	       << "Node#" << node->id() << endl
 	       << "max_gain = " << max_gain << endl
@@ -178,7 +180,7 @@ AigMgrImpl::rewrite()
 	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
 	replace_dict.add(node, new_edge);
 	lock_dfs(new_edge, lock_mark);
-	if ( debug > 0 ) {
+	if ( debug > 1 ) {
 	  print_new_edge(DOUT, new_edge, max_cut);
 	}
 	// node を非活性化しておく．
@@ -207,10 +209,12 @@ AigMgrImpl::rewrite()
       if ( debug > 1 ) {
 	print(DOUT);
       }
-      if ( and_num() > (before_num - acc_gain) ) {
+      if ( debug > 0 ) {
 	DOUT << "before:   " << before_num << endl
-	     << "after:    " << and_num() << endl
-	     << "expected: " << before_num - acc_gain << endl;
+	     << "after:    " << and_num() << endl;
+      }
+      if ( and_num() > (before_num - acc_gain) ) {
+	DOUT << "expected: " << before_num - acc_gain << endl;
 	abort();
       }
     }
