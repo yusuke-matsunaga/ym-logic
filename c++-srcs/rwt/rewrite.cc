@@ -14,7 +14,7 @@
 #include "Pat2Aig.h"
 #include "ReplaceDict.h"
 
-#define DEBUG_REWRITE 1
+#define DEBUG_REWRITE 0
 #define DOUT std::cout
 
 
