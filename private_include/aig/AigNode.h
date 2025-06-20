@@ -44,7 +44,6 @@ public:
     SizeType input_id ///< [in] 入力番号
   ) : mId{id},
       mInput{true},
-      mActive{true},
       mFanins{reinterpret_cast<PtrIntType>(input_id), 0}
   {
   }
@@ -56,7 +55,6 @@ public:
     AigEdge fanin1  ///< [in] ファンイン1の枝
   ) : mId{id},
       mInput{false},
-      mActive{true},
       mFanins{fanin0.mPackedData, fanin1.mPackedData}
   {
   }
@@ -75,13 +73,6 @@ public:
   id() const
   {
     return mId;
-  }
-
-  /// @brief アクティブの時 true を返す．
-  bool
-  is_active() const
-  {
-    return mActive;
   }
 
   /// @brief 入力ノードの時，true を返す．
@@ -258,18 +249,10 @@ private:
     return mRefCount == 0;
   }
 
-  /// @brief アクティブにする．
-  void
-  _activate()
-  {
-    mActive = true;
-  }
-
   /// @brief 仮死状態にする．
   void
   _deactivate()
   {
-    mActive = false;
     mRefCount = 0;
   }
 
@@ -310,9 +293,6 @@ private:
 
   // 入力/ANDの区別
   bool mInput: 1;
-
-  // active フラグ
-  bool mActive: 1;
 
   // 参照回数
   SizeType mRefCount{0};

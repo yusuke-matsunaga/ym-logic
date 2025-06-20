@@ -481,6 +481,7 @@ AigMgrImpl::_deactivate(
     DOUT << "_deactivate(Node#" << node->id() << ")" << endl;
   }
 #endif
+  mAndTable.erase(node);
   node->_deactivate();
   if ( node->mFanins[0] != 0 ) {
     dec_node_ref(node->fanin0_node());
@@ -607,7 +608,6 @@ AigMgrImpl::inc_node_ref(
   }
 #endif
   if ( node->_inc_ref() ) {
-    node->_activate();
     inc_node_ref(node->fanin0_node());
     inc_node_ref(node->fanin1_node());
   }
@@ -623,7 +623,7 @@ AigMgrImpl::dec_node_ref(
     // 入力ノードの参照回数は変更しない．
     return;
   }
-  if ( !node->is_active() ) {
+  if ( node->ref_count() == 0 ) {
     return;
   }
 #if DEBUG_AIGMGRIMPL

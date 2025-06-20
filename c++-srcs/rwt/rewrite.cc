@@ -113,7 +113,7 @@ AigMgrImpl::rewrite()
 	// ロックされたノードはスキップする．
 	continue;
       }
-      if ( debug > 1 ) {
+      if ( debug > 2 ) {
 	DOUT << "--------------------------------------------------" << endl
 	     << "  pick up Node#" << node->id() << endl;
       }
@@ -133,6 +133,8 @@ AigMgrImpl::rewrite()
       }
       // node に対する置き換えパタンを求める．
       int max_gain = -1;
+      int max_merit;
+      int max_cost;
       Cut* max_cut = nullptr;
       Npn4 max_npn;
       PatGraph max_pat;
@@ -157,6 +159,8 @@ AigMgrImpl::rewrite()
 	  if ( max_gain < gain ) {
 	    // 最大ゲインとなるパタンを記録しておく．
 	    max_gain = gain;
+	    max_merit = merit;
+	    max_cost = cost;
 	    max_cut = cut;
 	    max_npn = rep_npn;
 	    max_pat = pat;
@@ -170,7 +174,10 @@ AigMgrImpl::rewrite()
 	if ( debug > 1 ) {
 	  DOUT << "=====================" << endl
 	       << "Node#" << node->id() << endl
-	       << "max_gain = " << max_gain << endl
+	       << "max_gain = " << max_gain
+	       << " ( " << max_merit
+	       << " - " << max_cost << " )"
+	       << endl
 	       << "max_cut:" << endl
 	       << *max_cut
 	       << "--------------------" << endl
