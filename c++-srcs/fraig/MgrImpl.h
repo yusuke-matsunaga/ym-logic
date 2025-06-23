@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/fraig.h"
-#include "FraigHandle.h"
+#include "ym/FraigHandle.h"
 #include "StructTable.h"
 #include "PatTable.h"
 #include "FraigSat.h"
@@ -228,6 +228,14 @@ private:
     SizeType end_pos                      ///< [in] 終了位置
   );
 
+  /// @brief make_cofactor() の下請け関数
+  FraigHandle
+  cofactor_sub(
+    FraigNode* node,   ///< [in] 対象のNode
+    SizeType input_id, ///< [in] 置き換える変数番号
+    bool inv           ///< [in] 置き換える極性
+  );
+
   /// @brief 縮退検査を行う．
   /// @retval SatBool3::True 定数に縮退していた．
   /// @retval SatBool3::False 定数ではなかった．
@@ -262,8 +270,14 @@ private:
   /// @brief ノードを登録する．
   void
   reg_node(
-    std::unique_ptr<FraigNode>&& node
+    FraigNode* node
   );
+
+  /// @brief ハンドルの内容を表す文字列を作る．
+  std::string
+  print_handle(
+    FraigHandle handle
+  ) const;
 
 
 private:

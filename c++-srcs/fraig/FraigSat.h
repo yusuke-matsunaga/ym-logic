@@ -109,8 +109,16 @@ private:
   /// @brief ハンドルに対応するリテラルを得る．
   SatLiteral
   handle_lit(
-    const FraigHandle& handle ///< [in] 対象のハンドル
-  );
+    FraigNode* node, ///< [in] 対象のノード
+    bool inv         ///< [in] 反転属性
+  )
+  {
+    auto lit = node_lit(node);
+    if ( inv ) {
+      lit = ~lit;
+    }
+    return lit;
+  }
 
   /// @brief lit1 が成り立つか調べる．
   SatBool3

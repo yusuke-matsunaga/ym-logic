@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/fraig.h"
-#include "FraigHandle.h"
+#include "ym/FraigHandle.h"
 
 
 BEGIN_NAMESPACE_YM_FRAIG
@@ -136,6 +136,21 @@ public:
   {
     return mFlags[BIT_INV1];
   }
+
+  /// @brief 1番目のファンインのシグネチャを得る．
+  SizeType
+  fanin0_sig() const
+  {
+    return fanin0()->id() * 2 + static_cast<SizeType>(fanin0_inv());
+  }
+
+  /// @brief 2番目のファンインのシグネチャを得る．
+  SizeType
+  fanin1_sig() const
+  {
+    return fanin1()->id() * 2 + static_cast<SizeType>(fanin1_inv());
+  }
+
 
 
 public:

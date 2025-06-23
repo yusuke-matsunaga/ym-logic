@@ -69,16 +69,16 @@ MgrImpl::make_input()
   for ( auto i: Range(FraigNode::mPatUsed) ) {
     init_pat[i] = rd(mRandGen);
   }
-  auto node_ptr = std::unique_ptr<FraigNode>{new FraigNode(id, iid, init_pat)};
-  auto node = node_ptr.get();
-  reg_node(std::move(node_ptr));
+  auto node = new FraigNode(id, iid, init_pat);
+  reg_node(node);
 
   mInputNodes.push_back(node);
 
-  auto ans = FraigHandle(node, false);
+  auto sig = node->id() * 2;
+  auto ans = FraigHandle(sig);
 
   if ( debug ) {
-    cout << " -> " << ans << endl;
+    cout << " -> " << print_handle(ans) << endl;
   }
 
   return ans;
@@ -92,7 +92,11 @@ MgrImpl::make_and(
 )
 {
   if ( debug ) {
-    cout << "make_and(" << handle1 << ", " << handle2 << ") ..." << endl;
+    cout << "make_and("
+	 << print_handle(handle1)
+	 << ", "
+	 << print_handle(handle2)
+	 << ") ..." << endl;
   }
 
   FraigHandle ans;
@@ -121,23 +125,29 @@ MgrImpl::make_and(
     }
 
     if ( debug ) {
-      cout << "  after normalize: " << handle1 << ", " << handle2 << endl;
+      cout << "  after normalize: "
+	   << print_handle(handle1)
+	   << ", "
+	   << print_handle(handle2)
+	   << endl;
     }
 
     // 同じ構造を持つノードが既にないか調べる．
-    auto key = FraigNode(0, handle1, handle2);
+    auto node1 = node(handle1.node_id());
+    auto node2 = node(handle2.node_id());
+    auto key = FraigNode(0, node1, handle1.inv(), node2, handle2.inv());
     auto p = mStructTable.find(&key);
     if ( p != mStructTable.end() ) {
       // 等価なノードが存在した．
       auto node = *p;
-      ans = FraigHandle(node->id(), false);
+      auto sig = node->id() * 2;
+      ans = FraigHandle(sig);
     }
     else {
       // ノードを作る．
       SizeType id = mAllNodes.size();
-      auto node_ptr = std::unique_ptr<FraigNode>{new FraigNode(id, handle1, handle2)};
-      auto node = node_ptr.get();
-      reg_node(std::move(node_ptr));
+      auto node = new FraigNode(id, node1, handle1.inv(), node2, handle2.inv());
+      reg_node(node);
 
       // 構造ハッシュに追加する．
       mStructTable.insert(node);
@@ -146,7 +156,9 @@ MgrImpl::make_and(
       mSolver.make_cnf(node);
 
       if ( debug ) {
-	cout << "  new node: " << FraigHandle(node, false) << endl;
+	auto sig = node->id() * 2;
+	auto h = FraigHandle(sig);
+	cout << "  new node: " << print_handle(h) << endl;
       }
 
       // 縮退検査を行う．
@@ -170,7 +182,8 @@ MgrImpl::make_and(
 	    auto stat = mSolver.check_equiv(node, node1, inv);
 	    if ( stat == SatBool3::True ) {
 	      // 等価なノードが見つかった．
-	      ans = FraigHandle{node1, inv};
+	      auto sig = node1->id() * 2 + static_cast<SizeType>(inv);
+	      ans = FraigHandle(sig);
 	      goto exit;
 	    }
 	    else if ( stat == SatBool3::False ) {
@@ -184,7 +197,8 @@ MgrImpl::make_and(
 	  }
 	}
 	if ( !change ) {
-	  ans = FraigHandle{node, false};
+	  auto sig = node->id() * 2;
+	  ans = FraigHandle(sig);
 	  break;
 	}
       }
@@ -193,7 +207,7 @@ MgrImpl::make_and(
 
  exit:
   if ( debug ) {
-    cout << "  -> " << ans << endl;
+    cout << "  -> " << print_handle(ans) << endl;
   }
 
   return ans;
@@ -312,30 +326,39 @@ MgrImpl::make_cofactor(
     return edge;
   }
 
-  auto node = edge.node();
-  FraigHandle ans;
+  return cofactor_sub(node(edge.node_id()), input_id, inv) * edge.inv();
+}
+
+// @brief make_cofactor() の下請け関数
+FraigHandle
+MgrImpl::cofactor_sub(
+  FraigNode* node,
+  SizeType input_id,
+  bool inv
+)
+{
   if ( node->is_input() ) {
     // 入力ノード時は番号が input_id どうかで処理が変わる．
     if ( node->input_id() == input_id ) {
       if ( inv ) {
-	ans = make_zero();
+	return make_zero();
       }
       else {
-	ans = make_one();
+	return make_one();
       }
     }
     else {
-      ans = FraigHandle{node, false};
+      auto sig = node->id() * 2;
+      return FraigHandle(sig);
     }
   }
   else {
     // AND ノードの場合
     // 2つの子供に再帰的な処理を行って結果の AND を計算する．
-    auto tmp0 = make_cofactor(node->fanin0_handle(), input_id, inv);
-    auto tmp1 = make_cofactor(node->fanin1_handle(), input_id, inv);
-    ans = make_and(tmp0, tmp1);
+    auto tmp0 = cofactor_sub(node->fanin0(), input_id, inv) * node->fanin0_inv();
+    auto tmp1 = cofactor_sub(node->fanin1(), input_id, inv) * node->fanin1_inv();
+    return make_and(tmp0, tmp1);
   }
-  return ans ^ edge.inv();
 }
 
 // @brief 2つのハンドルが等価かどうか調べる．
@@ -350,8 +373,8 @@ MgrImpl::check_equiv(
     return SatBool3::True;
   }
 
-  auto node1 = aig1.node();
-  auto node2 = aig2.node();
+  auto node1 = node(aig1.node_id());
+  auto node2 = node(aig2.node_id());
 
   if ( node1 == node2 ) {
     // ということは逆極性なので絶対に等価ではない．
@@ -476,11 +499,11 @@ MgrImpl::add_pat(
 // @brief ノードを登録する．
 void
 MgrImpl::reg_node(
-  std::unique_ptr<FraigNode>&& node
+  FraigNode* node
 )
 {
-  mSolver.reg_node(node.get());
-  mAllNodes.push_back(std::move(node));
+  mSolver.reg_node(node);
+  mAllNodes.push_back(std::unique_ptr<FraigNode>(node));
 }
 
 // @brief ログレベルを設定する．
@@ -523,6 +546,32 @@ MgrImpl::dump_stats(
 )
 {
   mSolver.dump_stats(s);
+}
+
+// @brief ハンドルの内容を表す文字列を作る．
+std::string
+MgrImpl::print_handle(
+  FraigHandle handle
+) const
+{
+  if ( handle.is_zero() ) {
+    return "ZERO";
+  }
+  if ( handle.is_one() ) {
+    return "ONE";
+  }
+  auto node = this->node(handle.node_id());
+  std::ostringstream buf;
+  if ( handle.inv() ) {
+    buf << "~";
+  }
+  if ( node->is_input() ) {
+    buf << "I" << node->input_id();
+  }
+  else {
+    buf << "A" << node->id();
+  }
+  return buf.str();
 }
 
 END_NAMESPACE_YM_FRAIG

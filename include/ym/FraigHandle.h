@@ -161,14 +161,6 @@ private:
 
 };
 
-/// @relates FraigHandle
-/// @brief 内容を出力する関数
-ostream&
-operator<<(
-  ostream& s,     ///< [in] 出力先のストリーム
-  FraigHandle src ///< [in] ハンドル
-);
-
 END_NAMESPACE_YM_FRAIG
 
 #endif // FRAIGHANDLE_H

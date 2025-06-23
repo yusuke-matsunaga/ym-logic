@@ -66,11 +66,9 @@ FraigSat::make_cnf(
   FraigNode* node
 )
 {
-  auto handle1 = node->fanin0_handle();
-  auto handle2 = node->fanin1_handle();
   auto lito = node_lit(node);
-  auto lit1 = handle_lit(handle1);
-  auto lit2 = handle_lit(handle2);
+  auto lit1 = node_lit(node->fanin0()) * node->fanin0_inv();
+  auto lit2 = node_lit(node->fanin1()) * node->fanin1_inv();
   mSolver.add_clause(~lit1, ~lit2, lito);
   mSolver.add_clause( lit1, ~lito);
   mSolver.add_clause( lit2, ~lito);
@@ -225,17 +223,6 @@ FraigSat::node_lit(
 {
   ASSERT_COND( mLiteralDict.count(node->id()) > 0 );
   return mLiteralDict.at(node->id());
-}
-
-// @brief ハンドルに対応するリテラルを得る．
-SatLiteral
-FraigSat::handle_lit(
-  const FraigHandle& handle
-)
-{
-  auto node = handle.node();
-  auto lit = node_lit(node);
-  return lit * handle.inv();
 }
 
 // lit1 が成り立つか調べる．

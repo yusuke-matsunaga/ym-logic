@@ -6,11 +6,11 @@
 /// Copyright (C) 2018, 2022 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "FraigHandle.h"
+#include "ym/FraigHandle.h"
 #include "FraigNode.h"
 
 
-BEGIN_NAMESPACE_EQUIV
+BEGIN_NAMESPACE_YM_FRAIG
 
 //////////////////////////////////////////////////////////////////////
 // FraigHandle
@@ -38,10 +38,10 @@ operator<<(
       s << "I" << src.input_id();
     }
     else {
-      s << "A" << src.node()->id();
+      s << "A" << src.node_id();
     }
   }
   return s;
 }
 
-END_NAMESPACE_EQUIV
+END_NAMESPACE_YM_FRAIG

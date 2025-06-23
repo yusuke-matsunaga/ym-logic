@@ -153,8 +153,8 @@ FraigNode::FraigNode(
 {
   resize_pat(mPatSize);
 
-  mFlags[BIT_INV0] = handle1.inv();
-  mFlags[BIT_INV1] = handle2.inv();
+  mFlags[BIT_INV0] = inv0;
+  mFlags[BIT_INV1] = inv1;
   calc_pat(0, mPatUsed);
 }
 

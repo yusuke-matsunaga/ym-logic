@@ -30,9 +30,9 @@ public:
     const FraigNode* node ///< [in] 対象のノード
   ) const
   {
-    auto handle1 = node->fanin0_handle();
-    auto handle2 = node->fanin1_handle();
-    return handle1.hash() + handle2.hash() * 13;
+    auto h1 = node->fanin0_sig();
+    auto h2 = node->fanin1_sig();
+    return h1 + h2 * 13;
   }
 };
 
@@ -55,11 +55,11 @@ public:
     const FraigNode* node2  ///< [in] ノード2
   ) const
   {
-    auto handle1_0 = node1->fanin0_handle();
-    auto handle1_1 = node1->fanin1_handle();
-    auto handle2_0 = node2->fanin0_handle();
-    auto handle2_1 = node2->fanin1_handle();
-    return handle1_0 == handle2_0 && handle1_1 == handle2_1;
+    auto h1_0 = node1->fanin0_sig();
+    auto h1_1 = node1->fanin1_sig();
+    auto h2_0 = node2->fanin0_sig();
+    auto h2_1 = node2->fanin1_sig();
+    return h1_0 == h2_0 && h1_1 == h2_1;
   }
 };
 

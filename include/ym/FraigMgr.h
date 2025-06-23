@@ -10,6 +10,8 @@
 
 #include "ym/fraig.h"
 #include "ym/FraigHandle.h"
+#include "ym/SatInitParam.h"
+#include "ym/SatBool3.h"
 
 
 BEGIN_NAMESPACE_YM_FRAIG
