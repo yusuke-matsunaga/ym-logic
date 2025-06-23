@@ -144,8 +144,22 @@ AigMgrImpl::rewrite()
 	if ( cut->leaf_size() != 4 ) {
 	  continue;
 	}
+	{ // abc のヒューリスティック
+	  // 葉のノードうちファンアウト数が1のものが
+	  // 3つ以上あったらスキップする．
+	  SizeType count = 0;
+	  for ( auto leaf: cut->leaf_list() ) {
+	    if ( leaf->ref_count() == 1 ) {
+	      ++ count;
+	    }
+	  }
+	  if ( count > 2 ) {
+	    continue;
+	  }
+	}
 	auto tv = cut->calc_tv();
 	// カットの内部のノードのうち，削除されるノード数を数える．
+	// calc_merit に削除されるノードの印が残る．
 	CalcMerit calc_merit(cut, tv);
 	int merit = calc_merit.merit();
 	// カットの関数にマッチするパタンを列挙する．
