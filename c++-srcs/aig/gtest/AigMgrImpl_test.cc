@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include <gtest/gtest.h>
-#include "aig/AigMgrImpl.h"
+#include "AigMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

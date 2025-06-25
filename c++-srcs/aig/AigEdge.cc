@@ -6,8 +6,8 @@
 /// Copyright (C) 2024 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "aig/AigEdge.h"
-#include "aig/AigNode.h"
+#include "AigEdge.h"
+#include "AigNode.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

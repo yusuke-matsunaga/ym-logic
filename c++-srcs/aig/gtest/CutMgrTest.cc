@@ -7,8 +7,8 @@
 /// All rights reserved.
 
 #include <gtest/gtest.h>
-#include "../CutMgr.h"
-#include "aig/AigMgrImpl.h"
+#include "CutMgr.h"
+#include "AigMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

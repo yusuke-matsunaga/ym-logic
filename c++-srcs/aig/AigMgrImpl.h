@@ -11,7 +11,7 @@
 #include "ym/aig.h"
 #include "ym/Expr.h"
 #include "ym/SopCover.h"
-#include "aig/AigNode.h"
+#include "AigNode.h"
 #include "AigTable.h"
 #include "ym/JsonValue.h"
 
@@ -20,6 +20,7 @@ BEGIN_NAMESPACE_YM_AIG
 
 class ValArray;
 class EdgeDict;
+class ReplaceMgr;
 
 //////////////////////////////////////////////////////////////////////
 /// @class EventMgr EventMgr.h "EventMgr.h"
@@ -84,6 +85,7 @@ private:
 class AigMgrImpl
 {
   friend class AigHandle;
+  friend class ReplaceMgr;
 
 public:
 
@@ -135,23 +137,15 @@ public:
 
   /// @brief ANDノード数を返す．
   SizeType
-  and_num() const
-  {
-    if ( mAndDirty ) {
-      _make_and_list();
-    }
-    return mAndList.size();
-  }
+  and_num() const;
 
   /// @brief ANDノードの入力側からのトポロジカル順のリストを得る．
-  const std::vector<AigNode*>&
-  and_list() const
-  {
-    if ( mAndDirty ) {
-      _make_and_list();
-    }
-    return mAndList;
-  }
+  std::vector<AigNode*>
+  and_list() const;
+
+  /// @brief ハンドルのリストを得る．
+  std::vector<AigHandle*>
+  handle_list() const;
 
   /// @brief 論理シミュレーションを行う．
   /// @return output に対応する出力値を返す．
@@ -463,6 +457,7 @@ public:
       throw std::logic_error{"already exists"};
     }
     mHandleHash.emplace(handle);
+    mHandleList.push_back(handle);
   }
 
   /// @brief AigHandle の登録を削除する．
@@ -543,6 +538,25 @@ private:
   cofactor_sub(
     AigEdge edge,      ///< [in] 対象の枝
     EdgeDict& res_dict ///< [in] 結果を格納する辞書
+  );
+
+  /// @brief ReplaceMgr を登録する．
+  void
+  _attach(
+    ReplaceMgr* mgr
+  );
+
+  /// @brief ReplaceMgr の登録を解除する．
+  void
+  _dettach(
+    ReplaceMgr* mgr
+  );
+
+  /// @brief ノード(枝)の置き換えを行う．
+  void
+  _replace(
+    AigNode* old_node, ///< [in] 置き換え対象のノード
+    AigEdge new_edge   ///< [in] 新しい枝
   );
 
   /// @brief 境界条件を調べる．
@@ -648,10 +662,6 @@ private:
     AigEdge fanin1
   );
 
-  /// @brief mAndList を再構築する．
-  void
-  _make_and_list() const;
-
   /// @brief 内部情報が正しいかチェックする．
   void
   _sanity_check() const;
@@ -672,13 +682,8 @@ private:
   // 入力番号をキーにして入力ノードを収めた辞書
   std::unordered_map<SizeType, AigNode*> mInputDict;
 
-  // ANDノードを入力側からのトポロジカル順に並べたリスト
-  mutable
-  std::vector<AigNode*> mAndList;
-
-  // mAndList の構築が必要な時 true となるフラグ
-  mutable
-  bool mAndDirty{false};
+  // ハンドルのリスト
+  std::vector<AigHandle*> mHandleList;
 
   // ANDノードの構造ハッシュ
   AigTable mAndTable;
@@ -688,6 +693,9 @@ private:
 
   // AigHandle のハッシュ
   std::unordered_set<AigHandle*> mHandleHash;
+
+  // ReplaceMgr
+  ReplaceMgr* mRepMgr{nullptr};
 
 };
 

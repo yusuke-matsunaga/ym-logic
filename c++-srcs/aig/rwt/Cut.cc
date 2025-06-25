@@ -7,7 +7,7 @@
 /// All rights reserved.
 
 #include "CutMgr.h"
-#include "aig/AigNode.h"
+#include "../AigNode.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
@@ -121,6 +121,7 @@ Cut::calc_tv() const
     return calc_tv.tv(root());
   }
   catch ( std::logic_error err ) {
+    cerr << err.what() << endl;
     print(cerr);
     throw err;
   }
@@ -146,13 +147,19 @@ check_dfs(
   }
   node_mark.emplace(id);
   if ( !node->is_and() ) {
-    cout << "node is not AND";
+    std::ostringstream buf;
+    buf << "Node#" << node->id()
+	<< " is not AND";
     return false;
   }
   auto node0 = node->fanin0_node();
-  check_dfs(node0, node_mark, leaf_mark, mark);
+  if ( !check_dfs(node0, node_mark, leaf_mark, mark) ) {
+    return false;
+  }
   auto node1 = node->fanin1_node();
-  check_dfs(node1, node_mark, leaf_mark, mark);
+  if ( !check_dfs(node1, node_mark, leaf_mark, mark) ) {
+    return false;
+  }
   return true;
 }
 
@@ -162,18 +169,44 @@ END_NONAMESPACE
 bool
 Cut::check() const
 {
-  std::unordered_set<SizeType> leaf_mark;
-  for ( auto node: mLeafList ) {
-    leaf_mark.emplace(node->id());
+  {
+    std::unordered_set<SizeType> node_mark;
+    for ( auto node: mLeafList ) {
+      node_mark.emplace(node->id());
+    }
+    for ( auto node: mNodeList ) {
+      node_mark.emplace(node->id());
+    }
+    for ( auto node: mNodeList ) {
+      auto node0 = node->fanin0_node();
+      if ( node_mark.count(node0->id()) == 0 ) {
+	std::ostringstream buf;
+	buf << "Node#" << node0->id() << " is not contained in mNodeList";
+	cout << buf.str() << endl;
+	//throw std::logic_error{buf.str()};
+	return false;
+      }
+      auto node1 = node->fanin1_node();
+      if ( node_mark.count(node1->id()) == 0 ) {
+	std::ostringstream buf;
+	buf << "Node#" << node1->id() << " is not contained in mNodeList";
+	cout << buf.str() << endl;
+	//throw std::logic_error{buf.str()};
+	return false;
+      }
+    }
   }
-  std::unordered_set<SizeType> node_mark;
-  std::unordered_set<SizeType> mark;
-  if ( !check_dfs(root(), node_mark, leaf_mark, mark) ) {
-    print(cout);
-    throw std::logic_error{""};
-  }
-  if ( node_mark.size() != mNodeList.size() ) {
-    return false;
+  {
+    std::unordered_set<SizeType> leaf_mark;
+    for ( auto node: mLeafList ) {
+      leaf_mark.emplace(node->id());
+    }
+    std::unordered_set<SizeType> node_mark;
+    std::unordered_set<SizeType> mark;
+    if ( !check_dfs(root(), node_mark, leaf_mark, mark) ) {
+      print(cout);
+      throw std::logic_error{""};
+    }
   }
   return true;
 }
@@ -204,34 +237,28 @@ Cut::print(
   std::ostream& s
 ) const
 {
-  // カット内部の参照数を数える．
   std::unordered_map<SizeType, SizeType> count_dict;
-  {
-    for ( auto node: mLeafList ) {
-      count_dict.emplace(node->id(), 0);
-    }
-    for ( auto node: mNodeList ) {
-      count_dict.emplace(node->id(), 0);
-    }
-    for ( auto node: mNodeList ) {
-      if ( node->is_and() ) {
-	auto node0 = node->fanin0_node();
-	++ count_dict.at(node0->id());
-	auto node1 = node->fanin1_node();
-	++ count_dict.at(node1->id());
+  for ( auto node: mNodeList ) {
+    count_dict.emplace(node->id(), 0);
+  }
+  for ( auto node: mNodeList ) {
+    if ( node->is_and() ) {
+      auto node0 = node->fanin0_node();
+      if ( count_dict.count(node0->id()) == 0 ) {
+	count_dict.emplace(node0->id(), 0);
       }
+      ++ count_dict.at(node0->id());
+      auto node1 = node->fanin1_node();
+      if ( count_dict.count(node1->id()) == 0 ) {
+	count_dict.emplace(node1->id(), 0);
+      }
+      ++ count_dict.at(node1->id());
     }
   }
   s << "Root: Node#" << root()->id() << endl;
   s << "Leaves:";
   for ( auto node: mLeafList ) {
     s << " Node#" << node->id();
-#if 0
-    if ( node->ref_count() == count_dict.at(node->id()) ) {
-      s << "**";
-    }
-#endif
-    s << " " << count_dict.at(node->id()) << "/" << node->ref_count();
   }
   s << endl;
   for ( auto node: mNodeList ) {
@@ -243,11 +270,6 @@ Cut::print(
       s << "And(" << node->fanin0()
 	<< ", " << node->fanin1()
 	<< ")";
-#if 0
-      if ( node->ref_count() == count_dict.at(node->id()) ) {
-	s << "**";
-      }
-#endif
       s << " " << count_dict.at(node->id()) << "/" << node->ref_count();
     }
     s << endl;

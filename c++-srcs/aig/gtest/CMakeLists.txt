@@ -70,3 +70,36 @@ ym_add_gtest ( logic_aig_copy_test
   ${YM_SUBMODULE_OBJ_D_LIST}
   DEFINITIONS "-DTESTDATA_DIR=\"${TESTDATA_DIR}\""
   )
+
+ym_add_gtest(logic_rwt_PatMgr_test
+  PatMgrTest.cc
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  ${YM_SUBMODULE_OBJ_D_LIST}
+  )
+
+target_include_directories(logic_rwt_PatMgr_test
+  PRIVATE
+  ../rwt
+  )
+
+ym_add_gtest(logic_rwt_CutMgr_test
+  CutMgrTest.cc
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  ${YM_SUBMODULE_OBJ_D_LIST}
+  )
+
+target_include_directories(logic_rwt_CutMgr_test
+  PRIVATE
+  ../rwt
+  )
+
+ym_add_gtest(logic_rwt_Npn4_test
+  Npn4Test.cc
+  $<TARGET_OBJECTS:ym_logic_obj_d>
+  ${YM_SUBMODULE_OBJ_D_LIST}
+  )
+
+target_include_directories(logic_rwt_Npn4_test
+  PRIVATE
+  ../rwt
+  )

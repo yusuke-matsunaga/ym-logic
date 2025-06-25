@@ -12,7 +12,7 @@
 #include "PatNode.h"
 #include "Npn4.h"
 #include "CalcMerit.h"
-#include "aig/AigMgrImpl.h"
+#include "../AigMgrImpl.h"
 
 
 BEGIN_NAMESPACE_YM_AIG

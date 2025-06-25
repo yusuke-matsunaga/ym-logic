@@ -6,7 +6,8 @@
 /// Copyright (C) 2024 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "aig/AigMgrImpl.h"
+#include "AigMgrImpl.h"
+#include "ReplaceMgr.h"
 #include "ym/AigHandle.h"
 #include "ValArray.h"
 #include "EdgeDict.h"
@@ -465,7 +466,6 @@ AigMgrImpl::_change_fanin(
     dec_node_ref(node1);
     node->mFanins[1] = fanin1.mPackedData;
   }
-  mAndDirty = true;
   mAndTable.insert(node);
   _propagate_change(node);
 }
@@ -489,7 +489,10 @@ AigMgrImpl::_deactivate(
   if ( node->mFanins[1] != 0 ) {
     dec_node_ref(node->fanin1_node());
   }
-  mAndDirty = true;
+
+  if ( mRepMgr != nullptr ) {
+    mRepMgr->erase(node);
+  }
 }
 
 // @brief 参照回数が0のノードを取り除く
@@ -515,7 +518,6 @@ AigMgrImpl::sweep()
     }
     else {
       auto node = node_ptr.get();
-      mAndDirty = true;
       mAndTable.erase(node);
 #if DEBUG_AIGMGRIMPL
       {
@@ -528,6 +530,9 @@ AigMgrImpl::sweep()
     // ここで参照回数0のノードが開放される．
     mNodeArray.erase(wpos, epos);
   }
+  // mHandleList を整理する．
+  auto h_list = handle_list();
+  std::swap(mHandleList, h_list);
 }
 
 // @brief ANDノードを作る．
@@ -540,7 +545,6 @@ AigMgrImpl::_new_and(
   auto id = mNodeArray.size();
   auto node = new AigNode{id, fanin0, fanin1};
   mNodeArray.push_back(std::unique_ptr<AigNode>{node});
-  mAndDirty = true;
   mAndTable.insert(node);
 #if DEBUG_AIGMGRIMPL
   {
@@ -550,7 +554,65 @@ AigMgrImpl::_new_and(
 	 << ", " << fanin1 << "))" << endl;
   }
 #endif
+  if ( mRepMgr != nullptr ) {
+    auto node0 = fanin0.node();
+    auto& fo0 = mRepMgr->fo_info(node0);
+    fo0.fanin0_list.push_back(node);
+    auto node1 = fanin1.node();
+    auto& fo1 = mRepMgr->fo_info(node1);
+    fo1.fanin1_list.push_back(node);
+  }
   return node;
+}
+
+BEGIN_NONAMESPACE
+
+SizeType
+count_dfs(
+  AigNode* node,
+  std::unordered_set<SizeType>& mark
+)
+{
+  if ( node->is_input() ) {
+    return 0;
+  }
+  if ( mark.count(node->id()) > 0 ) {
+    return 0;
+  }
+  mark.emplace(node->id());
+  if ( node->ref_count() == 0 ) {
+    std::ostringstream buf;
+    buf << "Node#" << node->id() << ".ref_count() == 0";
+    cout << buf.str() << endl;
+    throw std::logic_error{buf.str()};
+  }
+  SizeType count = 1;
+  auto node0 = node->fanin0_node();
+  count += count_dfs(node0, mark);
+  auto node1 = node->fanin1_node();
+  count += count_dfs(node1, mark);
+  return count;
+}
+
+END_NONAMESPACE
+
+// @brief ANDノード数を返す．
+SizeType
+AigMgrImpl::and_num() const
+{
+  std::unordered_set<SizeType> mark;
+  SizeType count = 0;
+  for ( auto handle: mHandleList ) {
+    if ( mHandleHash.count(handle) == 0 ) {
+      continue;
+    }
+    auto edge = handle->_edge();
+    if ( edge.is_and() ) {
+      auto node = edge.node();
+      count += count_dfs(node, mark);
+    }
+  }
+  return count;
 }
 
 BEGIN_NONAMESPACE
@@ -559,37 +621,63 @@ void
 and_dfs(
   AigNode* node,
   std::unordered_set<SizeType>& mark,
-  std::vector<AigNode*>& and_list
+  std::vector<AigNode*>& node_list
 )
 {
-  if ( node->is_input() ||
-       node->ref_count() == 0 ) {
+  if ( node->is_input() ) {
     return;
   }
   if ( mark.count(node->id()) > 0 ) {
     return;
   }
-  auto node0 = node->fanin0_node();
-  and_dfs(node0, mark, and_list);
-  auto node1 = node->fanin1_node();
-  and_dfs(node1, mark, and_list);
-  and_list.push_back(node);
   mark.emplace(node->id());
+  if ( node->ref_count() == 0 ) {
+    std::ostringstream buf;
+    buf << "Node#" << node->id() << ".ref_count() == 0";
+    cout << buf.str() << endl;
+    throw std::logic_error{buf.str()};
+  }
+  auto node0 = node->fanin0_node();
+  and_dfs(node0, mark, node_list);
+  auto node1 = node->fanin1_node();
+  and_dfs(node1, mark, node_list);
+  node_list.push_back(node);
 }
 
 END_NONAMESPACE
 
-// @brief mAndList を再構築する．
-void
-AigMgrImpl::_make_and_list() const
+// @brief ANDノードの入力側からのトポロジカル順のリストを得る．
+std::vector<AigNode*>
+AigMgrImpl::and_list() const
 {
-  mAndList.clear();
-  mAndList.reserve(mNodeArray.size() - input_num());
+  std::vector<AigNode*> node_list;
+  node_list.reserve(mNodeArray.size() - input_num());
   std::unordered_set<SizeType> mark;
-  for ( auto& node: mNodeArray ) {
-    and_dfs(node.get(), mark, mAndList);
+  for ( auto handle: mHandleList ) {
+    if ( mHandleHash.count(handle) == 0 ) {
+      continue;
+    }
+    auto edge = handle->_edge();
+    if ( edge.is_and() ) {
+      auto node = edge.node();
+      and_dfs(node, mark, node_list);
+    }
   }
-  mAndDirty = false;
+  return node_list;
+}
+
+// @brief ハンドルのリストを得る．
+std::vector<AigHandle*>
+AigMgrImpl::handle_list() const
+{
+  std::vector<AigHandle*> h_list;
+  h_list.reserve(mHandleHash.size());
+  for ( auto handle: mHandleList ) {
+    if ( mHandleHash.count(handle) > 0 ) {
+      h_list.push_back(handle);
+    }
+  }
+  return h_list;
 }
 
 // @brief ノードの参照回数を増やす．
@@ -640,6 +728,55 @@ AigMgrImpl::dec_node_ref(
 void
 AigMgrImpl::_sanity_check() const
 {
+  if ( mRepMgr != nullptr ) {
+    for ( auto& node_ptr: mNodeArray ) {
+      auto node = node_ptr.get();
+      if ( node->is_input() ) {
+	continue;
+      }
+      auto& fo = mRepMgr->fo_info(node);
+      auto nfo = 0;
+      for ( auto node: fo.fanin0_list ) {
+	if ( node->ref_count() > 0 ) {
+	  ++ nfo;
+	}
+      }
+      for ( auto node: fo.fanin1_list ) {
+	if ( node->ref_count() > 0 ) {
+	  ++ nfo;
+	}
+      }
+      nfo += fo.handle_list.size();
+      if ( nfo != node->ref_count() ) {
+	std::ostringstream buf;
+	buf << "Node#" << node->id()
+	    << "->ref_count() = " << node->ref_count()
+	    << ", fo_size = " << nfo;
+	cout << buf.str() << endl;
+	throw std::logic_error{buf.str()};
+      }
+      for ( auto node1: fo.fanin0_list ) {
+	if ( node1->fanin0_node() != node ) {
+	  std::ostringstream buf;
+	  buf << "Node#" << node1->id()
+	      << "->fanin0_node() != Node#"
+	      << node->id();
+	  cout << buf.str() << endl;
+	  throw std::logic_error{buf.str()};
+	}
+      }
+      for ( auto node1: fo.fanin1_list ) {
+	if ( node1->fanin1_node() != node ) {
+	  std::ostringstream buf;
+	  buf << "Node#" << node1->id()
+	      << "->fanin1_node() != Node#"
+	      << node->id();
+	  cout << buf.str() << endl;
+	  throw std::logic_error{buf.str()};
+	}
+      }
+    }
+  }
   for ( auto& node: mNodeArray ) {
     if ( node->ref_count() == 0 ) {
       continue;
@@ -673,7 +810,10 @@ AigMgrImpl::print(
   for ( auto& node: mNodeArray ) {
     node->print(s);
   }
-  for ( auto handle: mHandleHash ) {
+  for ( auto handle: mHandleList ) {
+    if ( mHandleHash.count(handle) == 0 ) {
+      continue;
+    }
     auto edge = handle->_edge();
     s << "Handle("
       << hex << handle << dec

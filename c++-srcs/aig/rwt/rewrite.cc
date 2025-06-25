@@ -6,13 +6,13 @@
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "aig/AigMgrImpl.h"
+#include "../AigMgrImpl.h"
+#include "../ReplaceMgr.h"
 #include "PatMgr.h"
 #include "PatNode.h"
 #include "CutMgr.h"
 #include "CalcMerit.h"
 #include "Pat2Aig.h"
-#include "ReplaceDict.h"
 
 #define DEBUG_REWRITE 0
 #define DOUT std::cout
@@ -61,75 +61,32 @@ print_new_edge(
   print_dfs(s, root.node(), mark);
 }
 
-void
-lock_dfs(
-  AigEdge edge,
-  std::unordered_set<SizeType>& lock_mark
-)
-{
-  if ( edge.is_const() ) {
-    return;
-  }
-  auto node = edge.node();
-  if ( lock_mark.count(node->id()) > 0 ) {
-    return;
-  }
-  lock_mark.emplace(node->id());
-  if ( node->is_and() ) {
-    lock_dfs(node->fanin0(), lock_mark);
-    lock_dfs(node->fanin1(), lock_mark);
-  }
-}
-
 END_NONAMESPACE
 
 // @brief パタンの置き換えを行う．
 void
 AigMgrImpl::rewrite()
 {
+  SizeType i = 0;
   if ( debug > 1 ) {
     print(DOUT);
   }
   PatMgr pat_mgr;
   for ( bool go_on = true; go_on; ) {
-    bool changed = false;
-    int acc_gain = 0;
-    CutMgr cut_mgr(this, 4);
-    auto& node_list = and_list();
-    // 'ロック'の印
-    std::unordered_set<SizeType> lock_mark;
     if ( debug > 0 ) {
       DOUT << "===================================================" << endl;
     }
-    // 置き換え結果を記録する辞書
-    ReplaceDict replace_dict(this);
+    bool changed = false;
+    int acc_gain = 0;
+    CutMgr cut_mgr(this, 4);
+    ReplaceMgr rep_mgr(this);
     // 入力からのトポロジカル順に処理を行う．
-    // 置き換え結果は replace_dict に記録される．
-    // トポロジカル順なので置き換えの影響を受けるノードは必ず
-    // 後で処理される．
+    auto node_list = and_list();
     auto before_num = and_num();
     for ( auto node: node_list ) {
-      if ( lock_mark.count(node->id()) > 0 ) {
-	// ロックされたノードはスキップする．
-	continue;
-      }
       if ( debug > 2 ) {
 	DOUT << "--------------------------------------------------" << endl
 	     << "  pick up Node#" << node->id() << endl;
-      }
-      // 置き換えの結果を反映させる．
-      auto fanin0 = replace_dict.get(node->fanin0());
-      auto fanin1 = replace_dict.get(node->fanin1());
-      AigEdge new_edge;
-      if ( _special_case(fanin0, fanin1, new_edge) ) {
-	// 定数か fanin0, fanin1 に縮退していた．
-	replace_dict.add(node, new_edge);
-	++ acc_gain;
-	continue;
-      }
-      if ( fanin0 != node->fanin0() || fanin1 != node->fanin1() ) {
-	// ファンインが変更された．
-	_change_fanin(node, fanin0, fanin1);
       }
       // node に対する置き換えパタンを求める．
       int max_gain = -1;
@@ -155,6 +112,12 @@ AigMgrImpl::rewrite()
 	  }
 	  if ( count > 2 ) {
 	    continue;
+	  }
+	}
+	{
+	  if ( !cut->check() ) {
+	    cut->print(cout);
+	    abort();
 	  }
 	}
 	auto tv = cut->calc_tv();
@@ -199,34 +162,15 @@ AigMgrImpl::rewrite()
 	}
 	Pat2Aig pat2aig(this);
 	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
-	replace_dict.add(node, new_edge);
-	lock_dfs(new_edge, lock_mark);
 	if ( debug > 1 ) {
 	  print_new_edge(DOUT, new_edge, max_cut);
 	}
-	// node を非活性化しておく．
-	// ただし，構造はそのままで残してあるので
-	// 後に別のノードから参照される可能性はある．
-	_deactivate(node);
-      }
-      else {
-	// TFIをロックする．
-	lock_dfs(node->fanin0(), lock_mark);
-	lock_dfs(node->fanin1(), lock_mark);
+	// node を new_edge で置き換える．
+	cut_mgr.clear_cuts(node, rep_mgr);
+	_replace(node, new_edge);
       }
     }
     if ( changed ) {
-      // ハンドルの置き換えを行う．
-      for ( auto handle: mHandleHash ) {
-	auto old_edge = handle->_edge();
-	if ( old_edge.is_const() ) {
-	  continue;
-	}
-	auto new_edge = replace_dict.get(handle->_edge());
-	if ( new_edge != handle->_edge() ) {
-	  handle->_set_edge(new_edge);
-	}
-      }
       if ( debug > 1 ) {
 	print(DOUT);
       }

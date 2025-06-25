@@ -9,7 +9,7 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
-#include "aig/AigNode.h"
+#include "../AigNode.h"
 #include "CutMgr.h"
 
 

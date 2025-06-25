@@ -9,11 +9,13 @@
 /// All rights reserved.
 
 #include "ym/aig.h"
-#include "aig/AigMgrImpl.h"
-#include "aig/AigNode.h"
+#include "../AigMgrImpl.h"
+#include "../AigNode.h"
 
 
 BEGIN_NAMESPACE_YM_AIG
+
+class ReplaceMgr;
 
 //////////////////////////////////////////////////////////////////////
 /// @class Cut CutMgr.h "CutMgr.h"
@@ -190,23 +192,12 @@ public:
     return _enum_cuts(node);
   }
 
-
-public:
-  //////////////////////////////////////////////////////////////////////
-  // EventMgr の仮想関数
-  //////////////////////////////////////////////////////////////////////
-
-  /// @brief ノードのファンインが変化したときに呼ばれる関数
+  /// @brief カットの情報をクリアする．
   void
-  change_proc(
-    AigNode* node ///< [in] 対象のノード
-  ) override;
-
-  /// @brief ノードが削除されるときに呼ばれる関数
-  void
-  delete_proc(
-    AigNode* node ///< [in] 対象のノード
-  ) override;
+  clear_cuts(
+    AigNode* node,            ///< [in] 対象のノード
+    const ReplaceMgr& rep_mgr ///< [in] ファンアウト情報を持つマネージャ
+  );
 
 
 private:

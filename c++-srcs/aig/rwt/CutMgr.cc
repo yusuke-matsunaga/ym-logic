@@ -7,7 +7,8 @@
 /// All rights reserved.
 
 #include "CutMgr.h"
-#include "aig/AigNode.h"
+#include "../AigNode.h"
+#include "../ReplaceMgr.h"
 
 #define DEBUG_CUTMGR 1
 #define VERIFY_CUTMGR 1
@@ -244,25 +245,41 @@ CutMgr::_merge_footprint(
   return mark;
 }
 
-// @brief ノードのファンインが変化したときに呼ばれる関数
+// @brief カットの情報をクリアする．
 void
-CutMgr::change_proc(
-  AigNode* node
+CutMgr::clear_cuts(
+  AigNode* node,
+  const ReplaceMgr& rep_mgr
 )
 {
-  if ( mCutDict.count(node->id()) > 0 ) {
-    auto& cut_list = mCutDict.at(node->id());
-    _remove_cuts(cut_list);
+  std::unordered_set<SizeType> mark;
+  std::deque<AigNode*> queue;
+  mark.emplace(node->id());
+  queue.push_back(node);
+  while ( !queue.empty() ) {
+    auto node = queue.front();
+    queue.pop_front();
+    if ( mCutDict.count(node->id()) == 0 ) {
+      continue;
+    }
     mCutDict.erase(node->id());
+    if ( !rep_mgr.has_fo_info(node) ) {
+      continue;
+    }
+    auto& fo = rep_mgr.fo_info(node);
+    for ( auto node: fo.fanin0_list ) {
+      if ( mark.count(node->id()) == 0 ) {
+	mark.emplace(node->id());
+	queue.push_back(node);
+      }
+    }
+    for ( auto node: fo.fanin1_list ) {
+      if ( mark.count(node->id()) == 0 ) {
+	mark.emplace(node->id());
+	queue.push_back(node);
+      }
+    }
   }
-}
-
-// @brief ノードが削除されるときに呼ばれる関数
-void
-CutMgr::delete_proc(
-  AigNode* node
-)
-{
 }
 
 // @brief カットの情報が正しいかチェックする．

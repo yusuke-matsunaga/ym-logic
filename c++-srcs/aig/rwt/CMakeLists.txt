@@ -2,37 +2,35 @@
 # ===================================================================
 # インクルードパスの設定
 # ===================================================================
+include_directories (
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  )
 
 
 # ===================================================================
 # サブディレクトリの設定
 # ===================================================================
 
+add_subdirectory ( gtest )
+add_subdirectory ( test-programs )
+
 
 # ===================================================================
 #  ソースファイルの設定
 # ===================================================================
 
+set ( rwt_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/CalcMerit.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Cut.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/CutMgr.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Npn4.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/PatMgr.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Pat2Aig.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/rewrite.cc
+  PARENT_SCOPE
+  )
 
 
 # ===================================================================
-#  テスト用のターゲットの設定
+#  ターゲットの設定
 # ===================================================================
-
-ym_add_gtest(logic_rwt_PatMgr_test
-  PatMgrTest.cc
-  $<TARGET_OBJECTS:ym_logic_obj_d>
-  ${YM_SUBMODULE_OBJ_D_LIST}
-  )
-
-ym_add_gtest(logic_rwt_CutMgr_test
-  CutMgrTest.cc
-  $<TARGET_OBJECTS:ym_logic_obj_d>
-  ${YM_SUBMODULE_OBJ_D_LIST}
-  )
-
-ym_add_gtest(logic_rwt_Npn4_test
-  Npn4Test.cc
-  $<TARGET_OBJECTS:ym_logic_obj_d>
-  ${YM_SUBMODULE_OBJ_D_LIST}
-  )

@@ -23,7 +23,6 @@ add_subdirectory(sop)
 add_subdirectory(factor)
 add_subdirectory(rectcover)
 add_subdirectory(aig)
-add_subdirectory(rwt)
 #add_subdirectory(fraig)
 add_subdirectory(dd)
 add_subdirectory(gtest)
@@ -35,7 +34,6 @@ add_subdirectory(gtest)
 
 set (ym_logic_SOURCES
   ${aig_SOURCES}
-  ${rwt_SOURCES}
   ${dd_SOURCES}
   ${expr_SOURCES}
 #  ${fraig_SOURCES}
