@@ -25,10 +25,10 @@ Expr::analyze() const
   if ( is_one() ) {
     return PrimType::C1;
   }
-  if ( is_posi_literal() ) {
+  if ( is_positive_literal() ) {
     return PrimType::Buff;
   }
-  if ( is_nega_literal() ) {
+  if ( is_negative_literal() ) {
     return PrimType::Not;
   }
   // 全てのオペランドが同じ曲性のリテラル
@@ -41,10 +41,10 @@ Expr::analyze() const
       ok = false;
       break;
     }
-    if ( expr1.is_posi_literal() ) {
+    if ( expr1.is_positive_literal() ) {
       ++ phase;
     }
-    else { // is_nega_literal()
+    else { // is_negative_literal()
       -- phase;
       parity ^= 1;
     }

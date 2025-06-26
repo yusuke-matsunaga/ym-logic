@@ -276,16 +276,16 @@ class ExprGen(PyObjGen):
                         func_body=meth_is_constant,
                         doc_str='check if constant')
 
-        def meth_is_posi_literal(writer):
-            writer.gen_return_py_bool('val.is_posi_literal()')
-        self.add_method('is_posi_literal',
-                        func_body=meth_is_posi_literal,
+        def meth_is_positive_literal(writer):
+            writer.gen_return_py_bool('val.is_positive_literal()')
+        self.add_method('is_positive_literal',
+                        func_body=meth_is_positive_literal,
                         doc_str='check if positive literal')
 
-        def meth_is_nega_literal(writer):
-            writer.gen_return_py_bool('val.is_nega_literal()')
-        self.add_method('is_nega_literal',
-                        func_body=meth_is_nega_literal,
+        def meth_is_negative_literal(writer):
+            writer.gen_return_py_bool('val.is_negative_literal()')
+        self.add_method('is_negative_literal',
+                        func_body=meth_is_negative_literal,
                         doc_str='check if negative Literal')
 
         def meth_is_literal(writer):

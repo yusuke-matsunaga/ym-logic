@@ -665,24 +665,24 @@ is_constant(
 
 // check if positive literal
 PyObject*
-is_posi_literal(
+is_positive_literal(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
   auto& val = PyExpr::_get_ref(self);
-  return PyBool_FromLong(val.is_posi_literal());
+  return PyBool_FromLong(val.is_positive_literal());
 }
 
 // check if negative Literal
 PyObject*
-is_nega_literal(
+is_negative_literal(
   PyObject* self,
   PyObject* Py_UNUSED(args)
 )
 {
   auto& val = PyExpr::_get_ref(self);
-  return PyBool_FromLong(val.is_nega_literal());
+  return PyBool_FromLong(val.is_negative_literal());
 }
 
 // check if Literal type
@@ -1029,12 +1029,12 @@ PyMethodDef methods[] = {
    is_constant,
    METH_NOARGS,
    PyDoc_STR("check if constant")},
-  {"is_posi_literal",
-   is_posi_literal,
+  {"is_positive_literal",
+   is_positive_literal,
    METH_NOARGS,
    PyDoc_STR("check if positive literal")},
-  {"is_nega_literal",
-   is_nega_literal,
+  {"is_negative_literal",
+   is_negative_literal,
    METH_NOARGS,
    PyDoc_STR("check if negative Literal")},
   {"is_literal",

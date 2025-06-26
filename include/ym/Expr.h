@@ -425,12 +425,12 @@ public:
   /// @brief 肯定のリテラルのチェック
   /// @return 肯定のリテラルを表している時に true を返す．
   bool
-  is_posi_literal() const;
+  is_positive_literal() const;
 
   /// @brief 否定のリテラルのチェック
   /// @return 否定のリテラルを表している時に true を返す．
   bool
-  is_nega_literal() const;
+  is_negative_literal() const;
 
   /// @brief リテラルのチェック
   /// @return リテラルを表している時に true を返す．

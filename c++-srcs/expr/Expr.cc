@@ -369,7 +369,7 @@ Expr::is_constant() const
 
 // 肯定のリテラルを表している時に真となる．
 bool
-Expr::is_posi_literal() const
+Expr::is_positive_literal() const
 {
   if ( is_invalid() ) {
     return false;
@@ -379,7 +379,7 @@ Expr::is_posi_literal() const
 
 // 否定のリテラルを表している時に真となる．
 bool
-Expr::is_nega_literal() const
+Expr::is_negative_literal() const
 {
   if ( is_invalid() ) {
     return false;
@@ -772,12 +772,12 @@ Expr::dump(
     s.write_8(1);
     return;
   }
-  if ( is_posi_literal() ) {
+  if ( is_positive_literal() ) {
     s.write_8(2);
     s.write_64(varid());
     return;
   }
-  if ( is_nega_literal() ) {
+  if ( is_negative_literal() ) {
     s.write_8(3);
     s.write_64(varid());
     return;

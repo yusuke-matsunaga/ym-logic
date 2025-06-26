@@ -141,7 +141,7 @@ ExprWriter::dump_sub(
     s << "1";
   }
   else if ( expr.is_literal() ) {
-    if ( expr.is_nega_literal() ) {
+    if ( expr.is_negative_literal() ) {
       s << not_str();
     }
     auto id = expr.varid();
