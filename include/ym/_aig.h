@@ -1,6 +1,8 @@
 #ifndef YM_AIG_H
 #define YM_AIG_H
 
+#error "don't include me"
+
 /// @file ym/aig.h
 /// @brief aig のヘッダファイル
 /// @author Yusuke Matsunaga (松永 裕介)
