@@ -6,13 +6,13 @@
 /// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
-#include "../AigMgrImpl.h"
-#include "../ReplaceMgr.h"
-#include "PatMgr.h"
-#include "PatNode.h"
-#include "CutMgr.h"
-#include "CalcMerit.h"
-#include "Pat2Aig.h"
+#include "AigMgrImpl.h"
+#include "ReplaceMgr.h"
+#include "rwt/PatMgr.h"
+#include "rwt/PatNode.h"
+#include "rwt/CutMgr.h"
+#include "rwt/CalcMerit.h"
+#include "rwt/Pat2Aig.h"
 
 #define DEBUG_REWRITE 0
 #define DOUT std::cout

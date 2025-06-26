@@ -26,13 +26,13 @@ set ( aig_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/AigMgrHolder.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/DotGen.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/replace.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/rewrite.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/rwt/CalcMerit.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/rwt/Cut.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/rwt/CutMgr.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/rwt/Npn4.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/rwt/PatMgr.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/rwt/Pat2Aig.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/rwt/rewrite.cc
   PARENT_SCOPE
   )
 
