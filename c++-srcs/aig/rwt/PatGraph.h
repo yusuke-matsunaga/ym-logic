@@ -19,6 +19,8 @@ class PatNode;
 //////////////////////////////////////////////////////////////////////
 /// @class PatGraph PatGraph.h "PatGraph.h"
 /// @brief 置き換え用のパタンを表す構造体
+///
+/// 実際には入力と出力に対するNPN変換も合わせて持つ．
 //////////////////////////////////////////////////////////////////////
 class PatGraph
 {
@@ -52,11 +54,37 @@ public:
     return mRoot;
   }
 
+  /// @brief 根の反転属性を返す．
+  bool
+  root_inv() const
+  {
+    return mNpn.oinv();
+  }
+
   /// @brief NPN変換を返す．
   Npn4
   npn() const
   {
     return mNpn;
+  }
+
+  /// @brief NPN変換を自身に適用する．
+  PatGraph&
+  operator*=(
+    Npn4 npn
+  )
+  {
+    mNpn *= npn;
+    return *this;
+  }
+
+  /// @brief NPN変換を行った結果を返す．
+  PatGraph
+  operator*(
+    Npn4 npn
+  ) const
+  {
+    return PatGraph(mRoot, mNpn * npn);
   }
 
   /// @brief 内容を出力する(主にデバッグ用)．

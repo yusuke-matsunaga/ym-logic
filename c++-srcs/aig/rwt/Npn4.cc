@@ -97,8 +97,17 @@ perm2index(
   return index;
 }
 
-
 END_NONAMESPACE
+
+// @brief 出力の反転属性のみ指定したコンストラクタ
+Npn4::Npn4(
+  bool oinv
+)
+{
+  if ( oinv ) {
+    mChunk |= (1 << 9);
+  }
+}
 
 // @brief 内容を指定したコンストラクタ
 Npn4::Npn4(

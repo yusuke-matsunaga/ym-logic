@@ -88,20 +88,26 @@ AigMgrImpl::rewrite()
 	DOUT << "--------------------------------------------------" << endl
 	     << "  pick up Node#" << node->id() << endl;
       }
+      if ( node->ref_count() == 0 ) {
+	continue;
+      }
       // node に対する置き換えパタンを求める．
       int max_gain = -1;
       int max_merit;
       int max_cost;
       Cut* max_cut = nullptr;
-      Npn4 max_npn;
       PatGraph max_pat;
       // node に対するカットを列挙する．
       auto& cut_list = cut_mgr.enum_cuts(node);
+      bool stuck = false;
       for ( auto cut: cut_list ) {
 	if ( cut->leaf_size() != 4 ) {
 	  continue;
 	}
-	{ // abc のヒューリスティック
+	if ( stuck ) {
+	  break;
+	}
+	if ( 0 ) { // abc のヒューリスティック
 	  // 葉のノードうちファンアウト数が1のものが
 	  // 3つ以上あったらスキップする．
 	  SizeType count = 0;
@@ -114,33 +120,47 @@ AigMgrImpl::rewrite()
 	    continue;
 	  }
 	}
-	{
-	  if ( !cut->check() ) {
-	    cut->print(cout);
-	    abort();
-	  }
-	}
 	auto tv = cut->calc_tv();
 	// カットの内部のノードのうち，削除されるノード数を数える．
 	// calc_merit に削除されるノードの印が残る．
 	CalcMerit calc_merit(cut, tv);
 	int merit = calc_merit.merit();
-	// カットの関数にマッチするパタンを列挙する．
-	Npn4 rep_npn;
-	auto& pat_list = pat_mgr.get_pat(tv, rep_npn);
-	for ( auto& pat: pat_list ) {
-	  // cut を pat で置き換えた時の得失を計算する．
-	  Pat2Aig pat2aig(this);
-	  auto cost = pat2aig.calc_cost(cut, rep_npn, pat, calc_merit);
-	  auto gain = merit - cost;
-	  if ( max_gain < gain ) {
-	    // 最大ゲインとなるパタンを記録しておく．
-	    max_gain = gain;
-	    max_merit = merit;
-	    max_cost = cost;
-	    max_cut = cut;
-	    max_npn = rep_npn;
-	    max_pat = pat;
+	if ( tv == 0x0000 ) {
+	  // node は定数0に縮退していた．
+	  // これが最大のゲインになるはず
+	  max_merit = merit;
+	  max_gain = max_merit;
+	  max_cost = 0;
+	  max_cut = cut;
+	  max_pat = pat_mgr.zero();
+	  stuck = true;
+	}
+	else if ( tv == 0xFFFF ) {
+	  // node は定数1に縮退していた．
+	  // これが最大のゲインになるはず
+	  max_merit = merit;
+	  max_gain = max_merit;
+	  max_cost = 0;
+	  max_cut = cut;
+	  max_pat = pat_mgr.one();
+	  stuck = true;
+	}
+	else {
+	  // カットの関数にマッチするパタンを列挙する．
+	  auto pat_list = pat_mgr.get_pat(tv);
+	  for ( auto& pat: pat_list ) {
+	    // cut を pat で置き換えた時の得失を計算する．
+	    Pat2Aig pat2aig(this);
+	    auto cost = pat2aig.calc_cost(cut, pat, calc_merit);
+	    auto gain = merit - cost;
+	    if ( max_gain < gain ) {
+	      // 最大ゲインとなるパタンを記録しておく．
+	      max_gain = gain;
+	      max_merit = merit;
+	      max_cost = cost;
+	      max_cut = cut;
+	      max_pat = pat;
+	    }
 	  }
 	}
       }
@@ -161,7 +181,7 @@ AigMgrImpl::rewrite()
 	       << " =>" << endl;
 	}
 	Pat2Aig pat2aig(this);
-	auto new_edge = pat2aig.new_aig(max_cut, max_npn, max_pat);
+	auto new_edge = pat2aig.new_aig(max_cut, max_pat);
 	if ( debug > 1 ) {
 	  print_new_edge(DOUT, new_edge, max_cut);
 	}

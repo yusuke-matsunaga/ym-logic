@@ -43,11 +43,10 @@ calc_tv_dfs(
 
 PatMgr::Tv4
 calc_tv(
-  const PatGraph& pat,
-  const Npn4& rep_npn
+  const PatGraph& pat
 )
 {
-  auto npn = pat.npn() * rep_npn;
+  auto npn = pat.npn();
   static PatMgr::Tv4 tv_pat[] = {
     0xAAAA,
     0xCCCC,
@@ -79,13 +78,12 @@ TEST(PatMgrTest, init)
   PatMgr mgr;
 
   for ( SizeType tv = 0; tv < 0x10000; ++ tv ) {
-    Npn4 rep_npn;
-    auto& pat_list = mgr.get_pat(tv, rep_npn);
+    auto pat_list = mgr.get_pat(tv);
     if ( pat_list.empty() ) {
       continue;
     }
     for ( auto& graph: pat_list ) {
-      auto tv1 = calc_tv(graph, rep_npn);
+      auto tv1 = calc_tv(graph);
       EXPECT_EQ( tv, tv1 );
     }
   }

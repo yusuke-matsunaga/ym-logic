@@ -21,7 +21,8 @@ class PatNode;
 /// @class PatMgr PatMgr.h "PatMgr.h"
 /// @brief Rewrite 用のパタンマネージャ
 ///
-/// 関数の真理値表を表す数値(16ビット)をキーとして対応するパタンのリストを返す．
+/// 関数の真理値表を表す数値(16ビット)をキーとして対応するパタンの
+/// リストを返す．
 /// ただし，内部では Npn4 に基づく正規化を行っておく．
 //////////////////////////////////////////////////////////////////////
 class PatMgr
@@ -45,22 +46,39 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
+  /// @brief 定数０のグラフを返す．
+  PatGraph
+  zero()
+  {
+    return PatGraph(mConst0, Npn4());
+  }
+
+  /// @brief 定数1のグラフを返す．
+  PatGraph
+  one()
+  {
+    return PatGraph(mConst0, Npn4(true));
+  }
+
   /// @brief 関数をキーにして対応するパタンのリストを返す．
-  const std::vector<PatGraph>&
+  std::vector<PatGraph>
   get_pat(
-    Tv4 tv,   ///< [in] 関数の真理値表を表す数値
-    Npn4& npn ///< [out] パタンが表している関数に対するNPN変換
+    Tv4 tv ///< [in] 関数の真理値表を表す数値
   ) const
   {
+    // 結果のリスト
+    std::vector<PatGraph> pat_list;
     Npn4 xnpn;
     auto rep_tv = Npn4::normalize(tv, xnpn);
-    npn = ~xnpn;
+    auto rep_npn = ~xnpn;
     if ( mPatGraphDict.count(rep_tv) > 0 ) {
-      return mPatGraphDict.at(rep_tv);
+      auto& src_list = mPatGraphDict.at(rep_tv);
+      pat_list.reserve(src_list.size());
+      for ( auto src_pat: src_list ) {
+	pat_list.push_back(src_pat * rep_npn);
+      }
     }
-    // 空のリスト
-    static std::vector<PatGraph> dummy;
-    return dummy;
+    return pat_list;
   }
 
   /// @brief 定数0ノードを返す．

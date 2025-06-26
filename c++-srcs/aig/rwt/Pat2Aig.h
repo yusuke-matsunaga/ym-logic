@@ -16,7 +16,6 @@ BEGIN_NAMESPACE_YM_AIG
 class Cut;
 class AigMgrImpl;
 class AigEdge;
-class Npn4;
 class PatGraph;
 class PatNode;
 class CalcMerit;
@@ -53,7 +52,6 @@ public:
   AigEdge
   new_aig(
     const Cut* cut,
-    const Npn4& rep_npn,
     const PatGraph& pat
   );
 
@@ -61,7 +59,6 @@ public:
   int
   calc_cost(
     const Cut* cut,
-    const Npn4& rep_npn,
     const PatGraph& pat,
     const CalcMerit& calc_merit
   );

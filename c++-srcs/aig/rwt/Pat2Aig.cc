@@ -24,31 +24,32 @@ Pat2Aig::debug = false;
 AigEdge
 Pat2Aig::new_aig(
   const Cut* cut,
-  const Npn4& rep_npn,
   const PatGraph& pat
 )
 {
+  AigEdge aig_edge;
+  auto npn = pat.npn();
   auto pat_root = pat.root();
   if ( pat_root->id() == 0 ) {
     // 定数ノード
-    return AigEdge::zero();
+    aig_edge = AigEdge::zero();
   }
-
-  mNodeDict.clear();
-  // pat の葉のノードと cut の葉のノードの対応を取る．
-  auto npn = pat.npn() * rep_npn;
-  for ( SizeType i = 0; i < 4; ++ i ) {
-    auto ipos = npn.iperm(i);
-    if ( ipos < cut->leaf_size() ) {
-      // 対応する cut の葉ノードを取ってくる．
-      auto leaf_node = cut->leaf(ipos);
-      auto edge = AigEdge(leaf_node, npn.iinv(i));
-      // i 番目の入力のノード番号は i + 1
-      auto id = i + 1;
-      mNodeDict.emplace(id, edge);
+  else {
+    mNodeDict.clear();
+    // pat の葉のノードと cut の葉のノードの対応を取る．
+    for ( SizeType i = 0; i < 4; ++ i ) {
+      auto ipos = npn.iperm(i);
+      if ( ipos < cut->leaf_size() ) {
+	// 対応する cut の葉ノードを取ってくる．
+	auto leaf_node = cut->leaf(ipos);
+	auto edge = AigEdge(leaf_node, npn.iinv(i));
+	// i 番目の入力のノード番号は i + 1
+	auto id = i + 1;
+	mNodeDict.emplace(id, edge);
+      }
     }
+    aig_edge = aig_sub(pat_root);
   }
-  auto aig_edge = aig_sub(pat_root);
   if ( npn.oinv() ) {
     aig_edge = ~aig_edge;
   }
@@ -96,7 +97,6 @@ Pat2Aig::aig_sub(
 int
 Pat2Aig::calc_cost(
   const Cut* cut,
-  const Npn4& rep_npn,
   const PatGraph& pat,
   const CalcMerit& calc_merit
 )
@@ -110,7 +110,7 @@ Pat2Aig::calc_cost(
   mNodeDict.clear();
   mCount = 0;
   // pat の葉のノードと cut の葉のノードの対応を取る．
-  auto npn = pat.npn() * rep_npn;
+  auto npn = pat.npn();
   for ( SizeType i = 0; i < 4; ++ i ) {
     auto ipos = npn.iperm(i);
     if ( ipos < cut->leaf_size() ) {

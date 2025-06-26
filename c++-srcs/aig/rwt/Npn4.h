@@ -42,6 +42,13 @@ public:
   /// 恒等変換となる．
   Npn4() = default;
 
+  /// @brief 出力の反転属性のみ指定したコンストラクタ
+  ///
+  /// 入力に関しては恒等変換となる．
+  Npn4(
+    bool oinv ///< [in] 出力の反転属性
+  );
+
   /// @brief 内容を指定したコンストラクタ
   ///
   /// iinv, iperm が不正な時は std::invalid_argument 例外を送出する．
@@ -139,6 +146,16 @@ public:
   operator*(
     const Npn4& right
   ) const;
+
+  /// @brief 合成を自身に適用する．
+  Npn4&
+  operator*=(
+    const Npn4& right
+  )
+  {
+    *this = operator*(right);
+    return *this;
+  }
 
   /// @brief 等価比較演算
   bool
