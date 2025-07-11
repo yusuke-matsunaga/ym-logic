@@ -13,15 +13,15 @@
 
 BEGIN_NAMESPACE_YM
 
+static char* argv0 = nullptr;
+
 void
-usage(
-  string argv0
-)
+usage()
 {
-  cerr << "Usage: "
-       << basename(const_cast<char*>(argv0.c_str()))
-       << "[-q|-g|-b] <filename>"
-       << endl;
+  std::cerr << "Usage: "
+	    << basename(argv0)
+	    << "[-q|-g|-b] <filename>"
+	    << std::endl;
   exit(1);
 }
 
@@ -31,11 +31,11 @@ gen_factor(
   char** argv
 )
 {
+  argv0 = argv[0];
+
   bool quick_factor = false;
   bool good_factor = false;
   bool bool_factor = false;
-
-  auto argv0 = string{argv[0]};
 
   int ch;
   while ( (ch = getopt(argc, argv, "qgb")) != -1 ) {
@@ -44,20 +44,20 @@ gen_factor(
     case 'g': good_factor = true; break;
     case 'b': bool_factor = true; break;
     case '?':
-    default: usage(argv0); break;
+    default: usage(); break;
     }
   }
   argc -= optind;
   argv += optind;
 
   if ( argc != 1 ) {
-    usage(argv0);
+    usage();
   }
 
-  auto filename = string{argv[0]};
-  ifstream s{filename};
+  auto filename = std::string{argv[0]};
+  std::ifstream s{filename};
   if ( !s ) {
-    cerr << filename << ": No such file";
+    std::cerr << filename << ": No such file" << std::endl;
     return 2;
   }
 
@@ -67,9 +67,9 @@ gen_factor(
 
   auto cover = SopCover::read(s);
 
-  cout << "Initial Cover: "
-       << setw(10) << cover.cube_num() << " cubes, "
-       << setw(10) << cover.literal_num() << " literals" << endl;
+  std::cout << "Initial Cover: "
+	    << std::setw(10) << cover.cube_num() << " cubes, "
+	    << std::setw(10) << cover.literal_num() << " literals" << std::endl;
 
   Expr expr;
   if ( quick_factor ) {
@@ -81,9 +81,9 @@ gen_factor(
   else if ( bool_factor ) {
     expr = cover.bool_factor();
   }
-  cout << "Factored Form:                   "
-       << setw(10) << expr.literal_num() << " literals" << endl;
-  cout << expr << endl;
+  std::cout << "Factored Form:                   "
+	    << std::setw(10) << expr.literal_num() << " literals" << std::endl
+	    << expr << std::endl;
   return 0;
 }
 

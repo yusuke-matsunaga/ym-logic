@@ -380,7 +380,7 @@ BEGIN_NONAMESPACE
 inline
 int
 walsh_01_5b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -449,7 +449,7 @@ walsh_01_5b(
 inline
 int
 walsh_01_6b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -533,7 +533,7 @@ walsh_01_6b(
 inline
 int
 walsh_01_7b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -550,7 +550,7 @@ walsh_01_7b(
 inline
 int
 walsh_01_8b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -567,7 +567,7 @@ walsh_01_8b(
 inline
 int
 walsh_01_9b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -584,7 +584,7 @@ walsh_01_9b(
 inline
 int
 walsh_01_10b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -600,7 +600,7 @@ walsh_01_10b(
 // 11入力の walsh_01 用サブルーティン
 int
 walsh_01_11b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -616,7 +616,7 @@ walsh_01_11b(
 // 12入力の walsh_01 用サブルーティン
 int
 walsh_01_12b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -632,7 +632,7 @@ walsh_01_12b(
 // 13入力の walsh_01 用サブルーティン
 int
 walsh_01_13b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -648,7 +648,7 @@ walsh_01_13b(
 // 14入力の walsh_01 用サブルーティン
 int
 walsh_01_14b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -664,7 +664,7 @@ walsh_01_14b(
 // 15入力の walsh_01 用サブルーティン
 int
 walsh_01_15b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -680,7 +680,7 @@ walsh_01_15b(
 // 16入力の walsh_01 用サブルーティン
 int
 walsh_01_16b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -696,7 +696,7 @@ walsh_01_16b(
 // 17入力の walsh_01 用サブルーティン
 int
 walsh_01_17b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -712,7 +712,7 @@ walsh_01_17b(
 // 18入力の walsh_01 用サブルーティン
 int
 walsh_01_18b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -728,7 +728,7 @@ walsh_01_18b(
 // 19入力の walsh_01 用サブルーティン
 int
 walsh_01_19b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   int vec[]
 )
@@ -745,7 +745,7 @@ walsh_01_19b(
 inline
 int
 walsh_01_0(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -756,7 +756,7 @@ walsh_01_0(
 inline
 int
 walsh_01_1(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -781,7 +781,7 @@ walsh_01_1(
 inline
 int
 walsh_01_2(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -816,7 +816,7 @@ walsh_01_2(
 inline
 int
 walsh_01_3(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -862,7 +862,7 @@ walsh_01_3(
 inline
 int
 walsh_01_4(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -920,7 +920,7 @@ walsh_01_4(
 inline
 int
 walsh_01_5(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -941,7 +941,7 @@ walsh_01_5(
 inline
 int
 walsh_01_6(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -962,7 +962,7 @@ walsh_01_6(
 inline
 int
 walsh_01_7(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -987,7 +987,7 @@ walsh_01_7(
 inline
 int
 walsh_01_8(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1012,7 +1012,7 @@ walsh_01_8(
 inline
 int
 walsh_01_9(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1037,7 +1037,7 @@ walsh_01_9(
 inline
 int
 walsh_01_10(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1061,7 +1061,7 @@ walsh_01_10(
 // 11入力の walsh_01 本体
 int
 walsh_01_11(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1085,7 +1085,7 @@ walsh_01_11(
 // 12入力の walsh_01 本体
 int
 walsh_01_12(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1109,7 +1109,7 @@ walsh_01_12(
 // 13入力の walsh_01 本体
 int
 walsh_01_13(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1133,7 +1133,7 @@ walsh_01_13(
 // 14入力の walsh_01 本体
 int
 walsh_01_14(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1157,7 +1157,7 @@ walsh_01_14(
 // 15入力の walsh_01 本体
 int
 walsh_01_15(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1181,7 +1181,7 @@ walsh_01_15(
 // 16入力の walsh_01 本体
 int
 walsh_01_16(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1205,7 +1205,7 @@ walsh_01_16(
 // 17入力の walsh_01 本体
 int
 walsh_01_17(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1229,7 +1229,7 @@ walsh_01_17(
 // 18入力の walsh_01 本体
 int
 walsh_01_18(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1253,7 +1253,7 @@ walsh_01_18(
 // 19入力の walsh_01 本体
 int
 walsh_01_19(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1277,7 +1277,7 @@ walsh_01_19(
 // 20入力の walsh_01 本体
 int
 walsh_01_20(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec[]
 )
 {
@@ -1776,7 +1776,7 @@ w2pos(
 inline
 int
 walsh_012_5b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType ni,
   int vec1[],
   int vec2[]
@@ -1917,7 +1917,7 @@ walsh_012_5b(
 inline
 int
 walsh_012_6b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2121,7 +2121,7 @@ walsh_012_6b(
 inline
 int
 walsh_012_7b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2147,7 +2147,7 @@ walsh_012_7b(
 inline
 int
 walsh_012_8b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2173,7 +2173,7 @@ walsh_012_8b(
 inline
 int
 walsh_012_9b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2199,7 +2199,7 @@ walsh_012_9b(
 inline
 int
 walsh_012_10b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2225,7 +2225,7 @@ walsh_012_10b(
 inline
 int
 walsh_012_11b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2251,7 +2251,7 @@ walsh_012_11b(
 inline
 int
 walsh_012_12b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2276,7 +2276,7 @@ walsh_012_12b(
 // 13入力の walsh_012 用サブルーティン
 int
 walsh_012_13b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2301,7 +2301,7 @@ walsh_012_13b(
 // 14入力の walsh_012 用サブルーティン
 int
 walsh_012_14b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2326,7 +2326,7 @@ walsh_012_14b(
 // 15入力の walsh_012 用サブルーティン
 int
 walsh_012_15b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2351,7 +2351,7 @@ walsh_012_15b(
 // 16入力の walsh_012 用サブルーティン
 int
 walsh_012_16b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2376,7 +2376,7 @@ walsh_012_16b(
 // 17入力の walsh_012 用サブルーティン
 int
 walsh_012_17b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2401,7 +2401,7 @@ walsh_012_17b(
 // 18入力の walsh_012 用サブルーティン
 int
 walsh_012_18b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2426,7 +2426,7 @@ walsh_012_18b(
 // 19入力の walsh_012 用サブルーティン
 int
 walsh_012_19b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2451,7 +2451,7 @@ walsh_012_19b(
 // 20入力の walsh_012 用サブルーティン
 int
 walsh_012_20b(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   SizeType offset,
   SizeType ni,
   int vec1[],
@@ -2476,7 +2476,7 @@ walsh_012_20b(
 // 0入力の walsh_012 本体
 int
 walsh_012_0(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2487,7 +2487,7 @@ walsh_012_0(
 // 1入力の walsh_012 本体
 int
 walsh_012_1(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2498,7 +2498,7 @@ walsh_012_1(
 // 2入力の walsh_012 本体
 int
 walsh_012_2(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2528,7 +2528,7 @@ walsh_012_2(
 // 3入力の walsh_012 本体
 int
 walsh_012_3(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2576,7 +2576,7 @@ walsh_012_3(
 // 4入力の walsh_012 本体
 int
 walsh_012_4(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2645,7 +2645,7 @@ walsh_012_4(
 // 5入力の walsh_012 本体
 int
 walsh_012_5(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2669,7 +2669,7 @@ walsh_012_5(
 // 6入力の walsh_012 本体
 int
 walsh_012_6(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2694,7 +2694,7 @@ walsh_012_6(
 // 7入力の walsh_012 本体
 int
 walsh_012_7(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2719,7 +2719,7 @@ walsh_012_7(
 // 8入力の walsh_012 本体
 int
 walsh_012_8(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2744,7 +2744,7 @@ walsh_012_8(
 // 9入力の walsh_012 本体
 int
 walsh_012_9(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2769,7 +2769,7 @@ walsh_012_9(
 // 10入力の walsh_012 本体
 int
 walsh_012_10(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2794,7 +2794,7 @@ walsh_012_10(
 // 11入力の walsh_012 本体
 int
 walsh_012_11(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2819,7 +2819,7 @@ walsh_012_11(
 // 12入力の walsh_012 本体
 int
 walsh_012_12(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2844,7 +2844,7 @@ walsh_012_12(
 // 13入力の walsh_012 本体
 int
 walsh_012_13(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2869,7 +2869,7 @@ walsh_012_13(
 // 14入力の walsh_012 本体
 int
 walsh_012_14(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2894,7 +2894,7 @@ walsh_012_14(
 // 15入力の walsh_012 本体
 int
 walsh_012_15(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2919,7 +2919,7 @@ walsh_012_15(
 // 16入力の walsh_012 本体
 int
 walsh_012_16(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2944,7 +2944,7 @@ walsh_012_16(
 // 17入力の walsh_012 本体
 int
 walsh_012_17(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2969,7 +2969,7 @@ walsh_012_17(
 // 18入力の walsh_012 本体
 int
 walsh_012_18(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -2994,7 +2994,7 @@ walsh_012_18(
 // 19入力の walsh_012 本体
 int
 walsh_012_19(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )
@@ -3019,7 +3019,7 @@ walsh_012_19(
 // 20入力の walsh_01 本体
 int
 walsh_012_20(
-  const vector<TvFunc::WordType>& src_vec,
+  const std::vector<TvFunc::WordType>& src_vec,
   int vec1[],
   int vec2[]
 )

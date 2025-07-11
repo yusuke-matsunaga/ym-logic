@@ -56,7 +56,7 @@ BddMgr::variable(
 }
 
 // @brief 変数のリストを返す．
-vector<BddVar>
+std::vector<BddVar>
 BddMgr::variable_list() const
 {
   auto& edge_list = get()->variable_list();
@@ -64,7 +64,7 @@ BddMgr::variable_list() const
 }
 
 // @brief 変数順を表す変数のリストを返す．
-vector<BddVar>
+std::vector<BddVar>
 BddMgr::variable_order() const
 {
   auto edge_list = get()->variable_order();
@@ -74,7 +74,7 @@ BddMgr::variable_order() const
 // @brief 変数順を設定する．
 void
 BddMgr::set_variable_order(
-  const vector<BddVar>& order_list
+  const std::vector<BddVar>& order_list
 )
 {
   auto edge_list = BddVar::conv_to_edgelist(order_list);
@@ -96,7 +96,7 @@ BddMgr::one()
 }
 
 // @brief バイナリダンプから復元する．
-vector<Bdd>
+std::vector<Bdd>
 BddMgr::restore(
   BinDec& s
 )
@@ -150,12 +150,12 @@ BddMgr::disable_gc()
 }
 
 // @brief 枝のリストをBddのリストに変換する．
-vector<Bdd>
+std::vector<Bdd>
 BddMgr::conv_to_bddlist(
-  const vector<DdEdge>& edge_list
+  const std::vector<DdEdge>& edge_list
 ) const
 {
-  vector<Bdd> bdd_list;
+  std::vector<Bdd> bdd_list;
   bdd_list.reserve(edge_list.size());
   for ( auto edge: edge_list ) {
     auto bdd = _bdd(edge);
@@ -165,12 +165,12 @@ BddMgr::conv_to_bddlist(
 }
 
 // @brief 枝のリストを変数のリストに変換する．
-vector<BddVar>
+std::vector<BddVar>
 BddMgr::conv_to_varlist(
-  const vector<DdEdge>& edge_list
+  const std::vector<DdEdge>& edge_list
 ) const
 {
-  vector<BddVar> var_list;
+  std::vector<BddVar> var_list;
   var_list.reserve(edge_list.size());
   for ( auto edge: edge_list ) {
     auto var = _var(edge);

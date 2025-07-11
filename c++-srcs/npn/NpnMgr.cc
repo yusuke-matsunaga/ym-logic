@@ -39,31 +39,41 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 extern
 bool
-walsh_01_normalize(const TvFunc& func,
-		   NpnMap& xmap,
-		   InputInfo& input_info);
+walsh_01_normalize(
+  const TvFunc& func,
+  NpnMap& xmap,
+  InputInfo& input_info
+);
 
 extern
 void
-walsh_w0_refine(const TvFunc& func,
-		vector<PolConf>& polconf_list);
+walsh_w0_refine(
+  const TvFunc& func,
+  std::vector<PolConf>& polconf_list
+);
 
 extern
 void
-walsh_w1_refine(const TvFunc& func,
-		SizeType var,
-		vector<PolConf>& polconf_list);
+walsh_w1_refine(
+  const TvFunc& func,
+  SizeType var,
+  std::vector<PolConf>& polconf_list
+);
 
 extern
 void
-walsh_w1_refine(const TvFunc& func,
-		IgPartition& igpart);
+walsh_w1_refine(
+  const TvFunc& func,
+  IgPartition& igpart
+);
 
 extern
 void
-walsh_2_refine(const TvFunc& func,
-	       SizeType var,
-	       IgPartition& igpart);
+walsh_2_refine(
+  const TvFunc& func,
+  SizeType var,
+  IgPartition& igpart
+);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -82,16 +92,18 @@ NpnMgr::~NpnMgr()
 
 // @brief func の正規化を行う．
 TvFunc
-NpnMgr::cannonical(const TvFunc& func)
+NpnMgr::cannonical(
+  const TvFunc& func
+)
 {
   mMaxList.clear();
   mTvmax_count = 0;
 
   // まず独立な変数を取り除く
   mXmap0 = func.shrink_map();
-  TvFunc func0 = func.xform(mXmap0);
+  auto func0 = func.xform(mXmap0);
 
-  int ni0 = func0.input_num();
+  auto ni0 = func0.input_num();
 
   // 特例
   if ( ni0 == 0 ) {
@@ -125,7 +137,7 @@ NpnMgr::cannonical(const TvFunc& func)
 
   if ( debug ) {
     if ( ni0 < 10 ) {
-      cout << "NpnMgr::cannonical: func0 = " << func0 << endl;
+      std::cout << "NpnMgr::cannonical: func0 = " << func0 << std::endl;
     }
   }
 
@@ -136,32 +148,32 @@ NpnMgr::cannonical(const TvFunc& func)
   mXmap0 = mXmap0 * map1;
 
   // map1 に従って func0 を変換する．
-  TvFunc func1 = func0.xform(map1);
+  auto func1 = func0.xform(map1);
 
   // w1:group_num:bisym でグループを分割する．
   IgPartition igpart(iinfo);
 
   if ( debug ) {
-    cout << "  after walsh01_normalize" << endl;
+    std::cout << "  after walsh01_normalize" << std::endl;
     if ( ni0 < 10 ) {
-      cout << "    func1  = " << func1 << endl;
+      std::cout << "    func1  = " << func1 << std::endl;
     }
-    cout << "    map1   = " << map1 << endl
-	 << "    igpart = " << igpart << endl
-	 << endl;
+    std::cout << "    map1   = " << map1 << std::endl
+	      << "    igpart = " << igpart << std::endl
+	      << std::endl;
     }
 
   if ( opol_fixed && iinfo.polundet_num() == 0 && igpart.is_resolved() ) {
     // 解決した．
-    NpnMap map = igpart.to_npnmap();
+    auto map = igpart.to_npnmap();
     add_map(map);
-    TvFunc func2 = func1.xform(map);
+    auto func2 = func1.xform(map);
     if ( debug ) {
-      cout << "  resolved" << endl;
+      std::cout << "  resolved" << std::endl;
       if ( ni0 < 10 ) {
-	cout << "  func2 = " << func2 << endl;
+	std::cout << "  func2 = " << func2 << std::endl;
       }
-      cout << "  map2  = " << map << endl;
+      std::cout << "  map2  = " << map << std::endl;
     }
     return func2;
   }
@@ -174,19 +186,19 @@ NpnMgr::cannonical(const TvFunc& func)
   // となる．
 
   // polundet_num の指数乗だけ極性の割り当てがある．
-  int nug = iinfo.polundet_num();
-  int nug_exp = 1U << nug;
-  int n = nug_exp;
+  auto nug = iinfo.polundet_num();
+  auto nug_exp = 1U << nug;
+  auto n = nug_exp;
   if ( !opol_fixed ) {
     n *= 2;
   }
-  vector<PolConf> polconf_list;
+  std::vector<PolConf> polconf_list;
   polconf_list.reserve(n);
   int input_mask = 0U;
-  for (int i = 0; i < ni0; ++ i) {
+  for ( int i = 0; i < ni0; ++ i ) {
     input_mask |= (1U << i);
   }
-  for (int p = 0; p < nug_exp; ++ p) {
+  for ( int p = 0; p < nug_exp; ++ p ) {
     int input_bits = 0U;
     for (int i = 0; i < nug; ++ i) {
       int gid = iinfo.polundet_gid(i);
@@ -204,46 +216,46 @@ NpnMgr::cannonical(const TvFunc& func)
   walsh_w0_refine(func1, polconf_list);
 
   // 極性割り当ての候補を確定した入力の重み別 Walsh_1 でフィルタリングする．
-  for (int pid = 0;
-       polconf_list.size() > 1 && pid < igpart.partition_num();
-       ++ pid) {
+  for ( int pid = 0;
+	polconf_list.size() > 1 && pid < igpart.partition_num();
+	++ pid ) {
     if ( igpart.is_resolved(pid) ) {
-      int pos = igpart.partition_begin(pid);
-      int gid = igpart.group_id(pos);
-      int iid = igpart.input_id(gid);
+      auto pos = igpart.partition_begin(pid);
+      auto gid = igpart.group_id(pos);
+      auto iid = igpart.input_id(gid);
       walsh_w1_refine(func1, iid, polconf_list);
     }
   }
 
   if ( debug ) {
-    cout << "  # of polarity candidates: " << polconf_list.size() << endl;
-    for (int i = 0; i < polconf_list.size(); ++ i) {
-      cout << "    ";
-      print_polconf(cout, polconf_list[i], ni0);
+    std::cout << "  # of polarity candidates: " << polconf_list.size() << std::endl;
+    for ( int i = 0; i < polconf_list.size(); ++ i ) {
+      std::cout << "    ";
+      print_polconf(std::cout, polconf_list[i], ni0);
     }
-    cout << "    Partition: " << igpart << endl
-	 << endl;
+    std::cout << "    Partition: " << igpart << std::endl
+	      << std::endl;
   }
 
   // 残りはすべて展開して真理値ベクタが最大となるものを探す．
   mMaxFunc = TvFunc::zero(ni0);
   mMaxList.clear();
 
-  NpnMap xmap0_orig = mXmap0;
+  auto xmap0_orig = mXmap0;
   for ( auto polconf: polconf_list ) {
     // まずpolconfの内容を func1 に適用する．
-    NpnMap map2 = polconf.to_npnmap(ni0);
-    TvFunc func2 = func1.xform(map2);
+    auto map2 = polconf.to_npnmap(ni0);
+    auto func2 = func1.xform(map2);
     mXmap0 = xmap0_orig * map2;
 
     if ( debug ) {
-      cout << endl;
-      cout << "current PolConf: ";
-      print_polconf(cout, polconf, ni0);
-      cout << endl
-	   << " map(polconf) = " << map2 << endl;
+      std::cout << std::endl
+		<< "current PolConf: ";
+      print_polconf(std::cout, polconf, ni0);
+      std::cout << std::endl
+		<< " map(polconf) = " << map2 << std::endl;
       if ( ni0 < 10 ) {
-	cout << " func2 = " << func2 << endl;
+	std::cout << " func2 = " << func2 << std::endl;
       }
     }
 
@@ -252,39 +264,41 @@ NpnMgr::cannonical(const TvFunc& func)
     walsh_w1_refine(func2, igpart1);
 
     // あとは全ての順番を試す．
-    vector<bool> w1_mark(ni0, false);
+    std::vector<bool> w1_mark(ni0, false);
     tvmax_recur(func2, igpart1, w1_mark);
   }
 
   if ( debug ) {
     if ( ni0 < 10 ) {
-      cout << "  final result" << endl
-	   << "  cfunc = " << mMaxFunc << endl
-	   << "  cmap  = " << mMaxList[0] << endl;
+      std::cout << "  final result" << std::endl
+		<< "  cfunc = " << mMaxFunc << std::endl
+		<< "  cmap  = " << mMaxList[0] << std::endl;
     }
   }
   return mMaxFunc;
 }
 
 void
-NpnMgr::tvmax_recur(const TvFunc& func,
-		    const IgPartition& igpart,
-		    vector<bool>& w1_mark)
+NpnMgr::tvmax_recur(
+  const TvFunc& func,
+  const IgPartition& igpart,
+  std::vector<bool>& w1_mark
+)
 {
   if ( debug ) {
-    cout << endl;
-    cout << "tvmax_recur(" << igpart << ")" << endl;
+    std::cout << std::endl
+	      << "tvmax_recur(" << igpart << ")" << std::endl;
   }
 
   if ( igpart.is_resolved() ) {
     // 全ての入力順が解決している．
     ++ mTvmax_count;
-    NpnMap map = igpart.to_npnmap();
-    TvFunc func1 = func.xform(map);
+    auto map = igpart.to_npnmap();
+    auto func1 = func.xform(map);
     if ( debug ) {
       if ( func.input_num() < 10 ) {
-	cout << "func1 = " << func1 << endl
-	     << "map   = " << map << endl;
+	std::cout << "func1 = " << func1 << std::endl
+		  << "map   = " << map << std::endl;
       }
     }
     // 真理値表が最大のものを記録する．
@@ -294,16 +308,16 @@ NpnMgr::tvmax_recur(const TvFunc& func,
 	mMaxList.clear();
 	if ( debug ) {
 	  if ( func.input_num() < 10 ) {
-	    cout << "mMaxFunc = " << func1 << endl;
+	    std::cout << "mMaxFunc = " << func1 << std::endl;
 	  }
 	  else {
-	    cout << "mMaxFunc updated" << endl;
+	    std::cout << "mMaxFunc updated" << std::endl;
 	  }
 	}
       }
       add_map(map);
       if ( debug ) {
-	cout << "map      += " << map << endl;
+	std::cout << "map      += " << map << std::endl;
       }
     }
   }
@@ -313,8 +327,8 @@ NpnMgr::tvmax_recur(const TvFunc& func,
     for ( ; pid < igpart.partition_num(); ++ pid) {
       if ( igpart.is_resolved(pid) ) {
 	// 解決している分割を使って残りの分割を細分化する．
-	int pos = igpart.partition_begin(pid);
-	int gid = igpart.group_id(pos);
+	auto pos = igpart.partition_begin(pid);
+	auto gid = igpart.group_id(pos);
 	iid = igpart.input_id(gid);
 	if ( w1_mark[iid] ) {
 	  // すでに処理済み
@@ -341,10 +355,10 @@ NpnMgr::tvmax_recur(const TvFunc& func,
     }
     else {
       // この分割は解決していないので一つづつを細分化して再帰する．
-      for (int pos = igpart.partition_begin(pid);
-	   pos < igpart.partition_end(pid); ++ pos) {
-	int gid = igpart.group_id(pos);
-	int iid = igpart.input_id(gid);
+      for ( int pos = igpart.partition_begin(pid);
+	    pos < igpart.partition_end(pid); ++ pos ) {
+	auto gid = igpart.group_id(pos);
+	auto iid = igpart.input_id(gid);
 	IgPartition igpart1(igpart);
 	igpart1._refine(pid, pos);
 	walsh_2_refine(func, iid, igpart1);
@@ -357,7 +371,9 @@ NpnMgr::tvmax_recur(const TvFunc& func,
 
 // @brief 直前の cannonical の呼び出しにおける NpnMap の全候補を返す．
 void
-NpnMgr::all_cmap(vector<NpnMap>& map_list) const
+NpnMgr::all_cmap(
+  std::vector<NpnMap>& map_list
+) const
 {
   map_list.clear();
   map_list.reserve(mMaxList.size());
@@ -374,7 +390,9 @@ NpnMgr::tvmax_count() const
 }
 
 void
-NpnMgr::add_map(const NpnMap& map)
+NpnMgr::add_map(
+  const NpnMap& map
+)
 {
   mMaxList.push_back(mXmap0 * map);
 }

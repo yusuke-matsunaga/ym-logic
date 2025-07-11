@@ -29,9 +29,9 @@ public:
 
   /// @brief コンストラクタ
   ZddCopyOp(
-    ZddMgrImpl* mgr,                   ///< [in] マネージャ
-    const vector<ZddItem>& item_list,  ///< [in] 変数リスト
-    const vector<SizeType>& level_list ///< [in] レベルのリスト
+    ZddMgrImpl* mgr,                        ///< [in] マネージャ
+    const std::vector<ZddItem>& item_list,  ///< [in] 変数リスト
+    const std::vector<SizeType>& level_list ///< [in] レベルのリスト
   ) : mMgr{mgr},
       mItemList{item_list},
       mLevelList{level_list}
@@ -64,13 +64,13 @@ private:
   ZddMgrImpl* mMgr;
 
   // 要素リスト
-  vector<ZddItem> mItemList;
+  std::vector<ZddItem> mItemList;
 
   // レベルのリスト
-  vector<SizeType> mLevelList;
+  std::vector<SizeType> mLevelList;
 
   // 演算結果テーブル
-  unordered_map<Zdd, DdEdge> mTable;
+  std::unordered_map<Zdd, DdEdge> mTable;
 
 };
 

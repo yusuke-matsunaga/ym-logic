@@ -245,10 +245,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数番号をキーにしてレベルを格納する配列
-  vector<SizeType> mLevelArray;
+  std::vector<SizeType> mLevelArray;
 
   // レベルごとのテーブル配列
-  vector<DdNodeTable*> mTableArray;
+  std::vector<DdNodeTable*> mTableArray;
 
   // 格納されているノード数
   SizeType mNodeNum{0};

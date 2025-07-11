@@ -29,12 +29,12 @@ PolConf::to_npnmap(
 
 void
 print_polconf(
-  ostream& s,
+  std::ostream& s,
   const PolConf& polconf,
   SizeType ni
 )
 {
-  std::uint32_t inv_bits = polconf.iinv_bits();
+  auto inv_bits = polconf.iinv_bits();
   for ( SizeType i = 0; i < ni; ++ i ) {
     if ( inv_bits & (1U << i) ) {
       s << "N";
@@ -50,13 +50,13 @@ print_polconf(
   else {
     s << "P";
   }
-  s << endl;
+  s << std::endl;
 }
 
 void
 print_polconf_list(
-  ostream& s,
-  const vector<PolConf>& polconf_list,
+  std::ostream& s,
+  const std::vector<PolConf>& polconf_list,
   SizeType ni
 )
 {

@@ -31,7 +31,7 @@ BddVarSet::BddVarSet(
 // @brief 要素のリストを指定したコンストラクタ
 BddVarSet::BddVarSet(
   BddMgr& mgr,
-  const vector<BddVar>& var_set
+  const std::vector<BddVar>& var_set
 ) : Bdd(mgr.one())
 {
   for ( auto var: var_set ) {
@@ -128,7 +128,7 @@ BddVarSet::size() const
 }
 
 // @brief 変数のリストに変換する．
-vector<BddVar>
+std::vector<BddVar>
 BddVarSet::to_varlist() const
 {
   return Bdd::to_varlist();

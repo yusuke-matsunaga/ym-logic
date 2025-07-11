@@ -63,7 +63,7 @@ private:
   bool mPhase;
 
   // 演算結果テーブル
-  unordered_map<DdEdge, DdEdge> mTable;
+  std::unordered_map<DdEdge, DdEdge> mTable;
 
 };
 

@@ -190,18 +190,18 @@ private:
       auto cube0 = _cube(chunk, i - 1);
       auto cube1 = _cube(chunk, i);
       if ( _cube_compare(cube0, cube1) < 0 ) {
-	cout << "order error(" << begin
-	     << ": " << end
-	     << ")" << endl;
+	std::cout << "order error(" << begin
+		  << ": " << end
+		  << ")" << std::endl;
 	for ( SizeType i = begin; i < end; ++ i ) {
-	  cout << "#" << i << ": ";
-	  _print(cout, chunk, i, i + 1);
-	  cout << endl;
+	  std::cout << "#" << i << ": ";
+	  _print(std::cout, chunk, i, i + 1);
+	  std::cout << std::endl;
 	}
 	abort();
       }
       if ( !_cube_sanity_check(cube0) ) {
-	cout << "Cube#" << i << " is insane" << endl;
+	std::cout << "Cube#" << i << " is insane" << std::endl;
 	abort();
       }
     }

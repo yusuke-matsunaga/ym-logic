@@ -52,7 +52,7 @@ ZddMgrImpl::item(
 // @brief 部分集合を作る．
 DdEdge
 ZddMgrImpl::make_set(
-  const vector<SizeType>& level_list
+  const std::vector<SizeType>& level_list
 )
 {
   // ボトムアップに作るので逆順のリストを用意する．
@@ -173,7 +173,7 @@ restore_edge(
 DdEdge
 decode(
   SizeType edge_info,
-  const vector<DdEdge>& edge_list
+  const std::vector<DdEdge>& edge_list
 )
 {
   if ( edge_info == 0 ) {
@@ -189,7 +189,7 @@ decode(
 END_NONAMESPACE
 
 // @brief バイナリダンプから復元する．
-vector<DdEdge>
+std::vector<DdEdge>
 ZddMgrImpl::restore(
   BinDec& s
 )
@@ -203,12 +203,12 @@ ZddMgrImpl::restore(
     return {};
   }
 
-  vector<SizeType> root_info_list(n);
+  std::vector<SizeType> root_info_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     root_info_list[i] = s.read_vint();
   }
 
-  vector<DdEdge> edge_list;
+  std::vector<DdEdge> edge_list;
   for ( SizeType id = 1; ; ++ id ) {
     SizeType level = s.read_vint();
     SizeType edge0_info = restore_edge(s, id);
@@ -222,7 +222,7 @@ ZddMgrImpl::restore(
     edge_list.push_back(edge);
   }
 
-  vector<DdEdge> root_list(n);
+  std::vector<DdEdge> root_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     SizeType root_info = root_info_list[i];
     auto edge = decode(root_info, edge_list);

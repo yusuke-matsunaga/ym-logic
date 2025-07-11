@@ -99,17 +99,17 @@ public:
   static
   void
   display(
-    ostream& s,                             ///< [in] 出力ストリーム
-    const vector<SizeType>& root_edge_list, ///< [in] 根の枝のリスト
-    const vector<DdInfo>& node_list         ///< [in] ノード情報のリスト
+    std::ostream& s,                             ///< [in] 出力ストリーム
+    const std::vector<SizeType>& root_edge_list, ///< [in] 根の枝のリスト
+    const std::vector<DdInfo>& node_list         ///< [in] ノード情報のリスト
   );
 
   // @brief 構造を表す整数配列を作る．
   static
-  vector<SizeType>
+  std::vector<SizeType>
   rep_data(
-    const vector<SizeType>& root_edge_list, ///< [in] 根の枝のリスト
-    const vector<DdInfo>& node_list	    ///< [in] ノード情報のリスト
+    const std::vector<SizeType>& root_edge_list, ///< [in] 根の枝のリスト
+    const std::vector<DdInfo>& node_list	    ///< [in] ノード情報のリスト
   );
 
 

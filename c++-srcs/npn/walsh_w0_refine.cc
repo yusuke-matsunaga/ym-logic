@@ -36,14 +36,14 @@ BEGIN_NAMESPACE_YM_LOGIC
 void
 walsh_w0_refine(
   const TvFunc& func,
-  vector<PolConf>& polconf_list
+  std::vector<PolConf>& polconf_list
 )
 {
-  SizeType ni = func.input_num();
+  auto ni = func.input_num();
 
   if ( debug ) {
-    cout << "before walsh_w0_refine()" << endl;
-    print_polconf_list(cout, polconf_list, ni);
+    std::cout << "before walsh_w0_refine()" << std::endl;
+    print_polconf_list(std::cout, polconf_list, ni);
   }
 
   // 重み別 w0 係数を用いて極性の決定を行う．
@@ -53,7 +53,7 @@ walsh_w0_refine(
     int max_d0 = 0;
     SizeType wpos = 0;
     for ( SizeType i = 0; i < polconf_list.size(); ++ i ) {
-      PolConf polconf = polconf_list[i];
+      auto polconf = polconf_list[i];
       int d0 = func.walsh_w0(w, polconf.oinv(), polconf.iinv_bits());
 
       int stat = -1;
@@ -78,8 +78,8 @@ walsh_w0_refine(
   }
 
   if ( debug ) {
-    cout << "after walsh_w0_refine()" << endl;
-    print_polconf_list(cout, polconf_list, ni);
+    std::cout << "after walsh_w0_refine()" << std::endl;
+    print_polconf_list(std::cout, polconf_list, ni);
   }
 }
 

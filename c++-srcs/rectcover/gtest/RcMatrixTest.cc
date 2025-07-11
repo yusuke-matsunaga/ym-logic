@@ -91,8 +91,8 @@ TEST(RcMatrixTest, insert_col)
 
 TEST(RcMatrixTest, costr1)
 {
-  vector<SizeType> row_costs{1, 2, 3};
-  vector<SizeType> col_costs{4, 5, 6, 7};
+  std::vector<SizeType> row_costs{1, 2, 3};
+  std::vector<SizeType> col_costs{4, 5, 6, 7};
 
   auto mtx = RcMatrix(row_costs, col_costs);
 
@@ -114,8 +114,8 @@ TEST(RcMatrixTest, costr1)
 
 TEST(RcMatrixTest, add_elem1)
 {
-  vector<SizeType> row_costs{1, 2, 3};
-  vector<SizeType> col_costs{4, 5, 6, 7};
+  std::vector<SizeType> row_costs{1, 2, 3};
+  std::vector<SizeType> col_costs{4, 5, 6, 7};
 
   auto mtx = RcMatrix(row_costs, col_costs);
 
@@ -155,8 +155,8 @@ TEST(RcMatrixTest, add_elem1)
 
 TEST(RcMatrixTest, add_elem2)
 {
-  vector<SizeType> row_costs{1, 2, 3};
-  vector<SizeType> col_costs{4, 5, 6, 7};
+  std::vector<SizeType> row_costs{1, 2, 3};
+  std::vector<SizeType> col_costs{4, 5, 6, 7};
 
   auto mtx = RcMatrix(row_costs, col_costs);
 

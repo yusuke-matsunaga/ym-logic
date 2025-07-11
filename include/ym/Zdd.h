@@ -292,7 +292,7 @@ public:
   is_singleton() const;
 
   /// @brief サポートのリストを返す．
-  vector<ZddItem>
+  std::vector<ZddItem>
   get_support_list() const;
 
   /// @brief 根の要素とコファクターを求める．
@@ -384,7 +384,7 @@ public:
   /// @brief 内容を出力する．
   void
   display(
-    ostream& s ///< [in] 出力ストリーム
+    std::ostream& s ///< [in] 出力ストリーム
   ) const;
 
   /// @brief dot 形式で出力する．
@@ -408,13 +408,13 @@ public:
   ///     var_label は無視される．
   void
   gen_dot(
-    ostream& s,             ///< [in] 出力ストリーム
+    std::ostream& s,        ///< [in] 出力ストリーム
     const JsonValue& option ///< [in] オプションを表す JSON オブジェクト
     = JsonValue{}
   ) const;
 
   /// @brief 構造を表す整数配列を作る．
-  vector<SizeType>
+  std::vector<SizeType>
   rep_data() const;
 
   /// @brief 独自形式でバイナリダンプする．
@@ -439,15 +439,15 @@ public:
   static
   SizeType
   zdd_size(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+    const std::vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
   /// @brief 複数のZDDの内容を出力する．
   static
   void
   display(
-    ostream& s,                 ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+    std::ostream& s,                 ///< [in] 出力ストリーム
+    const std::vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
   /// @brief 複数のZDDを dot 形式で出力する．
@@ -472,17 +472,17 @@ public:
   static
   void
   gen_dot(
-    ostream& s,                  ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list, ///< [in] ZDDのリスト
-    const JsonValue& option      ///< [in] オプションを表す JSON オブジェクト
+    std::ostream& s,                  ///< [in] 出力ストリーム
+    const std::vector<Zdd>& zdd_list, ///< [in] ZDDのリスト
+    const JsonValue& option           ///< [in] オプションを表す JSON オブジェクト
     = JsonValue{}
   );
 
   /// @brief 構造を表す整数配列を作る．
   static
-  vector<SizeType>
+  std::vector<SizeType>
   rep_data(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+    const std::vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
   /// @brief 複数のZDDを独自形式でバイナリダンプする．
@@ -491,8 +491,8 @@ public:
   static
   void
   dump(
-    BinEnc& s,                  ///< [in] 出力ストリーム
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+    BinEnc& s,                       ///< [in] 出力ストリーム
+    const std::vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
   /// @}
@@ -596,14 +596,14 @@ private:
   static
   ZddMgrImpl*
   _mgr(
-    const vector<Zdd>& zdd_list ///< [in] ZDDのリスト
+    const std::vector<Zdd>& zdd_list ///< [in] ZDDのリスト
   );
 
   /// @brief ZDDのリストから枝のリストに変換する．
   static
-  vector<DdEdge>
+  std::vector<DdEdge>
   _conv_to_edgelist(
-    const vector<Zdd>& zdd_list ///< [in] BDDのリスト
+    const std::vector<Zdd>& zdd_list ///< [in] BDDのリスト
   );
 
 

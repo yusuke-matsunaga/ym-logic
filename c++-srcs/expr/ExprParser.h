@@ -42,8 +42,9 @@ enum class ExprToken {
 };
 
 /// @brief トークンを出力する．主にデバッグ用
-ostream& operator<<(
-  ostream& s,
+std::ostream&
+operator<<(
+  std::ostream& s,
   ExprToken token
 );
 
@@ -53,7 +54,7 @@ ostream& operator<<(
 /// @brief パーズ中のシンタックスエラーを表すクラス
 //////////////////////////////////////////////////////////////////////
 class SyntaxError :
-  public exception
+  public std::exception
 {
 public:
 
@@ -78,7 +79,7 @@ public:
 
   /// @brief コンストラクタ
   ExprParser(
-    const string& expr_str ///< [in] 論理式を表す文字列
+    const std::string& expr_str ///< [in] 論理式を表す文字列
   );
 
   /// @brief デストラクタ
@@ -93,7 +94,7 @@ public:
   /// @brief リテラル文字列からリテラル番号を得る．
   SizeType
   str_to_literal(
-    const string& str
+    const std::string& str
   );
 
   /// @brief トークンを一つ読み出す．
@@ -130,10 +131,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 元の文字列
-  string mExprStr;
+  std::string mExprStr;
 
   // 入力用の stream ポインタ
-  istringstream mInput;
+  std::istringstream mInput;
 
 };
 

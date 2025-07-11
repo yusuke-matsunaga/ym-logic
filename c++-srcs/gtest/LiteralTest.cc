@@ -19,9 +19,9 @@ TEST(LiteralTest, empty_constr)
 
   EXPECT_FALSE( lit.is_valid() );
 
-  ostringstream oss;
+  std::ostringstream oss;
   oss << lit;
-  EXPECT_EQ( string("U<>"), oss.str() );
+  EXPECT_EQ( std::string("U<>"), oss.str() );
 }
 
 TEST(LiteralTest, simple_constr)
@@ -51,14 +51,14 @@ TEST(LiteralTest, simple_constr)
   EXPECT_EQ( lit_n, lit_n.make_negative() );
 
   {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << lit;
-    EXPECT_EQ( string("P<3>"), oss.str() );
+    EXPECT_EQ( std::string("P<3>"), oss.str() );
   }
   {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << lit_n;
-    EXPECT_EQ( string("N<3>"), oss.str() );
+    EXPECT_EQ( std::string("N<3>"), oss.str() );
   }
 }
 

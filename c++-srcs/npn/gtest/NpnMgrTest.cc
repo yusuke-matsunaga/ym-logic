@@ -24,7 +24,7 @@ TEST(NpnMgrTest, cannonical_const0)
   NpnMgr npnmgr;
   npnmgr.cannonical(func);
 
-  vector<NpnMap> map_list;
+  std::vector<NpnMap> map_list;
   npnmgr.all_cmap(map_list);
 
   EXPECT_EQ( 1, map_list.size() );
@@ -42,7 +42,7 @@ TEST(NpnMgrTest, cannonical_const1)
   NpnMgr npnmgr;
   npnmgr.cannonical(func);
 
-  vector<NpnMap> map_list;
+  std::vector<NpnMap> map_list;
   npnmgr.all_cmap(map_list);
 
   EXPECT_EQ( 1, map_list.size() );
@@ -63,9 +63,9 @@ TEST_P(NpnMgrTestWithParam, func_test)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   int ni_exp_exp = 1U << ni_exp;
-  unordered_set<TvFunc> func_hash;
+  std::unordered_set<TvFunc> func_hash;
   for ( int sig: Range(ni_exp_exp) ) {
-    vector<int> values(ni_exp);
+    std::vector<int> values(ni_exp);
     for ( int p: Range(ni_exp) ) {
       if ( sig & (1U << p) ) {
 	values[p] = 1;
@@ -79,11 +79,11 @@ TEST_P(NpnMgrTestWithParam, func_test)
     NpnMgr npnmgr;
     TvFunc cfunc0 = npnmgr.cannonical(f);
 
-    vector<NpnMap> map_list;
+    std::vector<NpnMap> map_list;
     npnmgr.all_cmap(map_list);
     if ( map_list.empty() ) {
-      cout << "F     = " << f << endl
-	   << "cfunc = " << cfunc0 << endl;
+      std::cout << "F     = " << f << std::endl
+	   << "cfunc = " << cfunc0 << std::endl;
     }
 
     NpnMap map = map_list[0];
@@ -110,9 +110,9 @@ TEST_P(NpnMgrTestWithParam, func_test2)
   int ni = GetParam();
   int ni_exp = 1U << ni;
   int ni_exp_exp = 1U << ni_exp;
-  unordered_set<TvFunc> func_hash;
+  std::unordered_set<TvFunc> func_hash;
   for ( int sig: Range(ni_exp_exp) ) {
-    vector<int> values(ni_exp);
+    std::vector<int> values(ni_exp);
     for ( int p: Range(ni_exp) ) {
       if ( sig & (1U << p) ) {
 	values[p] = 1;
@@ -130,14 +130,14 @@ TEST_P(NpnMgrTestWithParam, func_test2)
     TvFunc cfunc = npnmgr.cannonical(f);
 
     {
-      vector<NpnMap> map_list;
+      std::vector<NpnMap> map_list;
       npnmgr.all_cmap(map_list);
 
       for ( auto map: map_list ) {
 	TvFunc xformed_cfunc = f.xform(map);
 	EXPECT_EQ( cfunc, xformed_cfunc );
 	if ( cfunc != xformed_cfunc ) {
-	  cout << "f = " << f << endl;
+	  std::cout << "f = " << f << std::endl;
 	}
       }
     }
@@ -160,21 +160,21 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	    TvFunc cfunc1 = npnmgr.cannonical(f1);
 
 	    {
-	      vector<NpnMap> map_list;
+	      std::vector<NpnMap> map_list;
 	      npnmgr.all_cmap(map_list);
 
 	      for ( auto cmap: map_list ) {
 		TvFunc xformed_cfunc1 = f1.xform(cmap);
 		EXPECT_EQ( cfunc1, xformed_cfunc1 );
 		if ( cfunc1 != xformed_cfunc1 ) {
-		  cout << "f1 = " << f1 << endl;
+		  std::cout << "f1 = " << f1 << std::endl;
 		}
 	      }
 	    }
 	    if ( cfunc != cfunc1 ) {
-	      cout << "f  = " << f << endl
-		   << "f1 = " << f1 << endl
-		   << "map = " << map << endl;
+	      std::cout << "f  = " << f << std::endl
+		   << "f1 = " << f1 << std::endl
+		   << "map = " << map << std::endl;
 	    }
 	    EXPECT_EQ( cfunc, cfunc1 );
 	  }
@@ -188,8 +188,8 @@ TEST_P(NpnMgrTestWithParam, func_test2)
 	map.set_oinv(oinv);
 	TvFunc f1 = f.xform(map);
 	if ( 0 ) {
-	  cout << "F1 = " << f1 << endl
-	       << " map = " << map << endl;
+	  std::cout << "F1 = " << f1 << std::endl
+	       << " map = " << map << std::endl;
 	}
 
 	NpnMgr npnmgr;
@@ -231,7 +231,7 @@ TEST_P(NpnMgrRandomTest, func_test)
 
   std::uniform_int_distribution<int> rd2(0, 1);
   for ( int i: Range(nfunc) ) {
-    vector<int> values(ni_exp);
+    std::vector<int> values(ni_exp);
     for ( int p: Range(ni_exp) ) {
       if ( rd2(mRandGen) ) {
 	values[p] = 1;
@@ -246,12 +246,12 @@ TEST_P(NpnMgrRandomTest, func_test)
     TvFunc cfunc = npnmgr.cannonical(f);
 
     {
-      vector<NpnMap> map_list;
+      std::vector<NpnMap> map_list;
       npnmgr.all_cmap(map_list);
 
       if ( map_list.empty() ) {
-	cout << "f = " << f << endl
-	     << "cfunc = " << cfunc << endl;
+	std::cout << "f = " << f << std::endl
+	     << "cfunc = " << cfunc << std::endl;
 	ASSERT_TRUE( false );
       }
 
@@ -263,7 +263,7 @@ TEST_P(NpnMgrRandomTest, func_test)
 
     RandPermGen rpg(ni);
     for ( int j: Range(nperm) ) {
-      vector<int> dst_map(ni);
+      std::vector<int> dst_map(ni);
       rpg.generate(mRandGen);
       for ( int k: Range(ni) ) {
 	dst_map[k] = rpg.elem(k);
@@ -283,9 +283,9 @@ TEST_P(NpnMgrRandomTest, func_test)
 	  TvFunc cfunc1 = npnmgr.cannonical(f1);
 
 	  if ( cfunc != cfunc1 ) {
-	    cout << "f  = " << f << endl
-		 << "f1 = " << f1 << endl
-		 << "map = " << map << endl;
+	    std::cout << "f  = " << f << std::endl
+		 << "f1 = " << f1 << std::endl
+		 << "map = " << map << std::endl;
 	  }
 	  EXPECT_EQ( cfunc, cfunc1 );
 	}
@@ -303,11 +303,13 @@ INSTANTIATE_TEST_SUITE_P(Test5to20,
 			::testing::Range(5, 20));
 
 TvFunc
-str_to_func(int ni,
-	    const string& func_str)
+str_to_func(
+  int ni,
+  const std::string& func_str
+)
 {
   int ni_exp = 1 << ni;
-  vector<int> values(ni_exp);
+  std::vector<int> values(ni_exp);
   for ( int i: Range(ni_exp) ) {
     values[i] = func_str[i] == '1' ? 1 : 0;
   }
@@ -393,11 +395,11 @@ TEST(NpnMgrTest1, bug5)
   NpnMgr npnmgr;
   TvFunc cfunc = npnmgr.cannonical(func);
 
-  vector<NpnMap> map_list;
+  std::vector<NpnMap> map_list;
   npnmgr.all_cmap(map_list);
   if ( map_list.empty() ) {
-    cout << "func = " << func << endl
-	 << "cfunc = " << cfunc << endl;
+    std::cout << "func = " << func << std::endl
+	 << "cfunc = " << cfunc << std::endl;
   }
   EXPECT_FALSE( map_list.empty() );
 }
@@ -409,11 +411,11 @@ TEST(NpnMgrTest1, bug6)
   NpnMgr npnmgr;
   TvFunc cfunc = npnmgr.cannonical(func);
 
-  vector<NpnMap> map_list;
+  std::vector<NpnMap> map_list;
   npnmgr.all_cmap(map_list);
   if ( map_list.empty() ) {
-    cout << "func = " << func << endl
-	 << "cfunc = " << cfunc << endl;
+    std::cout << "func = " << func << std::endl
+	 << "cfunc = " << cfunc << std::endl;
   }
   EXPECT_FALSE( map_list.empty() );
 }
@@ -463,7 +465,7 @@ TEST(NpnMgrTest1, bug9)
   NpnMgr npnmgr;
   TvFunc cfunc = npnmgr.cannonical(func);
 
-  vector<NpnMap> cmap_list;
+  std::vector<NpnMap> cmap_list;
   npnmgr.all_cmap(cmap_list);
 
   NpnMap map = cmap_list[0];

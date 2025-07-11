@@ -45,7 +45,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 演算結果テーブル
-  unordered_map<DdEdge, SizeType> mTable;
+  std::unordered_map<DdEdge, SizeType> mTable;
 
 };
 

@@ -54,7 +54,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // simplify用のテーブル
-  unordered_map<Apply2Key, DdEdge> mTable;
+  std::unordered_map<Apply2Key, DdEdge> mTable;
 
 };
 

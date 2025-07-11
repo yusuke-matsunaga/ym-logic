@@ -20,11 +20,11 @@ BEGIN_NAMESPACE_YM_DD
 // @brief 複合compose演算
 DdEdge
 Bdd::_multi_compose(
-  const unordered_map<BddVar, Bdd>& compose_map
+  const std::unordered_map<BddVar, Bdd>& compose_map
 ) const
 {
   _check_valid();
-  unordered_map<SizeType, DdEdge> cmap;
+  std::unordered_map<SizeType, DdEdge> cmap;
   for ( auto& p: compose_map ) {
     auto var = p.first;
     auto level = var.level();
@@ -41,11 +41,11 @@ Bdd::_multi_compose(
 // @brief 変数順を入れ替える演算
 DdEdge
 Bdd::_remap_vars(
-  const unordered_map<BddVar, BddLit>& varmap
+  const std::unordered_map<BddVar, BddLit>& varmap
 ) const
 {
   _check_valid();
-  unordered_map<SizeType, DdEdge> cmap;
+  std::unordered_map<SizeType, DdEdge> cmap;
   for ( auto& p: varmap ) {
     auto var = p.first;
     auto level = var.level();
@@ -66,7 +66,7 @@ Bdd::_remap_vars(
 // @brief コンストラクタ
 BddMultiCompOp::BddMultiCompOp(
   BddMgrImpl* mgr,
-  const unordered_map<SizeType, DdEdge>& comp_map
+  const std::unordered_map<SizeType, DdEdge>& comp_map
 ) : BddOpBase{mgr},
     mIteOp{mgr}
 {
@@ -75,8 +75,8 @@ BddMultiCompOp::BddMultiCompOp(
     mCompList.push_back(p);
   }
   sort(mCompList.begin(), mCompList.end(),
-       [](const pair<SizeType, DdEdge>& a,
-	  const pair<SizeType, DdEdge>& b)
+       [](const std::pair<SizeType, DdEdge>& a,
+	  const std::pair<SizeType, DdEdge>& b)
        { return a.first < b.first; });
 }
 

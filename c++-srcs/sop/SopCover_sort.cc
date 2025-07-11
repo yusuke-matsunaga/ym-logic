@@ -24,14 +24,14 @@ SopCover::_sort()
 {
 #if DEBUG
   {
-    cout << "SopCover::_sort()" << endl;
+    std::cout << "SopCover::_sort()" << std::endl;
     for ( SizeType i = 0; i < cube_num(); ++ i ) {
       auto cube = get_cube(i);
-      cout << "CUBE0#" << i << ": ";
-      cube.print(cout);
-      cout << endl;
+      std::cout << "CUBE0#" << i << ": ";
+      cube.print(std::cout);
+      std::cout << std::endl;
     }
-    cout << "----------------------" << endl;
+    std::cout << "----------------------" << std::endl;
   }
 #endif
   SopSorter sorter{variable_num()};
@@ -39,14 +39,14 @@ SopCover::_sort()
 
 #if DEBUG
   {
-    cout << "after SopCover::_sort()" << endl;
+    std::cout << "after SopCover::_sort()" << std::endl;
     for ( SizeType i = 0; i < cube_num(); ++ i ) {
       auto cube = get_cube(i);
-      cout << "CUBE0#" << i << ": ";
-      cube.print(cout);
-      cout << endl;
+      std::cout << "CUBE0#" << i << ": ";
+      cube.print(std::cout);
+      std::cout << std::endl;
     }
-    cout << "----------------------" << endl;
+    std::cout << "----------------------" << std::endl;
   }
 #endif
 }
@@ -138,30 +138,30 @@ SopSorter::sort_sub(
   }
 #if DEBUG
   {
-    cout << "cube1_list[" << begin1 << ": " << end1 << ")" << endl;
+    std::cout << "cube1_list[" << begin1 << ": " << end1 << ")" << std::endl;
     auto cube1_list = _cube_list(mTmpChunk, begin1, end1);
     auto cube1_iter = cube1_list.begin();
     auto cube1_end = cube1_list.end();
     SizeType i = begin1;
     for ( ; cube1_iter != cube1_end; ++ cube1_iter ) {
-      cout << "CUBE1#" << i << ": "; ++ i;
-      _print(cout, *cube1_iter);
-      cout << endl;
+      std::cout << "CUBE1#" << i << ": "; ++ i;
+      _print(std::cout, *cube1_iter);
+      std::cout << std::endl;
     }
-    cout << "=========================" << endl;
+    std::cout << "=========================" << std::endl;
   }
   {
-    cout << "cube2_list[" << begin2 << ": " << end2 << ")" << endl;
+    std::cout << "cube2_list[" << begin2 << ": " << end2 << ")" << std::endl;
     auto cube2_list = _cube_list(chunk, begin2, end2);
     auto cube2_iter = cube2_list.begin();
     auto cube2_end = cube2_list.end();
     SizeType i = begin2;
     for ( ; cube2_iter != cube2_end; ++ cube2_iter ) {
-      cout << "CUBE2#" << i << ": "; ++ i;
-      _print(cout, *cube2_iter);
-      cout << endl;
+      std::cout << "CUBE2#" << i << ": "; ++ i;
+      _print(std::cout, *cube2_iter);
+      std::cout << std::endl;
     }
-    cout << "=========================" << endl;
+    std::cout << "=========================" << std::endl;
   }
 #endif
   auto cube1_list = _cube_list(mTmpChunk, begin1, end1);
@@ -176,12 +176,12 @@ SopSorter::sort_sub(
     auto cube1 = *cube1_iter;
     auto cube2 = *cube2_iter;
     if ( 0 ) { /*DD*/
-      cout << "cube1: ";
-      _print(cout, cube1);
-      cout << endl;
-      cout << "cube2: ";
-      _print(cout, cube2);
-      cout << endl;
+      std::cout << "cube1: ";
+      _print(std::cout, cube1);
+      std::cout << std::endl;
+      std::cout << "cube2: ";
+      _print(std::cout, cube2);
+      std::cout << std::endl;
     }
     int comp_res = _cube_compare(cube1, cube2);
     auto dst_cube = _dst_cube(chunk, new_end);
@@ -201,22 +201,22 @@ SopSorter::sort_sub(
     }
     ++ new_end;
     if ( 0 ) { /*DD*/
-      cout << " => [#" << new_end - 1 << "]" ;
-      _print(cout, _cube(chunk, new_end - 1));
-      cout << endl;
+      std::cout << " => [#" << new_end - 1 << "]" ;
+      _print(std::cout, _cube(chunk, new_end - 1));
+      std::cout << std::endl;
       {
-	cout << "sort_list[" << begin << ": "
-	     << new_end << ")" << endl;
+	std::cout << "sort_list[" << begin << ": "
+	     << new_end << ")" << std::endl;
 	auto cube_list = _cube_list(chunk, begin, new_end);
 	auto cube_iter = cube_list.begin();
 	auto cube_end = cube_list.end();
 	SizeType i = begin;
 	for ( ; cube_iter != cube_end; ++ cube_iter ) {
-	  cout << "CUBE3#" << i << ": "; ++ i;
-	  _print(cout, *cube_iter);
-	  cout << endl;
+	  std::cout << "CUBE3#" << i << ": "; ++ i;
+	  _print(std::cout, *cube_iter);
+	  std::cout << std::endl;
 	}
-	cout << "=============================" << endl;
+	std::cout << "=============================" << std::endl;
       }
     }
   }
@@ -227,22 +227,22 @@ SopSorter::sort_sub(
     ++ cube1_iter;
     ++ new_end;
     if ( 0 ) { /*DD*/
-      cout << "cube1 => dst_cube: ";
-      _print(cout, dst_cube);
-      cout << endl;
+      std::cout << "cube1 => dst_cube: ";
+      _print(std::cout, dst_cube);
+      std::cout << std::endl;
       {
-	cout << "sort_list[" << begin << ": "
-	     << new_end << ")" << endl;
+	std::cout << "sort_list[" << begin << ": "
+	     << new_end << ")" << std::endl;
 	auto cube_list = _cube_list(chunk, begin, new_end);
 	auto cube_iter = cube_list.begin();
 	auto cube_end = cube_list.end();
 	SizeType i = begin;
 	for ( ; cube_iter != cube_end; ++ cube_iter ) {
-	  cout << "CUBE3#" << i << ": "; ++ i;
-	  _print(cout, *cube_iter);
-	  cout << endl;
+	  std::cout << "CUBE3#" << i << ": "; ++ i;
+	  _print(std::cout, *cube_iter);
+	  std::cout << std::endl;
 	}
-	cout << "=============================" << endl;
+	std::cout << "=============================" << std::endl;
       }
     }
   }
@@ -253,22 +253,22 @@ SopSorter::sort_sub(
     ++ cube2_iter;
     ++ new_end;
     if ( 0 ) { /*DD*/
-      cout << "cube2 => dst_cube: ";
-      _print(cout, dst_cube);
-      cout << endl;
+      std::cout << "cube2 => dst_cube: ";
+      _print(std::cout, dst_cube);
+      std::cout << std::endl;
       {
-	cout << "sort_list[" << begin << ": "
-	     << new_end << ")" << endl;
+	std::cout << "sort_list[" << begin << ": "
+	     << new_end << ")" << std::endl;
 	auto cube_list = _cube_list(chunk, begin, new_end);
 	auto cube_iter = cube_list.begin();
 	auto cube_end = cube_list.end();
 	SizeType i = begin;
 	for ( ; cube_iter != cube_end; ++ cube_iter ) {
-	  cout << "CUBE3#" << i << ": "; ++ i;
-	  _print(cout, *cube_iter);
-	  cout << endl;
+	  std::cout << "CUBE3#" << i << ": "; ++ i;
+	  _print(std::cout, *cube_iter);
+	  std::cout << std::endl;
 	}
-	cout << "=============================" << endl;
+	std::cout << "=============================" << std::endl;
       }
     }
   }
@@ -276,17 +276,17 @@ SopSorter::sort_sub(
 
 #if DEBUG
   {
-    cout << "sort_list[" << begin << ": " << end << ")" << endl;
+    std::cout << "sort_list[" << begin << ": " << end << ")" << std::endl;
     auto cube_list = _cube_list(chunk, begin, end);
     auto cube_iter = cube_list.begin();
     auto cube_end = cube_list.end();
     SizeType i = begin;
     for ( ; cube_iter != cube_end; ++ cube_iter ) {
-      cout << "CUBE3#" << i << ": "; ++ i;
-      _print(cout, *cube_iter);
-      cout << endl;
+      std::cout << "CUBE3#" << i << ": "; ++ i;
+      _print(std::cout, *cube_iter);
+      std::cout << std::endl;
     }
-    cout << "=============================" << endl;
+    std::cout << "=============================" << std::endl;
   }
 #endif
 
@@ -402,13 +402,13 @@ SopSorter::sort4(
 {
 #if DEBUG
   {
-    cout << "sort4 begin" << endl;
+    std::cout << "sort4 begin" << std::endl;
     auto cube1_list = _cube_list(chunk, begin, end);
     auto cube1_iter = cube1_list.begin();
     auto cube1_end = cube1_list.end();
     for ( ; cube1_iter != cube1_end; ++ cube1_iter ) {
-      _print(cout, *cube1_iter);
-      cout << endl;
+      _print(std::cout, *cube1_iter);
+      std::cout << std::endl;
     }
   }
 #endif
@@ -579,13 +579,13 @@ SopSorter::sort4(
 #endif
 #if DEBUG
   {
-    cout << "sort4 end" << endl;
+    std::cout << "sort4 end" << std::endl;
     auto cube1_list = _cube_list(chunk, begin, end);
     auto cube1_iter = cube1_list.begin();
     auto cube1_end = cube1_list.end();
     for ( ; cube1_iter != cube1_end; ++ cube1_iter ) {
-      _print(cout, *cube1_iter);
-      cout << endl;
+      _print(std::cout, *cube1_iter);
+      std::cout << std::endl;
     }
   }
 #endif

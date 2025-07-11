@@ -30,8 +30,8 @@ public:
 
   /// @brief コンストラクタ
   RcRect(
-    const vector<SizeType>& row_list, ///< [in] 行番号のリスト
-    const vector<SizeType>& col_list  ///< [in] 列番号のリスト
+    const std::vector<SizeType>& row_list, ///< [in] 行番号のリスト
+    const std::vector<SizeType>& col_list  ///< [in] 列番号のリスト
   ) : mRowList{row_list},
       mColList{col_list}
   {
@@ -56,7 +56,7 @@ public:
   }
 
   /// @brief 行番号のリストを返す．
-  const vector<SizeType>&
+  const std::vector<SizeType>&
   row_list() const
   {
     return mRowList;
@@ -70,7 +70,7 @@ public:
   }
 
   /// @brief 列番号のリストを返す．
-  const vector<SizeType>&
+  const std::vector<SizeType>&
   col_list() const
   {
     return mColList;
@@ -101,18 +101,18 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 行番号のリスト
-  vector<SizeType> mRowList;
+  std::vector<SizeType> mRowList;
 
   // 列番号のリスト
-  vector<SizeType> mColList;
+  std::vector<SizeType> mColList;
 
 };
 
 /// @brief RcRect のストリーム出力
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   const RcRect& rect
 )
 {
@@ -484,8 +484,8 @@ public:
 
   /// @brief コンストラクタ
   RcRowMergeIter(
-    const vector<SizeType>& rect_row_list, ///< [in] 矩形の行のリスト
-    const RcRowList& row_list              ///< [in] 行のリスト
+    const std::vector<SizeType>& rect_row_list, ///< [in] 矩形の行のリスト
+    const RcRowList& row_list                   ///< [in] 行のリスト
   ) : mRectIter{rect_row_list.begin()},
       mRectEnd{rect_row_list.end()},
       mRowIter{row_list.begin()},
@@ -561,10 +561,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 矩形の反復子
-  vector<SizeType>::const_iterator mRectIter;
+  std::vector<SizeType>::const_iterator mRectIter;
 
   // 矩形の反復子の末尾
-  vector<SizeType>::const_iterator mRectEnd;
+  std::vector<SizeType>::const_iterator mRectEnd;
 
   // 行の反復子
   RcRowIter mRowIter;
@@ -784,8 +784,8 @@ public:
 
   /// @brief コンストラクタ
   RcColMergeIter(
-    const vector<SizeType>& rect_col_list, ///< [in] 矩形の列のリスト
-    const RcColList& col_list              ///< [in] 列のリスト
+    const std::vector<SizeType>& rect_col_list, ///< [in] 矩形の列のリスト
+    const RcColList& col_list                   ///< [in] 列のリスト
   ) : mRectIter{rect_col_list.begin()},
       mRectEnd{rect_col_list.end()},
       mColIter{col_list.begin()},
@@ -861,10 +861,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 矩形の反復子
-  vector<SizeType>::const_iterator mRectIter;
+  std::vector<SizeType>::const_iterator mRectIter;
 
   // 矩形の反復子の末尾
-  vector<SizeType>::const_iterator mRectEnd;
+  std::vector<SizeType>::const_iterator mRectEnd;
 
   // 列の反復子
   RcColIter mColIter;
@@ -908,8 +908,8 @@ public:
 
   /// @brief コンストラクタ
   RcMatrix(
-    const vector<SizeType>& row_costs, ///< [in] 行のコストの配列
-    const vector<SizeType>& col_costs  ///< [in] 列のコストの配列
+    const std::vector<SizeType>& row_costs, ///< [in] 行のコストの配列
+    const std::vector<SizeType>& col_costs  ///< [in] 列のコストの配列
   )
   {
     auto row_size = row_costs.size();
@@ -1149,14 +1149,14 @@ public:
 #endif
 
   /// @brief 矩形がカバーしている価値番号のリストを求める．
-  vector<SizeType>
+  std::vector<SizeType>
   rect_vid_list(
     const RcRect& rect ///< [in] 矩形
   ) const
   {
     auto& rect_row_list = rect.row_list();
     auto& rect_col_list = rect.col_list();
-    vector<SizeType> vid_list;
+    std::vector<SizeType> vid_list;
     vid_list.reserve(rect.row_size() * rect.col_size());
     for ( auto row: rect.row_list() ) {
       auto iter = RcRowMergeIter{rect_col_list, row_list(row)};
@@ -1170,7 +1170,7 @@ public:
   }
 
   /// @brief 最大価値を持つ矩形を列挙する．
-  vector<RcRect>
+  std::vector<RcRect>
   enum_max_rects() const;
 
   /// @brief 矩形の価値を求める．
@@ -1271,16 +1271,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 価値の配列
-  vector<SizeType> mValueArray;
+  std::vector<SizeType> mValueArray;
 
   // 要素の所有権管理用のリスト
-  vector<std::unique_ptr<RcElem>> mElemList;
+  std::vector<std::unique_ptr<RcElem>> mElemList;
 
   // 行のヘッダを表す要素の配列
-  vector<std::unique_ptr<RcRowHead>> mRowHeadArray;
+  std::vector<std::unique_ptr<RcRowHead>> mRowHeadArray;
 
   // 列のヘッダを表す要素の配列
-  vector<std::unique_ptr<RcColHead>> mColHeadArray;
+  std::vector<std::unique_ptr<RcColHead>> mColHeadArray;
 
 };
 

@@ -84,10 +84,10 @@ private:
   bool mInv;
 
   // 演算結果テーブル1
-  unordered_map<const DdNode*, bool> mTable1;
+  std::unordered_map<const DdNode*, bool> mTable1;
 
   // 演算結果テーブル2
-  unordered_map<Apply2Key, bool> mTable2;
+  std::unordered_map<Apply2Key, bool> mTable2;
 };
 
 END_NAMESPACE_YM_DD

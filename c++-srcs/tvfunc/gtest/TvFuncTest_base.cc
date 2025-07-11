@@ -41,9 +41,9 @@ public:
   void
   check_func(
     const TvFunc& func,
-    const vector<int>& exp_values,
+    const std::vector<int>& exp_values,
     bool fast,
-    const string& str = string{}
+    const std::string& str = std::string{}
   )
   {
     // value() のテスト
@@ -110,11 +110,11 @@ public:
 	unate |= 2;
       }
       if ( unate != func.check_unate(i) ) {
-	cout << "VarId: " << i << endl;
-	func.print(cout);
-	cout << endl;
-	cout << "F0: " << func.cofactor(i, true) << endl
-	     << "F1: " << func.cofactor(i, false) << endl;
+	std::cout << "VarId: " << i << std::endl;
+	func.print(std::cout);
+	std::cout << std::endl;
+	std::cout << "F0: " << func.cofactor(i, true) << std::endl
+	     << "F1: " << func.cofactor(i, false) << std::endl;
       }
       EXPECT_EQ( unate, func.check_unate(i) );
     }
@@ -211,9 +211,9 @@ public:
     }
 
     if ( debug ) {
-      cout << "func:";
-      func.print(cout);
-      cout << endl;
+      std::cout << "func:";
+      func.print(std::cout);
+      std::cout << std::endl;
     }
     // walsh_w0(), walsh_w1() のテスト
     // ランダムな極性割り当てを試す．
@@ -230,17 +230,17 @@ public:
 	  ibits = 0U;
 	}
 	if ( debug ) {
-	  cout << "oinv = " << oinv << endl;
-	  cout << "ibits = ";
+	  std::cout << "oinv = " << oinv << std::endl;
+	  std::cout << "ibits = ";
 	  for (int i = 0; i < ni; ++ i) {
 	    if ( ibits & (1 << i) ) {
-	      cout << "1";
+	      std::cout << "1";
 	    }
 	    else {
-	      cout << "0";
+	      std::cout << "0";
 	    }
 	  }
-	  cout << endl;
+	  std::cout << std::endl;
 	}
 	int ww0[21];
 	for ( int j: Range(ni + 1) ) {
@@ -290,7 +290,7 @@ public:
 	}
 	for ( int w: Range(ni + 1) ) {
 	  if ( debug ) {
-	    cout << "  w = " << w << endl;
+	    std::cout << "  w = " << w << std::endl;
 	  }
 	  EXPECT_EQ( ww0[w], func.walsh_w0(w, oinv, ibits) );
 	  if ( ni < 14 ) {
@@ -299,18 +299,18 @@ public:
 	    }
 	  }
 	  if ( debug ) {
-	    cout << endl;
+	    std::cout << std::endl;
 	  }
 	}
       }
     }
 
     // dump/restore のテスト
-    ostringstream obuf;
+    std::ostringstream obuf;
     BinEnc bos{obuf};
     func.dump(bos);
 
-    istringstream ibuf{obuf.str()};
+    std::istringstream ibuf{obuf.str()};
     BinDec bis{ibuf};
     TvFunc func2;
     func2.restore(bis);
@@ -328,9 +328,9 @@ check_op(
 {
   auto ni = func1.input_num();
   auto ni_exp = 1U << ni;
-  vector<int> exp_and(ni_exp);
-  vector<int> exp_or(ni_exp);
-  vector<int> exp_xor(ni_exp);
+  std::vector<int> exp_and(ni_exp);
+  std::vector<int> exp_or(ni_exp);
+  std::vector<int> exp_xor(ni_exp);
   for ( int p: Range(ni_exp) ) {
     int v1 = func1.value(p);
     int v2 = func2.value(p);
@@ -376,7 +376,7 @@ TEST_P(TvFuncTest_base, empty_constr)
   init_values();
   SizeType ni = GetParam();
   auto f0 = TvFunc(ni);
-  ostringstream buf;
+  std::ostringstream buf;
   check_func(f0, mValues, false, buf.str());
 }
 
@@ -385,7 +385,7 @@ TEST_P(TvFuncTest_base, const_zero)
   init_values();
   SizeType ni = GetParam();
   auto f0 = TvFunc::zero(ni);
-  ostringstream buf;
+  std::ostringstream buf;
   check_func(f0, mValues, false, buf.str());
 }
 
@@ -398,7 +398,7 @@ TEST_P(TvFuncTest_base, const_one)
     mValues[p] = 1;
   }
   auto f0 = TvFunc::one(ni);
-  ostringstream buf;
+  std::ostringstream buf;
   check_func(f0, mValues, false, buf.str());
 }
 
@@ -417,7 +417,7 @@ TEST_P(TvFuncTest_base, literal1)
 	mValues[p] = 0;
       }
     }
-    ostringstream buf1;
+    std::ostringstream buf1;
     buf1 << "TvFunc::literal(" << ni << ", " << i << ", false)";
     check_func(f1, mValues, false, buf1.str());
 
@@ -430,7 +430,7 @@ TEST_P(TvFuncTest_base, literal1)
 	mValues[p] = 1;
       }
     }
-    ostringstream buf2;
+    std::ostringstream buf2;
     buf2 << "TvFunc::literal(" << ni << ", " << i << ", true)";
     check_func(f2, mValues, false, buf2.str());
   }
@@ -451,7 +451,7 @@ TEST_P(TvFuncTest_base, literal2)
 	mValues[p] = 0;
       }
     }
-    ostringstream buf1;
+    std::ostringstream buf1;
     buf1 << "TvFunc::literal(" << ni << ", Literal(" << i << ", false))";
     check_func(f1, mValues, true, buf1.str());
 
@@ -464,7 +464,7 @@ TEST_P(TvFuncTest_base, literal2)
 	mValues[p] = 1;
       }
     }
-    ostringstream buf2;
+    std::ostringstream buf2;
     buf2 << "TvFunc::literal(" << ni << ", Literal(" << i << ", true))";
     check_func(f2, mValues, true, buf2.str());
   }
@@ -485,7 +485,7 @@ TEST_P(TvFuncTest_base, posi_literal)
 	mValues[p] = 0;
       }
     }
-    ostringstream buf1;
+    std::ostringstream buf1;
     buf1 << "TvFunc::posi_literal(" << ni << ", " << i << ")";
     check_func(f1, mValues, true, buf1.str());
   }
@@ -506,7 +506,7 @@ TEST_P(TvFuncTest_base, nega_literal)
 	mValues[p] = 1;
       }
     }
-    ostringstream buf1;
+    std::ostringstream buf1;
     buf1 << "TvFunc::posi_literal(" << ni << ", " << i << ")";
     check_func(f1, mValues, true, buf1.str());
   }
@@ -531,7 +531,7 @@ TEST_P(TvFuncTest_base, cube1)
 	  mValues[p] = nval;
 	}
       }
-      ostringstream buf1;
+      std::ostringstream buf1;
       buf1 << "TvFunc::cube(" << ni << ", {" << lit << "})";
       check_func(f1, mValues, false, buf1.str());
     }
@@ -549,7 +549,7 @@ TEST_P(TvFuncTest_base, cube2)
     for ( SizeType c: Range(nsample) ) {
       // リテラル数
       SizeType nlit = rd(mRandGen) + 1;
-      vector<Literal> lit_list(nlit);
+      std::vector<Literal> lit_list(nlit);
       for ( SizeType i = 0; i < nlit; ++ i ) {
 	auto varid = rd(mRandGen);
 	auto inv = mRandDist(mRandGen) ? true : false;
@@ -563,7 +563,7 @@ TEST_P(TvFuncTest_base, cube2)
 	auto lit_f = TvFunc::literal(ni, lit);
 	exp_f &= lit_f;
       }
-      ostringstream buf1;
+      std::ostringstream buf1;
       buf1 << "TvFunc::cube(" << ni << ", {";
       const char* comma = "";
       for ( auto lit: lit_list ) {
@@ -587,7 +587,7 @@ TEST_P(TvFuncTest_base, cover1)
     for ( SizeType c: Range(nsample) ) {
       // キューブ数は２
       SizeType nlit1 = rd(mRandGen) + 1;
-      vector<Literal> lit_list1(nlit1);
+      std::vector<Literal> lit_list1(nlit1);
       for ( SizeType i = 0; i < nlit1; ++ i ) {
 	auto varid = rd(mRandGen);
 	auto inv = mRandDist(mRandGen) ? true : false;
@@ -595,7 +595,7 @@ TEST_P(TvFuncTest_base, cover1)
 	lit_list1[i] = lit;
       }
       SizeType nlit2 = rd(mRandGen) + 1;
-      vector<Literal> lit_list2(nlit2);
+      std::vector<Literal> lit_list2(nlit2);
       for ( SizeType i = 0; i < nlit2; ++ i ) {
 	auto varid = rd(mRandGen);
 	auto inv = mRandDist(mRandGen) ? true : false;
@@ -633,7 +633,7 @@ TEST_P(TvFuncTest_base, random_func)
 TEST(TvFuncTest, constructor_bad1)
 {
   // ベクタの長さが 2^3 ではない．
-  ASSERT_THROW((TvFunc{3, vector<int>{0, 1, 1, 0}}),
+  ASSERT_THROW((TvFunc{3, std::vector<int>{0, 1, 1, 0}}),
 	       std::invalid_argument);
 }
 
@@ -678,8 +678,8 @@ TEST(TvFuncTest, nega_literal_bad)
 
 TEST(TvFuncTest, check_op1)
 {
-  vector<int> values1(4);
-  vector<int> values2(4);
+  std::vector<int> values1(4);
+  std::vector<int> values2(4);
   for ( int v1: Range(14) ) {
     for ( int p: {0, 1, 2, 3} ) {
       if ( v1 & (1 << p) ) {
@@ -817,8 +817,8 @@ TEST_P(TvFuncTest_base, check_op2)
 {
   SizeType ni = GetParam();
   auto ni_exp = 1 << ni;
-  vector<int> values1(ni_exp, 0);
-  vector<int> values2(ni_exp, 0);
+  std::vector<int> values1(ni_exp, 0);
+  std::vector<int> values2(ni_exp, 0);
   int n = ni < 19 ? 100 : 1;
   for ( int c: Range(n) ) {
     for ( int p: Range(ni_exp) ) {
@@ -839,7 +839,7 @@ TEST_P(TvFuncTest_base, check_sup1)
 {
   SizeType ni = GetParam();
   auto ni_exp = 1 << ni;
-  vector<int> values(ni_exp, 0);
+  std::vector<int> values(ni_exp, 0);
   int n = ni < 17 ? 100 : ni < 19 ? 10 : 1;
   for ( int c: Range(n) ) {
     for ( int i: Range(ni) ) {
@@ -878,7 +878,7 @@ TEST_P(TvFuncTest_base, check_sup2)
 {
   SizeType ni = GetParam();
   auto ni_exp = 1 << ni;
-  vector<int> values(ni_exp, 0);
+  std::vector<int> values(ni_exp, 0);
   int n = ni < 19 ? 200 : 2;
   for ( int c: Range(n) ) {
     int i_bits = 0;
@@ -918,7 +918,7 @@ TEST_P(TvFuncTest_base, check_sup2)
 
 int
 check_sym(
-  const vector<int>& values,
+  const std::vector<int>& values,
   int i1,
   int i2
 )
@@ -954,7 +954,7 @@ TEST_P(TvFuncTest_base, check_sym)
   }
   std::uniform_int_distribution<int> rd(0, ni - 1);
   auto ni_exp = 1 << ni;
-  vector<int> values(ni_exp, 0);
+  std::vector<int> values(ni_exp, 0);
   int n1 = ni < 11 ? 50 : 10;
   int n2 = ni < 11 ? 50 : 10;
   for ( int c1: Range(n1) ) {
@@ -1007,7 +1007,7 @@ TEST_P(TvFuncTest_base, cofactor)
 {
   SizeType ni = GetParam();
   auto ni_exp = 1 << ni;
-  vector<int> values(ni_exp, 0);
+  std::vector<int> values(ni_exp, 0);
   int n = ni < 17 ? 100 : ni < 19 ? 10 : 1;
   for ( int c: Range(n) ) {
     for ( int p: Range(ni_exp) ) {
@@ -1022,8 +1022,8 @@ TEST_P(TvFuncTest_base, cofactor)
     for ( int var: Range(ni) ) {
       auto func0 = func.cofactor(var, true);
       auto func1 = func.cofactor(var, false);
-      vector<int> values0(ni_exp, 0);
-      vector<int> values1(ni_exp, 0);
+      std::vector<int> values0(ni_exp, 0);
+      std::vector<int> values1(ni_exp, 0);
       int i_bit = 1U << var;
       for ( int p: Range(ni_exp) ) {
 	if ( p & i_bit ) {
@@ -1058,7 +1058,7 @@ TEST_P(TvFuncTest_base, decompose)
     return;
   }
   auto ni_exp = 1 << ni;
-  vector<int> values(ni_exp, 0);
+  std::vector<int> values(ni_exp, 0);
   SizeType ni1 = ni - 1;
   auto ni1_exp = 1 << ni1;
   int n = ni < 17 ? 100 : ni < 19 ? 10 : 1;
@@ -1077,8 +1077,8 @@ TEST_P(TvFuncTest_base, decompose)
     func.decompose(func0, func1);
     EXPECT_EQ( ni1, func0.input_num() );
     EXPECT_EQ( ni1, func1.input_num() );
-    vector<int> values0(ni1_exp, 0);
-    vector<int> values1(ni1_exp, 0);
+    std::vector<int> values0(ni1_exp, 0);
+    std::vector<int> values1(ni1_exp, 0);
     for ( SizeType i = 0; i < ni1_exp; ++ i ) {
       values0[i] = values[i];
       values1[i] = values[i + ni1_exp];
@@ -1094,7 +1094,7 @@ TEST_P(TvFuncTest_base, xform)
 {
   SizeType ni = GetParam();
   auto ni_exp = 1 << ni;
-  vector<int> values(ni_exp, 0);
+  std::vector<int> values(ni_exp, 0);
   int n1 = ni < 12 ? 30 : ni < 19 ? 5 : 1;
   int n2 = ni < 15 ? 30 : 5;
   for ( int c1: Range(n1) ) {
@@ -1119,7 +1119,7 @@ TEST_P(TvFuncTest_base, xform)
       }
       auto xfunc = func.xform(map);
 
-      vector<int> exp_values(ni_exp);
+      std::vector<int> exp_values(ni_exp);
       for ( int p: Range(ni_exp) ) {
 	int q = 0;
 	for ( int i: Range(ni) ) {
@@ -1325,11 +1325,11 @@ TEST(TvFuncTest, invalid_func)
 {
   auto f1 = TvFunc(); // デフォルトで不正値となる．
 
-  ostringstream strbuf1;
+  std::ostringstream strbuf1;
   BinEnc enc{strbuf1};
   f1.dump(enc);
 
-  istringstream strbuf2{strbuf1.str()};
+  std::istringstream strbuf2{strbuf1.str()};
   BinDec dec{strbuf2};
   auto f2 = TvFunc::zero(10);
   f2.restore(dec);
@@ -1350,7 +1350,7 @@ TEST(TvFuncTest, hex_str)
   const char* fstr = "0111";
   auto f = TvFunc(fstr);
 
-  ostringstream buf;
+  std::ostringstream buf;
   f.print(buf, 16);
   auto xstr = buf.str();
   EXPECT_EQ( "7", xstr );
@@ -1358,7 +1358,7 @@ TEST(TvFuncTest, hex_str)
 
 TEST(TvFuncTest, from_vect)
 {
-  vector<int> vect{0, 1, 1, 1};
+  std::vector<int> vect{0, 1, 1, 1};
   auto f = TvFunc(2, vect);
 
   EXPECT_EQ( "1110", f.str() );

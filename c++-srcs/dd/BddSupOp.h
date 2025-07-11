@@ -72,7 +72,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 演算結果テーブル
-  unordered_map<const DdNode*, DdEdge> mTable;
+  std::unordered_map<const DdNode*, DdEdge> mTable;
 
 };
 

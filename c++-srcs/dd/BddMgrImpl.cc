@@ -51,7 +51,7 @@ BddMgrImpl::variable(
 }
 
 // @brief 変数順を表す変数のリストを返す．
-vector<DdEdge>
+std::vector<DdEdge>
 BddMgrImpl::variable_order()
 {
   auto order_list = variable_list();
@@ -69,7 +69,7 @@ BddMgrImpl::variable_order()
 // @brief 変数順を設定する．
 void
 BddMgrImpl::set_variable_order(
-  const vector<DdEdge>& order_list
+  const std::vector<DdEdge>& order_list
 )
 {
   auto nv = variable_num();
@@ -93,7 +93,7 @@ void
 BddMgrImpl::dvo_sift()
 {
   auto nv = variable_num();
-  vector<bool> lock_array(nv, false);
+  std::vector<bool> lock_array(nv, false);
   while ( true ) {
     // ノード数が最大の変数を選ぶ．
     SizeType max_num = 0;
@@ -302,7 +302,7 @@ restore_edge(
 DdEdge
 decode(
   SizeType edge_info,
-  const vector<DdEdge>& edge_list
+  const std::vector<DdEdge>& edge_list
 )
 {
   if ( edge_info == 0 ) {
@@ -365,7 +365,7 @@ BddMgrImpl::dump(
 }
 
 // @brief バイナリダンプから復元する．
-vector<DdEdge>
+std::vector<DdEdge>
 BddMgrImpl::restore(
   BinDec& s
 )
@@ -382,7 +382,7 @@ BddMgrImpl::restore(
   SizeType nv = variable_num();
   SizeType nv1 = s.read_vint();
   nv = std::max(nv, nv1);
-  vector<DdEdge> var_list(nv);
+  std::vector<DdEdge> var_list(nv);
   for ( SizeType i = 0; i < nv1; ++ i ) {
     auto varid = s.read_vint();
     var_list[i] = variable(varid);
@@ -392,12 +392,12 @@ BddMgrImpl::restore(
   }
   set_variable_order(var_list);
 
-  vector<SizeType> root_info_list(n);
+  std::vector<SizeType> root_info_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     root_info_list[i] = s.read_vint();
   }
 
-  vector<DdEdge> edge_list;
+  std::vector<DdEdge> edge_list;
   for ( SizeType id = 1; ; ++ id ) {
     SizeType level = s.read_vint();
     SizeType edge0_info = restore_edge(s, id);
@@ -411,7 +411,7 @@ BddMgrImpl::restore(
     edge_list.push_back(edge);
   }
 
-  vector<DdEdge> root_list(n);
+  std::vector<DdEdge> root_list(n);
   for ( SizeType i = 0; i < n; ++ i ) {
     SizeType root_info = root_info_list[i];
     auto edge = decode(root_info, edge_list);

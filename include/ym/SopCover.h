@@ -55,8 +55,8 @@ public:
   ///   と等しくなければならない．
   /// * キューブの順番は変わる可能性がある．
   SopCover(
-    SizeType var_num,                ///< [in] 変数の数
-    const vector<SopCube>& cube_list ///< [in] キューブのリスト
+    SizeType var_num,                     ///< [in] 変数の数
+    const std::vector<SopCube>& cube_list ///< [in] キューブのリスト
   ) : SopBase{var_num},
       mCubeNum{cube_list.size()},
       mChunk(_cube_size() * cube_num(), SOP_ALL1)
@@ -82,7 +82,7 @@ public:
   /// * キューブの順番は変わる可能性がある．
   SopCover(
     SizeType var_num,                        ///< [in] 変数の数
-    const vector<vector<Literal>>& cube_list ///< [in] カバーを表すリテラル
+    const std::vector<std::vector<Literal>>& cube_list ///< [in] カバーを表すリテラル
                                              ///<      のリストのリスト
   ) : SopBase{var_num},
       mCubeNum{cube_list.size()},
@@ -253,7 +253,7 @@ public:
   }
 
   /// @brief 内容をリテラルのリストのリストに変換する．
-  vector<vector<Literal>>
+  std::vector<std::vector<Literal>>
   literal_list() const
   {
     return _literal_list(cube_num(), chunk());
@@ -274,10 +274,10 @@ public:
   }
 
   /// @brief 内容をキューブのリストに変換する
-  vector<SopCube>
+  std::vector<SopCube>
   cube_list() const
   {
-    vector<SopCube> ans_list;
+    std::vector<SopCube> ans_list;
     ans_list.reserve(cube_num());
     for ( SizeType i = 0; i < cube_num(); ++ i ) {
       ans_list.push_back(get_cube(i));
@@ -339,8 +339,8 @@ public:
   /// @brief 内容をわかりやすい形で出力する．
   void
   print(
-    ostream& s,                             ///< [in] 出力先のストリーム
-    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
+    std::ostream& s,                                  ///< [in] 出力先のストリーム
+    const std::vector<std::string>& varname_list = {} ///< [in] 変数名のリスト
   ) const
   {
     _print(s, chunk(), 0, cube_num(), varname_list);
@@ -349,7 +349,7 @@ public:
   /// @brief 内容をデバッグ用に出力する．
   void
   debug_print(
-    ostream& s ///< [in] 出力先のストリーム
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const
   {
     _debug_print(s, cube_num(), chunk());
@@ -363,7 +363,7 @@ public:
   /// となる．
   void
   write(
-    ostream& s ///< [in] 出力先のストリーム
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const
   {
     _write_cover(s, chunk(), 0, cube_num());
@@ -373,7 +373,7 @@ public:
   static
   SopCover
   read(
-    istream& s ///< [in] 入力元のストリーム
+    std::istream& s ///< [in] 入力元のストリーム
   );
 
   //////////////////////////////////////////////////////////////////////
@@ -642,7 +642,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief すべてのカーネルとコカーネルペアを列挙する．
-  vector<pair<SopCover, vector<SopCube>>>
+  std::vector<std::pair<SopCover, std::vector<SopCube>>>
   all_kernels() const;
 
   /// @brief 最も価値の高いカーネルを求める．
@@ -653,7 +653,7 @@ public:
   SopCover
   best_kernel(
     std::function<int(const SopCover&,
-		      const vector<SopCube>&)> eval_func ///< [in] 評価関数
+		      const std::vector<SopCube>&)> eval_func ///< [in] 評価関数
   ) const;
 
   /// @brief "quick factor" を行う．
@@ -936,9 +936,9 @@ operator&(
 ///
 /// cover.print(s) と等価
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,           ///< [in] 出力先のストリーム
+  std::ostream& s,      ///< [in] 出力先のストリーム
   const SopCover& cover ///< [in] 対象のカバー
 )
 {

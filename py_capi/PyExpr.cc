@@ -1153,7 +1153,7 @@ new_func(
     auto self = type->tp_alloc(type, 0);
     auto my_obj = reinterpret_cast<Expr_Object*>(self);
     Expr src;
-    if ( expr_str != string{} ) {
+    if ( expr_str != std::string{} ) {
       try {
         src = Expr::from_rep_string(expr_str);
       }

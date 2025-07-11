@@ -16,7 +16,7 @@ BEGIN_NAMESPACE_YM_SOP
 //////////////////////////////////////////////////////////////////////
 
 // @brief 除算を行う．
-pair<SopCover, SopCover>
+std::pair<SopCover, SopCover>
 WeakDivision::divide(
   const SopCover& f,
   const SopCover& d
@@ -24,7 +24,7 @@ WeakDivision::divide(
 {
   auto q = f.algdiv(d);
   auto r = f - (q & d);
-  return make_pair(std::move(q), std::move(r));
+  return std::make_pair(std::move(q), std::move(r));
 }
 
 END_NAMESPACE_YM_SOP

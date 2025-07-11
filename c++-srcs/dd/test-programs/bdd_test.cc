@@ -21,21 +21,21 @@ simple_test(
   BddMgr mgr;
 
   //auto bdd = mgr.from_truth("10010110");
-  cout << "_A" << endl;
+  std::cout << "_A" << std::endl;
   auto bdd = mgr.variable(0);
-  cout << "A" << endl;
-  bdd.display(cout);
-  cout << "B" << endl;
+  std::cout << "A" << std::endl;
+  bdd.display(std::cout);
+  std::cout << "B" << std::endl;
   auto bdd2 = mgr.variable(1);
-  cout << "C" << endl;
-  bdd2.display(cout);
-  cout << "D" << endl;
+  std::cout << "C" << std::endl;
+  bdd2.display(std::cout);
+  std::cout << "D" << std::endl;
 
 #if 1
   auto bdd3 = bdd & bdd2;
-  cout << "E" << endl;
-  bdd3.display(cout);
-  cout << "F" << endl;
+  std::cout << "E" << std::endl;
+  bdd3.display(std::cout);
+  std::cout << "F" << std::endl;
 #endif
 
   return 0;

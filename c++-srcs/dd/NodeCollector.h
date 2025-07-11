@@ -26,7 +26,7 @@ public:
 
   /// @brief コンストラクタ
   NodeCollector(
-    const vector<DdEdge>& root_list ///< [in] 根の枝のリスト
+    const std::vector<DdEdge>& root_list ///< [in] 根の枝のリスト
   );
 
   /// @brief デストラクタ
@@ -39,7 +39,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief ノードのリストを返す．
-  const vector<const DdNode*>&
+  const std::vector<const DdNode*>&
   node_list() const
   {
     return mNodeList;
@@ -79,10 +79,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // ノード番号の対応表
-  unordered_map<const DdNode*, SizeType> mNodeMap;
+  std::unordered_map<const DdNode*, SizeType> mNodeMap;
 
   // ノードリスト
-  vector<const DdNode*> mNodeList;
+  std::vector<const DdNode*> mNodeList;
 
 };
 

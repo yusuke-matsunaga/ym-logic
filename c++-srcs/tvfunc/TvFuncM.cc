@@ -90,13 +90,13 @@ TvFuncM::TvFuncM(
 
 // @brief TvFunc を用いたコンストラクタ
 TvFuncM::TvFuncM(
-  const vector<TvFunc>& src_list
+  const std::vector<TvFunc>& src_list
 )
 {
   ASSERT_COND( !src_list.empty() );
   const TvFunc& first = src_list.front();
-  SizeType ni = first.input_num();
-  SizeType no = src_list.size();
+  auto ni = first.input_num();
+  auto no = src_list.size();
   // 全ての関数の入力数が等しいことを確認しておく．
   for ( auto f: src_list ) {
     ASSERT_COND( f.input_num() == ni );
@@ -106,10 +106,10 @@ TvFuncM::TvFuncM(
   mOutputNum = no;
   mBlockNum1 = nblock(ni);
   mBlockNum = mBlockNum1 * no;
-  mVector = vector<WordType>(mBlockNum);
+  mVector = std::vector<WordType>(mBlockNum);
   for ( SizeType i: Range(no) ) {
     SizeType offset = i * mBlockNum1;
-    const TvFunc& src1 = src_list[i];
+    auto& src1 = src_list[i];
     for ( SizeType b: Range(mBlockNum1) ) {
       mVector[offset + b] = src1.raw_data(b);
     }
@@ -625,7 +625,7 @@ operator&&(
 // mode は 2 か 16
 void
 TvFuncM::print(
-  ostream& s,
+  std::ostream& s,
   int mode
 ) const
 {

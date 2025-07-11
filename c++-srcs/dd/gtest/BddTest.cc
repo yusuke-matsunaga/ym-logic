@@ -37,7 +37,7 @@ BddTest::check(
     ++ ni;
   }
   ASSERT_EQ( n, (1 << ni) );
-  vector<bool> inputs(ni);
+  std::vector<bool> inputs(ni);
   for ( SizeType p = 0; p < n; ++ p ) {
     for ( SizeType i = 0; i < ni; ++ i ) {
       if ( p & (1 << (ni - i - 1)) ) {
@@ -55,7 +55,7 @@ BddTest::check(
     else {
       exp_val = true;
     }
-    ostringstream buf;
+    std::ostringstream buf;
     buf << "(";
     for ( SizeType i = 0; i < ni; ++ i ) {
       buf << " " << inputs[i];
@@ -63,7 +63,7 @@ BddTest::check(
     buf << ")";
     EXPECT_EQ( exp_val, val ) << buf.str();
   }
-  vector<BddVar> var_list(ni);
+  std::vector<BddVar> var_list(ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
     var_list[i] = mMgr.variable(i);
   }
@@ -87,7 +87,7 @@ BddTest::test_check_sym(
   auto bdd10 = bdd / (lit1 & ~lit2);
   auto bdd11 = bdd / (lit1 & lit2);
 
-  ostringstream buf;
+  std::ostringstream buf;
   buf << ", where var1 = " << var1 << ", var2 = " << var2;
   bool exp1 = bdd01 == bdd10;
   auto v1 = mMgr.variable(var1);
@@ -108,7 +108,7 @@ BddTest::test_check_sup(
   auto bdd0 = bdd / ~lit1;
   auto bdd1 = bdd / lit1;
 
-  ostringstream buf;
+  std::ostringstream buf;
   buf << ", where var = " << var;
   bool exp = bdd0 != bdd1;
   auto v = mMgr.variable(var);
@@ -131,7 +131,7 @@ BddTest::test_support(
 
   for ( SizeType i = 0; i < max_v; ++ i ) {
     auto var = mMgr.variable(i);
-    ostringstream buf;
+    std::ostringstream buf;
     buf << ", where var = " << var;
     auto exp_result = sup_mark.count(var) > 0;
     EXPECT_EQ( exp_result, bdd.check_sup(var) ) << buf.str();

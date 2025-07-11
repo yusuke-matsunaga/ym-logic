@@ -45,17 +45,17 @@ public:
   static
   Bdd
   gen_bdd(
-    const TvFunc& f,               ///< [in] 対象の関数
-    BddMgr& mgr,                   ///< [in] BDDマネージャ
-    const vector<BddVar>& var_list ///< [in] 変数リスト
+    const TvFunc& f,                    ///< [in] 対象の関数
+    BddMgr& mgr,                        ///< [in] BDDマネージャ
+    const std::vector<BddVar>& var_list ///< [in] 変数リスト
   );
 
   /// @brief 複数の TvFunc を BDD のリストに変換する．
   static
-  vector<Bdd>
+  std::vector<Bdd>
   gen_bdd(
-    const vector<TvFunc>& f_list, ///< [in] 対象の関数のリスト
-    BddMgr& mgr                   ///< [in] BDDマネージャ
+    const std::vector<TvFunc>& f_list, ///< [in] 対象の関数のリスト
+    BddMgr& mgr                        ///< [in] BDDマネージャ
   );
 
   /// @brief 複数の TvFunc を BDD のリストに変換する．
@@ -64,11 +64,11 @@ public:
   /// - var_list.size() >= input_num() でなければ
   ///   std::invalid_argument 例外を送出する．
   static
-  vector<Bdd>
+  std::vector<Bdd>
   gen_bdd(
-    const vector<TvFunc>& f_list,  ///< [in] 対象の関数のリスト
-    BddMgr& mgr,                   ///< [in] BDDマネージャ
-    const vector<BddVar>& var_list ///< [in] 変数リスト
+    const std::vector<TvFunc>& f_list,  ///< [in] 対象の関数のリスト
+    BddMgr& mgr,                        ///< [in] BDDマネージャ
+    const std::vector<BddVar>& var_list ///< [in] 変数リスト
   );
 
 };

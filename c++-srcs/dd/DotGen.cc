@@ -21,7 +21,7 @@ BEGIN_NAMESPACE_YM_DD
 // @brief dot 形式で出力する．
 void
 Bdd::gen_dot(
-  ostream& s,
+  std::ostream& s,
   const JsonValue& option
 ) const
 {
@@ -34,8 +34,8 @@ Bdd::gen_dot(
 // @brief 複数のBDDを dot 形式で出力する．
 void
 Bdd::gen_dot(
-  ostream& s,
-  const vector<Bdd>& bdd_list,
+  std::ostream& s,
+  const std::vector<Bdd>& bdd_list,
   const JsonValue& option
 )
 {
@@ -53,7 +53,7 @@ Bdd::gen_dot(
 // @brief dot 形式で出力する．
 void
 Zdd::gen_dot(
-  ostream& s,
+  std::ostream& s,
   const JsonValue& option
 ) const
 {
@@ -66,8 +66,8 @@ Zdd::gen_dot(
 // @brief 複数のZDDを dot 形式で出力する．
 void
 Zdd::gen_dot(
-  ostream& s,
-  const vector<Zdd>& zdd_list,
+  std::ostream& s,
+  const std::vector<Zdd>& zdd_list,
   const JsonValue& option
 )
 {
@@ -146,7 +146,7 @@ DotGen::set_attr(
     }
     auto attr_val = val_json.get_string();
     auto pos = attr_name.find_first_of(":");
-    if ( pos == string::npos ) {
+    if ( pos == std::string::npos ) {
       // 全てのタイプに指定する．
       mRootAttrList.emplace(attr_name, attr_val);
       mNodeAttrList.emplace(attr_name, attr_val);
@@ -188,7 +188,7 @@ DotGen::set_attr(
 	mEdge1AttrList.emplace(attr_name1, attr_val);
       }
       else {
-	ostringstream buf;
+	std::ostringstream buf;
 	buf << type << ": Unknown group name";
 	throw std::invalid_argument{buf.str()};
       }
@@ -199,13 +199,13 @@ DotGen::set_attr(
 // @brief 変数ラベルをセットする．
 void
 DotGen::set_label(
-  const string& name,
+  const std::string& name,
   const JsonValue& label_array,
-  std::unordered_map<SizeType, string>& label_dict
+  std::unordered_map<SizeType, std::string>& label_dict
 )
 {
   if ( !label_array.is_array() ) {
-    ostringstream buf;
+    std::ostringstream buf;
     buf << "'" << name << "' should be a JSON array";
     throw std::invalid_argument{buf.str()};
   }
@@ -213,7 +213,7 @@ DotGen::set_label(
   for ( SizeType i = 0; i < n; ++ i ) {
     auto obj = label_array.at(i);
     if ( !obj.is_string() ) {
-      ostringstream buf;
+      std::ostringstream buf;
       buf << "value of '" << name << "' should be a string";
       throw std::invalid_argument{buf.str()};
     }
@@ -225,7 +225,7 @@ DotGen::set_label(
 // @brief dot 形式で出力する．
 void
 DotGen::write(
-  ostream& s,
+  std::ostream& s,
   const DdInfoMgr& info_mgr
 )
 {
@@ -238,7 +238,7 @@ DotGen::write(
   SizeType i = 1;
   for ( auto edge: info_mgr.root_list() ) {
     auto attr_list = mRootAttrList;
-    ostringstream buf;
+    std::ostringstream buf;
     buf << "\"BDD#" << i << "\"";
     attr_list.emplace("label", buf.str());
     writer.write_node(root_name(i), attr_list);
@@ -252,7 +252,7 @@ DotGen::write(
       auto attr_list = mNodeAttrList;
       auto varid = info_mgr.level_to_varid(node.level());
       {
-	ostringstream buf;
+	std::ostringstream buf;
 	buf << "\"";
 	if ( mLabelDict.count(varid) > 0 ) {
 	  buf << mLabelDict.at(varid);
@@ -265,7 +265,7 @@ DotGen::write(
       }
       {
 	if ( mTexLblDict.count(varid) > 0 ) {
-	  ostringstream buf;
+	  std::ostringstream buf;
 	  buf << "\""
 	      << mTexLblDict.at(varid)
 	      << "\"";
@@ -301,7 +301,7 @@ DotGen::write(
   // 根のランクの設定
   {
     SizeType n = info_mgr.root_list().size();
-    vector<string> node_list(n);
+    std::vector<std::string> node_list(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       node_list[i] = root_name(i + 1);
     }
@@ -312,7 +312,7 @@ DotGen::write(
   for ( SizeType level = 0; level < info_mgr.max_level(); ++ level ) {
     auto& node_list = info_mgr.id_list(level);
     SizeType n = node_list.size();
-    vector<string> node_name_list;
+    std::vector<std::string> node_name_list;
     node_name_list.reserve(n);
     for ( auto id: node_list ) {
       node_name_list.push_back(node_name(id));
@@ -321,30 +321,30 @@ DotGen::write(
   }
 
   // 終端ノードのランクの設定
-  vector<string> terminal_nodes{"const0", "const1"};
+  std::vector<std::string> terminal_nodes{"const0", "const1"};
   writer.write_rank_group(terminal_nodes, "max");
 
   writer.graph_end();
 }
 
 // @brief ルート名を返す．
-string
+std::string
 DotGen::root_name(
   SizeType i
 )
 {
-  ostringstream buf;
+  std::ostringstream buf;
   buf << "root" << i;
   return buf.str();
 }
 
 // @brief ノード名を返す．
-string
+std::string
 DotGen::node_name(
   SizeType id
 )
 {
-  ostringstream buf;
+  std::ostringstream buf;
   buf << "node" << id;
   return buf.str();
 }
@@ -353,12 +353,12 @@ DotGen::node_name(
 void
 DotGen::write_edge(
   DotWriter& writer,
-  const string& from_node,
+  const std::string& from_node,
   SizeType edge,
   bool zero
 )
 {
-  string to_node;
+  std::string to_node;
   bool inv{false};
   if ( edge == 0 ) {
     to_node = "const0";
@@ -371,7 +371,7 @@ DotGen::write_edge(
     to_node = node_name(edge >> 1);
   }
 
-  auto attr_list{zero ? mEdge0AttrList : mEdge1AttrList};
+  auto attr_list = zero ? mEdge0AttrList : mEdge1AttrList;
   if ( inv ) {
     attr_list.emplace("dir", "both");
     attr_list.emplace("arrowtail", "odot");

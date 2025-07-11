@@ -33,8 +33,8 @@ public:
 
     // cof_f が [f: f + d] の範囲に入っているかテスト
     auto cov_f = cov.tvfunc();
-    ostringstream buf;
-    buf << f << "|" << d << endl
+    std::ostringstream buf;
+    buf << f << "|" << d << std::endl
 	<< cov_f;
     auto f1 = f & ~d;
     EXPECT_TRUE( f1.check_containment(cov_f) ) << buf.str();
@@ -54,8 +54,8 @@ public:
 
     // cube_list の各キューブが非冗長かどうかのテスト
     auto nc = cube_list.size();
-    vector<TvFunc> fl_list(nc);
-    vector<TvFunc> fu_list(nc);
+    std::vector<TvFunc> fl_list(nc);
+    std::vector<TvFunc> fu_list(nc);
     auto fl = TvFunc::zero(f.input_num());
     for ( SizeType i = 0; i < nc; ++ i ) {
       fl_list[i] = fl;
@@ -87,7 +87,7 @@ private:
     SizeType ni = cube.variable_num();
     auto lit_list = cube.literal_list();
     auto nl = lit_list.size();
-    ostringstream buf;
+    std::ostringstream buf;
     cube.print(buf);
     buf << ", " << r;
     for ( SizeType i = 0; i < nl; ++ i ) {

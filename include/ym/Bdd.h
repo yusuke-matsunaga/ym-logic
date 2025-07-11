@@ -35,6 +35,14 @@ class Bdd :
 
 public:
 
+  /// @brief compose 用の変換マップの型
+  using ComposeMap = std::unordered_map<BddVar, Bdd>;
+
+  /// @brief remap_vars 用の変換マップの型
+  using VarMap = std::unordered_map<BddVar, BddLit>;
+
+public:
+
   /// @brief 空のコンストラクタ
   ///
   /// 不正な値となる．
@@ -349,13 +357,13 @@ public:
   /// @brief 複合compose演算
   Bdd
   multi_compose(
-    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
+    const ComposeMap& compose_map ///< [in] 変換マップ
   ) const;
 
   /// @brief 複合compose演算を行って代入する．
   Bdd&
   multi_compose_int(
-    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
+    const ComposeMap& compose_map ///< [in] 変換マップ
   );
 
   /// @brief 変数順を入れ替える演算
@@ -363,7 +371,7 @@ public:
   /// 極性も入れ替え可能
   Bdd
   remap_vars(
-    const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
+    const VarMap& var_map ///< [in] 変数の変換マップ
   ) const;
 
   /// @}
@@ -403,7 +411,7 @@ protected:
   ///
   /// - is_posicube() == true が成り立つと仮定している．
   /// - そうでない時は std::invalid_argument 例外を送出する．
-  vector<BddVar>
+  std::vector<BddVar>
   to_varlist() const;
 
 
@@ -478,7 +486,7 @@ public:
   get_support() const;
 
   /// @brief サポート変数のリスト(vector)を得る．
-  vector<BddVar>
+  std::vector<BddVar>
   get_support_list() const;
 
   /// @brief 1となるパスを求める．
@@ -531,7 +539,7 @@ public:
   /// @brief 評価を行う．
   bool
   eval(
-    const vector<bool>& inputs ///< [in] 入力値ベクタ
+    const std::vector<bool>& inputs ///< [in] 入力値ベクタ
   ) const;
 
   /// @brief 等価比較演算
@@ -579,7 +587,7 @@ public:
   ///
   /// - is_cube() == true が成り立っていると仮定している．
   /// - そうでない時は std::invalid_argument 例外を送出する．
-  vector<BddLit>
+  std::vector<BddLit>
   to_litlist() const;
 
   /// @brief 内容を真理値表の文字列に変換する．
@@ -587,15 +595,15 @@ public:
   /// - var_list の先頭がMSBとなる．
   /// - var_list に含まれていない変数があった場合には
   ///   std::invalid_argument 例外を送出する．
-  string
+  std::string
   to_truth(
-    const vector<BddVar> var_list ///< [in] 入力変数のリスト
+    const std::vector<BddVar> var_list ///< [in] 入力変数のリスト
   ) const;
 
   /// @brief 内容を出力する．
   void
   display(
-    ostream& s ///< [in] 出力ストリーム
+    std::ostream& s ///< [in] 出力ストリーム
   ) const;
 
   /// @brief dot 形式で出力する．
@@ -622,13 +630,13 @@ public:
   ///     var_label は無視される．
   void
   gen_dot(
-    ostream& s,             ///< [in] 出力ストリーム
+    std::ostream& s,        ///< [in] 出力ストリーム
     const JsonValue& option ///< [in] オプションを表す JSON オブジェクト
     = JsonValue{}
   ) const;
 
   /// @brief 構造を表す整数配列を作る．
-  vector<SizeType>
+  std::vector<SizeType>
   rep_data() const;
 
   /// @brief 独自形式でバイナリダンプする．
@@ -658,7 +666,7 @@ public:
   static
   SizeType
   bdd_size(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+    const std::vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
   /// @brief 複数のBDDの内容を出力する．
@@ -667,8 +675,8 @@ public:
   static
   void
   display(
-    ostream& s,                 ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+    std::ostream& s,                 ///< [in] 出力ストリーム
+    const std::vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
   /// @brief 複数のBDDを dot 形式で出力する．
@@ -697,9 +705,9 @@ public:
   static
   void
   gen_dot(
-    ostream& s,                   ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list,  ///< [in] BDDのリスト
-    const JsonValue& option       ///< [in] オプションを表す JSON オブジェクト
+    std::ostream& s,                  ///< [in] 出力ストリーム
+    const std::vector<Bdd>& bdd_list, ///< [in] BDDのリスト
+    const JsonValue& option           ///< [in] オプションを表す JSON オブジェクト
     = JsonValue{}
   );
 
@@ -707,9 +715,9 @@ public:
   ///
   /// bdd_list 中の BDD は同一のマネージャに属していなければならない．
   static
-  vector<SizeType>
+  std::vector<SizeType>
   rep_data(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+    const std::vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
   /// @brief BDD の内容をバイナリダンプする．
@@ -718,8 +726,8 @@ public:
   static
   void
   dump(
-    BinEnc& s,                  ///< [in] 出力ストリーム
-    const vector<Bdd>& bdd_list ///< [in] 対象の BDDのリスト
+    BinEnc& s,                       ///< [in] 出力ストリーム
+    const std::vector<Bdd>& bdd_list ///< [in] 対象の BDDのリスト
   );
 
 
@@ -830,7 +838,7 @@ private:
   /// @brief 複合compose演算
   DdEdge
   _multi_compose(
-    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
+    const ComposeMap& compose_map ///< [in] 変換マップ
   ) const;
 
   /// @brief 変数順を入れ替える演算
@@ -838,7 +846,7 @@ private:
   /// 極性も入れ替え可能
   DdEdge
   _remap_vars(
-    const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
+    const VarMap& var_map ///< [in] 変換マップ
   ) const;
 
   /// @brief レベルを変数に変換する．
@@ -855,14 +863,14 @@ private:
   static
   BddMgrImpl*
   _mgr(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+    const std::vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
   /// @brief BDDのリストから枝のリストに変換する．
   static
-  vector<DdEdge>
+  std::vector<DdEdge>
   _conv_to_edgelist(
-    const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+    const std::vector<Bdd>& bdd_list ///< [in] BDDのリスト
   );
 
 

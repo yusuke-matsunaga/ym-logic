@@ -118,9 +118,9 @@ NpnMapM::operator*(
 }
 
 // @brief 内容を表示する(主にデバッグ用)．
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   const NpnMapM& map
 )
 {
@@ -173,7 +173,7 @@ operator<<(
 // バイナリ出力
 void
 NpnMapM::dump(
-  ostream& bos
+  std::ostream& bos
 ) const
 {
   SizeType ni = input_num();
@@ -196,7 +196,7 @@ NpnMapM::dump(
 // バイナリ入力
 void
 NpnMapM::restore(
-  istream& bis
+  std::istream& bis
 )
 {
   SizeType ni;

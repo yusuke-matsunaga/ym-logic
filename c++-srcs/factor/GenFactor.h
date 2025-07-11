@@ -51,12 +51,12 @@ private:
   )
   {
     if ( debug ) {
-      cout << "factor(f" << endl
-	   << "f[" << f.cube_num() << "] = " << f << endl;
+      std::cout << "factor(f" << std::endl
+		<< "f[" << f.cube_num() << "] = " << f << std::endl;
     }
     if ( f.cube_num() == 0 ) {
       if ( debug ) {
-	cout << " => 0" << endl;
+	std::cout << " => 0" << std::endl;
       }
       return Expr::zero();
     }
@@ -64,7 +64,7 @@ private:
     if ( d.cube_num() == 0 ) {
       auto expr = cov_to_expr(f);
       if ( debug ) {
-	cout << " => " << expr << endl;
+	std::cout << " => " << expr << std::endl;
       }
       return expr;
     }
@@ -72,25 +72,25 @@ private:
     auto& q = p.first;
     auto& r = p.second;
     if ( debug ) {
-      cout << "--------------------------" << endl;
-      cout << "d[" << d.cube_num() << "] = " << d << endl
-	   << "q[" << q.cube_num() << "] = " << q << endl
-	   << "r[" << r.cube_num() << "] = " << r << endl;
+      std::cout << "--------------------------" << std::endl
+		<< "d[" << d.cube_num() << "] = " << d << std::endl
+		<< "q[" << q.cube_num() << "] = " << q << std::endl
+		<< "r[" << r.cube_num() << "] = " << r << std::endl;
     }
     if ( q.literal_num() == 0 ) {
       // special case
       if ( debug ) {
-	cout << "factor(d)" << endl;
+	std::cout << "factor(d)" << std::endl;
       }
       auto d_expr = factor(d);
       if ( debug ) {
-	cout << "factor(r)" << endl;
+	std::cout << "factor(r)" << std::endl;
       }
       auto r_expr = factor(r);
       auto expr = d_expr | r_expr;
       if ( debug ) {
-	cout << "*factor(" << f << ")" << endl
-	     << " => " << expr << endl;
+	std::cout << "*factor(" << f << ")" << std::endl
+		  << " => " << expr << std::endl;
       }
       return expr;
     }
@@ -100,12 +100,12 @@ private:
 	throw std::logic_error{"cube_list.size() != 1"};
       }
       if ( debug ) {
-	cout << "literal_factor(f)" << endl;
+	std::cout << "literal_factor(f)" << std::endl;
       }
       auto expr = literal_factor(f, cube_list.front());
       if ( debug ) {
-	cout << "*factor(" << f << ")" << endl
-	     << " => " << expr << endl;
+	std::cout << "*factor(" << f << ")" << std::endl
+		  << " => " << expr << std::endl;
       }
       return expr;
     }
@@ -116,59 +116,59 @@ private:
       auto& d1 = p.first;
       auto& r1 = p.second;
       if ( debug ) {
-	cout << "--------------------------" << endl;
-	cout << "cc = " << cc << endl;
-	cout << "d1[" << d1.cube_num() << "] = " << d1 << endl
-	     << "q1[" << q1.cube_num() << "] = " << q1 << endl
-	     << "r1[" << r1.cube_num() << "] = " << r1 << endl;
+	std::cout << "--------------------------" << std::endl
+		  << "cc = " << cc << std::endl
+		  << "d1[" << d1.cube_num() << "] = " << d1 << std::endl
+		  << "q1[" << q1.cube_num() << "] = " << q1 << std::endl
+		  << "r1[" << r1.cube_num() << "] = " << r1 << std::endl;
       }
       if ( d1.literal_num() == 0 ) {
 	// special case
 	if ( debug ) {
-	  cout << "factor(q1)" << endl;
+	  std::cout << "factor(q1)" << std::endl;
 	}
 	auto q_expr = factor(q1);
 	if ( debug ) {
-	  cout << "factor(r1)" << endl;
+	  std::cout << "factor(r1)" << std::endl;
 	}
 	auto r_expr = factor(r1);
 	auto expr = q_expr | r_expr;
 	if ( debug ) {
-	  cout << "*factor(" << f << ")" << endl
-	       << " => " << expr << endl;
+	  std::cout << "*factor(" << f << ")" << std::endl
+		    << " => " << expr << std::endl;
 	}
 	return expr;
       }
       auto cc1 = d1.common_cube();
       if ( cc1.literal_num() == 0 ) {
 	if ( debug ) {
-	  cout << "factor(q1)" << endl;
+	  std::cout << "factor(q1)" << std::endl;
 	}
 	auto q_expr = factor(q1);
 	if ( debug ) {
-	  cout << "factor(d1)" << endl;
+	  std::cout << "factor(d1)" << std::endl;
 	}
 	auto d_expr = factor(d1);
 	if ( debug ) {
-	  cout << "factor(r1)" << endl;
+	  std::cout << "factor(r1)" << std::endl;
 	}
 	auto r_expr = factor(r1);
 	auto expr = (q_expr & d_expr) | r_expr;
 	if ( debug ) {
-	  cout << "*factor(" << f << ")" << endl
-	       << " => " << expr << endl;
+	  std::cout << "*factor(" << f << ")" << std::endl
+		    << " => " << expr << std::endl;
 	}
 	return expr;
       }
       else {
 	auto lit_list = cc1.literal_list();
 	if ( debug ) {
-	  cout << "literal_factor(f)" << endl;
+	  std::cout << "literal_factor(f)" << std::endl;
 	}
 	auto expr = literal_factor(f, lit_list);
 	if ( debug ) {
-	  cout << "*factor(" << f << ")" << endl
-	       << " => " << expr << endl;
+	  std::cout << "*factor(" << f << ")" << std::endl
+		    << " => " << expr << std::endl;
 	}
 	return expr;
       }
@@ -179,7 +179,7 @@ private:
   Expr
   literal_factor(
     const SopCover& f,
-    const vector<Literal>& lit_list
+    const std::vector<Literal>& lit_list
   )
   {
     if ( lit_list.empty() ) {
@@ -215,11 +215,11 @@ private:
     if ( nc == 0 ) {
       return Expr::zero();
     }
-    vector<Expr> and_list;
+    std::vector<Expr> and_list;
     and_list.reserve(nc);
     for ( auto cube: cube_list ) {
-      SizeType nl = cube.size();
-      vector<Expr> lit_list;
+      auto nl = cube.size();
+      std::vector<Expr> lit_list;
       lit_list.reserve(nl);
       for ( auto lit: cube ) {
 	auto lit_expr = Expr::literal(lit);

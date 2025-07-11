@@ -18,7 +18,7 @@ END_NONAMESPACE
 
 TEST(CkMatrixTest, test1)
 {
-  vector<KIX::CoverInfo> cover_list;
+  std::vector<KIX::CoverInfo> cover_list;
   {
     auto a = Literal(0);
     auto b = Literal(1);
@@ -36,7 +36,7 @@ TEST(CkMatrixTest, test1)
 			{a, d, e},
 			{b, d, e},
 			{c, d, e} });
-    auto inputs_F = vector<SizeType>{0, 1, 2, 3, 4, 5, 6};
+    auto inputs_F = std::vector<SizeType>{0, 1, 2, 3, 4, 5, 6};
     cover_list.push_back(KIX::CoverInfo{F, inputs_F});
   }
   {
@@ -51,7 +51,7 @@ TEST(CkMatrixTest, test1)
 			{b, f},
 			{a, c, e},
 			{b, c, e} });
-    auto inputs_G = vector<SizeType>{0, 1, 2, 4, 5};
+    auto inputs_G = std::vector<SizeType>{0, 1, 2, 4, 5};
     cover_list.push_back(KIX::CoverInfo{G, inputs_G});
   }
   {
@@ -63,7 +63,7 @@ TEST(CkMatrixTest, test1)
     auto H = SopCover(4,
 		      { {a, d, e},
 			{c, d, e} });
-    auto inputs_H = vector<SizeType>{0, 2, 3, 4};
+    auto inputs_H = std::vector<SizeType>{0, 2, 3, 4};
     cover_list.push_back(KIX::CoverInfo{H, inputs_H});
   }
 

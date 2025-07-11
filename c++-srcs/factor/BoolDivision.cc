@@ -30,13 +30,13 @@ calc_lit(
 }
 
 // @brief 除算を行う．
-pair<SopCover, SopCover>
+std::pair<SopCover, SopCover>
 BoolDivision::divide(
   const SopCover& f,
   const SopCover& d
 )
 {
-  SizeType ni = f.variable_num();
+  auto ni = f.variable_num();
   auto f_func = f.tvfunc();
   auto d_func = d.tvfunc();
   // ~d をドントケアにして q を求める．
@@ -53,10 +53,10 @@ BoolDivision::divide(
     auto& r1 = p.second;
     // リテラル数の少ない方を答とする．
     if ( q1.cube_num() > 0 && calc_lit(q, d, r) > calc_lit(q1, d, r1) ) {
-      return make_pair(std::move(q1), std::move(r1));
+      return std::make_pair(std::move(q1), std::move(r1));
     }
   }
-  return make_pair(std::move(q), std::move(r));
+  return std::make_pair(std::move(q), std::move(r));
 }
 
 END_NAMESPACE_YM_SOP

@@ -19,7 +19,7 @@ BEGIN_NAMESPACE_YM_DD
 
 // @brief コンストラクタ
 NodeCollector::NodeCollector(
-  const vector<DdEdge>& root_list
+  const std::vector<DdEdge>& root_list
 )
 {
   for ( auto root: root_list ) {

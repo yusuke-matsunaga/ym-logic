@@ -44,7 +44,7 @@ public:
   /// @brief dot 形式で出力する．
   void
   write(
-    ostream& s,               ///< [in] 出力ストリーム
+    std::ostream& s,          ///< [in] 出力ストリーム
     const DdInfoMgr& info_mgr ///< [in] グラフ構造の情報を持つオブジェクト
   );
 
@@ -63,19 +63,19 @@ private:
   /// @brief 変数ラベルをセットする．
   void
   set_label(
-    const string& name,          ///< [in] 名前(エラーメッセージ用)
-    const JsonValue& label_json, ///< [in] 変数ラベル配列を表す JSON オブジェクト
-    std::unordered_map<SizeType, string>& label_dict ///< [in] 結果を格納する辞書
+    const std::string& name,                              ///< [in] 名前(エラーメッセージ用)
+    const JsonValue& label_json,                          ///< [in] 変数ラベル配列を表す JSON オブジェクト
+    std::unordered_map<SizeType, std::string>& label_dict ///< [in] 結果を格納する辞書
   );
 
   /// @brief ルート名を返す．
-  string
+  std::string
   root_name(
     SizeType i ///< [in] 番号
   );
 
   /// @brief ノード名を返す．
-  string
+  std::string
   node_name(
     SizeType id ///< [in] 番号
   );
@@ -83,10 +83,10 @@ private:
   /// @brief 枝の内容を出力する．
   void
   write_edge(
-    DotWriter& writer,       ///< [in] dot 出力着
-    const string& from_node, ///< [in] 始点のノード名
-    SizeType edge,           ///< [in] 枝
-    bool zero                ///< [in] 0枝の時 true にするフラグ
+    DotWriter& writer,            ///< [in] dot 出力着
+    const std::string& from_node, ///< [in] 始点のノード名
+    SizeType edge,                ///< [in] 枝
+    bool zero                     ///< [in] 0枝の時 true にするフラグ
   );
 
 
@@ -96,31 +96,31 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数ラベルの辞書
-  unordered_map<SizeType, string> mLabelDict;
+  std::unordered_map<SizeType, std::string> mLabelDict;
 
   // TeX用変数ラベルの辞書
-  unordered_map<SizeType, string> mTexLblDict;
+  std::unordered_map<SizeType, std::string> mTexLblDict;
 
   // グラフの属性リスト
-  unordered_map<string, string> mGraphAttrList;
+  std::unordered_map<std::string, std::string> mGraphAttrList;
 
   // 根の属性リスト
-  unordered_map<string, string> mRootAttrList;
+  std::unordered_map<std::string, std::string> mRootAttrList;
 
   // ノードの属性リスト
-  unordered_map<string, string> mNodeAttrList;
+  std::unordered_map<std::string, std::string> mNodeAttrList;
 
   // 終端0の属性リスト
-  unordered_map<string, string> mTerminal0AttrList;
+  std::unordered_map<std::string, std::string> mTerminal0AttrList;
 
   // 終端1の属性リスト
-  unordered_map<string, string> mTerminal1AttrList;
+  std::unordered_map<std::string, std::string> mTerminal1AttrList;
 
   // 0枝の属性リスト
-  unordered_map<string, string> mEdge0AttrList;
+  std::unordered_map<std::string, std::string> mEdge0AttrList;
 
   // 1枝の属性リスト
-  unordered_map<string, string> mEdge1AttrList;
+  std::unordered_map<std::string, std::string> mEdge1AttrList;
 
 };
 

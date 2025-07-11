@@ -62,10 +62,10 @@ enum class PrimType : std::uint8_t {
 /// @relates PrimType
 /// @brief ストリーム出力演算子
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,      ///< [in] 出力ストリーム
-  PrimType type ///< [in] 組み込み型
+  std::ostream& s, ///< [in] 出力ストリーム
+  PrimType type    ///< [in] 組み込み型
 )
 {
   switch ( type ) {
@@ -192,10 +192,10 @@ enum class SopPat : std::uint8_t {
 /// @brief SopPat のストリーム出力
 /// @return s を返す．
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s, ///< [in] ストリーム
-  SopPat pat  ///< [in] パタン
+  std::ostream& s, ///< [in] ストリーム
+  SopPat pat      ///< [in] パタン
 )
 {
   switch ( pat ) {

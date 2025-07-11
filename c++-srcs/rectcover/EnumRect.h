@@ -39,7 +39,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 極大矩形を求める．
-  vector<RcRect>
+  std::vector<RcRect>
   operator()();
 
 
@@ -59,9 +59,9 @@ private:
   /// @return row0 よりも小さい行が含まれていたら true を返す．
   bool
   expand(
-    SizeType row0,                    ///< [in] 基準となる行番号
-    const vector<SizeType>& col_list, ///< [in] 列集合を表すリスト
-    vector<SizeType>& row_list        ///< [out] 結果の行集合を格納するリスト
+    SizeType row0,                         ///< [in] 基準となる行番号
+    const std::vector<SizeType>& col_list, ///< [in] 列集合を表すリスト
+    std::vector<SizeType>& row_list        ///< [out] 結果の行集合を格納するリスト
   );
 
 
@@ -77,7 +77,7 @@ private:
   int mMaxValue;
 
   // 最大の価値を持つ矩形のリスト
-  vector<RcRect> mMaxList;
+  std::vector<RcRect> mMaxList;
 
 };
 

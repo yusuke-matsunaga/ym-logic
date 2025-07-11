@@ -57,7 +57,7 @@ ZddMgr::item(
 }
 
 // @brief 要素のリストを返す．
-vector<ZddItem>
+std::vector<ZddItem>
 ZddMgr::item_list() const
 {
   return conv_to_itemlist(get()->item_list());
@@ -80,7 +80,7 @@ ZddMgr::one()
 // @brief 部分集合を作る．
 Zdd
 ZddMgr::make_set(
-  const vector<ZddItem> item_list
+  const std::vector<ZddItem> item_list
 )
 {
   auto level_list = ZddItem::conv_to_levellist(item_list);
@@ -89,7 +89,7 @@ ZddMgr::make_set(
 }
 
 // @brief バイナリダンプから復元する．
-vector<Zdd>
+std::vector<Zdd>
 ZddMgr::restore(
   BinDec& s
 )
@@ -143,12 +143,12 @@ ZddMgr::disable_gc()
 }
 
 // @brief 枝のリストをZddのリストに変換する．
-vector<Zdd>
+std::vector<Zdd>
 ZddMgr::conv_to_zddlist(
-  const vector<DdEdge>& edge_list
+  const std::vector<DdEdge>& edge_list
 ) const
 {
-  vector<Zdd> zdd_list;
+  std::vector<Zdd> zdd_list;
   zdd_list.reserve(edge_list.size());
   for ( auto edge: edge_list ) {
     auto zdd = _zdd(edge);
@@ -158,12 +158,12 @@ ZddMgr::conv_to_zddlist(
 }
 
 // @brief 枝のリストを要素のリストに変換する．
-vector<ZddItem>
+std::vector<ZddItem>
 ZddMgr::conv_to_itemlist(
-  const vector<DdEdge>& edge_list
+  const std::vector<DdEdge>& edge_list
 ) const
 {
-  vector<ZddItem> item_list;
+  std::vector<ZddItem> item_list;
   item_list.reserve(edge_list.size());
   for ( auto edge: edge_list ) {
     auto item = _item(edge);

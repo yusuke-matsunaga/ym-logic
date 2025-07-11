@@ -79,19 +79,19 @@ public:
   /// @brief 変数のリストを返す．
   ///
   /// 変数番号の昇順に並んでいる
-  vector<BddVar>
+  std::vector<BddVar>
   variable_list() const;
 
   /// @brief 変数順を表す変数のリストを返す．
   ///
   /// インデックスの昇順に並んでいる
-  vector<BddVar>
+  std::vector<BddVar>
   variable_order() const;
 
   /// @brief 変数順を設定する．
   void
   set_variable_order(
-    const vector<BddVar>& order_list ///< [in] 変数順を表すリスト
+    const std::vector<BddVar>& order_list ///< [in] 変数順を表すリスト
   );
 
 
@@ -128,8 +128,8 @@ public:
   /// - 不正な形式の場合は std::invalid_argument 例外を送出する．
   Bdd
   from_truth(
-    const string& str,             ///< [in] 01の文字列
-    const vector<BddVar>& var_list ///< [in] 変数のリスト
+    const std::string& str,             ///< [in] 01の文字列
+    const std::vector<BddVar>& var_list ///< [in] 変数のリスト
     = {}
   );
 
@@ -138,8 +138,8 @@ public:
   /// - var_list が省略された場合は自動的に適切な変数リストを用いる．
   Bdd
   from_expr(
-    const Expr& expr,              ///< [in] 論理式
-    const vector<BddVar>& var_list ///< [in] 変数のリスト
+    const Expr& expr,                   ///< [in] 論理式
+    const std::vector<BddVar>& var_list ///< [in] 変数のリスト
     = {}
   );
 
@@ -153,7 +153,7 @@ public:
   /// @return 生成されたBDDのリストを返す．
   ///
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
-  vector<Bdd>
+  std::vector<Bdd>
   restore(
     BinDec& s ///< [in] 入力ストリーム
   );
@@ -217,15 +217,15 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 枝のリストをBddのリストに変換する．
-  vector<Bdd>
+  std::vector<Bdd>
   conv_to_bddlist(
-    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+    const std::vector<DdEdge>& edge_list ///< [in] 枝のリスト
   ) const;
 
   /// @brief 枝のリストを変数のリストに変換する．
-  vector<BddVar>
+  std::vector<BddVar>
   conv_to_varlist(
-    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+    const std::vector<DdEdge>& edge_list ///< [in] 枝のリスト
   ) const;
 
 };

@@ -336,13 +336,13 @@ protected:
   }
 
   /// @brief 内容をリテラルのリストのリストに変換する．
-  vector<vector<Literal>>
+  std::vector<std::vector<Literal>>
   _literal_list(
     SizeType cube_num, ///< [in] キューブ数
     const Chunk& chunk ///< [in] 本体のビットベクタ
   ) const
   {
-    vector<vector<Literal>> ans_list;
+    std::vector<std::vector<Literal>> ans_list;
     ans_list.reserve(cube_num);
 
     auto cube_list = _cube_list(chunk, 0, cube_num);
@@ -389,27 +389,27 @@ protected:
   /// @brief カバーの内容を出力する．
   void
   _print(
-    ostream& s,         ///< [in] 出力先のストリーム
+    std::ostream& s,    ///< [in] 出力先のストリーム
     const Chunk& chunk, ///< [in] カバー/キューブを表すビットベクタ
     SizeType begin,     ///< [in] キューブの開始位置
     SizeType end,       ///< [in] キューブの終了位置(実際の末尾 + 1)
-    const vector<string>& varname_list ///< [in] 変数名のリスト
+    const std::vector<std::string>& varname_list ///< [in] 変数名のリスト
     = {}
   ) const;
 
   /// @brief キューブの内容を出力する．
   void
   _print(
-    ostream& s,                        ///< [in] 出力先のストリーム
-    Cube cube,                         ///< [in] キューブ
-    const vector<string>& varname_list ///< [in] 変数名のリスト
+    std::ostream& s,                             ///< [in] 出力先のストリーム
+    Cube cube,                                   ///< [in] キューブ
+    const std::vector<std::string>& varname_list ///< [in] 変数名のリスト
     = {}
   ) const;
 
   /// @brief カバーの内容を blif のカバー形式で出力する．
   void
   _write_cover(
-    ostream& s,
+    std::ostream& s,
     const Chunk& chunk,
     SizeType begin,
     SizeType end
@@ -418,14 +418,14 @@ protected:
   /// @brief キューブの内容を blif のカバー形式で出力する．
   void
   _write_cube(
-    ostream& s,
+    std::ostream& s,
     Cube cube
   ) const;
 
   /// @brief 内容を出力する(デバッグ用)．
   void
   _debug_print(
-    ostream& s,        ///< [in] 出力ストリーム
+    std::ostream& s,   ///< [in] 出力ストリーム
     SizeType cube_num, ///< [in] キューブ数
     const Chunk& chunk ///< [in] 本体のビットベクタ
   ) const;
@@ -433,8 +433,8 @@ protected:
   /// @brief 内容を出力する(デバッグ用)．
   void
   _debug_print(
-    ostream& s, ///< [in] 出力ストリーム
-    Cube cube   ///< [in] キューブ
+    std::ostream& s, ///< [in] 出力ストリーム
+    Cube cube        ///< [in] キューブ
   ) const;
 
 
@@ -480,12 +480,12 @@ protected:
   }
 
   /// @brief キューブの内容をリテラルのリストのリストに変換する．
-  vector<Literal>
+  std::vector<Literal>
   _cube_literal_list(
     Cube cube ///< [in] キューブ
   ) const
   {
-    vector<Literal> lit_list;
+    std::vector<Literal> lit_list;
     lit_list.reserve(_cube_literal_num(cube));
     auto cube_end = _cube_end(cube);
     SizeType base = 0;
@@ -526,8 +526,8 @@ protected:
   /// * dst_bv には十分な容量があると仮定する．
   void
   _cube_set_literals(
-    DstCube dst_cube,               ///< [in] 対象のビットベクタ
-    const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
+    DstCube dst_cube,                    ///< [in] 対象のビットベクタ
+    const std::vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
   ) const
   {
     for ( auto lit: lit_list ) {
@@ -540,8 +540,8 @@ protected:
   /// * dst_cube には十分な容量があると仮定する．
   void
   _cube_set_literals(
-    DstCube dst_cube,                   ///< [in] 対象のビットベクタ
-    initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト初期化子
+    DstCube dst_cube,                        ///< [in] 対象のビットベクタ
+    std::initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト初期化子
   ) const
   {
     for ( auto lit: lit_list ) {
@@ -592,7 +592,8 @@ protected:
     for ( ; cube != cube_end; ++ cube ) {
       if ( _word_check_conflict(*cube) ) {
 	// 不正なパタンがあった．
-	cout << "conflict pattern: " << hex << *cube << dec << endl;
+	std::cout << "conflict pattern: "
+		  << std::hex << *cube << std::dec << std::endl;
 	goto error;
       }
     }
@@ -605,7 +606,8 @@ protected:
 	auto word = *(cube_end - 1);
 	word |= mask;
 	if ( word != SOP_ALL1 ) {
-	  cout << "invalid pat in outbound: " << hex << word << dec << endl;
+	  std::cout << "invalid pat in outbound: "
+		    << std::hex << word << std::dec << std::endl;
 	  goto error;
 	}
       }
@@ -616,17 +618,11 @@ protected:
       auto nv = _cube_size() * 32;
       for ( SizeType i = 0; i < nv; ++ i ) {
 	if ( i == variable_num() ) {
-	  cout << "|";
+	  std::cout << "|";
 	}
-	auto pat = _get_pat(cube, i);
-	switch ( pat ) {
-	case SopPat::__: cout << "00"; break;
-	case SopPat::_0: cout << "01"; break;
-	case SopPat::_1: cout << "10"; break;
-	case SopPat::_X: cout << "11"; break;
-	}
+	std::cout << _get_pat(cube, i);
       }
-      cout << endl;
+      std::cout << std::endl;
     }
     return false;
   }
@@ -883,8 +879,8 @@ protected:
   /// @brief リテラルの集合を追加する．
   void
   _litset_add_literals(
-    DstCube dst_cube,               ///< [in] 対象のキューブ(LitSet)
-    const vector<Literal>& lit_list ///< [in] 追加するリテラルのリスト
+    DstCube dst_cube,                    ///< [in] 対象のキューブ(LitSet)
+    const std::vector<Literal>& lit_list ///< [in] 追加するリテラルのリスト
   )
   {
     for ( auto lit: lit_list ) {
@@ -1006,9 +1002,9 @@ protected:
   static
   void
   _word_literal_list(
-    SopPatWord word,          ///< [in] 対象のワード
-    SizeType base,            ///< [in] 変数番号の開始位置
-    vector<Literal>& lit_list ///< [out] リテラルを格納するリスト
+    SopPatWord word,               ///< [in] 対象のワード
+    SizeType base,                 ///< [in] 変数番号の開始位置
+    std::vector<Literal>& lit_list ///< [out] リテラルを格納するリスト
   );
 
   /// @brief ブロック位置を計算する．
@@ -1111,7 +1107,7 @@ protected:
   /// @brief リテラルが範囲内かチェックする．
   void
   _check_lits(
-    const vector<Literal>& lit_list
+    const std::vector<Literal>& lit_list
   ) const
   {
     for ( auto lit: lit_list ) {

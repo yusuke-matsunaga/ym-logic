@@ -59,8 +59,8 @@ public:
   /// - values のサイズは 2^ni に等しくなければならない．
   /// - 違反時には std::invalid_argument 例外が送出される．
   TvFunc(
-    SizeType ni,              ///< [in] 入力数
-    const vector<int>& values ///< [in] 真理値のベクタ
+    SizeType ni,                   ///< [in] 入力数
+    const std::vector<int>& values ///< [in] 真理値のベクタ
   );
 
   /// @brief 文字列からの変換コンストラクタ
@@ -71,7 +71,7 @@ public:
   /// - str は '0' と '1' 以外の文字を含んではいけない．
   /// - 違反時には std::invalid_argument 例外が送出される．
   TvFunc(
-    const string& str ///< [in] 0と1からなる文字列
+    const std::string& str ///< [in] 0と1からなる文字列
   );
 
   /// @brief コピーコンストラクタ
@@ -194,8 +194,8 @@ public:
   static
   TvFunc
   cover(
-    SizeType ni,                             ///< [in] 入力数
-    const vector<vector<Literal>>& cube_list ///< [in] キューブのリスト
+    SizeType ni,                                       ///< [in] 入力数
+    const std::vector<std::vector<Literal>>& cube_list ///< [in] キューブのリスト
   )
   {
     return TvFunc{ni, cube_list};
@@ -206,8 +206,8 @@ public:
   static
   TvFunc
   cover(
-    SizeType ni,                     ///< [in] 入力数
-    const vector<SopCube>& cube_list ///< [in] キューブのリスト
+    SizeType ni,                          ///< [in] 入力数
+    const std::vector<SopCube>& cube_list ///< [in] キューブのリスト
   )
   {
     return TvFunc{ni, cube_list};
@@ -218,8 +218,8 @@ public:
   static
   TvFunc
   cube(
-    SizeType ni,                    ///< [in] 入力数
-    const vector<Literal>& lit_list ///< [in] リテラルのリスト
+    SizeType ni,                         ///< [in] 入力数
+    const std::vector<Literal>& lit_list ///< [in] リテラルのリスト
   )
   {
     return TvFunc{ni, lit_list};
@@ -701,7 +701,7 @@ public:
   /// @brief 内容を表す文字列を返す．
   ///
   /// この値はコンストラクタで用いることができる．
-  string
+  std::string
   str(
     int mode = 2 ///< [in] 出力モード
                  ///< -  2: 2進モード
@@ -724,10 +724,10 @@ public:
   /// i0 が LSB, in が MSB となる．
   void
   print(
-    ostream& s,  ///< [in] 出力先のストリーム
-    int mode = 2 ///< [in] 出力モード
-                 ///< -  2: 2進モード
-                 ///< - 16: 16進モード
+    std::ostream& s,  ///< [in] 出力先のストリーム
+    int mode = 2      ///< [in] 出力モード
+                      ///< -  2: 2進モード
+                      ///< - 16: 16進モード
   ) const;
 
 
@@ -778,7 +778,7 @@ public:
 
   /// @brief npn 変換の正規変換をすべて求める．
   /// @return 変換を格納するリストを返す．
-  vector<NpnMap>
+  std::vector<NpnMap>
   npn_cannonical_all_map() const;
 
 
@@ -840,20 +840,20 @@ private:
 
   /// @brief カバー関数を作るコンストラクタ
   TvFunc(
-    SizeType ni,                             ///< [in] 入力数
-    const vector<vector<Literal>>& cube_list ///< [in] キューブのリスト
+    SizeType ni,                                       ///< [in] 入力数
+    const std::vector<std::vector<Literal>>& cube_list ///< [in] キューブのリスト
   );
 
   /// @brief カバー関数を作るコンストラクタ
   TvFunc(
-    SizeType ni,                     ///< [in] 入力数
-    const vector<SopCube>& cube_list ///< [in] キューブのリスト
+    SizeType ni,                          ///< [in] 入力数
+    const std::vector<SopCube>& cube_list ///< [in] キューブのリスト
   );
 
   /// @brief キューブ関数を作るコンストラクタ
   TvFunc(
-    SizeType ni,                    ///< [in] 入力数
-    const vector<Literal>& lit_list ///< [in] リテラルのリスト
+    SizeType ni,                         ///< [in] 入力数
+    const std::vector<Literal>& lit_list ///< [in] リテラルのリスト
   );
 
   /// @brief 比較関数
@@ -931,11 +931,11 @@ private:
   void
   _check_varid(
     SizeType varid,
-    const string& varname = "varid"
+    const char* varname = "varid"
   ) const
   {
     if ( varid == BAD_VARID || varid >= mInputNum ) {
-      ostringstream buf;
+      std::ostringstream buf;
       buf << "'" << varname << "' is out of range";
       throw std::out_of_range{buf.str()};
     }
@@ -954,7 +954,7 @@ private:
   SizeType mBlockNum;
 
   // パックされた真理値ベクトル
-  vector<WordType> mVector;
+  std::vector<WordType> mVector;
 
 };
 
@@ -1074,9 +1074,9 @@ operator^(
 /// @relates TvFunc
 /// @brief ストリームに対する出力
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,        ///< [in] 出力先のストリーム
+  std::ostream& s,   ///< [in] 出力先のストリーム
   const TvFunc& func ///< [in] 対象の関数
 )
 {

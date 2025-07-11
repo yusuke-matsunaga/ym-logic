@@ -80,7 +80,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // ITE用のテーブル
-  unordered_map<Apply3Key, DdEdge> mTable;
+  std::unordered_map<Apply3Key, DdEdge> mTable;
 
 };
 

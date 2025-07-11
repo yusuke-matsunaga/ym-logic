@@ -210,7 +210,7 @@ public:
   /// @brief 内容を出力する．
   void
   display(
-    ostream& s ///< [in] 出力先のストリーム
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const;
 
 
@@ -238,9 +238,9 @@ private:
 
 /// @brief IgPart のストリーム出力演算子
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   const IgPartition& igpart
 )
 {

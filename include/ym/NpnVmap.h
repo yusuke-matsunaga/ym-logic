@@ -113,7 +113,7 @@ public:
   /// @brief 内容をバイナリダンプする．
   void
   dump(
-    ostream& s ///< [in] 出力ストリーム
+    std::ostream& s ///< [in] 出力ストリーム
   ) const
   {
     s << mPosPol;
@@ -122,7 +122,7 @@ public:
   /// @brief バイナリ入力
   void
   restore(
-    istream& s ///< [in] 入力ストリーム
+    std::istream& s ///< [in] 入力ストリーム
   )
   {
     s >> mPosPol;

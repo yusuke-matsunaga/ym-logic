@@ -50,8 +50,8 @@ private:
   /// @brief 価値が最大の行を選ぶ．
   RcRect
   find_row(
-    const RcMatrix& matrix,          ///< [in] 対象の行列
-    const vector<SizeType>& row_list ///< [in] 行の候補のリスト
+    const RcMatrix& matrix,               ///< [in] 対象の行列
+    const std::vector<SizeType>& row_list ///< [in] 行の候補のリスト
     = {}
   );
 
@@ -69,8 +69,8 @@ private:
   /// @brief 価値が最大の列を選ぶ．
   RcRect
   find_col(
-    const RcMatrix& matrix,          ///< [in] 対象の行列
-    const vector<SizeType>& col_list ///< [in] 列の候補のリスト
+    const RcMatrix& matrix,               ///< [in] 対象の行列
+    const std::vector<SizeType>& col_list ///< [in] 列の候補のリスト
     = {}
   );
 
@@ -89,7 +89,7 @@ private:
   template<typename T>
   T
   random_choice(
-    const vector<T>& cand_list ///< [in] 候補のリスト
+    const std::vector<T>& cand_list ///< [in] 候補のリスト
   )
   {
     auto n = cand_list.size();

@@ -80,7 +80,7 @@ TEST(BddVarTest, copy_assignment2)
   SizeType ni = 5;
   auto var = mgr.variable(ni - 1);
 
-  vector<BddVar> var_list(ni);
+  std::vector<BddVar> var_list(ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
     auto var = mgr.variable(i);
     var_list[i] = var;

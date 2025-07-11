@@ -37,7 +37,7 @@ LitSet::LitSet(
 // @brief コンストラクタ
 LitSet::LitSet(
   SizeType var_num,
-  const vector<Literal>& lit_list
+  const std::vector<Literal>& lit_list
 ) : LitSet(var_num)
 {
   auto cube = mChunk.begin();
@@ -165,7 +165,7 @@ LitSet::check_intersect(
 // @brief 内容を出力する．
 void
 LitSet::print(
-  ostream& s
+  std::ostream& s
 ) const
 {
   const char* spc = "";

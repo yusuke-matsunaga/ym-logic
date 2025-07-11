@@ -54,7 +54,7 @@ private:
   SizeType mLevel;
 
   // 演算結果テーブル
-  unordered_map<const DdNode*, bool> mTable;
+  std::unordered_map<const DdNode*, bool> mTable;
 
 };
 

@@ -63,8 +63,8 @@ public:
 
   /// @brief コンストラクタ
   SopCube(
-    SizeType var_num,               ///< [in] 変数の数
-    const vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
+    SizeType var_num,                    ///< [in] 変数の数
+    const std::vector<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト
   ) : SopCube(var_num)
   {
     _check_lits(lit_list);
@@ -73,9 +73,8 @@ public:
 
   /// @brief コンストラクタ
   SopCube(
-    SizeType var_num,                   ///< [in] 変数の数
-    initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラル
-                                        ///<      のリスト初期化子
+    SizeType var_num,                        ///< [in] 変数の数
+    std::initializer_list<Literal>& lit_list ///< [in] キューブを表すリテラルのリスト初期化子
   ) : SopCube(var_num)
   {
     _check_lits(lit_list);
@@ -199,7 +198,7 @@ public:
   static
   SizeType
   literal_num(
-    const vector<SopCube>& cube_list ///< [in] キューブのリスト
+    const std::vector<SopCube>& cube_list ///< [in] キューブのリスト
   )
   {
     SizeType ans = 0;
@@ -255,11 +254,11 @@ public:
   }
 
   /// @brief 内容をリテラルのリストに変換する．
-  vector<Literal>
+  std::vector<Literal>
   literal_list() const
   {
     if ( is_invalid() ) {
-      return vector<Literal>{};
+      return std::vector<Literal>{};
     }
     return _cube_literal_list(_cube());
   }
@@ -291,8 +290,8 @@ public:
   static
   TvFunc
   tvfunc(
-    SizeType ni,                     ///< [in] 変数の数
-    const vector<SopCube>& cube_list ///< [in] キューブのリスト
+    SizeType ni,                          ///< [in] 変数の数
+    const std::vector<SopCube>& cube_list ///< [in] キューブのリスト
   )
   {
     if ( cube_list.empty() ) {
@@ -330,8 +329,8 @@ public:
   /// @brief 内容をわかりやすい形で出力する．
   void
   print(
-    ostream& s,                             ///< [in] 出力先のストリーム
-    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
+    std::ostream& s,                                  ///< [in] 出力先のストリーム
+    const std::vector<std::string>& varname_list = {} ///< [in] 変数名のリスト
   ) const
   {
     _print(s, chunk(), 0, 1, varname_list);
@@ -341,9 +340,9 @@ public:
   static
   void
   print(
-    ostream& s,                             ///< [in] 出力先のストリーム
-    const vector<SopCube>& cube_list,       ///< [in] キューブのリスト
-    const vector<string>& varname_list = {} ///< [in] 変数名のリスト
+    std::ostream& s,                                  ///< [in] 出力先のストリーム
+    const std::vector<SopCube>& cube_list,            ///< [in] キューブのリスト
+    const std::vector<std::string>& varname_list = {} ///< [in] 変数名のリスト
   )
   {
     const char* delim = "";
@@ -786,9 +785,9 @@ operator/(
 ///
 /// cube->print(s) と等価
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,         ///< [in] 出力先のストリーム
+  std::ostream& s,    ///< [in] 出力先のストリーム
   const SopCube& cube ///< [in] 対象のキューブ(のポインタ)
 )
 {

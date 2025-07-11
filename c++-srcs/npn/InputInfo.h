@@ -258,7 +258,7 @@ public:
   /// @brief 内容を出力する．
   void
   display(
-    ostream& s ///< [in] 出力先のストリーム
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const
   {
     for ( SizeType gid = 0; gid < group_num(); ++ gid ) {
@@ -270,9 +270,9 @@ public:
       for ( SizeType i = 0; i < elem_num(gid); ++ i ) {
 	s << " " << elem(gid, i);
       }
-      s << "}" << endl;
+      s << "}" << std::endl;
     }
-    s << endl;
+    s << std::endl;
   }
 
 
@@ -309,7 +309,7 @@ private:
   int mW1[TvFunc::kMaxNi];
 
   // 等価グループの要素のリストの配列
-  vector<SizeType> mElemListArray[TvFunc::kMaxNi];
+  std::vector<SizeType> mElemListArray[TvFunc::kMaxNi];
 
   // 極性の決まっていないグループ数
   SizeType mPolUndetNum;

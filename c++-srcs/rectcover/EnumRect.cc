@@ -11,19 +11,19 @@
 
 BEGIN_NAMESPACE_YM_RC
 
-vector<RcRect>
+std::vector<RcRect>
 EnumRect::operator()()
 {
   mMaxValue = std::numeric_limits<int>::min();
   mMaxList.clear();
   for ( SizeType row = 0; row < mMatrix.row_size(); ++ row ) {
-    vector<SizeType> new_col_list;
+    std::vector<SizeType> new_col_list;
     new_col_list.reserve(mMatrix.row_num(row));
     for ( auto elem: mMatrix.row_list(row) ) {
       auto col = elem->col();
       new_col_list.push_back(col);
     }
-    vector<SizeType> new_row_list;
+    std::vector<SizeType> new_row_list;
     if ( expand(row, new_col_list, new_row_list) ) {
       continue;
     }
@@ -54,7 +54,7 @@ EnumRect::enum_sub(
   // 現在の矩形の列と共通部分を持つ row0 以上の行を列挙する．
 
   // 処理済みのマーク
-  vector<bool> mark(mMatrix.row_size(), false);
+  std::vector<bool> mark(mMatrix.row_size(), false);
   // 現在の矩形の行を処理済みとする．
   for ( auto row: src_rect.row_list() ) {
     mark[row] = true;
@@ -72,7 +72,7 @@ EnumRect::enum_sub(
       mark[row] = true;
 
       // 現在の矩形と row の行の共通部分を求める．
-      vector<SizeType> new_col_list;
+      std::vector<SizeType> new_col_list;
       new_col_list.reserve(mMatrix.row_num(row));
       auto iter = RcRowMergeIter(src_rect.col_list(), mMatrix.row_list(row));
       for ( ; !iter.is_end(); ++ iter ) {
@@ -84,7 +84,7 @@ EnumRect::enum_sub(
       // その行に row 未満の行が含まれている場合は
       // 同じ矩形がすでに列挙されているということなので
       // スキップする．
-      vector<SizeType> new_row_list;
+      std::vector<SizeType> new_row_list;
       if ( expand(row, new_col_list, new_row_list) ) {
 	continue;
       }
@@ -98,8 +98,8 @@ EnumRect::enum_sub(
 bool
 EnumRect::expand(
   SizeType row0,
-  const vector<SizeType>& col_list,
-  vector<SizeType>& row_list
+  const std::vector<SizeType>& col_list,
+  std::vector<SizeType>& row_list
 )
 {
   if ( col_list.empty() ) {
@@ -113,14 +113,14 @@ EnumRect::expand(
   row_list.reserve(n);
 
   // col_list に含まれていることを示すビットベクタ
-  vector<bool> col_mark(mMatrix.col_size(), false);
+  std::vector<bool> col_mark(mMatrix.col_size(), false);
   SizeType col_num = col_list.size();
   for ( auto col: col_list ) {
     col_mark[col] = true;
   }
 
   // 処理済みを示すマーク
-  vector<bool> row_mark(mMatrix.row_size(), false);
+  std::vector<bool> row_mark(mMatrix.row_size(), false);
   row_mark[row0] = true;
   row_list.push_back(row0);
   // col_list に含まれる列に含まれる行を対象にする．
@@ -159,7 +159,7 @@ EnumRect::expand(
 //////////////////////////////////////////////////////////////////////
 
 // @brief 最大価値を持つ矩形を列挙する．
-vector<RcRect>
+std::vector<RcRect>
 RcMatrix::enum_max_rects() const
 {
   EnumRect enum_rect(*this);

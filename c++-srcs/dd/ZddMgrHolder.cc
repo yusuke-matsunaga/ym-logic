@@ -73,12 +73,12 @@ ZddMgrHolder::_item(
 }
 
 // @brief 枝のリストを Zdd のリストに変換する．
-vector<Zdd>
+std::vector<Zdd>
 ZddMgrHolder::conv_to_zddlist(
-  const vector<DdEdge>& edge_list
+  const std::vector<DdEdge>& edge_list
 ) const
 {
-  vector<Zdd> zdd_list;
+  std::vector<Zdd> zdd_list;
   zdd_list.reserve(edge_list.size());
   for ( auto edge: edge_list ) {
     auto zdd = _zdd(edge);
@@ -88,12 +88,12 @@ ZddMgrHolder::conv_to_zddlist(
 }
 
 // @brief 枝のリストを要素のリストに変換する．
-vector<ZddItem>
+std::vector<ZddItem>
 ZddMgrHolder::conv_to_itemlist(
-  const vector<DdEdge>& edge_list
+  const std::vector<DdEdge>& edge_list
 ) const
 {
-  vector<ZddItem> item_list;
+  std::vector<ZddItem> item_list;
   item_list.reserve(edge_list.size());
   for ( auto edge: edge_list ) {
     auto item = _item(edge);

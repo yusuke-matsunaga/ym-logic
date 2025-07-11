@@ -105,7 +105,7 @@ void
 byte_literal_list(
   std::uint8_t byte,
   SizeType base,
-  vector<Literal>& lit_list
+  std::vector<Literal>& lit_list
 )
 {
   static const int table[] = {
@@ -130,7 +130,7 @@ void
 SopBase::_word_literal_list(
   SopPatWord word,
   SizeType base,
-  vector<Literal>& lit_list
+  std::vector<Literal>& lit_list
 )
 {
   const SopPatWord H32MASK  = 0xFFFFFFFF00000000ULL;
@@ -225,11 +225,11 @@ SopBase::_to_expr(
 // @brief カバー/キューブの内容を出力する．
 void
 SopBase::_print(
-  ostream& s,
+  std::ostream& s,
   const Chunk& chunk,
   SizeType begin,
   SizeType end,
-  const vector<string>& varname_list
+  const std::vector<std::string>& varname_list
 ) const
 {
   const char* plus = "";
@@ -244,9 +244,9 @@ SopBase::_print(
 // @brief キューブの内容を出力する．
 void
 SopBase::_print(
-  ostream& s,
+  std::ostream& s,
   Cube cube,
-  const vector<string>& varname_list
+  const std::vector<std::string>& varname_list
 ) const
 {
   auto lit_list = _cube_literal_list(cube);
@@ -258,12 +258,12 @@ SopBase::_print(
     for ( auto lit: lit_list ) {
       auto var = lit.varid();
       auto inv = lit.is_negative();
-      string varname;
+      std::string varname;
       if ( varname_list.size() > var ) {
 	varname = varname_list[var];
       }
       else {
-	ostringstream buf;
+	std::ostringstream buf;
 	buf << "v" << var;
 	varname = buf.str();
       }
@@ -279,7 +279,7 @@ SopBase::_print(
 // @brief カバーの内容を blif のカバー形式で出力する．
 void
 SopBase::_write_cover(
-  ostream& s,
+  std::ostream& s,
   const Chunk& chunk,
   SizeType begin,
   SizeType end
@@ -294,25 +294,20 @@ SopBase::_write_cover(
 // @brief キューブの内容を blif のカバー形式で出力する．
 void
 SopBase::_write_cube(
-  ostream& s,
+  std::ostream& s,
   Cube cube
 ) const
 {
   for ( SizeType i = 0; i < variable_num(); ++ i ) {
-    switch ( _get_pat(cube, i) ) {
-    case SopPat::__: s << '?'; break;
-    case SopPat::_1: s << '1'; break;
-    case SopPat::_0: s << '0'; break;
-    case SopPat::_X: s << '-'; break;
-    }
+    s << _get_pat(cube, i);
   }
-  s << endl;
+  s << std::endl;
 }
 
 // @brief 内容を出力する(デバッグ用)．
 void
 SopBase::_debug_print(
-  ostream& s,
+  std::ostream& s,
   SizeType cube_num,
   const Chunk& chunk
 ) const
@@ -326,21 +321,14 @@ SopBase::_debug_print(
 // @brief 内容を出力する(デバッグ用)．
 void
 SopBase::_debug_print(
-  ostream& s,
+  std::ostream& s,
   Cube cube
 ) const
 {
   for ( SizeType var = 0; var < variable_num(); ++ var ) {
-    s << " ";
-    auto pat = _get_pat(cube, var);
-    switch ( pat ) {
-    case SopPat::__: s << "00"; break;
-    case SopPat::_0: s << "01"; break;
-    case SopPat::_1: s << "10"; break;
-    case SopPat::_X: s << "11"; break;
-    }
+    s << " " << _get_pat(cube, var);
   }
-  s << endl;
+  s << std::endl;
 }
 
 END_NAMESPACE_YM_SOP

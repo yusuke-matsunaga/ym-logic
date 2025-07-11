@@ -18,7 +18,7 @@ BEGIN_NAMESPACE_YM_SOP
 //////////////////////////////////////////////////////////////////////
 
 // @brief すべてのカーネルとコカーネルペアを列挙する．
-vector<pair<SopCover, vector<SopCube>>>
+std::vector<std::pair<SopCover, std::vector<SopCube>>>
 SopCover::all_kernels() const
 {
   KernelGen kg;
@@ -36,7 +36,7 @@ SopCover::best_kernel() const
 // @brief 最も価値の高いカーネルを求める．
 SopCover
 SopCover::best_kernel(
-  std::function<int(const SopCover&, const vector<SopCube>&)> eval_func
+  std::function<int(const SopCover&, const std::vector<SopCube>&)> eval_func
 ) const
 {
   KernelGen kg;
@@ -49,7 +49,7 @@ SopCover::best_kernel(
 //////////////////////////////////////////////////////////////////////
 
 // @brief カーネルとコカーネルを列挙する．
-vector<pair<SopCover, vector<SopCube>>>
+std::vector<std::pair<SopCover, std::vector<SopCube>>>
 KernelGen::all_kernels(
   const SopCover& cover
 )
@@ -57,15 +57,15 @@ KernelGen::all_kernels(
   generate(cover);
 
   // kernel_list に設定する．
-  vector<pair<SopCover, vector<SopCube>>> kernel_list;
+  std::vector<std::pair<SopCover, std::vector<SopCube>>> kernel_list;
   kernel_list.reserve(mKernelDict.size());
 
   // この処理は破壊的なので以降は mKernelDict は使えない．
   for ( auto& p: mKernelDict ) {
     auto& kernel = p.first;
     auto& cokernels = p.second;
-    kernel_list.push_back(make_pair(std::move(kernel),
-				    std::move(cokernels)));
+    kernel_list.push_back(std::make_pair(std::move(kernel),
+					 std::move(cokernels)));
   }
 
   std::sort(kernel_list.begin(), kernel_list.end());
@@ -79,7 +79,7 @@ BEGIN_NONAMESPACE
 int
 eval_func(
   const SopCover& kernel,
-  const vector<SopCube>& cokernels
+  const std::vector<SopCube>& cokernels
 )
 {
   auto k_nc = kernel.cube_num();
@@ -106,7 +106,7 @@ KernelGen::best_kernel(
 SopCover
 KernelGen::best_kernel(
   const SopCover& cover,
-  std::function<int(const SopCover&, const vector<SopCube>&)> eval_func
+  std::function<int(const SopCover&, const std::vector<SopCube>&)> eval_func
 )
 {
   // 特例1: cover が single cube の場合は空のカバーを返す．
@@ -156,7 +156,7 @@ KernelGen::generate(
   mEnd = literal_list.end();
   hash_clear();
 
-  SizeType nv = cover.variable_num();
+  auto nv = cover.variable_num();
   auto ccube0 = SopCube{nv}; // 空のキューブ
   auto plits = LitSet{nv}; // 空集合
   kern_sub(cover, literal_list.begin(), ccube0, plits);
@@ -169,20 +169,20 @@ KernelGen::generate(
 }
 
 // @brief 出現頻度の昇順にならべたリテラルのリストを作る．
-vector<Literal>
+std::vector<Literal>
 KernelGen::gen_literal_list(
   const SopCover& cover ///< [in] 対象のカバー
 )
 {
   // cover に2回以上現れるリテラルとその出現頻度のリストを作る．
-  SizeType nv = cover.variable_num();
-  vector<pair<SizeType, Literal>> tmp_list;
+  auto nv = cover.variable_num();
+  std::vector<std::pair<SizeType, Literal>> tmp_list;
   tmp_list.reserve(nv * 2);
   for ( SizeType var: Range(nv) ) {
     for ( auto lit: {Literal(var, false), Literal(var, true)} ) {
       auto n = cover.literal_num(lit);
       if ( n >= 2 ) {
-	tmp_list.push_back(make_pair(n, lit));
+	tmp_list.push_back(std::make_pair(n, lit));
       }
     }
   }
@@ -190,13 +190,13 @@ KernelGen::gen_literal_list(
   // 出現頻度の昇順にソートする．
   // c++-11 のラムダ式を使っている．
   sort(tmp_list.begin(), tmp_list.end(),
-       [](const pair<SizeType, Literal>& a,
-	  const pair<SizeType, Literal>& b) -> bool
+       [](const std::pair<SizeType, Literal>& a,
+	  const std::pair<SizeType, Literal>& b) -> bool
        { return a.first < b.first; });
 
   // リテラルだけを literal_list に移す．
   auto n = tmp_list.size();
-  vector<Literal> literal_list;
+  std::vector<Literal> literal_list;
   literal_list.reserve(n);
   for ( auto& p: tmp_list ) {
     auto lit = p.second;
@@ -209,7 +209,7 @@ KernelGen::gen_literal_list(
 void
 KernelGen::kern_sub(
   const SopCover& cover,
-  vector<Literal>::const_iterator p,
+  std::vector<Literal>::const_iterator p,
   const SopCube& ccube,
   const LitSet& plits
 )

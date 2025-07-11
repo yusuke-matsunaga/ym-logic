@@ -26,9 +26,9 @@ public:
 
   /// @brief コンストラクタ
   BddGen(
-    const TvFunc& func,            ///< [in] 対象の関数
-    BddMgr& mgr,                   ///< [in] BDD マネージャ
-    const vector<BddVar>& var_list ///< [in] 変数リスト
+    const TvFunc& func,                 ///< [in] 対象の関数
+    BddMgr& mgr,                        ///< [in] BDD マネージャ
+    const std::vector<BddVar>& var_list ///< [in] 変数リスト
   ) : mFunc{func},
       mMgr{mgr},
       mVarList{var_list}
@@ -75,7 +75,7 @@ private:
   BddMgr& mMgr;
 
   // 変数のリスト
-  vector<BddVar> mVarList;
+  std::vector<BddVar> mVarList;
 
 };
 

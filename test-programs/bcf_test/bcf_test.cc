@@ -22,7 +22,7 @@ bcf_test(
 )
 {
   if ( argc != 2 ) {
-    cerr << basename(argv[0]) << " <# of inputs>" << endl;
+    std::cerr << basename(argv[0]) << " <# of inputs>" << std::endl;
     return 1;
   }
 
@@ -53,7 +53,7 @@ bcf_test(
   // 0, 1 の一様分布生成器
   std::uniform_int_distribution<int> rand_dist;
 
-  vector<int> values(ni_exp, 0);
+  std::vector<int> values(ni_exp, 0);
   for ( SizeType c: Range(n) ) {
     for ( auto p: Range(ni_exp) ) {
       if ( ni <= 4 ) {
@@ -75,22 +75,22 @@ bcf_test(
     }
     auto func = TvFunc{ni, values};
     auto cov = Tv2Sop::all_primes(func);
-    cout << "BCF = ";
+    std::cout << "BCF = ";
     const char* delim = "";
     for ( auto& cube: cov ) {
-      cout << delim;
+      std::cout << delim;
       delim = " | ";
       const char* spc = "";
       for ( auto lit: cube.literal_list() ) {
-	cout << spc;
+	std::cout << spc;
 	spc = " ";
-	cout << "v" << lit.varid();
+	std::cout << "v" << lit.varid();
 	if ( lit.is_negative() ) {
-	  cout << "'";
+	  std::cout << "'";
 	}
       }
     }
-    cout << endl;
+    std::cout << std::endl;
   }
 
   return 0;

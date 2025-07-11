@@ -24,8 +24,8 @@ public:
 
   /// @brief コンストラクタ
   BddExprOp(
-    BddMgrImpl* mgr,                   ///< [in] マネージャ
-    const vector<SizeType>& index_list ///< [in] インデックスリスト
+    BddMgrImpl* mgr,                        ///< [in] マネージャ
+    const std::vector<SizeType>& index_list ///< [in] インデックスリスト
   ) : BddIteOp{mgr},
       mLevelList{index_list}
   {
@@ -53,7 +53,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // インデックスリスト
-  vector<SizeType> mLevelList;
+  std::vector<SizeType> mLevelList;
 
 };
 

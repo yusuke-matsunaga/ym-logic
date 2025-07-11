@@ -34,15 +34,15 @@ void
 walsh_w1_refine(
   const TvFunc& func,
   SizeType var,
-  vector<PolConf>& polconf_list
+  std::vector<PolConf>& polconf_list
 )
 {
-  SizeType ni = func.input_num();
+  auto ni = func.input_num();
 
   if ( debug ) {
-    cout << "before walsh_w1_refine" << endl;
-    print_polconf_list(cout, polconf_list, ni);
-    cout << endl;
+    std::cout << "before walsh_w1_refine" << std::endl;
+    print_polconf_list(std::cout, polconf_list, ni);
+    std::cout << std::endl;
   }
 
   // 重み別 w1 係数を用いて極性の決定を行う．
@@ -51,11 +51,11 @@ walsh_w1_refine(
     int max_d0 = 0;
     SizeType wpos = 0;
     for ( SizeType i = 0; i < polconf_list.size(); ++ i ) {
-      PolConf polconf = polconf_list[i];
+      auto polconf = polconf_list[i];
       int d0 = func.walsh_w1(var, w, polconf.oinv(), polconf.iinv_bits());
       if ( debug ) {
-	print_polconf(cout, polconf, ni);
-	cout << " walsh_w1(" << var << ", " << w << ") = " << d0 << endl;
+	print_polconf(std::cout, polconf, ni);
+	std::cout << " walsh_w1(" << var << ", " << w << ") = " << d0 << std::endl;
       }
       int stat = first ? -1 : max_d0 - d0;
       first = false;
@@ -74,9 +74,9 @@ walsh_w1_refine(
   }
 
   if ( debug ) {
-    cout << "after walsh_w1_refine" << endl;
-    print_polconf_list(cout, polconf_list, ni);
-    cout << endl;
+    std::cout << "after walsh_w1_refine" << std::endl;
+    print_polconf_list(std::cout, polconf_list, ni);
+    std::cout << std::endl;
   }
 }
 
@@ -134,7 +134,7 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  vector<int> mW1Array;
+  std::vector<int> mW1Array;
 
 };
 
@@ -148,11 +148,11 @@ walsh_w1_refine(
   IgPartition& igpart
 )
 {
-  SizeType ni = func.input_num();
+  auto ni = func.input_num();
 
   if ( debug ) {
-    cout << "before walsh_w1_refine" << endl;
-    cout << igpart << endl;
+    std::cout << "before walsh_w1_refine" << std::endl
+	      << igpart << std::endl;
   }
 
   // 重み別 w1 係数を用いて極性の決定を行う．
@@ -178,8 +178,8 @@ walsh_w1_refine(
   igpart.reorder();
 
   if ( debug ) {
-    cout << "after walsh_w1_refine" << endl
-	 << igpart << endl;
+    std::cout << "after walsh_w1_refine" << std::endl
+	      << igpart << std::endl;
   }
 }
 

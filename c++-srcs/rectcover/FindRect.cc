@@ -51,7 +51,7 @@ public:
   }
 
   /// @brief 最大価値の要素のリストを返す．
-  const vector<T>&
+  const std::vector<T>&
   elem_list() const
   {
     return mMaxList;
@@ -67,7 +67,7 @@ private:
   V mMaxValue;
 
   // 最大価値の要素のリスト
-  vector<T> mMaxList;
+  std::vector<T> mMaxList;
 
 };
 
@@ -148,7 +148,7 @@ END_NONAMESPACE
 RcRect
 FindRect::find_row(
   const RcMatrix& matrix,
-  const vector<SizeType>& row_list
+  const std::vector<SizeType>& row_list
 )
 {
   MaxHolder<SizeType, SizeType> max_row;
@@ -170,7 +170,7 @@ FindRect::find_row(
   }
   // 同じ価値ならランダムに選ぶ．{
   auto row = random_choice(max_row_list);
-  vector<SizeType> col_list;
+  std::vector<SizeType> col_list;
   col_list.reserve(matrix.row_num(row));
   for ( auto elem: matrix.row_list(row) ) {
     auto col = elem->col();
@@ -190,10 +190,10 @@ FindRect::row_expand(
   auto& rect_col_list = rect.col_list();
 
   // 現在の矩形の列と共通部分を持つ行を調べる．
-  vector<SizeType> row_cand_list;
+  std::vector<SizeType> row_cand_list;
   {
     // 処理済みの行のマーク
-    vector<bool> row_mark(matrix.row_size(), false);
+    std::vector<bool> row_mark(matrix.row_size(), false);
     // 現在の矩形の行を処理済みとマークする．
     for ( auto row: rect_row_list ) {
       row_mark[row] = true;
@@ -217,13 +217,13 @@ FindRect::row_expand(
   // 無条件で追加する．
 
   // 無条件で加える行のリスト
-  vector<SizeType> new_row_list = rect_row_list;
+  std::vector<SizeType> new_row_list = rect_row_list;
   new_row_list.reserve(matrix.row_size());
   // 行番号と対応する列番号のリストのリスト
-  vector<pair<SizeType, vector<SizeType>>> row_col_list;
+  std::vector<std::pair<SizeType, std::vector<SizeType>>> row_col_list;
   row_col_list.reserve(matrix.row_size());
   for ( auto row: row_cand_list ) {
-    vector<SizeType> new_col_list;
+    std::vector<SizeType> new_col_list;
     new_col_list.reserve(rect_col_list.size());
     auto iter = RcRowMergeIter{rect_col_list, matrix.row_list(row)};
     for ( ; !iter.is_end(); ++ iter ) {
@@ -296,7 +296,7 @@ END_NONAMESPACE
 RcRect
 FindRect::find_col(
   const RcMatrix& matrix,
-  const vector<SizeType>& col_list
+  const std::vector<SizeType>& col_list
 )
 {
   MaxHolder<SizeType, SizeType> max_col;
@@ -318,7 +318,7 @@ FindRect::find_col(
   }
   // 同じ価値ならランダムに選ぶ．
   auto col = random_choice(max_col_list);
-  vector<SizeType> row_list;
+  std::vector<SizeType> row_list;
   row_list.reserve(matrix.col_num(col));
   for ( auto elem: matrix.col_list(col) ) {
     auto row = elem->row();
@@ -338,10 +338,10 @@ FindRect::col_expand(
   auto& rect_col_list = rect.col_list();
 
   // 現在の矩形の行と共通部分を持つ列を調べる．
-  vector<SizeType> col_cand_list;
+  std::vector<SizeType> col_cand_list;
   {
     // 処理済みの列のマーク
-    vector<bool> col_mark(matrix.col_size(), false);
+    std::vector<bool> col_mark(matrix.col_size(), false);
     // 現在の矩形の列を処理済みとマークする．
     for ( auto col: rect_col_list ) {
       col_mark[col] = true;
@@ -365,13 +365,13 @@ FindRect::col_expand(
   // 無条件で追加する．
 
   // 無条件で加える列のリスト
-  vector<SizeType> new_col_list = rect_col_list;
+  std::vector<SizeType> new_col_list = rect_col_list;
   new_col_list.reserve(matrix.col_size());
   // 列番号と対応する行番号のリストのリスト
-  vector<pair<SizeType, vector<SizeType>>> col_row_list;
+  std::vector<std::pair<SizeType, std::vector<SizeType>>> col_row_list;
   col_row_list.reserve(matrix.col_size());
   for ( auto col: col_cand_list ) {
-    vector<SizeType> new_row_list;
+    std::vector<SizeType> new_row_list;
     new_row_list.reserve(rect_row_list.size());
     auto iter = RcColMergeIter{rect_row_list, matrix.col_list(col)};
     for ( ; !iter.is_end(); ++ iter ) {

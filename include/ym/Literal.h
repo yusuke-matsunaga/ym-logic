@@ -330,9 +330,9 @@ operator>=(
 /// @brief Literal の内容を ostream に出力する関数
 /// @return s
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,        ///< [in] 出力ストリーム
+  std::ostream& s,   ///< [in] 出力ストリーム
   const Literal& lit ///< [in] 出力対象のリテラル
 )
 {

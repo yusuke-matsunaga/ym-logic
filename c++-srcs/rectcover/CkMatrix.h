@@ -41,7 +41,7 @@ public:
 
   /// @brief 列に関する情報
   struct ColInfo {
-    vector<Literal> cube; ///< カーネルキューブを表すリテラルのリスト
+    std::vector<Literal> cube; ///< カーネルキューブを表すリテラルのリスト
   };
 
 
@@ -49,7 +49,7 @@ public:
 
   /// @brief コンストラクタ
   CkMatrix(
-    const vector<KIX::CoverInfo>& cover_list ///< [in] カバー情報のリスト
+    const std::vector<KIX::CoverInfo>& cover_list ///< [in] カバー情報のリスト
   );
 
   /// @brief デストラクタ
@@ -100,7 +100,7 @@ public:
   /// @brief 内容を出力する．
   void
   print(
-    ostream& s ///< [in] 出力先のストリーム
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const;
 
 
@@ -116,16 +116,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // もとのカバー情報のリスト
-  vector<KIX::CoverInfo> mCoverList;
+  std::vector<KIX::CoverInfo> mCoverList;
 
   // 行列の価値番号をキーにしてカバー番号とキューブ番号を保持する配列
-  vector<ValueInfo> mValueArray;
+  std::vector<ValueInfo> mValueArray;
 
   // 列番号をキーにして対応するキューブ（を表すリテラルのリスト）を保持する配列
-  vector<ColInfo> mColArray;
+  std::vector<ColInfo> mColArray;
 
   // 行番号をキーにして対応するカバー番号とコカーネルキューブを保持する配列
-  vector<RowInfo> mRowArray;
+  std::vector<RowInfo> mRowArray;
 
 };
 

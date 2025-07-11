@@ -38,7 +38,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief カーネルとコカーネルを列挙する．
-  vector<pair<SopCover, vector<SopCube>>>
+  std::vector<std::pair<SopCover, std::vector<SopCube>>>
   all_kernels(
     const SopCover& cover ///< [in] 対象のカバー
   );
@@ -54,7 +54,7 @@ public:
   best_kernel(
     const SopCover& cover, ///< [in] 対象のカバー
     std::function<int(const SopCover&,
-		      const vector<SopCube>&)> eval_func ///< [in] 評価関数
+		      const std::vector<SopCube>&)> eval_func ///< [in] 評価関数
   );
 
 
@@ -72,14 +72,14 @@ private:
   /// @brief カーネルを求める下請け関数
   void
   kern_sub(
-    const SopCover& cover,             ///< [in] 対象のカバー
-    vector<Literal>::const_iterator p, ///< [in] 次のリテラルの位置
-    const SopCube& ccube,              ///< [in] 今までに括りだされた共通のキューブ
-    const LitSet& plits                ///< [in] すでに括られたリテラルの集合
+    const SopCover& cover,                  ///< [in] 対象のカバー
+    std::vector<Literal>::const_iterator p, ///< [in] 次のリテラルの位置
+    const SopCube& ccube,                   ///< [in] 今までに括りだされた共通のキューブ
+    const LitSet& plits                     ///< [in] すでに括られたリテラルの集合
   );
 
   /// @brief 出現頻度の昇順にならべたリテラルのリストを作る．
-  vector<Literal>
+  std::vector<Literal>
   gen_literal_list(
     const SopCover& cover ///< [in] 対象のカバー
   );
@@ -105,7 +105,7 @@ private:
   )
   {
     if ( mKernelDict.count(kernel) == 0 ) {
-      mKernelDict.emplace(kernel, vector<SopCube>{cokernel});
+      mKernelDict.emplace(kernel, std::vector<SopCube>{cokernel});
     }
     else {
       auto& cokernels = mKernelDict.at(kernel);
@@ -120,11 +120,11 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // リテラルリストの末尾
-  vector<Literal>::const_iterator mEnd;
+  std::vector<Literal>::const_iterator mEnd;
 
   // ハッシュ表
   // カーネルをキーにしてコカーネルのリストを格納する．
-  std::unordered_map<SopCover, vector<SopCube>> mKernelDict;
+  std::unordered_map<SopCover, std::vector<SopCube>> mKernelDict;
 
 };
 

@@ -169,7 +169,7 @@ public:
   static
   Expr
   and_op(
-    const vector<Expr>& chd_list ///< [in] オペランドのベクタ
+    const std::vector<Expr>& chd_list ///< [in] オペランドのベクタ
   );
 
   /// @brief OR 式の生成
@@ -186,7 +186,7 @@ public:
   static
   Expr
   or_op(
-    const vector<Expr>& chd_list ///< [in] オペランドのベクタ
+    const std::vector<Expr>& chd_list ///< [in] オペランドのベクタ
   );
 
   /// @brief XOR 式の生成
@@ -203,7 +203,7 @@ public:
   static
   Expr
   xor_op(
-    const vector<Expr>& chd_list ///< [in] オペランドのベクタ
+    const std::vector<Expr>& chd_list ///< [in] オペランドのベクタ
   );
 
   /// @brief 論理式をパーズして Expr オブジェクトを作る．
@@ -213,7 +213,7 @@ public:
   static
   Expr
   from_string(
-    const string& expr_str ///< [in] 論理式を表す文字列
+    const std::string& expr_str ///< [in] 論理式を表す文字列
   );
 
   /// @brief rep_string() 形式の文字列から変換する．
@@ -223,7 +223,7 @@ public:
   static
   Expr
   from_rep_string(
-    const string& rep_str ///< [in] 論理式を表す文字列
+    const std::string& rep_str ///< [in] 論理式を表す文字列
   );
 
   /// @}
@@ -373,8 +373,8 @@ public:
   /// 演算はビット毎に独立に行われる．
   BitVectType
   eval(
-    const vector<BitVectType>& vals, ///< [in] 変数の値割り当て
-    BitVectType mask = ~0UL          ///< [in] 使用するビットのためのマスク
+    const std::vector<BitVectType>& vals, ///< [in] 変数の値割り当て
+    BitVectType mask = ~0UL               ///< [in] 使用するビットのためのマスク
   ) const;
 
   /// @brief 真理値表の作成
@@ -487,7 +487,7 @@ public:
   ) const;
 
   /// @brief オペランドのリストの取得
-  vector<Expr>
+  std::vector<Expr>
   operand_list() const;
 
   /// @brief "シンプル"な論理式のチェック
@@ -645,11 +645,11 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 論理式の内容を文字列にする．
-  string
+  std::string
   to_string() const;
 
   /// @brief 圧縮形式の文字列を出力する．
-  string
+  std::string
   rep_string() const;
 
   /// @}
@@ -746,9 +746,9 @@ compare_type(
 /// @relates Expr
 /// @brief 論理式の内容のストリーム出力
 /// @return s
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,      ///< [in] 出力ストリーム
+  std::ostream& s,      ///< [in] 出力ストリーム
   const Expr& expr ///< [in] 論理式
 );
 

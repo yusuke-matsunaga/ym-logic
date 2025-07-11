@@ -1803,12 +1803,12 @@ TEST_F(BddTest, dump_restore)
   auto bdd2 = from_truth("1010");
   auto bdd3 = from_truth("1000");
 
-  ostringstream obuf;
+  std::ostringstream obuf;
   BinEnc enc{obuf};
   Bdd::dump(enc, {bdd1, bdd2, bdd3});
-  string tmp = obuf.str();
+  auto tmp = obuf.str();
 
-  istringstream ibuf{tmp};
+  std::istringstream ibuf{tmp};
   BinDec dec{ibuf};
   auto bdd_list = mMgr.restore(dec);
 
@@ -1822,7 +1822,7 @@ TEST_F(BddTest, display1)
 {
   auto bdd1 = from_truth("1000");
 
-  ostringstream os;
+  std::ostringstream os;
   bdd1.display(os);
 
   static const char* exp_str =

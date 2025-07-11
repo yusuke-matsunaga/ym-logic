@@ -83,7 +83,7 @@ private:
   // データメンバ
   //////////////////////////////////////////////////////////////////////
 
-  vector<int> mW2Array;
+  std::vector<int> mW2Array;
 
 };
 
@@ -98,11 +98,11 @@ walsh_2_refine(
   IgPartition& igpart
 )
 {
-  SizeType ni = func.input_num();
+  auto ni = func.input_num();
 
   if ( debug ) {
-    cout << "before walsh_w2_refine(" << var << ")" << endl;
-    cout << igpart << endl;
+    std::cout << "before walsh_w2_refine(" << var << ")" << std::endl
+	      << igpart << std::endl;
   }
 
   // walsh_2 係数を用いて極性の決定を行う．
@@ -126,8 +126,8 @@ walsh_2_refine(
   igpart.reorder();
 
   if ( debug ) {
-    cout << "after walsh_w2_refine" << endl
-	 << igpart << endl;
+    std::cout << "after walsh_w2_refine" << std::endl
+	      << igpart << std::endl;
   }
 }
 

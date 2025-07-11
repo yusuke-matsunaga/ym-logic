@@ -162,21 +162,21 @@ Bdd::get_support() const
 }
 
 // @brief サポート変数のリスト(vector)を得る．
-vector<BddVar>
+std::vector<BddVar>
 Bdd::get_support_list() const
 {
   return get_support().to_varlist();
 }
 
 // @brief 変数のリストに変換する．
-vector<BddVar>
+std::vector<BddVar>
 Bdd::to_varlist() const
 {
   _check_valid();
   _check_posicube();
 
   auto edge = root();
-  vector<BddVar> var_list;
+  std::vector<BddVar> var_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
     auto var = _level_to_var(node->level());
@@ -187,14 +187,14 @@ Bdd::to_varlist() const
 }
 
 // @brief リテラルのリストの変換する．
-vector<BddLit>
+std::vector<BddLit>
 Bdd::to_litlist() const
 {
   _check_valid();
   _check_cube();
 
   auto edge = root();
-  vector<BddLit> lit_list;
+  std::vector<BddLit> lit_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
     auto inv = edge.inv();

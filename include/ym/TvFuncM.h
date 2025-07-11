@@ -59,15 +59,7 @@ public:
   ///
   /// src_list の関数の入力数は等しくなければならない．
   TvFuncM(
-    const vector<TvFunc>& src_list
-  );
-
-  /// @brief TvFunc のリストを用いたコンストラクタ
-  /// @param[in] src_list 各出力の論理関数
-  ///
-  /// src_list の関数の入力数は等しくなければならない．
-  TvFuncM(
-    const list<TvFunc>& src_list
+    const std::vector<TvFunc>& src_list
   );
 
   /// @brief コピー代入演算子
@@ -321,10 +313,10 @@ public:
   /// @brief 内容の出力
   void
   print(
-    ostream& s,  ///< [in] 出力先のストリーム
-    int mode = 2 ///< [in] 出力モード
-                 ///<  -  2: 2進表記
-                 ///<  - 16: 16進表記
+    std::ostream& s, ///< [in] 出力先のストリーム
+    int mode = 2     ///< [in] 出力モード
+                     ///<  -  2: 2進表記
+                     ///<  - 16: 16進表記
   ) const;
 
 
@@ -484,7 +476,7 @@ private:
   SizeType mBlockNum;
 
   // パックされた真理値ベクトル
-  vector<WordType> mVector;
+  std::vector<WordType> mVector;
 
 };
 
@@ -769,9 +761,9 @@ operator&&(
 /// @relates TvFuncM
 /// @brief ストリームに対する出力
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,         ///< [in] 出力先のストリーム
+  std::ostream& s,    ///< [in] 出力先のストリーム
   const TvFuncM& func ///< [in] 対象の関数
 )
 {

@@ -111,9 +111,9 @@ public:
 
   /// @brief レベルのリストに変換する．
   static
-  vector<SizeType>
+  std::vector<SizeType>
   conv_to_levellist(
-    const vector<ZddItem>& item_list
+    const std::vector<ZddItem>& item_list
   );
 
 
@@ -131,9 +131,9 @@ private:
 
 /// @brief ストリーム出力演算子
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   const ZddItem& item
 )
 {

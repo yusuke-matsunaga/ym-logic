@@ -31,8 +31,8 @@ public:
 
   /// @brief コンストラクタ
   DdInfoMgr(
-    const vector<DdEdge>& root_list, ///< [in] 根の枝のリスト
-    const DdNodeMgr* node_mgr        ///< [in] DdNodeMgr
+    const std::vector<DdEdge>& root_list, ///< [in] 根の枝のリスト
+    const DdNodeMgr* node_mgr             ///< [in] DdNodeMgr
   );
 
   /// @brief デストラクタ
@@ -62,7 +62,7 @@ public:
   }
 
   /// @brief 根の枝を表す整数のリストを返す．
-  const vector<SizeType>&
+  const std::vector<SizeType>&
   root_list() const
   {
     return mRootList;
@@ -76,14 +76,14 @@ public:
   }
 
   /// @brief ノード情報のリストを返す．
-  const vector<DdInfo>&
+  const std::vector<DdInfo>&
   node_list() const
   {
     return mNodeList;
   }
 
   /// @brief 指定されたレベルのノード番号のリストを返す．
-  const vector<SizeType>&
+  const std::vector<SizeType>&
   id_list(
     SizeType level ///< [in] レベル ( 0 <= level < max_level() )
   ) const
@@ -95,11 +95,11 @@ public:
   /// @brief 内容を見やすい形式で出力する．
   void
   display(
-    ostream& s ///< [in] 出力ストリーム
+    std::ostream& s ///< [in] 出力ストリーム
   ) const;
 
   // @brief 構造を表す整数配列を作る．
-  vector<SizeType>
+  std::vector<SizeType>
   rep_data() const;
 
 
@@ -126,16 +126,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // レベルをキーにして変数番号を保持する配列
-  vector<SizeType> mVarIdArray;
+  std::vector<SizeType> mVarIdArray;
 
   // 根の枝のリスト
-  vector<SizeType> mRootList;
+  std::vector<SizeType> mRootList;
 
   // ノードリスト
-  vector<DdInfo> mNodeList;
+  std::vector<DdInfo> mNodeList;
 
   // レベルごとのノード番号のリスト
-  vector<vector<SizeType>> mIdListArray;
+  std::vector<std::vector<SizeType>> mIdListArray;
 
 };
 

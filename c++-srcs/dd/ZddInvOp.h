@@ -51,7 +51,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 演算結果テーブル
-  unordered_map<const DdNode*, const DdNode*> mTable;
+  std::unordered_map<const DdNode*, const DdNode*> mTable;
 
 };
 

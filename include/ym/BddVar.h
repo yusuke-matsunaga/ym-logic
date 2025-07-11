@@ -134,16 +134,16 @@ public:
 
   /// @brief BddVar のリストから DdEdge のリストに変換する．
   static
-  vector<DdEdge>
+  std::vector<DdEdge>
   conv_to_edgelist(
-    const vector<BddVar>& var_list
+    const std::vector<BddVar>& var_list
   );
 
   /// @brief BddVar のリストからレベルのリストに変換する．
   static
-  vector<SizeType>
+  std::vector<SizeType>
   conv_to_levellist(
-    const vector<BddVar>& var_list
+    const std::vector<BddVar>& var_list
   );
 
 
@@ -161,9 +161,9 @@ private:
 
 /// @brief ストリーム出力演算子
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   const BddVar& var
 )
 {

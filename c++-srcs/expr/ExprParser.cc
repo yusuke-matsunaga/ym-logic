@@ -19,7 +19,7 @@ BEGIN_NAMESPACE_YM_LOGIC
 
 // @brief コンストラクタ
 ExprParser::ExprParser(
-  const string& expr_str
+  const std::string& expr_str
 ) : mExprStr{expr_str},
     mInput{mExprStr}
 {
@@ -33,7 +33,7 @@ ExprParser::~ExprParser()
 // str からリテラル番号を得る．
 SizeType
 ExprParser::str_to_literal(
-  const string& str
+  const std::string& str
 )
 {
   SizeType id = 0;
@@ -50,7 +50,7 @@ ExprParser::get_token(
   SizeType& lit_id
 )
 {
-  string str;
+  std::string str;
   char c;
 
   // 汚いのは承知で goto 文で状態遷移を書きます．
@@ -267,9 +267,9 @@ ExprParser::get_expr(
 }
 
 // @brief トークンを出力する．主にデバッグ用
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   ExprToken token
 )
 {

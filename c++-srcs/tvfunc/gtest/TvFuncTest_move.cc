@@ -45,12 +45,12 @@ TEST(TvFuncMove, move)
 
 TEST(TvFuncMove, copy_m)
 {
-  vector<TvFunc> f_list(2);
+  std::vector<TvFunc> f_list(2);
   f_list[0] = TvFunc::zero(20);
   f_list[1] = TvFunc::one(20);
   TvFuncM f(f_list);
 
-  vector<TvFunc> g_list(2);
+  std::vector<TvFunc> g_list(2);
   g_list[0] = TvFunc::posi_literal(20, 0);
   g_list[1] = TvFunc::nega_literal(20, 1);
   TvFuncM g(g_list);
@@ -69,12 +69,12 @@ TEST(TvFuncMove, copy_m)
 
 TEST(TvFuncMove, move_m)
 {
-  vector<TvFunc> f_list(2);
+  std::vector<TvFunc> f_list(2);
   f_list[0] = TvFunc::zero(20);
   f_list[1] = TvFunc::one(20);
   TvFuncM f(f_list);
 
-  vector<TvFunc> g_list(2);
+  std::vector<TvFunc> g_list(2);
   g_list[0] = TvFunc::posi_literal(20, 0);
   g_list[1] = TvFunc::nega_literal(20, 1);
   TvFuncM g(g_list);

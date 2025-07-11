@@ -25,8 +25,8 @@ public:
 
   /// @brief コンストラクタ
   BddMultiCompOp(
-    BddMgrImpl* mgr,                                ///< [in] マネージャ
-    const unordered_map<SizeType, DdEdge>& comp_map ///< [in] 変換マップ
+    BddMgrImpl* mgr,                                     ///< [in] マネージャ
+    const std::unordered_map<SizeType, DdEdge>& comp_map ///< [in] 変換マップ
   );
 
   /// @brief デストラクタ
@@ -67,10 +67,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変換リスト
-  vector<pair<SizeType, DdEdge>> mCompList;
+  std::vector<std::pair<SizeType, DdEdge>> mCompList;
 
   // 演算結果テーブル
-  unordered_map<const DdNode*, DdEdge> mTable;
+  std::unordered_map<const DdNode*, DdEdge> mTable;
 
   // ITE演算
   BddIteOp mIteOp;

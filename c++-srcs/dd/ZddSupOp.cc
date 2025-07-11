@@ -15,14 +15,14 @@
 BEGIN_NAMESPACE_YM_DD
 
 // @brief サポート変数のリスト(vector)を得る．
-vector<ZddItem>
+std::vector<ZddItem>
 Zdd::get_support_list() const
 {
   _check_valid();
 
   ZddSupOp op(get());
   auto edge = op.get_step(root());
-  vector<ZddItem> item_list;
+  std::vector<ZddItem> item_list;
   while ( !edge.is_const() ) {
     auto node = edge.node();
     auto level = node->level();

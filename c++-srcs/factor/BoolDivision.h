@@ -27,7 +27,7 @@ public:
   /// @brief 除算を行う．
   /// @return 商q と余りr の pair を返す．
   static
-  pair<SopCover, SopCover>
+  std::pair<SopCover, SopCover>
   divide(
     const SopCover& f, ///< [in] 被除数
     const SopCover& d  ///< [in] 除数

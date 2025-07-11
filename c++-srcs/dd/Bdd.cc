@@ -254,7 +254,7 @@ Bdd::compose_int(
 // @brief 複合compose演算
 Bdd
 Bdd::multi_compose(
-  const unordered_map<BddVar, Bdd>& compose_map
+  const ComposeMap& compose_map
 ) const
 {
   auto edge = _multi_compose(compose_map);
@@ -264,7 +264,7 @@ Bdd::multi_compose(
 // @brief 複合compose演算を行って代入する．
 Bdd&
 Bdd::multi_compose_int(
-  const unordered_map<BddVar, Bdd>& compose_map
+  const ComposeMap& compose_map
 )
 {
   auto edge = _multi_compose(compose_map);
@@ -275,7 +275,7 @@ Bdd::multi_compose_int(
 // @brief 変数順を入れ替える演算
 Bdd
 Bdd::remap_vars(
-  const unordered_map<BddVar, BddLit>& varmap
+  const VarMap& varmap
 ) const
 {
   auto edge = _remap_vars(varmap);
@@ -432,7 +432,7 @@ Bdd::root_inv() const
 // @brief 評価を行う．
 bool
 Bdd::eval(
-  const vector<bool>& inputs ///< [in] 入力値ベクタ
+  const std::vector<bool>& inputs ///< [in] 入力値ベクタ
 ) const
 {
   _check_valid();
@@ -494,7 +494,7 @@ Bdd::_change_root(
 // @brief 内容を出力する．
 void
 Bdd::display(
-  ostream& s
+  std::ostream& s
 ) const
 {
   auto edge = root();
@@ -504,7 +504,7 @@ Bdd::display(
 }
 
 // @brief 構造を表す整数配列を作る．
-vector<SizeType>
+std::vector<SizeType>
 Bdd::rep_data() const
 {
   auto edge = root();
@@ -548,7 +548,7 @@ Bdd::root() const
 // @brief 複数のBDDのノード数を数える．
 SizeType
 Bdd::bdd_size(
-  const vector<Bdd>& bdd_list
+  const std::vector<Bdd>& bdd_list
 )
 {
   if ( bdd_list.empty() ) {
@@ -563,8 +563,8 @@ Bdd::bdd_size(
 // @brief 複数のBDDの内容を出力する．
 void
 Bdd::display(
-  ostream& s,
-  const vector<Bdd>& bdd_list
+  std::ostream& s,
+  const std::vector<Bdd>& bdd_list
 )
 {
   if ( bdd_list.empty() ) {
@@ -577,9 +577,9 @@ Bdd::display(
 }
 
 // @brief 構造を表す整数配列を作る．
-vector<SizeType>
+std::vector<SizeType>
 Bdd::rep_data(
-  const vector<Bdd>& bdd_list
+  const std::vector<Bdd>& bdd_list
 )
 {
   if ( bdd_list.empty() ) {
@@ -595,7 +595,7 @@ Bdd::rep_data(
 void
 Bdd::dump(
   BinEnc& s,
-  const vector<Bdd>& bdd_list
+  const std::vector<Bdd>& bdd_list
 )
 {
   auto mgr = _mgr(bdd_list);
@@ -617,7 +617,7 @@ Bdd::_level_to_var(
 // @brief BDDのリストからマネージャを取り出す．
 BddMgrImpl*
 Bdd::_mgr(
-  const vector<Bdd>& bdd_list ///< [in] BDDのリスト
+  const std::vector<Bdd>& bdd_list
 )
 {
   if ( bdd_list.empty() ) {
@@ -634,16 +634,16 @@ Bdd::_mgr(
 }
 
 // @brief BDDのリストから枝のリストに変換する．
-vector<DdEdge>
+std::vector<DdEdge>
 Bdd::_conv_to_edgelist(
-  const vector<Bdd>& bdd_list
+  const std::vector<Bdd>& bdd_list
 )
 {
   if ( bdd_list.empty() ) {
     return {};
   }
 
-  vector<DdEdge> edge_list;
+  std::vector<DdEdge> edge_list;
   edge_list.reserve(bdd_list.size());
   for ( auto& bdd: bdd_list ) {
     auto edge = bdd.root();
@@ -728,12 +728,12 @@ BddVar::negative_literal() const
 }
 
 // @brief BddVar のリストから DdEdge のリストに変換する．
-vector<DdEdge>
+std::vector<DdEdge>
 BddVar::conv_to_edgelist(
-  const vector<BddVar>& var_list
+  const std::vector<BddVar>& var_list
 )
 {
-  vector<DdEdge> edge_list;
+  std::vector<DdEdge> edge_list;
   edge_list.reserve(var_list.size());
   for ( auto var: var_list ) {
     auto edge = var.root();
@@ -743,12 +743,12 @@ BddVar::conv_to_edgelist(
 }
 
 // @brief BddVar のリストからレベルのリストに変換する．
-vector<SizeType>
+std::vector<SizeType>
 BddVar::conv_to_levellist(
-  const vector<BddVar>& var_list
+  const std::vector<BddVar>& var_list
 )
 {
-  vector<SizeType> level_list;
+  std::vector<SizeType> level_list;
   level_list.reserve(var_list.size());
   for ( auto var: var_list ) {
     auto level = var.level();

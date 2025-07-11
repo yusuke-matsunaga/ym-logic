@@ -55,7 +55,7 @@ public:
   );
 
   /// @brief 要素(を表す枝)のリストを返す．
-  vector<DdEdge>
+  std::vector<DdEdge>
   item_list()
   {
     return mItemList;
@@ -64,7 +64,7 @@ public:
   /// @brief 部分集合を作る．
   DdEdge
   make_set(
-    const vector<SizeType>& level_list
+    const std::vector<SizeType>& level_list
   );
 
   /// @brief 複数のZDDを独自形式でバイナリダンプする．
@@ -80,7 +80,7 @@ public:
   /// @return 生成されたZDDのリストを返す．
   ///
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
-  vector<DdEdge>
+  std::vector<DdEdge>
   restore(
     BinDec& s ///< [in] 入力ストリーム
   );
@@ -166,7 +166,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 要素(の枝)のリスト
-  vector<DdEdge> mItemList;
+  std::vector<DdEdge> mItemList;
 
 };
 

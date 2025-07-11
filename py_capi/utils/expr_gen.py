@@ -35,7 +35,7 @@ class ExprGen(PyObjGen):
             self.gen_obj_conv(writer, objname='self', varname='my_obj')
             writer.gen_vardecl(typename='Expr',
                                varname='src')
-            with writer.gen_if_block('expr_str != string{}'):
+            with writer.gen_if_block('expr_str != std::string{}'):
                 with writer.gen_try_block():
                     writer.gen_assign('src', 'Expr::from_rep_string(expr_str)')
                 writer.gen_catch_invalid_argument()

@@ -10,6 +10,7 @@
 #include "DdNode.h"
 #include "DdEdge.h"
 #include "DdNodeTable.h"
+#include <iomanip>
 
 
 BEGIN_NAMESPACE_YM_DD
@@ -159,8 +160,8 @@ BEGIN_NONAMESPACE
 SizeType
 dfs_sub(
   DdEdge edge,
-  vector<SizeType>& data_list,
-  unordered_map<DdEdge, SizeType>& id_map
+  std::vector<SizeType>& data_list,
+  std::unordered_map<DdEdge, SizeType>& id_map
 )
 {
   if ( edge.is_zero() ) {
@@ -199,7 +200,7 @@ dfs_sub(
 
 void
 print_edge(
-  ostream& s,
+  std::ostream& s,
   SizeType val
 )
 {
@@ -211,7 +212,7 @@ print_edge(
   }
   else {
     SizeType id = val / 2;
-    s << setw(7) << id;
+    s << std::setw(7) << id;
     if ( val % 2 ) {
       s << "~";
     }
@@ -226,12 +227,12 @@ END_NONAMESPACE
 // @brief root を根とするDDの内容を出力する(デバッグ用)．
 void
 print(
-  ostream& s,
+  std::ostream& s,
   DdEdge root
 )
 {
-  unordered_map<DdEdge, SizeType> id_map;
-  vector<SizeType> data_list;
+  std::unordered_map<DdEdge, SizeType> id_map;
+  std::vector<SizeType> data_list;
   auto id = dfs_sub(root.posi_edge(), data_list, id_map);
   auto tmp = id * 2;
   if ( root.inv() ) {
@@ -239,18 +240,18 @@ print(
   }
   s << "Root:  ";
   print_edge(s, tmp);
-  s << endl;
+  s << std::endl;
   SizeType n = data_list.size() / 3;
   for ( SizeType i = 0; i < n; ++ i ) {
     SizeType base = (n - i - 1) * 3;
     auto level = data_list[base + 0];
     auto tmp0 = data_list[base + 1];
     auto tmp1 = data_list[base + 2];
-    s << setw(7) << (n - i) << ":"
-      << setw(6) << level;
+    s << std::setw(7) << (n - i) << ":"
+      << std::setw(6) << level;
     print_edge(s, tmp0);
     print_edge(s, tmp1);
-    s << endl;
+    s << std::endl;
   }
 }
 

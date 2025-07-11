@@ -29,9 +29,9 @@ public:
 
   /// @brief コンストラクタ
   BddCopyOp(
-    BddMgrImpl* mgr,                   ///< [in] マネージャ
-    const vector<BddVar>& var_list,    ///< [in] 変数リスト
-    const vector<SizeType>& level_list ///< [in] レベルのリスト
+    BddMgrImpl* mgr,                        ///< [in] マネージャ
+    const std::vector<BddVar>& var_list,    ///< [in] 変数リスト
+    const std::vector<SizeType>& level_list ///< [in] レベルのリスト
   ) : mMgr{mgr},
       mVarList{var_list},
       mLevelList{level_list}
@@ -64,13 +64,13 @@ private:
   BddMgrImpl* mMgr;
 
   // 変数リスト
-  vector<BddVar> mVarList;
+  std::vector<BddVar> mVarList;
 
   // レベルのリスト
-  vector<SizeType> mLevelList;
+  std::vector<SizeType> mLevelList;
 
   // 演算結果テーブル
-  unordered_map<Bdd, DdEdge> mTable;
+  std::unordered_map<Bdd, DdEdge> mTable;
 
 };
 

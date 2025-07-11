@@ -25,8 +25,8 @@ public:
 
   /// @brief コンストラクタ
   BddTruthOp(
-    BddMgrImpl* mgr,                   ///< [in] マネージャ
-    const vector<SizeType>& index_list ///< [in] インデックスリスト
+    BddMgrImpl* mgr,                        ///< [in] マネージャ
+    const std::vector<SizeType>& index_list ///< [in] インデックスリスト
   ) : BddOpBase{mgr},
       mIndexList{index_list}
   {
@@ -44,8 +44,8 @@ public:
   /// @brief 真理値表の文字列からBDDを作る．
   DdEdge
   op_step(
-    const string& str, ///< [in] 文字列
-    SizeType index     ///< [in] 先頭の変数インデックス
+    const std::string& str, ///< [in] 文字列
+    SizeType index          ///< [in] 先頭の変数インデックス
   );
 
 
@@ -55,10 +55,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 演算結果テーブル
-  unordered_map<string, DdEdge> mTable;
+  std::unordered_map<std::string, DdEdge> mTable;
 
   // インデックスリスト
-  vector<SizeType> mIndexList;
+  std::vector<SizeType> mIndexList;
 
 };
 

@@ -102,7 +102,7 @@ private:
 /// @brief PolConf の内容を出力する．
 void
 print_polconf(
-  ostream& s,             ///< [in] 出力先のストリーム
+  std::ostream& s,        ///< [in] 出力先のストリーム
   const PolConf& polconf, ///< [in] PolConf
   SizeType ni             ///< [in] 入力数
 );
@@ -111,9 +111,9 @@ print_polconf(
 /// @brief PolConf リストのの内容を出力する．
 void
 print_polconf_list(
-  ostream& s,                          ///< [in] 出力先のストリーム
-  const vector<PolConf>& polconf_list, ///< [in] PolConf のリスト
-  SizeType ni                          ///< [in] 入力数
+  std::ostream& s,                          ///< [in] 出力先のストリーム
+  const std::vector<PolConf>& polconf_list, ///< [in] PolConf のリスト
+  SizeType ni                               ///< [in] 入力数
 );
 
 END_NAMESPACE_YM_LOGIC

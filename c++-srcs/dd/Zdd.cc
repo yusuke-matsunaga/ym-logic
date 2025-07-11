@@ -350,7 +350,7 @@ Zdd::_change_root(
 // @brief 内容を出力する．
 void
 Zdd::display(
-  ostream& s
+  std::ostream& s
 ) const
 {
   auto edge = root();
@@ -360,7 +360,7 @@ Zdd::display(
 }
 
 // @brief 構造を表す整数配列を作る．
-vector<SizeType>
+std::vector<SizeType>
 Zdd::rep_data() const
 {
   auto edge = root();
@@ -414,7 +414,7 @@ Zdd::_level_to_item(
 // @brief ZDDのリストからマネージャを取り出す．
 ZddMgrImpl*
 Zdd::_mgr(
-  const vector<Zdd>& zdd_list ///< [in] BDDのリスト
+  const std::vector<Zdd>& zdd_list
 )
 {
   if ( zdd_list.empty() ) {
@@ -431,16 +431,16 @@ Zdd::_mgr(
 }
 
 // @brief ZDDのリストから枝のリストに変換する．
-vector<DdEdge>
+std::vector<DdEdge>
 Zdd::_conv_to_edgelist(
-  const vector<Zdd>& zdd_list
+  const std::vector<Zdd>& zdd_list
 )
 {
   if ( zdd_list.empty() ) {
     return {};
   }
 
-  vector<DdEdge> edge_list;
+  std::vector<DdEdge> edge_list;
   edge_list.reserve(zdd_list.size());
   for ( auto& zdd: zdd_list ) {
     auto edge = zdd.root();
@@ -492,12 +492,12 @@ ZddItem::level() const
 }
 
 // @brief レベルのリストに変換する．
-vector<SizeType>
+std::vector<SizeType>
 ZddItem::conv_to_levellist(
-  const vector<ZddItem>& item_list
+  const std::vector<ZddItem>& item_list
 )
 {
-  vector<SizeType> level_list;
+  std::vector<SizeType> level_list;
   level_list.reserve(item_list.size());
   for ( auto& item: item_list ) {
     auto level = item.level();

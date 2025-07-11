@@ -164,34 +164,31 @@ NpnMap
 NpnMap::inverse() const
 {
   if ( debug_npn_map ) {
-    cerr << "inverse :" << endl
-	 << *this
-	 << endl;
+    std::cerr << "inverse :" << std::endl
+	      << *this
+	      << std::endl;
   }
 
-  SizeType src_ni = input_num();
-  SizeType dst_ni = input_num2();
+  auto src_ni = input_num();
+  auto dst_ni = input_num2();
   NpnMap dst_map(dst_ni, src_ni);
   for ( SizeType src_var = 0; src_var < src_ni; ++ src_var ) {
-    NpnVmap imap1 = imap(src_var);
+    auto imap1 = imap(src_var);
     if ( !imap1.is_invalid() ) {
       auto dst_var = imap1.var();
       if ( dst_var >= dst_ni ) {
-	if ( debug_npn_map ) {
-	  cerr << "inverse(src): srcの値域と定義域が一致しません．";
-	}
-	return NpnMap{};
+	throw std::invalid_argument{"inverse(src): srcの値域と定義域が一致しません．"};
       }
-      bool inv = imap1.inv();
+      auto inv = imap1.inv();
       dst_map.set_imap(dst_var, src_var, inv);
     }
   }
   dst_map.set_oinv(oinv());
 
   if ( debug_npn_map ) {
-    cerr << "--->" << endl
-	 << dst_map
-	 << endl << endl;
+    std::cerr << "--->" << std::endl
+	      << dst_map
+	      << std::endl << std::endl;
   }
 
   return dst_map;
@@ -204,21 +201,18 @@ NpnMap::operator*(
 ) const
 {
   if ( debug_npn_map ) {
-    cerr << "compose :"	 << endl
-	 << *this	 << endl
-	 << "with"	 << endl
-	 << src2	 << endl;
+    std::cerr << "compose :" << std::endl
+	      << *this	 << std::endl
+	      << "with"	 << std::endl
+	      << src2	 << std::endl;
   }
 
-  SizeType ni1 = input_num();
-  SizeType ni1_2 = input_num2();
-  SizeType ni2 = src2.input_num();
-  SizeType ni2_2 = src2.input_num2();
+  auto ni1 = input_num();
+  auto ni1_2 = input_num2();
+  auto ni2 = src2.input_num();
+  auto ni2_2 = src2.input_num2();
   if ( ni1_2 != ni2 ) {
-    if ( debug_npn_map ) {
-      cerr << "src1 * src2: src1の値域とsrc2の定義域が一致しません．";
-    }
-    return NpnMap();
+    throw std::invalid_argument{"src1 * src2: src1の値域とsrc2の定義域が一致しません．"};
   }
 
   NpnMap dst_map(ni1, ni2_2);
@@ -230,13 +224,10 @@ NpnMap::operator*(
     }
     else {
       auto var2 = imap1.var();
-      bool inv2 = imap1.inv();
+      auto inv2 = imap1.inv();
       auto imap2 = src2.imap(var2);
       if ( imap2.is_invalid() ) {
-	if ( debug_npn_map ) {
-	  cerr << "src1 * src2: src1の値域とsrc2の定義域が一致しません．";
-	}
-	return NpnMap();
+	throw std::invalid_argument{"src1 * src2: src1の値域とsrc2の定義域が一致しません．"};
       }
       else {
 	auto var3 = imap2.var();
@@ -247,8 +238,8 @@ NpnMap::operator*(
   }
 
   if ( debug_npn_map ) {
-    cerr << "--->" << endl
-	 << dst_map << endl;
+    std::cerr << "--->" << std::endl
+	      << dst_map << std::endl;
   }
 
   return dst_map;
@@ -265,9 +256,9 @@ NpnMap::operator*=(
 }
 
 // ストリーム出力演算子
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   const NpnMap& map
 )
 {
@@ -278,13 +269,13 @@ operator<<(
     s << comma;
     comma = ", ";
     s << i << " ==> ";
-    NpnVmap imap = map.imap(i);
+    auto imap = map.imap(i);
     if ( imap.is_invalid() ) {
       s << "---";
     }
     else {
       auto dst_var = imap.var();
-      bool inv = imap.inv();
+      auto inv = imap.inv();
       if ( inv ) {
 	s << '~';
       }
@@ -304,11 +295,11 @@ operator<<(
 // バイナリ出力
 void
 NpnMap::dump(
-  ostream& bos
+  std::ostream& bos
 ) const
 {
-  SizeType ni = input_num();
-  SizeType ni2 = input_num2();
+  auto ni = input_num();
+  auto ni2 = input_num2();
   bos << ni << ni2;
   for ( SizeType i = 0; i < ni; ++ i ) {
     auto vmap = imap(i);
@@ -320,7 +311,7 @@ NpnMap::dump(
 // バイナリ入力
 void
 NpnMap::restore(
-  istream& bis
+  std::istream& bis
 )
 {
   SizeType ni;

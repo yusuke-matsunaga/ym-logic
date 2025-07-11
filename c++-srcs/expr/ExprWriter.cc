@@ -13,11 +13,11 @@
 BEGIN_NAMESPACE_YM_LOGIC
 
 // ostream に対する書出し
-ostream&
+std::ostream&
 ExprWriter::dump(
-  ostream& s,
+  std::ostream& s,
   const Expr& expr,
-  const unordered_map<SizeType, string>& var_names
+  const std::unordered_map<SizeType, std::string>& var_names
 ) const
 {
   if ( expr.is_invalid() ) {
@@ -30,43 +30,43 @@ ExprWriter::dump(
 }
 
 // ostream に対する書出し
-ostream&
+std::ostream&
 ExprWriter::dump(
-  ostream& s,
+  std::ostream& s,
   const Expr& expr
 ) const
 {
-  dump(s, expr, unordered_map<SizeType, string>());
+  dump(s, expr, std::unordered_map<SizeType, std::string>());
   return s;
 }
 
 // @brief 内容を文字列にする．
-string
+std::string
 ExprWriter::dump_to_string(
   const Expr& expr
 ) const
 {
-  ostringstream buf;
+  std::ostringstream buf;
   dump(buf, expr);
-  return string(buf.str());
+  return std::string(buf.str());
 }
 
 // @brief 内容を文字列にする．
-string
+std::string
 ExprWriter::dump_to_string(
   const Expr& expr,
-  const unordered_map<SizeType, string>& var_names
+  const std::unordered_map<SizeType, std::string>& var_names
 ) const
 {
-  ostringstream buf;
+  std::ostringstream buf;
   dump(buf, expr, var_names);
-  return string(buf.str());
+  return std::string(buf.str());
 }
 
 // 演算子文字列を設定する．
 void
 ExprWriter::set_opstr(
-  const vector<string>& op
+  const std::vector<std::string>& op
 )
 {
   for ( auto i: { 0, 1, 2, 3 } ) {
@@ -75,10 +75,10 @@ ExprWriter::set_opstr(
 }
 
 // 演算子文字列を取得する．
-vector<string>
+std::vector<std::string>
 ExprWriter::opstr() const
 {
-  vector<string> op(4);
+  std::vector<std::string> op(4);
   for ( auto i: { 0, 1, 2, 3 } ) {
     op[i] = mOpStrArray[i];
   }
@@ -86,52 +86,52 @@ ExprWriter::opstr() const
 }
 
 // NOT演算子の文字列を得る．
-const string&
+const std::string&
 ExprWriter::not_str() const
 {
   return mOpStrArray[0];
 }
 
 // AND演算子の文字列を得る．
-const string&
+const std::string&
 ExprWriter::and_str() const
 {
   return mOpStrArray[1];
 }
 
 // OR演算子の文字列を得る．
-const string&
+const std::string&
 ExprWriter::or_str() const
 {
   return mOpStrArray[2];
 }
 
 // XOR演算子の文字列を得る．
-const string&
+const std::string&
 ExprWriter::xor_str() const
 {
   return mOpStrArray[3];
 }
 
 // 論理式の内容を ostream に書出す．
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   const Expr& expr
 )
 {
   ExprWriter writer;
   // 空の map を渡す
-  return writer.dump(s, expr, unordered_map<SizeType, string>());
+  return writer.dump(s, expr, std::unordered_map<SizeType, std::string>());
 }
 
 
 // dump() のサブルーティン
 void
 ExprWriter::dump_sub(
-  ostream& s,
+  std::ostream& s,
   const Expr& expr,
-  const unordered_map<SizeType, string>& var_names
+  const std::unordered_map<SizeType, std::string>& var_names
 ) const
 {
   if ( expr.is_zero() ) {
@@ -154,7 +154,7 @@ ExprWriter::dump_sub(
     }
   }
   else { // AND/OR/XOR
-    string delim;
+    std::string delim;
     if ( expr.is_and() ) {
       delim = and_str();
     }
@@ -168,7 +168,7 @@ ExprWriter::dump_sub(
       ASSERT_NOT_REACHED;
     }
     s << "( ";
-    string delim1 = "";
+    std::string delim1 = "";
     for ( auto& opr: expr.operand_list() ) {
       s << delim1;
       dump_sub(s, opr, var_names);

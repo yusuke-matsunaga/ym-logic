@@ -24,7 +24,7 @@ Tv2Bdd::gen_bdd(
 )
 {
   auto ni = f.input_num();
-  vector<BddVar> var_list(ni);
+  std::vector<BddVar> var_list(ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
     var_list[i] = mgr.variable(ni - i - 1);
   }
@@ -36,7 +36,7 @@ Bdd
 Tv2Bdd::gen_bdd(
   const TvFunc& f,
   BddMgr& mgr,
-  const vector<BddVar>& var_list
+  const std::vector<BddVar>& var_list
 )
 {
   BddGen gen{f, mgr, var_list};

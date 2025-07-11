@@ -10,6 +10,7 @@
 #include "ym/BddMgr.h"
 #include "ym/BddVar.h"
 #include "ym/Expr.h"
+#include <unordered_set>
 
 
 BEGIN_NAMESPACE_YM_DD
@@ -17,7 +18,7 @@ BEGIN_NAMESPACE_YM_DD
 Bdd
 BddMgr::from_expr(
   const Expr& expr,
-  const vector<BddVar>& var_list
+  const std::vector<BddVar>& var_list
 )
 {
   std::unordered_set<BddVar> var_set;
@@ -25,7 +26,7 @@ BddMgr::from_expr(
     var_set.emplace(var);
   }
   // var_list に足りない変数を追加する．
-  vector<BddVar> tmp_var_list = var_list;
+  std::vector<BddVar> tmp_var_list = var_list;
   auto nv = expr.input_size();
   SizeType pos = 0;
   while ( tmp_var_list.size() < nv ) {

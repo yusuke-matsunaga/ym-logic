@@ -73,8 +73,8 @@ public:
 
   /// @brief And/Or/Xor 用のコンストラクタ
   ExprNode(
-    Type type,                          ///< [in] タイプ
-    const vector<NodePtr>& operand_list ///< [in] オペランドのリスト
+    Type type,                               ///< [in] タイプ
+    const std::vector<NodePtr>& operand_list ///< [in] オペランドのリスト
   ) : mTypeVarId{static_cast<SizeType>(type)},
       mOperandList{operand_list}
   {
@@ -108,21 +108,21 @@ public:
   static
   NodePtr
   new_and(
-    const vector<NodePtr>& operand_list ///< [in] オペランドのリスト
+    const std::vector<NodePtr>& operand_list ///< [in] オペランドのリスト
   );
 
   /// @brief ORノードを返す．
   static
   NodePtr
   new_or(
-    const vector<NodePtr>& operand_list ///< [in] オペランドのリスト
+    const std::vector<NodePtr>& operand_list ///< [in] オペランドのリスト
   );
 
   /// @brief XORノードを返す．
   static
   NodePtr
   new_xor(
-    const vector<NodePtr>& operand_list ///< [in] オペランドのリスト
+    const std::vector<NodePtr>& operand_list ///< [in] オペランドのリスト
   );
 
 
@@ -270,7 +270,7 @@ public:
   }
 
   /// @brief 演算子ノードの場合に子供のノードのリストを返す．
-  const vector<NodePtr>&
+  const std::vector<NodePtr>&
   operand_list() const
   {
     return mOperandList;
@@ -279,8 +279,8 @@ public:
   /// @brief vals の値にしたがった評価を行う．
   BitVectType
   eval(
-    const vector<BitVectType>& vals, ///< [in] 値のベクタ
-    BitVectType mask                 ///< [in] マスク
+    const std::vector<BitVectType>& vals, ///< [in] 値のベクタ
+    BitVectType mask                      ///< [in] マスク
   ) const;
 
   /// @brief 真理値表を作成する．
@@ -367,13 +367,13 @@ public:
   ) const;
 
   /// @brief 内容を表す文字列を返す．
-  string
+  std::string
   rep_string() const;
 
   /// @brief 内容を出力する．
   void
   print(
-    ostream& s ///< [in] 出力先のストリーム
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const;
 
   /// @brief node0 と node1 が式として等価のときに true を返す．
@@ -415,7 +415,7 @@ private:
   SizeType mTypeVarId;
 
   // オペランドのリスト
-  vector<NodePtr> mOperandList;
+  std::vector<NodePtr> mOperandList;
 
 };
 

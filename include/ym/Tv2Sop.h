@@ -29,14 +29,14 @@ public:
 
   /// @brief 主項を列挙する．
   static
-  vector<SopCube>
+  std::vector<SopCube>
   all_primes(
     const TvFunc& f ///< [in] 対象の関数
   );
 
   /// @brief 主項を列挙する．
   static
-  vector<SopCube>
+  std::vector<SopCube>
   all_primes(
     const TvFunc& f, ///< [in] 対象の関数
     const TvFunc& dc ///< [in] ドントケアの関数
@@ -48,7 +48,7 @@ public:
 
   /// @brief 単純なシャノン展開を行って非冗長積和形を求める．
   static
-  vector<SopCube>
+  std::vector<SopCube>
   isop(
     const TvFunc& f ///< [in] 対象の関数
   );
@@ -57,7 +57,7 @@ public:
   ///
   /// dc の入力数は f の入力数と等しくなければならない．
   static
-  vector<SopCube>
+  std::vector<SopCube>
   isop(
     const TvFunc& f, ///< [in] 対象の関数
     const TvFunc& dc ///< [in] ドントケアの関数

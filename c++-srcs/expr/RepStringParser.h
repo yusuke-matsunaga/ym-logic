@@ -23,7 +23,7 @@ public:
 
   /// @brief コンストラクタ
   RepStringParser(
-    const string& rep_string ///< [in] 文字列
+    const std::string& rep_string ///< [in] 文字列
   ) : mString{rep_string},
       mPos{0}
   {
@@ -71,7 +71,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 文字列
-  string mString;
+  std::string mString;
 
   // 読み出し位置
   SizeType mPos;

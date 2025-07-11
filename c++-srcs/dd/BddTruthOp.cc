@@ -35,8 +35,8 @@ END_NONAMESPACE
 // @brief 真理値表形式の文字列からBDDを作る．
 Bdd
 BddMgr::from_truth(
-  const string& str,
-  const vector<BddVar>& var_list
+  const std::string& str,
+  const std::vector<BddVar>& var_list
 )
 {
   auto n = str.size();
@@ -44,7 +44,7 @@ BddMgr::from_truth(
   if ( (1 << ni) != n ) {
     throw std::invalid_argument{"invalid string for truth format"};
   }
-  vector<BddVar> tmp_var_list(ni);
+  std::vector<BddVar> tmp_var_list(ni);
   if ( var_list.empty() ) {
     for ( SizeType i = 0; i < ni; ++ i ) {
       tmp_var_list[i] = variable(i);
@@ -76,7 +76,7 @@ BddMgr::from_truth(
 // @brief 真理値表の文字列からBDDを作る．
 DdEdge
 BddTruthOp::op_step(
-  const string& str,
+  const std::string& str,
   SizeType level
 )
 {
@@ -93,8 +93,8 @@ BddTruthOp::op_step(
 
   SizeType n = str.size();
   SizeType h = n / 2;
-  string str0 = str.substr(h);
-  string str1 = str.substr(0, h);
+  auto str0 = str.substr(h);
+  auto str1 = str.substr(0, h);
   auto e0 = op_step(str0, level + 1);
   auto e1 = op_step(str1, level + 1);
   auto ans = new_node(level, e0, e1);

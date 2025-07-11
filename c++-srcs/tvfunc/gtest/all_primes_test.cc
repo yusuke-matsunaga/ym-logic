@@ -25,10 +25,10 @@ prime_cover(
   auto ni = func.input_num();
   auto ni_exp = 1 << ni;
   // オンセットのリストを作る．
-  vector<SopCube> cube_list;
+  std::vector<SopCube> cube_list;
   for ( SizeType p = 0; p < ni_exp; ++ p ) {
     if ( func.value(p) ) {
-      vector<Literal> lit_list;
+      std::vector<Literal> lit_list;
       for ( SizeType i = 0; i < ni; ++ i ) {
 	auto lit = Literal{i, false};
 	if ( p & (1 << i) ) {
@@ -43,7 +43,7 @@ prime_cover(
   }
   // 教科書的に１ビット違いのキューブをマージしていき，
   // マージされなかったキューブを集める．
-  vector<vector<SopCube>> cube_list_list(ni + 1);
+  std::vector<std::vector<SopCube>> cube_list_list(ni + 1);
   cube_list_list[0] = cube_list;
   unordered_set<SopCube> cube_mark;
   unordered_set<SopCube> cube_check;
@@ -56,7 +56,7 @@ prime_cover(
       for ( SizeType i1 = i0 + 1; i1 < nc; ++ i1 ) {
 	const auto& cube1 = cube_list[i1];
 	SizeType dpos = -1;
-	vector<Literal> lit_list;
+	std::vector<Literal> lit_list;
 	for ( SizeType i = 0; i < ni; ++ i ) {
 	  auto pat0 = cube0.get_pat(i);
 	  auto pat1 = cube1.get_pat(i);
@@ -94,7 +94,7 @@ prime_cover(
       break;
     }
   }
-  vector<SopCube> ans_list;
+  std::vector<SopCube> ans_list;
   for ( const auto& cube_list: cube_list_list ) {
     for ( const auto& cube: cube_list ) {
       if ( cube_mark.count(cube) == 0 ) {
@@ -127,21 +127,21 @@ public:
 
 TEST_P(PrimeTest, all_primes1)
 {
-  auto vect = vector<int>{0, 1, 1, 1};
+  auto vect = std::vector<int>{0, 1, 1, 1};
   auto f = TvFunc{2, vect};
   check(f);
 }
 
 TEST_P(PrimeTest, all_primes2)
 {
-  auto vect = vector<int>{0, 0, 0, 1, 0, 1, 1, 1};
+  auto vect = std::vector<int>{0, 0, 0, 1, 0, 1, 1, 1};
   auto f = TvFunc{3, vect};
   check(f);
 }
 
 TEST_P(PrimeTest, all_primes3)
 {
-  auto vect = vector<int>{1, 1, 1, 1, 0, 1, 0, 0};
+  auto vect = std::vector<int>{1, 1, 1, 1, 0, 1, 0, 0};
   auto f = TvFunc{3, vect};
   check(f);
 }
@@ -169,7 +169,7 @@ TEST_P(PrimeTest, all_primes4)
     return;
   }
 
-  auto values = vector<int>(ni_exp, 0);
+  auto values = std::vector<int>(ni_exp, 0);
   for ( SizeType c: Range(n) ) {
     for ( auto p: Range(ni_exp) ) {
       if ( ni <= 4 ) {

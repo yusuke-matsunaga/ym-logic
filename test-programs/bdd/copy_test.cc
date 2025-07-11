@@ -21,19 +21,19 @@ test()
 
   Bdd bdd1{bdd};
 
-  bdd1.display(cout);
+  bdd1.display(std::cout);
 
   SizeType ni = 2;
-  vector<BddVar> var_list(ni);
+  std::vector<BddVar> var_list(ni);
   for ( SizeType i = 0; i < ni; ++ i ) {
     auto var = mgr.variable(i);
-    cout << "Var#" << i << endl;
-    var.display(cout);
+    std::cout << "Var#" << i << std::endl;
+    var.display(std::cout);
     var_list[i] = var;
-    var_list[i].display(cout);
+    var_list[i].display(std::cout);
   }
   auto str = bdd.to_truth(var_list);
-  cout << str << endl;
+  std::cout << str << std::endl;
 }
 
 END_NAMESPACE_YM

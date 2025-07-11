@@ -43,13 +43,13 @@ TEST_F(BoolDivisionTest, test1)
   auto q = p.first;
   auto r = p.second;
 
-  cout << "q: ";
-  q.print(cout);
-  cout << endl;
+  std::cout << "q: ";
+  q.print(std::cout);
+  std::cout << std::endl;
 
-  cout << "r: ";
-  r.print(cout);
-  cout << endl;
+  std::cout << "r: ";
+  r.print(std::cout);
+  std::cout << std::endl;
 }
 
 TEST_F(BoolDivisionTest, test2)
@@ -67,13 +67,13 @@ TEST_F(BoolDivisionTest, test2)
   auto q = p.first;
   auto r = p.second;
 
-  cout << "q: ";
-  q.print(cout);
-  cout << endl;
+  std::cout << "q: ";
+  q.print(std::cout);
+  std::cout << std::endl;
 
-  cout << "r: ";
-  r.print(cout);
-  cout << endl;
+  std::cout << "r: ";
+  r.print(std::cout);
+  std::cout << std::endl;
 }
 
 END_NAMESPACE_YM_SOP

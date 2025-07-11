@@ -59,15 +59,15 @@ TEST_F(GenFactorTest, gen_factor)
 
   auto expr1 = cover1.quick_factor();
 
-  cout << expr1 << endl;
+  std::cout << expr1 << std::endl;
 
   auto expr2 = cover1.good_factor();
 
-  cout << expr2 << endl;
+  std::cout << expr2 << std::endl;
 
   auto expr3 = cover1.bool_factor();
 
-  cout << expr3 << endl;
+  std::cout << expr3 << std::endl;
 }
 
 TEST_F(GenFactorTest, bool_factor0)
@@ -85,7 +85,7 @@ TEST_F(GenFactorTest, bool_factor0)
 
   EXPECT_EQ( f2, f1 );
 
-  cout << expr1 << endl;
+  std::cout << expr1 << std::endl;
 }
 
 TEST_F(GenFactorTest, bool_factor1)

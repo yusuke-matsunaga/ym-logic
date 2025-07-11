@@ -19,12 +19,12 @@ BEGIN_NAMESPACE_YM_SOP
 // @brief write() で書き出した形式で読み込む．
 SopCover
 SopCover::read(
-  istream& s
+  std::istream& s
 )
 {
   // 行単位で読み込む．
-  std::vector<string> line_list;
-  string line;
+  std::vector<std::string> line_list;
+  std::string line;
   while ( std::getline(s, line) ) {
     line_list.push_back(line);
   }

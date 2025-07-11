@@ -30,6 +30,14 @@ class BddMgrImpl :
 {
 public:
 
+  /// @brief compose 用の変換マップの型
+  using ComposeMap = std::unordered_map<BddVar, Bdd>;
+
+  /// @brief remap_vars 用の変換マップの型
+  using VarMap = std::unordered_map<BddVar, BddLit>;
+
+public:
+
   /// @brief コンストラクタ
   BddMgrImpl();
 
@@ -53,7 +61,7 @@ public:
   );
 
   /// @brief 変数(を表す枝)のリストを返す．
-  const vector<DdEdge>&
+  const std::vector<DdEdge>&
   variable_list()
   {
     return mVarList;
@@ -62,13 +70,13 @@ public:
   /// @brief 変数順を表す変数のリストを返す．
   ///
   /// レベルの昇順に並んでいる
-  vector<DdEdge>
+  std::vector<DdEdge>
   variable_order();
 
   /// @brief 変数順を設定する．
   void
   set_variable_order(
-    const vector<DdEdge>& order_list ///< [in] 変数順を表すリスト
+    const std::vector<DdEdge>& order_list ///< [in] 変数順を表すリスト
   );
 
   /// @brief sifting を用いて変数順の最適化を行う．
@@ -92,7 +100,7 @@ public:
   /// @return 生成されたBDDのリストを返す．
   ///
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
-  vector<DdEdge>
+  std::vector<DdEdge>
   restore(
     BinDec& s ///< [in] 入力ストリーム
   );
@@ -213,8 +221,8 @@ public:
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
   Bdd
   from_truth(
-    const string& str,             ///< [in] 01の文字列
-    const vector<BddVar>& var_list ///< [in] 変数のリスト
+    const std::string& str,             ///< [in] 01の文字列
+    const std::vector<BddVar>& var_list ///< [in] 変数のリスト
   ) const;
 
   /// @brief 論理式から BDD を作る．
@@ -222,8 +230,8 @@ public:
   /// - var_list が省略された場合は自動的に適切な変数リストを用いる．
   Bdd
   from_expr(
-    const Expr& expr,              ///< [in] 論理式
-    const vector<BddVar>& var_list ///< [in] 変数のリスト
+    const Expr& expr,                   ///< [in] 論理式
+    const std::vector<BddVar>& var_list ///< [in] 変数のリスト
   );
 
   /// @brief ドントケアを利用した簡単化を行う．
@@ -263,8 +271,8 @@ public:
   /// @brief 複合compose演算
   Bdd
   multi_compose(
-    const Bdd& bdd,                               ///< [in] 対象の BDD
-    const unordered_map<BddVar, Bdd>& compose_map ///< [in] 変換マップ
+    const Bdd& bdd,               ///< [in] 対象の BDD
+    const ComposeMap& compose_map ///< [in] 変換マップ
   ) const;
 
   /// @brief 変数順を入れ替える演算
@@ -272,20 +280,20 @@ public:
   /// 極性も入れ替え可能
   Bdd
   remap_vars(
-    const Bdd& bdd,                             ///< [in] 対象の BDD
-    const unordered_map<BddVar, BddLit>& varmap ///< [in] 変数の対応表
+    const Bdd& bdd,      ///< [in] 対象の BDD
+    const VarMap& varmap ///< [in] 変数の対応表
   ) const;
 
   /// @brief 変数のリストをレベルのリストに変換する．
-  vector<SizeType>
+  std::vector<SizeType>
   level_list(
-    const vector<BddVar>& var_list ///< [in] 変数リスト
+    const std::vector<BddVar>& var_list ///< [in] 変数リスト
   ) const;
 
   /// @brief 変数順を表す変数のリストを返す．
   ///
   /// レベルの昇順に並んでいる
-  vector<BddVar>
+  std::vector<BddVar>
   variable_order() const;
 
 
@@ -325,7 +333,7 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数(の枝)のリスト
-  vector<DdEdge> mVarList;
+  std::vector<DdEdge> mVarList;
 
 };
 

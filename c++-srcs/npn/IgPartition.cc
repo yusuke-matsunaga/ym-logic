@@ -147,11 +147,11 @@ IgPartition::reorder()
 
   // pid をキーにしてグループ番号のリストを持つ配列
   // 要するに mGidArray をデコードしたもの
-  vector<vector<SizeType> > gid_lists(n);
+  std::vector<std::vector<SizeType>> gid_lists(n);
   // 要素数が1の pid のリスト
-  vector<SizeType> pid_list1;
+  std::vector<SizeType> pid_list1;
   // 要素数が2以上の pid のリスト
-  vector<SizeType> pid_list2;
+  std::vector<SizeType> pid_list2;
   for ( SizeType pid = 0; pid < n; ++ pid ) {
     auto ps = partition_size(pid);
     gid_lists[pid].reserve(ps);
@@ -224,7 +224,7 @@ IgPartition::_refine(
 // @brief 内容を出力する．
 void
 IgPartition::display(
-  ostream& s
+  std::ostream& s
 ) const
 {
   for ( SizeType i = 0; i < mPartitionNum; ++ i ) {

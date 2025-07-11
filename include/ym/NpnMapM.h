@@ -286,13 +286,13 @@ public:
   /// @brief バイナリストリームに出力する．
   void
   dump(
-    ostream& s ///< [in] 出力先のストリーム
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const;
 
   /// @brief バイナリストリームから読み込む．
   void
   restore(
-    istream& s ///< [in] 入力元のストリーム
+    std::istream& s ///< [in] 入力元のストリーム
   );
 
 
@@ -320,7 +320,7 @@ private:
   SizeType mOutputNum{0};
 
   // 入力と出力のマッピング情報
-  vector<NpnVmap> mMapArray;
+  std::vector<NpnVmap> mMapArray;
 
 };
 
@@ -334,9 +334,9 @@ private:
 /// @brief 内容を表示する(主にデバッグ用)．
 ///
 /// 改行はしない．
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,        ///< [in] 出力ストリーム
+  std::ostream& s,   ///< [in] 出力ストリーム
   const NpnMapM& map ///< [in] 出力対象のマップ
 );
 

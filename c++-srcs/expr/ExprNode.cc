@@ -48,7 +48,7 @@ ExprNode::new_literal(
 // @brief ANDノードを返す．
 Expr::NodePtr
 ExprNode::new_and(
-  const vector<NodePtr>& operand_list
+  const std::vector<NodePtr>& operand_list
 )
 {
   auto node = new ExprNode{And, operand_list};
@@ -58,7 +58,7 @@ ExprNode::new_and(
 // @brief ORノードを返す．
 Expr::NodePtr
 ExprNode::new_or(
-  const vector<NodePtr>& operand_list
+  const std::vector<NodePtr>& operand_list
 )
 {
   auto node = new ExprNode{Or, operand_list};
@@ -68,7 +68,7 @@ ExprNode::new_or(
 // @brief XORノードを返す．
 Expr::NodePtr
 ExprNode::new_xor(
-  const vector<NodePtr>& operand_list
+  const std::vector<NodePtr>& operand_list
 )
 {
   auto node = new ExprNode{Xor, operand_list};
@@ -180,7 +180,7 @@ ExprNode::nega_equiv(
 // @brief vals の値にしたがった評価を行う．
 ExprNode::BitVectType
 ExprNode::eval(
-  const vector<BitVectType>& vals,
+  const std::vector<BitVectType>& vals,
   BitVectType mask
 ) const
 {
@@ -545,11 +545,11 @@ ExprNode::soplit(
 }
 
 // @brief 内容を表す文字列を返す．
-string
+std::string
 ExprNode::rep_string() const
 {
   // 逆ポーランド記法を用いる．
-  ostringstream buf;
+  std::ostringstream buf;
   switch ( type() ) {
   case ExprNode::Const0:      buf << "C0"; break;
   case ExprNode::Const1:      buf << "C1"; break;
@@ -568,7 +568,7 @@ ExprNode::rep_string() const
 // @brief 内容を出力する．
 void
 ExprNode::print(
-  ostream& s
+  std::ostream& s
 ) const
 {
   switch ( type() ) {

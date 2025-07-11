@@ -91,7 +91,7 @@ TEST(ZddTest, make_set2)
 
   auto item0 = mgr.item(0);
   auto item2 = mgr.item(2);
-  vector<ZddItem> elem_list{item0, item2};
+  std::vector<ZddItem> elem_list{item0, item2};
 
   auto zdd = mgr.make_set(elem_list);
 

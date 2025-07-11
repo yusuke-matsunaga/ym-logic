@@ -68,7 +68,7 @@ public:
   );
 
   /// @brief 要素のリストを返す．
-  vector<ZddItem>
+  std::vector<ZddItem>
   item_list() const;
 
 
@@ -97,7 +97,7 @@ public:
   /// @brief 部分集合を作る．
   Zdd
   make_set(
-    const vector<ZddItem> item_list ///< [in] 要素のリスト
+    const std::vector<ZddItem> item_list ///< [in] 要素のリスト
   );
 
 
@@ -110,7 +110,7 @@ public:
   /// @return 生成されたZDDのリストを返す．
   ///
   /// 不正な形式の場合は std::invalid_argument 例外を送出する．
-  vector<Zdd>
+  std::vector<Zdd>
   restore(
     BinDec& s ///< [in] 入力ストリーム
   );
@@ -174,15 +174,15 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 枝のリストをZddのリストに変換する．
-  vector<Zdd>
+  std::vector<Zdd>
   conv_to_zddlist(
-    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+    const std::vector<DdEdge>& edge_list ///< [in] 枝のリスト
   ) const;
 
   /// @brief 枝のリストを要素のリストに変換する．
-  vector<ZddItem>
+  std::vector<ZddItem>
   conv_to_itemlist(
-    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+    const std::vector<DdEdge>& edge_list ///< [in] 枝のリスト
   ) const;
 
 };

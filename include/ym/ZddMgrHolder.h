@@ -158,15 +158,15 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 枝のリストを Zdd のリストに変換する．
-  vector<Zdd>
+  std::vector<Zdd>
   conv_to_zddlist(
-    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+    const std::vector<DdEdge>& edge_list ///< [in] 枝のリスト
   ) const;
 
   /// @brief 枝のリストを要素のリストに変換する．
-  vector<ZddItem>
+  std::vector<ZddItem>
   conv_to_itemlist(
-    const vector<DdEdge>& edge_list ///< [in] 枝のリスト
+    const std::vector<DdEdge>& edge_list ///< [in] 枝のリスト
   ) const;
 
 

@@ -99,7 +99,7 @@ SopCover::_algdiv(
   SizeType& dst_num
 ) const
 {
-  SizeType num1 = cube_num();
+  auto num1 = cube_num();
 
   // 作業領域のビットベクタを確保する．
   auto tmp_chunk = _new_chunk(num1);
@@ -108,7 +108,7 @@ SopCover::_algdiv(
   // ただし，除数も被除数も algebraic expression の場合
   // ので bv1 の各キューブについて bv2 の各キューブで割ってみて
   // 成功した場合，その商を記録する．
-  vector<bool> mark(num1, false);
+  std::vector<bool> mark(num1, false);
   {
     auto dst_list = _cube_list(tmp_chunk);
     for ( SizeType i1 = 0; i1 < num1; ++ i1 ) {
@@ -126,7 +126,7 @@ SopCover::_algdiv(
   }
 
   // 商のキューブは tmp_chunk 中に num2 回現れているはず．
-  vector<SizeType> pos_list;
+  std::vector<SizeType> pos_list;
   pos_list.reserve(num1);
   for ( SizeType i1 = 0; i1 < num1; ++ i1 ) {
     if ( !mark[i1] ) {
@@ -134,7 +134,7 @@ SopCover::_algdiv(
       continue;
     }
     SizeType c = 1;
-    vector<SizeType> tmp_list;
+    std::vector<SizeType> tmp_list;
     auto cube1 = _cube(tmp_chunk, i1);
     for ( SizeType i2 = i1 + 1; i2 < num1; ++ i2 ) {
       auto cube2 = _cube(tmp_chunk, i2);
@@ -173,7 +173,7 @@ SopCover::_algdiv(
   SizeType& dst_num
 ) const
 {
-  SizeType num1 = cube_num();
+  auto num1 = cube_num();
   auto dst_chunk = _new_chunk(num1);
   auto dst_list = _cube_list(dst_chunk);
   auto cube1_list = _cube_list(chunk(), 0, num1);
@@ -203,7 +203,7 @@ SopCover::_algdiv(
   auto mask = 3UL << sft;
   auto nmask = ~mask;
 
-  SizeType num1 = cube_num();
+  auto num1 = cube_num();
   auto dst_chunk = _new_chunk(num1);
   auto dst_list = _cube_list(dst_chunk);
   auto cube1_list = _cube_list(chunk(), 0, num1);

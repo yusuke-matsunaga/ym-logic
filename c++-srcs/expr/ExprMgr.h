@@ -183,10 +183,10 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 作業領域として使われるノードの配列
-  vector<Expr::NodePtr> mTmpNodeList;
+  std::vector<Expr::NodePtr> mTmpNodeList;
 
   // 再帰関数のなかで作業領域として使われるノードの配列
-  vector<Expr::NodePtr> mNodeStack;
+  std::vector<Expr::NodePtr> mNodeStack;
 
 };
 

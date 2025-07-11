@@ -39,15 +39,17 @@ public:
   //////////////////////////////////////////////////////////////////////
 
   /// @brief 論理関数の正規化を行う．
-  /// @param[in] func 対象の論理関数
   /// @return 正規化された関数を返す．
   TvFunc
-  cannonical(const TvFunc& func);
+  cannonical(
+    const TvFunc& func ///< [in] 対象の論理関数
+  );
 
   /// @brief すべての正規化マップを返す．
-  /// @param[out] map_list 変換マップを格納するリスト
   void
-  all_cmap(vector<NpnMap>& map_list) const;
+  all_cmap(
+    std::vector<NpnMap>& map_list ///< [out] 変換マップを格納するリスト
+  ) const;
 
   /// @brief w2max_recur の起動回数を返す．
   /// 直前の cannonical の呼び出しにおける
@@ -62,12 +64,16 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   void
-  tvmax_recur(const TvFunc& func,
-	      const IgPartition& igpart,
-	      vector<bool>& w1_mark);
+  tvmax_recur(
+    const TvFunc& func,
+    const IgPartition& igpart,
+    std::vector<bool>& w1_mark
+  );
 
   void
-  add_map(const NpnMap& map);
+  add_map(
+    const NpnMap& map
+  );
 
 
 private:
@@ -83,7 +89,7 @@ private:
   TvFunc mMaxFunc;
 
   // w2max_recur で用いる現在の最適解のリスト
-  vector<NpnMap> mMaxList;
+  std::vector<NpnMap> mMaxList;
 
   // 1回の cannonical あたりの tvmax_recur の起動回数
   std::uint64_t mTvmax_count;

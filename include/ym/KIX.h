@@ -27,8 +27,8 @@ public:
   /// @brief カバーの情報
   struct CoverInfo
   {
-    SopCover cover;          ///< カバー
-    vector<SizeType> inputs; ///< 入力番号のリスト
+    SopCover cover;               ///< カバー
+    std::vector<SizeType> inputs; ///< 入力番号のリスト
   };
 
 
@@ -43,9 +43,9 @@ public:
   /// 括りだした新しいカバーは結果のカバーの末尾に追加される．
   /// 新しいカバーの出力に対応する入力はもとの入力の後ろに追加される．
   static
-  vector<CoverInfo>
+  std::vector<CoverInfo>
   extract(
-    const vector<CoverInfo>& cover_list ///< [in] カバー情報のリスト
+    const std::vector<CoverInfo>& cover_list ///< [in] カバー情報のリスト
   );
 
 };

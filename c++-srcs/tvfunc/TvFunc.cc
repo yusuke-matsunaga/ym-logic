@@ -95,7 +95,7 @@ TvFunc::TvFunc(
 // @brief カバーに対応した関数を作るコンストラクタ
 TvFunc::TvFunc(
   SizeType ni,
-  const vector<vector<Literal>>& cube_list
+  const std::vector<std::vector<Literal>>& cube_list
 ) : TvFunc(ni)
 {
   for ( auto& cube: cube_list ) {
@@ -127,7 +127,7 @@ TvFunc::TvFunc(
 // @brief カバー関数を作るコンストラクタ
 TvFunc::TvFunc(
   SizeType ni,
-  const vector<SopCube>& cube_list
+  const std::vector<SopCube>& cube_list
 ) : TvFunc(ni)
 {
   for ( auto& cube: cube_list ) {
@@ -159,7 +159,7 @@ TvFunc::TvFunc(
 // @brief キューブに対応した関数を作るコンストラクタ
 TvFunc::TvFunc(
   SizeType ni,
-  const vector<Literal>& lit_list
+  const std::vector<Literal>& lit_list
 ) : TvFunc(ni)
 {
   for ( auto lit: lit_list ) {
@@ -185,7 +185,7 @@ TvFunc::TvFunc(
 // 入力数と真理値を指定したコンストラクタ
 TvFunc::TvFunc(
   SizeType ni,
-  const vector<int>& values
+  const std::vector<int>& values
 ) : TvFunc(ni)
 {
   SizeType ni_pow = 1 << ni;
@@ -219,7 +219,7 @@ BEGIN_NONAMESPACE
 
 SizeType
 get_ni(
-  const string& str
+  const std::string& str
 )
 {
   // str が適切な文字列か確認する．
@@ -246,7 +246,7 @@ END_NONAMESPACE
 
 // @brief 文字列からの変換コンストラクタ
 TvFunc::TvFunc(
-  const string& str
+  const std::string& str
 ) : TvFunc(get_ni(str))
 {
   SizeType base = 0;
@@ -439,9 +439,9 @@ TvFunc::xform(
   }
 
 #if defined(DEBUG)
-  cout << "xform" << endl
-       << *this << endl
-       << npnmap << endl;
+  std::cout << "xform" << std::endl
+	    << *this << std::endl
+	    << npnmap << std::endl;
 #endif
 
   SizeType new_ni = npnmap.input_num2();
@@ -479,7 +479,7 @@ TvFunc::xform(
   }
 
 #if defined(DEBUG)
-  cout << ans << endl;
+  std::cout << ans << std::endl;
 #endif
 
   return ans;
@@ -527,30 +527,30 @@ TvFunc::npn_cannonical_map() const
 {
   nsLogic::NpnMgr npn_mgr;
   npn_mgr.cannonical(*this);
-  vector<NpnMap> cmap_list;
+  std::vector<NpnMap> cmap_list;
   npn_mgr.all_cmap(cmap_list);
   ASSERT_COND( !cmap_list.empty() );
   return cmap_list.front();
 }
 
 // @brief npn 変換の正規変換をすべて求める．
-vector<NpnMap>
+std::vector<NpnMap>
 TvFunc::npn_cannonical_all_map() const
 {
   nsLogic::NpnMgr npn_mgr;
   npn_mgr.cannonical(*this);
-  vector<NpnMap> map_list;
+  std::vector<NpnMap> map_list;
   npn_mgr.all_cmap(map_list);
   return map_list;
 }
 
 // @brief 内容を表す文字列を返す．
-string
+std::string
 TvFunc::str(
   int mode
 ) const
 {
-  ostringstream buf;
+  std::ostringstream buf;
   print(buf, mode);
   return buf.str();
 }
@@ -634,7 +634,7 @@ TvFunc::check_containment(
 // mode は 2 か 16
 void
 TvFunc::print(
-  ostream& s,
+  std::ostream& s,
   int mode
 ) const
 {
@@ -675,7 +675,7 @@ TvFunc::print(
 	v += value(pos + 1) * 2;
 	v += value(pos + 2) * 4;
 	v += value(pos + 3) * 8;
-	s << hex << v << dec;
+	s << std::hex << v << std::dec;
       }
       break;
     }

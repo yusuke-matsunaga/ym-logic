@@ -17,7 +17,7 @@ loop_test()
   for ( int i = 0; i < 1000000; ++ i ) {
     BddMgr mgr;
     SizeType n = 1000;
-    vector<Bdd> bdd_list(n);
+    std::vector<Bdd> bdd_list(n);
     for ( SizeType i = 0; i < n; ++ i ) {
       bdd_list[i] = mgr.variable(i);
     }

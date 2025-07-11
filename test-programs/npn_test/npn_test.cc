@@ -28,7 +28,7 @@ npn_test(
   int redmax = 0;
 
   if ( argc != 2 && argc != 3 ) {
-    cerr << "USAGE: npn_test <# of inputs> [<# of functions>]" << endl;
+    std::cerr << "USAGE: npn_test <# of inputs> [<# of functions>]" << std::endl;
     return -1;
   }
 
@@ -46,7 +46,7 @@ npn_test(
     int ni_exp_exp = 1U << ni_exp;
     nf = ni_exp_exp;
     for ( int p: Range(ni_exp_exp) ) {
-      vector<int> values(ni_exp);
+      std::vector<int> values(ni_exp);
       for ( int b: Range(ni_exp) ) {
 	if ( p & (1U << b) ) {
 	  values[b] = 1;
@@ -59,7 +59,7 @@ npn_test(
       NpnMgr npnmgr;
       TvFunc cf = npnmgr.cannonical(f);
       auto tv = npnmgr.tvmax_count();
-      vector<NpnMap> cmap_list;
+      std::vector<NpnMap> cmap_list;
       npnmgr.all_cmap(cmap_list);
       tvcount += tv;
       auto red_num = tv > 0 ? tv - cmap_list.size() : 0;
@@ -75,7 +75,7 @@ npn_test(
     // ランダムサンプリング
     std::uniform_int_distribution<int> rd2(0, 1);
     for ( int i: Range(nf) ) {
-      vector<int> values(ni_exp);
+      std::vector<int> values(ni_exp);
       for ( int b: Range(ni_exp) ) {
 	if ( rd2(rg) ) {
 	  values[b] = 1;
@@ -88,7 +88,7 @@ npn_test(
       NpnMgr npnmgr;
       TvFunc cf = npnmgr.cannonical(f);
       auto tv = npnmgr.tvmax_count();
-      vector<NpnMap> cmap_list;
+      std::vector<NpnMap> cmap_list;
       npnmgr.all_cmap(cmap_list);
       tvcount += tv;
       auto red_num = tv > 0 ? tv - cmap_list.size() : 0;
@@ -103,12 +103,12 @@ npn_test(
 
   timer.stop();
   auto time = timer.get_time();
-  cout << "# of inputs:     " << ni << endl
-       << "# of functions:  " << nf << " functions" << endl
-       << "CPU time:        " << time << endl
-       << "Total recursion: " << tvcount << endl
-       << "Max recursion:   " << tvmax << endl
-       << "Max redundant:   " << redmax << endl;
+  std::cout << "# of inputs:     " << ni << std::endl
+	    << "# of functions:  " << nf << " functions" << std::endl
+	    << "CPU time:        " << time << std::endl
+	    << "Total recursion: " << tvcount << std::endl
+	    << "Max recursion:   " << tvmax << std::endl
+	    << "Max redundant:   " << redmax << std::endl;
   return 0;
 }
 

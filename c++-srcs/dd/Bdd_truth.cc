@@ -29,7 +29,7 @@ public:
 
   /// @brief コンストラクタ
   TruStrOp(
-    const vector<BddVar>& var_list ///< [in] 変数のリスト
+    const std::vector<BddVar>& var_list ///< [in] 変数のリスト
   ) : mVarList{var_list}
   {
   }
@@ -43,7 +43,7 @@ public:
   // 外部インターフェイス
   //////////////////////////////////////////////////////////////////////
 
-  string
+  std::string
   run(
     const Bdd& bdd
   ) const
@@ -57,7 +57,7 @@ private:
   // 内部で用いられる関数
   //////////////////////////////////////////////////////////////////////
 
-  string
+  std::string
   trustr_step(
     const Bdd& bdd,
     SizeType pos
@@ -70,11 +70,11 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // 変数のリスト
-  vector<BddVar> mVarList;
+  std::vector<BddVar> mVarList;
 
 };
 
-string
+std::string
 TruStrOp::trustr_step(
   const Bdd& bdd,
   SizeType pos
@@ -102,14 +102,14 @@ TruStrOp::trustr_step(
 END_NONAMESPACE
 
 // @brief 内容を真理値表の文字列に変換する．
-string
+std::string
 Bdd::to_truth(
-  const vector<BddVar> var_list
+  const std::vector<BddVar> var_list
 ) const
 {
   if ( is_invalid() ) {
     // 不正値の場合には空文字列を返す．
-    return string{};
+    return std::string{};
   }
   TruStrOp op{var_list};
   return op.run(*this);

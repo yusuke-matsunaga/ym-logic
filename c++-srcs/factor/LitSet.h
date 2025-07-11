@@ -43,14 +43,14 @@ public:
 
   /// @brief 一般的なコンストラクタ
   LitSet(
-    SizeType variable_num,          ///< [in] 変数の数
-    const vector<Literal>& lit_list ///< [in] リテラルのリスト
+    SizeType variable_num,               ///< [in] 変数の数
+    const std::vector<Literal>& lit_list ///< [in] リテラルのリスト
   );
 
   /// @brief 一般的なコンストラクタ
   LitSet(
-    SizeType variable_num,              ///< [in] 変数の数
-    initializer_list<Literal>& lit_list ///< [in] リテラルのリスト
+    SizeType variable_num,                   ///< [in] 変数の数
+    std::initializer_list<Literal>& lit_list ///< [in] リテラルのリスト
   );
 
   /// @brief コピーコンストラクタ
@@ -117,7 +117,7 @@ public:
   /// @brief 内容を出力する．
   void
   print(
-    ostream& s ///< [in] 出力先のストリーム
+    std::ostream& s ///< [in] 出力先のストリーム
   ) const;
 
 
@@ -205,9 +205,9 @@ operator+(
 
 /// @brief ストリーム演算
 inline
-ostream&
+std::ostream&
 operator<<(
-  ostream& s,
+  std::ostream& s,
   const LitSet& lit_set ///< [in] リテラル集合の本体
 )
 {

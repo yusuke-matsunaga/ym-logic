@@ -219,8 +219,8 @@ private:
 extern
 void
 print(
-  ostream& s, ///< [in] 出力ストリーム
-  DdEdge root ///< [in] 根の枝
+  std::ostream& s, ///< [in] 出力ストリーム
+  DdEdge root      ///< [in] 根の枝
 );
 
 END_NAMESPACE_YM_DD

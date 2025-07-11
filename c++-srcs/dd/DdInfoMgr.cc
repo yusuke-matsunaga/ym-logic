@@ -11,13 +11,14 @@
 #include "DdNode.h"
 #include "DdNodeMgr.h"
 #include "NodeCollector.h"
+#include <iomanip>
 
 
 BEGIN_NAMESPACE_YM_DD
 
 // @brief コンストラクタ
 DdInfoMgr::DdInfoMgr(
-  const vector<DdEdge>& root_list,
+  const std::vector<DdEdge>& root_list,
   const DdNodeMgr* node_mgr
 )
 {
@@ -43,11 +44,11 @@ DdInfoMgr::DdInfoMgr(
   }
 
   // レベルごとのノードリストを作る．
-  mVarIdArray = vector<SizeType>(max_level);
+  mVarIdArray = std::vector<SizeType>(max_level);
   for ( SizeType i = 0; i < max_level; ++ i ) {
     mVarIdArray[i] = node_mgr->level_to_varid(i);
   }
-  mIdListArray = vector<vector<SizeType>>(max_level);
+  mIdListArray = std::vector<std::vector<SizeType>>(max_level);
   for ( SizeType i = 0; i < mNodeList.size(); ++ i ) {
     auto& node = mNodeList[i];
     auto level = node.level();
@@ -61,7 +62,7 @@ BEGIN_NONAMESPACE
 // @brief 枝の内容を出力する．
 void
 display_edge(
-  ostream& s,
+  std::ostream& s,
   SizeType edge
 )
 {
@@ -74,7 +75,7 @@ display_edge(
   else {
     SizeType node = edge >> 1;
     bool inv = static_cast<bool>(edge & 1);
-    s << setw(6) << node;
+    s << std::setw(6) << node;
     if ( inv ) {
       s << "~";
     }
@@ -89,33 +90,33 @@ END_NONAMESPACE
 // @brief 内容を見やすい形式で出力する．
 void
 DdInfoMgr::display(
-  ostream& s
+  std::ostream& s
 ) const
 {
   for ( auto root: mRootList ) {
     display_edge(s, root);
   }
-  s << endl;
+  s << std::endl;
   SizeType n = mNodeList.size();
   for ( SizeType i = 0; i < n; ++ i ) {
     SizeType id = n - i;
     auto& node = mNodeList[id - 1];
     auto varid = level_to_varid(node.level());
-    s << setw(6) << id << ": "
-      << setw(4) << varid;
+    s << std::setw(6) << id << ": "
+      << std::setw(4) << varid;
     display_edge(s, node.edge0());
     s << ": ";
     display_edge(s, node.edge1());
-    s << endl;
+    s << std::endl;
     -- id;
   }
 }
 
 // @brief 構造を表す整数配列を作る．
-vector<SizeType>
+std::vector<SizeType>
 DdInfoMgr::rep_data() const
 {
-  vector<SizeType> ans;
+  std::vector<SizeType> ans;
   ans.push_back(mRootList.size());
   for ( auto root: mRootList ) {
     ans.push_back(root);

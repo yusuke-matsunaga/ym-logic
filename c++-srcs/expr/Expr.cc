@@ -67,7 +67,7 @@ Expr::and_op(
 // 与えられた論理式を部分論理式に持つ n 入力ANDの論理式を作るクラス・メソッド
 Expr
 Expr::and_op(
-  const vector<Expr>& chd_list
+  const std::vector<Expr>& chd_list
 )
 {
   auto n = chd_list.size();
@@ -102,7 +102,7 @@ Expr::or_op(
 // 与えられた論理式を部分論理式に持つ n 入力ORの論理式を作るクラス・メソッド
 Expr
 Expr::or_op(
-  const vector<Expr>& chd_list
+  const std::vector<Expr>& chd_list
 )
 {
   auto n = chd_list.size();
@@ -137,7 +137,7 @@ Expr::xor_op(
 // 与えられた論理式を部分論理式に持つ n 入力XORの論理式を作るクラス・メソッド
 Expr
 Expr::xor_op(
-  const vector<Expr>& chd_list
+  const std::vector<Expr>& chd_list
 )
 {
   auto n = chd_list.size();
@@ -158,7 +158,7 @@ Expr::xor_op(
 // 論理式をパーズしてファクタードフォームを作る．
 Expr
 Expr::from_string(
-  const string& expr_str
+  const std::string& expr_str
 )
 {
   try {
@@ -174,10 +174,10 @@ Expr::from_string(
 // rep_string() 形式の文字列から変換する．
 Expr
 Expr::from_rep_string(
-  const string& rep_str
+  const std::string& rep_str
 )
 {
-  if ( rep_str == string{} ) {
+  if ( rep_str == std::string{} ) {
     return Expr{};
   }
   ExprMgr mgr;
@@ -249,7 +249,7 @@ Expr::compose(
 // comp_map にしたがって複数のリテラルの置き換えを行う．
 Expr
 Expr::compose(
-  const unordered_map<SizeType, Expr>& comp_map
+  const std::unordered_map<SizeType, Expr>& comp_map
 ) const
 {
   ExprMgr mgr;
@@ -265,10 +265,10 @@ Expr::compose(
 // - comp_list 中に変数の重複が有った場合の動作は不定となる．
 Expr
 Expr::compose(
-  const vector<pair<SizeType, Expr>>& comp_list
+  const std::vector<std::pair<SizeType, Expr>>& comp_list
 ) const
 {
-  unordered_map<SizeType, Expr> comp_map;
+  std::unordered_map<SizeType, Expr> comp_map;
   for ( auto p: comp_list ) {
     comp_map.emplace(p.first, p.second);
   }
@@ -279,7 +279,7 @@ Expr::compose(
 // 与えられた論理式のリテラル番号を再マップする．
 Expr
 Expr::remap_var(
-  const unordered_map<SizeType, SizeType>& varmap
+  const std::unordered_map<SizeType, SizeType>& varmap
 ) const
 {
   ExprMgr mgr;
@@ -289,10 +289,10 @@ Expr::remap_var(
 // 与えられた論理式のリテラル番号を再マップする．
 Expr
 Expr::remap_var(
-  const vector<pair<SizeType, SizeType>>& varlist
+  const std::vector<std::pair<SizeType, SizeType>>& varlist
 ) const
 {
-  unordered_map<SizeType, SizeType> varmap;
+  std::unordered_map<SizeType, SizeType> varmap;
   for ( auto p: varlist ) {
     varmap.emplace(p.first, p.second);
   }
@@ -310,11 +310,9 @@ Expr::simplify()
 }
 
 // @brief 値の評価
-// @param[in] vals 変数の値割り当て
-// @return 評価値
 Expr::BitVectType
 Expr::eval(
-  const vector<BitVectType>& vals,
+  const std::vector<BitVectType>& vals,
   BitVectType mask
 ) const
 {
@@ -508,14 +506,14 @@ Expr::operand(
 }
 
 // @brief オペランドのリストの取得
-vector<Expr>
+std::vector<Expr>
 Expr::operand_list() const
 {
   if ( is_invalid() ) {
     return {};
   }
-  SizeType n = operand_num();
-  vector<Expr> ans_list;
+  auto n = operand_num();
+  std::vector<Expr> ans_list;
   ans_list.reserve(n);
   for ( auto& opr: root()->operand_list() ) {
     auto expr1 = Expr{opr};
@@ -674,13 +672,13 @@ Expr::sop_literal_num(
 
 BEGIN_NONAMESPACE
 
-vector<Expr>
+std::vector<Expr>
 restore_operand_list(
   BinDec& s
 )
 {
   SizeType nc = s.read_64();
-  vector<Expr> opr_list;
+  std::vector<Expr> opr_list;
   opr_list.reserve(nc);
   for ( SizeType i = 0; i < nc; ++ i ) {
     opr_list.push_back(Expr::restore(s));
@@ -736,16 +734,16 @@ Expr::restore(
   return Expr::invalid();
 }
 
-string
+std::string
 Expr::to_string() const
 {
-  ostringstream os;
+  std::ostringstream os;
   os << *this;
   return os.str();
 }
 
 // @brief 圧縮形式の文字列を出力する．
-string
+std::string
 Expr::rep_string() const
 {
   if ( is_valid() ) {

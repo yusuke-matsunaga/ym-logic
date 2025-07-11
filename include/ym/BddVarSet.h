@@ -32,9 +32,9 @@ public:
   ///
   /// var_set を省略した場合には空集合となる．
   BddVarSet(
-    BddMgr& mgr,                  ///< [in] BDDマネージャ
-    const vector<BddVar>& var_set ///< [in] 変数のリスト
-    = vector<BddVar>{}
+    BddMgr& mgr,                       ///< [in] BDDマネージャ
+    const std::vector<BddVar>& var_set ///< [in] 変数のリスト
+    = std::vector<BddVar>{}
   );
 
   /// @brief デストラクタ
@@ -110,7 +110,7 @@ public:
   /// @brief 変数のリストに変換する．
   ///
   /// 変換できない時は例外を送出する．
-  vector<BddVar>
+  std::vector<BddVar>
   to_varlist() const;
 
   /// @brief 先頭の変数を返す．

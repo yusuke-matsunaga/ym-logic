@@ -21,20 +21,20 @@ truth_test(
 )
 {
   for ( int i = 1; i < argc; ++ i ) {
-    string filename = argv[i];
-    ifstream s{filename};
+    std::string filename = argv[i];
+    std::ifstream s{filename};
     if ( !s ) {
-      cerr << filename << ": No such file." << endl;
+      std::cerr << filename << ": No such file." << std::endl;
       return 1;
     }
 
     BddMgr mgr;
-    string buf;
+    std::string buf;
     SizeType ni = 0;
     SizeType no = 0;
     SizeType nsingle = 0;
     SizeType nall = 0;
-    vector<Bdd> func_list;
+    std::vector<Bdd> func_list;
     while ( getline(s, buf) ) {
       auto f = mgr.from_truth(buf);
       func_list.push_back(f);
@@ -42,8 +42,8 @@ truth_test(
     }
     no = func_list.size();
     nall = Bdd::bdd_size(func_list);
-    cout << basename(argv[i]) << ": #i " << ni << ": #o " << no
-	 << ": #n " << nsingle << ": #a " << nall << endl;
+    std::cout << basename(argv[i]) << ": #i " << ni << ": #o " << no
+	      << ": #n " << nsingle << ": #a " << nall << std::endl;
   }
   return 0;
 }

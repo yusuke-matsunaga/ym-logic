@@ -18,7 +18,7 @@ struct SigHash
 {
   SizeType
   operator()(
-    const vector<SizeType>& sig_list
+    const std::vector<SizeType>& sig_list
   ) const
   {
     SizeType ans = 0;
@@ -30,13 +30,13 @@ struct SigHash
 };
 
 // キューブ(を表すリテラルのリスト)を正規化する．
-vector<SizeType>
+std::vector<SizeType>
 cube_signature(
-  const vector<Literal>& lits,
-  const vector<SizeType>& input_map
+  const std::vector<Literal>& lits,
+  const std::vector<SizeType>& input_map
 )
 {
-  vector<SizeType> sig_list;
+  std::vector<SizeType> sig_list;
   sig_list.reserve(lits.size());
   for ( auto lit: lits ) {
     auto vid = lit.varid();
@@ -53,12 +53,12 @@ END_NONAMESPACE
 
 // @brief コンストラクタ
 CkMatrix::CkMatrix(
-  const vector<KIX::CoverInfo>& cover_list
+  const std::vector<KIX::CoverInfo>& cover_list
 ) : mCoverList{cover_list}
 {
   // 同一のカーネルキューブを列に対応させるための辞書
   // カバーごとに入力が異なるので正規化を行う．
-  std::unordered_map<vector<SizeType>, SizeType, SigHash> kc_dict;
+  std::unordered_map<std::vector<SizeType>, SizeType, SigHash> kc_dict;
 
   auto cover_num = cover_list.size();
   for ( SizeType cover_id = 0; cover_id < cover_num; ++ cover_id ) {
@@ -89,9 +89,9 @@ CkMatrix::CkMatrix(
 	continue;
       }
       auto nk = kernel.cube_num();
-      vector<SopCube> kcube_array;
+      std::vector<SopCube> kcube_array;
       kcube_array.reserve(nk);
-      vector<SizeType> col_id_array(nk);
+      std::vector<SizeType> col_id_array(nk);
       // カーネルキューブを列に対応させる．
       for ( SizeType i = 0; i < nk; ++ i ) {
 	kcube_array.push_back(kernel.get_cube(i));
@@ -141,7 +141,7 @@ CkMatrix::CkMatrix(
 // @brief 内容を出力する．
 void
 CkMatrix::print(
-  ostream& s
+  std::ostream& s
 ) const
 {
   const char* col_sp = "";
@@ -158,14 +158,14 @@ CkMatrix::print(
       spc = " ";
     }
   }
-  s << endl;
-  s << endl;
+  s << std::endl;
+  s << std::endl;
   for ( auto& row_info: mRowArray ) {
     auto cover_id = row_info.cover_id;
     auto& cube = row_info.ccube;
-    s << cover_id << " " << cube << endl;
+    s << cover_id << " " << cube << std::endl;
   }
-  s << endl;
+  s << std::endl;
 
   for ( SizeType row_id = 0; row_id < row_size(); ++ row_id ) {
     const char* spc = "";
@@ -174,7 +174,7 @@ CkMatrix::print(
 	<< ")[" << elem->val_id() << "]";
       spc = ", ";
     }
-    s << endl;
+    s << std::endl;
   }
 }
 

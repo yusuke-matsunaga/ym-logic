@@ -121,7 +121,7 @@ TEST_F(BddTest, from_truth3)
   auto var0 = mMgr.variable(0);
   auto var1 = mMgr.variable(1);
   auto var2 = mMgr.variable(2);
-  vector<BddVar> var_list{var2, var1, var0};
+  std::vector<BddVar> var_list{var2, var1, var0};
   const char* exp_str = "10010101";
   Bdd bdd = mMgr.from_truth(exp_str, var_list);
   check(bdd, exp_str);
@@ -230,13 +230,13 @@ TEST_F(BddTest, mgr_var_ordering)
   EXPECT_EQ( 3, var3.id() );
 
   auto v_list = mMgr.variable_list();
-  vector<BddVar> exp_v_list{var0, var1, var2, var3};
+  std::vector<BddVar> exp_v_list{var0, var1, var2, var3};
   EXPECT_EQ( exp_v_list, v_list );
 
   mMgr.set_variable_order({var3, var2, var1, var0});
 
   auto o_list = mMgr.variable_order();
-  vector<BddVar> exp_o_list{var3, var2, var1, var0};
+  std::vector<BddVar> exp_o_list{var3, var2, var1, var0};
   EXPECT_EQ( exp_o_list, o_list );
 }
 

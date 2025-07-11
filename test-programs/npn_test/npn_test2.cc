@@ -20,14 +20,14 @@ npn_test2(
 )
 {
   if ( argc != 2 ) {
-    cerr << "USAGE: npn_test2 <filename>" << endl;
+    std::cerr << "USAGE: npn_test2 <filename>" << std::endl;
     return -1;
   }
 
-  string filename = argv[1];
-  ifstream fs(filename);
+  std::string filename = argv[1];
+  std::ifstream fs(filename);
   if ( !fs ) {
-    cerr << filename << ": no such file." << endl;
+    std::cerr << filename << ": no such file." << std::endl;
     return -1;
   }
 
@@ -37,10 +37,10 @@ npn_test2(
   SizeType tvmax = 0;
   SizeType redmax = 0;
 
-  string line;
+  std::string line;
   while ( getline(fs, line) ) {
-    string ni_str;
-    string func_str;
+    std::string ni_str;
+    std::string func_str;
     bool head = true;
     for ( int i = 0; i < line.size(); ++ i) {
       char c = line[i];
@@ -59,11 +59,11 @@ npn_test2(
     int ni = atoi(ni_str.c_str());
     SizeType ni_exp = 1U << ni;
     if ( func_str.size() != ni_exp ) {
-      cerr << "illegal func_str: " << func_str << endl
-	   << "expected size = " << ni_exp << endl;
+      std::cerr << "illegal func_str: " << func_str << std::endl
+		<< "expected size = " << ni_exp << std::endl;
       continue;
     }
-    vector<int> values(ni_exp);
+    std::vector<int> values(ni_exp);
     for (int i = 0; i < ni_exp; ++ i) {
       if ( func_str[i] == '0' ) {
 	values[i] = 0;
@@ -73,15 +73,15 @@ npn_test2(
       }
     }
     TvFunc f(ni, values);
-    cout << "F = " << f << endl;
+    std::cout << "F = " << f << std::endl;
 
     timer.start();
     NpnMgr npnmgr;
     TvFunc cf = npnmgr.cannonical(f);
-    vector<NpnMap> cmap_list;
+    std::vector<NpnMap> cmap_list;
     npnmgr.all_cmap(cmap_list);
     timer.stop();
-    cout << "cmap_list size: " << cmap_list.size() << endl;
+    std::cout << "cmap_list size: " << cmap_list.size() << std::endl;
     auto tv = npnmgr.tvmax_count();
     auto red_num = tv > 0 ? tv - cmap_list.size() : 0;
     if ( tvmax < tv ) {
@@ -93,10 +93,10 @@ npn_test2(
   }
 
   auto time = timer.get_time();
-  cout << "CPU time:        " << time << endl
-       << "Total recursion: " << tvcount << endl
-       << "Max recursion:   " << tvmax << endl
-       << "Max redundant:   " << redmax << endl;
+  std::cout << "CPU time:        " << time << std::endl
+	    << "Total recursion: " << tvcount << std::endl
+	    << "Max recursion:   " << tvmax << std::endl
+	    << "Max redundant:   " << redmax << std::endl;
   return 0;
 }
 

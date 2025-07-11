@@ -10,6 +10,7 @@
 #include "ym/SopCover.h"
 #include "ym/SopCube.h"
 #include "CkMatrix.h"
+#include <unordered_set>
 
 
 BEGIN_NAMESPACE_YM_RC
@@ -20,7 +21,7 @@ struct HashFunc
 {
   SizeType
   operator()(
-    const pair<SizeType, SizeType>& a
+    const std::pair<SizeType, SizeType>& a
   ) const
   {
     return a.first * 1048573 + a.second;
@@ -28,13 +29,13 @@ struct HashFunc
 };
 
 // 入力番号を正規化する．
-vector<Literal>
+std::vector<Literal>
 normalize(
-  const vector<Literal>& src_list,
-  const vector<SizeType>& inputs
+  const std::vector<Literal>& src_list,
+  const std::vector<SizeType>& inputs
 )
 {
-  vector<Literal> ans_list;
+  std::vector<Literal> ans_list;
   for ( auto lit: src_list ) {
     auto new_vid = inputs[lit.varid()];
     auto inv = lit.is_negative();
@@ -47,7 +48,7 @@ normalize(
 // 入力番号をパックする．
 KIX::CoverInfo
 pack(
-  const vector<vector<Literal>>& src_cube_list
+  const std::vector<std::vector<Literal>>& src_cube_list
 )
 {
   // 現れる入力番号のリストを作る．
@@ -71,10 +72,10 @@ pack(
     varmap.emplace(vid, i);
   }
   // varmap に従って変換する．
-  vector<vector<Literal>> dst_cube_list;
+  std::vector<std::vector<Literal>> dst_cube_list;
   dst_cube_list.reserve(src_cube_list.size());
   for ( auto& lits: src_cube_list ) {
-    vector<Literal> new_lits;
+    std::vector<Literal> new_lits;
     new_lits.reserve(lits.size());
     for ( auto lit: lits ) {
       auto vid = lit.varid();
@@ -91,9 +92,9 @@ pack(
 END_NONAMESPACE
 
 // @brief 共通な論理式を括りだす．
-vector<KIX::CoverInfo>
+std::vector<KIX::CoverInfo>
 KIX::extract(
-  const vector<CoverInfo>& cover_list
+  const std::vector<CoverInfo>& cover_list
 )
 {
   // co-kernel/kernel cube matrix を作る．
@@ -113,9 +114,9 @@ KIX::extract(
   std::unordered_set<CkMatrix::ValueInfo> deleted_cubes;
   // 各カバーに追加されるキューブの情報
   // キーはカバー番号
-  vector<vector<pair<SopCube, SizeType>>> added_cube_list(cover_list.size());
+  std::vector<std::vector<std::pair<SopCube, SizeType>>> added_cube_list(cover_list.size());
   // 新しく追加されるカバーの情報
-  vector<vector<vector<Literal>>> new_cover_list;
+  std::vector<std::vector<std::vector<Literal>>> new_cover_list;
   // 結果のサイズ
   SizeType ans_size = cover_list.size();
   for ( ; ; ) {
@@ -146,10 +147,10 @@ KIX::extract(
       auto& row_info = matrix.row_info(row_id);
       auto cover_id = row_info.cover_id;
       auto& cube = row_info.ccube;
-      added_cube_list[cover_id].push_back(make_pair(cube, new_input_id));
+      added_cube_list[cover_id].push_back(std::make_pair(cube, new_input_id));
     }
     // 新しく追加されるカバーの情報を記録する．
-    vector<vector<Literal>> new_cover;
+    std::vector<std::vector<Literal>> new_cover;
     new_cover.reserve(rect.col_size());
     for ( auto col_id: rect.col_list() ) {
       auto& col_info = matrix.col_info(col_id);
@@ -161,7 +162,7 @@ KIX::extract(
   }
 
   // 結果のカバーリストを作る．
-  vector<CoverInfo> ans_cover_list;
+  std::vector<CoverInfo> ans_cover_list;
   ans_cover_list.reserve(ans_size);
 
   // もとのカバーを置き換えながらコピーする．
@@ -175,7 +176,7 @@ KIX::extract(
     auto& inputs = cover_info.inputs;
     auto cube_list = cover.literal_list();
     SizeType nc = cover.cube_num();
-    vector<vector<Literal>> new_cube_list;
+    std::vector<std::vector<Literal>> new_cube_list;
     for ( SizeType j = 0; j < nc; ++ j ) {
       if ( deleted_cubes.count(CkMatrix::ValueInfo{i, j}) > 0 ) {
 	// 削除された．
