@@ -16,7 +16,7 @@ BEGIN_NAMESPACE_YM_RC
 
 TEST(KIXTest, test1)
 {
-  vector<KIX::CoverInfo> cover_list;
+  std::vector<KIX::CoverInfo> cover_list;
   {
     auto a = Literal(0);
     auto b = Literal(1);
@@ -34,7 +34,7 @@ TEST(KIXTest, test1)
 			{a, d, e},
 			{b, d, e},
 			{c, d, e} });
-    auto inputs_F = vector<SizeType>{0, 1, 2, 3, 4, 5, 6};
+    auto inputs_F = std::vector<SizeType>{0, 1, 2, 3, 4, 5, 6};
     cover_list.push_back(KIX::CoverInfo{F, inputs_F});
   }
   {
@@ -49,7 +49,7 @@ TEST(KIXTest, test1)
 			{b, f},
 			{a, c, e},
 			{b, c, e} });
-    auto inputs_G = vector<SizeType>{0, 1, 2, 4, 5};
+    auto inputs_G = std::vector<SizeType>{0, 1, 2, 4, 5};
     cover_list.push_back(KIX::CoverInfo{G, inputs_G});
   }
   {
@@ -61,17 +61,17 @@ TEST(KIXTest, test1)
     auto H = SopCover(4,
 		      { {a, d, e},
 			{c, d, e} });
-    auto inputs_H = vector<SizeType>{0, 2, 3, 4};
+    auto inputs_H = std::vector<SizeType>{0, 2, 3, 4};
     cover_list.push_back(KIX::CoverInfo{H, inputs_H});
   }
 
   for ( auto& cover_input: cover_list ) {
-    cout << cover_input.cover << endl;
+    std::cout << cover_input.cover << std::endl;
     for ( auto input: cover_input.inputs ) {
-      cout << " " << input;
+      std::cout << " " << input;
     }
-    cout << endl;
-    cout << endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
   }
 
   // co-kernel/kernel cube matrix を作る．
@@ -80,11 +80,11 @@ TEST(KIXTest, test1)
   auto rect_list = matrix.enum_max_rects();
 
   if ( rect_list.empty() ) {
-    cout << "rect_list is empty()" << endl;
+    std::cout << "rect_list is empty()" << std::endl;
   }
   else {
     for ( auto rect: rect_list ) {
-      cout << rect << endl;
+      std::cout << rect << std::endl;
     }
   }
 }

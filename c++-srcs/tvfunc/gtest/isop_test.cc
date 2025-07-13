@@ -69,7 +69,7 @@ public:
     }
     for ( SizeType i = 0; i < nc; ++ i ) {
       auto f1 = fl_list[i] | fu_list[i];
-      ostringstream buf;
+      std::ostringstream buf;
       buf << cube_list[i] << " is redundant";
       EXPECT_NE( f1, f ) << buf.str();
     }
@@ -91,7 +91,7 @@ private:
     cube.print(buf);
     buf << ", " << r;
     for ( SizeType i = 0; i < nl; ++ i ) {
-      vector<Literal> lit_list1;
+      std::vector<Literal> lit_list1;
       lit_list1.reserve(nl - 1);
       for ( SizeType j = 0; j < nl; ++ j ) {
 	if ( i == j ) {
@@ -223,8 +223,8 @@ TEST_P(IsopTest, isop_p)
     n = 400;
   }
 
-  auto f_values = vector<int>(ni_exp, 0);
-  auto d_values = vector<int>(ni_exp, 0);
+  auto f_values = std::vector<int>(ni_exp, 0);
+  auto d_values = std::vector<int>(ni_exp, 0);
   for ( SizeType c: Range(n) ) {
     for ( auto p: Range(ni_exp) ) {
       if ( ni <= 3 ) {

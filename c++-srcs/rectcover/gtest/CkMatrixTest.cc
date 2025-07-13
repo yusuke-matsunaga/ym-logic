@@ -69,7 +69,7 @@ TEST(CkMatrixTest, test1)
 
   auto ckmatrix = CkMatrix(cover_list);
 
-  ckmatrix.print(cout);
+  ckmatrix.print(std::cout);
 }
 
 END_NAMESPACE_YM_RC

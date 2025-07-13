@@ -40,7 +40,7 @@ Tv2BddTest::check_func(
   SizeType ni_exp = 1UL << ni;
   for ( SizeType b = 0; b < ni_exp; ++ b ) {
     auto v1 = func.value(b);
-    vector<bool> inputs(ni);
+    std::vector<bool> inputs(ni);
     for ( SizeType i = 0; i < ni; ++ i ) {
       if ( b & (1UL << i) ) {
 	inputs[i] = true;
@@ -85,7 +85,7 @@ TEST_F(Tv2BddTest, literal2)
 
 TEST_F(Tv2BddTest, func1)
 {
-  vector<int> val_list{0, 1, 1, 0, 1, 0, 0, 0};
+  std::vector<int> val_list{0, 1, 1, 0, 1, 0, 0, 0};
   TvFunc func{3, val_list};
 
   check_func(func);

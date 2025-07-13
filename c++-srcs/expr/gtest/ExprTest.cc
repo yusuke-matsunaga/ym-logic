@@ -241,7 +241,7 @@ TEST_F(ExprTest, literal1)
   BinEnc bos{obuf};
   bos << expr;
 
-  istringstream ibuf{obuf.str()};
+  std::istringstream ibuf{obuf.str()};
   BinDec bis{ibuf};
   Expr expr2;
   bis >> expr2;
@@ -1267,13 +1267,13 @@ TEST_F(ExprTest, inv1)
   {
     std::ostringstream oss;
     oss << lit0n;
-    EXPECT_EQ( string("~0"), oss.str() );
+    EXPECT_EQ( std::string("~0"), oss.str() );
   }
   auto lit1p = lit1n.invert();
   {
     std::ostringstream oss;
     oss << lit1p;
-    EXPECT_EQ( string("1"), oss.str() );
+    EXPECT_EQ( std::string("1"), oss.str() );
   }
 
   auto prod = lit0p & lit1n;
@@ -1281,7 +1281,7 @@ TEST_F(ExprTest, inv1)
   {
     std::ostringstream oss;
     oss << prod_n;
-    EXPECT_EQ( string("( ~0 | 1 )"), oss.str() );
+    EXPECT_EQ( std::string("( ~0 | 1 )"), oss.str() );
   }
 }
 
@@ -1299,7 +1299,7 @@ TEST_F(ExprTest, compose1)
 
   std::ostringstream oss;
   oss << expr;
-  EXPECT_EQ( string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
+  EXPECT_EQ( std::string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
 
   std::ostringstream obuf;
   BinEnc bos{obuf};
@@ -1325,14 +1325,14 @@ TEST_F(ExprTest, compose2)
   auto expr0 = lit0p | lit4n;
   auto opr1 = lit1p & lit3p;
   auto opr2 = ~(lit1n & lit2p);
-  unordered_map<SizeType, Expr> comp_map;
+  std::unordered_map<SizeType, Expr> comp_map;
   comp_map[var0] = opr1;
   comp_map[var4] = opr2;
   auto expr = expr0.compose(comp_map);
 
   std::ostringstream oss;
   oss << expr;
-  EXPECT_EQ( string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
+  EXPECT_EQ( std::string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
 
   std::ostringstream obuf;
   BinEnc bos{obuf};
@@ -1358,14 +1358,14 @@ TEST_F(ExprTest, compose3)
   auto expr0 = lit0p | lit4n;
   auto opr1 = lit1p & lit3p;
   auto opr2 = ~(lit1n & lit2p);
-  std::vector<pair<SizeType, Expr>> comp_list;
-  comp_list.push_back(make_pair(var0, opr1));
-  comp_list.push_back(make_pair(var4, opr2));
+  std::vector<std::pair<SizeType, Expr>> comp_list;
+  comp_list.push_back(std::make_pair(var0, opr1));
+  comp_list.push_back(std::make_pair(var4, opr2));
   auto expr = expr0.compose(comp_list);
 
   std::ostringstream oss;
   oss << expr;
-  EXPECT_EQ( string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
+  EXPECT_EQ( std::string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
 
   std::ostringstream obuf;
   BinEnc bos{obuf};
@@ -1388,13 +1388,13 @@ TEST_F(ExprTest, remap_var1)
   auto lit3p = Expr::posi_literal(var3);
 
   auto expr0 = (lit0p & lit3p) | (lit1n & lit2p);
-  unordered_map<SizeType, SizeType> varmap;
+  std::unordered_map<SizeType, SizeType> varmap;
   varmap[var0] = var1;
   auto expr = expr0.remap_var(varmap);
 
   std::ostringstream oss;
   oss << expr;
-  EXPECT_EQ( string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
+  EXPECT_EQ( std::string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
 
   std::ostringstream obuf;
   BinEnc bos{obuf};
@@ -1417,13 +1417,13 @@ TEST_F(ExprTest, remap_var2)
   auto lit3p = Expr::posi_literal(var3);
 
   auto expr0 = (lit0p & lit3p) | (lit1n & lit2p);
-  std::vector<pair<SizeType, SizeType>> varlist;
-  varlist.push_back(make_pair(var0, var1));
+  std::vector<std::pair<SizeType, SizeType>> varlist;
+  varlist.push_back(std::make_pair(var0, var1));
   auto expr = expr0.remap_var(varlist);
 
   std::ostringstream oss;
   oss << expr;
-  EXPECT_EQ( string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
+  EXPECT_EQ( std::string("( ( 1 & 3 ) | ( ~1 & 2 ) )"), oss.str() );
 
   std::ostringstream obuf;
   BinEnc bos{obuf};
@@ -1509,7 +1509,7 @@ TEST_F(ExprTest, from_string1)
 
   std::ostringstream oss;
   oss << expr;
-  EXPECT_EQ( string("( 0 | ( 1 & ~2 ) )"), oss.str() );
+  EXPECT_EQ( std::string("( 0 | ( 1 & ~2 ) )"), oss.str() );
 
   std::ostringstream obuf;
   BinEnc bos{obuf};
@@ -1532,7 +1532,7 @@ TEST_F(ExprTest, from_string2)
 
   std::ostringstream oss;
   oss << expr;
-  EXPECT_EQ( string("( 0 | ( 1 & ~2 ) )"), oss.str() );
+  EXPECT_EQ( std::string("( 0 | ( 1 & ~2 ) )"), oss.str() );
 
   std::ostringstream obuf;
   BinEnc bos{obuf};

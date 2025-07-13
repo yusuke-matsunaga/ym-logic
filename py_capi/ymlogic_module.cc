@@ -18,8 +18,6 @@
 #include "pym/PyBddMgr.h"
 #include "pym/PySopCover.h"
 #include "pym/PySopCube.h"
-#include "pym/PyAigHandle.h"
-#include "pym/PyAigMgr.h"
 #include "pym/PyModule.h"
 
 
@@ -77,12 +75,6 @@ PyInit_ymlogic()
     goto error;
   }
   if ( !PySopCube::init(m) ) {
-    goto error;
-  }
-  if ( !PyAigHandle::init(m) ) {
-    goto error;
-  }
-  if ( !PyAigMgr::init(m) ) {
     goto error;
   }
 

@@ -45,12 +45,12 @@ TEST_F(SopTest, constructor1)
   EXPECT_EQ(  0, cover1.literal_num(~lit9) );
 };
 
-// SopCover{SizeType, const vector<SopCube>} のテスト
+// SopCover{SizeType, const std::vector<SopCube>} のテスト
 TEST_F(SopTest, constructor2)
 {
   auto cube1 = SopCube{nv, {lit0, lit1}};
   auto cube2 = SopCube{nv, {lit2, lit3}};
-  vector<SopCube> cube_list{cube1, cube2};
+  std::vector<SopCube> cube_list{cube1, cube2};
 
   auto cover1 = SopCover{nv, cube_list};
 
@@ -107,22 +107,22 @@ TEST_F(SopTest, constructor2_2)
   EXPECT_EQ( ~lit0, cube.front() );
 }
 
-// SopCover{SizeType, const vector<SopCube>} のテスト
+// SopCover{SizeType, const std::vector<SopCube>} のテスト
 // 変数の数が合わないのでエラーとなる．
 TEST_F(SopTest, constructor2_bad)
 {
   auto cube1 = SopCube{nv + 1, {lit0, lit1}};
   auto cube2 = SopCube{nv, {lit2, lit3}};
 
-  vector<SopCube> cube_list{cube1, cube2};
+  std::vector<SopCube> cube_list{cube1, cube2};
 
   EXPECT_THROW( (SopCover{nv, cube_list}), std::invalid_argument );
 }
 
-// SopCover(SizeType, vector<vector<Literal>>) のテスト
+// SopCover(SizeType, std::vector<std::vector<Literal>>) のテスト
 TEST_F(SopTest, constructor3)
 {
-  vector<vector<Literal>> cube_list{ {lit0, lit1},
+  std::vector<std::vector<Literal>> cube_list{ {lit0, lit1},
 				     {lit2, lit3} };
   auto cover1 = SopCover{nv, cube_list};
 
@@ -161,11 +161,11 @@ TEST_F(SopTest, constructor3)
 
 };
 
-// SopCover(SizeType, vector<vector<Literal>>) のテスト
+// SopCover(SizeType, std::vector<std::vector<Literal>>) のテスト
 // リテラルが範囲外なのでエラーとなる．
 TEST_F(SopTest, constructor3_bad)
 {
-  vector<vector<Literal>> cube_list{ {lit100, lit1},
+  std::vector<std::vector<Literal>> cube_list{ {lit100, lit1},
 				     {lit2, lit3} };
   EXPECT_THROW( (SopCover{nv, cube_list}),
 		std::out_of_range );
@@ -2557,7 +2557,7 @@ TEST_F(SopTest, sort1)
 			      {~lit0,  lit1},
 			      { lit0, ~lit2},
 			      { lit0, ~lit1} });
-  ostringstream buf;
+  std::ostringstream buf;
   cover1.print(buf);
 
   auto str = buf.str();
@@ -2577,7 +2577,7 @@ TEST_F(SopTest, sort2)
 			      { lit5,  lit6},
 			      { lit0, ~lit2},
 			      { lit0, ~lit1} } };
-  ostringstream buf;
+  std::ostringstream buf;
   cover1.print(buf);
 
   auto str = buf.str();
@@ -2589,10 +2589,12 @@ TEST_F(SopTest, sort2)
 // 3つの要素の全組み合わせを試す．
 TEST_F(SopTest, sort3)
 {
-  vector<vector<Literal>> cube_list = { {lit0}, {lit1}, {lit2} };
+  auto cube_list = std::vector<std::vector<Literal>>{
+    {lit0}, {lit1}, {lit2}
+  };
   auto n = 3 * 3 * 3;
   for ( SizeType b = 0; b < n; ++ b ) {
-    vector<vector<Literal>> lit_list(3);
+    std::vector<std::vector<Literal>> lit_list(3);
     auto tmp_b = b;
     for ( SizeType i = 0; i < 3; ++ i ) {
       auto idx = tmp_b % 3;
@@ -2613,10 +2615,12 @@ TEST_F(SopTest, sort3)
 // 4つの要素の全組み合わせを試す．
 TEST_F(SopTest, sort4)
 {
-  vector<vector<Literal>> cube_list = { {lit0}, {lit1}, {lit2}, {lit3} };
+  auto cube_list = std::vector<std::vector<Literal>>{
+    {lit0}, {lit1}, {lit2}, {lit3}
+  };
   auto n = 1 << 8;
   for ( SizeType b = 0; b < n; ++ b ) {
-    vector<vector<Literal>> lit_list(4);
+    std::vector<std::vector<Literal>> lit_list(4);
     for ( SizeType i = 0; i < 4; ++ i ) {
       auto idx = (b >> (i * 2)) & 3;
       lit_list[i] = cube_list[idx];
@@ -2635,14 +2639,16 @@ TEST_F(SopTest, sort4)
 // 5つの要素の全組み合わせを試す．
 TEST_F(SopTest, sort5)
 {
-  vector<vector<Literal>> cube_list = { {lit0}, {lit1}, {lit2}, {lit3}, {lit4} };
+  auto cube_list = std::vector<std::vector<Literal>>{
+    {lit0}, {lit1}, {lit2}, {lit3}, {lit4}
+  };
   SizeType nv = 5;
   auto n = 1;
   for ( SizeType i = 0; i < nv; ++ i ) {
     n *= nv;
   }
   for ( SizeType b = 0; b < n; ++ b ) {
-    vector<vector<Literal>> lit_list(nv);
+    std::vector<std::vector<Literal>> lit_list(nv);
     auto tmp_b = b;
     for ( SizeType i = 0; i < nv; ++ i ) {
       auto idx = tmp_b % nv;
@@ -2663,15 +2669,17 @@ TEST_F(SopTest, sort5)
 // 6つの要素の全組み合わせを試す．
 TEST_F(SopTest, sort6)
 {
-  vector<vector<Literal>> cube_list = { {lit0}, {lit1}, {lit2},
-					{lit3}, {lit4}, {lit5} };
+  auto cube_list = std::vector<std::vector<Literal>>{
+    {lit0}, {lit1}, {lit2},
+    {lit3}, {lit4}, {lit5}
+  };
   SizeType nv = 6;
   auto n = 1;
   for ( SizeType i = 0; i < nv; ++ i ) {
     n *= nv;
   }
   for ( SizeType b = 0; b < n; ++ b ) {
-    vector<vector<Literal>> lit_list(nv);
+    std::vector<std::vector<Literal>> lit_list(nv);
     auto tmp_b = b;
     for ( SizeType i = 0; i < nv; ++ i ) {
       auto idx = tmp_b % nv;
@@ -2708,7 +2716,7 @@ TEST_F(SopTest, sort_random)
   std::uniform_int_distribution<int> pol_dist(0, 1);
 
   SizeType nv = 30;
-  vector<Literal> lit_set(nv);
+  std::vector<Literal> lit_set(nv);
   for ( SizeType i = 0; i < nv; ++ i ) {
     lit_set[i] = Literal{i, false};
   }
@@ -2716,10 +2724,10 @@ TEST_F(SopTest, sort_random)
   std::uniform_int_distribution<int> lit_dist(0, nv - 1);
 
   for ( SizeType i = 0; i < nsample; ++ i ) {
-    vector<vector<Literal>> cube_list;
+    std::vector<std::vector<Literal>> cube_list;
     cube_list.reserve(ncube);
     for ( SizeType j = 0; j < ncube; ++ j ) {
-      vector<Literal> lit_list;
+      std::vector<Literal> lit_list;
       lit_list.reserve(nlit);
       for ( SizeType c = 0; c < nlit; ++ c ) {
 	auto idx = lit_dist(rand_gen);
@@ -2731,7 +2739,7 @@ TEST_F(SopTest, sort_random)
       lit_list.erase(std::unique(lit_list.begin(), lit_list.end()),
 		     lit_list.end());
       // 極性をランダムに付加する．
-      vector<Literal> lit_list2;
+      std::vector<Literal> lit_list2;
       lit_list.reserve(nlit);
       for ( auto lit: lit_list ) {
 	if ( pol_dist(rand_gen) ) {
@@ -2761,7 +2769,7 @@ TEST_F(SopTest, expr)
   auto expr1 = cover1.expr();
   EXPECT_TRUE( expr1.is_zero() );
 
-  auto cover2 = SopCover{3, vector<vector<Literal>>{{}} };
+  auto cover2 = SopCover{3, std::vector<std::vector<Literal>>{{}} };
   auto expr2 = cover2.expr();
   EXPECT_TRUE( expr2.is_one() );
 
@@ -2783,7 +2791,7 @@ TEST_F(SopTest, tvfunc)
   EXPECT_EQ( nv, func1.input_num() );
   EXPECT_TRUE( func1.is_zero() );
 
-  auto cover2 = SopCover{nv, vector<vector<Literal>>{{}} };
+  auto cover2 = SopCover{nv, std::vector<std::vector<Literal>>{{}} };
   auto func2 = cover2.tvfunc();
   EXPECT_EQ( nv, func2.input_num() );
   EXPECT_TRUE( func2.is_one() );
@@ -2804,10 +2812,10 @@ TEST_F(SopTest, read_write)
   auto cube2 = SopCube{3, {~lit2}};
   auto cover3 = SopCover{3, {cube1, cube2}};
 
-  ostringstream buf;
+  std::ostringstream buf;
   cover3.write(buf);
 
-  istringstream ibuf{buf.str()};
+  std::istringstream ibuf{buf.str()};
   auto cover4 = SopCover::read(ibuf);
 
   EXPECT_EQ( cover3, cover4 );

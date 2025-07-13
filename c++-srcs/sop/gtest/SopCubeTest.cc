@@ -110,7 +110,7 @@ TEST_F(SopTest, constructor2_bad)
 // 変数の数とリテラルの vector を指定したコンストラクタのテスト
 TEST_F(SopTest, constructor3)
 {
-  auto lit_list = vector<Literal>{~lit5, lit0};
+  auto lit_list = std::vector<Literal>{~lit5, lit0};
   auto cube1 = SopCube{nv, lit_list};
 
   EXPECT_TRUE( cube1.is_valid() );
@@ -150,7 +150,7 @@ TEST_F(SopTest, constructor3)
 // リテラルが範囲外でエラーとなる．
 TEST_F(SopTest, constructor3_bad)
 {
-  auto lit_list = vector<Literal>{~lit5, lit100};
+  auto lit_list = std::vector<Literal>{~lit5, lit100};
   EXPECT_THROW( (SopCube{nv, lit_list}),
 		std::out_of_range );
 }

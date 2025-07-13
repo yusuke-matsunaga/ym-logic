@@ -45,8 +45,8 @@ prime_cover(
   // マージされなかったキューブを集める．
   std::vector<std::vector<SopCube>> cube_list_list(ni + 1);
   cube_list_list[0] = cube_list;
-  unordered_set<SopCube> cube_mark;
-  unordered_set<SopCube> cube_check;
+  std::unordered_set<SopCube> cube_mark;
+  std::unordered_set<SopCube> cube_check;
   for ( SizeType d = 0; d < ni; ++ d ) {
     const auto& cube_list = cube_list_list[d];
     // 1ビット違いのキューブをマージする．

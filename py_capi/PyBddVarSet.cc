@@ -1,14 +1,12 @@
 
 /// @file PyBddVarSet.cc
-/// @brief Python BddVarSet の実装ファイル
+/// @brief PyBddVarSet の実装ファイル
 /// @author Yusuke Matsunaga (松永 裕介)
 ///
-/// Copyright (C) 2023 Yusuke Matsunaga
+/// Copyright (C) 2025 Yusuke Matsunaga
 /// All rights reserved.
 
 #include "pym/PyBddVarSet.h"
-#include "pym/PyBddMgr.h"
-#include "pym/PyBdd.h"
 #include "pym/PyModule.h"
 
 
@@ -17,263 +15,339 @@ BEGIN_NAMESPACE_YM
 BEGIN_NONAMESPACE
 
 // Python 用のオブジェクト定義
-struct BddVarSetObject
+// この構造体は同じサイズのヒープから作られるので
+// mVal のコンストラクタは起動されないことに注意．
+// そのためあとでコンストラクタを明示的に起動する必要がある．
+// またメモリを開放するときにも明示的にデストラクタを起動する必要がある．
+struct PyBddVarSet_Object
 {
   PyObject_HEAD
   BddVarSet mVal;
 };
 
 // Python 用のタイプ定義
-PyTypeObject BddVarSetType = {
+PyTypeObject PyBddVarSet_Type = {
   PyVarObject_HEAD_INIT(nullptr, 0)
+  // 残りは PyBddVarSet::init() 中で初期化する．
 };
-
-// 生成関数
-PyObject*
-BddVarSet_new(
-  PyTypeObject* type,
-  PyObject* args,
-  PyObject* kwds
-)
-{
-  static const char* kw_list[] = {
-    "mgr",
-    "varset",
-    nullptr
-  };
-  PyObject* mgr_obj = nullptr;
-  PyObject* varset_obj = nullptr;
-  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O!O!",
-				    const_cast<char**>(kw_list),
-				    PyBddMgr::_typeobject(), &mgr_obj,
-				    &PyList_Type, &varset_obj) ) {
-    return nullptr;
-  }
-  auto self = type->tp_alloc(type, 0);
-  auto bdd_obj = reinterpret_cast<BddVarSetObject*>(self);
-  if ( mgr_obj != nullptr ) {
-    vector<BddVar> var_set;
-    if ( varset_obj != nullptr ) {
-      SizeType n = PyList_Size(varset_obj);
-      var_set.reserve(n);
-      for ( SizeType i = 0; i < n; ++ i ) {
-	auto obj1 = PyList_GetItem(varset_obj, i);
-	if ( !PyBdd::Check(obj1) ) {
-	  PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'BddVar'");
-	  return nullptr;
-	}
-	auto& bdd = PyBdd::_get_ref(obj1);
-	auto var = BddVar::from_bdd(bdd);
-	if ( var.is_invalid() ) {
-	  PyErr_SetString(PyExc_TypeError, "argument 1 must be a list of 'BddVar'");
-	  return nullptr;
-	}
-	var_set.push_back(var);
-      }
-    }
-    auto& mgr = PyBddMgr::_get_ref(mgr_obj);
-    new (&bdd_obj->mVal) BddVarSet{mgr, var_set};
-  }
-  else {
-    new (&bdd_obj->mVal) BddVarSet{};
-  }
-  return self;
-}
 
 // 終了関数
 void
-BddVarSet_dealloc(
+dealloc_func(
   PyObject* self
 )
 {
-  auto bdd_obj = reinterpret_cast<BddVarSetObject*>(self);
-  bdd_obj->mVal.~BddVarSet();
+  auto obj = reinterpret_cast<PyBddVarSet_Object*>(self);
+  obj->mVal.~BddVarSet();
   Py_TYPE(self)->tp_free(self);
 }
 
 PyObject*
-BddVarSet_to_varlist(
+nb_add(
   PyObject* self,
-  PyObject* Py_UNUSED(args)
+  PyObject* other
 )
 {
-  auto& bdd = PyBddVarSet::_get_ref(self);
   try {
-    auto varlist = bdd.to_varlist();
-    SizeType n = varlist.size();
-    auto ans_obj = PyList_New(n);
-    for ( SizeType i = 0; i < n; ++ i ) {
-      auto var = varlist[i];
-      auto var_obj = PyBdd::ToPyObject(var);
-      PyList_SET_ITEM(ans_obj, i, var_obj);
+    if ( PyBddVarSet::Check(self) ) {
+      auto& val1 = PyBddVarSet::_get_ref(self);
+      if ( PyBddVarSet::Check(other) ) {
+        auto& val2 = PyBddVarSet::_get_ref(other);
+        return PyBddVarSet::ToPyObject(val1 + val2);
+      }
     }
-    return ans_obj;
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  catch ( std::invalid_argument ) {
-    PyErr_SetString(PyExc_ValueError, "invalid_argument");
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
     return nullptr;
   }
 }
 
 PyObject*
-BddVarSet_bdd(
+nb_subtract(
   PyObject* self,
-  PyObject* Py_UNUSED(args)
+  PyObject* other
 )
 {
-  auto& bdd = PyBddVarSet::_get_ref(self);
-  auto ans_bdd = bdd.bdd();
-  return PyBdd::ToPyObject(ans_bdd);
+  try {
+    if ( PyBddVarSet::Check(self) ) {
+      auto& val1 = PyBddVarSet::_get_ref(self);
+      if ( PyBddVarSet::Check(other) ) {
+        auto& val2 = PyBddVarSet::_get_ref(other);
+        return PyBddVarSet::ToPyObject(val1 - val2);
+      }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
-// メソッド定義
-PyMethodDef BddVarSet_methods[] = {
-  {"to_varlist", BddVarSet_to_varlist, METH_NOARGS,
-   PyDoc_STR("convert to the list of variables")},
-  {"bdd", BddVarSet_bdd, METH_NOARGS,
-   PyDoc_STR("convert to BDD")},
-  {nullptr, nullptr, 0, nullptr}
-};
-
 PyObject*
-BddVarSet_size(
+nb_and(
   PyObject* self,
-  void* Py_UNUSED(closure)
+  PyObject* other
 )
 {
-  auto& bdd = PyBddVarSet::_get_ref(self);
-  auto val = bdd.size();
-  return PyLong_FromLong(val);
+  try {
+    if ( PyBddVarSet::Check(self) ) {
+      auto& val1 = PyBddVarSet::_get_ref(self);
+      if ( PyBddVarSet::Check(other) ) {
+        auto& val2 = PyBddVarSet::_get_ref(other);
+        return PyBddVarSet::ToPyObject(val1 & val2);
+      }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
-// get/set 関数定義
-PyGetSetDef BddVarSet_getset[] = {
-  {"size", BddVarSet_size, nullptr, PyDoc_STR("size"), nullptr},
-  {nullptr, nullptr, nullptr, nullptr, nullptr},
+PyObject*
+nb_inplace_add(
+  PyObject* self,
+  PyObject* other
+)
+{
+  try {
+    if ( PyBddVarSet::Check(self) ) {
+      auto& val1 = PyBddVarSet::_get_ref(self);
+      if ( PyBddVarSet::Check(other) ) {
+        auto& val2 = PyBddVarSet::_get_ref(other);
+        val1 += val2;
+        Py_XINCREF(self);
+        return self;
+      }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
+}
+
+PyObject*
+nb_inplace_subtract(
+  PyObject* self,
+  PyObject* other
+)
+{
+  try {
+    if ( PyBddVarSet::Check(self) ) {
+      auto& val1 = PyBddVarSet::_get_ref(self);
+      if ( PyBddVarSet::Check(other) ) {
+        auto& val2 = PyBddVarSet::_get_ref(other);
+        val1 -= val2;
+        Py_XINCREF(self);
+        return self;
+      }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
+}
+
+PyObject*
+nb_inplace_and(
+  PyObject* self,
+  PyObject* other
+)
+{
+  try {
+    if ( PyBddVarSet::Check(self) ) {
+      auto& val1 = PyBddVarSet::_get_ref(self);
+      if ( PyBddVarSet::Check(other) ) {
+        auto& val2 = PyBddVarSet::_get_ref(other);
+        val1 &= val2;
+        Py_XINCREF(self);
+        return self;
+      }
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
+}
+
+// Numberオブジェクト構造体
+PyNumberMethods number = {
+  .nb_add = nb_add,
+  .nb_subtract = nb_subtract,
+  .nb_and = nb_and,
+  .nb_inplace_add = nb_inplace_add,
+  .nb_inplace_subtract = nb_inplace_subtract,
+  .nb_inplace_and = nb_inplace_and
 };
 
-// 比較関数
+// richcompare 関数
 PyObject*
-BddVarSet_richcmpfunc(
+richcompare_func(
   PyObject* self,
   PyObject* other,
   int op
 )
 {
-  if ( PyBddVarSet::Check(self) &&
-       PyBddVarSet::Check(other) ) {
-    auto& val1 = PyBddVarSet::_get_ref(self);
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    if ( op == Py_EQ ) {
-      return PyBool_FromLong(val1 == val2);
+  auto& val = PyBddVarSet::_get_ref(self);
+  try {
+    if ( PyBddVarSet::Check(other) ) {
+      auto& val2 = PyBddVarSet::_get_ref(other);
+      if ( op == Py_EQ ) {
+        return PyBool_FromLong(val == val2);
+      }
+      if ( op == Py_NE ) {
+        return PyBool_FromLong(val != val2);
+      }
     }
-    if ( op == Py_NE ) {
-      return PyBool_FromLong(val1 != val2);
-    }
+    Py_RETURN_NOTIMPLEMENTED;
   }
-  Py_INCREF(Py_NotImplemented);
-  return Py_NotImplemented;
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
 }
 
-// 和
+// return size
 PyObject*
-BddVarSet_add(
+size(
   PyObject* self,
-  PyObject* other
+  PyObject* Py_UNUSED(args)
 )
 {
-  if ( PyBddVarSet::Check(self) &&
-       PyBddVarSet::Check(other) ) {
-    auto& val1 = PyBddVarSet::_get_ref(self);
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    try {
-      return PyBddVarSet::ToPyObject(val1 + val2);
-    }
-    catch ( std::invalid_argument ) {
-      PyErr_SetString(PyExc_ValueError, "invalid_argument");
-      return nullptr;
-    }
-  }
-  Py_RETURN_NOTIMPLEMENTED;
+  auto& val = PyBddVarSet::_get_ref(self);
+  return PyLong::ToPyObject(val.size());
 }
 
-// 差
+// convert to list of 'BddVar's
 PyObject*
-BddVarSet_sub(
+to_varlist(
   PyObject* self,
-  PyObject* other
+  PyObject* Py_UNUSED(args)
 )
 {
-  if ( PyBddVarSet::Check(self) &&
-       PyBddVarSet::Check(other) ) {
-    auto& val1 = PyBddVarSet::_get_ref(self);
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    try {
-      return PyBddVarSet::ToPyObject(val1 - val2);
-    }
-    catch ( std::invalid_argument ) {
-      PyErr_SetString(PyExc_ValueError, "invalid_argument");
-      return nullptr;
-    }
-  }
-  Py_RETURN_NOTIMPLEMENTED;
+  auto& val = PyBddVarSet::_get_ref(self);
+  return PyList<BddVar, PyBddVar>::ToPyObject(val.to_varlist());
 }
 
-// 積(共通集合)
+// return top variable
 PyObject*
-BddVarSet_and(
+top_var(
   PyObject* self,
-  PyObject* other
+  PyObject* Py_UNUSED(args)
 )
 {
-  if ( PyBddVarSet::Check(self) &&
-       PyBddVarSet::Check(other) ) {
-    auto& val1 = PyBddVarSet::_get_ref(self);
-    auto& val2 = PyBddVarSet::_get_ref(other);
-    try {
-      return PyBddVarSet::ToPyObject(val1 & val2);
-    }
-    catch ( std::invalid_argument ) {
-      PyErr_SetString(PyExc_ValueError, "invalid_argument");
-      return nullptr;
-    }
-  }
-  Py_RETURN_NOTIMPLEMENTED;
+  auto& val = PyBddVarSet::_get_ref(self);
+  return PyBddVar::ToPyObject(val.top_var());
 }
 
-// 数値演算メソッド定義
-PyNumberMethods BddVarSet_number = {
-  .nb_add = BddVarSet_add,
-  .nb_subtract = BddVarSet_sub,
-  .nb_and = BddVarSet_and,
-  .nb_inplace_add = BddVarSet_add,
-  .nb_inplace_subtract = BddVarSet_sub,
-  .nb_inplace_and = BddVarSet_and,
+// メソッド定義
+PyMethodDef methods[] = {
+  {"size",
+   size,
+   METH_NOARGS,
+   PyDoc_STR("return size")},
+  {"to_varlist",
+   to_varlist,
+   METH_NOARGS,
+   PyDoc_STR("convert to list of 'BddVar's")},
+  {"top_var",
+   top_var,
+   METH_NOARGS,
+   PyDoc_STR("return top variable")},
+  // end-marker
+  {nullptr, nullptr, 0, nullptr}
 };
+
+// new 関数
+PyObject*
+new_func(
+  PyTypeObject* type,
+  PyObject* args,
+  PyObject* kwds
+)
+{
+  static const char* kwlist[] = {
+    "mgr",
+    "varset",
+    nullptr
+  };
+  PyObject* mgr_obj = nullptr;
+  PyObject* list_obj = nullptr;
+  if ( !PyArg_ParseTupleAndKeywords(args, kwds, "|O!O",
+                                    const_cast<char**>(kwlist),
+                                    PyBddMgr::_typeobject(), &mgr_obj,
+                                    &list_obj) ) {
+    return nullptr;
+  }
+  try {
+    auto self = type->tp_alloc(type, 0);
+    auto my_obj = reinterpret_cast<PyBddVarSet_Object*>(self);
+    if ( mgr_obj == nullptr ) {
+      new (&my_obj->mVal) BddVarSet();
+    }
+    else {
+      auto& mgr = PyBddMgr::_get_ref(mgr_obj);
+      std::vector<Bddvar> var_set;
+      if ( !PyList<BddVar, PyBddVar>::FromPyObject(list_obj, var_set) ) {
+        PyErr_SetString(PyExc_TypeError, "argument 2 should be a sequence of 'BddVar'");
+        return nullptr;
+      }
+      new (&my_obj->mVal) BddVarSet(mgr, var_set);
+    }
+    return self;
+  }
+  catch ( std::invalid_argument err ) {
+    std::ostringstream buf;
+    buf << "invalid argument" << ": " << err.what();
+    PyErr_SetString(PyExc_ValueError, buf.str().c_str());
+    return nullptr;
+  }
+}
 
 END_NONAMESPACE
 
 
-// @brief 'BddVarSet' オブジェクトを使用可能にする．
+// @brief PyBddVarSet オブジェクトを使用可能にする．
 bool
 PyBddVarSet::init(
   PyObject* m
 )
 {
-  BddVarSetType.tp_name = "BddVarSet";
-  BddVarSetType.tp_basicsize = sizeof(BddVarSetObject);
-  BddVarSetType.tp_itemsize = 0;
-  BddVarSetType.tp_dealloc = BddVarSet_dealloc;
-  BddVarSetType.tp_flags = Py_TPFLAGS_DEFAULT;
-  BddVarSetType.tp_doc = PyDoc_STR("BddVarSet object");
-  BddVarSetType.tp_richcompare = BddVarSet_richcmpfunc;
-  BddVarSetType.tp_methods = BddVarSet_methods;
-  BddVarSetType.tp_getset = BddVarSet_getset;
-  BddVarSetType.tp_new = BddVarSet_new;
-  BddVarSetType.tp_as_number = &BddVarSet_number;
-
-  // 型オブジェクトの登録
-  if ( !PyModule::reg_type(m, "BddVarSet", &BddVarSetType) ) {
+  PyBddVarSet_Type.tp_name = "PyBddVarSet";
+  PyBddVarSet_Type.tp_basicsize = sizeof(PyBddVarSet_Object);
+  PyBddVarSet_Type.tp_itemsize = 0;
+  PyBddVarSet_Type.tp_dealloc = dealloc_func;
+  PyBddVarSet_Type.tp_as_number = &number;
+  PyBddVarSet_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+  PyBddVarSet_Type.tp_doc = PyDoc_STR("Python extended object for BddVarSet");
+  PyBddVarSet_Type.tp_richcompare = richcompare_func;
+  PyBddVarSet_Type.tp_methods = methods;
+  PyBddVarSet_Type.tp_new = new_func;
+  if ( !PyModule::reg_type(m, "PyBddVarSet", &PyBddVarSet_Type) ) {
     goto error;
   }
 
@@ -284,23 +358,24 @@ PyBddVarSet::init(
   return false;
 }
 
-// @brief BddVarSet を PyObject に変換する．
+// BddVarSet を PyObject に変換する．
 PyObject*
 PyBddVarSet::Conv::operator()(
-  const BddVarSet& val
+  const ElemType& val ///< [in] 元の値
 )
 {
-  auto obj = BddVarSetType.tp_alloc(&BddVarSetType, 0);
-  auto bddvarset_obj = reinterpret_cast<BddVarSetObject*>(obj);
-  new (&bddvarset_obj->mVal) BddVarSet{val};
+  auto type = PyBddVarSet::_typeobject();
+  auto obj = type->tp_alloc(type, 0);
+  auto my_obj = reinterpret_cast<PyBddVarSet_Object*>(obj);
+  new (&my_obj->mVal) BddVarSet(val);
   return obj;
 }
 
-// @brief PyObject* から BddVarSet を取り出す．
+// PyObject を BddVarSet に変換する．
 bool
 PyBddVarSet::Deconv::operator()(
-  PyObject* obj,
-  BddVarSet& val
+  PyObject* obj, ///< [in] Python のオブジェクト
+  ElemType& val  ///< [out] 結果を格納する変数
 )
 {
   if ( PyBddVarSet::Check(obj) ) {
@@ -316,24 +391,24 @@ PyBddVarSet::Check(
   PyObject* obj
 )
 {
-  return Py_IS_TYPE(obj, _typeobject());
+  return Py_IS_TYPE(obj, &PyBddVarSet_Type);
 }
 
-// @brief BddVarSet を表す PyObject から BddVarSet を取り出す．
+// @brief PyObject から BddVarSet を取り出す．
 BddVarSet&
 PyBddVarSet::_get_ref(
   PyObject* obj
 )
 {
-  auto bddvarset_obj = reinterpret_cast<BddVarSetObject*>(obj);
-  return bddvarset_obj->mVal;
+  auto my_obj = reinterpret_cast<PyBddVarSet_Object*>(obj);
+  return my_obj->mVal;
 }
 
 // @brief BddVarSet を表すオブジェクトの型定義を返す．
 PyTypeObject*
 PyBddVarSet::_typeobject()
 {
-  return &BddVarSetType;
+  return &PyBddVarSet_Type;
 }
 
 END_NAMESPACE_YM

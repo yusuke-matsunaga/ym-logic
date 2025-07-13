@@ -37,7 +37,7 @@ TEST(LitSetTest, single)
     for ( auto inv: {false, true} ) {
       auto lit = Literal(i, inv);
       auto exp = lit == lit0;
-      ostringstream buf;
+      std::ostringstream buf;
       buf << lit;
       EXPECT_EQ( exp, litset.is_in(lit) ) << buf.str();
     }
@@ -49,14 +49,14 @@ TEST(LitSetTest, multi2)
   SizeType nv = 10;
   auto lit0 = Literal(5, true);
   auto lit1 = Literal(2, false);
-  auto lits = vector<Literal>{lit0, lit1};
+  auto lits = std::vector<Literal>{lit0, lit1};
   auto litset = LitSet(nv, lits);
   EXPECT_EQ( nv, litset.variable_num() );
   for ( SizeType i = 0; i < nv; ++ i ) {
     for ( auto inv: {false, true} ) {
       auto lit = Literal(i, inv);
       auto exp = lit == lit0 || lit == lit1;
-      ostringstream buf;
+      std::ostringstream buf;
       buf << lit;
       EXPECT_EQ( exp, litset.is_in(lit) ) << buf.str();
     }
@@ -74,7 +74,7 @@ TEST(LitSetTest, multi1)
     for ( auto inv: {false, true} ) {
       auto lit = Literal(i, inv);
       auto exp = lit == lit0 || lit == lit1;
-      ostringstream buf;
+      std::ostringstream buf;
       buf << lit;
       EXPECT_EQ( exp, litset.is_in(lit) ) << buf.str();
     }
@@ -89,13 +89,13 @@ TEST(LitSetTest, check_intersect)
   auto lit7 = Literal(7, false);
   auto litset = LitSet(nv, {lit2, lit5, lit7});
   auto cube1 = SopCube(nv, {lit2, lit5, ~lit7});
-  ostringstream buf1;
-  buf1 << "litset = " << litset << endl
+  std::ostringstream buf1;
+  buf1 << "litset = " << litset << std::endl
        << "cube1 = " << cube1;
   EXPECT_TRUE( litset.check_intersect(cube1) ) << buf1.str();
   auto cube2 = SopCube(nv, {~lit2});
-  ostringstream buf2;
-  buf2 << "litset = " << litset << endl
+  std::ostringstream buf2;
+  buf2 << "litset = " << litset << std::endl
        << "cube2 = " << cube2;
   EXPECT_FALSE( litset.check_intersect(cube2) ) << buf2.str();
   auto cube3 = SopCube(nv);

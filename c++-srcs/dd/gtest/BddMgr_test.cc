@@ -256,7 +256,7 @@ TEST_F(BddTest, mgr_display1)
   auto bdd1 = var0 & var1;
   auto bdd2 = var0 | var1;
 
-  ostringstream os;
+  std::ostringstream os;
   Bdd::display(os, {bdd1, bdd2});
 
   static const char* exp_str =
@@ -278,7 +278,7 @@ TEST_F(BddTest, mgr_display2)
   auto bdd1 = var0 & var1;
   auto bdd2 = var0 | var1;
 
-  ostringstream os;
+  std::ostringstream os;
   Bdd::display(os, {bdd1, bdd2});
 
   static const char* exp_str =

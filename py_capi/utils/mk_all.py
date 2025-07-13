@@ -76,8 +76,7 @@ sopcover_gen = SopCoverGen()
 gen_list = [primtype_gen, literal_gen, npnmap_gen,
             tvfunc_gen, expr_gen,
             bdd_gen, bddmgr_gen,
-            sopcover_gen, sopcube_gen,
-            aighandle_gen, aigmgr_gen]
+            sopcover_gen, sopcube_gen]
 
 from mk_py_capi import ModuleGen
 module_gen = ModuleGen(modulename='ymlogic',

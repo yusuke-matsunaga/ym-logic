@@ -44,7 +44,7 @@ public:
   void
   check(
     const SopCover& cover,
-    const vector<string>& exp_list
+    const std::vector<std::string>& exp_list
   )
   {
     KernelGen kg;
@@ -56,7 +56,7 @@ public:
       auto& ki = kernel_list[i];
       auto& kernel = ki.first;
       auto& cokernels = ki.second;
-      ostringstream tmp;
+      std::ostringstream tmp;
       tmp << kernel << "| ";
       const char* delim = "";
       for ( auto& cube: cokernels ) {
@@ -75,7 +75,7 @@ TEST_F(KernelTest, test1)
   auto cover1 = SopCover{nv, { {v0, v2},
 			       {v1, v2} }};
 
-  vector<string> exp_list{
+  std::vector<std::string> exp_list{
     "v0 + v1| v2"
   };
 
@@ -89,7 +89,7 @@ TEST_F(KernelTest, test2)
 			       {v0, v3},
 			       {v1, v3} }};
 
-  vector<string> exp_list{
+  std::vector<std::string> exp_list{
     "v2 + v3| v0, v1",
     "v0 + v1| v2, v3",
     "v0 v2 + v0 v3 + v1 v2 + v1 v3| {}"
@@ -110,7 +110,7 @@ TEST_F(KernelTest, test3)
 			       { v1, v5, v6 },
 			       { v7 } } };
 
-  vector<string> exp_list{
+  std::vector<std::string> exp_list{
     "v3 + v4| v0 v5, v2 v5",
     "v3 + v4 + v6| v1 v5",
     "v0 + v1 + v2| v3 v5, v4 v5",
@@ -140,7 +140,7 @@ TEST_F(KernelTest, test4)
 		      {a, d, e},
 		      {b, d, e},
 		      {c, d, e} });
-  vector<string> exp_list{
+  std::vector<std::string> exp_list{
     "v3 v4 + v6| v2",
     "v3 v4 + v5| v1",
     "v3 v4 + v5 + v6| v0",
