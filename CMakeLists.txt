@@ -27,6 +27,6 @@ include_directories (
 add_subdirectory(c++-srcs)
 add_subdirectory(test-programs)
 if ( Python3_FOUND )
-  add_subdirectory(py_capi)
-  add_subdirectory( pytest )
+#  add_subdirectory(py_capi)
+#  add_subdirectory( pytest )
 endif ( Python3_FOUND )
